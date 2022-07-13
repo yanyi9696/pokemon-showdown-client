@@ -136,7 +136,7 @@
 		update: function () {
 			teams = Storage.teams;
 			if (this.curTeam) {
-				this.ignoreEVLimits = (this.curTeam.gen < 3 || (this.curTeam.format.includes('hackmons') && this.curTeam.gen !== 6) || this.curTeam.format === 'gen8metronomebattle');
+				this.ignoreEVLimits = (this.curTeam.gen < 3 || ((this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh')) && this.curTeam.gen !== 6) || this.curTeam.format === 'gen8metronomebattle');
 				if (this.curSet) {
 					return this.updateSetView();
 				}
@@ -3223,7 +3223,7 @@
 			if (set.happiness) delete set.happiness;
 			if (set.shiny) delete set.shiny;
 			if (set.gigantamax) delete set.gigantamax;
-			if (!this.curTeam.format.includes('hackmons') && species.requiredItems.length === 1) {
+			if (!(this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh')) && species.requiredItems.length === 1) {
 				set.item = species.requiredItems[0];
 			} else {
 				set.item = '';

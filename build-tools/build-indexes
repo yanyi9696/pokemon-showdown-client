@@ -8,8 +8,11 @@ const child_process = require("child_process");
 const rootDir = path.resolve(__dirname, '..');
 process.chdir(rootDir);
 
+// process.stdout.write("Hey here in the build-indexes!");
+
 if (!fs.existsSync('data/pokemon-showdown')) {
-	child_process.execSync('git clone https://github.com/smogon/pokemon-showdown.git', {
+	// child_process.execSync('git clone https://github.com/smogon/pokemon-showdown.git', {
+	child_process.execSync('git clone -b dev https://github.com/Dark-Night-Base/pokemon-showdown.git', {
 		cwd: 'data',
 	});
 }
