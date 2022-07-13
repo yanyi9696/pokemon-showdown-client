@@ -216,10 +216,11 @@ function toId() {
 		 * domain in order to have access to the correct cookies.
 		 */
 		getActionPHP: function () {
-			var ret = '/~~' + Config.server.id + '/action.php';
-			if (Config.testclient) {
-				ret = 'https://' + Config.routes.client + ret;
-			}
+			// var ret = '/~~' + Config.server.id + '/action.php';
+			// if (Config.testclient) {
+			// 	ret = 'https://' + Config.routes.client + ret;
+			// }
+			var ret = 'https://play.pokemonshowdown.com/action.php';
 			return (this.getActionPHP = function () {
 				return ret;
 			})();
