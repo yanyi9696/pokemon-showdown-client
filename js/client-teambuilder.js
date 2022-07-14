@@ -2918,18 +2918,18 @@
 				val = (id in BattlePokedex ? this.curTeam.dex.species.get(e.currentTarget.value).name : '');
 				break;
 			case 'ability':
-				if (id in BattleItems && this.curTeam.format == "gen8dualwielding") {
+				if (id in BattleItems && this.curTeam.format.contains("dualwielding")) {
 					val = BattleItems[id].name;
-				} else if (id in BattleMovedex && this.curTeam.format == "gen8trademarked") {
+				} else if (id in BattleMovedex && this.curTeam.format.contains("trademarked")) {
 					val = BattleMovedex[id].name;
 				} else {
 					val = (id in BattleAbilities ? BattleAbilities[id].name : '');
 				}
 				break;
 			case 'item':
-				if (id in BattleMovedex && this.curTeam.format == "gen8fortemons") {
+				if (id in BattleMovedex && this.curTeam.format.contains("fortemons")) {
 					val = BattleMovedex[id].name;
-				} else if (id in BattleAbilities && this.curTeam.format == "gen8multibility") {
+				} else if (id in BattleAbilities && this.curTeam.format.contains("multibility")) {
 					val = BattleAbilities[id].name;
 				} else {
 					val = (id in BattleItems ? BattleItems[id].name : '');
