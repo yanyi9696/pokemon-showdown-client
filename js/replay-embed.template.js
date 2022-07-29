@@ -202,6 +202,10 @@ var Replays = {
 		filename += '-' + toID(this.battle.p1.name);
 		filename += '-' + toID(this.battle.p2.name);
 
+		// Disabling route replacement will cause the function to use official BattleLog here
+		// todo: find out which file to change, battle.js suspected
+		// done: just download the resources and enable the route replacement; the key is config.js, tho
+		// todo: change .replayId of ssr to room.id
 		e.currentTarget.href = BattleLog.createReplayFileHref(this);
 		e.currentTarget.download = filename + '.html';
 
