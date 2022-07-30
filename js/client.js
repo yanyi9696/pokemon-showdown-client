@@ -1373,31 +1373,33 @@ function toId() {
 			this.trigger('init:formats');
 		},
 		uploadReplay: function (data) {
-			var id = data.id;
-			var serverid = Config.server.id && toID(Config.server.id.split(':')[0]);
-			var silent = data.silent;
-			if (serverid && serverid !== 'showdown') id = serverid + '-' + id;
-			$.post(app.user.getActionPHP(), {
-				act: 'uploadreplay',
-				log: data.log,
-				serverid: serverid,
-				password: data.password || '',
-				id: id
-			}, function (data) {
-				if (silent) return;
-				var sData = data.split(':');
-				if (sData[0] === 'success') {
-					app.addPopup(ReplayUploadedPopup, {id: sData[1] || id});
-				} else if (data === 'hash mismatch') {
-					app.addPopupMessage("Someone else is already uploading a replay of this battle. Try again in five seconds.");
-				} else if (data === 'not found') {
-					app.addPopupMessage("This server isn't registered, and doesn't support uploading replays.");
-				} else if (data === 'invalid id') {
-					app.addPopupMessage("This server is using invalid battle IDs, so this replay can't be uploaded.");
-				} else {
-					app.addPopupMessage("Error while uploading replay: " + data);
-				}
-			});
+			$.post(app.addPopup(ReplayUploadedPopup, data));
+
+			// var id = data.id;
+			// var serverid = Config.server.id && toID(Config.server.id.split(':')[0]);
+			// var silent = data.silent;
+			// if (serverid && serverid !== 'showdown') id = serverid + '-' + id;
+			// $.post(app.user.getActionPHP(), {
+			// 	act: 'uploadreplay',
+			// 	log: data.log,
+			// 	serverid: serverid,
+			// 	password: data.password || '',
+			// 	id: id
+			// }, function (data) {
+			// 	if (silent) return;
+			// 	var sData = data.split(':');
+			// 	if (sData[0] === 'success') {
+			// 		app.addPopup(ReplayUploadedPopup, {id: sData[1] || id});
+			// 	} else if (data === 'hash mismatch') {
+			// 		app.addPopupMessage("Someone else is already uploading a replay of this battle. Try again in five seconds.");
+			// 	} else if (data === 'not found') {
+			// 		app.addPopupMessage("This server isn't registered, and doesn't support uploading replays.");
+			// 	} else if (data === 'invalid id') {
+			// 		app.addPopupMessage("This server is using invalid battle IDs, so this replay can't be uploaded.");
+			// 	} else {
+			// 		app.addPopupMessage("Error while uploading replay: " + data);
+			// 	}
+			// });
 		},
 		roomsResponse: function (data) {
 			if (data) {
@@ -2861,7 +2863,8 @@ function toId() {
 		initialize: function (data) {
 			var buf = '';
 			buf = '<p>Your replay has been uploaded! It\'s available at:</p>';
-			buf += '<p> <a class="replay-link" href="https://' + Config.routes.replays + '/' + data.id + '" target="_blank" class="no-panel-intercept">https://' + Config.routes.replays + '/' + data.id + '</a> <button name="copyReplayLink">Copy</button></p>';
+			//buf += '<p> <a class="replay-link" href="https://' + Config.routes.replays + '/' + data.id + '" target="_blank" class="no-panel-intercept">https://' + Config.routes.replays + '/' + data.id + '</a> <button name="copyReplayLink">Copy</button></p>';
+			buf += '<p> <a class="replay-link" href="http://' + Config.routes.replays + '/files/' + data.uri + '" target="_blank" class="no-panel-intercept">http://' + Config.routes.replays + '/files/' + data.uri + '</a> <button name="copyReplayLink">Copy</button></p>';
 			buf += '<p><button class="autofocus" name="close">Close</button><p>';
 			this.$el.html(buf).css('max-width', 620);
 		},
