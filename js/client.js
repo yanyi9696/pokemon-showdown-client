@@ -1373,7 +1373,7 @@ function toId() {
 			this.trigger('init:formats');
 		},
 		uploadReplay: function (data) {
-			$.post(app.addPopup(ReplayUploadedPopup, data));
+			app.addPopup(ReplayUploadedPopup, data);
 
 			// var id = data.id;
 			// var serverid = Config.server.id && toID(Config.server.id.split(':')[0]);
