@@ -27,6 +27,9 @@
 				if (this.curTeam.format.includes('bdsp')) {
 					this.curTeam.dex = Dex.mod('gen8bdsp');
 				}
+				if (this.curTeam.format.includes('digimon')) {
+					this.curTeam.dex = Dex.mod('digimon');
+				}
 				Storage.activeSetList = this.curSetList;
 			}
 		},
@@ -694,6 +697,9 @@
 			if (this.curTeam.format.includes('bdsp')) {
 				this.curTeam.dex = Dex.mod('gen8bdsp');
 			}
+			if (this.curTeam.format.includes('digimon')) {
+				this.curTeam.dex = Dex.mod('digimon');
+			}
 			Storage.activeSetList = this.curSetList = Storage.unpackTeam(this.curTeam.team);
 			this.curTeamIndex = i;
 			this.update();
@@ -1149,7 +1155,11 @@
 					buf += '<li><button name="import" class="button big"><i class="fa fa-upload"></i> Import from text or URL</button></li>';
 				}
 				if (i < this.curTeam.capacity) {
-					buf += '<li><button name="addPokemon" class="button big"><i class="fa fa-plus"></i> Add Pok&eacute;mon</button></li>';
+					if (this.curTeam.format.includes('digimon')) {
+						buf += '<li><button name="addPokemon" class="button big"><i class="fa fa-plus"></i> Add Digimon</button></li>';
+					} else {
+						buf += '<li><button name="addPokemon" class="button big"><i class="fa fa-plus"></i> Add Pok&eacute;mon</button></li>';
+					}
 				}
 				buf += '</ol>';
 				buf += '<form id="pokepasteForm" style="display:inline" method="post" action="https://pokepast.es/create" target="_blank">';
@@ -1168,14 +1178,19 @@
 			var species = this.curTeam.dex.species.get(set.species);
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
-			var isNatDex = this.curTeam.format.includes('nationaldex');
+			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd');
+			var isDigimon = this.curTeam.format.includes('digimon');
 			var buf = '<li value="' + i + '">';
 			if (!set.species) {
 				if (this.deletedSet) {
 					buf += '<div class="setmenu setmenu-left"><button name="undeleteSet"><i class="fa fa-undo"></i> Undo Delete</button></div>';
 				}
 				buf += '<div class="setmenu"><button name="importSet"><i class="fa fa-upload"></i>Import</button></div>';
-				buf += '<div class="setchart" style="background-image:url(' + Dex.resourcePrefix + 'sprites/gen5/0.png);"><div class="setcol setcol-icon"><div class="setcell-sprite"></div><div class="setcell setcell-pokemon"><label>Pok&eacute;mon</label><input type="text" name="pokemon" class="textbox chartinput" value="" autocomplete="off" /></div></div></div>';
+				if (isDigimon) {
+					buf += '<div class="setchart" style="background-image:url(' + Dex.resourcePrefix + 'sprites/gen5/0.png);"><div class="setcol setcol-icon"><div class="setcell-sprite"></div><div class="setcell setcell-pokemon"><label>Digimon</label><input type="text" name="pokemon" class="textbox chartinput" value="" autocomplete="off" /></div></div></div>';
+				} else {
+					buf += '<div class="setchart" style="background-image:url(' + Dex.resourcePrefix + 'sprites/gen5/0.png);"><div class="setcol setcol-icon"><div class="setcell-sprite"></div><div class="setcell setcell-pokemon"><label>Pok&eacute;mon</label><input type="text" name="pokemon" class="textbox chartinput" value="" autocomplete="off" /></div></div></div>';
+				}
 				buf += '</li>';
 				return buf;
 			}
@@ -1192,7 +1207,11 @@
 			} else {
 				buf += '<div class="setcell-sprite"></div>';
 			}
-			buf += '<div class="setcell setcell-pokemon"><label>Pok&eacute;mon</label><input type="text" name="pokemon" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.species) + '" autocomplete="off" /></div></div>';
+			if (isDigimon) {
+				buf += '<div class="setcell setcell-pokemon"><label>Digimon</label><input type="text" name="pokemon" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.species) + '" autocomplete="off" /></div></div>';
+			} else {
+				buf += '<div class="setcell setcell-pokemon"><label>Pok&eacute;mon</label><input type="text" name="pokemon" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.species) + '" autocomplete="off" /></div></div>';
+			}
 
 			// details
 			buf += '<div class="setcol setcol-details"><div class="setrow">';
@@ -1213,7 +1232,7 @@
 				}
 				buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
 				if (!isLetsGo) {
-					if (this.curTeam.gen === 8 && !isNatDex) {
+					if (this.curTeam.gen === 8 && !isNatDex && !isDigimon) {
 						if (isBDSP && species.baseSpecies === "Unown") {
 							buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
 						}
@@ -1473,6 +1492,9 @@
 			}
 			if (this.curTeam.format.includes('bdsp')) {
 				this.curTeam.dex = Dex.mod('gen8bdsp');
+			}
+			if (this.curTeam.format.includes('digimon')) {
+				this.curTeam.dex = Dex.mod('digimon');
 			}
 			this.save();
 			if (this.curTeam.gen === 5 && !Dex.loadedSpriteData['bw']) Dex.loadSpriteData('bw');
@@ -1813,7 +1835,11 @@
 				var set = this.curSetList[i];
 				var pokemonicon = '<span class="picon pokemonicon-' + i + '" style="' + Dex.getPokemonIcon(set) + '"></span>';
 				if (!set.species) {
-					buf += '<button disabled="disabled" class="addpokemon" aria-label="Add Pok&eacute;mon"><i class="fa fa-plus"></i></button> ';
+					if (this.curTeam.format.includes('digimon')) {
+						buf += '<button disabled="disabled" class="addpokemon" aria-label="Add Digimon"><i class="fa fa-plus"></i></button> ';
+					} else {
+						buf += '<button disabled="disabled" class="addpokemon" aria-label="Add Pok&eacute;mon"><i class="fa fa-plus"></i></button> ';
+					}
 					isAdd = true;
 				} else if (i == this.curSetLoc) {
 					buf += '<button disabled="disabled" class="pokemon">' + pokemonicon + BattleLog.escapeHTML(set.name || this.curTeam.dex.species.get(set.species).baseSpecies || '<i class="fa fa-plus"></i>') + '</button> ';
@@ -2589,7 +2615,8 @@
 			var set = this.curSet;
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
-			var isNatDex = this.curTeam.gen === 8 && this.curTeam.format.includes('nationaldex');
+			var isNatDex = this.curTeam.gen === 8 && (this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd'));
+			var isDigimon = this.curTeam.format.includes('digimon');
 			var species = this.curTeam.dex.species.get(set.species);
 			if (!set) return;
 			buf += '<div class="resultheader"><h3>Details</h3></div>';
@@ -2646,7 +2673,7 @@
 				buf += '</select></div></div>';
 			}
 
-			if (!isLetsGo && (this.curTeam.gen === 7 || isNatDex || (isBDSP && species.baseSpecies === 'Unown'))) {
+			if (!isLetsGo && (this.curTeam.gen === 7 || isNatDex || (isBDSP && species.baseSpecies === 'Unown') || isDigimon)) {
 				buf += '<div class="formrow"><label class="formlabel" title="Hidden Power Type">Hidden Power:</label><div><select name="hptype">';
 				buf += '<option value=""' + (!set.hpType ? ' selected="selected"' : '') + '>(automatic type)</option>'; // unset
 				var types = Dex.types.all();
@@ -2673,7 +2700,8 @@
 			var species = this.curTeam.dex.species.get(set.species);
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
-			var isNatDex = this.curTeam.format.includes('nationaldex');
+			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd');
+			var isDigimon = this.curTeam.format.includes('digimon');
 
 			// level
 			var level = parseInt(this.$chart.find('input[name=level]').val(), 10);
@@ -2744,7 +2772,7 @@
 					if (this.curTeam.gen < 8 || isNatDex) buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 255) + '</span>';
 				}
 				buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
-				if (!isLetsGo && (this.curTeam.gen < 8 || isNatDex)) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
+				if (!isLetsGo && (this.curTeam.gen < 8 || isNatDex || isDigimon)) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
 				if (this.curTeam.gen === 8 && !isBDSP && (species.canGigantamax || species.forme === 'Gmax')) {
 					buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
 				}
