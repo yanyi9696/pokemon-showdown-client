@@ -751,6 +751,21 @@ const Dex = new class implements ModdedDex {
 			"pikachustarter", "eeveestarter", "meltan", "melmetal", "pokestarufo", "pokestarufo2", "pokestarbrycenman", "pokestarmt", "pokestarmt2", "pokestargiant", "pokestarhumanoid", "pokestarmonster", "pokestarf00", "pokestarf002", "pokestarspirit",
 		].includes(species.id);
 		if (species.gen === 8 && species.isNonstandard !== 'CAP') xydexExists = false;
+		if (species.num > 40000) {
+			spriteData.x = -6;
+			spriteData.y = -7;
+			if (id === 'hououmon') {
+				spriteData.x = -3
+				spriteData.y = 0;
+			}
+			if (id === 'omegamon') {
+				spriteData.y = 0;
+			}
+			if (id === 'wargreymon') {
+				spriteData.y = 7;
+			}
+			return spriteData;
+		}
 		if ((!gen || gen >= 6) && xydexExists) {
 			if (species.gen >= 7) {
 				spriteData.x = -6;
