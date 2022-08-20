@@ -755,13 +755,20 @@ const Dex = new class implements ModdedDex {
 			spriteData.x = -6;
 			spriteData.y = -7;
 			if (id === 'hououmon') {
-				spriteData.x = -3
+				spriteData.x = -3;
 				spriteData.y = 0;
 			}
-			if (id === 'omegamon') {
+			if (id === 'holydramon' || id === 'omegamon') {
 				spriteData.y = 0;
 			}
-			if (id === 'wargreymon') {
+			if (id === 'rosemon') {
+				spriteData.y = 14;
+			}
+			if (id === 'plesiomon' || id === 'vikemon') {
+				spriteData.x = 0;
+				spriteData.y = 0;
+			}
+			if (id === 'diablomon' || id === 'wargreymon') {
 				spriteData.y = 7;
 			}
 			return spriteData;
