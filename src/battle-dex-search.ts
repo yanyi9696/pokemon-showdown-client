@@ -1525,6 +1525,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					if (typeof move.isMax === 'string') continue;
 					if (move.isNonstandard === 'Past' && this.formatType !== 'natdex') continue;
 					if (move.isNonstandard === 'LGPE' && this.formatType !== 'letsgo') continue;
+					if (move.isNonstandard === 'Digimon' && this.formatType !== 'digimon') continue;
 					moves.push(move.id);
 				}
 			}
