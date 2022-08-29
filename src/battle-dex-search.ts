@@ -998,6 +998,17 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			});
 		}
 
+		// Nihilslave: 500 Cup filter
+		if (format.includes('500cup')) {
+			tierSet = tierSet.filter(([type, id]) => {
+				if (type === 'pokemon') {
+					const bst = this.dex.species.get(id).bst;
+					if (bst > 500) return false;
+				}
+				return true;
+			});
+		}
+
 		return tierSet;
 	}
 	filter(row: SearchRow, filters: string[][]) {
