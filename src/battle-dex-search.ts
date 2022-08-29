@@ -1170,7 +1170,7 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			table = table['metronome'];
 		} else if (this.dex.gen < 8) {
 			table = table['gen' + this.dex.gen];
-		}
+		} // Nihilslave: add an else if here to make it show mega stones in mnm
 		if (!table.itemSet) {
 			table.itemSet = table.items.map((r: any) => {
 				if (typeof r === 'string') {

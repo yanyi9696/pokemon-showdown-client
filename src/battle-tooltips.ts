@@ -495,6 +495,10 @@ class BattleTooltips {
 		Ground: "Tectonic Rage",
 		Fairy: "Twinkle Tackle",
 		"???": "",
+		"Light": "",
+		"Vaccine": "",
+		"Data": "",
+		"Virus": "",
 	};
 
 	static maxMoveTable: {[type in TypeName]: string} = {
@@ -517,6 +521,10 @@ class BattleTooltips {
 		Ground: "Max Quake",
 		Fairy: "Max Starfall",
 		"???": "",
+		"Light": "",
+		"Vaccine": "",
+		"Data": "",
+		"Virus": "",
 	};
 
 	getMaxMoveFromType(type: TypeName, gmaxMove?: string | Move) {
@@ -1338,6 +1346,7 @@ class BattleTooltips {
 
 		let moveType = move.type;
 		let category = move.category;
+		if (this.battle.tier.includes('Digimon')) moveType = moveType === 'Fairy' ? 'Light' : moveType;
 		if (category === 'Status' && forMaxMove) return ['Normal', 'Status']; // Max Guard
 		// can happen in obscure situations
 		if (!pokemon) return [moveType, category];
@@ -1977,6 +1986,9 @@ class BattleTooltips {
 		return value;
 	}
 	getPokemonTypes(pokemon: Pokemon | ServerPokemon): ReadonlyArray<TypeName> {
+		if (this.battle.tier.includes('Digimon')) {
+			return Dex.mod('digimon' as ID).species.get(pokemon.speciesForme).types;
+		}
 		if (!(pokemon as Pokemon).getTypes) {
 			return this.battle.dex.species.get(pokemon.speciesForme).types;
 		}
