@@ -2688,6 +2688,9 @@ a.ilink.yours {
 .setcell-pokemon {
 	margin-top: 0;
 }
+.setcell-preevo {
+	margin-top: -75px;
+}
 .setcell-details {
 	height: 60px;
 }

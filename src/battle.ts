@@ -1405,6 +1405,9 @@ export class Battle {
 		if (move.id === 'focuspunch') {
 			pokemon.removeTurnstatus('focuspunch' as ID);
 		}
+		if (move.id === 'breathofwyvern') {
+			pokemon.removeTurnstatus('breathofwyvern' as ID);
+		}
 		this.scene.updateStatbar(pokemon);
 		if (fromeffect.id === 'sleeptalk') {
 			pokemon.rememberMove(move.name, 0);
@@ -1553,6 +1556,10 @@ export class Battle {
 			break;
 		case 'attract':
 			this.scene.resultAnim(pokemon, 'Immobilized', 'neutral');
+			break;
+		case 'breathofwyvern':
+			this.scene.resultAnim(pokemon, 'Breath Interrupted', 'neutral');
+			pokemon.removeTurnstatus('breathofwyvern' as ID);
 			break;
 		}
 		this.scene.animReset(pokemon);
