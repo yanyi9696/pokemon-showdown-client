@@ -1230,9 +1230,11 @@
 				} else if (this.curTeam.gen < 8 || isNatDex) {
 					buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 255) + '</span>';
 				}
-				buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
+				if (!isDigimon) {
+					buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
+				}
 				if (!isLetsGo) {
-					if (this.curTeam.gen === 8 && !isNatDex && !isDigimon) {
+					if (this.curTeam.gen === 8 && !isNatDex) {
 						if (isBDSP && species.baseSpecies === "Unown") {
 							buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
 						}
@@ -1241,8 +1243,16 @@
 						buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
 					}
 				}
-				if (this.curTeam.gen === 8 && !isBDSP && (species.canGigantamax || species.forme === 'Gmax')) {
-					buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
+				if (this.curTeam.gen === 8 && !isBDSP && !isDigimon) {
+					if (!species.cannotDynamax && set.dynamaxLevel !== 10 && set.dynamaxLevel !== undefined) {
+						buf += '<span class="detailcell"><label>Dmax Level</label>' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 10) + '</span>';
+					}
+					if (species.canGigantamax || species.forme === 'Gmax') {
+						buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
+					}
+				}
+				if (isDigimon) {
+					buf += '<span class="detailcell"><label>Pre-Evolution</label>' + (set.preEvo || 'None') + '</span>';
 				}
 			}
 			buf += '</button></div></div>';
@@ -1268,7 +1278,7 @@
 			// if (this.curTeam.gen > 1 && !isLetsGo) buf += '<div class="setcell setcell-item"><label>Item</label><input type="text" name="item" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.item) + '" /></div>';
 			if (this.curTeam.gen > 1) buf += '<div class="setcell setcell-item"><label>Item</label><input type="text" name="item" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.item) + '" autocomplete="off" /></div>';
 			if (this.curTeam.gen > 2 && !isLetsGo) buf += '<div class="setcell setcell-ability"><label>Ability</label><input type="text" name="ability" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.ability) + '" autocomplete="off" /></div>';
-			if (isDigimon) buf += '<div class="setcell setcell-preevo"><label>Pre-Evolution</label><input type="text" name="pre-evo" class="textbox chartinput" value autocomplete="off" /></div>';
+			// if (isDigimon) buf += '<div class="setcell setcell-preevo"><label>Pre-Evolution</label><input type="text" name="pre-evo" class="textbox chartinput" value autocomplete="off" /></div>';
 			buf += '</div></div>';
 
 			// moves
@@ -2647,20 +2657,27 @@
 					if (this.curTeam.gen < 8 || isNatDex) buf += '<div class="formrow"><label class="formlabel">Happiness:</label><div><input type="number" min="0" max="255" step="1" name="happiness" value="' + (typeof set.happiness === 'number' ? set.happiness : 255) + '" class="textbox inputform numform" /></div></div>';
 				}
 
-				buf += '<div class="formrow"><label class="formlabel">Shiny:</label><div>';
-				buf += '<label><input type="radio" name="shiny" value="yes"' + (set.shiny ? ' checked' : '') + ' /> Yes</label> ';
-				buf += '<label><input type="radio" name="shiny" value="no"' + (!set.shiny ? ' checked' : '') + ' /> No</label>';
-				buf += '</div></div>';
-
-				if (!isBDSP && (species.canGigantamax || species.forme === 'Gmax')) {
-					buf += '<div class="formrow"><label class="formlabel">Gigantamax:</label><div>';
-					if (species.forme === 'Gmax') {
-						buf += 'Yes';
-					} else {
-						buf += '<label><input type="radio" name="gigantamax" value="yes"' + (set.gigantamax ? ' checked' : '') + ' /> Yes</label> ';
-						buf += '<label><input type="radio" name="gigantamax" value="no"' + (!set.gigantamax ? ' checked' : '') + ' /> No</label>';
-					}
+				if (!isDigimon) {
+					buf += '<div class="formrow"><label class="formlabel">Shiny:</label><div>';
+					buf += '<label><input type="radio" name="shiny" value="yes"' + (set.shiny ? ' checked' : '') + ' /> Yes</label> ';
+					buf += '<label><input type="radio" name="shiny" value="no"' + (!set.shiny ? ' checked' : '') + ' /> No</label>';
 					buf += '</div></div>';
+				}
+
+				if (this.curTeam.gen === 8 && !isBDSP && !isDigimon) {
+					if (!species.cannotDynamax) {
+						buf += '<div class="formrow"><label class="formlabel">Dmax Level:</label><div><input type="number" min="0" max="10" step="1" name="dynamaxlevel" value="' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 10) + '" class="textbox inputform numform" /></div></div>';
+					}
+					if (species.canGigantamax || species.forme === 'Gmax') {
+						buf += '<div class="formrow"><label class="formlabel">Gigantamax:</label><div>';
+						if (species.forme === 'Gmax') {
+							buf += 'Yes';
+						} else {
+							buf += '<label><input type="radio" name="gigantamax" value="yes"' + (set.gigantamax ? ' checked' : '') + ' /> Yes</label> ';
+							buf += '<label><input type="radio" name="gigantamax" value="no"' + (!set.gigantamax ? ' checked' : '') + ' /> No</label>';
+						}
+						buf += '</div></div>';
+					}
 				}
 			}
 
@@ -2674,13 +2691,25 @@
 				buf += '</select></div></div>';
 			}
 
-			if (!isLetsGo && (this.curTeam.gen === 7 || isNatDex || (isBDSP && species.baseSpecies === 'Unown') || isDigimon)) {
+			if (!isLetsGo && (this.curTeam.gen === 7 || isNatDex || (isBDSP && species.baseSpecies === 'Unown'))) {
 				buf += '<div class="formrow"><label class="formlabel" title="Hidden Power Type">Hidden Power:</label><div><select name="hptype">';
 				buf += '<option value=""' + (!set.hpType ? ' selected="selected"' : '') + '>(automatic type)</option>'; // unset
 				var types = Dex.types.all();
 				for (var i = 0; i < types.length; i++) {
 					if (types[i].HPivs) {
 						buf += '<option value="' + types[i].name + '"' + (set.hpType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + '</option>';
+					}
+				}
+				buf += '</select></div></div>';
+			}
+
+			if (isDigimon) {
+				buf += '<div class="formrow"><label class="formlabel" title="Pre-Evolution">Pre-Evolution:</label><div><select name="preevo">';
+				buf += '<option value=""' + (!set.preEvo ? ' selected="selected"' : '') + '>(none)</option>'; // unset
+				if (species.evos !== null && species.evos.length) {
+					const preEvos = species.evos;
+					for (const preEvo of preEvos) {
+						buf += '<option value="' + preEvo + '"' + (set.preEvo === preEvo ? ' selected="selected"' : '') + '>' + preEvo + '</option>';
 					}
 				}
 				buf += '</select></div></div>';
@@ -2711,9 +2740,7 @@
 
 			// happiness
 			var happiness = parseInt(this.$chart.find('input[name=happiness]').val(), 10);
-			if (isNaN(happiness)) happiness = 255;
-			if (happiness > 255) happiness = 255;
-			if (happiness < 0) happiness = 255;
+			if (isNaN(happiness) || happiness > 255 || happiness < 0) happiness = 255;
 			set.happiness = happiness;
 			if (set.happiness === 255) delete set.happiness;
 
@@ -2724,6 +2751,12 @@
 			} else {
 				delete set.shiny;
 			}
+
+			// dynamax level
+			var dynamaxLevel = parseInt(this.$chart.find('input[name=dynamaxlevel]').val(), 10);
+			if (isNaN(dynamaxLevel) || dynamaxLevel > 10 || dynamaxLevel < 0) dynamaxLevel = 10;
+			set.dynamaxLevel = dynamaxLevel;
+			if (set.dynamaxLevel === 10) delete set.dynamaxLevel;
 
 			// gigantamax
 			var gmax = (this.$chart.find('input[name=gigantamax]:checked').val() === 'yes');
@@ -2757,6 +2790,14 @@
 				delete set.hpType;
 			}
 
+			// preEvo
+			var preEvo = this.$chart.find('select[name=preevo]').val();
+			if (preEvo && this.curTeam.dex.species.get(preEvo).exists) {
+				set.preEvo = preEvo;
+			} else {
+				delete set.preEvo;
+			}
+
 			// update details cell
 			var buf = '';
 			var GenderChart = {
@@ -2772,10 +2813,16 @@
 				} else {
 					if (this.curTeam.gen < 8 || isNatDex) buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 255) + '</span>';
 				}
-				buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
-				if (!isLetsGo && (this.curTeam.gen < 8 || isNatDex || isDigimon)) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
-				if (this.curTeam.gen === 8 && !isBDSP && (species.canGigantamax || species.forme === 'Gmax')) {
-					buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
+				if (!isDigimon) buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
+				if (!isLetsGo && (this.curTeam.gen < 8 || isNatDex)) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
+				if (isDigimon) buf += '<span class="detailcell"><label>Pre-Evolution</label>' + (set.preEvo || 'None') + '</span>';
+				if (this.curTeam.gen === 8 && !isBDSP && !isDigimon) {
+					if (!species.cannotDynamax) {
+						buf += '<span class="detailcell"><label>Dmax Level</label>' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 10) + '</span>';
+					}
+					if (species.canGigantamax || species.forme === 'Gmax') {
+						buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
+					}
 				}
 			}
 			this.$('button[name=details]').html(buf);
@@ -2947,18 +2994,18 @@
 				val = (id in BattlePokedex ? this.curTeam.dex.species.get(e.currentTarget.value).name : '');
 				break;
 			case 'ability':
-				if (id in BattleItems && this.curTeam.format.contains("dualwielding")) {
+				if (id in BattleItems && this.curTeam.format.includes("dualwielding")) {
 					val = BattleItems[id].name;
-				} else if (id in BattleMovedex && this.curTeam.format.contains("trademarked")) {
+				} else if (id in BattleMovedex && this.curTeam.format.includes("trademarked")) {
 					val = BattleMovedex[id].name;
 				} else {
 					val = (id in BattleAbilities ? BattleAbilities[id].name : '');
 				}
 				break;
 			case 'item':
-				if (id in BattleMovedex && this.curTeam.format.contains("fortemons")) {
+				if (id in BattleMovedex && this.curTeam.format.includes("fortemons")) {
 					val = BattleMovedex[id].name;
-				} else if (id in BattleAbilities && this.curTeam.format.contains("multibility")) {
+				} else if (id in BattleAbilities && this.curTeam.format.includes("multibility")) {
 					val = BattleAbilities[id].name;
 				} else {
 					val = (id in BattleItems ? BattleItems[id].name : '');
@@ -3004,7 +3051,9 @@
 				set.gender = 'F';
 				if (set.happiness) delete set.happiness;
 				if (set.shiny) delete set.shiny;
+				if (set.dynamaxLevel) delete set.dynamaxLevel;
 				if (set.gigantamax) delete set.gigantamax;
+				if (set.preEvo) delete set.preEvo;
 				set.item = 'Starf Berry';
 				set.ability = 'Harvest';
 				set.moves = ['Substitute', 'Horn Leech', 'Earthquake', 'Phantom Force'];
@@ -3033,7 +3082,9 @@
 				}
 				if (set.happiness) delete set.happiness;
 				if (set.shiny) delete set.shiny;
+				if (set.dynamaxLevel) delete set.dynamaxLevel;
 				if (set.gigantamax) delete set.gigantamax;
+				if (set.preEvo) delete set.preEvo;
 				set.item = 'Leftovers';
 				set.ability = 'Battle Armor';
 				set.moves = ['Acupressure', 'Knock Off', 'Rest', 'Sleep Talk'];
@@ -3251,7 +3302,9 @@
 			if (species.gender && species.gender !== 'N') set.gender = species.gender;
 			if (set.happiness) delete set.happiness;
 			if (set.shiny) delete set.shiny;
+			if (set.dynamaxLevel) delete set.dynamaxLevel;
 			if (set.gigantamax) delete set.gigantamax;
+			if (set.preEvo) delete set.preEvo;
 			if (!(this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh')) && species.requiredItems.length === 1) {
 				set.item = species.requiredItems[0];
 			} else {

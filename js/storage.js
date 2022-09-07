@@ -779,10 +779,12 @@ Storage.packTeam = function (team) {
 			buf += '|';
 		}
 
-		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax) {
+		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.preEvo) {
 			buf += ',' + (set.hpType || '');
 			buf += ',' + toID(set.pokeball);
 			buf += ',' + (set.gigantamax ? 'G' : '');
+			buf += ',' + (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : '');
+			buf += ',' + (set.preEvo || '');
 		}
 	}
 
@@ -887,15 +889,17 @@ Storage.fastUnpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 4);
+			if (i < buf.length) misc = buf.substring(i).split(',', 6);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 4);
+			if (i !== j) misc = buf.substring(i, j).split(',', 6);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
 			set.hpType = misc[1];
 			set.pokeball = misc[2];
 			set.gigantamax = !!misc[3];
+			set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
+			set.preEvo = misc[5];
 		}
 		if (j < 0) break;
 		i = j + 1;
@@ -1003,15 +1007,17 @@ Storage.unpackTeam = function (buf) {
 		j = buf.indexOf(']', i);
 		var misc = undefined;
 		if (j < 0) {
-			if (i < buf.length) misc = buf.substring(i).split(',', 4);
+			if (i < buf.length) misc = buf.substring(i).split(',', 6);
 		} else {
-			if (i !== j) misc = buf.substring(i, j).split(',', 4);
+			if (i !== j) misc = buf.substring(i, j).split(',', 6);
 		}
 		if (misc) {
 			set.happiness = (misc[0] ? Number(misc[0]) : 255);
 			set.hpType = misc[1];
 			set.pokeball = misc[2];
 			set.gigantamax = !!misc[3];
+			set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
+			set.preEvo = misc[5];
 		}
 		if (j < 0) break;
 		i = j + 1;
@@ -1190,8 +1196,14 @@ Storage.importTeam = function (buffer, teams) {
 		} else if (line.substr(0, 14) === 'Hidden Power: ') {
 			line = line.substr(14);
 			curSet.hpType = line;
+		} else if (line.substr(0, 15) === 'Dynamax Level: ') {
+			line = line.substr(15);
+			curSet.dynamaxLevel = +line;
 		} else if (line === 'Gigantamax: Yes') {
 			curSet.gigantamax = true;
+		} else if (line.substr(0, 15) === 'Pre-Evolution: ') {
+			line = line.substr(15);
+			curSet.preEvo = line;
 		} else if (line.substr(0, 5) === 'EVs: ') {
 			line = line.substr(5);
 			var evLines = line.split('/');
@@ -1311,8 +1323,14 @@ Storage.exportTeam = function (team) {
 		if (curSet.hpType) {
 			text += 'Hidden Power: ' + curSet.hpType + "  \n";
 		}
+		if (typeof curSet.dynamaxLevel === 'number' && curSet.dynamaxLevel !== 10 && !isNaN(curSet.dynamaxLevel)) {
+			text += 'Dynamax Level: ' + curSet.dynamaxLevel + "  \n";
+		}
 		if (curSet.gigantamax) {
 			text += 'Gigantamax: Yes  \n';
+		}
+		if (curSet.preEvo) {
+			text += 'Pre-Evolution: ' + curSet.preEvo + "  \n";
 		}
 		var first = true;
 		if (curSet.evs) {
