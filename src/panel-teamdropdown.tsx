@@ -96,10 +96,15 @@ class PSTeambuilder {
 				buf += '|';
 			}
 
-			if (set.pokeball || (set.hpType && toID(set.hpType) !== hasHP) || set.gigantamax) {
+			if (
+				set.pokeball || (set.hpType && toID(set.hpType) !== hasHP) || set.gigantamax ||
+				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.preEvo
+			) {
 				buf += ',' + (set.hpType || '');
 				buf += ',' + toID(set.pokeball);
 				buf += ',' + (set.gigantamax ? 'G' : '');
+				buf += ',' + (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : '');
+				buf += ',' + (set.preEvo || '');
 			}
 		}
 
@@ -186,11 +191,13 @@ class PSTeambuilder {
 
 			// happiness
 			if (parts[11]) {
-				let misc = parts[11].split(',', 4);
+				let misc = parts[11].split(',', 6);
 				set.happiness = (misc[0] ? Number(misc[0]) : undefined);
 				set.hpType = misc[1];
 				set.pokeball = misc[2];
 				set.gigantamax = !!misc[3];
+				set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
+				set.preEvo = misc[5];
 			}
 		}
 
@@ -278,8 +285,14 @@ class PSTeambuilder {
 		if (typeof set.happiness === 'number' && set.happiness !== 255 && !isNaN(set.happiness)) {
 			text += `Happiness: ${set.happiness}  \n`;
 		}
+		if (typeof set.dynamaxLevel === 'number' && set.dynamaxLevel !== 255 && !isNaN(set.dynamaxLevel)) {
+			text += `Dynamax Level: ${set.dynamaxLevel}  \n`;
+		}
 		if (set.gigantamax) {
 			text += `Gigantamax: Yes  \n`;
+		}
+		if (set.preEvo) {
+			text += `Pre-Evolution: ${set.preEvo}  \n`;
 		}
 
 		text += `\n`;
@@ -347,8 +360,14 @@ class PSTeambuilder {
 		} else if (line.startsWith('Hidden Power: ')) {
 			line = line.slice(14);
 			set.hpType = line;
+		} else if (line.startsWith('Dynamax Level: ')) {
+			line = line.substr(15);
+			set.dynamaxLevel = +line;
 		} else if (line === 'Gigantamax: Yes') {
 			set.gigantamax = true;
+		} else if (line.startsWith('Pre-Evolution: ')) {
+			line = line.substr(15);
+			set.preEvo = line;
 		} else if (line.startsWith('EVs: ')) {
 			line = line.slice(5);
 			let evLines = line.split('/');

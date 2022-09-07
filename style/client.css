@@ -2688,9 +2688,6 @@ a.ilink.yours {
 .setcell-pokemon {
 	margin-top: 0;
 }
-.setcell-preevo {
-	margin-top: -70px;
-}
 .setcell-details {
 	height: 60px;
 }
@@ -2870,10 +2867,6 @@ a.ilink.yours {
 }
 .setchart .setcol-moves input {
 	width: 129px;
-}
-.setchart .setcell-preevo input {
-	width: 114px;
-	margin-right: 0px;
 }
 
 .teambuilder-clipboard-container {

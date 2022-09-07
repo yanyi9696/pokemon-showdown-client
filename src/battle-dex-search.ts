@@ -1465,6 +1465,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		const isHackmons = (format.includes('hackmons') || format.endsWith('bh'));
 		const isSTABmons = (format.includes('stabmons') || format === 'staaabmons');
 		const isTradebacks = format.includes('tradebacks');
+		const isDigimon = format.includes('digimon');
 		const galarBornLegality = ((/^battle(stadium|festival)/.test(format) || format.startsWith('vgc')) &&
 			this.dex.gen === 8);
 
@@ -1584,6 +1585,23 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					}
 				}
 				if (valid) moves.push(id);
+			}
+		}
+
+		if (isDigimon && this.set !== null && typeof this.set.preEvo === 'string' && this.set.preEvo.length > 0) {
+			let preevoLearnsetid = this.firstLearnsetid(dex.species.get(this.set.preEvo).id);
+			let preevoLearnset = lsetTable.learnsets[preevoLearnsetid];
+			if (preevoLearnset) {
+				for (let moveid in preevoLearnset) {
+					if (moves.includes(moveid)) continue;
+					moves.push(moveid);
+					if (moveid === 'sketch') sketch = true;
+					if (moveid === 'hiddenpower') {
+						moves.push(
+							'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
+						);
+					}
+				}
 			}
 		}
 

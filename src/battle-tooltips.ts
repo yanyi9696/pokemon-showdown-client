@@ -2105,8 +2105,12 @@ interface PokemonSet {
 	pokeball?: string;
 	/** Defaults to the type of your Hidden Power in Moves, otherwise Dark */
 	hpType?: string;
+	/** Defaults to 10 */
+	dynamaxLevel?: number;
 	/** Defaults to no (can only be yes for certain Pokemon) */
 	gigantamax?: boolean;
+	/** Digimon Pre-Evolution */
+	preEvo?: string;
 }
 
 class BattleStatGuesser {
