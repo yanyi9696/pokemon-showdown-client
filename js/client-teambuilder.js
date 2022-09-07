@@ -2792,8 +2792,14 @@
 
 			// preEvo
 			var preEvo = this.$chart.find('select[name=preevo]').val();
-			if (preEvo && this.curTeam.dex.species.get(preEvo).exists) {
-				set.preEvo = preEvo;
+			if (preEvo) {
+				let preEvoSpecies = this.curTeam.dex.species.get(preEvo);
+				if (preEvoSpecies.exists && species.evos.includes(preEvoSpecies.name)) {
+					set.preEvo = preEvo;
+				}
+				else {
+					delete set.preEvo;
+				}
 			} else {
 				delete set.preEvo;
 			}
