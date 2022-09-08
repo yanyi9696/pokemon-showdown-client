@@ -2803,7 +2803,7 @@
 			if (preEvo) {
 				let preEvoSpecies = this.curTeam.dex.species.get(preEvo);
 				if (preEvoSpecies.exists) {
-					if (species.evos.includes(preEvoSpecies.name) || species.forme === "X" && this.curTeam.dex.species.get(species.baseSpecies).evos.includes(preEvoSpecies.name)) {
+					if (species.evos?.includes(preEvoSpecies.name) || species.forme === "X" && this.curTeam.dex.species.get(species.baseSpecies).evos?.includes(preEvoSpecies.name)) {
 						set.preEvo = preEvo;
 					}
 					else {
