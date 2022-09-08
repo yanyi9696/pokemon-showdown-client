@@ -2711,6 +2711,14 @@
 					for (const preEvo of preEvos) {
 						buf += '<option value="' + preEvo + '"' + (set.preEvo === preEvo ? ' selected="selected"' : '') + '>' + preEvo + '</option>';
 					}
+				} else if (species.forme === "X") {
+					const preXSpecies = this.curTeam.dex.species.get(species.baseSpecies);
+					if (preXSpecies.evos !== null && preXSpecies.evos.length) {
+						const preEvos = preXSpecies.evos;
+						for (const preEvo of preEvos) {
+							buf += '<option value="' + preEvo + '"' + (set.preEvo === preEvo ? ' selected="selected"' : '') + '>' + preEvo + '</option>';
+						}
+					}
 				}
 				buf += '</select></div></div>';
 			}
@@ -2794,8 +2802,13 @@
 			var preEvo = this.$chart.find('select[name=preevo]').val();
 			if (preEvo) {
 				let preEvoSpecies = this.curTeam.dex.species.get(preEvo);
-				if (preEvoSpecies.exists && species.evos.includes(preEvoSpecies.name)) {
-					set.preEvo = preEvo;
+				if (preEvoSpecies.exists) {
+					if (species.evos.includes(preEvoSpecies.name) || species.forme === "X" && this.curTeam.dex.species.get(species.baseSpecies).evos.includes(preEvoSpecies.name)) {
+						set.preEvo = preEvo;
+					}
+					else {
+						delete set.preEvo;
+					}
 				}
 				else {
 					delete set.preEvo;

@@ -1521,6 +1521,24 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			}
 			learnsetid = this.nextLearnsetid(learnsetid, species.id);
 		}
+		if (isDigimon && this.set !== null && typeof this.set.preEvo === 'string') {
+			if (species.evos?.includes(this.set.preEvo) || species.forme === "X" && dex.species.get(species.baseSpecies).evos?.includes(this.set.preEvo)) {
+				let preevoLearnsetid = this.firstLearnsetid(dex.species.get(this.set.preEvo).id);
+				let preevoLearnset = lsetTable.learnsets[preevoLearnsetid];
+				if (preevoLearnset) {
+					for (let moveid in preevoLearnset) {
+						if (moves.includes(moveid)) continue;
+						moves.push(moveid);
+						if (moveid === 'sketch') sketch = true;
+						if (moveid === 'hiddenpower') {
+							moves.push(
+								'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
+							);
+						}
+					}
+				}
+			}
+		}
 		if (sketch || isHackmons) {
 			if (isHackmons) moves = [];
 			for (let id in BattleMovedex) {
@@ -1585,23 +1603,6 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					}
 				}
 				if (valid) moves.push(id);
-			}
-		}
-
-		if (isDigimon && this.set !== null && typeof this.set.preEvo === 'string' && this.set.preEvo.length > 0) {
-			let preevoLearnsetid = this.firstLearnsetid(dex.species.get(this.set.preEvo).id);
-			let preevoLearnset = lsetTable.learnsets[preevoLearnsetid];
-			if (preevoLearnset) {
-				for (let moveid in preevoLearnset) {
-					if (moves.includes(moveid)) continue;
-					moves.push(moveid);
-					if (moveid === 'sketch') sketch = true;
-					if (moveid === 'hiddenpower') {
-						moves.push(
-							'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
-						);
-					}
-				}
 			}
 		}
 
