@@ -228,6 +228,17 @@ function requireNoCache(pathSpec) {
 		generateAlias(id, name, 'ability');
 	}
 
+	const infoTable = {Pokedex: 'pokemon', Moves: 'move', Items: 'item', Abilities: 'ability'};
+	const digiDex = Dex.mod('digimon');
+	for (const key in infoTable) {
+		for (let id in digiDex.data[key]) {
+			if (digiDex.data[key][id]?.num <= 40000) continue;
+			index.push(toID(id) + ' ' + infoTable[key]);
+			const name = digiDex.data[key][id].name;
+			if (name) generateAlias(id, name, infoTable[key]);
+		}
+	}
+
 	index.sort();
 
 	// manually rearrange
@@ -349,7 +360,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			return genStr;
 		})();
 		// process.stdout.write("" + gen + (isDoubles ? " doubles" : "") + "... ");
-		const pokemon = Object.keys(Dex.data.Pokedex);
+		const pokemon = Object.keys(gen === 'digimon' ? Dex.mod(gen).data.Pokedex : Dex.data.Pokedex);
 		pokemon.sort();
 		const tierTable = {};
 		const overrideTier = {};
@@ -610,7 +621,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			if (!formatSlices['DUU']) formatSlices['DUU'] = formatSlices['New'];
 		}
 
-		const itemList = Object.keys(Dex.data.Items);
+		const itemList = Object.keys(gen === 'digimon' ? Dex.mod(gen).data.Items : Dex.data.Items);
 		itemList.sort();
 
 		const greatItems = [['header', "Popular items"]];
@@ -1054,7 +1065,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	// Mods
 	//
 
-	for (const mod of ['gen7letsgo', 'gen8bdsp', 'digimon']) {
+	for (const mod of ['gen7letsgo', 'gen8bdsp']) {
 		const modDex = Dex.mod(mod);
 		const modData = modDex.data;
 		const parentDex = Dex.forGen(modDex.gen);
@@ -1066,7 +1077,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			const modEntry = modData.Pokedex[id];
 			const parentEntry = parentData.Pokedex[id];
 			for (const key of overrideSpeciesKeys) {
-				if (mod === 'digimon' || JSON.stringify(modEntry[key]) !== JSON.stringify(parentEntry[key])) {
+				if (JSON.stringify(modEntry[key]) !== JSON.stringify(parentEntry[key])) {
 					if (!overrideSpeciesData[id]) overrideSpeciesData[id] = {};
 					overrideSpeciesData[id][key] = modEntry[key];
 				}
@@ -1080,7 +1091,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			const parentEntry = parentDex.moves.get(id);
 			for (const key of overrideMoveKeys) {
 				if (key === 'category' && modDex.gen <= 3) continue;
-				if (mod === 'digimon' || JSON.stringify(modEntry[key]) !== JSON.stringify(parentEntry[key])) {
+				if (JSON.stringify(modEntry[key]) !== JSON.stringify(parentEntry[key])) {
 					if (!overrideMoveData[id]) overrideMoveData[id] = {};
 					overrideMoveData[id][key] = modEntry[key];
 				}
@@ -1101,6 +1112,50 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		}
 	}
 
+	//
+	// Digimon
+	//
+	
+	const digiDex = Dex.mod('digimon');
+	const digiData = digiDex.data;
+
+	const digimonSpeciesData = {};
+	const digimonSpeciesKeys = ['num', 'name', 'baseSpecies', 'forme', 'types', 'gender', 'genderRatio', 'baseStats', 'abilities', 'weightkg', 'evos', 'eggGroups', 'otherFormes', 'formeOrder', 'requiredItem'];
+	BattleTeambuilderTable['digimon'].overrideSpeciesData = digimonSpeciesData;
+	for (const id in digiData.Pokedex) {
+		if (digiDex.species.get(id).num <= 40000) continue;
+		if (!digimonSpeciesData[id]) digimonSpeciesData[id] = {};
+		for (const key of digimonSpeciesKeys) {
+			digimonSpeciesData[id][key] = digiData.Pokedex[id][key];
+		}
+	}
+
+	const digimonMoveData = {};
+	BattleTeambuilderTable['digimon'].overrideMoveData = digimonMoveData;
+	for (const id in digiData.Moves) {
+		const digiEntry = digiDex.moves.get(id);
+		const pokeEntry = Dex.moves.get(id);
+		for (const key in digiEntry) {
+			if (digiEntry.num > 40000 || JSON.stringify(digiEntry[key]) !== JSON.stringify(pokeEntry[key])) {
+				if (!digimonMoveData[id]) digimonMoveData[id] = {};
+				digimonMoveData[id][key] = digiEntry[key];
+			}
+		}
+	}
+
+	const digimonAbilityData = {};
+	BattleTeambuilderTable['digimon'].overrideAbilityData = digimonAbilityData;
+	for (const id in digiData.Abilities) {
+		const digiEntry = digiDex.abilities.get(id);
+		const pokeEntry = Dex.abilities.get(id);
+		for (const key in digiEntry) {
+			if (digiEntry.num > 40000 || JSON.stringify(digiEntry[key]) !== JSON.stringify(pokeEntry[key])) {
+				if (!digimonAbilityData[id]) digimonAbilityData[id] = {};
+				digimonAbilityData[id][key] = digiEntry[key];
+			}
+		}
+	}
+
 	buf += `exports.BattleTeambuilderTable = JSON.parse('${JSON.stringify(BattleTeambuilderTable).replace(/['\\]/g, "\\$&")}');\n\n`;
 
 	fs.writeFileSync('data/teambuilder-tables.js', buf);
@@ -1116,6 +1171,7 @@ process.stdout.write("Building `data/pokedex.js`... ");
 
 {
 	const Pokedex = requireNoCache('../data/pokemon-showdown/.data-dist/pokedex.js').Pokedex;
+	const Digidex = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/pokedex.js').Pokedex;
 	for (const id in Pokedex) {
 		const entry = Pokedex[id];
 		if (Dex.data.FormatsData[id]) {
@@ -1126,9 +1182,9 @@ process.stdout.write("Building `data/pokedex.js`... ");
 			if (formatsEntry.unreleasedHidden) entry.unreleasedHidden = formatsEntry.unreleasedHidden;
 		}
 	}
-	const buf = 'exports.BattlePokedex = ' + es3stringify(Pokedex) + ';';
-	fs.writeFileSync('data/pokedex.js', buf);
-	fs.writeFileSync('data/pokedex.json', JSON.stringify(Pokedex));
+	const buf = 'exports.BattlePokedex = ' + es3stringify(Pokedex) + es3stringify(Digidex) + ';';
+	fs.writeFileSync('data/pokedex.js', buf.replace('}{', ','));
+	fs.writeFileSync('data/pokedex.json', (JSON.stringify(Pokedex) + JSON.stringify(Digidex)).replace('}{', ','));
 }
 
 console.log("DONE");
@@ -1141,14 +1197,24 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 
 {
 	const Moves = requireNoCache('../data/pokemon-showdown/.data-dist/moves.js').Moves;
+	const DigiMoves = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/moves.js').Moves;
 	for (const id in Moves) {
 		const move = Dex.moves.get(Moves[id].name);
 		if (move.desc) Moves[id].desc = move.desc;
 		if (move.shortDesc) Moves[id].shortDesc = move.shortDesc;
 	}
-	const buf = 'exports.BattleMovedex = ' + es3stringify(Moves) + ';';
-	fs.writeFileSync('data/moves.js', buf);
-	fs.writeFileSync('data/moves.json', JSON.stringify(Moves));
+	for (const id in DigiMoves) {
+		const move = Dex.mod('digimon').moves.get(DigiMoves[id].name);
+		if (move.num <= 40000) {
+			delete DigiMoves[id];
+			continue;
+		}
+		if (move.desc) DigiMoves[id].desc = move.desc;
+		if (move.shortDesc) DigiMoves[id].shortDesc = move.shortDesc;
+	}
+	const buf = 'exports.BattleMovedex = ' + es3stringify(Moves) + es3stringify(DigiMoves) + ';';
+	fs.writeFileSync('data/moves.js', buf.replace('}{', ','));
+	fs.writeFileSync('data/moves.json', (JSON.stringify(Moves) + JSON.stringify(DigiMoves)).replace('}{', ','));
 }
 
 /*********************************************************
@@ -1157,13 +1223,19 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 
 {
 	const Items = requireNoCache('../data/pokemon-showdown/.data-dist/items.js').Items;
+	const DigiItems = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/items.js').Items;
 	for (const id in Items) {
 		const item = Dex.items.get(Items[id].name);
 		if (item.desc) Items[id].desc = item.desc;
 		if (item.shortDesc) Items[id].shortDesc = item.shortDesc;
 	}
-	const buf = 'exports.BattleItems = ' + es3stringify(Items) + ';';
-	fs.writeFileSync('data/items.js', buf);
+	for (const id in DigiItems) {
+		const item = Dex.mod('digimon').items.get(DigiItems[id].name);
+		if (item.desc) DigiItems[id].desc = item.desc;
+		if (item.shortDesc) DigiItems[id].shortDesc = item.shortDesc;
+	}
+	const buf = 'exports.BattleItems = ' + es3stringify(Items) + es3stringify(DigiItems) + ';';
+	fs.writeFileSync('data/items.js', buf.replace('}{', ','));
 }
 
 /*********************************************************
@@ -1172,13 +1244,19 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 
 {
 	const Abilities = requireNoCache('../data/pokemon-showdown/.data-dist/abilities.js').Abilities;
+	const DigiAbilities = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/abilities.js').Abilities;
 	for (const id in Abilities) {
 		const ability = Dex.abilities.get(Abilities[id].name);
 		if (ability.desc) Abilities[id].desc = ability.desc;
 		if (ability.shortDesc) Abilities[id].shortDesc = ability.shortDesc;
 	}
-	const buf = 'exports.BattleAbilities = ' + es3stringify(Abilities) + ';';
-	fs.writeFileSync('data/abilities.js', buf);
+	for (const id in DigiAbilities) {
+		const ability = Dex.mod('digimon').abilities.get(DigiAbilities[id].name);
+		if (ability.desc) DigiAbilities[id].desc = ability.desc;
+		if (ability.shortDesc) DigiAbilities[id].shortDesc = ability.shortDesc;
+	}
+	const buf = 'exports.BattleAbilities = ' + es3stringify(Abilities) + es3stringify(DigiAbilities) + ';';
+	fs.writeFileSync('data/abilities.js', buf.replace('}{', ','));
 }
 
 /*********************************************************
@@ -1227,9 +1305,10 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 
 {
 	const Learnsets = requireNoCache('../data/pokemon-showdown/.data-dist/learnsets.js').Learnsets;
-	const buf = 'exports.BattleLearnsets = ' + es3stringify(Learnsets) + ';';
-	fs.writeFileSync('data/learnsets.js', buf);
-	fs.writeFileSync('data/learnsets.json', JSON.stringify(Learnsets));
+	const DigimonLearnsets = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/learnsets.js').Learnsets;
+	const buf = 'exports.BattleLearnsets = ' + es3stringify(Learnsets) + es3stringify(DigimonLearnsets) + ';';
+	fs.writeFileSync('data/learnsets.js', buf.replace('}{', ','));
+	fs.writeFileSync('data/learnsets.json', (JSON.stringify(Learnsets) + JSON.stringify(DigimonLearnsets)).replace('}{', ','));
 }
 
 /*********************************************************

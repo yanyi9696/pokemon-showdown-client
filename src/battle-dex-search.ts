@@ -324,6 +324,16 @@ class DexSearch {
 
 			if (!id) break;
 
+			// Nihilslave: trying to filter out Digimon results here
+			if (this.dex.modid !== ('digimon' as ID)) {
+				if (Dex.species.get(id).exists && Dex.species.get(id).num > 40000
+				|| Dex.abilities.get(id).exists && Dex.abilities.get(id).num > 40000
+				|| Dex.moves.get(id).exists && Dex.moves.get(id).num > 40000
+				|| Dex.items.get(id).exists && Dex.items.get(id).num > 40000) {
+					continue;
+				}
+			}
+
 			if (passType === 'fuzzy') {
 				// fuzzy match pass; stop after 2 results
 				if (count >= 2) {
@@ -1543,7 +1553,9 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			if (isHackmons) moves = [];
 			for (let id in BattleMovedex) {
 				if (!format.startsWith('cap') && (id === 'paleowave' || id === 'shadowstrike')) continue;
+				if (!format.includes('gennext') && id === 'magikarpsrevenge') continue;
 				const move = dex.moves.get(id);
+				if (!isDigimon && move.num > 40000) continue;
 				if (move.gen > dex.gen) continue;
 				if (sketch) {
 					if (move.noSketch || move.isMax || move.isZ) continue;
@@ -1555,7 +1567,6 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					if (typeof move.isMax === 'string') continue;
 					if (move.isNonstandard === 'Past' && this.formatType !== 'natdex') continue;
 					if (move.isNonstandard === 'LGPE' && this.formatType !== 'letsgo') continue;
-					if (move.isNonstandard === 'Digimon' && this.formatType !== 'digimon') continue;
 					moves.push(move.id);
 				}
 			}
@@ -2804,9 +2815,9 @@ class BattleTypeSearch extends BattleTypedSearch<'type'> {
 						Rock: 0,
 						Steel: 0,
 						Water: 0,
-						Vaccine: 0,
+						Vaccine: 2,
 						Data: 0,
-						Virus: 0,
+						Virus: 1,
 					},
 				},
 				virus: {
@@ -2830,7 +2841,7 @@ class BattleTypeSearch extends BattleTypedSearch<'type'> {
 						Rock: 0,
 						Steel: 0,
 						Water: 0,
-						Vaccine: 0,
+						Vaccine: 1,
 						Data: 0,
 						Virus: 0,
 					},
