@@ -1124,6 +1124,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 				const ability = dex.abilities.get(i);
 				if (ability.isNonstandard) continue;
 				if (ability.gen > dex.gen) continue;
+				if (!format.includes('digimon') && ability.num > 40000) continue;
 				abilities.push(ability.id);
 			}
 
