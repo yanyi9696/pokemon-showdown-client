@@ -1233,7 +1233,7 @@
 				if (!isDigimon) {
 					buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
 				}
-				if (!isLetsGo) {
+				if (!isLetsGo && this.curTeam.gen < 9) {
 					if (this.curTeam.gen === 8 && !isNatDex) {
 						if (isBDSP && species.baseSpecies === "Unown") {
 							buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
@@ -1249,6 +1249,11 @@
 					}
 					if (species.canGigantamax || species.forme === 'Gmax') {
 						buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
+					}
+				}
+				if (this.curTeam.gen === 9) {
+					if (set.teraType) {
+						buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
 					}
 				}
 				if (isDigimon) {
@@ -2077,15 +2082,15 @@
 				}
 			}
 
-			var generationNumber = 8;
+			var generationNumber = 9;
 			if (format.substr(0, 3) === 'gen') {
 				var number = parseInt(format.charAt(3), 10);
-				if (1 <= number && number <= 7) {
+				if (1 <= number && number <= 8) {
 					generationNumber = number;
 				}
 				format = format.substr(4);
 			}
-			var generation = ['rb', 'gs', 'rs', 'dp', 'bw', 'xy', 'sm', 'ss'][generationNumber - 1];
+			var generation = ['rb', 'gs', 'rs', 'dp', 'bw', 'xy', 'sm', 'ss', 'sv'][generationNumber - 1];
 			if (format === 'battlespotdoubles') {
 				smogdexid += '/vgc15';
 			} else if (format === 'doublesou' || format === 'doublesuu') {
@@ -2721,6 +2726,15 @@
 						}
 					}
 				}
+			}
+
+			if (this.curTeam.gen === 9) {
+				buf += '<div class="formrow"><label class="formlabel" title="Terastal Type">Terastal Type:</label><div><select name="teratype">';
+				buf += '<option value=""' + (!set.teraType ? ' selected="selected"' : '') + '>(automatic type)</option>'; // unset
+				var types = Dex.types.all();
+				for (var i = 0; i < types.length; i++) {
+					buf += '<option value="' + types[i].name + '"' + (set.teraType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + '</option>';
+				}
 				buf += '</select></div></div>';
 			}
 
@@ -2799,6 +2813,14 @@
 				delete set.hpType;
 			}
 
+			// Terastal type
+			var teraType = this.$chart.find('select[name=teratype]').val();
+			if (Dex.types.isName(teraType)) {
+				set.teraType = teraType;
+			} else {
+				delete set.teraType;
+			}
+
 			// preEvo
 			var preEvo = this.$chart.find('select[name=preevo]').val();
 			if (preEvo) {
@@ -2843,6 +2865,9 @@
 					if (species.canGigantamax || species.forme === 'Gmax') {
 						buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
 					}
+				}
+				if (this.curTeam.gen === 9) {
+					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
 				}
 			}
 			this.$('button[name=details]').html(buf);

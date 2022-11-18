@@ -368,7 +368,7 @@ class DexSearch {
 
 			// For pokemon queries, accept types/tier/abilities/moves/eggroups as filters
 			if (searchType === 'pokemon' && (typeIndex === 5 || typeIndex > 7)) continue;
-			if (searchType === 'pokemon' && typeIndex === 3 && this.dex.gen < 8) continue;
+			if (searchType === 'pokemon' && typeIndex === 3 && this.dex.gen < 9) continue;
 			// For move queries, accept types/categories as filters
 			if (searchType === 'move' && ((typeIndex !== 8 && typeIndex > 4) || typeIndex === 3)) continue;
 			// For move queries in the teambuilder, don't accept pokemon as filters
@@ -773,7 +773,9 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.format.startsWith('battlestadium') ||
 			this.format.startsWith('battlefestival')
 		) {
-			if (gen === 8) {
+			if (gen === 9) {
+				genChar = 'a';
+			} else if (gen === 8) {
 				genChar = 'g';
 			} else if (gen === 7) {
 				genChar = 'q';
@@ -811,7 +813,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.formatType === 'nfe' ? `gen${gen}nfe` :
 			this.formatType === 'dlc1' ? 'gen8dlc1' :
 			this.formatType === 'dlc1doubles' ? 'gen8dlc1doubles' :
-			this.formatType === 'natdex' ? 'natdex' :
+			this.formatType === 'natdex' ? `gen${gen}natdex` :
 			this.formatType === 'stadium' ? `gen${gen}stadium${gen > 1 ? gen : ''}` :
 			`gen${gen}`;
 		if (table && table[tableKey]) {
@@ -873,6 +875,9 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			case 'grookey':
 				results.push(['header', "Generation 8"]);
 				break;
+			case 'sprigatito':
+				results.push(['header', "Generation 9"]);
+				break;
 			case 'missingno':
 				results.push(['header', "Glitch"]);
 				break;
@@ -894,7 +899,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		const dex = this.dex;
 
 		let table = BattleTeambuilderTable;
-		if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 8) {
+		if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 9) {
 			table = table['gen' + dex.gen];
 		} else if (isVGCOrBS) {
 			table = table['gen' + dex.gen + 'vgc'];
@@ -908,7 +913,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		) {
 			table = table['gen' + dex.gen + 'doubles'];
 			isDoublesOrBS = true;
-		} else if (dex.gen < 8 && !this.formatType) {
+		} else if (dex.gen < 9 && !this.formatType) {
 			table = table['gen' + dex.gen];
 		} else if (this.formatType?.startsWith('bdsp')) {
 			table = table['gen8' + this.formatType];
@@ -917,7 +922,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		} else if (this.formatType === 'digimon') {
 			table = table['digimon'];
 		} else if (this.formatType === 'natdex') {
-			table = table['natdex'];
+			table = table['gen' + this.dex.gen + 'natdex'];
 		} else if (this.formatType === 'metronome') {
 			table = table['metronome'];
 		} else if (this.formatType === 'nfe') {
@@ -1189,12 +1194,12 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 		if (this.formatType?.startsWith('bdsp')) {
 			table = table['gen8bdsp'];
 		} else if (this.formatType === 'natdex') {
-			table = table['natdex'];
+			table = table['gen' + this.dex.gen + 'natdex'];
 		} else if (this.formatType === 'digimon') {
 			table = table['digimon'];
 		} else if (this.formatType === 'metronome') {
 			table = table['metronome'];
-		} else if (this.dex.gen < 8) {
+		} else if (this.dex.gen < 9) {
 			table = table['gen' + this.dex.gen];
 		} // Nihilslave: add an else if here to make it show mega stones in mnm
 		if (!table.itemSet) {
@@ -1482,7 +1487,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		const isTradebacks = format.includes('tradebacks');
 		const isDigimon = format.includes('digimon');
 		const regionBornLegality = dex.gen >= 6 &&
-			/^battle(spot|stadium|festival)/.test(format) || format.startsWith('vgc');
+			/^battle(spot|stadium|festival)/.test(format) || format.startsWith('vgc') ||
+			(dex.gen === 9 && this.formatType !== 'natdex');
 
 		const abilityid = this.set ? toID(this.set.ability) : '' as ID;
 		const itemid = this.set ? toID(this.set.item) : '' as ID;
@@ -1503,7 +1509,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				for (let moveid in learnset) {
 					let learnsetEntry = learnset[moveid];
 					const move = dex.moves.get(moveid);
-					const minGenCode: {[gen: number]: string} = {6: 'p', 7: 'q', 8: 'g'};
+					const minGenCode: {[gen: number]: string} = {6: 'p', 7: 'q', 8: 'g', 9: 'a'};
 					if (regionBornLegality && !learnsetEntry.includes(minGenCode[dex.gen])) {
 						continue;
 					}
@@ -1600,7 +1606,9 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					if (pokemon.battleOnly && typeof pokemon.battleOnly === 'string') {
 						species = dex.species.get(pokemon.battleOnly);
 					}
-					const excludedForme = (s: Species) => ['Alola', 'Alola-Totem', 'Galar', 'Galar-Zen', 'Hisui'].includes(s.forme);
+					const excludedForme = (s: Species) => [
+						'Alola', 'Alola-Totem', 'Galar', 'Galar-Zen', 'Hisui', 'Paldea',
+					].includes(s.forme);
 					if (baseSpecies.otherFormes && !['Wormadam', 'Urshifu'].includes(baseSpecies.baseSpecies)) {
 						if (!excludedForme(species)) speciesTypes.push(...baseSpecies.types);
 						for (const formeName of baseSpecies.otherFormes) {
