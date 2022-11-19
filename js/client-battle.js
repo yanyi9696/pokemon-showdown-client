@@ -1320,7 +1320,9 @@
 					return true;
 				}
 			} else if (this.request.requestType === 'move') {
-				while (choices.length < this.battle.pokemonControlled && !nearActive[choices.length]) {
+				var requestDetails = this.request && this.request.side ? this.battle.myPokemon : [];
+				while (choices.length < this.battle.pokemonControlled &&
+						(!nearActive[choices.length] || requestDetails[choices.length].commanding)) {
 					choices.push('pass');
 				}
 
