@@ -32468,6 +32468,8 @@ BattleMoveAnims['shellsidearmspecial'] = {anim: BattleMoveAnims['sludgebomb'].an
 BattleMoveAnims['surgingstrikes'] = {anim: BattleMoveAnims['aquajet'].anim};
 BattleMoveAnims['eeriespell'] = {anim: BattleMoveAnims['psyshock'].anim};
 
+BattleMoveAnims['shedtail'] = {anim: BattleMoveAnims['substitute'].anim};
+
 // Digimon
 
 BattleMoveAnims['greysword'] = {anim: BattleMoveAnims['sacredsword'].anim};
