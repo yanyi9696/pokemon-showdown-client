@@ -1180,6 +1180,7 @@
 			var isBDSP = this.curTeam.format.includes('bdsp');
 			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd');
 			var isDigimon = this.curTeam.format.includes('digimon');
+			var isCreatemon = this.curTeam.format.includes('createmons');
 			var buf = '<li value="' + i + '">';
 			if (!set.species) {
 				if (this.deletedSet) {
@@ -1222,12 +1223,14 @@
 				'F': 'Female',
 				'N': '&mdash;'
 			};
-			buf += '<span class="detailcell detailcell-first"><label>Level</label>' + (set.level || 100) + '</span>';
+			if (!isCreatemon) {
+				buf += '<span class="detailcell detailcell-first"><label>Level</label>' + (set.level || 100) + '</span>';
+			}
 			if (this.curTeam.gen > 1) {
 				buf += '<span class="detailcell"><label>Gender</label>' + GenderChart[set.gender || species.gender || 'N'] + '</span>';
 				if (isLetsGo) {
 					buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 70) + '</span>';
-				} else if (this.curTeam.gen < 8 || isNatDex) {
+				} else if (this.curTeam.gen < 8 || isNatDex || isCreatemon) {
 					buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 255) + '</span>';
 				}
 				if (!isDigimon) {
@@ -1243,6 +1246,9 @@
 						buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
 					}
 				}
+				if (isCreatemon) {
+					buf += '<span class="detailcell"><label>First Type</label>' + (set.hpType || species.types[0]) + '</span>';
+				}
 				if (this.curTeam.gen === 8 && !isBDSP && !isDigimon) {
 					if (!species.cannotDynamax && set.dynamaxLevel !== 10 && set.dynamaxLevel !== undefined) {
 						buf += '<span class="detailcell"><label>Dmax Level</label>' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 10) + '</span>';
@@ -1252,7 +1258,11 @@
 					}
 				}
 				if (this.curTeam.gen === 9) {
-					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
+					if (!isCreatemon) {
+						buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
+					} else {
+						buf += '<span class="detailcell"><label>Second Type</label>' + (set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0])) + '</span>';
+					}
 				}
 				if (isDigimon) {
 					buf += '<span class="detailcell"><label>Pre-Evolution</label>' + (set.preEvo || 'None') + '</span>';
@@ -1295,26 +1305,52 @@
 
 			// stats
 			buf += '<div class="setcol setcol-stats"><div class="setrow"><label>Stats</label><button class="textbox setstats" name="stats">';
-			buf += '<span class="statrow statrow-head"><label></label> <span class="statgraph"></span> <em>' + (!isLetsGo ? 'EV' : 'AV') + '</em></span>';
+			buf += '<span class="statrow statrow-head"><label></label> <span class="statgraph"></span> <em>' + (!isLetsGo ? (!isCreatemon ? 'EV' : 'BS') : 'AV') + '</em></span>';
 			var stats = {};
-			var defaultEV = (this.curTeam.gen > 2 ? 0 : 252);
-			for (var j in BattleStatNames) {
-				if (j === 'spd' && this.curTeam.gen === 1) continue;
-				stats[j] = this.getStat(j, set);
-				var ev = (set.evs[j] === undefined ? defaultEV : set.evs[j]);
-				var evBuf = '<em>' + (ev === defaultEV ? '' : ev) + '</em>';
-				if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === j) {
-					evBuf += '<small>+</small>';
-				} else if (BattleNatures[set.nature] && BattleNatures[set.nature].minus === j) {
-					evBuf += '<small>&minus;</small>';
+			if (!isCreatemon) {
+				var defaultEV = (this.curTeam.gen > 2 ? 0 : 252);
+				for (var j in BattleStatNames) {
+					if (j === 'spd' && this.curTeam.gen === 1) continue;
+					stats[j] = this.getStat(j, set);
+					var ev = (set.evs[j] === undefined ? defaultEV : set.evs[j]);
+					var evBuf = '<em>' + (ev === defaultEV ? '' : ev) + '</em>';
+					if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === j) {
+						evBuf += '<small>+</small>';
+					} else if (BattleNatures[set.nature] && BattleNatures[set.nature].minus === j) {
+						evBuf += '<small>&minus;</small>';
+					}
+					var width = stats[j] * 75 / 504;
+					if (j == 'hp') width = stats[j] * 75 / 704;
+					if (width > 75) width = 75;
+					var color = Math.floor(stats[j] * 180 / 714);
+					if (color > 360) color = 360;
+					var statName = this.curTeam.gen === 1 && j === 'spa' ? 'Spc' : BattleStatNames[j];
+					buf += '<span class="statrow"><label>' + statName + '</label> <span class="statgraph"><span style="width:' + width + 'px;background:hsl(' + color + ',40%,75%);"></span></span> ' + evBuf + '</span>';
 				}
-				var width = stats[j] * 75 / 504;
-				if (j == 'hp') width = stats[j] * 75 / 704;
-				if (width > 75) width = 75;
-				var color = Math.floor(stats[j] * 180 / 714);
-				if (color > 360) color = 360;
-				var statName = this.curTeam.gen === 1 && j === 'spa' ? 'Spc' : BattleStatNames[j];
-				buf += '<span class="statrow"><label>' + statName + '</label> <span class="statgraph"><span style="width:' + width + 'px;background:hsl(' + color + ',40%,75%);"></span></span> ' + evBuf + '</span>';
+			} else {
+				if (!set.evs) {
+					set.evs = species.baseStats;
+				}
+				for (var j in BattleStatNames) {
+					var baseStats = set.evs[j] === undefined ? species.baseStats[j] : set.evs[j];
+					stats[j] = baseStats * 2 + (j == 'hp' ? 204 : 99);
+					var evBuf = '<em>' + baseStats + '</em>';
+					if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === j) {
+						stats[j] *= 1.1;
+						evBuf += '<small>+</small>';
+					} else if (BattleNatures[set.nature] && BattleNatures[set.nature].minus === j) {
+						stats[j] *= 0.9;
+						evBuf += '<small>&minus;</small>';
+					}
+					stats[j] = Math.floor(stats[j]);
+					var width = stats[j] * 75 / 504;
+					if (j == 'hp') width = stats[j] * 75 / 704;
+					if (width > 75) width = 75;
+					var color = Math.floor(stats[j] * 180 / 714);
+					if (color > 360) color = 360;
+					var statName = stats[j];
+					buf += '<span class="statrow"><label>' + statName + '</label> <span class="statgraph"><span style="width:' + width + 'px;background:hsl(' + color + ',40%,75%);"></span></span> ' + evBuf + '</span>';
+				}
 			}
 			buf += '</button></div></div>';
 
@@ -1890,27 +1926,55 @@
 			var stats = {hp:'', atk:'', def:'', spa:'', spd:'', spe:''};
 
 			var supportsEVs = !this.curTeam.format.includes('letsgo');
+			var isCreatemon = this.curTeam.format.includes('createmons');
 
 			// stat cell
-			var buf = '<span class="statrow statrow-head"><label></label> <span class="statgraph"></span> <em>' + (supportsEVs ? 'EV' : 'AV') + '</em></span>';
-			var defaultEV = (this.curTeam.gen > 2 ? 0 : 252);
-			for (var stat in stats) {
-				if (stat === 'spd' && this.curTeam.gen === 1) continue;
-				stats[stat] = this.getStat(stat, set);
-				var ev = (set.evs[stat] === undefined ? defaultEV : set.evs[stat]);
-				var evBuf = '<em>' + (ev === defaultEV ? '' : ev) + '</em>';
-				if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === stat) {
-					evBuf += '<small>+</small>';
-				} else if (BattleNatures[set.nature] && BattleNatures[set.nature].minus === stat) {
-					evBuf += '<small>&minus;</small>';
+			var buf = '<span class="statrow statrow-head"><label></label> <span class="statgraph"></span> <em>' + (supportsEVs ? (isCreatemon ? 'BS' : 'EV') : 'AV') + '</em></span>';
+			if (!isCreatemon) {
+				var defaultEV = (this.curTeam.gen > 2 ? 0 : 252);
+				for (var stat in stats) {
+					if (stat === 'spd' && this.curTeam.gen === 1) continue;
+					stats[stat] = this.getStat(stat, set);
+					var ev = (set.evs[stat] === undefined ? defaultEV : set.evs[stat]);
+					var evBuf = '<em>' + (ev === defaultEV ? '' : ev) + '</em>';
+					if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === stat) {
+						evBuf += '<small>+</small>';
+					} else if (BattleNatures[set.nature] && BattleNatures[set.nature].minus === stat) {
+						evBuf += '<small>&minus;</small>';
+					}
+					var width = stats[stat] * 75 / 504;
+					if (stat == 'hp') width = stats[stat] * 75 / 704;
+					if (width > 75) width = 75;
+					var color = Math.floor(stats[stat] * 180 / 714);
+					if (color > 360) color = 360;
+					var statName = this.curTeam.gen === 1 && stat === 'spa' ? 'Spc' : BattleStatNames[stat];
+					buf += '<span class="statrow"><label>' + statName + '</label> <span class="statgraph"><span style="width:' + width + 'px;background:hsl(' + color + ',40%,75%);"></span></span> ' + evBuf + '</span>';
 				}
-				var width = stats[stat] * 75 / 504;
-				if (stat == 'hp') width = stats[stat] * 75 / 704;
-				if (width > 75) width = 75;
-				var color = Math.floor(stats[stat] * 180 / 714);
-				if (color > 360) color = 360;
-				var statName = this.curTeam.gen === 1 && stat === 'spa' ? 'Spc' : BattleStatNames[stat];
-				buf += '<span class="statrow"><label>' + statName + '</label> <span class="statgraph"><span style="width:' + width + 'px;background:hsl(' + color + ',40%,75%);"></span></span> ' + evBuf + '</span>';
+			} else {
+				var species = this.curTeam.dex.species.get(set.species);
+				if (!set.evs) {
+					set.evs = species.baseStats;
+				}
+				for (var stat in stats) {
+					var baseStats = set.evs[stat] === undefined ? species.baseStats[stat] : set.evs[stat];
+					stats[stat] = baseStats * 2 + (stat == 'hp' ? 204 : 99);
+					var evBuf = '<em>' + baseStats + '</em>';
+					if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === stat) {
+						stats[stat] *= 1.1;
+						evBuf += '<small>+</small>';
+					} else if (BattleNatures[set.nature] && BattleNatures[set.nature].minus === stat) {
+						stats[stat] *= 0.9;
+						evBuf += '<small>&minus;</small>';
+					}
+					stats[stat] = Math.floor(stats[stat]);
+					var width = stats[stat] * 75 / 504;
+					if (stat == 'hp') width = stats[stat] * 75 / 704;
+					if (width > 75) width = 75;
+					var color = Math.floor(stats[stat] * 180 / 714);
+					if (color > 360) color = 360;
+					var statName = stats[stat];
+					buf += '<span class="statrow"><label>' + statName + '</label> <span class="statgraph"><span style="width:' + width + 'px;background:hsl(' + color + ',40%,75%);"></span></span> ' + evBuf + '</span>';
+				}
 			}
 			this.$('button[name=stats]').html(buf);
 
@@ -2108,8 +2172,16 @@
 			var buf = '';
 			var set = this.curSet;
 			var species = this.curTeam.dex.species.get(this.curSet.species);
+			var isCreatemon = this.curTeam.format.includes('createmons');
 
 			var baseStats = species.baseStats;
+			if (isCreatemon) {
+				if (set.evs) {
+					baseStats = set.evs;
+				} else {
+					set.evs = baseStats;
+				}
+			} 
 
 			buf += '<div class="resultheader"><h3>EVs</h3></div>';
 			buf += '<div class="statform">';
@@ -2178,14 +2250,32 @@
 			buf += '</div>';
 
 			buf += '<div class="col graphcol"><div></div>';
-			for (var i in stats) {
-				stats[i] = this.getStat(i);
-				var width = stats[i] * 180 / 504;
-				if (i == 'hp') width = Math.floor(stats[i] * 180 / 704);
-				if (width > 179) width = 179;
-				var color = Math.floor(stats[i] * 180 / 714);
-				if (color > 360) color = 360;
-				buf += '<div><em><span style="width:' + Math.floor(width) + 'px;background:hsl(' + color + ',85%,45%);border-color:hsl(' + color + ',85%,35%)"></span></em></div>';
+			if (!isCreatemon) {
+				for (var i in stats) {
+					stats[i] = this.getStat(i);
+					var width = stats[i] * 180 / 504;
+					if (i == 'hp') width = Math.floor(stats[i] * 180 / 704);
+					if (width > 179) width = 179;
+					var color = Math.floor(stats[i] * 180 / 714);
+					if (color > 360) color = 360;
+					buf += '<div><em><span style="width:' + Math.floor(width) + 'px;background:hsl(' + color + ',85%,45%);border-color:hsl(' + color + ',85%,35%)"></span></em></div>';
+				}
+			} else {
+				for (var i in stats) {
+					stats[i] = set.evs[i] * 2 + (i == 'hp' ? 204 : 99);
+					if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === i) {
+						stats[i] *= 1.1;
+					} else if (BattleNatures[set.nature] && BattleNatures[set.nature].minus === i) {
+						stats[i] *= 0.9;
+					}
+					stats[i] = Math.floor(stats[i]);
+					var width = stats[i] * 180 / 504;
+					if (i == 'hp') width = Math.floor(stats[i] * 180 / 704);
+					if (width > 179) width = 179;
+					var color = Math.floor(stats[i] * 180 / 714);
+					if (color > 360) color = 360;
+					buf += '<div><em><span style="width:' + Math.floor(width) + 'px;background:hsl(' + color + ',85%,45%);border-color:hsl(' + color + ',85%,35%)"></span></em></div>';
+				}
 			}
 			if (this.curTeam.gen > 2 && supportsEVs) buf += '<div><em>Remaining:</em></div>';
 			buf += '</div>';
@@ -2632,6 +2722,7 @@
 			var isBDSP = this.curTeam.format.includes('bdsp');
 			var isNatDex = this.curTeam.gen === 8 && (this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd'));
 			var isDigimon = this.curTeam.format.includes('digimon');
+			var isCreatemon = this.curTeam.format.includes('createmons');
 			var species = this.curTeam.dex.species.get(set.species);
 			if (!set) return;
 			buf += '<div class="resultheader"><h3>Details</h3></div>';
@@ -2707,6 +2798,16 @@
 				buf += '</select></div></div>';
 			}
 
+			if (isCreatemon) {
+				buf += '<div class="formrow"><label class="formlabel" title="First Type">First Type:</label><div><select name="hptype">';
+				var types = Dex.types.all();
+				var hpType = set.hpType || species.types[0];
+				for (var i = 0; i < types.length; i++) {
+					buf += '<option value="' + types[i].name + '"' + (hpType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + '</option>';
+				}
+				buf += '</select></div></div>';
+			}
+
 			if (isDigimon) {
 				buf += '<div class="formrow"><label class="formlabel" title="Pre-Evolution">Pre-Evolution:</label><div><select name="preevo">';
 				buf += '<option value=""' + (!set.preEvo ? ' selected="selected"' : '') + '>(none)</option>'; // unset
@@ -2726,10 +2827,20 @@
 				}
 			}
 
-			if (this.curTeam.gen === 9) {
+			if (this.curTeam.gen === 9 && !isCreatemon) {
 				buf += '<div class="formrow"><label class="formlabel" title="Tera Type">Tera Type:</label><div><select name="teratype">';
 				var types = Dex.types.all();
 				var teraType = set.teraType || species.types[0];
+				for (var i = 0; i < types.length; i++) {
+					buf += '<option value="' + types[i].name + '"' + (teraType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + '</option>';
+				}
+				buf += '</select></div></div>';
+			}
+
+			if (isCreatemon) {
+				buf += '<div class="formrow"><label class="formlabel" title="Second Type">Second Type:</label><div><select name="teratype">';
+				var types = Dex.types.all();
+				var teraType = set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0]);
 				for (var i = 0; i < types.length; i++) {
 					buf += '<option value="' + types[i].name + '"' + (teraType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + '</option>';
 				}
@@ -2753,6 +2864,7 @@
 			var isBDSP = this.curTeam.format.includes('bdsp');
 			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd');
 			var isDigimon = this.curTeam.format.includes('digimon');
+			var isCreatemon = this.curTeam.format.includes('createmons');
 
 			// level
 			var level = parseInt(this.$chart.find('input[name=level]').val(), 10);
@@ -2855,6 +2967,7 @@
 				}
 				if (!isDigimon) buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
 				if (!isLetsGo && (this.curTeam.gen < 8 || isNatDex)) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
+				if (isCreatemon) buf += '<span class="detailcell"><label>First Type</label>' + (set.hpType || species.types[0]) + '</span>';
 				if (isDigimon) buf += '<span class="detailcell"><label>Pre-Evolution</label>' + (set.preEvo || 'None') + '</span>';
 				if (this.curTeam.gen === 8 && !isBDSP && !isDigimon) {
 					if (!species.cannotDynamax) {
@@ -2865,7 +2978,11 @@
 					}
 				}
 				if (this.curTeam.gen === 9) {
-					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
+					if (!isCreatemon) {
+						buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
+					} else {
+						buf += '<span class="detailcell"><label>Second Type</label>' + (set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0])) + '</span>';
+					}
 				}
 			}
 			this.$('button[name=details]').html(buf);
