@@ -642,6 +642,10 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			format = 'digimon' as ID;
 			this.dex = Dex.mod('digimon' as ID);
 		}
+		if (format.includes('createmons')) {
+			format = 'balancedcreatemons' as ID;
+			this.formatType = 'natdex';
+		}
 		this.format = format;
 
 		this.species = '' as ID;
@@ -971,7 +975,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			tierSet = tierSet.slice(slices['CAP LC'], slices.AG || slices.Uber).concat(tierSet.slice(slices.LC));
 		} else if (format === 'anythinggoes' || format.endsWith('ag') || format.startsWith('ag')) {
 			tierSet = tierSet.slice(slices.AG);
-		} else if (format.includes('hackmons') || format.endsWith('bh')) tierSet = tierSet.slice(slices.AG || slices.Uber);
+		} else if (format.includes('hackmons') || format.endsWith('bh') || format.includes('createmons')) tierSet = tierSet.slice(slices.AG || slices.Uber);
 		else if (format === 'monotype') tierSet = tierSet.slice(slices.Uber);
 		else if (format === 'doublesubers') tierSet = tierSet.slice(slices.DUber);
 		else if (format === 'doublesou' && dex.gen > 4) tierSet = tierSet.slice(slices.DOU);
@@ -1104,6 +1108,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 		const format = this.format;
 		const isHackmons = (format.includes('hackmons') || format.endsWith('bh'));
 		const isAAA = (format === 'almostanyability' || format.includes('aaa'));
+		const isCreatemon = format.includes('createmons');
 		const dex = this.dex;
 		let species = dex.species.get(this.species);
 		let abilitySet: SearchRow[] = [['header', "Abilities"]];
@@ -1128,7 +1133,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 			abilitySet.push(['header', "Special Event Ability"]);
 			abilitySet.push(['ability', toID(species.abilities['S'])]);
 		}
-		if (isAAA || format === 'metronomebattle' || isHackmons) {
+		if (isAAA || format === 'metronomebattle' || isHackmons || isCreatemon) {
 			let abilities: ID[] = [];
 			for (let i in this.getTable()) {
 				const ability = dex.abilities.get(i);
@@ -1487,6 +1492,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		const isSTABmons = (format.includes('stabmons') || format === 'staaabmons');
 		const isTradebacks = format.includes('tradebacks');
 		const isDigimon = format.includes('digimon');
+		const isCreatemon = format.includes('createmons');
 		const regionBornLegality = dex.gen >= 6 &&
 			/^battle(spot|stadium|festival)/.test(format) || format.startsWith('vgc') ||
 			(dex.gen === 9 && this.formatType !== 'natdex');
@@ -1559,8 +1565,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				}
 			}
 		}
-		if (sketch || isHackmons) {
-			if (isHackmons) moves = [];
+		if (sketch || isHackmons || isCreatemon) {
+			if (isHackmons || isCreatemon) moves = [];
 			for (let id in BattleMovedex) {
 				if (!format.startsWith('cap') && (id === 'paleowave' || id === 'shadowstrike')) continue;
 				if (!format.includes('gennext') && id === 'magikarpsrevenge') continue;

@@ -139,7 +139,7 @@
 		update: function () {
 			teams = Storage.teams;
 			if (this.curTeam) {
-				this.ignoreEVLimits = (this.curTeam.gen < 3 || ((this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh')) && this.curTeam.gen !== 6) || this.curTeam.format === 'gen8metronomebattle');
+				this.ignoreEVLimits = (this.curTeam.gen < 3 || ((this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh')) && this.curTeam.gen !== 6) || this.curTeam.format === 'gen8metronomebattle' || this.curTeam.format.includes('createmons'));
 				if (this.curSet) {
 					return this.updateSetView();
 				}
@@ -1195,7 +1195,12 @@
 				buf += '</li>';
 				return buf;
 			}
-			buf += '<div class="setmenu"><button name="copySet"><i class="fa fa-files-o"></i>Copy</button> <button name="importSet"><i class="fa fa-upload"></i>Import/Export</button> <button name="moveSet"><i class="fa fa-arrows"></i>Move</button> <button name="deleteSet"><i class="fa fa-trash"></i>Delete</button></div>';
+			if (!isCreatemon) {
+				buf += '<div class="setmenu"><button name="copySet"><i class="fa fa-files-o"></i>Copy</button> <button name="importSet"><i class="fa fa-upload"></i>Import/Export</button> <button name="moveSet"><i class="fa fa-arrows"></i>Move</button> <button name="deleteSet"><i class="fa fa-trash"></i>Delete</button></div>';
+			} else {
+				var btnClass = 'button' + (app.isDisconnected ? ' disabled' : '');
+				buf += '<div class="setmenu"><button name="checkPoint" class="' + btnClass + '"><i class="fa fa-check"></i>Check</button> <button name="copySet"><i class="fa fa-files-o"></i>Copy</button> <button name="importSet"><i class="fa fa-upload"></i>Import/Export</button> <button name="moveSet"><i class="fa fa-arrows"></i>Move</button> <button name="deleteSet"><i class="fa fa-trash"></i>Delete</button></div>';
+			}
 			buf += '<div class="setchart-nickname">';
 			buf += '<label>Nickname</label><input type="text" name="nickname" class="textbox" value="' + BattleLog.escapeHTML(set.name || '') + '" placeholder="' + BattleLog.escapeHTML(species.baseSpecies) + '" />';
 			buf += '</div>';
@@ -1281,9 +1286,27 @@
 			buf += itemicon;
 			buf += '</div>';
 			buf += '<div class="setcell setcell-typeicons">';
-			var types = species.types;
-			if (types) {
-				for (var i = 0; i < types.length; i++) buf += Dex.getTypeIcon(types[i]);
+			if (!isCreatemon) {
+				var types = species.types;
+				if (types) {
+					for (var i = 0; i < types.length; i++) buf += Dex.getTypeIcon(types[i]);
+				}
+			} else {
+				var types = [];
+				if (set.hpType) {
+					types.push(set.hpType);
+				} else {
+					types.push(species.types[0]);
+				}
+				if (set.teraType) {
+					types.push(set.teraType);
+				} else if (species.types.length > 1) {
+					types.push(species.types[1]);
+				}
+				buf += Dex.getTypeIcon(types[0]);
+				if (types.length > 1 && types[1] !== types[0]) {
+					buf += Dex.getTypeIcon(types[1]);
+				}
 			}
 			buf += '</div></div>';
 
@@ -1331,9 +1354,17 @@
 				if (!set.evs) {
 					set.evs = species.baseStats;
 				}
+				if (!set.ivs) set.ivs = {
+					hp: 31,
+					atk: 31,
+					def: 31,
+					spa: 31,
+					spd: 31,
+					spe: 31
+				};
 				for (var j in BattleStatNames) {
 					var baseStats = set.evs[j] === undefined ? species.baseStats[j] : set.evs[j];
-					stats[j] = baseStats * 2 + (j == 'hp' ? 204 : 99);
+					stats[j] = baseStats * 2 + (j == 'hp' ? 173 : 68) + set.ivs[j];
 					var evBuf = '<em>' + baseStats + '</em>';
 					if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === j) {
 						stats[j] *= 1.1;
@@ -1678,7 +1709,13 @@
 			});
 		},
 
-		// copy/import/export/move/delete
+		// check/copy/import/export/move/delete
+		checkPoint: function (i, button) {
+			i = +($(button).closest('li').attr('value'));
+			app.sendTeam(this.curTeam);
+			app.send('/ctm ' + i);
+			button.blur();
+		},
 		copySet: function (i, button) {
 			i = +($(button).closest('li').attr('value'));
 			this.clipboardAdd($.extend(true, {}, this.curSetList[i]));
@@ -1955,9 +1992,17 @@
 				if (!set.evs) {
 					set.evs = species.baseStats;
 				}
+				if (!set.ivs) set.ivs = {
+					hp: 31,
+					atk: 31,
+					def: 31,
+					spa: 31,
+					spd: 31,
+					spe: 31
+				};
 				for (var stat in stats) {
 					var baseStats = set.evs[stat] === undefined ? species.baseStats[stat] : set.evs[stat];
-					stats[stat] = baseStats * 2 + (stat == 'hp' ? 204 : 99);
+					stats[stat] = baseStats * 2 + (stat == 'hp' ? 173 : 68) + set.ivs[stat];
 					var evBuf = '<em>' + baseStats + '</em>';
 					if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === stat) {
 						stats[stat] *= 1.1;
@@ -2000,17 +2045,21 @@
 				totalev += (set.evs[stat] || 0);
 			}
 
-			if (this.curTeam.gen > 2 && supportsEVs) buf += '<div><em>Remaining:</em></div>';
+			if (this.curTeam.gen > 2 && supportsEVs && !isCreatemon) buf += '<div><em>Remaining:</em></div>';
+			if (isCreatemon) buf += '<div><em>BST:</em></div>';
 			this.$chart.find('.graphcol').html(buf);
 
 			if (this.curTeam.gen <= 2) return;
-			if (supportsEVs) {
+			if (supportsEVs && !isCreatemon) {
 				var maxEv = 510;
 				if (totalev <= maxEv) {
 					this.$chart.find('.totalev').html('<em>' + (totalev > (maxEv - 2) ? 0 : (maxEv - 2) - totalev) + '</em>');
 				} else {
 					this.$chart.find('.totalev').html('<b>' + (maxEv - totalev) + '</b>');
 				}
+			}
+			if (isCreatemon) {
+				this.$chart.find('.totalev').html('<b>' + totalev + '</b>');
 			}
 			this.$chart.find('select[name=nature]').val(set.nature || 'Serious');
 		},
@@ -2181,6 +2230,14 @@
 				} else {
 					set.evs = baseStats;
 				}
+				if (!set.ivs) set.ivs = {
+					hp: 31,
+					atk: 31,
+					def: 31,
+					spa: 31,
+					spd: 31,
+					spe: 31
+				};
 			} 
 
 			buf += '<div class="resultheader"><h3>EVs</h3></div>';
@@ -2262,7 +2319,7 @@
 				}
 			} else {
 				for (var i in stats) {
-					stats[i] = set.evs[i] * 2 + (i == 'hp' ? 204 : 99);
+					stats[i] = set.evs[i] * 2 + (i == 'hp' ? 173 : 68) + set.ivs[i];
 					if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === i) {
 						stats[i] *= 1.1;
 					} else if (BattleNatures[set.nature] && BattleNatures[set.nature].minus === i) {
@@ -2277,10 +2334,11 @@
 					buf += '<div><em><span style="width:' + Math.floor(width) + 'px;background:hsl(' + color + ',85%,45%);border-color:hsl(' + color + ',85%,35%)"></span></em></div>';
 				}
 			}
-			if (this.curTeam.gen > 2 && supportsEVs) buf += '<div><em>Remaining:</em></div>';
+			if (this.curTeam.gen > 2 && supportsEVs && !isCreatemon) buf += '<div><em>Remaining:</em></div>';
+			if (isCreatemon) buf += '<div><em>BST:</em></div>';
 			buf += '</div>';
 
-			buf += '<div class="col evcol"><div><strong>' + (supportsEVs ? 'EVs' : 'AVs') + '</strong></div>';
+			buf += '<div class="col evcol"><div><strong>' + (supportsEVs ? (isCreatemon ? 'BS' : 'EVs') : 'AVs') + '</strong></div>';
 			var totalev = 0;
 			this.plus = '';
 			this.minus = '';
@@ -2298,13 +2356,16 @@
 				buf += '<div><input type="text" name="stat-' + i + '" value="' + val + '" class="textbox inputform numform" /></div>';
 				totalev += (set.evs[i] || 0);
 			}
-			if (this.curTeam.gen > 2 && supportsEVs) {
+			if (this.curTeam.gen > 2 && supportsEVs && !isCreatemon) {
 				var maxTotalEVs = 510;
 				if (totalev <= maxTotalEVs) {
 					buf += '<div class="totalev"><em>' + (totalev > (maxTotalEVs - 2) ? 0 : (maxTotalEVs - 2) - totalev) + '</em></div>';
 				} else {
 					buf += '<div class="totalev"><b>' + (maxTotalEVs - totalev) + '</b></div>';
 				}
+			}
+			if (isCreatemon) {
+				buf += '<div class="totalev"><b>' + totalev + '</b></div>';
 			}
 			buf += '</div>';
 
@@ -2728,7 +2789,9 @@
 			buf += '<div class="resultheader"><h3>Details</h3></div>';
 			buf += '<form class="detailsform">';
 
-			buf += '<div class="formrow"><label class="formlabel">Level:</label><div><input type="number" min="1" max="100" step="1" name="level" value="' + (typeof set.level === 'number' ? set.level : 100) + '" class="textbox inputform numform" /></div></div>';
+			if (!isCreatemon) {
+				buf += '<div class="formrow"><label class="formlabel">Level:</label><div><input type="number" min="1" max="100" step="1" name="level" value="' + (typeof set.level === 'number' ? set.level : 100) + '" class="textbox inputform numform" /></div></div>';
+			}
 
 			if (this.curTeam.gen > 1) {
 				buf += '<div class="formrow"><label class="formlabel">Gender:</label><div>';
@@ -2749,7 +2812,7 @@
 				if (isLetsGo) {
 					buf += '<div class="formrow"><label class="formlabel">Happiness:</label><div><input type="number" name="happiness" value="70" class="textbox inputform numform" /></div></div>';
 				} else {
-					if (this.curTeam.gen < 8 || isNatDex) buf += '<div class="formrow"><label class="formlabel">Happiness:</label><div><input type="number" min="0" max="255" step="1" name="happiness" value="' + (typeof set.happiness === 'number' ? set.happiness : 255) + '" class="textbox inputform numform" /></div></div>';
+					if (this.curTeam.gen < 8 || isNatDex || isCreatemon) buf += '<div class="formrow"><label class="formlabel">Happiness:</label><div><input type="number" min="0" max="255" step="1" name="happiness" value="' + (typeof set.happiness === 'number' ? set.happiness : 255) + '" class="textbox inputform numform" /></div></div>';
 				}
 
 				if (!isDigimon) {
@@ -2927,8 +2990,10 @@
 			var teraType = this.$chart.find('select[name=teratype]').val();
 			if (Dex.types.isName(teraType) && teraType !== species.types[0]) {
 				set.teraType = teraType;
-			} else {
+			} else if (!isCreatemon) {
 				delete set.teraType;
+			} else if (Dex.types.isName(teraType)) {
+				set.teraType = teraType;
 			}
 
 			// preEvo
@@ -2957,13 +3022,15 @@
 				'F': 'Female',
 				'N': '&mdash;'
 			};
-			buf += '<span class="detailcell detailcell-first"><label>Level</label>' + (set.level || 100) + '</span>';
+			if (!isCreatemon) {
+				buf += '<span class="detailcell detailcell-first"><label>Level</label>' + (set.level || 100) + '</span>';
+			}
 			if (this.curTeam.gen > 1) {
 				buf += '<span class="detailcell"><label>Gender</label>' + GenderChart[set.gender || 'N'] + '</span>';
 				if (isLetsGo) {
 					buf += '<span class="detailcell"><label>Happiness</label>70</span>';
 				} else {
-					if (this.curTeam.gen < 8 || isNatDex) buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 255) + '</span>';
+					if (this.curTeam.gen < 8 || isNatDex || isCreatemon) buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 255) + '</span>';
 				}
 				if (!isDigimon) buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
 				if (!isLetsGo && (this.curTeam.gen < 8 || isNatDex)) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
@@ -3465,7 +3532,7 @@
 			if (set.dynamaxLevel) delete set.dynamaxLevel;
 			if (set.gigantamax) delete set.gigantamax;
 			if (set.preEvo) delete set.preEvo;
-			if (!(this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh')) && species.requiredItems.length === 1) {
+			if (!(this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh') || this.curTeam.format.includes('createmons')) && species.requiredItems.length === 1) {
 				set.item = species.requiredItems[0];
 			} else {
 				set.item = '';

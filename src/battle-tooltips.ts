@@ -2204,7 +2204,8 @@ class BattleStatGuesser {
 			this.dex.gen < 3 ||
 			((this.formatid.includes('hackmons') || this.formatid.endsWith('bh')) && this.dex.gen !== 6) ||
 			this.formatid.includes('metronomebattle') ||
-			this.formatid.endsWith('norestrictions')
+			this.formatid.endsWith('norestrictions') ||
+			this.formatid.includes('createmons')
 		);
 		this.supportsEVs = !this.formatid.includes('letsgo');
 		this.supportsAVs = !this.supportsEVs && this.formatid.endsWith('norestrictions');
