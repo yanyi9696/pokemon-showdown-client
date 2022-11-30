@@ -1,9 +1,7 @@
 /sprites/
 /audio/
-/config/
 /index.php
 /index.html
-/testclient.html
 /preactalpha.html
 /crossprotocol.html
 /data/*
@@ -33,3 +31,5 @@ package-lock.json
 /website/files/
 /website/images/
 /website/ads.txt
+
+/config/testclient-key.js
