@@ -172,7 +172,7 @@ Config.customcolors = {
 	'zarel': 'aeo'
 };
 /*** Begin automatically generated configuration ***/
-Config.version = "0.11.2 (e673910f/b5bf36f3)";
+Config.version = "0.11.2 (95914c2d/b5bf36f3)";
 
 Config.routes = {
 	root: 'ps.sciroccogti.top',
