@@ -1158,7 +1158,9 @@ class BattleTooltips {
 		const isNFE = Dex.species.get(serverPokemon.speciesForme).evos?.some(evo => {
 			const evoSpecies = Dex.species.get(evo);
 			return !evoSpecies.isNonstandard ||
-					evoSpecies.isNonstandard === Dex.species.get(serverPokemon.speciesForme)?.isNonstandard;
+					evoSpecies.isNonstandard === Dex.species.get(serverPokemon.speciesForme)?.isNonstandard ||
+					// Pokemon with Hisui evolutions
+					evoSpecies.isNonstandard === "Unobtainable";
 		});
 		if (item === 'eviolite' && isNFE) {
 			stats.def = Math.floor(stats.def * 1.5);
@@ -2259,7 +2261,7 @@ class BattleStatGuesser {
 		let needsFourMoves = !['unown', 'ditto'].includes(species.id);
 		let moveids = set.moves.map(toID);
 		if (moveids.includes('lastresort' as ID)) needsFourMoves = false;
-		if (set.moves.length < 4 && needsFourMoves && this.formatid !== 'gen8metronomebattle') {
+		if (set.moves.length < 4 && needsFourMoves && !this.formatid.includes('metronomebattle')) {
 			return '?';
 		}
 

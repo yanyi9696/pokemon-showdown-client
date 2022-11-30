@@ -139,7 +139,7 @@
 		update: function () {
 			teams = Storage.teams;
 			if (this.curTeam) {
-				this.ignoreEVLimits = (this.curTeam.gen < 3 || ((this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh')) && this.curTeam.gen !== 6) || this.curTeam.format === 'gen8metronomebattle' || this.curTeam.format.includes('createmons'));
+				this.ignoreEVLimits = (this.curTeam.gen < 3 || ((this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh')) && this.curTeam.gen !== 6) || this.curTeam.format.includes('metronomebattle') || this.curTeam.format.includes('createmons'));
 				if (this.curSet) {
 					return this.updateSetView();
 				}
@@ -2781,7 +2781,7 @@
 			var set = this.curSet;
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
-			var isNatDex = this.curTeam.gen === 8 && (this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd'));
+			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd');
 			var isDigimon = this.curTeam.format.includes('digimon');
 			var isCreatemon = this.curTeam.format.includes('createmons');
 			var species = this.curTeam.dex.species.get(set.species);
