@@ -1331,3 +1331,21 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 }
 
 console.log("DONE");
+
+/*********************************************************
+ * Build createmons.js
+ *********************************************************/
+
+ process.stdout.write("Building `data/createmons.js`...");
+
+ {
+	const typeToPoint = requireNoCache('../data/pokemon-showdown/.data-dist/mods/createmons/pointchart.js').typeToPoint;
+	const abilityToPoint = requireNoCache('../data/pokemon-showdown/.data-dist/mods/createmons/pointchart.js').abilityToPoint;
+	const moveToPoint = requireNoCache('../data/pokemon-showdown/.data-dist/mods/createmons/pointchart.js').moveToPoint;
+	const buf = 'exports.typeToPoint = ' + es3stringify(typeToPoint) + ';' 
+			+ 'exports.abilityToPoint = ' + es3stringify(abilityToPoint) + ';' 
+			+ 'exports.moveToPoint = ' + es3stringify(moveToPoint) + ';';
+	fs.writeFileSync('data/createmons.js', buf);
+}
+
+console.log("DONE");
