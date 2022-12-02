@@ -1241,20 +1241,37 @@ console.log("DONE");
 	const DigiAbilities = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/abilities.js').Abilities;
 	const DigiTypeChart = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/typechart.js').TypeChart;
 	const DigiLearnsets = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/learnsets.js').Learnsets;
+	for (const id in DigiDex) {
+		// this doesn't work, don't know why
+		const digimon = Dex.mod('digimon').species.get(id);
+		if (digimon.num <= 40000) {
+			delete DigiDex[id];
+		}
+	}
 	for (const id in DigiMoves) {
-		const move = Dex.mod('digimon').moves.get(DigiMoves[id].name);
+		const move = Dex.mod('digimon').moves.get(id);
 		if (move.desc) DigiMoves[id].desc = move.desc;
 		if (move.shortDesc) DigiMoves[id].shortDesc = move.shortDesc;
 	}
 	for (const id in DigiItems) {
-		const item = Dex.mod('digimon').items.get(DigiItems[id].name);
+		const item = Dex.mod('digimon').items.get(id);
+		if (item.num <= 40000) {
+			delete DigiItems[id];
+			continue;
+		}
 		if (item.desc) DigiItems[id].desc = item.desc;
 		if (item.shortDesc) DigiItems[id].shortDesc = item.shortDesc;
 	}
 	for (const id in DigiAbilities) {
-		const ability = Dex.mod('digimon').abilities.get(DigiAbilities[id].name);
+		const ability = Dex.mod('digimon').abilities.get(id);
 		if (ability.desc) DigiAbilities[id].desc = ability.desc;
 		if (ability.shortDesc) DigiAbilities[id].shortDesc = ability.shortDesc;
+	}
+	for (const id in DigiLearnsets) {
+		const digimon = Dex.mod('digimon').species.get(id);
+		if (digimon.num <= 40000) {
+			delete DigiLearnsets[id];
+		}
 	}
 	buf += 'exports.DigiDex = ' + es3stringify(DigiDex) + ';';
 	buf += 'exports.DigiMoves = ' + es3stringify(DigiMoves) + ';';
