@@ -1138,6 +1138,7 @@
 					buf += '<label class="label">Format:</label><button class="select formatselect teambuilderformatselect" name="format" value="' + this.curTeam.format + '">' + (isGenericFormat(this.curTeam.format) ? '<em>Select a format</em>' : BattleLog.escapeFormat(this.curTeam.format)) + '</button>';
 					var btnClass = 'button' + (!this.curSetList.length || app.isDisconnected ? ' disabled' : '');
 					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button></li>';
+					if (this.curTeam.format.includes('createmons')) buf += '<label class="label">Total Point:</label><em>' + this.getTeamPoint() + '</em>';
 				}
 				if (!this.curSetList.length) {
 					buf += '<li><em>you have no pokemon lol</em></li>';
@@ -2138,6 +2139,14 @@
 			}
 		
 			return details;
+		},
+		getTeamPoint: function () {
+			var totalPoint = 0;
+			for (var i in this.curSetList) {
+				var details = this.getSetPoint(this.curTeam.dex, this.curSetList[i]);
+				totalPoint += Math.floor(details[0] * details[1] * details[4] * details[5]);
+			}
+			return totalPoint;
 		},
 		curChartType: '',
 		curChartName: '',
