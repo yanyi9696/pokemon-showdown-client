@@ -1716,7 +1716,7 @@
 			const details = this.getSetPoint(this.curTeam.dex, this.curSetList[i]);
 			app.addPopupMessage(
 				'S: ' + details[0] + '\n' + 
-				'T: ' + details[2] + (details[3] === -1 ? ' * 1.5' : (' + ' + details[3])) + ' = ' + details[1] + '\n' + 
+				'T: ' + details[2] + (details[3] === -1 ? ' * 1.5' : (' + ' + details[3])) + ' = ' + details[1].toFixed(1) + '\n' + 
 				'A: ' + details[4] + '\n' + 
 				'M: ' + details[6] + ' + ' + details[7] + ' + ' + details[8] + ' + ' + details[9] + ' = ' + details[5] + '\n' + 
 				'Total: ' + Math.floor(details[0] * details[1] * details[4] * details[5])
