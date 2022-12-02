@@ -1352,7 +1352,7 @@
 				}
 			} else {
 				if (!set.evs) {
-					set.evs = species.baseStats;
+					set.evs = JSON.parse(JSON.stringify(species.baseStats));
 				}
 				if (!set.ivs) set.ivs = {
 					hp: 31,
@@ -1364,7 +1364,7 @@
 				};
 				for (var j in BattleStatNames) {
 					var baseStats = set.evs[j] === undefined ? species.baseStats[j] : set.evs[j];
-					stats[j] = baseStats * 2 + (j == 'hp' ? 173 : 68) + set.ivs[j];
+					stats[j] = 2 * baseStats + (j == 'hp' ? 173 : 68) + (set.ivs[j] === undefined ? 31 : set.ivs[j]);
 					var evBuf = '<em>' + baseStats + '</em>';
 					if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === j) {
 						stats[j] *= 1.1;
@@ -1996,7 +1996,7 @@
 			} else {
 				var species = this.curTeam.dex.species.get(set.species);
 				if (!set.evs) {
-					set.evs = species.baseStats;
+					set.evs = JSON.parse(JSON.stringify(species.baseStats));
 				}
 				if (!set.ivs) set.ivs = {
 					hp: 31,
@@ -2008,7 +2008,7 @@
 				};
 				for (var stat in stats) {
 					var baseStats = set.evs[stat] === undefined ? species.baseStats[stat] : set.evs[stat];
-					stats[stat] = baseStats * 2 + (stat == 'hp' ? 173 : 68) + set.ivs[stat];
+					stats[stat] = 2 * baseStats + (stat == 'hp' ? 173 : 68) + (set.ivs[stat] === undefined ? 31 : set.ivs[stat]);
 					var evBuf = '<em>' + baseStats + '</em>';
 					if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === stat) {
 						stats[stat] *= 1.1;
@@ -2095,7 +2095,7 @@
 			const moveToPoint = exports.moveToPoint;
 		
 			// stats points
-			if (!set.evs) set.evs = species.baseStats;
+			if (!set.evs) set.evs = JSON.parse(JSON.stringify(species.baseStats));
 			details.push(this.calcBSPoint(set.evs));
 		
 			// type points
@@ -2301,10 +2301,8 @@
 
 			var baseStats = species.baseStats;
 			if (isCreatemon) {
-				if (set.evs) {
-					baseStats = set.evs;
-				} else {
-					set.evs = baseStats;
+				if (!set.evs) {
+					set.evs = JSON.parse(JSON.stringify(baseStats));
 				}
 				if (!set.ivs) set.ivs = {
 					hp: 31,
@@ -2378,7 +2376,7 @@
 
 			buf += '<div class="col basestatscol"><div><em>Base</em></div>';
 			for (var i in stats) {
-				buf += '<div><b>' + baseStats[i] + '</b></div>';
+				buf += '<div><b>' + (isCreatemon ? set.evs[i] : baseStats[i]) + '</b></div>';
 			}
 			buf += '</div>';
 
@@ -2395,7 +2393,7 @@
 				}
 			} else {
 				for (var i in stats) {
-					stats[i] = set.evs[i] * 2 + (i == 'hp' ? 173 : 68) + set.ivs[i];
+					stats[i] = 2 * (set.evs[i] === undefined ? baseStats[i] : set.evs[i]) + (i == 'hp' ? 173 : 68) + (set.ivs[i] === undefined ? 31 : set.ivs[i]);
 					if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === i) {
 						stats[i] *= 1.1;
 					} else if (BattleNatures[set.nature] && BattleNatures[set.nature].minus === i) {
@@ -2668,7 +2666,7 @@
 
 				if (set.evs[stat] !== val || natureChange) {
 					set.evs[stat] = val;
-					if (this.ignoreEVLimits) {
+					if (this.ignoreEVLimits && !this.curTeam.format.includes('createmons')) {
 						var evNum = supportsEVs ? 252 : supportsAVs ? 200 : 0;
 						if (set.evs['hp'] === undefined) set.evs['hp'] = evNum;
 						if (set.evs['atk'] === undefined) set.evs['atk'] = evNum;
@@ -2781,8 +2779,10 @@
 			// I am a trained professional.
 			if (val !== originalVal) slider.value = val;
 
-			if (!set.evs) set.evs = {};
-			if (this.ignoreEVLimits) {
+			var isCreatemon = this.curTeam.format.includes('createmons');
+			var species = this.curTeam.dex.species.get(set.species);
+			if (!set.evs) set.evs = isCreatemon ? JSON.parse(JSON.stringify(species.baseStats)) : {};
+			if (this.ignoreEVLimits && !isCreatemon) {
 				var evNum = supportsEVs ? 252 : supportsAVs ? 200 : 0;
 				if (set.evs['hp'] === undefined) set.evs['hp'] = evNum;
 				if (set.evs['atk'] === undefined) set.evs['atk'] = evNum;
@@ -3619,6 +3619,8 @@
 			set.evs = {};
 			set.ivs = {};
 			set.nature = '';
+
+			if (this.curTeam.format.includes('createmons')) set.evs = JSON.parse(JSON.stringify(species.baseStats));
 			this.updateSetTop();
 			if (selectNext) this.$(set.item || !this.$('input[name=item]').length ? (this.$('input[name=ability]').length ? 'input[name=ability]' : 'input[name=move1]') : 'input[name=item]').select();
 		},
