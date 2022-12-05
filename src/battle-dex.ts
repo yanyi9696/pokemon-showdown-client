@@ -865,8 +865,8 @@ class ModdedDex {
 	constructor(modid: ID) {
 		this.modid = modid;
 		const gen = parseInt(modid.substr(3, 1), 10);
-		if (modid !== 'digimon' && (!modid.startsWith('gen') || !gen)) throw new Error("Unsupported modid");
-		this.gen = modid === 'digimon' ? 8 : gen;
+		if (!modid.startsWith('gen') || !gen) throw new Error("Unsupported modid");
+		this.gen = gen;
 	}
 	moves = {
 		get: (name: string): Move => {

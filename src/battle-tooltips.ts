@@ -1373,7 +1373,6 @@ class BattleTooltips {
 
 		let moveType = move.type;
 		let category = move.category;
-		if (this.battle.tier.includes('Digimon')) moveType = moveType === 'Fairy' ? 'Light' : moveType;
 		if (category === 'Status' && forMaxMove) return ['Normal', 'Status']; // Max Guard
 		// can happen in obscure situations
 		if (!pokemon) return [moveType, category];
@@ -2059,9 +2058,6 @@ class BattleTooltips {
 		return value;
 	}
 	getPokemonTypes(pokemon: Pokemon | ServerPokemon): ReadonlyArray<TypeName> {
-		if (this.battle.tier.includes('Digimon')) {
-			return Dex.mod('digimon' as ID).species.get(pokemon.speciesForme).types;
-		}
 		if (!(pokemon as Pokemon).getTypes) {
 			return this.battle.dex.species.get(pokemon.speciesForme).types;
 		}
