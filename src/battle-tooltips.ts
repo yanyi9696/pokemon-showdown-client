@@ -1155,10 +1155,10 @@ class BattleTooltips {
 		if (ability === 'marvelscale' && pokemon.status) {
 			stats.def = Math.floor(stats.def * 1.5);
 		}
-		const isNFE = Dex.species.get(serverPokemon.speciesForme).evos?.some(evo => {
-			const evoSpecies = Dex.species.get(evo);
+		const isNFE = this.battle.dex.species.get(serverPokemon.speciesForme).evos?.some(evo => {
+			const evoSpecies = this.battle.dex.species.get(evo);
 			return !evoSpecies.isNonstandard ||
-					evoSpecies.isNonstandard === Dex.species.get(serverPokemon.speciesForme)?.isNonstandard ||
+					evoSpecies.isNonstandard === this.battle.dex.species.get(serverPokemon.speciesForme)?.isNonstandard ||
 					// Pokemon with Hisui evolutions
 					evoSpecies.isNonstandard === "Unobtainable";
 		});
@@ -1216,18 +1216,10 @@ class BattleTooltips {
 		if (ability === 'furcoat') {
 			stats.def *= 2;
 		}
-		if (this.battle.abilityActive('Vessel of Ruin', clientPokemon)) {
-			stats.spa = Math.floor(stats.spa * 0.75);
-		}
-		if (this.battle.abilityActive('Sword of Ruin', clientPokemon)) {
-			stats.def = Math.floor(stats.def * 0.75);
-		}
-		if (this.battle.abilityActive('Tablets of Ruin', clientPokemon)) {
-			stats.atk = Math.floor(stats.atk * 0.75);
-		}
-		if (this.battle.abilityActive('Beads of Ruin', clientPokemon)) {
-			stats.spd = Math.floor(stats.spd * 0.75);
-		}
+		stats.spa = Math.floor(stats.spa * Math.pow(0.75, this.battle.abilityActive('Vessel of Ruin', clientPokemon)));
+		stats.def = Math.floor(stats.def * Math.pow(0.75, this.battle.abilityActive('Sword of Ruin', clientPokemon)));
+		stats.atk = Math.floor(stats.atk * Math.pow(0.75, this.battle.abilityActive('Tablets of Ruin', clientPokemon)));
+		stats.spd = Math.floor(stats.spd * Math.pow(0.75, this.battle.abilityActive('Beads of Ruin', clientPokemon)));
 		const sideConditions = this.battle.mySide.sideConditions;
 		if (sideConditions['tailwind']) {
 			speedModifiers.push(2);
@@ -1800,6 +1792,13 @@ class BattleTooltips {
 			} else {
 				value.setRange(isGKLK ? 20 : 40, 120);
 			}
+		}
+		// Base power based on times hit
+		if (move.id === 'ragefist') {
+			value.set(Math.min(350, 50 + 50 * pokemon.timesAttacked),
+				pokemon.timesAttacked > 0
+					? `Hit ${pokemon.timesAttacked} time${pokemon.timesAttacked > 1 ? 's' : ''}`
+					: undefined);
 		}
 		if (!value.value) return value;
 

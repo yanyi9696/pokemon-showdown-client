@@ -103,6 +103,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	/** [[moveName, ppUsed]] */
 	moveTrack: [string, number][] = [];
 	statusData = {sleepTurns: 0, toxicTurns: 0};
+	timesAttacked = 0;
 
 	sprite: PokemonSprite;
 
@@ -1186,19 +1187,28 @@ export class Battle {
 		}
 		return false;
 	}
+	/**
+	 * Returns 1 if the abilities are active and 0 if none are active. If `excludePokemon` was provided, instead
+	 * returns the number of active sources of the abilities.
+	 * @param abilities A string or array of strings containing the name or names of abilities to look for.
+	 * @param excludePokemon A Pokemon to be ignored if the ability/abilities do not affect their source,
+	 * i.e. Sword of Ruin.
+	 */
 	abilityActive(abilities: string | string[], excludePokemon?: Pokemon | null) {
+		let activeAbilityCount = 0;
 		if (typeof abilities === 'string') abilities = [abilities];
 		if (this.ngasActive()) {
 			abilities = abilities.filter(a => this.dex.abilities.get(a).isPermanent);
-			if (!abilities.length) return false;
+			if (!abilities.length) return 0;
 		}
 		for (const active of this.getAllActive()) {
 			if (active === excludePokemon) continue;
 			if (abilities.includes(active.ability) && !active.volatiles['gastroacid']) {
-				return true;
+				if (!excludePokemon) return 1;
+				activeAbilityCount++;
 			}
 		}
-		return false;
+		return activeAbilityCount;
 	}
 	reset() {
 		this.paused = true;
@@ -1680,6 +1690,7 @@ export class Battle {
 					break;
 				}
 			} else {
+				poke.timesAttacked += 1;
 				let damageinfo = '' + Pokemon.getFormattedRange(range, damage[1] === 100 ? 0 : 1, '\u2013');
 				if (damage[1] !== 100) {
 					let hover = '' + ((damage[0] < 0) ? '\u2212' : '') +
@@ -1725,6 +1736,18 @@ export class Battle {
 					break;
 				case 'wish':
 					this.scene.runResidualAnim('wish' as ID, poke);
+					break;
+				case 'revivalblessing':
+					this.scene.runResidualAnim('wish' as ID, poke);
+					const {siden} = this.parsePokemonId(args[1]);
+					const side = this.sides[siden];
+					poke.fainted = false;
+					poke.status = '';
+					this.scene.updateSidebar(side);
+					// Revived while still on the field
+					if (!side.active[poke.slot]) {
+						poke.side.replace(poke);
+					}
 					break;
 				}
 			}
@@ -1862,13 +1885,12 @@ export class Battle {
 		case '-copyboost': {
 			let poke = this.getPokemon(args[1])!;
 			let frompoke = this.getPokemon(args[2])!;
-			let effect = Dex.getEffect(kwArgs.from);
 			let stats = args[3] ? args[3].split(', ') : ['atk', 'def', 'spa', 'spd', 'spe', 'accuracy', 'evasion'];
 			for (const stat of stats) {
 				poke.boosts[stat] = frompoke.boosts[stat];
 				if (!poke.boosts[stat]) delete poke.boosts[stat];
 			}
-			if (this.gen >= 6 && effect.id === 'psychup') {
+			if (this.gen >= 6) {
 				const volatilesToCopy = ['focusenergy', 'gmaxchistrike', 'laserfocus'];
 				for (const volatile of volatilesToCopy) {
 					if (frompoke.volatiles[volatile]) {
@@ -2402,6 +2424,7 @@ export class Battle {
 			poke.boosts = {...tpoke.boosts};
 			poke.copyTypesFrom(tpoke);
 			poke.ability = tpoke.ability;
+			poke.timesAttacked = tpoke.timesAttacked;
 			const targetForme = tpoke.volatiles.formechange;
 			const speciesForme = (targetForme && !targetForme[1].endsWith('-Gmax')) ? targetForme[1] : tpoke.speciesForme;
 			const pokemon = tpoke;

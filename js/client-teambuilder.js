@@ -3616,6 +3616,7 @@
 			if (set.shiny) delete set.shiny;
 			if (set.dynamaxLevel) delete set.dynamaxLevel;
 			if (set.gigantamax) delete set.gigantamax;
+			if (set.teraType) delete set.teraType;
 			if (set.preEvo) delete set.preEvo;
 			if (!(this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh') || this.curTeam.format.includes('createmons')) && species.requiredItems.length === 1) {
 				set.item = species.requiredItems[0];
