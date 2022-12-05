@@ -173,6 +173,8 @@ function updateFiles() {
 	// Nihilslave: we use testclient.html
 	let testclientContents = fs.readFileSync('testclient.template.html', {encoding: 'utf-8'});
 	testclientContents = testclientContents.replace(URL_REGEX, updateURL);
+	let date = new Date();
+	testclientContents = testclientContents.replace('Mmm dd, yyyy', date.toDateString().split(" ")[1] + ' ' + date.getDate() + ', ' + date.getFullYear());
 
 	// add news, only if it's actually likely to exist
 	if (__dirname.endsWith('play.pokemonshowdown.com/build-tools')) {
