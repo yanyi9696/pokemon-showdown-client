@@ -10,6 +10,10 @@ declare var BattleStatuses: any;
 declare var BattlePokemonSprites: any;
 declare var BattlePokemonSpritesBW: any;
 
+// digimon
+
+declare var DigiTypeChart: any;
+
 // PS globals
 /////////////
 
