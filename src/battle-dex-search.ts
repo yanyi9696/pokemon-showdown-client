@@ -1709,6 +1709,7 @@ class BattleTypeSearch extends BattleTypedSearch<'type'> {
 	}
 	getDefaultResults(): SearchRow[] {
 		const results: SearchRow[] = [];
+		// Nihilslave: leaves the only relevant digimon thing here, hoping it reborn in a correct way
 		if (this.formatType === 'digimon') {
 			const DigiTypeChart = window.DigiTypeChart;
 			for (let id in DigiTypeChart) {

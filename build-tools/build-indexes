@@ -1242,8 +1242,7 @@ console.log("DONE");
 	const DigiLearnsets = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/learnsets.js').Learnsets;
 	for (const id in DigiDex) {
 		// this doesn't work, don't know why
-		const digimon = Dex.mod('digimon').species.get(id);
-		if (digimon.num <= 40000) {
+		if (DigiDex[id]['num'] <= 40000) {
 			delete DigiDex[id];
 		}
 	}

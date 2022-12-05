@@ -4,6 +4,7 @@
 /index.html
 /preactalpha.html
 /crossprotocol.html
+/testclient.html
 /data/*
 node_modules/
 eslint-cache/
