@@ -33,4 +33,5 @@ package-lock.json
 /website/images/
 /website/ads.txt
 
+/config/config.js
 /config/testclient-key.js
