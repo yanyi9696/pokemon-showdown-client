@@ -1796,9 +1796,15 @@ export class PokemonSprite extends Sprite {
 		quarkdrivespa: ['Quark Drive: SpA', 'good'],
 		quarkdrivespd: ['Quark Drive: SpD', 'good'],
 		quarkdrivespe: ['Quark Drive: Spe', 'good'],
+		fallen1: ['Fallen: 1', 'good'],
+		fallen2: ['Fallen: 2', 'good'],
+		fallen3: ['Fallen: 3', 'good'],
+		fallen4: ['Fallen: 4', 'good'],
+		fallen5: ['Fallen: 5', 'good'],
 		noretreat: ['No Retreat', 'bad'],
 		octolock: ['Octolock', 'bad'],
 		tarshot: ['Tar Shot', 'bad'],
+		saltcure: ['Salt Cure', 'bad'],
 		doomdesire: null,
 		futuresight: null,
 		mimic: ['Mimic', 'good'],
@@ -2565,7 +2571,7 @@ export class PokemonSprite extends Sprite {
 			return;
 		}
 		const spriten = +this.isFrontSprite;
-		if (id === 'substitute') {
+		if (id === 'substitute' || id === 'shedtail') {
 			this.animSub(instant);
 		} else if (id === 'leechseed') {
 			const pos1 = {
@@ -2665,6 +2671,9 @@ export class PokemonSprite extends Sprite {
 		else if (pokemon.speciesForme === 'Groudon-Primal') symbol = 'omega';
 		if (symbol) {
 			buf += ` <img src="${Dex.resourcePrefix}sprites/misc/${symbol}.png" alt="${symbol}" style="vertical-align:text-bottom;" />`;
+		}
+		if (pokemon.teraType) {
+			buf += ` <img src="${Dex.resourcePrefix}sprites/types/Tera${pokemon.teraType}.png" alt="Tera-${pokemon.teraType}" style="vertical-align:text-bottom;" height="16" width="16" />`;
 		}
 
 		buf += `</strong><div class="hpbar"><div class="hptext"></div><div class="hptextborder"></div><div class="prevhp"><div class="hp"></div></div><div class="status"></div>`;
