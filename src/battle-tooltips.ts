@@ -28,7 +28,7 @@ class ModifiableValue {
 		this.itemName = Dex.items.get(serverPokemon.item).name;
 		const ability = serverPokemon.ability || pokemon?.ability || serverPokemon.baseAbility;
 		this.abilityName = Dex.abilities.get(ability).name;
-		this.weatherName = Dex.moves.get(battle.weather).exists ?
+		this.weatherName = battle.weather === 'snow' ? 'Snow' : Dex.moves.get(battle.weather).exists ?
 			Dex.moves.get(battle.weather).name : Dex.abilities.get(battle.weather).name;
 	}
 	reset(value = 0, isAccuracy?: boolean) {
@@ -803,12 +803,19 @@ class BattleTooltips {
 				}
 			}
 
-			let types = this.getPokemonTypes(pokemon);
+			let types = serverPokemon?.terastallized ? [serverPokemon.teraType] : this.getPokemonTypes(pokemon);
 
-			if (clientPokemon && (clientPokemon.volatiles.typechange || clientPokemon.volatiles.typeadd)) {
+			if (pokemon.terastallized) {
+				text += `<small>(Terastallized)</small><br />`;
+			} else if (clientPokemon?.volatiles.typechange || clientPokemon?.volatiles.typeadd) {
 				text += `<small>(Type changed)</small><br />`;
 			}
 			text += types.map(type => Dex.getTypeIcon(type)).join(' ');
+			if (pokemon.terastallized) {
+				text += ` <small>(base: ${this.getPokemonTypes(pokemon, true).map(type => Dex.getTypeIcon(type)).join(' ')})</small>`;
+			} else if (serverPokemon?.teraType) {
+				text += ` <small>(Tera Type: ${Dex.getTypeIcon(serverPokemon.teraType)})</small>`;
+			}
 			text += `</h2>`;
 		}
 
@@ -1216,10 +1223,18 @@ class BattleTooltips {
 		if (ability === 'furcoat') {
 			stats.def *= 2;
 		}
-		stats.spa = Math.floor(stats.spa * Math.pow(0.75, this.battle.abilityActive('Vessel of Ruin', clientPokemon)));
-		stats.def = Math.floor(stats.def * Math.pow(0.75, this.battle.abilityActive('Sword of Ruin', clientPokemon)));
-		stats.atk = Math.floor(stats.atk * Math.pow(0.75, this.battle.abilityActive('Tablets of Ruin', clientPokemon)));
-		stats.spd = Math.floor(stats.spd * Math.pow(0.75, this.battle.abilityActive('Beads of Ruin', clientPokemon)));
+		if (this.battle.abilityActive('Vessel of Ruin', pokemon)) {
+			stats.spa = Math.floor(stats.spa * 0.75);
+		}
+		if (this.battle.abilityActive('Sword of Ruin', pokemon)) {
+			stats.def = Math.floor(stats.def * 0.75);
+		}
+		if (this.battle.abilityActive('Tablets of Ruin', pokemon)) {
+			stats.atk = Math.floor(stats.atk * 0.75);
+		}
+		if (this.battle.abilityActive('Beads of Ruin', pokemon)) {
+			stats.spd = Math.floor(stats.spd * 0.75);
+		}
 		const sideConditions = this.battle.mySide.sideConditions;
 		if (sideConditions['tailwind']) {
 			speedModifiers.push(2);
@@ -1342,8 +1357,9 @@ class BattleTooltips {
 		let level = pokemon.volatiles.transform?.[4] || pokemon.level;
 		let tier = this.battle.tier;
 		let gen = this.battle.gen;
+		let isCGT = tier.includes('Computer-Generated Teams');
 		let isRandomBattle = tier.includes('Random Battle') ||
-			(tier.includes('Random') && tier.includes('Battle') && gen >= 6);
+			(tier.includes('Random') && tier.includes('Battle') && gen >= 6) || isCGT;
 
 		let minNature = (isRandomBattle || gen < 3) ? 1 : 0.9;
 		let maxNature = (isRandomBattle || gen < 3) ? 1 : 1.1;
@@ -1358,8 +1374,8 @@ class BattleTooltips {
 			else if (tier.includes('Random')) max += 20;
 		} else {
 			let maxIvEvOffset = maxIv + ((isRandomBattle && gen >= 3) ? 21 : 63);
-			min = tr(tr(2 * baseSpe * level / 100 + 5) * minNature);
 			max = tr(tr((2 * baseSpe + maxIvEvOffset) * level / 100 + 5) * maxNature);
+			min = isCGT ? max : tr(tr(2 * baseSpe * level / 100 + 5) * minNature);
 		}
 		return [min, max];
 	}
@@ -1429,8 +1445,8 @@ class BattleTooltips {
 				moveType = 'Psychic';
 			}
 		}
-		if (move.id === 'terablast' && pokemon.teraType) {
-			moveType = pokemon.teraType as TypeName;
+		if (move.id === 'terablast' && pokemon.terastallized) {
+			moveType = pokemon.terastallized as TypeName;
 		}
 
 		// Aura Wheel as Morpeko-Hangry changes the type to Dark
@@ -2062,12 +2078,12 @@ class BattleTooltips {
 
 		return value;
 	}
-	getPokemonTypes(pokemon: Pokemon | ServerPokemon): ReadonlyArray<TypeName> {
+	getPokemonTypes(pokemon: Pokemon | ServerPokemon, preterastallized = false): ReadonlyArray<TypeName> {
 		if (!(pokemon as Pokemon).getTypes) {
 			return this.battle.dex.species.get(pokemon.speciesForme).types;
 		}
 
-		return (pokemon as Pokemon).getTypeList();
+		return (pokemon as Pokemon).getTypeList(undefined, preterastallized);
 	}
 	pokemonHasType(pokemon: Pokemon | ServerPokemon, type: TypeName, types?: ReadonlyArray<TypeName>) {
 		if (!types) types = this.getPokemonTypes(pokemon);

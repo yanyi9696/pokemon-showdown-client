@@ -2655,8 +2655,19 @@ export class PokemonSprite extends Sprite {
 	// Statbar
 	/////////////////////////////////////////////////////////////////////
 
+	getClassForPosition(slot: number) {
+		// DOUBLES: Slot0 -> left / Slot1 -> Right
+		// TRIPLES: slot0 -> left / Slot1 -> Center / Slot2 -> Right
+		const position = [
+			' leftstatbar',
+			this.scene.activeCount === 3 ? ' centerstatbar' : ' rightstatbar',
+			' rightstatbar',
+		];
+		return position[slot];
+	}
+
 	getStatbarHTML(pokemon: Pokemon) {
-		let buf = '<div class="statbar' + (this.isFrontSprite ? ' lstatbar' : ' rstatbar') + '" style="display: none">';
+		let buf = '<div class="statbar' + (this.isFrontSprite ? ' lstatbar' : ' rstatbar') + this.getClassForPosition(pokemon.slot) + '" style="display: none">';
 		const ignoreNick = this.isFrontSprite && (this.scene.battle.ignoreOpponent || this.scene.battle.ignoreNicks);
 		buf += `<strong>${BattleLog.escapeHTML(ignoreNick ? pokemon.speciesForme : pokemon.name)}`;
 		const gender = pokemon.gender;
@@ -2672,8 +2683,8 @@ export class PokemonSprite extends Sprite {
 		if (symbol) {
 			buf += ` <img src="${Dex.resourcePrefix}sprites/misc/${symbol}.png" alt="${symbol}" style="vertical-align:text-bottom;" />`;
 		}
-		if (pokemon.teraType) {
-			buf += ` <img src="${Dex.resourcePrefix}sprites/types/Tera${pokemon.teraType}.png" alt="Tera-${pokemon.teraType}" style="vertical-align:text-bottom;" height="16" width="16" />`;
+		if (pokemon.terastallized) {
+			buf += ` <img src="${Dex.resourcePrefix}sprites/types/Tera${pokemon.terastallized}.png" alt="Tera-${pokemon.terastallized}" style="vertical-align:text-bottom;" height="16" width="16" />`;
 		}
 
 		buf += `</strong><div class="hpbar"><div class="hptext"></div><div class="hptextborder"></div><div class="prevhp"><div class="hp"></div></div><div class="status"></div>`;
@@ -2749,7 +2760,9 @@ export class PokemonSprite extends Sprite {
 		} else if (pokemon.status === 'frz') {
 			status += '<span class="frz">FRZ</span> ';
 		}
-		if (pokemon.volatiles.typechange && pokemon.volatiles.typechange[1]) {
+		if (pokemon.terastallized) {
+			status += `<img src="${Dex.resourcePrefix}sprites/types/${encodeURIComponent(pokemon.terastallized)}.png" alt="${pokemon.terastallized}" class="pixelated" /> `;
+		} else if (pokemon.volatiles.typechange && pokemon.volatiles.typechange[1]) {
 			const types = pokemon.volatiles.typechange[1].split('/');
 			for (const type of types) {
 				status += '<img src="' + Dex.resourcePrefix + 'sprites/types/' + encodeURIComponent(type) + '.png" alt="' + type + '" class="pixelated" /> ';
@@ -2783,7 +2796,19 @@ export class PokemonSprite extends Sprite {
 		let effect = PokemonSprite.statusTable[id];
 		if (typeof effect === 'string') return effect;
 		if (effect === null) return PokemonSprite.statusTable[id] = '';
-		if (effect === undefined) effect = [`[[${id}]]`, 'neutral'];
+		if (effect === undefined) {
+			let label = `[[${id}]]`;
+			if (Dex.species.get(id).exists) {
+				label = Dex.species.get(id).name;
+			} else if (Dex.items.get(id).exists) {
+				label = Dex.items.get(id).name;
+			} else if (Dex.moves.get(id).exists) {
+				label = Dex.moves.get(id).name;
+			} else if (Dex.abilities.get(id).exists) {
+				label = Dex.abilities.get(id).name;
+			}
+			effect = [label, 'neutral'];
+		}
 		return PokemonSprite.statusTable[id] = `<span class="${effect[1]}">${effect[0].replace(/ /g, '&nbsp;')}</span> `;
 	}
 

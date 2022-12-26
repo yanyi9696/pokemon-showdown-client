@@ -90,7 +90,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	itemEffect = '';
 	prevItem = '';
 	prevItemEffect = '';
-	teraType = '';
+	terastallized: string | '' = '';
 
 	boosts: {[stat: string]: number} = {};
 	status: StatusName | 'tox' | '' | '???' = '';
@@ -467,15 +467,14 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 		}
 		delete this.volatiles['transform'];
 		delete this.volatiles['formechange'];
-		delete this.volatiles['terastallize'];
 
 		pokemon.boosts = {};
 		pokemon.volatiles = {};
 		pokemon.side.battle.scene.removeTransform(pokemon);
 		pokemon.statusStage = 0;
 	}
-	copyTypesFrom(pokemon: Pokemon) {
-		const [types, addedType] = pokemon.getTypes();
+	copyTypesFrom(pokemon: Pokemon, preterastallized = false) {
+		const [types, addedType] = pokemon.getTypes(undefined, preterastallized);
 		this.addVolatile('typechange' as ID, types.join('/'));
 		if (addedType) {
 			this.addVolatile('typeadd' as ID, addedType);
@@ -483,9 +482,11 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 			this.removeVolatile('typeadd' as ID);
 		}
 	}
-	getTypes(serverPokemon?: ServerPokemon): [ReadonlyArray<TypeName>, TypeName | ''] {
+	getTypes(serverPokemon?: ServerPokemon, preterastallized = false): [ReadonlyArray<TypeName>, TypeName | ''] {
 		let types: ReadonlyArray<TypeName>;
-		if (this.volatiles.typechange) {
+		if (this.terastallized && !preterastallized) {
+			types = [this.terastallized as TypeName];
+		} else if (this.volatiles.typechange) {
 			types = this.volatiles.typechange[1].split('/');
 		} else {
 			types = this.getSpecies(serverPokemon).types;
@@ -537,8 +538,8 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 		}
 		return ability.name;
 	}
-	getTypeList(serverPokemon?: ServerPokemon) {
-		const [types, addedType] = this.getTypes(serverPokemon);
+	getTypeList(serverPokemon?: ServerPokemon, preterastallized = false) {
+		const [types, addedType] = this.getTypes(serverPokemon, preterastallized);
 		return addedType ? types.concat(addedType) : types;
 	}
 	getSpeciesForme(serverPokemon?: ServerPokemon): string {
@@ -677,7 +678,7 @@ export class Side {
 			if (this.foe && this.avatar === this.foe.avatar) this.rollTrainerSprites();
 		}
 	}
-	addSideCondition(effect: Effect) {
+	addSideCondition(effect: Effect, persist: boolean) {
 		let condition = effect.id;
 		if (this.sideConditions[condition]) {
 			if (condition === 'spikes' || condition === 'toxicspikes') {
@@ -695,7 +696,7 @@ export class Side {
 			this.sideConditions[condition] = [effect.name, 1, 5, this.battle.gen >= 4 ? 8 : 0];
 			break;
 		case 'safeguard':
-			this.sideConditions[condition] = [effect.name, 1, 5, 0];
+			this.sideConditions[condition] = [effect.name, 1, persist ? 7 : 5, 0];
 			break;
 		case 'lightscreen':
 			this.sideConditions[condition] = [effect.name, 1, 5, this.battle.gen >= 4 ? 8 : 0];
@@ -704,7 +705,7 @@ export class Side {
 			this.sideConditions[condition] = [effect.name, 1, 5, 0];
 			break;
 		case 'tailwind':
-			this.sideConditions[condition] = [effect.name, 1, this.battle.gen >= 5 ? 4 : 3, 0];
+			this.sideConditions[condition] = [effect.name, 1, this.battle.gen >= 5 ? persist ? 6 : 4 : persist ? 5 : 3, 0];
 			break;
 		case 'luckychant':
 			this.sideConditions[condition] = [effect.name, 1, 5, 0];
@@ -941,6 +942,7 @@ export class Side {
 
 		pokemon.fainted = true;
 		pokemon.hp = 0;
+		pokemon.terastallized = '';
 		if (pokemon.side.faintCounter < 100) pokemon.side.faintCounter++;
 
 		this.battle.scene.animFaint(pokemon);
@@ -994,6 +996,10 @@ export interface ServerPokemon extends PokemonDetails, PokemonHealth {
 	pokeball: string;
 	/** false if the pokemon cannot gigantamax, otherwise a string containing the full name of its G-max move */
 	gigantamax: string | false;
+	/** always the Tera Type of the Pokemon, regardless of whether it is terastallized or not */
+	teraType: string;
+	/** falsy if the pokemon is not terastallized, otherwise it is the Tera Type of the Pokemon */
+	terastallized: string;
 }
 
 export class Battle {
@@ -1190,28 +1196,23 @@ export class Battle {
 		}
 		return false;
 	}
-	/**
-	 * Returns 1 if the abilities are active and 0 if none are active. If `excludePokemon` was provided, instead
-	 * returns the number of active sources of the abilities.
-	 * @param abilities A string or array of strings containing the name or names of abilities to look for.
-	 * @param excludePokemon A Pokemon to be ignored if the ability/abilities do not affect their source,
-	 * i.e. Sword of Ruin.
-	 */
-	abilityActive(abilities: string | string[], excludePokemon?: Pokemon | null) {
-		let activeAbilityCount = 0;
+	abilityActive(abilities: string | string[], excludePokemon?: Pokemon | ServerPokemon | null) {
 		if (typeof abilities === 'string') abilities = [abilities];
 		if (this.ngasActive()) {
 			abilities = abilities.filter(a => this.dex.abilities.get(a).isPermanent);
-			if (!abilities.length) return 0;
+			if (!abilities.length) return false;
 		}
 		for (const active of this.getAllActive()) {
 			if (active === excludePokemon) continue;
+			if (excludePokemon && this.pokemonControlled === 1 &&
+				active.ident.slice(0, 2) === excludePokemon.ident.slice(0, 2)) {
+				continue;
+			}
 			if (abilities.includes(active.ability) && !active.volatiles['gastroacid']) {
-				if (!excludePokemon) return 1;
-				activeAbilityCount++;
+				return true;
 			}
 		}
-		return activeAbilityCount;
+		return false;
 	}
 	reset() {
 		this.paused = true;
@@ -1693,7 +1694,9 @@ export class Battle {
 					break;
 				}
 			} else {
-				poke.timesAttacked += 1;
+				if (this.dex.moves.get(this.lastMove).category !== 'Status') {
+					poke.timesAttacked++;
+				}
 				let damageinfo = '' + Pokemon.getFormattedRange(range, damage[1] === 100 ? 0 : 1, '\u2013');
 				if (damage[1] !== 100) {
 					let hover = '' + ((damage[0] < 0) ? '\u2212' : '') +
@@ -1747,10 +1750,6 @@ export class Battle {
 					poke.fainted = false;
 					poke.status = '';
 					this.scene.updateSidebar(side);
-					// Revived while still on the field
-					if (!side.active[poke.slot]) {
-						poke.side.replace(poke);
-					}
 					break;
 				}
 			}
@@ -2425,7 +2424,7 @@ export class Battle {
 			}
 
 			poke.boosts = {...tpoke.boosts};
-			poke.copyTypesFrom(tpoke);
+			poke.copyTypesFrom(tpoke, true);
 			poke.ability = tpoke.ability;
 			poke.timesAttacked = tpoke.timesAttacked;
 			const targetForme = tpoke.volatiles.formechange;
@@ -2479,7 +2478,7 @@ export class Battle {
 		case '-terastallize': {
 			let poke = this.getPokemon(args[1])!;
 			let type = Dex.types.get(args[2]).name;
-			poke.teraType = type;
+			poke.terastallized = type;
 			this.scene.animTransform(poke, true, true);
 			this.log(args, kwArgs);
 			break;
@@ -2494,6 +2493,7 @@ export class Battle {
 			this.activateAbility(ofpoke || poke, fromeffect);
 			switch (effect.id) {
 			case 'typechange':
+				if (poke.terastallized) break;
 				if (ofpoke && fromeffect.id === 'reflecttype') {
 					poke.copyTypesFrom(ofpoke);
 				} else {
@@ -2642,7 +2642,9 @@ export class Battle {
 				this.scene.resultAnim(poke, 'Reflect', 'good');
 				break;
 			}
-			poke.addVolatile(effect.id);
+			if (!(effect.id === 'typechange' && poke.terastallized)) {
+				poke.addVolatile(effect.id);
+			}
 			this.scene.updateStatbar(poke);
 			this.log(args, kwArgs);
 			break;
@@ -2939,6 +2941,9 @@ export class Battle {
 			case 'quickclaw':
 				poke.item = 'Quick Claw';
 				break;
+			case 'abilityshield':
+				poke.item = 'Ability Shield';
+				break;
 			default:
 				if (kwArgs.broken) { // for custom moves that break protection
 					this.scene.resultAnim(poke, 'Protection broken', 'bad');
@@ -2950,7 +2955,7 @@ export class Battle {
 		case '-sidestart': {
 			let side = this.getSide(args[1]);
 			let effect = Dex.getEffect(args[2]);
-			side.addSideCondition(effect);
+			side.addSideCondition(effect, !!kwArgs.persistent);
 
 			switch (effect.id) {
 			case 'tailwind':
@@ -3003,6 +3008,7 @@ export class Battle {
 			let poke = this.getPokemon(kwArgs.of);
 			let fromeffect = Dex.getEffect(kwArgs.from);
 			this.activateAbility(poke, fromeffect);
+			let minTimeLeft = 5;
 			let maxTimeLeft = 0;
 			if (effect.id.endsWith('terrain')) {
 				for (let i = this.pseudoWeather.length - 1; i >= 0; i--) {
@@ -3014,7 +3020,8 @@ export class Battle {
 				}
 				if (this.gen > 6) maxTimeLeft = 8;
 			}
-			this.addPseudoWeather(effect.name, 5, maxTimeLeft);
+			if (kwArgs.persistent) minTimeLeft += 2;
+			this.addPseudoWeather(effect.name, minTimeLeft, maxTimeLeft);
 
 			switch (effect.id) {
 			case 'gravity':
