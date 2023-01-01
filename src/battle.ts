@@ -3044,6 +3044,10 @@ export class Battle {
 				}
 				if (this.gen > 6) maxTimeLeft = 8;
 			}
+			// mbhv4
+			if (this.tier.includes('More Balanced Hackmons') && effect.id.endsWith('room')) {
+				maxTimeLeft = 8;
+			}
 			if (kwArgs.persistent) minTimeLeft += 2;
 			this.addPseudoWeather(effect.name, minTimeLeft, maxTimeLeft);
 
