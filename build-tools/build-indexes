@@ -792,6 +792,302 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		items.push(...badItems);
 		items.push(...unreleasedItems);
 	}
+	// #region mbhv4
+	const genNum = 9;
+	const mod = 'gen9morebalancedhackmons';
+	const pokemon = Object.keys(Dex.data.Pokedex);
+	pokemon.sort();
+	const tierTable = {};
+	const overrideTier = {};
+	const zuBans = {};
+	const monotypeBans = {};
+	const nonstandardMoves = [];
+	for (const id of pokemon) {
+		const species = Dex.mod(mod).species.get(id);
+		const baseSpecies = Dex.mod(mod).species.get(species.baseSpecies);
+		if (species.gen > genNum) continue;
+		const tier = (() => {
+			if (species.tier === 'CAP' || species.tier === 'CAP NFE' || species.tier === 'CAP LC') {
+				return species.tier;
+			}
+			return species.natDexTier;
+		})();
+		overrideTier[species.id] = tier;
+		if (species.forme) {
+			if (
+				[
+					'Aegislash', 'Castform', 'Cherrim', 'Cramorant', 'Eiscue', 'Meloetta', 'Mimikyu', 'Minior', 'Morpeko', 'Wishiwashi',
+				].includes(species.baseSpecies) || species.forme.includes('Totem') || species.forme.includes('Zen')
+			) {
+				continue;
+			}
+		}
+
+		if (!tierTable[tier]) tierTable[tier] = [];
+		tierTable[tier].push(id);
+
+		// not important
+		// const zu = Dex.formats.get('gen9zu');
+		// if (zu.exists && Dex.formats.getRuleTable(zu).isBannedSpecies(species) &&
+		// 	["(PU)", "NFE", "LC"].includes(species.tier)) {
+		// 	zuBans[species.id] = 1;
+		// }
+		// const mono = Dex.formats.get('gen9nationaldexmonotype');
+		// if (Dex.formats.getRuleTable(mono).isBannedSpecies(species)) {
+		// 	monotypeBans[species.id] = 1;
+		// }
+	}
+
+	// not important
+	// nonstandardMoves.push(...Object.keys(Dex.data.Moves).filter(id => {
+	// 	const move = Dex.mod('gen8dlc1').moves.get(id);
+	// 	const bMove = Dex.mod('gen8').moves.get(id);
+	// 	return bMove.isNonstandard !== move.isNonstandard;
+	// }));
+
+	const tiers = [];
+	const items = [];
+	const formatSlices = {};
+
+	BattleTeambuilderTable[mod] = {};
+	BattleTeambuilderTable[mod].tiers = tiers;
+	BattleTeambuilderTable[mod].overrideTier = overrideTier;
+	BattleTeambuilderTable[mod].items = items;
+	BattleTeambuilderTable[mod].monotypeBans = monotypeBans;
+	BattleTeambuilderTable[mod].formatSlices = formatSlices;
+
+	const tierOrder = (() => {
+		return ["CAP", "CAP NFE", "CAP LC", "AG", "Uber", "(Uber)", "OU", "(OU)", "UUBL", "UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "(PU)", "New", "NFE", "LC", "Unreleased"];
+	})();
+
+	for (const tier of tierOrder) {
+		if (tier in {OU:1, AG:1, Uber:1, UU:1, RU:1, NU:1, PU:1, "(PU)":1, NFE:1, LC:1, DOU:1, DUU:1, "(DUU)":1, New:1, Legal:1, Regular:1, "Restricted Legendary":1, "CAP LC":1}) {
+			let usedTier = tier;
+			if (usedTier === "(PU)") usedTier = "ZU";
+			if (usedTier === "(DUU)") usedTier = "DNU";
+			formatSlices[usedTier] = tiers.length;
+		}
+		if (!tierTable[tier]) continue;
+		if (tier === "(PU)") {
+			tiers.push(['header', "Below PU"]);
+		} else if (tier === "(DUU)") {
+			tiers.push(['header', "Below DUU"]);
+		} else if (tier.charAt(0) === '(') {
+			tiers.push(['header', tier.slice(1, -1) + " by technicality"]);
+		} else if (tier === "NFE") {
+			tiers.push(['header', "NFEs not in a higher tier"]);
+		} else {
+			tiers.push(['header', tier]);
+		}
+		tiers.push(...tierTable[tier]);
+	}
+	if (!formatSlices['OU']) formatSlices['OU'] = formatSlices['New'];
+	if (!formatSlices['UU']) formatSlices['UU'] = formatSlices['New'];
+	if (!formatSlices['RU']) formatSlices['RU'] = formatSlices['New'];
+
+	const itemList = Object.keys(Dex.data.Items);
+	itemList.sort();
+
+	const greatItems = [['header', "Popular items"]];
+	const goodItems = [['header', "Items"]];
+	const specificItems = [['header', "Pok&eacute;mon-specific items"]];
+	const poorItems = [['header', "Usually useless items"]];
+	const badItems = [['header', "Useless items"]];
+	const unreleasedItems = [];
+	for (const id of itemList) {
+		const item = Dex.mod(mod).items.get(id);
+		if (item.gen > genNum) {
+			continue;
+		}
+		if (item.isNonstandard) {
+			if (item.isNonstandard !== "Past") continue;
+			if (!item.itemUser && !item.zMove) continue;
+		}
+		switch (id) {
+		case 'leftovers':
+		case 'lifeorb':
+		case 'choiceband':
+		case 'choicescarf':
+		case 'choicespecs':
+		case 'eviolite':
+		case 'assaultvest':
+		case 'focussash':
+		case 'powerherb':
+		case 'rockyhelmet':
+		case 'heavydutyboots':
+		case 'expertbelt':
+		case 'salacberry':
+			greatItems.push(id);
+			break;
+		case 'mentalherb':
+			greatItems.push(id);
+			break;
+		case 'lumberry':
+			goodItems.push(id);
+			break;
+		case 'sitrusberry':
+			goodItems.push(id);
+			break;
+		case 'aguavberry':
+		case 'figyberry':
+		case 'iapapaberry':
+		case 'magoberry':
+		case 'wikiberry':
+			greatItems.push(id);
+			break;
+		case 'berryjuice':
+			goodItems.push(id);
+			break;
+		case 'dragonfang':
+			goodItems.push(id);
+			break;
+		case 'dragonscale':
+			badItems.push(id);
+			break;
+		case 'mail':
+			unreleasedItems.push(id);
+			break;
+		// Legendaries
+		case 'adamantorb':
+		case 'griseousorb':
+		case 'lustrousorb':
+		case 'blueorb':
+		case 'redorb':
+		case 'souldew':
+		// Other
+		// fallsthrough
+		case 'stick':
+		case 'thickclub':
+		case 'lightball':
+		case 'luckypunch':
+		case 'quickpowder':
+		case 'metalpowder':
+		case 'deepseascale':
+		case 'deepseatooth':
+			specificItems.push(id);
+			break;
+		// Fling-only
+		case 'rarebone':
+		case 'belueberry':
+		case 'blukberry':
+		case 'cornnberry':
+		case 'durinberry':
+		case 'hondewberry':
+		case 'magostberry':
+		case 'nanabberry':
+		case 'nomelberry':
+		case 'pamtreberry':
+		case 'pinapberry':
+		case 'pomegberry':
+		case 'qualotberry':
+		case 'rabutaberry':
+		case 'razzberry':
+		case 'spelonberry':
+		case 'tamatoberry':
+		case 'watmelberry':
+		case 'wepearberry':
+		case 'energypowder':
+		case 'electirizer':
+		case 'oldamber':
+		case 'dawnstone':
+		case 'dubiousdisc':
+		case 'duskstone':
+		case 'firestone':
+		case 'icestone':
+		case 'leafstone':
+		case 'magmarizer':
+		case 'moonstone':
+		case 'ovalstone':
+		case 'prismscale':
+		case 'protector':
+		case 'reapercloth':
+		case 'sachet':
+		case 'shinystone':
+		case 'sunstone':
+		case 'thunderstone':
+		case 'upgrade':
+		case 'waterstone':
+		case 'whippeddream':
+		case 'bottlecap':
+		case 'goldbottlecap':
+		case 'galaricacuff':
+		case 'chippedpot':
+		case 'crackedpot':
+		case 'galaricawreath':
+			badItems.push(id);
+			break;
+		// outclassed items
+		case 'aspearberry':
+		case 'bindingband':
+		case 'cheriberry':
+		case 'destinyknot':
+		case 'enigmaberry':
+		case 'floatstone':
+		case 'ironball':
+		case 'jabocaberry':
+		case 'oranberry':
+		case 'machobrace':
+		case 'pechaberry':
+		case 'persimberry':
+		case 'poweranklet':
+		case 'powerband':
+		case 'powerbelt':
+		case 'powerbracer':
+		case 'powerlens':
+		case 'powerweight':
+		case 'rawstberry':
+		case 'ringtarget':
+		case 'rowapberry':
+		case 'bigroot':
+		case 'focusband':
+		// gen 2
+		case 'psncureberry':
+		case 'przcureberry':
+		case 'burntberry':
+		case 'bitterberry':
+		case 'iceberry':
+		case 'berry':
+			poorItems.push(id);
+			break;
+		default:
+			if (
+				item.name.endsWith(" Ball") || item.name.endsWith(" Fossil") || item.name.startsWith("Fossilized ") ||
+				item.name.endsWith(" Sweet") || item.name.endsWith(" Apple")
+			) {
+				badItems.push(id);
+			} else if (item.name.startsWith("TR")) {
+				badItems.push(id);
+			} else if (item.name.endsWith(" Gem") && item.name !== "Normal Gem") {
+				if (genNum >= 6) {
+					unreleasedItems.push(id);
+				} else if (item.name === "Flying Gem") {
+					greatItems.push(id);
+				} else {
+					goodItems.push(id);
+				}
+			} else if (item.name.endsWith(" Drive")) {
+				specificItems.push(id);
+			} else if (item.name.endsWith(" Memory")) {
+				specificItems.push(id);
+			} else if (item.name.startsWith("Rusted")) {
+				specificItems.push(id);
+			} else if (item.itemUser) {
+				specificItems.push(id);
+			} else if (item.megaStone) {
+				specificItems.push(id);
+			} else {
+				goodItems.push(id);
+			}
+		}
+	}
+	items.push(...greatItems);
+	items.push(...goodItems);
+	items.push(...specificItems);
+	items.push(...poorItems);
+	items.push(...badItems);
+	items.push(...unreleasedItems);
+
+	// #endregion mbhv4
 
 	//
 	// Learnset table
@@ -884,6 +1180,8 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			BattleTeambuilderTable['gen8bdsp'].learnsets[id][moveid] = '8g';
 		}
 	}
+	// mbhv4, doesn't really need a learnset table i think?
+	BattleTeambuilderTable['gen9morebalancedhackmons'].learnsets = learnsets;
 	const DLC1Learnsets = Dex.mod('gen8dlc1').data.Learnsets;
 	for (const id in DLC1Learnsets) {
 		const learnset = DLC1Learnsets[id].learnset;
@@ -1016,7 +1314,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	// Mods
 	//
 
-	for (const mod of ['gen7letsgo', 'gen8bdsp']) {
+	for (const mod of ['gen7letsgo', 'gen8bdsp', 'gen9morebalancedhackmons']) {
 		const modDex = Dex.mod(mod);
 		const modData = modDex.data;
 		const parentDex = Dex.forGen(modDex.gen);
@@ -1058,6 +1356,21 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 					if (!overrideAbilityData[id]) overrideAbilityData[id] = {};
 					overrideAbilityData[id][key] = modEntry[key];
 				}
+			}
+		}
+
+		const overrideItemDesc = {};
+		BattleTeambuilderTable[mod].overrideItemDesc = overrideItemDesc;
+		for (const id in modData.Items) {
+			const modEntry = modDex.items.get(id);
+			const parentEntry = parentDex.items.get(id);
+			if (modEntry.desc && (modEntry.desc !== parentEntry.desc)) {
+				// console.log(modEntry.desc);
+				overrideItemDesc[id] = modEntry.desc;
+			}
+			if (modEntry.shortDesc && (modEntry.shortDesc !== parentEntry.shortDesc)) {
+				// console.log(modEntry.shortDesc);
+				overrideItemDesc[id] = modEntry.shortDesc;
 			}
 		}
 	}

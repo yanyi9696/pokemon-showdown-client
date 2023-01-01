@@ -919,6 +919,12 @@ class ModdedDex {
 					break;
 				}
 			}
+			if (this.modid !== 'gen' + this.gen) {
+				const table = window.BattleTeambuilderTable[this.modid];
+				if (id in table.overrideItemDesc) {
+					data.shortDesc = table.overrideItemDesc[id];
+				}
+			}
 
 			const item = new Item(id, name, data);
 			this.cache.Items[id] = item;

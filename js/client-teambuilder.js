@@ -27,6 +27,9 @@
 				if (this.curTeam.format.includes('bdsp')) {
 					this.curTeam.dex = Dex.mod('gen8bdsp');
 				}
+				if (this.curTeam.format.includes('morebalancedhackmons')) {
+					this.curTeam.dex = Dex.mod('gen9morebalancedhackmons');
+				}
 				Storage.activeSetList = this.curSetList;
 			}
 		},
@@ -694,6 +697,9 @@
 			if (this.curTeam.format.includes('bdsp')) {
 				this.curTeam.dex = Dex.mod('gen8bdsp');
 			}
+			if (this.curTeam.format.includes('morebalancedhackmons')) {
+				this.curTeam.dex = Dex.mod('gen9morebalancedhackmons');
+			}
 			Storage.activeSetList = this.curSetList = Storage.unpackTeam(this.curTeam.team);
 			this.curTeamIndex = i;
 			this.update();
@@ -1181,7 +1187,8 @@
 			var species = this.curTeam.dex.species.get(set.species);
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
-			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd');
+			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd') ||
+				this.curTeam.format.includes('morebalancedhackmons');
 			var isDigimon = this.curTeam.format.includes('digimon');
 			var isCreatemon = this.curTeam.format.includes('createmons');
 			var buf = '<li value="' + i + '">';
@@ -1575,6 +1582,9 @@
 			}
 			if (this.curTeam.format.includes('bdsp')) {
 				this.curTeam.dex = Dex.mod('gen8bdsp');
+			}
+			if (this.curTeam.format.includes('morebalancedhackmons')) {
+				this.curTeam.dex = Dex.mod('gen9morebalancedhackmons');
 			}
 			this.save();
 			if (this.curTeam.gen === 5 && !Dex.loadedSpriteData['bw']) Dex.loadSpriteData('bw');
@@ -2864,7 +2874,8 @@
 			var set = this.curSet;
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
-			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd');
+			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd') ||
+				this.curTeam.format.includes('morebalancedhackmons');
 			var isDigimon = this.curTeam.format.includes('digimon');
 			var isCreatemon = this.curTeam.format.includes('createmons');
 			var species = this.curTeam.dex.species.get(set.species);
@@ -3008,7 +3019,8 @@
 			var species = this.curTeam.dex.species.get(set.species);
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
-			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd');
+			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.startsWith('gen8nd') ||
+				this.curTeam.format.includes('morebalancedhackmons');
 			var isDigimon = this.curTeam.format.includes('digimon');
 			var isCreatemon = this.curTeam.format.includes('createmons');
 
