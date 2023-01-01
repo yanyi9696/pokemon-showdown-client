@@ -457,6 +457,8 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 			delete this.volatiles['typeadd'];
 			delete this.volatiles['typechange'];
 			delete this.volatiles['yawn'];
+			// mbhv4
+			delete this.volatiles['utilityumbrella'];
 		}
 		if (copySource === 'shedtail') {
 			for (let i in this.volatiles) {
@@ -2195,7 +2197,10 @@ export class Battle {
 			poke.item = item.name;
 			poke.itemEffect = '';
 			poke.removeVolatile('airballoon' as ID);
+			// mbhv4
+			poke.removeVolatile('utilityumbrella' as ID);
 			if (item.id === 'airballoon') poke.addVolatile('airballoon' as ID);
+			if (item.id === 'utilityumbrella') poke.addVolatile('utilityumbrella' as ID);
 
 			if (effect.id) {
 				switch (effect.id) {
@@ -2250,6 +2255,10 @@ export class Battle {
 				case 'airballoon':
 					this.scene.resultAnim(poke, 'Balloon', 'good');
 					break;
+				// mbhv4
+				case 'utilityumbrella':
+					this.scene.resultAnim(poke, 'Umbrella', 'good');
+					break;
 				}
 			}
 			this.log(args, kwArgs);
@@ -2266,6 +2275,7 @@ export class Battle {
 				poke.prevItemEffect = '';
 			}
 			poke.removeVolatile('airballoon' as ID);
+			poke.removeVolatile('utilityumbrella' as ID);
 			poke.addVolatile('itemremoved' as ID);
 			if (kwArgs.eat) {
 				poke.prevItemEffect = 'eaten';
@@ -2315,6 +2325,10 @@ export class Battle {
 				case 'redcard':
 					poke.prevItemEffect = 'held up';
 					break;
+				// mbhv4
+				case 'utilityumbrella':
+					poke.prevItemEffect = 'consumed';
+					poke.removeVolatile('utilityumbrella' as ID);
 				default:
 					poke.prevItemEffect = 'consumed';
 					break;

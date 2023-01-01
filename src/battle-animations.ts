@@ -1855,6 +1855,8 @@ export class PokemonSprite extends Sprite {
 		// Gen 1
 		lightscreen: ['Light Screen', 'good'],
 		reflect: ['Reflect', 'good'],
+		// mbhv4
+		utilityumbrella: ['Umbrella', 'good'],
 		// Digimon
 		breathofwyvern: ['Gathering', 'neutral'],
 	};

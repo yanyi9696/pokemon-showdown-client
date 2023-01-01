@@ -169,11 +169,13 @@ function updateFiles() {
 	let replayEmbedContents = fs.readFileSync('js/replay-embed.template.js', {encoding: 'utf8'});
 	// Nihilslave: Disable this to get correct sprites if ur client doesn't have them.
 	replayEmbedContents = replayEmbedContents.replace(/play\.pokemonshowdown\.com/g, routes.client);
+	// Nihilslave: update the url over time
+	let date = new Date();
+	replayEmbedContents = replayEmbedContents.replace(/a7/g, date.getTime());
 
 	// Nihilslave: we use testclient.html
 	let testclientContents = fs.readFileSync('testclient.template.html', {encoding: 'utf-8'});
 	testclientContents = testclientContents.replace(URL_REGEX, updateURL);
-	let date = new Date();
 	testclientContents = testclientContents.replace('Mmm dd, yyyy', date.toDateString().split(" ")[1] + ' ' + date.getDate() + ', ' + date.getFullYear());
 
 	// add news, only if it's actually likely to exist
