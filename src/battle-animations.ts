@@ -933,7 +933,16 @@ export class BattleScene implements BattleSceneStub {
 			} else if (this.battle.weatherTimeLeft !== 0) {
 				weatherhtml += ` <small>(${this.battle.weatherTimeLeft} turn${this.battle.weatherTimeLeft === 1 ? '' : 's'})</small>`;
 			}
-			const nullifyWeather = this.battle.abilityActive(['Air Lock', 'Cloud Nine']);
+			let nullifyWeather = this.battle.abilityActive(['Air Lock', 'Cloud Nine']);
+			// mbhv4
+			if (this.battle.tier.includes('More Balanced Hackmons')) {
+				for (const pokemon of this.battle.getAllActive()) {
+					if (toID(pokemon.item) === 'utilityumbrella' as ID) {
+						nullifyWeather = true;
+						break;
+					}
+				}
+			}
 			weatherhtml = `${nullifyWeather ? '<s>' : ''}${weatherhtml}${nullifyWeather ? '</s>' : ''}`;
 		}
 
@@ -964,6 +973,14 @@ export class BattleScene implements BattleSceneStub {
 		let weather = this.battle.weather;
 		if (this.battle.abilityActive(['Air Lock', 'Cloud Nine'])) {
 			weather = '' as ID;
+		}
+		if (this.battle.tier.includes('More Balanced Hackmons')) {
+			for (const pokemon of this.battle.getAllActive()) {
+				if (toID(pokemon.item) === 'utilityumbrella' as ID) {
+					weather = '' as ID;
+					break;
+				}
+			}
 		}
 		let terrain = '' as ID;
 		for (const pseudoWeatherData of this.battle.pseudoWeather) {

@@ -2200,7 +2200,9 @@ export class Battle {
 			// mbhv4
 			poke.removeVolatile('utilityumbrella' as ID);
 			if (item.id === 'airballoon') poke.addVolatile('airballoon' as ID);
-			if (item.id === 'utilityumbrella') poke.addVolatile('utilityumbrella' as ID);
+			if (this.tier.includes('More Balanced Hackmons') && item.id === 'utilityumbrella') {
+				poke.addVolatile('utilityumbrella' as ID);
+			}
 
 			if (effect.id) {
 				switch (effect.id) {
@@ -2257,7 +2259,9 @@ export class Battle {
 					break;
 				// mbhv4
 				case 'utilityumbrella':
-					this.scene.resultAnim(poke, 'Umbrella', 'good');
+					if (this.tier.includes('More Balanced Hackmons')) {
+						this.scene.resultAnim(poke, 'Umbrella', 'good');
+					}
 					break;
 				}
 			}
