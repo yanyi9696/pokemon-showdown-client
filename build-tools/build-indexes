@@ -1328,6 +1328,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 				if (JSON.stringify(modEntry[key]) !== JSON.stringify(parentEntry[key])) {
 					if (!overrideSpeciesData[id]) overrideSpeciesData[id] = {};
 					overrideSpeciesData[id][key] = modEntry[key];
+					// console.log(JSON.stringify(modEntry[key]));
 				}
 			}
 		}
