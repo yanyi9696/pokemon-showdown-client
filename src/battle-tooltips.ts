@@ -1088,7 +1088,8 @@ class BattleTooltips {
 		if (item === 'choiceband' && !clientPokemon?.volatiles['dynamax']) {
 			stats.atk = Math.floor(stats.atk * 1.5);
 		}
-		if (ability === 'purepower' || ability === 'hugepower') {
+		if ((ability === 'purepower' && !this.battle.tier.includes('More Balanced Hackmons')) ||
+			ability === 'hugepower') {
 			stats.atk *= 2;
 		}
 		if (ability === 'hustle' || (ability === 'gorillatactics' && !clientPokemon?.volatiles['dynamax'])) {
@@ -1190,7 +1191,8 @@ class BattleTooltips {
 		if (item === 'deepseatooth' && species === 'Clamperl') {
 			stats.spa *= 2;
 		}
-		if (item === 'souldew' && this.battle.gen <= 6 && (species === 'Latios' || species === 'Latias')) {
+		if (item === 'souldew' && (this.battle.gen <= 6 || this.battle.tier.includes('More Balanced Hackmons')) &&
+			(species === 'Latios' || species === 'Latias')) {
 			stats.spa = Math.floor(stats.spa * 1.5);
 			stats.spd = Math.floor(stats.spd * 1.5);
 		}
@@ -1223,17 +1225,32 @@ class BattleTooltips {
 		if (ability === 'furcoat') {
 			stats.def *= 2;
 		}
-		if (this.battle.abilityActive('Vessel of Ruin', pokemon)) {
-			stats.spa = Math.floor(stats.spa * 0.75);
-		}
-		if (this.battle.abilityActive('Sword of Ruin', pokemon)) {
-			stats.def = Math.floor(stats.def * 0.75);
-		}
-		if (this.battle.abilityActive('Tablets of Ruin', pokemon)) {
-			stats.atk = Math.floor(stats.atk * 0.75);
-		}
-		if (this.battle.abilityActive('Beads of Ruin', pokemon)) {
-			stats.spd = Math.floor(stats.spd * 0.75);
+		if (!this.battle.tier.includes('More Balanced Hackmons')) {
+			if (this.battle.abilityActive('Vessel of Ruin', pokemon)) {
+				stats.spa = Math.floor(stats.spa * 0.75);
+			}
+			if (this.battle.abilityActive('Sword of Ruin', pokemon)) {
+				stats.def = Math.floor(stats.def * 0.75);
+			}
+			if (this.battle.abilityActive('Tablets of Ruin', pokemon)) {
+				stats.atk = Math.floor(stats.atk * 0.75);
+			}
+			if (this.battle.abilityActive('Beads of Ruin', pokemon)) {
+				stats.spd = Math.floor(stats.spd * 0.75);
+			}
+		} else {
+			if (this.battle.abilityActive('Vessel of Ruin')) {
+				stats.spa = Math.floor(stats.spa * 0.75);
+			}
+			if (this.battle.abilityActive('Sword of Ruin')) {
+				stats.def = Math.floor(stats.def * 0.75);
+			}
+			if (this.battle.abilityActive('Tablets of Ruin')) {
+				stats.atk = Math.floor(stats.atk * 0.75);
+			}
+			if (this.battle.abilityActive('Beads of Ruin')) {
+				stats.spd = Math.floor(stats.spd * 0.75);
+			}
 		}
 		const sideConditions = this.battle.mySide.sideConditions;
 		if (sideConditions['tailwind']) {
@@ -1770,7 +1787,10 @@ class BattleTooltips {
 		}
 		// Moves which have base power changed due to items
 		if (serverPokemon.item) {
-			let item = Dex.items.get(serverPokemon.item);
+			// let item = Dex.items.get(serverPokemon.item);
+			// Nihilslave: use a better dex
+			// doesn't work for malicious armor, don't know why
+			let item = this.battle.dex.items.get(serverPokemon.item);
 			if (move.id === 'fling' && item.fling) {
 				value.itemModify(item.fling.basePower);
 			}
@@ -1810,10 +1830,17 @@ class BattleTooltips {
 		}
 		// Base power based on times hit
 		if (move.id === 'ragefist') {
-			value.set(Math.min(350, 50 + 50 * pokemon.timesAttacked),
-				pokemon.timesAttacked > 0
-					? `Hit ${pokemon.timesAttacked} time${pokemon.timesAttacked > 1 ? 's' : ''}`
-					: undefined);
+			if (!this.battle.tier.includes('More Balanced Hackmons')) {
+				value.set(Math.min(350, 50 + 50 * pokemon.timesAttacked),
+					pokemon.timesAttacked > 0
+						? `Hit ${pokemon.timesAttacked} time${pokemon.timesAttacked > 1 ? 's' : ''}`
+						: undefined);
+			} else {
+				value.set(Math.min(200, 50 + 25 * pokemon.timesAttacked),
+					pokemon.timesAttacked > 0
+						? `Hit ${pokemon.timesAttacked} time${pokemon.timesAttacked > 1 ? 's' : ''}`
+						: undefined);
+			}
 		}
 		if (!value.value) return value;
 
@@ -1949,6 +1976,11 @@ class BattleTooltips {
 				value.modify(0.5, 'Grassy Terrain + grounded target');
 			}
 		}
+		if (this.battle.tier.includes('More Balanced Hackmons')) {
+			if (this.battle.weather === 'deltastream' && moveType === 'Flying') {
+				value.modify(1.3, 'Delta Stream boost');
+			}
+		}
 		if (
 			move.id === 'expandingforce' &&
 			this.battle.hasPseudoWeather('Psychic Terrain') &&
@@ -2058,7 +2090,9 @@ class BattleTooltips {
 		}
 
 		// Pokemon-specific items
-		if (item.name === 'Soul Dew' && this.battle.gen < 7) return value;
+		if (item.name === 'Soul Dew' && (this.battle.gen < 7 || this.battle.tier.includes('More Balanced Hackmons'))) {
+			return value;
+		}
 		if (BattleTooltips.orbUsers[speciesName] === item.name &&
 			[BattleTooltips.orbTypes[item.name], 'Dragon'].includes(moveType)) {
 			value.itemModify(1.2);

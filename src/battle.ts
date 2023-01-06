@@ -3358,6 +3358,9 @@ export class Battle {
 			if (this.tier.includes(`Let's Go`)) {
 				this.dex = Dex.mod('gen7letsgo' as ID);
 			}
+			if (this.tier.includes('More Balanced Hackmons')) {
+				this.dex = Dex.mod('gen9morebalancedhackmons' as ID);
+			}
 			this.log(args);
 			break;
 		}
