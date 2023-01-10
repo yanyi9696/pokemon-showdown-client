@@ -1548,12 +1548,12 @@ console.log("DONE");
 
  {
 	let buf = '';
-	const DigiDex = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/pokedex.js').Pokedex;
-	const DigiMoves = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/moves.js').Moves;
-	const DigiItems = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/items.js').Items;
-	const DigiAbilities = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/abilities.js').Abilities;
-	const DigiTypeChart = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/typechart.js').TypeChart;
-	const DigiLearnsets = requireNoCache('../data/pokemon-showdown/.data-dist/mods/digimon/learnsets.js').Learnsets;
+	const DigiDex = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/pokedex.js').Pokedex;
+	const DigiMoves = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/moves.js').Moves;
+	const DigiItems = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/items.js').Items;
+	const DigiAbilities = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/abilities.js').Abilities;
+	const DigiTypeChart = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/typechart.js').TypeChart;
+	const DigiLearnsets = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/learnsets.js').Learnsets;
 	for (const id in DigiDex) {
 		// this doesn't work, don't know why
 		if (DigiDex[id]['num'] <= 40000) {
@@ -1603,9 +1603,9 @@ console.log("DONE");
  process.stdout.write("Building `data/createmons.js`...");
 
  {
-	const typeToPoint = requireNoCache('../data/pokemon-showdown/.data-dist/mods/createmons/pointchart.js').typeToPoint;
-	const abilityToPoint = requireNoCache('../data/pokemon-showdown/.data-dist/mods/createmons/pointchart.js').abilityToPoint;
-	const moveToPoint = requireNoCache('../data/pokemon-showdown/.data-dist/mods/createmons/pointchart.js').moveToPoint;
+	const typeToPoint = requireNoCache('../data/pokemon-showdown/dist/data/mods/createmons/pointchart.js').typeToPoint;
+	const abilityToPoint = requireNoCache('../data/pokemon-showdown/dist/data/mods/createmons/pointchart.js').abilityToPoint;
+	const moveToPoint = requireNoCache('../data/pokemon-showdown/dist/data/mods/createmons/pointchart.js').moveToPoint;
 	const buf = 'exports.typeToPoint = ' + es3stringify(typeToPoint) + ';' 
 			+ 'exports.abilityToPoint = ' + es3stringify(abilityToPoint) + ';' 
 			+ 'exports.moveToPoint = ' + es3stringify(moveToPoint) + ';';
