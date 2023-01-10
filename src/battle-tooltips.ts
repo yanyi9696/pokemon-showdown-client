@@ -1489,7 +1489,8 @@ class BattleTooltips {
 		const noTypeOverride = [
 			'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terablast', 'terrainpulse', 'weatherball',
 		];
-		if (!noTypeOverride.includes(move.id)) {
+		const allowTypeOverride = !noTypeOverride.includes(move.id) && (move.id !== 'terablast' || !pokemon.terastallized);
+		if (allowTypeOverride) {
 			if (this.battle.rules['Revelationmons Mod']) {
 				const [types] = pokemon.getTypes(serverPokemon);
 				for (let i = 0; i < types.length; i++) {
@@ -1897,10 +1898,11 @@ class BattleTooltips {
 			}
 		}
 		const noTypeOverride = [
-			'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terablast', 'terrainpulse', 'weatherball',
+			'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
 		];
+		const allowTypeOverride = !noTypeOverride.includes(move.id) && (move.id !== 'terablast' || !pokemon.terastallized);
 		if (
-			move.category !== 'Status' && !noTypeOverride.includes(move.id) && !move.isZ && !move.isMax &&
+			move.category !== 'Status' && allowTypeOverride && !move.isZ && !move.isMax &&
 			!move.id.startsWith('hiddenpower')
 		) {
 			if (move.type === 'Normal') {
@@ -2036,18 +2038,23 @@ class BattleTooltips {
 		'Spell Tag': 'Ghost',
 		'Twisted Spoon': 'Psychic',
 	};
-	static orbUsers: {[speciesForme: string]: string} = {
-		'Latias': 'Soul Dew',
-		'Latios': 'Soul Dew',
-		'Dialga': 'Adamant Orb',
-		'Palkia': 'Lustrous Orb',
-		'Giratina': 'Griseous Orb',
+	static orbUsers: {[speciesForme: string]: string[]} = {
+		'Latias': ['Soul Dew'],
+		'Latios': ['Soul Dew'],
+		'Dialga': ['Adamant Crystal', 'Adamant Orb'],
+		'Palkia': ['Lustrous Globe', 'Lustrous Orb'],
+		'Giratina': ['Griseous Core', 'Griseous Orb'],
+		'Venomicon': ['Vile Vial'],
 	};
-	static orbTypes: {[itemName: string]: TypeName} = {
-		'Soul Dew': 'Psychic',
-		'Adamant Orb': 'Steel',
-		'Lustrous Orb': 'Water',
-		'Griseous Orb': 'Ghost',
+	static orbTypes: {[itemName: string]: TypeName[]} = {
+		'Soul Dew': ['Psychic', 'Dragon'],
+		'Adamant Crystal': ['Steel', 'Dragon'],
+		'Adamant Orb': ['Steel', 'Dragon'],
+		'Lustrous Globe': ['Water', 'Dragon'],
+		'Lustrous Orb': ['Water', 'Dragon'],
+		'Griseous Core': ['Ghost', 'Dragon'],
+		'Griseous Orb': ['Ghost', 'Dragon'],
+		'Vile Vial': ['Poison', 'Flying'],
 	};
 	static noGemMoves = [
 		'Fire Pledge',
@@ -2093,8 +2100,8 @@ class BattleTooltips {
 		if (item.name === 'Soul Dew' && (this.battle.gen < 7 || this.battle.tier.includes('More Balanced Hackmons'))) {
 			return value;
 		}
-		if (BattleTooltips.orbUsers[speciesName] === item.name &&
-			[BattleTooltips.orbTypes[item.name], 'Dragon'].includes(moveType)) {
+		if (BattleTooltips.orbUsers[speciesName]?.includes(item.name) &&
+			BattleTooltips.orbTypes[item.name]?.includes(moveType)) {
 			value.itemModify(1.2);
 			return value;
 		}
