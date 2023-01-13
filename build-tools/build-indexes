@@ -1629,6 +1629,11 @@ process.stdout.write("Building `data/digimon.js`...");
 
 	buf += 'exports.DigimonTable = ' + JSON.stringify(DigimonTable).replace(/['\\]/g, "\\$&") + ';';
 
+	let deleteFlag = false;
+	for (const id in Digidex) {
+		if (id === 'bulbasaur') deleteFlag = true;
+		if (deleteFlag) delete Digidex[id];
+	}
 	for (const id in DigiMovedex) {
 		const move = Dex.mod('digimon').moves.get(id);
 		if (move.desc) DigiMovedex[id].desc = move.desc;
