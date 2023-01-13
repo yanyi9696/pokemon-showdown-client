@@ -25,6 +25,8 @@ type SearchFilter = [string, string];
 declare const BattleSearchIndex: [ID, SearchType, number?, number?][];
 declare const BattleSearchIndexOffset: any;
 declare const BattleTeambuilderTable: any;
+// digimon
+declare const DigimonTable: any;
 
 /**
  * Backend for search UIs.
@@ -637,6 +639,11 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			format = 'balancedcreatemons' as ID;
 			this.formatType = 'natdex';
 		}
+		if (format.includes('digimon')) {
+			this.formatType = 'digimon';
+			format = 'digimon' as ID;
+			this.dex = Dex.mod('digimon' as ID);
+		}
 		this.format = format;
 
 		this.species = '' as ID;
@@ -728,6 +735,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (this.formatType?.startsWith('bdsp')) table = table['gen8bdsp'];
 		if (this.formatType === 'letsgo') table = table['gen7letsgo'];
 		if (this.format === 'morebalancedhackmons' as ID) table = table['gen9morebalancedhackmons'];
+		if (this.formatType === 'digimon') table = DigimonTable;
 		if (speciesid in table.learnsets) return speciesid;
 		const species = this.dex.species.get(speciesid);
 		if (!species.exists) return '' as ID;
@@ -785,6 +793,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			if (this.formatType?.startsWith('bdsp')) table = table['gen8bdsp'];
 			if (this.formatType === 'letsgo') table = table['gen7letsgo'];
 			if (this.format === 'morebalancedhackmons' as ID) table = table['gen9morebalancedhackmons'];
+			if (this.formatType === 'digimon') table = DigimonTable;
 			let learnset = table.learnsets[learnsetid];
 			if (learnset && (moveid in learnset) && (!this.format.startsWith('tradebacks') ? learnset[moveid].includes(genChar) :
 				learnset[moveid].includes(genChar) ||
@@ -814,6 +823,9 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			`gen${gen}`;
 		if (table && table[tableKey]) {
 			table = table[tableKey];
+		}
+		if (this.formatType === 'digimon') {
+			table = DigimonTable;
 		}
 		if (!table) return pokemon.tier;
 
@@ -932,6 +944,8 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			}
 		} else if (this.formatType === 'stadium') {
 			table = table['gen' + dex.gen + 'stadium' + (dex.gen > 1 ? dex.gen : '')];
+		} else if (this.formatType === 'digimon') {
+			table = DigimonTable;
 		}
 
 		if (!table.tierSet) {
@@ -1190,9 +1204,11 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			table = table['gen' + this.dex.gen + 'natdex'];
 		} else if (this.formatType === 'metronome') {
 			table = table['gen' + this.dex.gen + 'metronome'];
+		} else if (this.formatType === 'digimon') {
+			table = DigimonTable;
 		} else if (this.dex.gen < 9) {
 			table = table['gen' + this.dex.gen];
-		} // Nihilslave: add an else if here to make it show mega stones in mnm
+		}
 		if (!table.itemSet) {
 			table.itemSet = table.items.map((r: any) => {
 				if (typeof r === 'string') {
@@ -1516,6 +1532,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		if (this.formatType?.startsWith('bdsp')) lsetTable = lsetTable['gen8bdsp'];
 		if (this.formatType === 'letsgo') lsetTable = lsetTable['gen7letsgo'];
 		if (this.format === 'morebalancedhackmons' as ID) lsetTable = lsetTable['gen9morebalancedhackmons'];
+		if (this.formatType === 'digimon') lsetTable = DigimonTable;
 		if (this.formatType?.startsWith('dlc1')) lsetTable = lsetTable['gen8dlc1'];
 		while (learnsetid) {
 			let learnset = lsetTable.learnsets[learnsetid];

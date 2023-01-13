@@ -200,6 +200,11 @@ const Dex = new class implements ModdedDex {
 		if (modid in this.moddedDexes) {
 			return this.moddedDexes[modid];
 		}
+		const bigModid = ['digimon'];
+		if (bigModid.includes(modid)) {
+			this.moddedDexes[modid] = new BigModdedDex(modid);
+			return this.moddedDexes[modid];
+		}
 		this.moddedDexes[modid] = new ModdedDex(modid);
 		return this.moddedDexes[modid];
 	}
@@ -865,8 +870,14 @@ class ModdedDex {
 	constructor(modid: ID) {
 		this.modid = modid;
 		const gen = parseInt(modid.substr(3, 1), 10);
-		if (!modid.startsWith('gen') || !gen) throw new Error("Unsupported modid");
-		this.gen = gen;
+		// if (!modid.startsWith('gen') || !gen) throw new Error("Unsupported modid");
+		// this.gen = gen;
+		// Nihilslave: use this for BigModdedDex
+		if (!modid.startsWith('gen') || !gen) {
+			this.gen = Dex.gen;
+		} else {
+			this.gen = gen;
+		}
 	}
 	moves = {
 		get: (name: string): Move => {
@@ -1024,6 +1035,206 @@ class ModdedDex {
 				if (id in table.overrideTypeChart) {
 					data = {...data, ...table.overrideTypeChart[id]};
 				}
+			}
+
+			this.cache.Types[id] = data;
+			return data;
+		},
+	};
+
+	getPokeballs() {
+		if (this.pokeballs) return this.pokeballs;
+		this.pokeballs = [];
+		if (!window.BattleItems) window.BattleItems = {};
+		for (const data of Object.values(window.BattleItems) as AnyObject[]) {
+			if (data.gen && data.gen > this.gen) continue;
+			if (!data.isPokeball) continue;
+			this.pokeballs.push(data.name);
+		}
+		return this.pokeballs;
+	}
+}
+
+class BigModdedDex extends ModdedDex{
+	// readonly gen: number;
+	// readonly modid: ID;
+	// readonly cache = {
+	// 	Moves: {} as any as {[k: string]: Move},
+	// 	Items: {} as any as {[k: string]: Item},
+	// 	Abilities: {} as any as {[k: string]: Ability},
+	// 	Species: {} as any as {[k: string]: Species},
+	// 	Types: {} as any as {[k: string]: Effect},
+	// };
+	// pokeballs: string[] | null = null;
+	constructor(modid: ID) {
+		super(modid);
+		// this.modid = modid;
+		// const gen = parseInt(modid.substr(3, 1), 10);
+		// if (!modid.startsWith('gen') || !gen) {
+		// 	this.gen = Dex.gen;
+		// } else {
+		// 	this.gen = gen;
+		// }
+	}
+	moves = {
+		get: (name: string): Move => {
+			let id = toID(name);
+			if (window.BattleAliases && id in BattleAliases) {
+				name = BattleAliases[id];
+				id = toID(name);
+			}
+			if (this.cache.Moves.hasOwnProperty(id)) return this.cache.Moves[id];
+
+			let data;
+			if (Dex.moves.get(name).exists === true) {
+				data = {...Dex.moves.get(name)};
+			}
+			switch(this.modid) {
+			case 'digimon':
+				let moveData = window.DigiMovedex[id];
+				if (moveData && typeof moveData.exists === 'boolean') {
+					data = {...moveData};
+				} else if (!data) {
+					data = {exists: false};
+				}
+				break;
+			default:
+				if (!data) data = {exists: false};
+				break;
+			}
+
+			const move = new Move(id, name, data);
+			this.cache.Moves[id] = move;
+			return move;
+		},
+	};
+
+	items = {
+		get: (name: string): Item => {
+			let id = toID(name);
+			if (window.BattleAliases && id in BattleAliases) {
+				name = BattleAliases[id];
+				id = toID(name);
+			}
+			if (this.cache.Items.hasOwnProperty(id)) return this.cache.Items[id];
+
+			let data;
+			if (Dex.items.get(name).exists === true) {
+				data = {...Dex.items.get(name)};
+			}
+			switch (this.modid) {
+			case 'digimon':
+				let itemData = window.DigiItems[id];
+				if (itemData && typeof itemData.exists === 'boolean') {
+					data = {...itemData};
+				} else if (!data) {
+					data = {exists: false};
+				}
+				break;
+			default:
+				if (!data) data = {exists: false};
+				break;
+			}
+
+			const item = new Item(id, name, data);
+			this.cache.Items[id] = item;
+			return item;
+		},
+	};
+
+	abilities = {
+		get: (name: string): Ability => {
+			let id = toID(name);
+			if (window.BattleAliases && id in BattleAliases) {
+				name = BattleAliases[id];
+				id = toID(name);
+			}
+			if (this.cache.Abilities.hasOwnProperty(id)) return this.cache.Abilities[id];
+
+			let data;
+			if (Dex.abilities.get(name).exists === true) {
+				data = {...Dex.abilities.get(name)};
+			}
+			switch (this.modid) {
+			case 'digimon':
+				let abilityData = window.DigiAbilities[id];
+				if (abilityData && typeof abilityData.exists === 'boolean') {
+					data = {...abilityData};
+				} else if (!data) {
+					data = {exists: false};
+				}
+			}
+
+			const ability = new Ability(id, name, data);
+			this.cache.Abilities[id] = ability;
+			return ability;
+		},
+	};
+
+	species = {
+		get: (name: string): Species => {
+			let id = toID(name);
+			if (window.BattleAliases && id in BattleAliases) {
+				name = BattleAliases[id];
+				id = toID(name);
+			}
+			if (this.cache.Species.hasOwnProperty(id)) return this.cache.Species[id];
+
+			let data;
+			if (Dex.species.get(name).exists === true) {
+				data = {...Dex.species.get(name)};
+			}
+			switch (this.modid) {
+			case 'digimon':
+				let speciesData = window.Digidex[id];
+				if (speciesData && typeof speciesData.exists === 'boolean') {
+					data = {...speciesData};
+				} else if (!data) {
+					data = {exists: false};
+				}
+				break;
+			default:
+				if (!data) data = {exists: false};
+				break;
+			}
+
+			if (!data.tier && data.baseSpecies && toID(data.baseSpecies) !== id) {
+				data.tier = this.species.get(data.baseSpecies).tier;
+			}
+
+			const species = new Species(id, name, data);
+			this.cache.Species[id] = species;
+			return species;
+		},
+	};
+
+	types = {
+		get: (name: string): Effect => {
+			const id = toID(name) as ID;
+			name = id.substr(0, 1).toUpperCase() + id.substr(1);
+
+			if (this.cache.Types.hasOwnProperty(id)) return this.cache.Types[id];
+
+			let data;
+			if (Dex.types.get(name).exists === true) {
+				data = {...Dex.types.get(name)};
+			}
+			switch (this.modid) {
+			case 'digimon':
+				let typeData = window.DigiTypeChart[id];
+				if (typeData && typeData.damageTaken) {
+					typeData.exists = true;
+					if (!typeData.id) typeData.id = id;
+					if (!typeData.name) typeData.name = name;
+					if (!typeData.effectType) typeData.effectType = 'Type';
+					data = {...typeData};
+				} else if (!data) {
+					data = {exists: false};
+				}
+				break;
+			default:
+				if (!data) data = {exists: false};
+				break;
 			}
 
 			this.cache.Types[id] = data;

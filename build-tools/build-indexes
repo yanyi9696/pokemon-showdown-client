@@ -1544,26 +1544,95 @@ console.log("DONE");
  * Build digimon.js
  *********************************************************/
 
- process.stdout.write("Building `data/digimon.js`...");
+process.stdout.write("Building `data/digimon.js`...");
 
- {
-	let buf = '';
-	const DigiDex = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/pokedex.js').Pokedex;
-	const DigiMoves = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/moves.js').Moves;
+{
+	// Nihilslave: this is far from finished, don't build without this commented out
+	const DigimonTable = {};
+
+	let buf = '// DO NOT EDIT - automatically built with build-tools/build-indexes\n\n';
+
+	const Digidex = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/pokedex.js').Pokedex;
+	const DigiMovedex = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/moves.js').Moves;
 	const DigiItems = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/items.js').Items;
 	const DigiAbilities = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/abilities.js').Abilities;
 	const DigiTypeChart = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/typechart.js').TypeChart;
 	const DigiLearnsets = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/learnsets.js').Learnsets;
-	for (const id in DigiDex) {
-		// this doesn't work, don't know why
-		if (DigiDex[id]['num'] <= 40000) {
-			delete DigiDex[id];
+
+	const digimon = Object.keys(Digidex);
+	digimon.sort;
+	const tierTable = {};
+	for (const id of digimon) {
+		const species = Dex.mod('digimon').species.get(id);
+		const tier = species.tier;
+		if (!tierTable[tier]) tierTable[tier] = [];
+		tierTable[tier].push(id);
+	}
+
+	const tiers = [];
+	const items = [];
+	const formatSlices = {};
+
+	DigimonTable.tiers = tiers;
+	DigimonTable.overrideTier = {};
+	DigimonTable.items = items;
+	DigimonTable.monotypeBans = {};
+	DigimonTable.formatSlices = formatSlices;
+
+	const tierOrder = ["Uber", "(Uber)", "OU", "(OU)", "UUBL", "UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "(PU)", "NFE", "LC", "Unreleased"];
+
+	for (const tier of tierOrder) {
+		if (tier in {OU:1, AG:1, Uber:1, UU:1, RU:1, NU:1, PU:1, "(PU)":1, NFE:1, LC:1, Legal:1, Regular:1}) {
+			let usedTier = tier;
+			if (usedTier === "(PU)") usedTier = "ZU";
+			formatSlices[usedTier] = tiers.length;
+		}
+		if (!tierTable[tier]) continue;
+		if (tier === "(PU)") {
+			tiers.push(['header', "Below PU"]);
+		} else if (tier.charAt(0) === '(') {
+			tiers.push(['header', tier.slice(1, -1) + " by technicality"]);
+		} else if (tier === "NFE") {
+			tiers.push(['header', "NFEs not in a higher tier"]);
+		} else {
+			tiers.push(['header', tier]);
+		}
+		tiers.push(...tierTable[tier]);
+	}
+	if (!formatSlices['OU']) formatSlices['OU'] = formatSlices['New'];
+	if (!formatSlices['UU']) formatSlices['UU'] = formatSlices['New'];
+	if (!formatSlices['RU']) formatSlices['RU'] = formatSlices['New'];
+
+	const itemList = Object.keys(DigiItems);
+	itemList.sort();
+
+	const greatItems = [['header', "Popular items"]];
+	const goodItems = [['header', "Items"]];
+	const specificItems = [['header', "Pok&eacute;mon-specific items"]];
+	const poorItems = [['header', "Usually useless items"]];
+	const badItems = [['header', "Useless items"]];
+	const unreleasedItems = [];
+	for (const id of itemList) {
+		const item = Dex.mod('digimon').items.get(id);
+		switch (id) {
+		default:
+			greatItems.push(id);
+			break;
 		}
 	}
-	for (const id in DigiMoves) {
+	items.push(...greatItems);
+	items.push(...goodItems);
+	items.push(...specificItems);
+	items.push(...poorItems);
+	items.push(...badItems);
+	items.push(...unreleasedItems);
+
+	buf += 'exports.DigimonTable = ' + JSON.stringify(DigimonTable).replace(/['\\]/g, "\\$&") + ';';
+
+	for (const id in DigiMovedex) {
 		const move = Dex.mod('digimon').moves.get(id);
-		if (move.desc) DigiMoves[id].desc = move.desc;
-		if (move.shortDesc) DigiMoves[id].shortDesc = move.shortDesc;
+		if (move.desc) DigiMovedex[id].desc = move.desc;
+		if (move.shortDesc) DigiMovedex[id].shortDesc = move.shortDesc;
 	}
 	for (const id in DigiItems) {
 		const item = Dex.mod('digimon').items.get(id);
@@ -1585,10 +1654,11 @@ console.log("DONE");
 			delete DigiLearnsets[id];
 		}
 	}
-	buf += 'exports.DigiDex = ' + es3stringify(DigiDex) + ';';
-	buf += 'exports.DigiMoves = ' + es3stringify(DigiMoves) + ';';
-	buf += 'exports.DigiAbilities = ' + es3stringify(DigiAbilities) + ';';
+	// .json is for dex.pokemonshowdown.com, not needed here
+	buf += 'exports.Digidex = ' + es3stringify(Digidex) + ';';
+	buf += 'exports.DigiMovedex = ' + es3stringify(DigiMovedex) + ';';
 	buf += 'exports.DigiItems = ' + es3stringify(DigiItems) + ';';
+	buf += 'exports.DigiAbilities = ' + es3stringify(DigiAbilities) + ';';
 	buf += 'exports.DigiTypeChart = ' + es3stringify(DigiTypeChart) + ';';
 	buf += 'exports.DigiLearnsets = ' + es3stringify(DigiLearnsets) + ';';
 	fs.writeFileSync('data/digimon.js', buf);
@@ -1600,9 +1670,9 @@ console.log("DONE");
  * Build createmons.js
  *********************************************************/
 
- process.stdout.write("Building `data/createmons.js`...");
+process.stdout.write("Building `data/createmons.js`...");
 
- {
+{
 	const typeToPoint = requireNoCache('../data/pokemon-showdown/dist/data/mods/createmons/pointchart.js').typeToPoint;
 	const abilityToPoint = requireNoCache('../data/pokemon-showdown/dist/data/mods/createmons/pointchart.js').abilityToPoint;
 	const moveToPoint = requireNoCache('../data/pokemon-showdown/dist/data/mods/createmons/pointchart.js').moveToPoint;
