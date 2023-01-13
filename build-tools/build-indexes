@@ -1569,10 +1569,12 @@ process.stdout.write("Building `data/digimon.js`...");
 		tierTable[tier].push(id);
 	}
 
+	const learnsets = {};
 	const tiers = [];
 	const items = [];
 	const formatSlices = {};
 
+	DigimonTable.learnsets = learnsets;
 	DigimonTable.tiers = tiers;
 	DigimonTable.overrideTier = {};
 	DigimonTable.items = items;
@@ -1627,9 +1629,20 @@ process.stdout.write("Building `data/digimon.js`...");
 	items.push(...badItems);
 	items.push(...unreleasedItems);
 
+	const lsets = Dex.mod('digimon').data.Learnsets;
+	let deleteFlag = false;
+	for (const id in lsets) {
+		if (id === 'bulbasaur') deleteFlag = true;
+		if (deleteFlag) break;
+		learnsets[id] = {};
+		for (const moveid in lsets[id]['learnset']) {
+			learnsets[id][moveid] = '9a';
+		}
+	}
+
 	buf += 'exports.DigimonTable = ' + JSON.stringify(DigimonTable).replace(/['\\]/g, "\\$&") + ';';
 
-	let deleteFlag = false;
+	deleteFlag = false;
 	for (const id in Digidex) {
 		if (id === 'bulbasaur') deleteFlag = true;
 		if (deleteFlag) delete Digidex[id];
@@ -1653,11 +1666,10 @@ process.stdout.write("Building `data/digimon.js`...");
 		if (ability.desc) DigiAbilities[id].desc = ability.desc;
 		if (ability.shortDesc) DigiAbilities[id].shortDesc = ability.shortDesc;
 	}
+	deleteFlag = false;
 	for (const id in DigiLearnsets) {
-		const digimon = Dex.mod('digimon').species.get(id);
-		if (digimon.num <= 40000) {
-			delete DigiLearnsets[id];
-		}
+		if (id === 'bulbasaur') deleteFlag = true;
+		if (deleteFlag) delete DigiLearnsets[id];
 	}
 	// .json is for dex.pokemonshowdown.com, not needed here
 	buf += 'exports.Digidex = ' + es3stringify(Digidex) + ';';

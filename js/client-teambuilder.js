@@ -1279,9 +1279,9 @@
 					}
 				}
 				if (this.curTeam.gen === 9) {
-					if (!isCreatemon) {
+					if (!isCreatemon && !isDigimon) {
 						buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
-					} else {
+					} else if (isCreatemon){
 						buf += '<span class="detailcell"><label>Second Type</label>' + (set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0])) + '</span>';
 					}
 				}
@@ -2993,7 +2993,7 @@
 				}
 			}
 
-			if (this.curTeam.gen === 9 && !isCreatemon) {
+			if (this.curTeam.gen === 9 && !isCreatemon && !isDigimon) {
 				buf += '<div class="formrow"><label class="formlabel" title="Tera Type">Tera Type:</label><div><select name="teratype">';
 				var types = Dex.types.all();
 				var teraType = set.teraType || species.types[0];
@@ -3149,9 +3149,9 @@
 					}
 				}
 				if (this.curTeam.gen === 9) {
-					if (!isCreatemon) {
+					if (!isCreatemon && !isDigimon) {
 						buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
-					} else {
+					} else if (isCreatemon) {
 						buf += '<span class="detailcell"><label>Second Type</label>' + (set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0])) + '</span>';
 					}
 				}

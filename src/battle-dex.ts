@@ -1056,25 +1056,8 @@ class ModdedDex {
 }
 
 class BigModdedDex extends ModdedDex{
-	// readonly gen: number;
-	// readonly modid: ID;
-	// readonly cache = {
-	// 	Moves: {} as any as {[k: string]: Move},
-	// 	Items: {} as any as {[k: string]: Item},
-	// 	Abilities: {} as any as {[k: string]: Ability},
-	// 	Species: {} as any as {[k: string]: Species},
-	// 	Types: {} as any as {[k: string]: Effect},
-	// };
-	// pokeballs: string[] | null = null;
 	constructor(modid: ID) {
 		super(modid);
-		// this.modid = modid;
-		// const gen = parseInt(modid.substr(3, 1), 10);
-		// if (!modid.startsWith('gen') || !gen) {
-		// 	this.gen = Dex.gen;
-		// } else {
-		// 	this.gen = gen;
-		// }
 	}
 	moves = {
 		get: (name: string): Move => {
@@ -1091,9 +1074,8 @@ class BigModdedDex extends ModdedDex{
 			}
 			switch(this.modid) {
 			case 'digimon':
-				let moveData = window.DigiMovedex[id];
-				if (moveData && typeof moveData.exists === 'boolean') {
-					data = {...moveData};
+				if (id in window.DigiMovedex) {
+					data = window.DigiMovedex[id];
 				} else if (!data) {
 					data = {exists: false};
 				}
@@ -1124,9 +1106,8 @@ class BigModdedDex extends ModdedDex{
 			}
 			switch (this.modid) {
 			case 'digimon':
-				let itemData = window.DigiItems[id];
-				if (itemData && typeof itemData.exists === 'boolean') {
-					data = {...itemData};
+				if (id in window.DigiItems) {
+					data = window.DigiItems[id];
 				} else if (!data) {
 					data = {exists: false};
 				}
@@ -1157,9 +1138,8 @@ class BigModdedDex extends ModdedDex{
 			}
 			switch (this.modid) {
 			case 'digimon':
-				let abilityData = window.DigiAbilities[id];
-				if (abilityData && typeof abilityData.exists === 'boolean') {
-					data = {...abilityData};
+				if (id in window.DigiAbilities) {
+					data = window.DigiAbilities[id];
 				} else if (!data) {
 					data = {exists: false};
 				}
@@ -1186,9 +1166,8 @@ class BigModdedDex extends ModdedDex{
 			}
 			switch (this.modid) {
 			case 'digimon':
-				let speciesData = window.Digidex[id];
-				if (speciesData && typeof speciesData.exists === 'boolean') {
-					data = {...speciesData};
+				if (id in window.Digidex) {
+					data = window.Digidex[id];
 				} else if (!data) {
 					data = {exists: false};
 				}
@@ -1227,7 +1206,7 @@ class BigModdedDex extends ModdedDex{
 					if (!typeData.id) typeData.id = id;
 					if (!typeData.name) typeData.name = name;
 					if (!typeData.effectType) typeData.effectType = 'Type';
-					data = {...typeData};
+					if (typeData.id !== 'fairy' as ID) data = {...typeData};
 				} else if (!data) {
 					data = {exists: false};
 				}
