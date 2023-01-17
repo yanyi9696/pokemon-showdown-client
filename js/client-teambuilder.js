@@ -1736,7 +1736,8 @@
 				'T: ' + details[2] + (details[3] === -1 ? ' * 1.5' : (' + ' + details[3])) + ' = ' + details[1].toFixed(1) + '\n' + 
 				'A: ' + details[4] + '\n' + 
 				'M: ' + details[6] + ' + ' + details[7] + ' + ' + details[8] + ' + ' + details[9] + ' = ' + details[5] + '\n' + 
-				'Total: ' + Math.floor(details[0] * details[1] * details[4] * details[5])
+				(details[10] ? ('P: ' + details[10] * 5000 + '\n') : '') + 
+				'Total: ' + (Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10] * 5000)
 			);
 			button.blur();
 		},
@@ -2103,8 +2104,8 @@
 		},
 		getSetPoint: function (dex, set) {
 			// different from server side
-			// BS | T | T1 | T2 | A | M | M1 | M2 | M3 | M4 |
-			//  0 | 1 |  2 |  3 | 4 | 5 |  6 |  7 |  8 |  9 |
+			// BS | T | T1 | T2 | A | M | M1 | M2 | M3 | M4 |  P |
+			//  0 | 1 |  2 |  3 | 4 | 5 |  6 |  7 |  8 |  9 | 10 |
 			const details = [];
 			const species = dex.species.get(set.species);
 
@@ -2154,6 +2155,17 @@
 				details.push(0.5);
 				details[5] += 0.5;
 			}
+
+			// penalty
+			details.push(0);
+			for (const statName in set.evs) {
+				if (set.evs[statName] > 150) {
+					++details[10];
+					if (statName === 'hp') {
+						++details[10];
+					}
+				}
+			}
 		
 			return details;
 		},
@@ -2161,7 +2173,7 @@
 			var totalPoint = 0;
 			for (var i in this.curSetList) {
 				var details = this.getSetPoint(this.curTeam.dex, this.curSetList[i]);
-				totalPoint += Math.floor(details[0] * details[1] * details[4] * details[5]);
+				totalPoint += Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10] * 5000;
 			}
 			return totalPoint;
 		},
