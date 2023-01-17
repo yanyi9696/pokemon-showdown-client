@@ -2952,6 +2952,10 @@
 						buf += '</div></div>';
 					}
 				}
+
+				if (isCreatemon) {
+					buf += '<div class="formrow"><label class="formlabel">Weight:</label><div><input type="number" min="1" max="999" step="1" name="dynamaxlevel" value="' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 999) + '" class="textbox inputform numform" /></div></div>';
+				}
 			}
 
 			if (this.curTeam.gen > 2) {
@@ -3066,9 +3070,17 @@
 
 			// dynamax level
 			var dynamaxLevel = parseInt(this.$chart.find('input[name=dynamaxlevel]').val(), 10);
-			if (isNaN(dynamaxLevel) || dynamaxLevel > 10 || dynamaxLevel < 0) dynamaxLevel = 10;
-			set.dynamaxLevel = dynamaxLevel;
-			if (set.dynamaxLevel === 10) delete set.dynamaxLevel;
+			if (!isCreatemon) {
+				if (isNaN(dynamaxLevel) || dynamaxLevel > 10 || dynamaxLevel < 0) dynamaxLevel = 10;
+				set.dynamaxLevel = dynamaxLevel;
+				if (set.dynamaxLevel === 10) delete set.dynamaxLevel;
+			} else {
+				if (isNaN(dynamaxLevel)) dynamaxLevel = 999;
+				if (dynamaxLevel < 1) dynamaxLevel = 1;
+				if (dynamaxLevel > 999) dynamaxLevel = 999;
+				set.dynamaxLevel = dynamaxLevel;
+				if (set.dynamaxLevel === 999) delete set.dynamaxLevel;
+			}
 
 			// gigantamax
 			var gmax = (this.$chart.find('input[name=gigantamax]:checked').val() === 'yes');
