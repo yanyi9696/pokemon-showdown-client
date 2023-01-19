@@ -3184,6 +3184,11 @@
 			}
 			this.$('button[name=details]').html(buf);
 
+			if (isCreatemon) {
+				this.update();
+				this.updateChart();
+			}
+
 			this.save();
 			this.updatePokemonSprite();
 		},
