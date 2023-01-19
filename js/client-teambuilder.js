@@ -3081,7 +3081,7 @@
 				if (dynamaxLevel < 1) dynamaxLevel = 1;
 				if (dynamaxLevel > 999) dynamaxLevel = 999;
 				set.dynamaxLevel = dynamaxLevel;
-				if (set.dynamaxLevel === 10) delete set.dynamaxLevel;
+				// if (set.dynamaxLevel === 10) delete set.dynamaxLevel;
 			}
 
 			// gigantamax
