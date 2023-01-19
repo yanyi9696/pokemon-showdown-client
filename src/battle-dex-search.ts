@@ -505,6 +505,7 @@ class DexSearch {
 				}
 				break;
 			case 'ability':
+				// Nihilslave: idk why it uses Dex here instead of this.dex, but it's risky to change
 				let ability = Dex.abilities.get(fId).name;
 				buf.push(['header', `${ability} Pok&eacute;mon`]);
 				for (let id in BattlePokedex) {

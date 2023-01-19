@@ -742,7 +742,36 @@ const Dex = new class implements ModdedDex {
 		if (pokemon.species && !spriteid) {
 			spriteid = species.spriteid || toID(pokemon.species);
 		}
-		if (species.exists === false) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
+		if (species.exists === false) {
+			let modSpecies = Dex.mod('digimon' as ID).species.get(pokemon.species);
+			if (modSpecies.exists === true) {
+				const modSpriteData: TeambuilderSpriteData = {
+					spriteid: modSpecies.id,
+					spriteDir: 'sprites/dex',
+					x: -6,
+					y: -7,
+				};
+				if (id === 'hououmon') {
+					modSpriteData.x = -3;
+					modSpriteData.y = 0;
+				}
+				if (id === 'holydramon' || id === 'omegamon') {
+					modSpriteData.y = 0;
+				}
+				if (id === 'rosemon') {
+					modSpriteData.y = 14;
+				}
+				if (id === 'plesiomon' || id === 'vikemon') {
+					modSpriteData.x = 0;
+					modSpriteData.y = 0;
+				}
+				if (id === 'diablomon' || id === 'wargreymon') {
+					modSpriteData.y = 7;
+				}
+				return modSpriteData;
+			}
+			return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
+		}
 		const spriteData: TeambuilderSpriteData = {
 			spriteid,
 			spriteDir: 'sprites/dex',

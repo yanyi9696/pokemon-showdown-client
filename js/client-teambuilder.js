@@ -350,9 +350,10 @@
 			var filterFolder;
 
 			if (!this.curFolder) {
-				buf += '<h2>Hi</h2>';
-				buf += '<p>Did you have a good day?</p>';
-				buf += '<p><button class="button" name="greeting" value="Y"><i class="fa fa-smile-o"></i> Yes, my day was pretty good</button> <button class="button" name="greeting" value="N"><i class="fa fa-frown-o"></i> No, it wasn\'t great</button></p>';
+				// Nihilslave: why do we need this
+				// buf += '<h2>Hi</h2>';
+				// buf += '<p>Did you have a good day?</p>';
+				// buf += '<p><button class="button" name="greeting" value="Y"><i class="fa fa-smile-o"></i> Yes, my day was pretty good</button> <button class="button" name="greeting" value="N"><i class="fa fa-frown-o"></i> No, it wasn\'t great</button></p>';
 				buf += '<h2>All teams <small style="font-weight: normal">(' + teams.length + ')</small></h2>';
 			} else {
 				if (this.curFolder.slice(-1) === '/') {
@@ -1267,8 +1268,9 @@
 						buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
 					}
 				}
+				// Nihilslave: we don't need to show this cuz types changes in time
 				if (isCreatemon) {
-					buf += '<span class="detailcell"><label>First Type</label>' + (set.hpType || species.types[0]) + '</span>';
+					// buf += '<span class="detailcell"><label>First Type</label>' + (set.hpType || species.types[0]) + '</span>';
 				}
 				if (this.curTeam.gen === 8 && !isBDSP && !isDigimon) {
 					if (!species.cannotDynamax && set.dynamaxLevel !== 10 && set.dynamaxLevel !== undefined) {
@@ -1282,7 +1284,7 @@
 					if (!isCreatemon && !isDigimon) {
 						buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
 					} else if (isCreatemon){
-						buf += '<span class="detailcell"><label>Second Type</label>' + (set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0])) + '</span>';
+						// buf += '<span class="detailcell"><label>Second Type</label>' + (set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0])) + '</span>';
 					}
 				}
 				if (isDigimon) {
@@ -3162,7 +3164,7 @@
 				}
 				if (!isDigimon) buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
 				if (!isLetsGo && (this.curTeam.gen < 8 || isNatDex)) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
-				if (isCreatemon) buf += '<span class="detailcell"><label>First Type</label>' + (set.hpType || species.types[0]) + '</span>';
+				// if (isCreatemon) buf += '<span class="detailcell"><label>First Type</label>' + (set.hpType || species.types[0]) + '</span>';
 				if (isDigimon) buf += '<span class="detailcell"><label>Pre-Evolution</label>' + (set.preEvo || 'None') + '</span>';
 				if (this.curTeam.gen === 8 && !isBDSP && !isDigimon) {
 					if (!species.cannotDynamax) {
@@ -3176,7 +3178,7 @@
 					if (!isCreatemon && !isDigimon) {
 						buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
 					} else if (isCreatemon) {
-						buf += '<span class="detailcell"><label>Second Type</label>' + (set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0])) + '</span>';
+						// buf += '<span class="detailcell"><label>Second Type</label>' + (set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0])) + '</span>';
 					}
 				}
 			}
