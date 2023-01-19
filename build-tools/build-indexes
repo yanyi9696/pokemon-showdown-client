@@ -1630,10 +1630,8 @@ process.stdout.write("Building `data/digimon.js`...");
 	items.push(...unreleasedItems);
 
 	const lsets = Dex.mod('digimon').data.Learnsets;
-	let deleteFlag = false;
 	for (const id in lsets) {
-		if (id === 'bulbasaur') deleteFlag = true;
-		if (deleteFlag) break;
+		if (id === 'bulbasaur') break;
 		learnsets[id] = {};
 		for (const moveid in lsets[id]['learnset']) {
 			learnsets[id][moveid] = '9a';
@@ -1642,7 +1640,7 @@ process.stdout.write("Building `data/digimon.js`...");
 
 	buf += 'exports.DigimonTable = ' + JSON.stringify(DigimonTable).replace(/['\\]/g, "\\$&") + ';';
 
-	deleteFlag = false;
+	let deleteFlag = false;
 	for (const id in Digidex) {
 		if (id === 'bulbasaur') deleteFlag = true;
 		if (deleteFlag) delete Digidex[id];
