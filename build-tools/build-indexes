@@ -1547,7 +1547,7 @@ console.log("DONE");
 process.stdout.write("Building `data/digimon.js`...");
 
 {
-	// Nihilslave: this is far from finished, don't build without this commented out
+	//#region teambuilder-tables
 	const DigimonTable = {};
 
 	let buf = '// DO NOT EDIT - automatically built with build-tools/build-indexes\n\n';
@@ -1676,6 +1676,166 @@ process.stdout.write("Building `data/digimon.js`...");
 	buf += 'exports.DigiAbilities = ' + es3stringify(DigiAbilities) + ';';
 	buf += 'exports.DigiTypeChart = ' + es3stringify(DigiTypeChart) + ';';
 	buf += 'exports.DigiLearnsets = ' + es3stringify(DigiLearnsets) + ';';
+	buf += '\n\n';
+	//#endregion
+
+	//#region search-index
+	let index = [];
+
+	index = index.concat(Object.keys(Digidex).map(x => x + ' pokemon'));
+	index = index.concat(Object.keys(DigiMovedex).map(x => x + ' move'));
+	index = index.concat(Object.keys(DigiItems).map(x => x + ' item'));
+	index = index.concat(Object.keys(DigiAbilities).map(x => x + ' ability'));
+	index = index.concat(Object.keys(DigiTypeChart).map(x => toID(x) + ' type'));
+	index = index.concat(['physical', 'special', 'status'].map(x => toID(x) + ' category'));
+	// useless but we just keep this
+	index = index.concat(['monster', 'water1', 'bug', 'flying', 'field', 'fairy', 'grass', 'humanlike', 'water3', 'mineral', 'amorphous', 'water2', 'ditto', 'dragon', 'undiscovered'].map(x => toID(x) + ' egggroup'));
+	index = index.concat(['ou', 'uu', 'ru', 'nu', 'pu', 'lc', 'nfe', 'uber', 'uubl', 'rubl', 'nubl', 'publ'].map(x => toID(x) + ' tier'));
+
+	let DigimonArticleTitles = {};
+	index.push('pokemon article');
+	index.push('moves article');
+
+	function generateAlias(id, name, type) {
+		let i = name.lastIndexOf(' ');
+		if (i < 0) i = name.lastIndexOf('-');
+		// hopefully we can do X formes like this
+		// if (name.endsWith('-Mega')) {
+		// 	index.push('mega' + toID(name.slice(0, -5)) + ' ' + type + ' ' + id + ' 0');
+		// 	index.push('m' + toID(name.slice(0, -5)) + ' ' + type + ' ' + id + ' 0');
+		// 	return;
+		// }
+		let oldI = i;
+		// if (name === 'Alakazam') i = 5;
+		let acronym;
+		if (oldI < 0 && i > 0) {
+			acronym = toID(name.charAt(0) + name.slice(i));
+		}
+		if (i < 0) return;
+		index.push('' + toID(name.slice(i)) + ' ' + type + ' ' + id + ' ' + toID(name.slice(0, i)).length);
+		if (name.startsWith('Hidden Power ')) {
+			acronym = 'hp' + toID(name.substr(13));
+			index.push('' + acronym + ' ' + type + ' ' + id + ' 0');
+		} else if (name === 'Hidden Power') {
+			index.push('hp ' + type + ' ' + id + ' 0');
+		} else if (name.includes(' ')) {
+			acronym = toID(name.split(' ').map((x, i) => i !== 0 ? x : x.charAt(0)).join(''));
+		} else if (name.includes('-') && name.charAt(1) !== '-') {
+			acronym = toID(name.split('-').map((x, i) => i !== 0 ? x : x.charAt(0)).join(''));
+		}
+		if (acronym) {
+			index.push('' + acronym + ' ' + type + ' ' + id + ' 0');
+		}
+		// if (name === 'High Jump Kick') {
+		// 	index.push('hjkick ' + type + ' ' + id + ' 0');
+		// } else if (name === 'Wake-Up Slap') {
+		// 	index.push('wuslap ' + type + ' ' + id + ' 0');
+		// 	index.push('wupslap ' + type + ' ' + id + ' 0');
+		// } else if (name === 'Zen Headbutt') {
+		// 	index.push('zhbutt ' + type + ' ' + id + ' 0');
+		// } else if (name === 'Articuno') {
+		// 	index.push('cuno ' + type + ' ' + id + ' 4');
+		// }
+
+		let i2 = name.lastIndexOf(' ', i - 1);
+		if (i2 < 0) i2 = name.lastIndexOf('-', i - 1);
+		if (name === 'Zen Headbutt') i2 = 8;
+		if (i2 >= 0) {
+			index.push('' + toID(name.slice(i2)) + ' ' + type + ' ' + id + ' ' + toID(name.slice(0, i2)).length);
+		}
+	}
+
+	for (const id in Digidex) {
+		const name = Digidex[id].name;
+		generateAlias(id, name, 'pokemon');
+	}
+	for (const id in DigiMovedex) {
+		const name = DigiMovedex[id].name;
+		generateAlias(id, name, 'move');
+	}
+	for (const id in DigiItems) {
+		const name = DigiItems[id].name;
+		generateAlias(id, name, 'item');
+	}
+	for (const id in DigiAbilities) {
+		const name = DigiAbilities[id].name;
+		generateAlias(id, name, 'ability');
+	}
+
+	index.sort();
+
+	// don't really know what these do, just keep
+	index[index.indexOf('grass type')] = 'grass egggroup';
+	index[index.indexOf('grass egggroup')] = 'grass type';
+
+	index[index.indexOf('fairy type')] = 'fairy egggroup';
+	index[index.indexOf('fairy egggroup')] = 'fairy type';
+
+	index[index.indexOf('flying type')] = 'flying egggroup';
+	index[index.indexOf('flying egggroup')] = 'flying type';
+
+	index[index.indexOf('dragon type')] = 'dragon egggroup';
+	index[index.indexOf('dragon egggroup')] = 'dragon type';
+
+	index[index.indexOf('bug type')] = 'bug egggroup';
+	index[index.indexOf('bug egggroup')] = 'bug type';
+
+	index[index.indexOf('psychic type')] = 'psychic move';
+	index[index.indexOf('psychic move')] = 'psychic type';
+
+	index[index.indexOf('ditto pokemon')] = 'ditto egggroup';
+	index[index.indexOf('ditto egggroup')] = 'ditto pokemon';
+
+	let DigimonSearchIndex = index.map(x => {
+		x = x.split(' ');
+		if (x.length > 3) {
+			x[3] = Number(x[3]);
+			x[2] = index.indexOf(x[2] + ' ' + x[1]);
+		}
+		return x;
+	});
+
+	let DigimonSearchIndexOffset = DigimonSearchIndex.map((entry, i) => {
+		const id = entry[0];
+		let name = '';
+		switch (entry[1]) {
+		case 'pokemon': name = Dex.mod('digimon').species.get(id).name; break;
+		case 'move': name = Dex.mod('digimon').moves.get(id).name; break;
+		case 'item': name = Dex.mod('digimon').items.get(id).name; break;
+		case 'ability': name = Dex.mod('digimon').abilities.get(id).name; break;
+		case 'article': name = DigimonArticleTitles[id] || ''; break;
+		}
+		let res = '';
+		let nonAlnum = 0;
+		for (let i = 0, j = 0; i < id.length; i++, j++) {
+			while (!/[a-zA-Z0-9]/.test(name[j])) {
+				j++;
+				nonAlnum++;
+			}
+			res += nonAlnum;
+		}
+		if (nonAlnum) return res;
+		return '';
+	});
+
+	let DigimonSearchCountIndex = {};
+	for (const type in DigiTypeChart) {
+		DigimonSearchCountIndex[type + ' move'] = Object.keys(DigiMovedex).filter(id => (DigiMovedex[id].type === type)).length;
+	}
+
+	for (const type in DigiTypeChart) {
+		DigimonSearchCountIndex[type + ' pokemon'] = Object.keys(Digidex).filter(id => (Digidex[id].types.indexOf(type) >= 0)).length;
+	}
+
+	buf += 'exports.DigimonSearchIndex = ' + JSON.stringify(DigimonSearchIndex) + ';\n\n';
+
+	buf += 'exports.DigimonSearchIndexOffset = ' + JSON.stringify(DigimonSearchIndexOffset) + ';\n\n';
+
+	buf += 'exports.DigimonSearchCountIndex = ' + JSON.stringify(DigimonSearchCountIndex) + ';\n\n';
+
+	buf += 'exports.DigimonArticleTitles = ' + JSON.stringify(DigimonArticleTitles) + ';\n\n';
+	//#endregion
+
 	fs.writeFileSync('data/digimon.js', buf);
 }
 

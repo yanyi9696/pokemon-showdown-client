@@ -26,6 +26,8 @@ declare const BattleSearchIndex: [ID, SearchType, number?, number?][];
 declare const BattleSearchIndexOffset: any;
 declare const BattleTeambuilderTable: any;
 // digimon
+declare const DigimonSearchIndex: [ID, SearchType, number?, number?][];
+declare const DigimonSearchIndexOffset: any;
 declare const DigimonTable: any;
 
 /**
@@ -205,6 +207,39 @@ class DexSearch {
 	}
 
 	textSearch(query: string): SearchRow[] {
+		// Nihilslave: change searchindex for big mods
+		let searchIndex = BattleSearchIndex;
+		let searchIndexOffset = BattleSearchIndexOffset;
+		let closest = DexSearch.getClosest;
+		switch (this.dex.modid) {
+		case 'digimon':
+			searchIndex = DigimonSearchIndex;
+			searchIndexOffset = DigimonSearchIndexOffset;
+			closest = function (query: string) {
+				// binary search through the index!
+				let left = 0;
+				let right = searchIndex.length - 1;
+				while (right > left) {
+					let mid = Math.floor((right - left) / 2 + left);
+					if (searchIndex[mid][0] === query && (mid === 0 || searchIndex[mid - 1][0] !== query)) {
+						// that's us
+						return mid;
+					} else if (searchIndex[mid][0] < query) {
+						left = mid + 1;
+					} else {
+						right = mid - 1;
+					}
+				}
+				if (left >= searchIndex.length - 1) left = searchIndex.length - 1;
+				else if (searchIndex[left + 1][0] && searchIndex[left][0] < query) left++;
+				if (left && searchIndex[left - 1][0] === query) left--;
+				return left;
+			}
+			break;
+		default:
+			break;
+		}
+
 		query = toID(query);
 
 		this.exactMatch = false;
@@ -225,8 +260,8 @@ class DexSearch {
 		}
 
 		// i represents the location of the search index we're looking at
-		let i = DexSearch.getClosest(query);
-		this.exactMatch = (BattleSearchIndex[i][0] === query);
+		let i = closest(query);
+		this.exactMatch = (searchIndex[i][0] === query);
 
 		// Even with output buffer buckets, we make multiple passes through
 		// the search index. searchPasses is a queue of which pass we're on:
@@ -268,24 +303,24 @@ class DexSearch {
 			if (['sub', 'tr'].includes(query) || toID(BattleAliases[query]).slice(0, query.length) !== query) {
 				queryAlias = toID(BattleAliases[query]);
 				let aliasPassType: SearchPassType = (queryAlias === 'hiddenpower' ? 'exact' : 'normal');
-				searchPasses.unshift([aliasPassType, DexSearch.getClosest(queryAlias), queryAlias]);
+				searchPasses.unshift([aliasPassType, closest(queryAlias), queryAlias]);
 			}
 			this.exactMatch = true;
 		}
 
 		// If there are no matches starting with query: Do a fuzzy match pass
 		// Fuzzy matches will still be shown after alias matches
-		if (!this.exactMatch && BattleSearchIndex[i][0].substr(0, query.length) !== query) {
+		if (!this.exactMatch && searchIndex[i][0].substr(0, query.length) !== query) {
 			// No results start with this. Do a fuzzy match pass.
 			let matchLength = query.length - 1;
 			if (!i) i++;
 			while (matchLength &&
-				BattleSearchIndex[i][0].substr(0, matchLength) !== query.substr(0, matchLength) &&
-				BattleSearchIndex[i - 1][0].substr(0, matchLength) !== query.substr(0, matchLength)) {
+				searchIndex[i][0].substr(0, matchLength) !== query.substr(0, matchLength) &&
+				searchIndex[i - 1][0].substr(0, matchLength) !== query.substr(0, matchLength)) {
 				matchLength--;
 			}
 			let matchQuery = query.substr(0, matchLength);
-			while (i >= 1 && BattleSearchIndex[i - 1][0].substr(0, matchLength) === matchQuery) i--;
+			while (i >= 1 && searchIndex[i - 1][0].substr(0, matchLength) === matchQuery) i--;
 			searchPasses.push(['fuzzy', i, '']);
 		}
 
@@ -311,7 +346,7 @@ class DexSearch {
 		let illegal = this.typedSearch?.illegalReasons;
 
 		// We aren't actually looping through the entirety of the searchIndex
-		for (i = 0; i < BattleSearchIndex.length; i++) {
+		for (i = 0; i < searchIndex.length; i++) {
 			if (!passType) {
 				let searchPass = searchPasses.shift();
 				if (!searchPass) break;
@@ -320,7 +355,7 @@ class DexSearch {
 				query = searchPass[2];
 			}
 
-			let entry = BattleSearchIndex[i];
+			let entry = searchIndex[i];
 			let id = entry[0];
 			let type = entry[1];
 
@@ -381,13 +416,13 @@ class DexSearch {
 				let originalIndex = entry[2]!;
 				if (matchStart) {
 					matchEnd = matchStart + query.length;
-					matchStart += (BattleSearchIndexOffset[originalIndex][matchStart] || '0').charCodeAt(0) - 48;
-					matchEnd += (BattleSearchIndexOffset[originalIndex][matchEnd - 1] || '0').charCodeAt(0) - 48;
+					matchStart += (searchIndexOffset[originalIndex][matchStart] || '0').charCodeAt(0) - 48;
+					matchEnd += (searchIndexOffset[originalIndex][matchEnd - 1] || '0').charCodeAt(0) - 48;
 				}
-				id = BattleSearchIndex[originalIndex][0];
+				id = searchIndex[originalIndex][0];
 			} else {
 				matchEnd = query.length;
-				if (matchEnd) matchEnd += (BattleSearchIndexOffset[i][matchEnd - 1] || '0').charCodeAt(0) - 48;
+				if (matchEnd) matchEnd += (searchIndexOffset[i][matchEnd - 1] || '0').charCodeAt(0) - 48;
 			}
 
 			// some aliases are substrings
