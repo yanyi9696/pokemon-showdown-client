@@ -1226,17 +1226,25 @@ class BattleTooltips {
 			stats.def *= 2;
 		}
 		if (!this.battle.tier.includes('More Balanced Hackmons')) {
-			if (this.battle.abilityActive('Vessel of Ruin', pokemon)) {
-				stats.spa = Math.floor(stats.spa * 0.75);
+			if (this.battle.abilityActive('Vessel of Ruin')) {
+				if (ability !== 'vesselofruin') {
+					stats.spa = Math.floor(stats.spa * 0.75);
+				}
 			}
-			if (this.battle.abilityActive('Sword of Ruin', pokemon)) {
-				stats.def = Math.floor(stats.def * 0.75);
+			if (this.battle.abilityActive('Sword of Ruin')) {
+				if (ability !== 'swordofruin') {
+					stats.def = Math.floor(stats.def * 0.75);
+				}
 			}
-			if (this.battle.abilityActive('Tablets of Ruin', pokemon)) {
-				stats.atk = Math.floor(stats.atk * 0.75);
+			if (this.battle.abilityActive('Tablets of Ruin')) {
+				if (ability !== 'tabletsofruin') {
+					stats.atk = Math.floor(stats.atk * 0.75);
+				}
 			}
-			if (this.battle.abilityActive('Beads of Ruin', pokemon)) {
-				stats.spd = Math.floor(stats.spd * 0.75);
+			if (this.battle.abilityActive('Beads of Ruin')) {
+				if (ability !== 'beadsofruin') {
+					stats.spd = Math.floor(stats.spd * 0.75);
+				}
 			}
 		} else {
 			if (this.battle.abilityActive('Vessel of Ruin')) {

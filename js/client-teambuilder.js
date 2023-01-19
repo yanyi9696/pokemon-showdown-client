@@ -3344,23 +3344,24 @@
 			var id = toID(e.currentTarget.value);
 			if (id in BattleAliases) id = toID(BattleAliases[id]);
 			var val = '';
+			var format = this.curTeam.format;
 			switch (name) {
 			case 'pokemon':
 				val = (id in BattlePokedex ? this.curTeam.dex.species.get(e.currentTarget.value).name : '');
 				break;
 			case 'ability':
-				if (id in BattleItems && this.curTeam.format.includes("dualwielding")) {
+				if (id in BattleItems && format.includes("dualwielding")) {
 					val = BattleItems[id].name;
-				} else if (id in BattleMovedex && this.curTeam.format.includes("trademarked")) {
+				} else if (id in BattleMovedex && format.includes("trademarked")) {
 					val = BattleMovedex[id].name;
 				} else {
 					val = (id in BattleAbilities ? BattleAbilities[id].name : '');
 				}
 				break;
 			case 'item':
-				if (id in BattleMovedex && this.curTeam.format.includes("fortemons")) {
+				if (id in BattleMovedex && format.includes("fortemons")) {
 					val = BattleMovedex[id].name;
-				} else if (id in BattleAbilities && this.curTeam.format.includes("multibility")) {
+				} else if (id in BattleAbilities && format.includes("multibility")) {
 					val = BattleAbilities[id].name;
 				} else {
 					val = (id in BattleItems ? BattleItems[id].name : '');
