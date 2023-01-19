@@ -2987,7 +2987,7 @@
 				var types = Dex.types.all();
 				var hpType = set.hpType || species.types[0];
 				for (var i = 0; i < types.length; i++) {
-					buf += '<option value="' + types[i].name + '"' + (hpType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + '</option>';
+					buf += '<option value="' + types[i].name + '"' + (hpType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + ' (' + exports.typeToPoint[types[i].id] + ')' + '</option>';
 				}
 				buf += '</select></div></div>';
 			}
@@ -3026,7 +3026,7 @@
 				var types = Dex.types.all();
 				var teraType = set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0]);
 				for (var i = 0; i < types.length; i++) {
-					buf += '<option value="' + types[i].name + '"' + (teraType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + '</option>';
+					buf += '<option value="' + types[i].name + '"' + (teraType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + ' (' + exports.typeToPoint[types[i].id] + ')' + '</option>';
 				}
 				buf += '</select></div></div>';
 			}
@@ -3081,7 +3081,7 @@
 				if (dynamaxLevel < 1) dynamaxLevel = 1;
 				if (dynamaxLevel > 999) dynamaxLevel = 999;
 				set.dynamaxLevel = dynamaxLevel;
-				if (set.dynamaxLevel === 999) delete set.dynamaxLevel;
+				if (set.dynamaxLevel === 10) delete set.dynamaxLevel;
 			}
 
 			// gigantamax
