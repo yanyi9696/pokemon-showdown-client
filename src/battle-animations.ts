@@ -1494,6 +1494,9 @@ export class BattleScene implements BattleSceneStub {
 	animDragOut(pokemon: Pokemon) {
 		return pokemon.sprite.animDragOut(pokemon);
 	}
+	resetStatbar(pokemon: Pokemon, startHidden?: boolean) {
+		return pokemon.sprite.resetStatbar(pokemon, startHidden);
+	}
 	updateStatbar(pokemon: Pokemon, updatePrevhp?: boolean, updateHp?: boolean) {
 		return pokemon.sprite.updateStatbar(pokemon, updatePrevhp, updateHp);
 	}
