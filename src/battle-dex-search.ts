@@ -1084,7 +1084,9 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		for (const [filterType, value] of filters) {
 			switch (filterType) {
 			case 'type':
-				if (species.types[0] !== value && species.types[1] !== value) return false;
+				// if (species.types[0] !== value && species.types[1] !== value) return false;
+				// Nihilslave: change this for digimon, it works better anyway tho
+				if (!species.types.includes(value as TypeName)) return false;
 				break;
 			case 'egggroup':
 				if (species.eggGroups[0] !== value && species.eggGroups[1] !== value) return false;
