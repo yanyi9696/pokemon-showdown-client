@@ -1572,6 +1572,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		if (this.format === 'morebalancedhackmons' as ID) lsetTable = lsetTable['gen9morebalancedhackmons'];
 		if (this.formatType === 'digimon') lsetTable = DigimonTable;
 		if (this.formatType?.startsWith('dlc1')) lsetTable = lsetTable['gen8dlc1'];
+		// todo: add something here to show pre-evo moves of digimon
+		// or should we implement that in function canLearn() ?
 		while (learnsetid) {
 			let learnset = lsetTable.learnsets[learnsetid];
 			if (learnset) {
