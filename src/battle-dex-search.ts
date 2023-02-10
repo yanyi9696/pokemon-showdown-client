@@ -838,6 +838,16 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			}
 			learnsetid = this.nextLearnsetid(learnsetid, speciesid);
 		}
+		if (this.format.includes('digimon') && this.set?.preEvo) {
+			const preEvoSpecies = this.dex.species.get(this.set.preEvo);
+			let preEvoLearnsetid = this.firstLearnsetid(preEvoSpecies.id);
+			while (preEvoLearnsetid) {
+				let table = DigimonTable;
+				let preEvoLearnset = table.learnsets[preEvoLearnsetid];
+				if (preEvoLearnset && (moveid in preEvoLearnset)) return true;
+				preEvoLearnsetid = this.nextLearnsetid(preEvoLearnsetid, preEvoSpecies.id);
+			}
+		}
 		return false;
 	}
 	getTier(pokemon: Species) {
@@ -1557,6 +1567,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		const isSTABmons = (format.includes('stabmons') || format === 'staaabmons');
 		const isTradebacks = format.includes('tradebacks');
 		const isCreatemon = format.includes('createmons');
+		const isDigimon = format.includes('digimon');
 		const regionBornLegality = dex.gen >= 6 &&
 			/^battle(spot|stadium|festival)/.test(format) || format.startsWith('vgc') ||
 			(dex.gen === 9 && this.formatType !== 'natdex');
@@ -1610,6 +1621,25 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				}
 			}
 			learnsetid = this.nextLearnsetid(learnsetid, species.id);
+		}
+		if (isDigimon && this.set?.preEvo) {
+			const preEvoSpecies = dex.species.get(this.set.preEvo);
+			let preEvoLearnsetid = this.firstLearnsetid(preEvoSpecies.id);
+			while (preEvoLearnsetid) {
+				let preEvoLearnset = lsetTable.learnsets[preEvoLearnsetid];
+				if (preEvoLearnset) {
+					for (let moveid in preEvoLearnset) {
+						if (moves.includes(moveid)) continue;
+						moves.push(moveid);
+						if (moveid === 'hiddenpower') {
+							moves.push(
+								'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
+							);
+						}
+					}
+				}
+				preEvoLearnsetid = this.nextLearnsetid(preEvoLearnsetid, preEvoSpecies.id);
+			}
 		}
 		if (sketch || isHackmons || isCreatemon) {
 			if (isHackmons || isCreatemon) moves = [];
