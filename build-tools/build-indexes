@@ -799,12 +799,9 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	pokemon.sort();
 	const tierTable = {};
 	const overrideTier = {};
-	const zuBans = {};
 	const monotypeBans = {};
-	const nonstandardMoves = [];
 	for (const id of pokemon) {
 		const species = Dex.mod(mod).species.get(id);
-		const baseSpecies = Dex.mod(mod).species.get(species.baseSpecies);
 		if (species.gen > genNum) continue;
 		const tier = (() => {
 			if (species.tier === 'CAP' || species.tier === 'CAP NFE' || species.tier === 'CAP LC') {
@@ -825,25 +822,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 
 		if (!tierTable[tier]) tierTable[tier] = [];
 		tierTable[tier].push(id);
-
-		// not important
-		// const zu = Dex.formats.get('gen9zu');
-		// if (zu.exists && Dex.formats.getRuleTable(zu).isBannedSpecies(species) &&
-		// 	["(PU)", "NFE", "LC"].includes(species.tier)) {
-		// 	zuBans[species.id] = 1;
-		// }
-		// const mono = Dex.formats.get('gen9nationaldexmonotype');
-		// if (Dex.formats.getRuleTable(mono).isBannedSpecies(species)) {
-		// 	monotypeBans[species.id] = 1;
-		// }
 	}
-
-	// not important
-	// nonstandardMoves.push(...Object.keys(Dex.data.Moves).filter(id => {
-	// 	const move = Dex.mod('gen8dlc1').moves.get(id);
-	// 	const bMove = Dex.mod('gen8').moves.get(id);
-	// 	return bMove.isNonstandard !== move.isNonstandard;
-	// }));
 
 	const tiers = [];
 	const items = [];
