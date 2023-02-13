@@ -1608,6 +1608,17 @@ class BattleTooltips {
 			value.itemModify(1.1, "Wide Lens");
 		}
 
+		if (this.battle.tier.includes('More Balanced Hackmons')) {
+			if (value.tryItem('Muscle Band') && move.category === 'Physical') {
+				accuracyModifiers.push(4915);
+				value.itemModify(1.2, "Muscle Band");
+			}
+			if (value.tryItem('Wise Glasses') && move.category === 'Special') {
+				accuracyModifiers.push(4915);
+				value.itemModify(1.2, "Wise Glasses");
+			}
+		}
+
 		// Chaining modifiers
 		let chain = 4096;
 		for (const mod of accuracyModifiers) {
