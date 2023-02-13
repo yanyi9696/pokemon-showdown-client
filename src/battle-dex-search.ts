@@ -1189,6 +1189,10 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 				if (ability.gen > dex.gen) continue;
 				abilities.push(ability.id);
 			}
+			// hardcode ase for mbhv4
+			if (format.includes('morebalancedhackmons')) {
+				abilities.push('allseeingeye' as ID);
+			}
 
 			let goodAbilities: SearchRow[] = [['header', "Abilities"]];
 			let poorAbilities: SearchRow[] = [['header', "Situational Abilities"]];
