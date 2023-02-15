@@ -1622,6 +1622,10 @@ process.stdout.write("Building `data/digimon.js`...");
 	let deleteFlag = false;
 	for (const id in Digidex) {
 		if (id === 'bulbasaur') deleteFlag = true;
+		const fdata = Dex.mod('digimon').data.FormatsData[id];
+		if (fdata && fdata.tier) {
+			Digidex[id].tier = fdata.tier;
+		}
 		if (deleteFlag) delete Digidex[id];
 	}
 	for (const id in DigiMovedex) {
