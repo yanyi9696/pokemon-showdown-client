@@ -1213,7 +1213,7 @@ class BigModdedDex extends ModdedDex{
 					if (!typeData.id) typeData.id = id;
 					if (!typeData.name) typeData.name = name;
 					if (!typeData.effectType) typeData.effectType = 'Type';
-					if (typeData.id !== 'fairy' as ID) data = {...typeData};
+					data = {...typeData};
 				} else if (!data) {
 					data = {exists: false};
 				}
