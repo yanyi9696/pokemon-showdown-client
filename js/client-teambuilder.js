@@ -1612,6 +1612,10 @@
 			var set = this.curSetList[i];
 			var name = $.trim(e.currentTarget.value).replace(/\|/g, '');
 			e.currentTarget.value = set.name = name;
+			if (this.curTeam.format.includes('crossevolution')) {
+				this.update();
+				this.updateChart();
+			}
 			this.save();
 		},
 
@@ -3800,7 +3804,7 @@
 			}
 		},
 		// Nihilslave: end of utility functions
-		
+
 		// initialization
 
 		getGen: function (format) {
