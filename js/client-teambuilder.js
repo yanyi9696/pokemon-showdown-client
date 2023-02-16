@@ -3696,6 +3696,7 @@
 		getStat: function (stat, set, evOverride, natureOverride) {
 			var supportsEVs = !this.curTeam.format.includes('letsgo');
 			var supportsAVs = !supportsEVs;
+			var isCE = this.curTeam.format.includes('crossevolution');
 			if (!set) set = this.curSet;
 			if (!set) return 0;
 
@@ -3718,6 +3719,19 @@
 			if (typeof set.ivs[stat] === 'undefined') set.ivs[stat] = 31;
 
 			var baseStat = species.baseStats[stat];
+			if (isCE) {
+				if (set.name !== set.species) {
+					const crossSpecies = this.curTeam.dex.species.get(set.name);
+					if (!!crossSpecies.exists && crossSpecies.prevo && species.prevo) {
+						const crossPrevoSpecies = this.curTeam.dex.species.get(crossSpecies.prevo);
+						if (!crossPrevoSpecies === !species.prevo) {
+							baseStat = species.baseStats[stat] + crossSpecies.baseStats[stat] - crossPrevoSpecies.baseStats[stat];
+							if (baseStat < 1) baseStat = 1;
+							if (baseStat > 255) baseStat = 255;
+						}
+					}
+				}
+			}
 			var iv = (set.ivs[stat] || 0);
 			if (this.curTeam.gen <= 2) iv &= 30;
 			var ev = set.evs[stat];
