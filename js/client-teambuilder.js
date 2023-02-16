@@ -1612,11 +1612,11 @@
 			var set = this.curSetList[i];
 			var name = $.trim(e.currentTarget.value).replace(/\|/g, '');
 			e.currentTarget.value = set.name = name;
+			this.save();
 			if (this.curTeam.format.includes('crossevolution')) {
 				this.update();
 				this.updateChart();
 			}
-			this.save();
 		},
 
 		// clipboard
@@ -3111,13 +3111,13 @@
 			}
 			this.$('button[name=details]').html(buf);
 
+			this.save();
+			this.updatePokemonSprite();
+
 			if (isCreatemon) {
 				this.update();
 				this.updateChart();
 			}
-
-			this.save();
-			this.updatePokemonSprite();
 		},
 		altForm: function (e) {
 			var set = this.curSet;
