@@ -3784,7 +3784,7 @@
 			const species = this.curTeam.dex.species.get(set.species);
 			if (set.name !== set.species) {
 				const crossSpecies = this.curTeam.dex.species.get(set.name);
-				if (!!crossSpecies.exists && crossSpecies.prevo && species.prevo) {
+				if (!!crossSpecies.exists && crossSpecies.prevo) {
 					const crossPrevoSpecies = this.curTeam.dex.species.get(crossSpecies.prevo);
 					if (!crossPrevoSpecies.prevo === !species.prevo) {
 						const mixedSpecies = this.deepClone(species);
