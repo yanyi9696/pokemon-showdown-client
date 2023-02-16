@@ -2096,129 +2096,6 @@
 			}
 			this.$chart.find('select[name=nature]').val(set.nature || 'Serious');
 		},
-		// Nihilslave: utility functions
-		deepClone: function (obj) {
-			if (obj === null || typeof obj !== 'object') return obj;
-			if (Array.isArray(obj)) return obj.map(prop => this.deepClone(prop));
-			const clone = Object.create(Object.getPrototypeOf(obj));
-			for (const key of Object.keys(obj)) {
-				clone[key] = this.deepClone(obj[key]);
-			}
-			return clone;
-		},
-		calcBSPoint: function (stats) {
-			for (var statName in stats) stats[statName] = stats[statName] || 1;
-			const h = stats['hp'];
-			const a = stats['atk'];
-			const b = stats['def'];
-			const c = stats['spa'];
-			const d = stats['spd'];
-			const s = stats['spe'];
-			const actualBs1 = h * b + h * d + s * s + 50 * (2 * h + a + 2 * b + c + 2 * d - 4 * s) + 25000;
-			const sqrtActualBs1 = Math.sqrt(actualBs1);
-			const actualBs2 = Math.max(h, a, b, c, d, s) + 50;
-			const bs = Math.floor(Math.floor(sqrtActualBs1 * actualBs2) * 5 / 1024);
-			return bs;
-		},
-		getSetPoint: function (dex, set) {
-			// different from server side
-			// BS | T | T1 | T2 | A | M | M1 | M2 | M3 | M4 |  P |
-			//  0 | 1 |  2 |  3 | 4 | 5 |  6 |  7 |  8 |  9 | 10 |
-			const details = [];
-			const species = dex.species.get(set.species);
-
-			const typeToPoint = exports.typeToPoint;
-			const abilityToPoint = exports.abilityToPoint;
-			const moveToPoint = exports.moveToPoint;
-		
-			// stats points
-			if (!set.evs) set.evs = JSON.parse(JSON.stringify(species.baseStats));
-			details.push(this.calcBSPoint(set.evs));
-		
-			// type points
-			var types = [];
-			if (set.hpType && dex.types.get(set.hpType).exists) {
-				types.push(dex.types.get(set.hpType).id);
-			} else {
-				types.push(dex.types.get(species.types[0]).id);
-			}
-			details.push(typeToPoint[types[0]]);
-			details.push(typeToPoint[types[0]]);
-			if (set.teraType && dex.types.get(set.teraType).exists) {
-				types.push(dex.types.get(set.teraType).id);
-			} else if (species.types.length > 1) {
-				types.push(dex.types.get(species.types[1]).id);
-			}
-			if (types.length < 2 || types[1] === types[0]) {
-				details[1] *= 1.5;
-				details.push(-1);
-			} else {
-				details[1] += typeToPoint[types[1]];
-				details.push(typeToPoint[types[1]]);
-			}
-		
-			// ability points
-			const abilityPoint = abilityToPoint[dex.abilities.get(set.ability).id] || 1;
-			details.push(abilityPoint);
-		
-			// move points
-			// mem: maybe all moves like fly should have 1 point
-			details.push(0);
-			for (const move of set.moves) {
-				const point = moveToPoint[dex.moves.get(move).id] || 0.5
-				details.push(point);
-				details[5] += point;
-			}
-			for (var i = set.moves.length; i < 4; ++i) {
-				details.push(0.5);
-				details[5] += 0.5;
-			}
-
-			// penalty
-			details.push(0);
-			for (const statName in set.evs) {
-				if (set.evs[statName] > 150) {
-					++details[10];
-					if (statName === 'hp') {
-						++details[10];
-					}
-				}
-			}
-		
-			return details;
-		},
-		getTeamPoint: function () {
-			var totalPoint = 0;
-			for (var i in this.curSetList) {
-				var details = this.getSetPoint(this.curTeam.dex, this.curSetList[i]);
-				totalPoint += Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10] * 5000;
-			}
-			return totalPoint;
-		},
-		getCESpecies: function (set) {
-			const species = this.curTeam.dex.species.get(set.species);
-			if (set.name !== set.species) {
-				const crossSpecies = this.curTeam.dex.species.get(set.name);
-				if (!!crossSpecies.exists && crossSpecies.prevo && species.prevo) {
-					const crossPrevoSpecies = this.curTeam.dex.species.get(crossSpecies.prevo);
-					if (!crossPrevoSpecies.prevo === !species.prevo) {
-						const mixedSpecies = this.deepClone(species);
-						for (var stat in mixedSpecies.baseStats) {
-							mixedSpecies.baseStats[stat] += crossSpecies.baseStats[stat] - crossPrevoSpecies.baseStats[stat];
-							if (mixedSpecies.baseStats[stat] < 1) mixedSpecies.baseStats[stat] = 1;
-							if (mixedSpecies.baseStats[stat] > 255) mixedSpecies.baseStats[stat] = 255;
-						}
-						if (crossSpecies.types[0] !== crossPrevoSpecies.types[0]) mixedSpecies.types[0] = crossSpecies.types[0];
-						if (crossSpecies.types[1] !== crossPrevoSpecies.types[1]) {
-							mixedSpecies.types[1] = crossSpecies.types[1] || crossSpecies.types[0];
-						}
-						if (mixedSpecies.types[0] === mixedSpecies.types[1]) mixedSpecies.types = [mixedSpecies.types[0]];
-						return mixedSpecies;
-					}
-				}
-			}
-		},
-		// Nihilslave: end of utility functions
 		curChartType: '',
 		curChartName: '',
 		searchChartTypes: {
@@ -3800,6 +3677,130 @@
 			return Math.floor(val);
 		},
 
+		// Nihilslave: utility functions
+		deepClone: function (obj) {
+			if (obj === null || typeof obj !== 'object') return obj;
+			if (Array.isArray(obj)) return obj.map(prop => this.deepClone(prop));
+			const clone = Object.create(Object.getPrototypeOf(obj));
+			for (const key of Object.keys(obj)) {
+				clone[key] = this.deepClone(obj[key]);
+			}
+			return clone;
+		},
+		calcBSPoint: function (stats) {
+			for (var statName in stats) stats[statName] = stats[statName] || 1;
+			const h = stats['hp'];
+			const a = stats['atk'];
+			const b = stats['def'];
+			const c = stats['spa'];
+			const d = stats['spd'];
+			const s = stats['spe'];
+			const actualBs1 = h * b + h * d + s * s + 50 * (2 * h + a + 2 * b + c + 2 * d - 4 * s) + 25000;
+			const sqrtActualBs1 = Math.sqrt(actualBs1);
+			const actualBs2 = Math.max(h, a, b, c, d, s) + 50;
+			const bs = Math.floor(Math.floor(sqrtActualBs1 * actualBs2) * 5 / 1024);
+			return bs;
+		},
+		getSetPoint: function (dex, set) {
+			// different from server side
+			// BS | T | T1 | T2 | A | M | M1 | M2 | M3 | M4 |  P |
+			//  0 | 1 |  2 |  3 | 4 | 5 |  6 |  7 |  8 |  9 | 10 |
+			const details = [];
+			const species = dex.species.get(set.species);
+
+			const typeToPoint = exports.typeToPoint;
+			const abilityToPoint = exports.abilityToPoint;
+			const moveToPoint = exports.moveToPoint;
+		
+			// stats points
+			if (!set.evs) set.evs = JSON.parse(JSON.stringify(species.baseStats));
+			details.push(this.calcBSPoint(set.evs));
+		
+			// type points
+			var types = [];
+			if (set.hpType && dex.types.get(set.hpType).exists) {
+				types.push(dex.types.get(set.hpType).id);
+			} else {
+				types.push(dex.types.get(species.types[0]).id);
+			}
+			details.push(typeToPoint[types[0]]);
+			details.push(typeToPoint[types[0]]);
+			if (set.teraType && dex.types.get(set.teraType).exists) {
+				types.push(dex.types.get(set.teraType).id);
+			} else if (species.types.length > 1) {
+				types.push(dex.types.get(species.types[1]).id);
+			}
+			if (types.length < 2 || types[1] === types[0]) {
+				details[1] *= 1.5;
+				details.push(-1);
+			} else {
+				details[1] += typeToPoint[types[1]];
+				details.push(typeToPoint[types[1]]);
+			}
+		
+			// ability points
+			const abilityPoint = abilityToPoint[dex.abilities.get(set.ability).id] || 1;
+			details.push(abilityPoint);
+		
+			// move points
+			// mem: maybe all moves like fly should have 1 point
+			details.push(0);
+			for (const move of set.moves) {
+				const point = moveToPoint[dex.moves.get(move).id] || 0.5
+				details.push(point);
+				details[5] += point;
+			}
+			for (var i = set.moves.length; i < 4; ++i) {
+				details.push(0.5);
+				details[5] += 0.5;
+			}
+
+			// penalty
+			details.push(0);
+			for (const statName in set.evs) {
+				if (set.evs[statName] > 150) {
+					++details[10];
+					if (statName === 'hp') {
+						++details[10];
+					}
+				}
+			}
+		
+			return details;
+		},
+		getTeamPoint: function () {
+			var totalPoint = 0;
+			for (var i in this.curSetList) {
+				var details = this.getSetPoint(this.curTeam.dex, this.curSetList[i]);
+				totalPoint += Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10] * 5000;
+			}
+			return totalPoint;
+		},
+		getCESpecies: function (set) {
+			const species = this.curTeam.dex.species.get(set.species);
+			if (set.name !== set.species) {
+				const crossSpecies = this.curTeam.dex.species.get(set.name);
+				if (!!crossSpecies.exists && crossSpecies.prevo && species.prevo) {
+					const crossPrevoSpecies = this.curTeam.dex.species.get(crossSpecies.prevo);
+					if (!crossPrevoSpecies.prevo === !species.prevo) {
+						const mixedSpecies = this.deepClone(species);
+						for (var stat in mixedSpecies.baseStats) {
+							mixedSpecies.baseStats[stat] += crossSpecies.baseStats[stat] - crossPrevoSpecies.baseStats[stat];
+							if (mixedSpecies.baseStats[stat] < 1) mixedSpecies.baseStats[stat] = 1;
+							if (mixedSpecies.baseStats[stat] > 255) mixedSpecies.baseStats[stat] = 255;
+						}
+						if (crossSpecies.types[0] !== crossPrevoSpecies.types[0]) mixedSpecies.types[0] = crossSpecies.types[0];
+						if (crossSpecies.types[1] !== crossPrevoSpecies.types[1]) {
+							mixedSpecies.types[1] = crossSpecies.types[1] || crossSpecies.types[0];
+						}
+						if (mixedSpecies.types[0] === mixedSpecies.types[1]) mixedSpecies.types = [mixedSpecies.types[0]];
+						return mixedSpecies;
+					}
+				}
+			}
+		},
+		// Nihilslave: end of utility functions
+		
 		// initialization
 
 		getGen: function (format) {
