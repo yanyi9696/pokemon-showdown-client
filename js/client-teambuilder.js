@@ -1198,6 +1198,7 @@
 				this.curTeam.format.includes('morebalancedhackmons');
 			var isDigimon = this.curTeam.format.includes('digimon');
 			var isCreatemon = this.curTeam.format.includes('createmons');
+			var isCE = this.curTeam.format.includes('crossevolution');
 			var buf = '<li value="' + i + '">';
 			if (!set.species) {
 				if (this.deletedSet) {
@@ -1306,6 +1307,11 @@
 			buf += '<div class="setcell setcell-typeicons">';
 			if (!isCreatemon) {
 				var types = species.types;
+				if (isCE) {
+					if (this.getCESpecies(set)) {
+						types = this.getCESpecies(set).types;
+					}
+				}
 				if (types) {
 					for (var i = 0; i < types.length; i++) buf += Dex.getTypeIcon(types[i]);
 				}
@@ -2090,6 +2096,16 @@
 			}
 			this.$chart.find('select[name=nature]').val(set.nature || 'Serious');
 		},
+		// Nihilslave: utility functions
+		deepClone: function (obj) {
+			if (obj === null || typeof obj !== 'object') return obj;
+			if (Array.isArray(obj)) return obj.map(prop => this.deepClone(prop));
+			const clone = Object.create(Object.getPrototypeOf(obj));
+			for (const key of Object.keys(obj)) {
+				clone[key] = this.deepClone(obj[key]);
+			}
+			return clone;
+		},
 		calcBSPoint: function (stats) {
 			for (var statName in stats) stats[statName] = stats[statName] || 1;
 			const h = stats['hp'];
@@ -2179,6 +2195,30 @@
 			}
 			return totalPoint;
 		},
+		getCESpecies: function (set) {
+			const species = this.curTeam.dex.species.get(set.species);
+			if (set.name !== set.species) {
+				const crossSpecies = this.curTeam.dex.species.get(set.name);
+				if (!!crossSpecies.exists && crossSpecies.prevo && species.prevo) {
+					const crossPrevoSpecies = this.curTeam.dex.species.get(crossSpecies.prevo);
+					if (!crossPrevoSpecies.prevo === !species.prevo) {
+						const mixedSpecies = this.deepClone(species);
+						for (var stat in mixedSpecies.baseStats) {
+							mixedSpecies.baseStats[stat] += crossSpecies.baseStats[stat] - crossPrevoSpecies.baseStats[stat];
+							if (mixedSpecies.baseStats[stat] < 1) mixedSpecies.baseStats[stat] = 1;
+							if (mixedSpecies.baseStats[stat] > 255) mixedSpecies.baseStats[stat] = 255;
+						}
+						if (crossSpecies.types[0] !== crossPrevoSpecies.types[0]) mixedSpecies.types[0] = crossSpecies.types[0];
+						if (crossSpecies.types[1] !== crossPrevoSpecies.types[1]) {
+							mixedSpecies.types[1] = crossSpecies.types[1] || crossSpecies.types[0];
+						}
+						if (mixedSpecies.types[0] === mixedSpecies.types[1]) mixedSpecies.types = [mixedSpecies.types[0]];
+						return mixedSpecies;
+					}
+				}
+			}
+		},
+		// Nihilslave: end of utility functions
 		curChartType: '',
 		curChartName: '',
 		searchChartTypes: {
@@ -2338,8 +2378,14 @@
 			var set = this.curSet;
 			var species = this.curTeam.dex.species.get(this.curSet.species);
 			var isCreatemon = this.curTeam.format.includes('createmons');
+			var isCE = this.curTeam.format.includes('crossevolution');
 
 			var baseStats = species.baseStats;
+			if (isCE) {
+				if (this.getCESpecies(set)) {
+					baseStats = this.getCESpecies(set).baseStats;
+				}
+			}
 			if (isCreatemon) {
 				if (!set.evs) {
 					set.evs = JSON.parse(JSON.stringify(baseStats));
@@ -3720,16 +3766,9 @@
 
 			var baseStat = species.baseStats[stat];
 			if (isCE) {
-				if (set.name !== set.species) {
-					const crossSpecies = this.curTeam.dex.species.get(set.name);
-					if (!!crossSpecies.exists && crossSpecies.prevo && species.prevo) {
-						const crossPrevoSpecies = this.curTeam.dex.species.get(crossSpecies.prevo);
-						if (!crossPrevoSpecies === !species.prevo) {
-							baseStat = species.baseStats[stat] + crossSpecies.baseStats[stat] - crossPrevoSpecies.baseStats[stat];
-							if (baseStat < 1) baseStat = 1;
-							if (baseStat > 255) baseStat = 255;
-						}
-					}
+				const CESpecies = this.getCESpecies(set);
+				if (CESpecies) {
+					baseStat = CESpecies.baseStats[stat];
 				}
 			}
 			var iv = (set.ivs[stat] || 0);
