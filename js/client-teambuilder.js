@@ -3593,6 +3593,7 @@
 			if (species.gender && species.gender !== 'N') set.gender = species.gender;
 			if (set.happiness) delete set.happiness;
 			if (set.shiny) delete set.shiny;
+			if (set.hpType) delete set.hpType;
 			if (set.dynamaxLevel) delete set.dynamaxLevel;
 			if (set.gigantamax) delete set.gigantamax;
 			if (set.teraType) delete set.teraType;
@@ -3609,7 +3610,11 @@
 			set.ivs = {};
 			set.nature = '';
 
-			if (this.curTeam.format.includes('createmons')) set.evs = JSON.parse(JSON.stringify(species.baseStats));
+			if (this.curTeam.format.includes('createmons')) {
+				set.evs = JSON.parse(JSON.stringify(species.baseStats));
+				set.hpType = species.types[0];
+				set.teraType = species.types.length > 1 ? species.types[1] : species.types[0];
+			}
 			this.updateSetTop();
 			if (selectNext) this.$(set.item || !this.$('input[name=item]').length ? (this.$('input[name=ability]').length ? 'input[name=ability]' : 'input[name=move1]') : 'input[name=item]').select();
 		},
