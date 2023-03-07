@@ -852,11 +852,12 @@ class BattleTooltips {
 		}
 
 		const supportsAbilities = this.battle.gen > 2 && !this.battle.tier.includes("Let's Go");
+		const abilityPossibility = this.battle.tier.includes("Hackmons") || this.battle.tier.endsWith("BH") || this.battle.tier.includes("Createmons");
 
 		let abilityText = '';
 		if (supportsAbilities) {
 			abilityText = this.getPokemonAbilityText(
-				clientPokemon, serverPokemon, isActive, !!illusionIndex && illusionIndex > 1
+				clientPokemon, serverPokemon, isActive, !!illusionIndex && illusionIndex > 1 || abilityPossibility
 			);
 		}
 
