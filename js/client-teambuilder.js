@@ -1744,12 +1744,12 @@
 			i = +($(button).closest('li').attr('value'));
 			const details = this.getSetPoint(this.curTeam.dex, this.curSetList[i]);
 			app.addPopupMessage(
-				'S: <strong>' + details[0] + '</strong>\n' + 
-				'T: <strong>' + details[1].toFixed(1) + '</strong> = ' + details[2] + (details[3] === -1 ? ' * 1.5' : (' + ' + details[3])) + '\n' + 
-				'A: <strong>' + details[4] + '</strong>\n' + 
-				'M: <strong>' + details[5] + '</strong> = ' + details[6] + ' + ' + details[7] + ' + ' + details[8] + ' + ' + details[9] + '\n' + 
-				(details[10] ? ('P: <strong>' + details[10] + '</strong> = 2 * ' + details[11] + ' + ' + details[12] + ' + ' + details[13] + ' + ' + details[14] + ' + ' + details[15] + ' + ' + details[16] + '\n') : '') + 
-				'Total: <strong>' + (Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10]) + '</strong>'
+				'S: ' + details[0] + '\n' + 
+				'T: ' + details[1].toFixed(1) + ' = ' + details[2] + (details[3] === -1 ? ' * 1.5' : (' + ' + details[3])) + '\n' + 
+				'A: ' + details[4] + '\n' + 
+				'M: ' + details[5] + ' = ' + details[6] + ' + ' + details[7] + ' + ' + details[8] + ' + ' + details[9] + '\n' + 
+				(details[10] ? ('P: ' + details[10] + ' = 2 * ' + details[11] + ' + ' + details[12] + ' + ' + details[13] + ' + ' + details[14] + ' + ' + details[15] + ' + ' + details[16] + '\n') : '') + 
+				'Total: ' + (Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10])
 			);
 			button.blur();
 		},
