@@ -2111,6 +2111,14 @@
 				}
 				this.$chart.find('.totalev').html(totalevBuf);
 			}
+			// update "Base" column
+			if (isCreatemon) {
+				buf = '<div><em>Base</em></div>';
+				for (var stat in set.evs) {
+					buf += '<div><b>' + set.evs[stat] + '</b></div>';
+				}
+				this.$chart.find('.basestatscol').html(buf);
+			}
 			this.$chart.find('select[name=nature]').val(set.nature || 'Serious');
 		},
 		curChartType: '',
