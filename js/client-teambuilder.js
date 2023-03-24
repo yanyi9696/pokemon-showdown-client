@@ -2394,7 +2394,11 @@
 					val += '-';
 					this.minus = i;
 				}
-				buf += '<div><input type="text" name="stat-' + i + '" value="' + val + '" class="textbox inputform numform" /></div>';
+				if (isCreatemon) {
+					buf += '<div><input type="number" name="stat-' + i + '" value="' + val + '" class="textbox inputform numform" min="1" max="252" step="1" /></div>';
+				} else {
+					buf += '<div><input type="text" name="stat-' + i + '" value="' + val + '" class="textbox inputform numform" /></div>';
+				}
 				totalev += (set.evs[i] || 0);
 			}
 			if (this.curTeam.gen > 2 && supportsEVs && !isCreatemon) {
