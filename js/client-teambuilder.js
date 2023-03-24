@@ -2083,7 +2083,15 @@
 			}
 
 			if (this.curTeam.gen > 2 && supportsEVs && !isCreatemon) buf += '<div><em>Remaining:</em></div>';
-			if (isCreatemon) buf += '<div><em>BST:</em><em>S:</em></div>';
+			if (isCreatemon) {
+				buf += '<div><em>BST:</em><em>S:</em>';
+				const bcPenalty = this.calcPPoint(set.evs);
+				if (bcPenalty > 0) {
+					buf += '<em>P:</em></div>';
+				} else {
+					buf += '</div>';
+				}
+			}
 			this.$chart.find('.graphcol').html(buf);
 
 			if (this.curTeam.gen <= 2) return;
@@ -2096,7 +2104,12 @@
 				}
 			}
 			if (isCreatemon) {
-				this.$chart.find('.totalev').html('<b>' + totalev + '</b><b>' + this.calcBSPoint(set.evs) + '</b>');
+				let totalevBuf = '<b>' + totalev + '</b><b>' + this.calcBSPoint(set.evs) + '</b>';
+				const bcPenalty = this.calcPPoint(set.evs);
+				if (bcPenalty > 0) {
+					totalevBuf += '<b>' + bcPenalty + '</b>';
+				}
+				this.$chart.find('.totalev').html(totalevBuf);
 			}
 			this.$chart.find('select[name=nature]').val(set.nature || 'Serious');
 		},
@@ -2376,7 +2389,15 @@
 				}
 			}
 			if (this.curTeam.gen > 2 && supportsEVs && !isCreatemon) buf += '<div><em>Remaining:</em></div>';
-			if (isCreatemon) buf += '<div><em>BST:</em><em>S:</em></div>';
+			if (isCreatemon) {
+				buf += '<div><em>BST:</em><em>S:</em>';
+				const bcPenalty = this.calcPPoint(set.evs);
+				if (bcPenalty > 0) {
+					buf += '<em>P:</em></div>';
+				} else {
+					buf += '</div>';
+				}
+			}
 			buf += '</div>';
 
 			buf += '<div class="col evcol"><div><strong>' + (supportsEVs ? (isCreatemon ? 'BS' : 'EVs') : 'AVs') + '</strong></div>';
@@ -2410,7 +2431,13 @@
 				}
 			}
 			if (isCreatemon) {
-				buf += '<div class="totalev"><b>' + totalev + '</b><b>' + this.calcBSPoint(set.evs) + '</b></div>';
+				buf += '<div class="totalev"><b>' + totalev + '</b><b>' + this.calcBSPoint(set.evs) + '</b>';
+				const bcPenalty = this.calcPPoint(set.evs);
+				if (bcPenalty > 0) {
+					buf += '<b>' + bcPenalty + '</b></div>';
+				} else {
+					buf += '</div>';
+				}
 			}
 			buf += '</div>';
 
@@ -3714,6 +3741,20 @@
 			const actualBs2 = Math.max(h, a, b, c, d, s) + 50;
 			const bs = Math.floor(Math.floor(sqrtActualBs1 * actualBs2) * 5 / 1024);
 			return bs;
+		},
+		calcPPoint: function (stats) {
+			let penalty = 0;
+			for (const statName in stats) {
+				const stat = stats[statName];
+				if (stat > 150) {
+					const pnt = Math.floor((stat - 150) * (stat - 150) * (stat - 150) * 193 / 2048);
+					penalty += pnt;
+					if (statName === 'hp') {
+						penalty += pnt;
+					}
+				}
+			}
+			return penalty;
 		},
 		getSetPoint: function (dex, set) {
 			// different from server side
