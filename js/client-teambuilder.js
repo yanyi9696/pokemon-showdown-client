@@ -2416,7 +2416,9 @@
 					this.minus = i;
 				}
 				if (isCreatemon) {
-					buf += '<div><input type="number" name="stat-' + i + '" value="' + val + '" class="textbox inputform numform" min="1" max="252" step="1" /></div>';
+					// buf += '<div><input type="text" inputmode="numeric" name="stat-' + i + '" value="' + val + '" class="textbox inputform numform" min="1" max="252" step="1" pattern="\d+[-\+]?" /></div>';
+					// i give up
+					buf += '<div><input type="text" name="stat-' + i + '" value="' + val + '" class="textbox inputform numform" /></div>';
 				} else {
 					buf += '<div><input type="text" name="stat-' + i + '" value="' + val + '" class="textbox inputform numform" /></div>';
 				}
