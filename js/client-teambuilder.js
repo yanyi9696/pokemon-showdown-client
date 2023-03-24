@@ -2607,7 +2607,9 @@
 				}
 				buf += '</select></p>';
 
-				buf += '<p><em>Protip:</em> You can also set natures by typing "+" and "-" next to a stat.</p>';
+				if (!isCreatemon) {
+					buf += '<p><em>Protip:</em> You can also set natures by typing "+" and "-" next to a stat.</p>';
+				}
 			}
 
 			buf += '</div>';
