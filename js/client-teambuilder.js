@@ -1744,12 +1744,12 @@
 			i = +($(button).closest('li').attr('value'));
 			const details = this.getSetPoint(this.curTeam.dex, this.curSetList[i]);
 			app.addPopupMessage(
-				'S: ' + details[0] + '\n' + 
-				'T: ' + details[2] + (details[3] === -1 ? ' * 1.5' : (' + ' + details[3])) + ' = ' + details[1].toFixed(1) + '\n' + 
-				'A: ' + details[4] + '\n' + 
-				'M: ' + details[6] + ' + ' + details[7] + ' + ' + details[8] + ' + ' + details[9] + ' = ' + details[5] + '\n' + 
-				(details[10] ? ('P: ' + details[10] * 5000 + '\n') : '') + 
-				'Total: ' + (Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10] * 5000)
+				'S: <strong>' + details[0] + '</strong>\n' + 
+				'T: <strong>' + details[1].toFixed(1) + '</strong> = ' + details[2] + (details[3] === -1 ? ' * 1.5' : (' + ' + details[3])) + '\n' + 
+				'A: <strong>' + details[4] + '</strong>\n' + 
+				'M: <strong>' + details[5] + '</strong> = ' + details[6] + ' + ' + details[7] + ' + ' + details[8] + ' + ' + details[9] + '\n' + 
+				(details[10] ? ('P: <strong>' + details[10] + '</strong> = 2 * ' + details[11] + ' + ' + details[12] + ' + ' + details[13] + ' + ' + details[14] + ' + ' + details[15] + ' + ' + details[16] + '\n') : '') + 
+				'Total: <strong>' + (Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10]) + '</strong>'
 			);
 			button.blur();
 		},
@@ -3713,8 +3713,8 @@
 		},
 		getSetPoint: function (dex, set) {
 			// different from server side
-			// BS | T | T1 | T2 | A | M | M1 | M2 | M3 | M4 |  P |
-			//  0 | 1 |  2 |  3 | 4 | 5 |  6 |  7 |  8 |  9 | 10 |
+			// BS | T | T1 | T2 | A | M | M1 | M2 | M3 | M4 |  P | P1 | P2 | P3 | P4 | P5 | P6 |
+			//  0 | 1 |  2 |  3 | 4 | 5 |  6 |  7 |  8 |  9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
 			const details = [];
 			const species = dex.species.get(set.species);
 
@@ -3768,12 +3768,17 @@
 			// penalty
 			details.push(0);
 			for (const statName in set.evs) {
-				if (set.evs[statName] > 150) {
-					++details[10];
+				const stat = set.evs[statName];
+				let penalty = 0;
+				if (stat > 150) {
+					penalty = (stat - 150) * (stat - 150) * (stat - 150) * 193 / 2048;
+					penalty = Math.floor(penalty);
+					details[10] += penalty
 					if (statName === 'hp') {
-						++details[10];
+						details[10] += penalty;
 					}
 				}
+				details.push(penalty);
 			}
 		
 			return details;
@@ -3782,7 +3787,7 @@
 			var totalPoint = 0;
 			for (var i in this.curSetList) {
 				var details = this.getSetPoint(this.curTeam.dex, this.curSetList[i]);
-				totalPoint += Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10] * 5000;
+				totalPoint += Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10];
 			}
 			return totalPoint;
 		},
