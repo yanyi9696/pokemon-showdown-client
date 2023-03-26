@@ -216,10 +216,13 @@ function toId() {
 		 * domain in order to have access to the correct cookies.
 		 */
 		getActionPHP: function () {
+			// Nihilslave: looks like this is the original code? don't use it anyway
 			// var ret = '/~~' + Config.server.id + '/action.php';
 			// if (Config.testclient) {
 			// 	ret = 'https://' + Config.routes.client + ret;
 			// }
+
+			// Nihilslave: return this so that we can get access to official login server
 			var ret = 'https://play.pokemonshowdown.com/action.php';
 			return (this.getActionPHP = function () {
 				return ret;
