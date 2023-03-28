@@ -1098,12 +1098,14 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				// Nihilslave: change this for digimon, it works better anyway tho
 				let types: string[] = species.types.slice();
 				if (this.format.includes('thecardgame')) {
-					types = types.map(type => type.replace(/(Ghost|Fairy)/g, 'Psychic')
-						.replace(/Bug/g, 'Grass')
-						.replace(/Ice/g, 'Water')
-						.replace(/(Rock|Ground)/g, 'Fighting')
-						.replace(/Flying/g, 'Normal')
-						.replace(/Poison/g, 'Dark'));
+					types = Array.from(new Set(types.map(type => (
+						type.replace(/(Ghost|Fairy)/g, 'Psychic')
+							.replace(/Bug/g, 'Grass')
+							.replace(/Ice/g, 'Water')
+							.replace(/(Rock|Ground)/g, 'Fighting')
+							.replace(/Flying/g, 'Normal')
+							.replace(/Poison/g, 'Dark')
+					))));
 				}
 				if (!types.includes(value)) return false;
 				break;
@@ -1760,7 +1762,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			case 'type':
 				let type: string = move.type;
 				if (this.format.includes('thecardgame')) {
-					type = type.replace(/(Ghost|Fairy)/g, 'Psychic')
+					type = type
+						.replace(/(Ghost|Fairy)/g, 'Psychic')
 						.replace(/Bug/g, 'Grass')
 						.replace(/Ice/g, 'Water')
 						.replace(/(Rock|Ground)/g, 'Fighting')

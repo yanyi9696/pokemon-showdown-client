@@ -1314,13 +1314,14 @@
 					}
 				}
 				if (isTCG) {
-					types = types.map(type => type.replace(/(Ghost|Fairy)/g, 'Psychic')
-						.replace(/Bug/g, 'Grass')
-						.replace(/Ice/g, 'Water')
-						.replace(/(Rock|Ground)/g, 'Fighting')
-						.replace(/Flying/g, 'Normal')
-						.replace(/Poison/g, 'Dark'));
-					types = types.filter((type, index) => types.indexOf(type) === index);
+					types = Array.from(new Set(types.map(type => (
+						type.replace(/(Ghost|Fairy)/g, 'Psychic')
+							.replace(/Bug/g, 'Grass')
+							.replace(/Ice/g, 'Water')
+							.replace(/(Rock|Ground)/g, 'Fighting')
+							.replace(/Flying/g, 'Normal')
+							.replace(/Poison/g, 'Dark')
+					))));
 				}
 				if (types) {
 					for (var i = 0; i < types.length; i++) buf += Dex.getTypeIcon(types[i]);

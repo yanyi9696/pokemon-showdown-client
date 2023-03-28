@@ -350,13 +350,14 @@
 		buf += '<span class="col typecol">';
 		var types = pokemon.types;
 		if (this.mod.includes('thecardgame')) {
-			types = types.map(type => type.replace(/(Ghost|Fairy)/g, 'Psychic')
-				.replace(/Bug/g, 'Grass')
-				.replace(/Ice/g, 'Water')
-				.replace(/(Rock|Ground)/g, 'Fighting')
-				.replace(/Flying/g, 'Normal')
-				.replace(/Poison/g, 'Dark'));
-			types = types.filter((type, index) => types.indexOf(type) === index);
+			types = Array.from(new Set(types.map(type => (
+				type.replace(/(Ghost|Fairy)/g, 'Psychic')
+					.replace(/Bug/g, 'Grass')
+					.replace(/Ice/g, 'Water')
+					.replace(/(Rock|Ground)/g, 'Fighting')
+					.replace(/Flying/g, 'Normal')
+					.replace(/Poison/g, 'Dark')
+			))));
 		}
 		for (var i = 0; i < types.length; i++) {
 			buf += Dex.getTypeIcon(types[i]);
@@ -592,7 +593,8 @@
 		buf += '<span class="col typecol">';
 		var type = move.type;
 		if (this.mod.includes('thecardgame')) {
-			type = type.replace(/(Ghost|Fairy)/g, 'Psychic')
+			type = type
+				.replace(/(Ghost|Fairy)/g, 'Psychic')
 				.replace(/Bug/g, 'Grass')
 				.replace(/Ice/g, 'Water')
 				.replace(/(Rock|Ground)/g, 'Fighting')
