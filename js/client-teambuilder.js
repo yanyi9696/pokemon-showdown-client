@@ -1199,6 +1199,7 @@
 			var isDigimon = this.curTeam.format.includes('digimon');
 			var isCreatemon = this.curTeam.format.includes('createmons');
 			var isCE = this.curTeam.format.includes('crossevolution');
+			var isTCG = this.curTeam.format.includes('thecardgame');
 			var buf = '<li value="' + i + '">';
 			if (!set.species) {
 				if (this.deletedSet) {
@@ -1311,6 +1312,15 @@
 					if (this.getCESpecies(set)) {
 						types = this.getCESpecies(set).types;
 					}
+				}
+				if (isTCG) {
+					types = types.map(type => type.replace(/(Ghost|Fairy)/g, 'Psychic')
+						.replace(/Bug/g, 'Grass')
+						.replace(/Ice/g, 'Water')
+						.replace(/(Rock|Ground)/g, 'Fighting')
+						.replace(/Flying/g, 'Normal')
+						.replace(/Poison/g, 'Dark'));
+					types = types.filter((type, index) => types.indexOf(type) === index);
 				}
 				if (types) {
 					for (var i = 0; i < types.length; i++) buf += Dex.getTypeIcon(types[i]);

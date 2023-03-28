@@ -177,8 +177,12 @@
 			break;
 		}
 		// Nihilslave: add this to help show points in bc teambuilder
+		this.mod = '';
 		if (format.includes('balancedcreatemons')) {
-			this.mod = 'balancedcreatemons';
+			this.mod += 'balancedcreatemons';
+		}
+		if (format.includes('thecardgame')) {
+			this.mod += 'thecardgame';
 		}
 		this.find('', firstElem);
 	};
@@ -284,7 +288,7 @@
 	Search.prototype.renderMoveSortRow = function () {
 		var buf = '<li class="result"><div class="sortrow">';
 		buf += '<button class="sortcol movenamesortcol' + (this.sortCol === 'name' ? ' cur' : '') + '" data-sort="name">Name</button>';
-		if (this.mod === 'balancedcreatemons') {
+		if (this.mod.includes('balancedcreatemons')) {
 			// you cannot sort unless u make some changes to src/battle-dex-search.ts
 			// todo: fix it?
 			buf += '<button class="sortcol pointsortcol' + (this.sortCol === 'point' ? ' cur' : '') + '" data-sort="point">Pt</button>';
@@ -345,6 +349,15 @@
 		// type
 		buf += '<span class="col typecol">';
 		var types = pokemon.types;
+		if (this.mod.includes('thecardgame')) {
+			types = types.map(type => type.replace(/(Ghost|Fairy)/g, 'Psychic')
+				.replace(/Bug/g, 'Grass')
+				.replace(/Ice/g, 'Water')
+				.replace(/(Rock|Ground)/g, 'Fighting')
+				.replace(/Flying/g, 'Normal')
+				.replace(/Poison/g, 'Dark'));
+			types = types.filter((type, index) => types.indexOf(type) === index);
+		}
 		for (var i = 0; i < types.length; i++) {
 			buf += Dex.getTypeIcon(types[i]);
 		}
@@ -362,7 +375,7 @@
 					buf += '<span class="col abilitycol">' + abilities['0'] + '</span>';
 				}
 				var unreleasedHidden = pokemon.unreleasedHidden;
-				if (unreleasedHidden === 'Past' && (this.mod === 'natdex' || gen < 8)) unreleasedHidden = false;
+				if (unreleasedHidden === 'Past' && (this.mod.includes('natdex') || gen < 8)) unreleasedHidden = false;
 				if (abilities['S']) {
 					if (abilities['H']) {
 						buf += '<span class="col twoabilitycol' + (unreleasedHidden ? ' unreleasedhacol' : '') + '">' + (abilities['H'] || '') + '<br />(' + abilities['S'] + ')</span>';
@@ -517,7 +530,7 @@
 			name = name.substr(0, matchStart) + '<b>' + name.substr(matchStart, matchLength) + '</b>' + name.substr(matchStart + matchLength);
 		}
 		buf += '<span class="col namecol">' + name + '</span> ';
-		if (this.mod === 'balancedcreatemons') {
+		if (this.mod.includes('balancedcreatemons')) {
 			var point = exports.abilityToPoint[id];
 			if (!point) point = 1;
 			buf += '<span class="col namecol">' + '(' + point + ')' + '</span> ';
@@ -569,7 +582,7 @@
 		}
 
 		// bc - point
-		if (this.mod === 'balancedcreatemons') {
+		if (this.mod.includes('balancedcreatemons')) {
 			var point = exports.moveToPoint[id];
 			if (!point) point = 0.5;
 			buf += '<span class="col labelcol"><em>Point</em><br />' + point + '</span> ';
@@ -577,7 +590,16 @@
 
 		// type
 		buf += '<span class="col typecol">';
-		buf += Dex.getTypeIcon(move.type);
+		var type = move.type;
+		if (this.mod.includes('thecardgame')) {
+			type = type.replace(/(Ghost|Fairy)/g, 'Psychic')
+				.replace(/Bug/g, 'Grass')
+				.replace(/Ice/g, 'Water')
+				.replace(/(Rock|Ground)/g, 'Fighting')
+				.replace(/Flying/g, 'Normal')
+				.replace(/Poison/g, 'Dark');
+		}
+		buf += Dex.getTypeIcon(type);
 		buf += Dex.getCategoryIcon(move.category);
 		buf += '</span> ';
 
