@@ -223,7 +223,7 @@ function toId() {
 			// }
 
 			// Nihilslave: return this so that we can get access to official login server
-			var ret = 'https://play.pokemonshowdown.com/api/login?sid=test';
+			var ret = 'https://play.pokemonshowdown.com/action.php';
 			return (this.getActionPHP = function () {
 				return ret;
 			})();
