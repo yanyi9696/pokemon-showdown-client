@@ -538,7 +538,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 				return ["Mythical", "Restricted Legendary", "Regular", "NFE", "LC"];
 			}
 			if (isDoubles && genNum > 4) {
-				return ["DUber", "(DUber)", "DOU", "DBL", "(DOU)", "DUU", "(DUU)", "New", "NFE", "LC"];
+				return ["DUber", "(DUber)", "DOU", "DBL", "(DOU)", "DUU", "(DUU)", "New", "NFE", "LC", "Unreleased"];
 			}
 			if (gen === 'gen4') {
 				return ["CAP", "CAP NFE", "CAP LC", "AG", "Uber", "OU", "(OU)", "UUBL", "UU", "NUBL", "NU", "NFE", "LC"];
