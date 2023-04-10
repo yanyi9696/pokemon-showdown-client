@@ -3990,6 +3990,7 @@
 			}
 			fusionSpecies.types[0] = headSpecies.types[0];
 			fusionSpecies.types[1] = bodySpecies.types[1] || bodySpecies.types[0];
+			if (fusionSpecies.types[1] === fusionSpecies.types[0]) fusionSpecies.types = [fusionSpecies.types[0]];
 
 			return fusionSpecies;
 		},
