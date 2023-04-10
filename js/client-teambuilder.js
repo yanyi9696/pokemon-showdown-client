@@ -3971,6 +3971,7 @@
 				H: headSpecies.abilities['H'],
 			};
 			fusionSpecies.bst = 0;
+			if (headSpecies.maxHP || bodySpecies.maxHP) fusionSpecies.maxHP = 1;
 			let i;
 			for (i in fusionSpecies.baseStats) {
 				let headStat, bodyStat;
@@ -3984,6 +3985,7 @@
 				fusionSpecies.baseStats[i] = Math.floor((headStat + bodyStat) / 3);
 				if (fusionSpecies.baseStats[i] < 1) fusionSpecies.baseStats[i] = 1;
 				if (fusionSpecies.baseStats[i] > 255) fusionSpecies.baseStats[i] = 255;
+				if (i === 'hp' && fusionSpecies.maxHP) fusionSpecies.baseStats[i] = 1;
 				fusionSpecies.bst += fusionSpecies.baseStats[i];
 			}
 			fusionSpecies.types[0] = headSpecies.types[0];
