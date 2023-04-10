@@ -816,9 +816,29 @@ const Dex = new class implements ModdedDex {
 		return spriteData;
 	}
 
+	// Nihilslave: get IF Sprites
+	getIFTeambuilderSpriteData(pokemon: any, gen: number = 0): TeambuilderSpriteData {
+		let headSpecies = Dex.species.get(pokemon.name);
+		let bodySpecies = Dex.species.get(pokemon.species);
+		if (!headSpecies.exists) return this.getTeambuilderSpriteData(pokemon, gen);
+		const spriteData: TeambuilderSpriteData = {
+			spriteid: headSpecies.num + '.' + bodySpecies.num,
+			spriteDir: 'sprites/infinitefusion',
+			x: -2,
+			y: -3,
+		};
+		// actually we don't need to check if headSpecies and bodySpecies are the same
+		// just add the corresponding sprites
+
+		// todo: add sprites
+		// todo: download sprites and cache
+		return spriteData;
+	}
+
 	getTeambuilderSprite(pokemon: any, gen: number = 0) {
 		if (!pokemon) return '';
-		const data = this.getTeambuilderSpriteData(pokemon, gen);
+		// Nihilslave: for IF
+		const data = pokemon.isIF ? this.getIFTeambuilderSpriteData(pokemon, gen) : this.getTeambuilderSpriteData(pokemon, gen);
 		const shiny = (data.shiny ? '-shiny' : '');
 		return 'background-image:url(' + Dex.resourcePrefix + data.spriteDir + shiny + '/' + data.spriteid + '.png);background-position:' + data.x + 'px ' + data.y + 'px;background-repeat:no-repeat';
 	}

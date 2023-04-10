@@ -1224,7 +1224,9 @@
 			buf += '<div class="setchart-nickname">';
 			buf += '<label>Nickname</label><input type="text" name="nickname" class="textbox" value="' + BattleLog.escapeHTML(set.name || '') + '" placeholder="' + BattleLog.escapeHTML(species.baseSpecies) + '" />';
 			buf += '</div>';
+			if (isIF) set.isIF = true;
 			buf += '<div class="setchart" style="' + Dex.getTeambuilderSprite(set, this.curTeam.gen) + ';">';
+			if (isIF) set.isIF = false;
 
 			// icon
 			buf += '<div class="setcol setcol-icon">';
@@ -1284,7 +1286,7 @@
 					}
 				}
 				if (this.curTeam.gen === 9) {
-					if (!isCreatemon && !isDigimon) {
+					if (!isCreatemon && !isDigimon && !isIF) {
 						buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
 					} else if (isCreatemon){
 						// buf += '<span class="detailcell"><label>Second Type</label>' + (set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0])) + '</span>';
@@ -1997,7 +1999,9 @@
 			var set = this.curSet;
 			if (!set) return;
 
+			if (this.curTeam.format.includes('infinitefusion')) set.isIF = true;
 			this.$('.setchart').attr('style', Dex.getTeambuilderSprite(set, this.curTeam.gen));
+			if (this.curTeam.format.includes('infinitefusion')) set.isIF = false;
 
 			this.$('.pokemonicon-' + this.curSetLoc).css('background', Dex.getPokemonIcon(set).substr(11));
 
@@ -2895,6 +2899,7 @@
 			var isHackmons = this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh');
 			var isDigimon = this.curTeam.format.includes('digimon');
 			var isCreatemon = this.curTeam.format.includes('createmons');
+			var isIF = this.curTeam.format.includes('infinitefusion');
 			var species = this.curTeam.dex.species.get(set.species);
 			if (!set) return;
 			buf += '<div class="resultheader"><h3>Details</h3></div>';
@@ -3005,7 +3010,7 @@
 				}
 			}
 
-			if (this.curTeam.gen === 9 && !isCreatemon && !isDigimon) {
+			if (this.curTeam.gen === 9 && !isCreatemon && !isDigimon && !isIF) {
 				buf += '<div class="formrow"><label class="formlabel" title="Tera Type">Tera Type:</label><div><select name="teratype">';
 				var types = Dex.types.all();
 				var teraType = set.teraType || species.types[0];
@@ -3044,6 +3049,7 @@
 				this.curTeam.format.startsWith('gen8nd') || this.curTeam.format.includes('morebalancedhackmons');
 			var isDigimon = this.curTeam.format.includes('digimon');
 			var isCreatemon = this.curTeam.format.includes('createmons');
+			var isIF = this.curTeam.format.includes('infinitefusion');
 
 			// level
 			var level = parseInt(this.$chart.find('input[name=level]').val(), 10);
@@ -3169,7 +3175,7 @@
 					}
 				}
 				if (this.curTeam.gen === 9) {
-					if (!isCreatemon && !isDigimon) {
+					if (!isCreatemon && !isDigimon && !isIF) {
 						buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
 					} else if (isCreatemon) {
 						// buf += '<span class="detailcell"><label>Second Type</label>' + (set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0])) + '</span>';
@@ -3638,6 +3644,7 @@
 			}
 
 			set.name = "";
+			if (this.curTeam.format.includes('infinitefusion')) set.name = species.name;
 			set.species = val;
 			if (set.level) delete set.level;
 			if (this.curTeam && this.curTeam.format) {

@@ -1185,29 +1185,76 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 		const isHackmons = (format.includes('hackmons') || format.endsWith('bh'));
 		const isAAA = (format === 'almostanyability' || format.includes('aaa'));
 		const isCreatemon = format.includes('createmons');
+		const isIF = format.includes('infinitefusion');
 		const dex = this.dex;
 		let species = dex.species.get(this.species);
+		// Nihilslave: add this variable for mods
+		// todo: actually, i really want the dex to tell me the result, EDIT src/battle-dex.ts one day
+		let speciesAbilities = {...species.abilities};
+		if (isIF && this.set?.name) {
+			let headSpecies = dex.species.get(this.set.name);
+			if (headSpecies.exists) {
+				if (headSpecies.name === species.name) {
+					const specialSelfFusions: {[k: string]: string} = {
+						deoxys: 'Deoxys-Attack',
+						rotom: 'Rotom-Heat',
+						shaymin: 'Shaymin-Sky',
+						keldeo: 'Keldeo-Resolute',
+						meloetta: 'Meloetta-Pirouette',
+						greninja: 'Greninja-Ash',
+						floette: 'Floette-Eternal',
+						zygarde: 'Zygarde-Complete',
+						hoopa: 'Hoopa-Unbound',
+						lycanroc: 'Lycanroc-Dusk',
+						wishiwashi: 'Wishiwashi-School',
+						necrozma: 'Necrozma-Ultra',
+						cramorant: 'Cramorant-Gorging',
+						eternatus: 'Eternatus-Eternamax',
+						palafin: 'Palafin-Hero',
+					};
+					if (toID(headSpecies.name) in specialSelfFusions) {
+						speciesAbilities = {...dex.species.get(specialSelfFusions[toID(headSpecies.name)]).abilities};
+					} else if (headSpecies.otherFormes) {
+						for (const forme of headSpecies.otherFormes) {
+							if (forme.endsWith('-Mega') || forme.endsWith('-Mega-Y') ||
+								forme.endsWith('-Primal') ||
+								forme.endsWith('-Origin') ||
+								forme.endsWith('-Therian') ||
+								forme.endsWith('-Starter') ||
+								forme.endsWith('-Crowned')
+							) speciesAbilities = {...dex.species.get(forme).abilities};
+						}
+					}
+				} else {
+					speciesAbilities = {
+						0: headSpecies.abilities['0'],
+						1: speciesAbilities['1'] || speciesAbilities['0'],
+						H: headSpecies.abilities['H'],
+					};
+				}
+			}
+		}
 		let abilitySet: SearchRow[] = [['header', "Abilities"]];
 
 		if (species.isMega) {
-			abilitySet.unshift(['html', `Will be <strong>${species.abilities['0']}</strong> after Mega Evolving.`]);
+			abilitySet.unshift(['html', `Will be <strong>${speciesAbilities['0']}</strong> after Mega Evolving.`]);
 			species = dex.species.get(species.baseSpecies);
 		}
 		if (species.forme === 'X') {
-			abilitySet.unshift(['html', `Will be <strong>${species.abilities['0']}</strong> after X-Evolving.`]);
+			abilitySet.unshift(['html', `Will be <strong>${speciesAbilities['0']}</strong> after X-Evolving.`]);
 			species = dex.species.get(species.baseSpecies);
 		}
-		abilitySet.push(['ability', toID(species.abilities['0'])]);
-		if (species.abilities['1']) {
-			abilitySet.push(['ability', toID(species.abilities['1'])]);
+		abilitySet.push(['ability', toID(speciesAbilities['0'])]);
+		if (speciesAbilities['1']) {
+			abilitySet.push(['ability', toID(speciesAbilities['1'])]);
 		}
-		if (species.abilities['H']) {
+		if (speciesAbilities['H']) {
 			abilitySet.push(['header', "Hidden Ability"]);
-			abilitySet.push(['ability', toID(species.abilities['H'])]);
+			abilitySet.push(['ability', toID(speciesAbilities['H'])]);
 		}
-		if (species.abilities['S']) {
+		if (speciesAbilities['S']) {
 			abilitySet.push(['header', "Special Event Ability"]);
-			abilitySet.push(['ability', toID(species.abilities['S'])]);
+			abilitySet.push(['ability', toID(speciesAbilities['S'])]);
 		}
 		if (isAAA || format.includes('metronomebattle') || isHackmons || isCreatemon) {
 			let abilities: ID[] = [];
@@ -1239,13 +1286,13 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 			abilitySet = [...goodAbilities, ...poorAbilities, ...badAbilities];
 			if (species.isMega) {
 				if (isAAA) {
-					abilitySet.unshift(['html', `Will be <strong>${species.abilities['0']}</strong> after Mega Evolving.`]);
+					abilitySet.unshift(['html', `Will be <strong>${speciesAbilities['0']}</strong> after Mega Evolving.`]);
 				}
 				// species is unused after this, so no need to replace
 			}
 			if (species.forme === 'X') {
 				if (isAAA) {
-					abilitySet.unshift(['html', `Will be <strong>${species.abilities['0']}</strong> after X-Evolving.`]);
+					abilitySet.unshift(['html', `Will be <strong>${speciesAbilities['0']}</strong> after X-Evolving.`]);
 				}
 				// species is unused after this, so no need to replace
 			}
@@ -1600,6 +1647,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		const isTradebacks = format.includes('tradebacks');
 		const isCreatemon = format.includes('createmons');
 		const isDigimon = format.includes('digimon');
+		const isIF = format.includes('infinitefusion');
 		const regionBornLegality = dex.gen >= 6 &&
 			/^battle(spot|stadium|festival)/.test(format) || format.startsWith('vgc') ||
 			(dex.gen === 9 && this.formatType !== 'natdex');
@@ -1669,6 +1717,25 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					}
 				}
 				preEvoLearnsetid = this.nextLearnsetid(preEvoLearnsetid, preEvoSpecies.id);
+			}
+		}
+		if (isIF && this.set?.name) {
+			const headSpecies = dex.species.get(this.set.name);
+			let headLearnsetid = this.firstLearnsetid(headSpecies.id);
+			while (headLearnsetid) {
+				let headLearnset = lsetTable.learnsets[headLearnsetid];
+				if (headLearnset) {
+					for (let moveid in headLearnset) {
+						if (moves.includes(moveid)) continue;
+						moves.push(moveid);
+						if (moveid === 'hiddenpower') {
+							moves.push(
+								'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
+							);
+						}
+					}
+				}
+				headLearnsetid = this.nextLearnsetid(headLearnsetid, headSpecies.id);
 			}
 		}
 		if (sketch || isHackmons || isCreatemon) {
