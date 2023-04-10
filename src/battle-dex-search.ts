@@ -1101,6 +1101,16 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				return true;
 			});
 		}
+		// Nihilslave: if filter
+		if (format.includes('infinitefusion')) {
+			tierSet = tierSet.filter(([type, id]) => {
+				if (type === 'pokemon') {
+					const sp = this.dex.species.get(id);
+					if (sp.baseSpecies !== sp.name) return false;
+				}
+				return true;
+			});
+		}
 
 		return tierSet;
 	}

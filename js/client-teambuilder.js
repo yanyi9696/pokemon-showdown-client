@@ -3971,7 +3971,7 @@
 				H: headSpecies.abilities['H'],
 			};
 			fusionSpecies.bst = 0;
-			if (headSpecies.maxHP || bodySpecies.maxHP) fusionSpecies.maxHP = 1;
+			if (headSpecies.id === 'shedinja' || bodySpecies.id === 'shedinja') fusionSpecies.maxHP = 1;
 			let i;
 			for (i in fusionSpecies.baseStats) {
 				let headStat, bodyStat;
