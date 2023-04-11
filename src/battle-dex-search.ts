@@ -1241,6 +1241,15 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 						1: speciesAbilities['1'] || speciesAbilities['0'],
 						H: headSpecies.abilities['H'],
 					};
+					if (speciesAbilities['H'] === speciesAbilities[1] || speciesAbilities['H'] === speciesAbilities[0]) delete speciesAbilities['H'];
+					if (speciesAbilities[1] === speciesAbilities[0]) delete speciesAbilities[1];
+					const pair = [headSpecies.name, species.name].sort();
+					if (pair[0] === 'Kyurem' && pair[1] === 'Reshiram') speciesAbilities = {...this.dex.species.get('Kyurem-White').abilities};
+					if (pair[0] === 'Kyurem' && pair[1] === 'Zekrom') speciesAbilities = {...this.dex.species.get('Kyurem-Black').abilities};
+					if (pair[0] === 'Necrozma' && pair[1] === 'Solgaleo') speciesAbilities = {...this.dex.species.get('Necrozma-Dusk-Mane').abilities};
+					if (pair[0] === 'Lunala' && pair[1] === 'Necrozma') speciesAbilities = {...this.dex.species.get('Necrozma-Dawn-Wings').abilities};
+					if (pair[0] === 'Calyrex' && pair[1] === 'Glastrier') speciesAbilities = {...this.dex.species.get('Calyrex-Ice').abilities};
+					if (pair[0] === 'Calyrex' && pair[1] === 'Spectrier') speciesAbilities = {...this.dex.species.get('Calyrex-Shadow').abilities};
 				}
 			}
 		}
@@ -1767,6 +1776,13 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				}
 			} else {
 				headLearnsetid = this.firstLearnsetid(headSpecies.id);
+				const pair = [headSpecies.name, species.name].sort();
+				if (pair[0] === 'Kyurem' && pair[1] === 'Reshiram') headLearnsetid = this.firstLearnsetid('kyuremwhite' as ID);
+				if (pair[0] === 'Kyurem' && pair[1] === 'Zekrom') headLearnsetid = this.firstLearnsetid('kyuremblack' as ID);
+				if (pair[0] === 'Necrozma' && pair[1] === 'Solgaleo') headLearnsetid = this.firstLearnsetid('necrozmaduskmane' as ID);
+				if (pair[0] === 'Lunala' && pair[1] === 'Necrozma') headLearnsetid = this.firstLearnsetid('necrozmadawnwings' as ID);
+				if (pair[0] === 'Calyrex' && pair[1] === 'Glastrier') headLearnsetid = this.firstLearnsetid('calyrexice' as ID);
+				if (pair[0] === 'Calyrex' && pair[1] === 'Spectrier') headLearnsetid = this.firstLearnsetid('calyrexshadow' as ID);
 			}
 			while (headLearnsetid) {
 				let headLearnset = lsetTable.learnsets[headLearnsetid];
