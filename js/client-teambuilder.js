@@ -2022,6 +2022,7 @@
 
 			var supportsEVs = !this.curTeam.format.includes('letsgo');
 			var isCreatemon = this.curTeam.format.includes('createmons');
+			var isIF = this.curTeam.format.includes('infinitefusion');
 
 			// stat cell
 			var buf = '<span class="statrow statrow-head"><label></label> <span class="statgraph"></span> <em>' + (supportsEVs ? (isCreatemon ? 'BS' : 'EV') : 'AV') + '</em></span>';
@@ -2118,6 +2119,7 @@
 			if (this.curTeam.gen <= 2) return;
 			if (supportsEVs && !isCreatemon) {
 				var maxEv = 510;
+				if (isIF) maxEV = 1020;
 				if (totalev <= maxEv) {
 					this.$chart.find('.totalev').html('<em>' + (totalev > (maxEv - 2) ? 0 : (maxEv - 2) - totalev) + '</em>');
 				} else {
@@ -2461,6 +2463,7 @@
 			}
 			if (this.curTeam.gen > 2 && supportsEVs && !isCreatemon) {
 				var maxTotalEVs = 510;
+				if (isIF) maxTotalEVs = 1020;
 				if (totalev <= maxTotalEVs) {
 					buf += '<div class="totalev"><em>' + (totalev > (maxTotalEVs - 2) ? 0 : (maxTotalEVs - 2) - totalev) + '</em></div>';
 				} else {
