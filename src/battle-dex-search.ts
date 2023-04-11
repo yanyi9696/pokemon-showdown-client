@@ -1731,7 +1731,43 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		}
 		if (isIF && this.set?.name) {
 			const headSpecies = dex.species.get(this.set.name);
-			let headLearnsetid = this.firstLearnsetid(headSpecies.id);
+			let headLearnsetid;
+			if (headSpecies.name === species.name) {
+				const specialSelfFusions: {[k: string]: string} = {
+					deoxys: 'Deoxys-Attack',
+					rotom: 'Rotom-Heat',
+					shaymin: 'Shaymin-Sky',
+					keldeo: 'Keldeo-Resolute',
+					meloetta: 'Meloetta-Pirouette',
+					greninja: 'Greninja-Ash',
+					floette: 'Floette-Eternal',
+					zygarde: 'Zygarde-Complete',
+					hoopa: 'Hoopa-Unbound',
+					lycanroc: 'Lycanroc-Dusk',
+					wishiwashi: 'Wishiwashi-School',
+					necrozma: 'Necrozma-Ultra',
+					cramorant: 'Cramorant-Gorging',
+					eternatus: 'Eternatus-Eternamax',
+					palafin: 'Palafin-Hero',
+				};
+				if (headSpecies.id in specialSelfFusions) {
+					headLearnsetid = this.firstLearnsetid(toID(specialSelfFusions[headSpecies.id]));
+				} else if (headSpecies.otherFormes) {
+					for (const forme of headSpecies.otherFormes) {
+						if (forme.endsWith('-Mega') || forme.endsWith('-Mega-Y') ||
+							forme.endsWith('-Primal') ||
+							forme.endsWith('-Origin') ||
+							forme.endsWith('-Therian') ||
+							forme.endsWith('-Starter') ||
+							forme.endsWith('-Crowned')
+						) headLearnsetid = this.firstLearnsetid(dex.species.get(forme).id);
+					}
+				} else {
+					headLearnsetid = this.firstLearnsetid(headSpecies.id);
+				}
+			} else {
+				headLearnsetid = this.firstLearnsetid(headSpecies.id);
+			}
 			while (headLearnsetid) {
 				let headLearnset = lsetTable.learnsets[headLearnsetid];
 				if (headLearnset) {
