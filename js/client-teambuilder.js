@@ -2117,9 +2117,8 @@
 			this.$chart.find('.graphcol').html(buf);
 
 			if (this.curTeam.gen <= 2) return;
-			if (supportsEVs && !isCreatemon) {
+			if (supportsEVs && !isCreatemon && !isIF) {
 				var maxEv = 510;
-				if (isIF) maxEV = 1020;
 				if (totalev <= maxEv) {
 					this.$chart.find('.totalev').html('<em>' + (totalev > (maxEv - 2) ? 0 : (maxEv - 2) - totalev) + '</em>');
 				} else {
@@ -2133,6 +2132,10 @@
 					totalevBuf += '<b>' + bcPenalty + '</b>';
 				}
 				this.$chart.find('.totalev').html(totalevBuf);
+			}
+			if (isIF) {
+				var maxEv = 1020;
+				this.$chart.find('.totalev').html('<b>' + (maxEv - totalev) + '</b>');
 			}
 			// update "Base" column
 			if (isCreatemon) {
@@ -2461,9 +2464,8 @@
 				}
 				totalev += (set.evs[i] || 0);
 			}
-			if (this.curTeam.gen > 2 && supportsEVs && !isCreatemon) {
+			if (this.curTeam.gen > 2 && supportsEVs && !isCreatemon && !isIF) {
 				var maxTotalEVs = 510;
-				if (isIF) maxTotalEVs = 1020;
 				if (totalev <= maxTotalEVs) {
 					buf += '<div class="totalev"><em>' + (totalev > (maxTotalEVs - 2) ? 0 : (maxTotalEVs - 2) - totalev) + '</em></div>';
 				} else {
@@ -2478,6 +2480,10 @@
 				} else {
 					buf += '</div>';
 				}
+			}
+			if (isIF) {
+				var maxTotalEVs = 1020;
+				buf += '<div class="totalev"><em>' + (maxTotalEVs - totalev) + '</em></div>';
 			}
 			buf += '</div>';
 
