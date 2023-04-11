@@ -3678,6 +3678,12 @@
 				set.item = '';
 			}
 			set.ability = species.abilities['0'];
+			if (this.curTeam.format.includes('infinitefusion')) {
+				const IFSpecies = this.getIFSpecies(set);
+				if (IFSpecies) {
+					set.ability = IFSpecies.abilities['0'];
+				}
+			}
 
 			set.moves = [];
 			set.evs = {};
@@ -3986,6 +3992,7 @@
 				fusionSpecies.baseStats[i] = Math.floor((headStat + bodyStat) / 3);
 				if (fusionSpecies.baseStats[i] < 1) fusionSpecies.baseStats[i] = 1;
 				if (fusionSpecies.baseStats[i] > 255) fusionSpecies.baseStats[i] = 255;
+				// this is needed for client
 				if (i === 'hp' && fusionSpecies.maxHP) fusionSpecies.baseStats[i] = 1;
 				fusionSpecies.bst += fusionSpecies.baseStats[i];
 			}
