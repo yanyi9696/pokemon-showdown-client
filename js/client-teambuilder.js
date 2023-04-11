@@ -2809,6 +2809,7 @@
 					total += (i === stat ? val : set.evs[i]);
 				}
 				var totalLimit = 508;
+				if (this.curTeam.format.includes('infinitefusion')) totalLimit = 1020;
 				var limit = 252;
 				if (total > totalLimit && val - total + totalLimit >= 0) {
 					// don't allow dragging beyond 508 EVs
