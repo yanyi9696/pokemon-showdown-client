@@ -1218,7 +1218,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 						lycanroc: 'Lycanroc-Dusk',
 						wishiwashi: 'Wishiwashi-School',
 						necrozma: 'Necrozma-Ultra',
-						cramorant: 'Cramorant-Gorging',
+						// cramorant: 'Cramorant-Gorging',
 						eternatus: 'Eternatus-Eternamax',
 						palafin: 'Palafin-Hero',
 					};
@@ -1250,6 +1250,8 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 					if (pair[0] === 'Lunala' && pair[1] === 'Necrozma') speciesAbilities = {...this.dex.species.get('Necrozma-Dawn-Wings').abilities};
 					if (pair[0] === 'Calyrex' && pair[1] === 'Glastrier') speciesAbilities = {...this.dex.species.get('Calyrex-Ice').abilities};
 					if (pair[0] === 'Calyrex' && pair[1] === 'Spectrier') speciesAbilities = {...this.dex.species.get('Calyrex-Shadow').abilities};
+					if (pair[0] === 'Arrokuda' && pair[1] === 'Cramorant') speciesAbilities = {...this.dex.species.get('Cramorant-Gulping').abilities};
+					if (pair[0] === 'Cramorant' && pair[1] === 'Pikachu') speciesAbilities = {...this.dex.species.get('Cramorant-Gorging').abilities};
 				}
 			}
 		}
@@ -1755,7 +1757,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					lycanroc: 'Lycanroc-Dusk',
 					wishiwashi: 'Wishiwashi-School',
 					necrozma: 'Necrozma-Ultra',
-					cramorant: 'Cramorant-Gorging',
+					// cramorant: 'Cramorant-Gorging',
 					eternatus: 'Eternatus-Eternamax',
 					palafin: 'Palafin-Hero',
 				};
@@ -1783,6 +1785,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				if (pair[0] === 'Lunala' && pair[1] === 'Necrozma') headLearnsetid = this.firstLearnsetid('necrozmadawnwings' as ID);
 				if (pair[0] === 'Calyrex' && pair[1] === 'Glastrier') headLearnsetid = this.firstLearnsetid('calyrexice' as ID);
 				if (pair[0] === 'Calyrex' && pair[1] === 'Spectrier') headLearnsetid = this.firstLearnsetid('calyrexshadow' as ID);
+				if (pair[0] === 'Arrokuda' && pair[1] === 'Cramorant') headLearnsetid = this.firstLearnsetid('cramorantgulping' as ID);
+				if (pair[0] === 'Cramorant' && pair[1] === 'Pikachu') headLearnsetid = this.firstLearnsetid('cramorantgorging' as ID);
 			}
 			while (headLearnsetid) {
 				let headLearnset = lsetTable.learnsets[headLearnsetid];

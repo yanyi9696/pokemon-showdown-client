@@ -3947,7 +3947,7 @@
 					lycanroc: 'Lycanroc-Dusk',
 					wishiwashi: 'Wishiwashi-School',
 					necrozma: 'Necrozma-Ultra',
-					cramorant: 'Cramorant-Gorging',
+					// cramorant: 'Cramorant-Gorging',
 					eternatus: 'Eternatus-Eternamax',
 					palafin: 'Palafin-Hero',
 				};
@@ -3974,6 +3974,8 @@
 			if (pair[0] === 'Lunala' && pair[1] === 'Necrozma') return this.curTeam.dex.species.get('Necrozma-Dawn-Wings');
 			if (pair[0] === 'Calyrex' && pair[1] === 'Glastrier') return this.curTeam.dex.species.get('Calyrex-Ice');
 			if (pair[0] === 'Calyrex' && pair[1] === 'Spectrier') return this.curTeam.dex.species.get('Calyrex-Shadow');
+			if (pair[0] === 'Arrokuda' && pair[1] === 'Cramorant') return this.curTeam.dex.species.get('Cramorant-Gulping');
+			if (pair[0] === 'Cramorant' && pair[1] === 'Pikachu') return this.curTeam.dex.species.get('Cramorant-Gorging');
 
 			const fusionSpecies = this.deepClone(bodySpecies);
 			fusionSpecies.weightkg = Math.max(0.1, (headSpecies.weightkg + bodySpecies.weightkg) / 2).toFixed(1);
