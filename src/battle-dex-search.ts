@@ -1241,6 +1241,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 						0: headSpecies.abilities['0'],
 						1: speciesAbilities['1'] || speciesAbilities['0'],
 						H: headSpecies.abilities['H'],
+						S: headSpecies.abilities['S'],
 					};
 					if (speciesAbilities['H'] === speciesAbilities[1] || speciesAbilities['H'] === speciesAbilities[0]) delete speciesAbilities['H'];
 					if (speciesAbilities[1] === speciesAbilities[0]) delete speciesAbilities[1];
