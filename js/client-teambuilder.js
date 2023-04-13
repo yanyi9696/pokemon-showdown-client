@@ -3938,6 +3938,7 @@
 					deoxys: 'Deoxys-Attack',
 					rotom: 'Rotom-Heat',
 					shaymin: 'Shaymin-Sky',
+					darmanitan: 'Darmanitan-Zen',
 					keldeo: 'Keldeo-Resolute',
 					meloetta: 'Meloetta-Pirouette',
 					greninja: 'Greninja-Ash',
