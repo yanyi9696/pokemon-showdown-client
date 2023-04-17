@@ -726,8 +726,7 @@ const Dex = new class implements ModdedDex {
 		const headNum = headSpecies.num;
 		const bodyNum = bodySpecies.num;
 		spriteData.url += `${headNum}/${headNum}.${bodyNum}.png`;
-
-		// todo: cries
+		spriteData.cryurl = `audio/cries/${headSpecies.id}.mp3`;
 
 		if (!options.noScale) {
 			if (spriteData.isFrontSprite) {
