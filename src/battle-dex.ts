@@ -491,6 +491,8 @@ const Dex = new class implements ModdedDex {
 		const mechanicsGen = options.gen || 6;
 		let isDynamax = !!options.dynamax;
 		if (pokemon instanceof Pokemon) {
+			// @ts-ignore
+			if (pokemon.isIF) return this.getIFSpriteData(pokemon, isFront, options);
 			if (pokemon.volatiles.transform) {
 				options.shiny = pokemon.volatiles.transform[2];
 				options.gender = pokemon.volatiles.transform[3];
@@ -683,6 +685,69 @@ const Dex = new class implements ModdedDex {
 		return spriteData;
 	}
 
+	getIFSpriteData(pokemon: Pokemon | Species | string, isFront: boolean, options: {
+		gen?: number,
+		shiny?: boolean,
+		gender?: GenderName,
+		afd?: boolean,
+		noScale?: boolean,
+		mod?: string,
+		dynamax?: boolean,
+	} = {gen: 6}): {
+		gen: number;
+		w: number;
+		h: number;
+		y: number;
+		url: string;
+		pixelated: boolean;
+		isFrontSprite: boolean;
+		cryurl: string;
+		shiny?: boolean;
+	} {
+		let spriteData = {
+			gen: 6,
+			w: 120,
+			h: 120,
+			y: 0,
+			url: Dex.resourcePrefix + 'sprites/infinitefusion/',
+			pixelated: true,
+			isFrontSprite: isFront,
+			cryurl: '',
+			shiny: false,
+		};
+		if (!(pokemon instanceof Pokemon)) {
+			spriteData.url += '1.1.png';
+			return spriteData;
+		}
+		let headSpecies = Dex.species.get(pokemon.name);
+		let bodySpecies = Dex.species.get(pokemon.speciesForme);
+		if (!headSpecies.exists) {
+			// @ts-ignore
+			delete pokemon.isIF;
+			return this.getSpriteData(pokemon, isFront, options);
+		}
+		const headNum = headSpecies.num;
+		const bodyNum = bodySpecies.num;
+		spriteData.url += `${headNum}/${headNum}.${bodyNum}.png`;
+
+		// todo: cries
+
+		if (!options.noScale) {
+			if (spriteData.isFrontSprite) {
+				spriteData.w *= 2;
+				spriteData.h *= 2;
+				spriteData.y += -16;
+			} else {
+				// old gen backsprites are multiplied by 1.5x by the 3D engine
+				spriteData.w *= 2 / 1.5;
+				spriteData.h *= 2 / 1.5;
+				spriteData.y += -11;
+			}
+		}
+
+		return spriteData;
+	}
+
 	getPokemonIconNum(id: ID, isFemale?: boolean, facingLeft?: boolean) {
 		let num = 0;
 		if (window.BattlePokemonSprites?.[id]?.num) {
@@ -820,9 +885,11 @@ const Dex = new class implements ModdedDex {
 	getIFTeambuilderSpriteData(pokemon: any, gen: number = 0): TeambuilderSpriteData {
 		let headSpecies = Dex.species.get(pokemon.name);
 		let bodySpecies = Dex.species.get(pokemon.species);
+		const headNum = headSpecies.num;
+		const bodyNum = bodySpecies.num;
 		if (!headSpecies.exists) return this.getTeambuilderSpriteData(pokemon, gen);
 		const spriteData: TeambuilderSpriteData = {
-			spriteid: headSpecies.num + '.' + bodySpecies.num,
+			spriteid: `${headNum}/${headNum}.${bodyNum}`,
 			spriteDir: 'sprites/infinitefusion',
 			x: -2,
 			y: -3,

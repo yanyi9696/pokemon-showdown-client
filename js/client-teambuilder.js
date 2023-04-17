@@ -1226,7 +1226,7 @@
 			buf += '</div>';
 			if (isIF) set.isIF = true;
 			buf += '<div class="setchart" style="' + Dex.getTeambuilderSprite(set, this.curTeam.gen) + ';">';
-			if (isIF) set.isIF = false;
+			if (isIF) delete set.isIF;
 
 			// icon
 			buf += '<div class="setcol setcol-icon">';
@@ -2001,7 +2001,7 @@
 
 			if (this.curTeam.format.includes('infinitefusion')) set.isIF = true;
 			this.$('.setchart').attr('style', Dex.getTeambuilderSprite(set, this.curTeam.gen));
-			if (this.curTeam.format.includes('infinitefusion')) set.isIF = false;
+			if (this.curTeam.format.includes('infinitefusion')) delete set.isIF;
 
 			this.$('.pokemonicon-' + this.curSetLoc).css('background', Dex.getPokemonIcon(set).substr(11));
 
