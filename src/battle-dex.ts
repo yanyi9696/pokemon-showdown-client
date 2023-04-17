@@ -706,19 +706,20 @@ const Dex = new class implements ModdedDex {
 	} {
 		// @ts-ignore
 		delete pokemon.isIF;
+		// battle sprites are 96x96, while teambuilder sprites are 120x120
 		let spriteData = {
 			gen: 6,
-			w: 120,
-			h: 120,
+			w: 96,
+			h: 96,
 			y: 0,
-			url: Dex.resourcePrefix + 'sprites/infinitefusion/',
+			url: Dex.resourcePrefix + 'sprites/infinitefusion-battle/',
 			pixelated: true,
 			isFrontSprite: isFront,
 			cryurl: '',
 			shiny: false,
 		};
 		if (!(pokemon instanceof Pokemon)) {
-			spriteData.url += '1.1.png';
+			spriteData.url += '1/1.1.png';
 			return spriteData;
 		}
 		let headSpecies = Dex.species.get(pokemon.name);
