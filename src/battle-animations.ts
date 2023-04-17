@@ -116,6 +116,8 @@ export class BattleScene implements BattleSceneStub {
 		if (battle.id) {
 			numericId = parseInt(battle.id.slice(battle.id.lastIndexOf('-') + 1), 10);
 			if (this.battle.id.includes('digimon')) this.mod = 'digimon';
+			// Nihilslave: enable this when all sprites are ready
+			// if (this.battle.id.includes('infinitefusion')) this.mod = 'infinitefusion';
 		}
 		if (!numericId) {
 			numericId = Math.floor(Math.random() * 1000000);

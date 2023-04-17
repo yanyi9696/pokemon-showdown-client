@@ -492,7 +492,7 @@ const Dex = new class implements ModdedDex {
 		let isDynamax = !!options.dynamax;
 		if (pokemon instanceof Pokemon) {
 			// @ts-ignore
-			if (pokemon.isIF) return this.getIFSpriteData(pokemon, isFront, options);
+			if (options.mod === 'infinitefusion') return this.getIFSpriteData(pokemon, isFront, options);
 			if (pokemon.volatiles.transform) {
 				options.shiny = pokemon.volatiles.transform[2];
 				options.gender = pokemon.volatiles.transform[3];
@@ -704,8 +704,6 @@ const Dex = new class implements ModdedDex {
 		cryurl: string;
 		shiny?: boolean;
 	} {
-		// @ts-ignore
-		delete pokemon.isIF;
 		// battle sprites are 96x96, while teambuilder sprites are 120x120
 		let spriteData = {
 			gen: 6,
