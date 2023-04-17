@@ -706,7 +706,7 @@ const Dex = new class implements ModdedDex {
 	} {
 		// battle sprites are 96x96, while teambuilder sprites are 120x120
 		let spriteData = {
-			gen: 6,
+			gen: 9,
 			w: 96,
 			h: 96,
 			y: 0,
