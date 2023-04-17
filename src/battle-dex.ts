@@ -704,6 +704,8 @@ const Dex = new class implements ModdedDex {
 		cryurl: string;
 		shiny?: boolean;
 	} {
+		// @ts-ignore
+		delete pokemon.isIF;
 		let spriteData = {
 			gen: 6,
 			w: 120,
@@ -721,11 +723,7 @@ const Dex = new class implements ModdedDex {
 		}
 		let headSpecies = Dex.species.get(pokemon.name);
 		let bodySpecies = Dex.species.get(pokemon.speciesForme);
-		if (!headSpecies.exists) {
-			// @ts-ignore
-			delete pokemon.isIF;
-			return this.getSpriteData(pokemon, isFront, options);
-		}
+		if (!headSpecies.exists) return this.getSpriteData(pokemon, isFront, options);
 		const headNum = headSpecies.num;
 		const bodyNum = bodySpecies.num;
 		spriteData.url += `${headNum}/${headNum}.${bodyNum}.png`;
