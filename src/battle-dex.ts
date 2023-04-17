@@ -722,7 +722,7 @@ const Dex = new class implements ModdedDex {
 		}
 		let headSpecies = Dex.species.get(pokemon.name);
 		let bodySpecies = Dex.species.get(pokemon.speciesForme);
-		if (!headSpecies.exists) return this.getSpriteData(pokemon, isFront, options);
+		if (!headSpecies.exists) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
 		const headNum = headSpecies.num;
 		const bodyNum = bodySpecies.num;
 		spriteData.url += `${headNum}/${headNum}.${bodyNum}.png`;
@@ -730,14 +730,16 @@ const Dex = new class implements ModdedDex {
 
 		if (!options.noScale) {
 			if (spriteData.isFrontSprite) {
-				spriteData.w *= 2;
-				spriteData.h *= 2;
+				// 2 is too big i think
+				spriteData.w *= 1;
+				spriteData.h *= 1;
 				spriteData.y += -16;
 			} else {
 				// old gen backsprites are multiplied by 1.5x by the 3D engine
-				spriteData.w *= 2 / 1.5;
-				spriteData.h *= 2 / 1.5;
-				spriteData.y += -11;
+				// 2 / 1.5 is kinda meh
+				spriteData.w *= 1.5;
+				spriteData.h *= 1.5;
+				spriteData.y += -5;
 			}
 		}
 
