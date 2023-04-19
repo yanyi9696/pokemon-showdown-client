@@ -720,6 +720,7 @@ const Dex = new class implements ModdedDex {
 			spriteData.url += '1/1.1.png';
 			return spriteData;
 		}
+		if (pokemon.volatiles.transform) return this.getSpriteData(pokemon.volatiles.transform[1], isFront, options);
 		let headname = pokemon.details.split(', ').find(value => value.startsWith('headname:'));
 		if (headname) headname = headname.slice(9);
 		// const nickname = pokemon.name || headname;
