@@ -723,8 +723,8 @@ const Dex = new class implements ModdedDex {
 		let headname = pokemon.details.split(', ').find(value => value.startsWith('headname:'));
 		if (headname) headname = headname.slice(9);
 		// const nickname = pokemon.name || headname;
-		let headSpecies = Dex.species.get(headname);
-		let bodySpecies = Dex.species.get(pokemon.speciesForme);
+		const headSpecies = Dex.species.get(headname);
+		const bodySpecies = Dex.species.get(pokemon.speciesForme);
 		if (!headSpecies.exists) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
 		const headNum = headSpecies.num;
 		const bodyNum = bodySpecies.num;
