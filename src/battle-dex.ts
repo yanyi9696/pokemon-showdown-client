@@ -736,7 +736,7 @@ const Dex = new class implements ModdedDex {
 				spriteData.y += -16;
 			} else {
 				// old gen backsprites are multiplied by 1.5x by the 3D engine
-				// 2 / 1.5 is kinda meh
+				// just use my own size lol
 				spriteData.w *= 1.5;
 				spriteData.h *= 1.5;
 				spriteData.y += -5;
