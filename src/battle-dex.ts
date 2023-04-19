@@ -728,6 +728,13 @@ const Dex = new class implements ModdedDex {
 		spriteData.url += `${headNum}/${headNum}.${bodyNum}.png`;
 		spriteData.cryurl = `audio/cries/${headSpecies.id}.mp3`;
 
+		// check if sprite exists
+		const request = new XMLHttpRequest();
+		request.open('HEAD', spriteData.url, false);
+		request.send();
+    	if (request.status === 404) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
+
+
 		if (!options.noScale) {
 			if (spriteData.isFrontSprite) {
 				// 2 is too big i think
