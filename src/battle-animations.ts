@@ -117,7 +117,7 @@ export class BattleScene implements BattleSceneStub {
 			numericId = parseInt(battle.id.slice(battle.id.lastIndexOf('-') + 1), 10);
 			if (this.battle.id.includes('digimon')) this.mod = 'digimon';
 			// Nihilslave: enable this when all sprites are ready
-			// if (this.battle.id.includes('infinitefusion')) this.mod = 'infinitefusion';
+			if (this.battle.id.includes('infinitefusion')) this.mod = 'infinitefusion';
 		}
 		if (!numericId) {
 			numericId = Math.floor(Math.random() * 1000000);
@@ -829,6 +829,7 @@ export class BattleScene implements BattleSceneStub {
 				let url = spriteData.url;
 				// if (this.paused) url.replace('/xyani', '/xy').replace('.gif', '.png');
 				buf += '<img src="' + url + '" width="' + spriteData.w + '" height="' + spriteData.h + '" style="position:absolute;top:' + Math.floor(y - spriteData.h / 2) + 'px;left:' + Math.floor(x - spriteData.w / 2) + 'px" />';
+				// todo: flip back sprite for infinite fusion
 				buf2 += '<div style="position:absolute;top:' + (y + 45) + 'px;left:' + (x - 40) + 'px;width:80px;font-size:10px;text-align:center;color:#FFF;">';
 				const gender = pokemon.gender;
 				if (gender === 'M' || gender === 'F') {
