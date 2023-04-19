@@ -720,7 +720,10 @@ const Dex = new class implements ModdedDex {
 			spriteData.url += '1/1.1.png';
 			return spriteData;
 		}
-		let headSpecies = Dex.species.get(pokemon.name);
+		let detailNickname = pokemon.details.split(', ').find(value => value.startsWith('headname:'));
+		if (detailNickname) detailNickname = detailNickname.slice(9);
+		const nickname = pokemon.name || detailNickname;
+		let headSpecies = Dex.species.get(nickname);
 		let bodySpecies = Dex.species.get(pokemon.speciesForme);
 		if (!headSpecies.exists) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
 		const headNum = headSpecies.num;
