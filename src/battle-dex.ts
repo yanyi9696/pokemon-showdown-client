@@ -722,7 +722,7 @@ const Dex = new class implements ModdedDex {
 		}
 		if (pokemon.volatiles.transform) return this.getSpriteData(pokemon.volatiles.transform[1], isFront, options);
 		let headname = pokemon.details.split(', ').find(value => value.startsWith('headname:'));
-		if (headname) headname = headname.slice(9);
+		headname = headname ? headname.slice(9) : pokemon.name;
 		// const nickname = pokemon.name || headname;
 		const headSpecies = Dex.species.get(headname);
 		const bodySpecies = Dex.species.get(pokemon.speciesForme);
@@ -738,7 +738,7 @@ const Dex = new class implements ModdedDex {
 		try {
 			request.send();
 		} catch(e) {}
-    	if (request.status === 404) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
+    	if ([404, 0].includes(request.status)) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
 
 
 		if (!options.noScale) {
