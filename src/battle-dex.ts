@@ -741,6 +741,8 @@ const Dex = new class implements ModdedDex {
 					found = true;
 				} else {
 					// do nothing
+					// todo: actually do something here
+					// such as getting the sprite real-time
 				}
 			}
 		}
@@ -754,7 +756,7 @@ const Dex = new class implements ModdedDex {
 				// 2 is too big i think
 				spriteData.w *= 1;
 				spriteData.h *= 1;
-				spriteData.y += -16;
+				spriteData.y += -10;
 			} else {
 				// old gen backsprites are multiplied by 1.5x by the 3D engine
 				// just use my own size lol
