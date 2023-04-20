@@ -685,6 +685,9 @@ const Dex = new class implements ModdedDex {
 		return spriteData;
 	}
 
+	getRemoteIFSprite(head: number, body: number) {
+		if (head > 890 || body > 890) return;
+	}
 	getIFSpriteData(pokemon: Pokemon | Species | string, isFront: boolean, options: {
 		gen?: number,
 		shiny?: boolean,
@@ -735,6 +738,7 @@ const Dex = new class implements ModdedDex {
 		// check if sprite exists
 		const request = new XMLHttpRequest();
 		let found = false;
+		const getRemoteIFSprite = (h: number, b: number) => this.getRemoteIFSprite(h, b);
 		request.onreadystatechange = function() {
 			if (request.readyState === 4) {
 				if (request.status === 200) {
@@ -743,11 +747,13 @@ const Dex = new class implements ModdedDex {
 					// do nothing
 					// todo: actually do something here
 					// such as getting the sprite real-time
+					getRemoteIFSprite(headNum, bodyNum);
 				}
 			}
 		}
 		request.open('HEAD', spriteData.url, false);
 		request.send();
+		if (!found) request.send(); // try again to load newly downloaded sprite
 		if (!found) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
 
 

@@ -1085,6 +1085,14 @@ class BattleTooltips {
 		if (this.battle.abilityActive(['Air Lock', 'Cloud Nine'])) {
 			weather = '' as ID;
 		}
+		if (this.battle.tier.includes('More Balanced Hackmons')) {
+			for (const activePokemon of this.battle.getAllActive()) {
+				if (toID(activePokemon.item) === 'utilityumbrella') {
+					weather = '' as ID;
+					break;
+				}
+			}
+		}
 
 		if (item === 'choiceband' && !clientPokemon?.volatiles['dynamax']) {
 			stats.atk = Math.floor(stats.atk * 1.5);
@@ -1117,7 +1125,7 @@ class BattleTooltips {
 					if (ability === 'solarpower') {
 						stats.spa = Math.floor(stats.spa * 1.5);
 					}
-					if (ability === 'orichalcumpulse') {
+					if (ability === 'orichalcumpulse' && !this.battle.tier.includes('More Balanced Hackmons')) {
 						stats.atk = Math.floor(stats.atk * 1.3);
 					}
 					let allyActive = clientPokemon?.side.active;
@@ -1190,7 +1198,7 @@ class BattleTooltips {
 			if (ability === 'surgesurfer') {
 				speedModifiers.push(2);
 			}
-			if (ability === 'hadronengine') {
+			if (ability === 'hadronengine' && !this.battle.tier.includes('More Balanced Hackmons')) {
 				stats.spa = Math.floor(stats.spa * 1.3);
 			}
 		}
