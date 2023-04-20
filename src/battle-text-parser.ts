@@ -590,6 +590,12 @@ class BattleTextParser {
 				const template = this.template('start', id.slice(0, id.length - 3));
 				return line1 + template.replace('[POKEMON]', this.pokemon(pokemon)).replace('[STAT]', BattleTextParser.stat(stat));
 			}
+			// Nihilslave: temporarily use includes() to judge if we're in mbhv4
+			if ((id.startsWith('orichalcumpulse') || id.startsWith('hadronengine')) && !(['orichalcumpulse', 'hadronengine'].includes(id))) {
+				const stat = id.slice(-3);
+				const template = this.template('start', id.slice(0, id.length - 3));
+				return line1 + template.replace('[POKEMON]', this.pokemon(pokemon)).replace('[STAT]', BattleTextParser.stat(stat));
+			}
 			let templateId = 'start';
 			if (kwArgs.already) templateId = 'alreadyStarted';
 			if (kwArgs.fatigue) templateId = 'startFromFatigue';

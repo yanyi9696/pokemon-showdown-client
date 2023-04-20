@@ -446,6 +446,11 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 				volatilesToRemove.push('protosynthesis' + statName);
 				volatilesToRemove.push('quarkdrive' + statName);
 			}
+			// mbhv4
+			for (const statName of Dex.statNamesExceptHP) {
+				volatilesToRemove.push('orichalcumpulse' + statName);
+				volatilesToRemove.push('hadronengine' + statName);
+			}
 			for (const volatile of volatilesToRemove) {
 				delete this.volatiles[volatile];
 			}
@@ -2782,6 +2787,23 @@ export class Battle {
 					poke.removeVolatile('quarkdrivespa' as ID);
 					poke.removeVolatile('quarkdrivespd' as ID);
 					poke.removeVolatile('quarkdrivespe' as ID);
+					break;
+				// mbhv4
+				case 'orichalcumpulse':
+					if (!this.tier.includes('More Balanced Hackmons')) break;
+					poke.removeVolatile('orichalcumpulseatk' as ID);
+					poke.removeVolatile('orichalcumpulsedef' as ID);
+					poke.removeVolatile('orichalcumpulsespa' as ID);
+					poke.removeVolatile('orichalcumpulsespd' as ID);
+					poke.removeVolatile('orichalcumpulsespe' as ID);
+					break;
+				case 'hadronengine':
+					if (!this.tier.includes('More Balanced Hackmons')) break;
+					poke.removeVolatile('hadronengineatk' as ID);
+					poke.removeVolatile('hadronenginedef' as ID);
+					poke.removeVolatile('hadronenginespa' as ID);
+					poke.removeVolatile('hadronenginespd' as ID);
+					poke.removeVolatile('hadronenginespe' as ID);
 					break;
 				default:
 					if (effect.effectType === 'Move') {

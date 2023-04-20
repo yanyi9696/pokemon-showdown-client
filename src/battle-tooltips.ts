@@ -1153,6 +1153,14 @@ class BattleTooltips {
 			}
 			for (const statName of Dex.statNamesExceptHP) {
 				if (clientPokemon.volatiles['protosynthesis' + statName] || clientPokemon.volatiles['quarkdrive' + statName]) {
+					if (statName === 'spe' || this.battle.tier.includes('More Balanced Hackmons')) {
+						speedModifiers.push(1.5);
+					} else {
+						stats[statName] = Math.floor(stats[statName] * 1.3);
+					}
+				}
+				// only happens in mbhv4
+				if (clientPokemon.volatiles['orichalcumpulse' + statName] || clientPokemon.volatiles['hadronengine' + statName]) {
 					if (statName === 'spe') {
 						speedModifiers.push(1.5);
 					} else {
