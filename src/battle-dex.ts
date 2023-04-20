@@ -734,11 +734,19 @@ const Dex = new class implements ModdedDex {
 
 		// check if sprite exists
 		const request = new XMLHttpRequest();
+		let found = false;
+		request.onreadystatechange = function() {
+			if (request.readyState === 4) {
+				if (request.status === 200) {
+					found = true;
+				} else {
+					// do nothing
+				}
+			}
+		}
 		request.open('HEAD', spriteData.url, false);
-		try {
-			request.send();
-		} catch(e) {}
-    	if ([404, 0].includes(request.status)) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
+		request.send();
+		if (!found) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
 
 
 		if (!options.noScale) {
