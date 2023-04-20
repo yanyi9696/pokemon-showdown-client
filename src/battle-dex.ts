@@ -686,7 +686,32 @@ const Dex = new class implements ModdedDex {
 	}
 
 	getRemoteIFSprite(head: number, body: number) {
-		if (head > 890 || body > 890) return;
+		if (head > 890 || head === 848) return;
+		if (body > 890 || body === 848) return;
+		let headString = head.toString();
+		let bodyString = body.toString();
+		const fix_table: {[k: number]: string} = {
+			199: "slowking",
+			201: "unown",
+			664: "scatterbug",
+			668: "pyroar",
+		};
+		if (head in fix_table) headString = fix_table[head];
+		if (body in fix_table) bodyString = fix_table[body];
+		const {Builder, Browser, By, Key, until} = require('selenium-webdriver');
+		const webdriver = require('selenium-webdriver');
+		const firefox = require('selenium-webdriver/firefox');
+		let driver = new webdriver.Builder()
+			.forBrowser(webdriver.Browser.FIREFOX)
+			// .setFirefoxOptions()
+			.build();
+		try {
+			driver.get('https://www.baidu.com/');
+			driver.findElement(By.name('f')).sendKeys('webdriver', Key.RETURN);
+			// driver.wait(until.titleIs('webdriver_百度搜索'), 1000);
+		} finally {
+			driver.quit();
+		}
 	}
 	getIFSpriteData(pokemon: Pokemon | Species | string, isFront: boolean, options: {
 		gen?: number,
@@ -751,9 +776,15 @@ const Dex = new class implements ModdedDex {
 				}
 			}
 		}
-		request.open('HEAD', spriteData.url, false);
-		request.send();
-		if (!found) request.send(); // try again to load newly downloaded sprite
+		try {
+			request.open('HEAD', spriteData.url, false);
+			request.send();
+		} catch (e) {}
+		if (!found) {
+			try {
+				request.send(); // try again to load newly downloaded sprite
+			} catch(e) {}
+		}
 		if (!found) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
 
 
