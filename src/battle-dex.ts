@@ -687,22 +687,11 @@ const Dex = new class implements ModdedDex {
 
 	async getRemoteIFSprite(head: number, body: number) {
 		console.log('getRemoteIFSprite');
-		if (head > 890 || head === 848) return;
-		if (body > 890 || body === 848) return;
-		// added es2017.String lib in tsconfig.json for padStart
-		let headString = head.toString().padStart(3, '0');
-		let bodyString = body.toString().padStart(3, '0');
-		if (headString.length !== 3 || bodyString.length !== 3) return;
-		const fix_table: {[k: number]: string} = {
-			199: "slowking",
-			201: "unown",
-			664: "scatterbug",
-			668: "pyroar",
-		};
-		if (head in fix_table) headString = fix_table[head];
-		if (body in fix_table) bodyString = fix_table[body];
-		console.log(`${headString}, ${bodyString}`);
+		if (head > 890 || head < 1 || head === 848) return;
+		if (body > 890 || body < 1 || body === 848) return;
 
+		const child_process = require("child_process");
+		child_process.exec(`python3 getRemoteIFSprite ${head} ${body}`, {cwd: '/home/mc/pokemon-showdown-client/sprites'});
 		// the current plan is to call an external python script to do the job
 		// like what i did on windows
 
@@ -793,23 +782,29 @@ const Dex = new class implements ModdedDex {
 		spriteData.cryurl = `audio/cries/${headSpecies.id}.mp3`;
 
 		// check if sprite exists
-		const request = new XMLHttpRequest();
-		let found = false;
-		const getRemoteIFSprite = (h: number, b: number) => this.getRemoteIFSprite(h, b);
-		request.onreadystatechange = function() {
-			if (request.readyState === 4) {
-				if (request.status === 200) {
-					found = true;
-				} else {
-					getRemoteIFSprite(headNum, bodyNum);
-				}
-			}
+		const fs = require("fs");
+		if (!fs.existsSync(`/home/mc/pokemon-showdown-client/sprites/infinitefusion-battle/${headNum}/${headNum}.${bodyNum}.png`)) {
+			// if not, try cache and return body sprite temporarily
+			this.getRemoteIFSprite(headNum, bodyNum);
+			return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
 		}
-		try {
-			request.open('HEAD', spriteData.url, false);
-			request.send();
-		} catch (e) {}
-		if (!found) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
+		// const request = new XMLHttpRequest();
+		// let found = false;
+		// const getRemoteIFSprite = (h: number, b: number) => this.getRemoteIFSprite(h, b);
+		// request.onreadystatechange = function() {
+		// 	if (request.readyState === 4) {
+		// 		if (request.status === 200) {
+		// 			found = true;
+		// 		} else {
+		// 			getRemoteIFSprite(headNum, bodyNum);
+		// 		}
+		// 	}
+		// }
+		// try {
+		// 	request.open('HEAD', spriteData.url, false);
+		// 	request.send();
+		// } catch (e) {}
+		// if (!found) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
 
 
 		if (!options.noScale) {
