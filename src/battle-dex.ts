@@ -685,11 +685,13 @@ const Dex = new class implements ModdedDex {
 		return spriteData;
 	}
 
-	getRemoteIFSprite(head: number, body: number) {
+	async getRemoteIFSprite(head: number, body: number) {
+		console.log('getRemoteIFSprite');
 		if (head > 890 || head === 848) return;
 		if (body > 890 || body === 848) return;
-		let headString = head.toString();
-		let bodyString = body.toString();
+		// added ts2017.String lib in tsconfig.json for padStart
+		let headString = head.toString().padStart(3, '0');
+		let bodyString = body.toString().padStart(3, '0');
 		const fix_table: {[k: number]: string} = {
 			199: "slowking",
 			201: "unown",
@@ -698,20 +700,49 @@ const Dex = new class implements ModdedDex {
 		};
 		if (head in fix_table) headString = fix_table[head];
 		if (body in fix_table) bodyString = fix_table[body];
-		const {Builder, Browser, By, Key, until} = require('selenium-webdriver');
-		const webdriver = require('selenium-webdriver');
-		const firefox = require('selenium-webdriver/firefox');
-		let driver = new webdriver.Builder()
-			.forBrowser(webdriver.Browser.FIREFOX)
-			// .setFirefoxOptions()
-			.build();
-		try {
-			driver.get('https://www.baidu.com/');
-			driver.findElement(By.name('f')).sendKeys('webdriver', Key.RETURN);
-			// driver.wait(until.titleIs('webdriver_百度搜索'), 1000);
-		} finally {
-			driver.quit();
-		}
+		console.log(`${headString}, ${bodyString}`);
+
+		// the current plan is to call an external python script to do the job
+		// like what i did on windows
+
+		// export PATH=$PATH:/home/mc/Firefox
+		// const {Builder, Browser, By, Key, until} = require('selenium-webdriver');
+		// const firefox = require('selenium-webdriver/firefox');
+		// const options = new firefox.Options().headless().windowSize({width: 1366, height: 768}).setPreference('browser.download.folderList', 2).setPreference('browser.download.dir', '/home/mc/pokemon-showdown-client/sprites/cache');
+		// let driver = new Builder().forBrowser(Browser.FIREFOX).setFirefoxOptions(options).build();
+		// try {
+		// 	await driver.manage().window().maximize();
+		// 	console.log('page loading');
+		// 	await driver.get('https://japeal.com/pkm/');
+		// 	driver.wait(until.elementLocated(By.className('cc-allow')), 10000);
+		// 	driver.findElement(By.className('cc-allow')).click();
+
+		// 	console.log('setting head species');
+		// 	driver.findElement(By.id('Rimagediv')).click();
+		// 	driver.wait(until.elementIsVisible(By.id('msdropdown20_titleText')), 10000);
+		// 	driver.findElement(By.id('msdropdown20_titleText')).sendKeys(headString);
+		// 	driver.wait(until.elementIsVisible(By.className('selected')), 10000);
+		// 	driver.findElement(By.className('selected')).click();
+
+		// 	console.log('setting body species');
+		// 	driver.findElement(By.id('Limagediv')).click();
+		// 	driver.wait(until.elementIsVisible(By.id('msdropdown20_titleText')), 10000);
+		// 	driver.findElement(By.id('msdropdown20_titleText')).sendKeys(Key.CONTROL, 'a', Key.NULL, bodyString);
+		// 	driver.wait(until.elementIsVisible(By.className('selected')), 10000);
+		// 	driver.findElement(By.className('selected')).click();
+
+		// 	console.log('fusing');
+		// 	driver.wait(until.elementIsEnabled(By.id('fbutton')), 10000);
+		// 	driver.findElement(By.id('fbutton')).click();
+		// 	console.log('closing patreon ads');
+		// 	driver.wait(until.elementIsEnabled(By.id('fbutton')), 10000);
+		// 	driver.findElement(By.id('fbutton')).click();
+		// 	console.log('downloading');
+		// 	driver.wait(until.elementIsEnabled(By.id('downloadBtn')), 10000);
+		// 	driver.findElement(By.id('downloadBtn')).click();
+		// } finally {
+		// 	driver.quit();
+		// }
 	}
 	getIFSpriteData(pokemon: Pokemon | Species | string, isFront: boolean, options: {
 		gen?: number,
@@ -769,9 +800,6 @@ const Dex = new class implements ModdedDex {
 				if (request.status === 200) {
 					found = true;
 				} else {
-					// do nothing
-					// todo: actually do something here
-					// such as getting the sprite real-time
 					getRemoteIFSprite(headNum, bodyNum);
 				}
 			}
@@ -780,11 +808,6 @@ const Dex = new class implements ModdedDex {
 			request.open('HEAD', spriteData.url, false);
 			request.send();
 		} catch (e) {}
-		if (!found) {
-			try {
-				request.send(); // try again to load newly downloaded sprite
-			} catch(e) {}
-		}
 		if (!found) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
 
 
