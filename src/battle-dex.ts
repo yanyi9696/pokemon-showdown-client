@@ -689,9 +689,10 @@ const Dex = new class implements ModdedDex {
 		console.log('getRemoteIFSprite');
 		if (head > 890 || head === 848) return;
 		if (body > 890 || body === 848) return;
-		// added ts2017.String lib in tsconfig.json for padStart
+		// added es2017.String lib in tsconfig.json for padStart
 		let headString = head.toString().padStart(3, '0');
 		let bodyString = body.toString().padStart(3, '0');
+		if (headString.length !== 3 || bodyString.length !== 3) return;
 		const fix_table: {[k: number]: string} = {
 			199: "slowking",
 			201: "unown",
