@@ -2158,7 +2158,20 @@ class BattleTooltips {
 	}
 	getPokemonTypes(pokemon: Pokemon | ServerPokemon, preterastallized = false): ReadonlyArray<TypeName> {
 		if (!(pokemon as Pokemon).getTypes) {
-			return this.battle.dex.species.get(pokemon.speciesForme).types;
+			// Nihilslave: this is the part for my-side pokemon
+			let types: ReadonlyArray<TypeName>;
+			types = this.battle.dex.species.get(pokemon.speciesForme).types;
+			// also works for special fusion for some reason
+			if (pokemon.name) {
+				const headSpecies = this.battle.dex.species.get(pokemon.name);
+				if (headSpecies.forme) {
+					types = headSpecies.types;
+				} else if (headSpecies.exists) {
+					types = [headSpecies.types[0], types[1] || types[0]];
+				}
+				if (types.length > 1 && types[1] === types[0]) types = [types[0]];
+			}
+			return types;
 		}
 
 		return (pokemon as Pokemon).getTypeList(undefined, preterastallized);

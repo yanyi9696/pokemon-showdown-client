@@ -488,6 +488,17 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 		} else {
 			types = this.getSpecies(serverPokemon).types;
 		}
+		if (this.details.split(', ').find(value => value.startsWith('headname:'))) {
+			const headSpecies = this.side.battle.dex.species.get(
+				this.details.split(', ').find(value => value.startsWith('headname:'))!.slice(9)
+			);
+			if (headSpecies.forme) {
+				types = headSpecies.types;
+			} else if (headSpecies.exists) {
+				types = [headSpecies.types[0], types[1] || types[0]];
+			}
+			if (types.length > 1 && types[1] === types[0]) types = [types[0]];
+		}
 		if (this.hasTurnstatus('roost' as ID) && types.includes('Flying')) {
 			types = types.filter(typeName => typeName !== 'Flying');
 			if (!types.length) types = ['Normal'];
