@@ -685,14 +685,6 @@ const Dex = new class implements ModdedDex {
 		return spriteData;
 	}
 
-	async getRemoteIFSprite(head: number, body: number) {
-		if (head > 890 || head < 1 || head === 848) return;
-		if (body > 890 || body < 1 || body === 848) return;
-		
-		// childprocess maybe not the correct way to do this
-		// the current plan is to send something to the server or some other program
-		// and that program's duty is to run getRemoteIFSprite to download the required sprites
-	}
 	getIFSpriteData(pokemon: Pokemon | Species | string, isFront: boolean, options: {
 		gen?: number,
 		shiny?: boolean,
@@ -749,13 +741,10 @@ const Dex = new class implements ModdedDex {
 		// }
 		const request = new XMLHttpRequest();
 		let found = false;
-		const getRemoteIFSprite = (h: number, b: number) => this.getRemoteIFSprite(h, b);
 		request.onreadystatechange = function() {
 			if (request.readyState === 4) {
 				if (request.status === 200) {
 					found = true;
-				} else {
-					getRemoteIFSprite(headNum, bodyNum);
 				}
 			}
 		}
