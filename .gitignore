@@ -1,4 +1,5 @@
-/sprites/
+/sprites/*
+!/sprites/getRemoteIFSprite.py
 /audio/
 /index.php
 /index.html

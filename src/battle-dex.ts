@@ -686,54 +686,12 @@ const Dex = new class implements ModdedDex {
 	}
 
 	async getRemoteIFSprite(head: number, body: number) {
-		console.log('getRemoteIFSprite');
 		if (head > 890 || head < 1 || head === 848) return;
 		if (body > 890 || body < 1 || body === 848) return;
-
-		// const child_process = require("child_process");
-		// child_process.exec(`python3 getRemoteIFSprite ${head} ${body}`, {cwd: '/home/mc/pokemon-showdown-client/sprites'});
-
-		// the current plan is to call an external python script to do the job
-		// like what i did on windows
-
-		// export PATH=$PATH:/home/mc/Firefox
-		// const {Builder, Browser, By, Key, until} = require('selenium-webdriver');
-		// const firefox = require('selenium-webdriver/firefox');
-		// const options = new firefox.Options().headless().windowSize({width: 1366, height: 768}).setPreference('browser.download.folderList', 2).setPreference('browser.download.dir', '/home/mc/pokemon-showdown-client/sprites/cache');
-		// let driver = new Builder().forBrowser(Browser.FIREFOX).setFirefoxOptions(options).build();
-		// try {
-		// 	await driver.manage().window().maximize();
-		// 	console.log('page loading');
-		// 	await driver.get('https://japeal.com/pkm/');
-		// 	driver.wait(until.elementLocated(By.className('cc-allow')), 10000);
-		// 	driver.findElement(By.className('cc-allow')).click();
-
-		// 	console.log('setting head species');
-		// 	driver.findElement(By.id('Rimagediv')).click();
-		// 	driver.wait(until.elementIsVisible(By.id('msdropdown20_titleText')), 10000);
-		// 	driver.findElement(By.id('msdropdown20_titleText')).sendKeys(headString);
-		// 	driver.wait(until.elementIsVisible(By.className('selected')), 10000);
-		// 	driver.findElement(By.className('selected')).click();
-
-		// 	console.log('setting body species');
-		// 	driver.findElement(By.id('Limagediv')).click();
-		// 	driver.wait(until.elementIsVisible(By.id('msdropdown20_titleText')), 10000);
-		// 	driver.findElement(By.id('msdropdown20_titleText')).sendKeys(Key.CONTROL, 'a', Key.NULL, bodyString);
-		// 	driver.wait(until.elementIsVisible(By.className('selected')), 10000);
-		// 	driver.findElement(By.className('selected')).click();
-
-		// 	console.log('fusing');
-		// 	driver.wait(until.elementIsEnabled(By.id('fbutton')), 10000);
-		// 	driver.findElement(By.id('fbutton')).click();
-		// 	console.log('closing patreon ads');
-		// 	driver.wait(until.elementIsEnabled(By.id('fbutton')), 10000);
-		// 	driver.findElement(By.id('fbutton')).click();
-		// 	console.log('downloading');
-		// 	driver.wait(until.elementIsEnabled(By.id('downloadBtn')), 10000);
-		// 	driver.findElement(By.id('downloadBtn')).click();
-		// } finally {
-		// 	driver.quit();
-		// }
+		
+		// childprocess maybe not the correct way to do this
+		// the current plan is to send something to the server or some other program
+		// and that program's duty is to run getRemoteIFSprite to download the required sprites
 	}
 	getIFSpriteData(pokemon: Pokemon | Species | string, isFront: boolean, options: {
 		gen?: number,
