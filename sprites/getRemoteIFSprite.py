@@ -162,7 +162,7 @@ def handle_head(driver:WebDriver, head:str):
 
     log("clicking on pokemon portrait")
     element = get_element_by_id(driver, id_head_pokemon)
-    tryClick(element, 300)
+    tryClick(element)
     
     log(f"writing pokemon name ({head})")
     element = get_element_by_id(driver, id_textbox)
