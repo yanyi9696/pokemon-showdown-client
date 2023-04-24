@@ -238,10 +238,18 @@ def download_sprite(driver:WebDriver, head:str, body:str):
 
 if __name__ == '__main__':
     print("START")
-    driver = create_driver()
-    init_website(driver)
     head = sys.argv[1]
     body = sys.argv[2]
+    filename = f"{head}.{body}.png"
+    cachename = os.path.join(download_path, filename)
+    tbFilename = os.path.join(download_path, '..', 'infinitefusion', head, filename)
+    btFilename = os.path.join(download_path, '..', 'infinitefusion-battle', head, filename)
+    if os.path.exists(cachename) or os.path.exists(tbFilename) or os.path.exists(btFilename):
+        log("sprite already exists")
+        print("EXIT")
+        exit()
+    driver = create_driver()
+    init_website(driver)
     try:
         handle_head(driver, head.rjust(3, '0'))
         handle_body(driver, body.rjust(3, '0'))
@@ -249,14 +257,12 @@ if __name__ == '__main__':
     finally:
         driver.quit()
     log('processing sprite')
-    if not os.path.exists(os.path.join('.', 'infinitefusion', head)):
-        os.makedirs(os.path.join('.', 'infinitefusion', head), exist_ok=True)
-    if not os.path.exists(os.path.join('.', 'infinitefusion-battle', head)):
-        os.makedirs(os.path.join('.', 'infinitefusion-battle', head), exist_ok=True)
-    filename = f"{head}.{body}.png"
-    cachename = f"{download_path}/{filename}"
-    tbFilename = f"{download_path}/../infinitefusion/{head}/{filename}"
-    btFilename = f"{download_path}/../infinitefusion-battle/{head}/{filename}"
+    tbDirectory = os.path.join(download_path, '..', 'infinitefusion', head)
+    btDirectory = os.path.join(download_path, '..', 'infinitefusion-battle', head)
+    if not os.path.exists(tbDirectory):
+        os.makedirs(tbDirectory, exist_ok=True)
+    if not os.path.exists(btDirectory):
+        os.makedirs(btDirectory, exist_ok=True)
     commands = [
         f'convert {cachename} -gravity South -chop 0x36 {cachename}',
         f'convert {cachename} -gravity North -background none -extent 300x300 {tbFilename}',
