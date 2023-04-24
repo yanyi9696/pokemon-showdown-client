@@ -726,10 +726,15 @@ const Dex = new class implements ModdedDex {
 		// const nickname = pokemon.name || headname;
 		const headSpecies = Dex.species.get(headname);
 		const bodySpecies = Dex.species.get(pokemon.speciesForme);
-		// no fusion and special fusion
-		if (!headSpecies.exists || headSpecies.forme && headSpecies.id === bodySpecies.id) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
-		const headNum = headSpecies.num;
-		const bodyNum = bodySpecies.num;
+		if (!headSpecies.exists) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
+		let headNum = headSpecies.num;
+		let bodyNum = bodySpecies.num;
+		// only these two are needed, currently
+		const specialFusions: {[k: string]: number[]} = {
+			'kyuremblack': [644, 646],
+			'kyuremwhite': [643, 646],
+		};
+		if (headSpecies.id in specialFusions) [headNum, bodyNum] = specialFusions[headSpecies.id];
 		spriteData.url += `${headNum}/${headNum}.${bodyNum}.png`;
 		spriteData.cryurl = `audio/cries/${headSpecies.id}.mp3`;
 
