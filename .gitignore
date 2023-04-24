@@ -12,6 +12,7 @@ eslint-cache/
 Thumbs.db
 npm-debug.log
 package-lock.json
+geckodriver.log
 /vendor/
 
 /js/server/
