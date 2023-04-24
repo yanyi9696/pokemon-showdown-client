@@ -89,7 +89,7 @@ def accept_all_cookies(driver:WebDriver):
         log("accepting all cookies")
         time.sleep(basic_delay)
 
-def tryClick(element:WebElement, t=60):
+def tryClick(element:WebElement, t=10):
     endTime = time.time() + t
     while True:
         try:
@@ -101,7 +101,7 @@ def tryClick(element:WebElement, t=60):
             continue
         break
 
-def trySendkeys(element:WebElement, keys, t=60):
+def trySendkeys(element:WebElement, keys, t=10):
     endTime = time.time() + t
     while True:
         try:
@@ -193,12 +193,12 @@ def download_sprite(driver:WebDriver, head:str, body:str):
     log("pokemon fusion")
     time.sleep(basic_delay)
     element = get_element_by_id(driver, id_fusion)
-    tryClick(element, 300)
+    tryClick(element, 60)
     log("downloading sprite")
     element = get_element_by_id(driver, id_download)
     time.sleep(driver_delay)
     tryClick(element)
-    spritename = getDownLoadedFileName(driver, 300)
+    spritename = getDownLoadedFileName(driver, 60)
     log(f"{spritename}")
     filename = f"{head}.{body}.png"
     try:
