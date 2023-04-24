@@ -726,7 +726,8 @@ const Dex = new class implements ModdedDex {
 		// const nickname = pokemon.name || headname;
 		const headSpecies = Dex.species.get(headname);
 		const bodySpecies = Dex.species.get(pokemon.speciesForme);
-		if (!headSpecies.exists) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
+		// no fusion and special fusion
+		if (!headSpecies.exists || headSpecies.forme && headSpecies.id === bodySpecies.id) return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
 		const headNum = headSpecies.num;
 		const bodyNum = bodySpecies.num;
 		spriteData.url += `${headNum}/${headNum}.${bodyNum}.png`;
