@@ -236,6 +236,7 @@ if __name__ == '__main__':
         os.makedirs(tbDirectory, exist_ok=True)
     if not os.path.exists(btDirectory):
         os.makedirs(btDirectory, exist_ok=True)
+    # sudo apt install imagemagick-6.q16
     commands = [
         f'convert {cachename} -gravity South -chop 0x36 {cachename}',
         f'convert {cachename} -gravity North -background none -extent 300x300 {tbFilename}',
