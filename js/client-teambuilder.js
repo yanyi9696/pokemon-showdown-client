@@ -1225,7 +1225,11 @@
 			buf += '<label>Nickname</label><input type="text" name="nickname" class="textbox" value="' + BattleLog.escapeHTML(set.name || '') + '" placeholder="' + BattleLog.escapeHTML(species.baseSpecies) + '" />';
 			buf += '</div>';
 			if (isIF) set.isIF = true;
-			buf += '<div class="setchart" style="' + Dex.getTeambuilderSprite(set, this.curTeam.gen) + ';">';
+			var s = Dex.getTeambuilderSprite(set, this.curTeam.gen);
+			if (s.length < 15) {
+				app.send('/ifget ' + s);
+			}
+			buf += '<div class="setchart" style="' + s + ';">';
 			if (isIF) delete set.isIF;
 
 			// icon
@@ -2000,7 +2004,11 @@
 			if (!set) return;
 
 			if (this.curTeam.format.includes('infinitefusion')) set.isIF = true;
-			this.$('.setchart').attr('style', Dex.getTeambuilderSprite(set, this.curTeam.gen));
+			var s = Dex.getTeambuilderSprite(set, this.curTeam.gen);
+			if (s.length < 15) {
+				app.send('/ifget ' + s);
+			}
+			this.$('.setchart').attr('style', s);
 			if (this.curTeam.format.includes('infinitefusion')) delete set.isIF;
 
 			this.$('.pokemonicon-' + this.curSetLoc).css('background', Dex.getPokemonIcon(set).substr(11));

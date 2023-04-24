@@ -930,11 +930,22 @@ const Dex = new class implements ModdedDex {
 			x: -2,
 			y: -3,
 		};
-		// actually we don't need to check if headSpecies and bodySpecies are the same
-		// just add the corresponding sprites
+		const url = Dex.resourcePrefix + 'sprites/infinitefusion/' + spriteData.spriteid + '.png';
+		const request = new XMLHttpRequest();
+		request.onreadystatechange = function() {
+			if (request.readyState === 4) {
+				if (request.status === 200) {
+					spriteData.shiny = false;
+				} else {
+					spriteData.shiny = true;
+				}
+			}
+		}
+		try {
+			request.open('HEAD', url, false);
+			request.send();
+		} catch (e) {}
 
-		// todo: add sprites
-		// todo: download sprites and cache
 		return spriteData;
 	}
 
@@ -942,6 +953,7 @@ const Dex = new class implements ModdedDex {
 		if (!pokemon) return '';
 		// Nihilslave: for IF
 		const data = pokemon.isIF ? this.getIFTeambuilderSpriteData(pokemon, gen) : this.getTeambuilderSpriteData(pokemon, gen);
+		if (pokemon.isIF && data.shiny) return data.spriteid.split('/')[1];
 		const shiny = (data.shiny ? '-shiny' : '');
 		return 'background-image:url(' + Dex.resourcePrefix + data.spriteDir + shiny + '/' + data.spriteid + '.png);background-position:' + data.x + 'px ' + data.y + 'px;background-repeat:no-repeat';
 	}
