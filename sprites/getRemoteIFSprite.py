@@ -9,9 +9,9 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.common.proxy import Proxy, ProxyType
-# pip install selenium
-# don't use `sudo apt-get install firefox` cuz that has Marionette port issues
-# manually install firefox and download geckodriver instead
+# 1. pip install selenium
+# 2. don't use `sudo apt-get install firefox` cuz that has Marionette port issues
+# 2.5. manually install firefox and download geckodriver instead
 import subprocess
 import time
 import sys
