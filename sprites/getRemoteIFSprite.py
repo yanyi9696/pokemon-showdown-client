@@ -53,7 +53,7 @@ def get_driver():
         'noProxy': ''
     })
     options.proxy = proxy
-    service = Service(executable_path='/home/mc/Firefox/geckodriver', port=4337)
+    service = Service(executable_path='/home/mc/Firefox/geckodriver')# , port=4337)
     return firefox(service=service, options=options)
 
 def get_element_by_id(driver:WebDriver, id_element:str) -> WebElement:
@@ -89,19 +89,33 @@ def accept_all_cookies(driver:WebDriver):
         log("accepting all cookies")
         time.sleep(basic_delay)
 
+def tryClick(element:WebElement, t=60):
+    endTime = time.time() + t
+    while True:
+        try:
+            element.click()
+        except:
+            time.sleep(1)
+            if time.time() > endTime:
+                break
+            continue
+        break
+
+def trySendkeys(element:WebElement, keys, t=60):
+    endTime = time.time() + t
+    while True:
+        try:
+            element.send_keys(keys)
+        except:
+            time.sleep(1)
+            if time.time() > endTime:
+                break
+            continue
+        break
+
 def clear_element(element:WebElement):
-    while True:
-        try:
-            element.send_keys(Keys.CONTROL + "a")
-        except:
-            continue
-        break
-    while True:
-        try:
-            element.send_keys(Keys.DELETE)
-        except:
-            continue
-        break
+    trySendkeys(element, Keys.CONTROL + "a")
+    trySendkeys(element, Keys.DELETE)
 
 def create_driver():
     driver = get_driver()
@@ -148,84 +162,43 @@ def handle_head(driver:WebDriver, head:str):
 
     log("clicking on pokemon portrait")
     element = get_element_by_id(driver, id_head_pokemon)
-    while True:
-        try:
-            element.click()
-        except:
-            continue
-        break
+    tryClick(element, 300)
     
     log(f"writing pokemon name ({head})")
     element = get_element_by_id(driver, id_textbox)
     clear_element(element)
-    while True:
-        try:
-            element.send_keys(head)
-        except:
-            continue
-        break
+    trySendkeys(element, head)
 
     log("picking the best choice")
     element = get_element_by_class(driver, class_selected)
-    while True:
-        try:
-            element.click()
-        except:
-            continue
-        break
+    tryClick(element)
 
 def handle_body(driver:WebDriver, body:str):
     if body in fix_table:
         body = fix_table[body]
     log("clicking on pokemon portrait")
     element = get_element_by_id(driver, id_body_pokemon)
-    while True:
-        try:
-            element.click()
-        except:
-            continue
-        break
+    tryClick(element)
     
     log(f"writing pokemon name ({body})")
     element = get_element_by_id(driver, id_textbox)
     clear_element(element)
-    while True:
-        try:
-            element.send_keys(body)
-        except:
-            continue
-        break
+    trySendkeys(element, body)
 
     log("picking the best choice")
     element = get_element_by_class(driver, class_selected)
-    while True:
-        try:
-            element.click()
-        except:
-            continue
-        break
+    tryClick(element)
 
 def download_sprite(driver:WebDriver, head:str, body:str):
     log("pokemon fusion")
     time.sleep(basic_delay)
     element = get_element_by_id(driver, id_fusion)
-    while True:
-        try:
-            element.click()
-        except:
-            continue
-        break
+    tryClick(element, 300)
     log("downloading sprite")
     element = get_element_by_id(driver, id_download)
-    while True:
-        try:
-            # delay to wait fusion to complete
-            time.sleep(driver_delay)
-            element.click()
-        except:
-            continue
-        break
-    spritename = getDownLoadedFileName(driver, 3000)
+    time.sleep(driver_delay)
+    tryClick(element)
+    spritename = getDownLoadedFileName(driver, 300)
     log(f"{spritename}")
     filename = f"{head}.{body}.png"
     try:
