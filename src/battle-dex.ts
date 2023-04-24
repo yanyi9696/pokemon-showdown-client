@@ -732,13 +732,6 @@ const Dex = new class implements ModdedDex {
 		spriteData.url += `${headNum}/${headNum}.${bodyNum}.png`;
 		spriteData.cryurl = `audio/cries/${headSpecies.id}.mp3`;
 
-		// check if sprite exists
-		// const fs = require('fs');
-		// if (!fs.existsSync(`/home/mc/pokemon-showdown-client/sprites/infinitefusion-battle/${headNum}/${headNum}.${bodyNum}.png`)) {
-		// 	// if not, try cache and return body sprite temporarily
-		// 	this.getRemoteIFSprite(headNum, bodyNum);
-		// 	return this.getSpriteData(pokemon, isFront, {...options, mod: undefined});
-		// }
 		const request = new XMLHttpRequest();
 		let found = false;
 		request.onreadystatechange = function() {
