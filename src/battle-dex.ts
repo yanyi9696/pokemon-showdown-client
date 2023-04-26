@@ -1134,6 +1134,7 @@ class ModdedDex {
 			if (this.gen < 3 || this.modid === 'gen7letsgo') {
 				data.abilities = {0: "No Ability"};
 			}
+			if (ModModifier[this.modid]?.speciesMod) data = ModModifier[this.modid].speciesMod(data);
 
 			const table = window.BattleTeambuilderTable[this.modid];
 			if (id in table.overrideTier) data.tier = table.overrideTier[id];
@@ -1367,6 +1368,31 @@ class BigModdedDex extends ModdedDex{
 		}
 		return this.pokeballs;
 	}
+}
+
+const ModModifier: {
+	[mod: string]: {
+		movesMod?: any,
+		itemsMod?: any,
+		abilitiesMod?: any,
+		speciesMod?: any,
+	}
+} = {
+	scalemons: {
+		speciesMod: (data: any): any => {
+			const bstWithoutHp: number = data.bst - data.baseStats['hp'];
+			const scale = 600 - data.baseStats['hp'];
+			data.bst = data.baseStats['hp'];
+			for (const stat in data.baseStats) {
+				if (stat === 'hp') continue;
+				data.baseStats[stat] = Math.floor(data.baseStats[stat] * scale / bstWithoutHp);
+				if (data.baseStats[stat] < 1) data.baseStats[stat] = 1;
+				if (data.baseStats[stat] > 255) data.baseStats[stat] = 255;
+				data.bst += data.baseStats[stat];
+			}
+			return data;
+		},
+	},
 }
 
 if (typeof require === 'function') {
