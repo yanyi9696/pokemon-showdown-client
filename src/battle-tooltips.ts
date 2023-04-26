@@ -790,6 +790,18 @@ class BattleTooltips {
 		if (pokemon.speciesForme !== pokemon.name) {
 			name += ' <small>(' + BattleLog.escapeHTML(pokemon.speciesForme) + ')</small>';
 		}
+		if (this.battle.tier.includes('Infinite Fusion')) {
+			const headname = pokemon.details.split(', ').find(value => value.startsWith('headname:'));
+			name = headname ? headname.slice(9) : pokemon.name;
+			name = BattleLog.escapeHTML(name);
+			if (BattleLog.escapeHTML(pokemon.speciesForme) !== name) {
+				if (headname) {
+					name += '&sect;' + BattleLog.escapeHTML(pokemon.speciesForme);
+				} else {
+					name += ' <small>(' + BattleLog.escapeHTML(pokemon.speciesForme) + ')</small>';
+				}
+			}
+		}
 
 		let levelBuf = (pokemon.level !== 100 ? ` <small>L${pokemon.level}</small>` : ``);
 		if (!illusionIndex || illusionIndex === 1) {
