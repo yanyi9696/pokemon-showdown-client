@@ -1030,14 +1030,19 @@ class ModdedDex {
 					Object.assign(data, table.overrideMoveData[id]);
 				}
 			}
-			if (this.modid !== `gen${this.gen}`) {
-				const table = window.BattleTeambuilderTable[this.modid];
-				if (id in table.overrideMoveData) {
-					Object.assign(data, table.overrideMoveData[id]);
+			for (const mid of this.modid) {
+				if (mid !== `gen${this.gen}` && mid in window.BattleTeambuilderTable) {
+					const table = window.BattleTeambuilderTable[mid];
+					if (id in table.overrideMoveData) {
+						Object.assign(data, table.overrideMoveData[id]);
+					}
 				}
 			}
 			if (this.gen <= 3 && data.category !== 'Status') {
 				data.category = Dex.getGen3Category(data.type);
+			}
+			for (const mid of this.modid) {
+				if (ModModifier[mid]?.movesMod) ModModifier[mid].movesMod(data);
 			}
 
 			const move = new Move(id, name, data);
@@ -1064,11 +1069,16 @@ class ModdedDex {
 					break;
 				}
 			}
-			if (this.modid !== 'gen' + this.gen) {
-				const table = window.BattleTeambuilderTable[this.modid];
-				if (id in table.overrideItemDesc) {
-					data.shortDesc = table.overrideItemDesc[id];
+			for (const mid of this.modid) {
+				if (mid !== `gen${this.gen}` && mid in window.BattleTeambuilderTable) {
+					const table = window.BattleTeambuilderTable[mid];
+					if (id in table.overrideItemDesc) {
+						data.shortDesc = table.overrideItemDesc[id];
+					}
 				}
+			}
+			for (const mid of this.modid) {
+				if (ModModifier[mid]?.itemsMod) ModModifier[mid].itemsMod(data);
 			}
 
 			const item = new Item(id, name, data);
@@ -1094,11 +1104,16 @@ class ModdedDex {
 					Object.assign(data, table.overrideAbilityData[id]);
 				}
 			}
-			if (this.modid !== `gen${this.gen}`) {
-				const table = window.BattleTeambuilderTable[this.modid];
-				if (id in table.overrideAbilityData) {
-					Object.assign(data, table.overrideAbilityData[id]);
+			for (const mid of this.modid) {
+				if (mid !== `gen${this.gen}` && mid in window.BattleTeambuilderTable) {
+					const table = window.BattleTeambuilderTable[mid];
+					if (id in table.overrideAbilityData) {
+						Object.assign(data, table.overrideAbilityData[id]);
+					}
 				}
+			}
+			for (const mid of this.modid) {
+				if (ModModifier[mid]?.abilitiesMod) ModModifier[mid].abilitiesMod(data);
 			}
 
 			const ability = new Ability(id, name, data);
@@ -1201,179 +1216,39 @@ class BigModdedDex extends ModdedDex{
 	constructor(modid: ID) {
 		super(modid);
 	}
-	moves = {
-		get: (name: string): Move => {
-			let id = toID(name);
-			if (window.BattleAliases && id in BattleAliases) {
-				name = BattleAliases[id];
-				id = toID(name);
-			}
-			if (this.cache.Moves.hasOwnProperty(id)) return this.cache.Moves[id];
+	// types = {
+	// 	get: (name: string): Effect => {
+	// 		const id = toID(name) as ID;
+	// 		name = id.substr(0, 1).toUpperCase() + id.substr(1);
 
-			let data;
-			if (Dex.moves.get(name).exists === true) {
-				data = {...Dex.moves.get(name)};
-			}
-			switch(this.modid) {
-			case 'digimon':
-				if (id in window.DigiMovedex) {
-					data = window.DigiMovedex[id];
-				} else if (!data) {
-					data = {exists: false};
-				}
-				break;
-			default:
-				if (!data) data = {exists: false};
-				break;
-			}
+	// 		if (this.cache.Types.hasOwnProperty(id)) return this.cache.Types[id];
 
-			const move = new Move(id, name, data);
-			this.cache.Moves[id] = move;
-			return move;
-		},
-	};
+	// 		let data;
+	// 		if (Dex.types.get(name).exists === true) {
+	// 			data = {...Dex.types.get(name)};
+	// 		}
+	// 		switch (this.modid) {
+	// 		case 'digimon':
+	// 			let typeData = window.DigiTypeChart[id];
+	// 			if (typeData && typeData.damageTaken) {
+	// 				typeData.exists = true;
+	// 				if (!typeData.id) typeData.id = id;
+	// 				if (!typeData.name) typeData.name = name;
+	// 				if (!typeData.effectType) typeData.effectType = 'Type';
+	// 				data = {...typeData};
+	// 			} else if (!data) {
+	// 				data = {exists: false};
+	// 			}
+	// 			break;
+	// 		default:
+	// 			if (!data) data = {exists: false};
+	// 			break;
+	// 		}
 
-	items = {
-		get: (name: string): Item => {
-			let id = toID(name);
-			if (window.BattleAliases && id in BattleAliases) {
-				name = BattleAliases[id];
-				id = toID(name);
-			}
-			if (this.cache.Items.hasOwnProperty(id)) return this.cache.Items[id];
-
-			let data;
-			if (Dex.items.get(name).exists === true) {
-				data = {...Dex.items.get(name)};
-			}
-			switch (this.modid) {
-			case 'digimon':
-				if (id in window.DigiItems) {
-					data = window.DigiItems[id];
-				} else if (!data) {
-					data = {exists: false};
-				}
-				break;
-			default:
-				if (!data) data = {exists: false};
-				break;
-			}
-
-			const item = new Item(id, name, data);
-			this.cache.Items[id] = item;
-			return item;
-		},
-	};
-
-	abilities = {
-		get: (name: string): Ability => {
-			let id = toID(name);
-			if (window.BattleAliases && id in BattleAliases) {
-				name = BattleAliases[id];
-				id = toID(name);
-			}
-			if (this.cache.Abilities.hasOwnProperty(id)) return this.cache.Abilities[id];
-
-			let data;
-			if (Dex.abilities.get(name).exists === true) {
-				data = {...Dex.abilities.get(name)};
-			}
-			switch (this.modid) {
-			case 'digimon':
-				if (id in window.DigiAbilities) {
-					data = window.DigiAbilities[id];
-				} else if (!data) {
-					data = {exists: false};
-				}
-			}
-
-			const ability = new Ability(id, name, data);
-			this.cache.Abilities[id] = ability;
-			return ability;
-		},
-	};
-
-	species = {
-		get: (name: string): Species => {
-			let id = toID(name);
-			if (window.BattleAliases && id in BattleAliases) {
-				name = BattleAliases[id];
-				id = toID(name);
-			}
-			if (this.cache.Species.hasOwnProperty(id)) return this.cache.Species[id];
-
-			let data;
-			if (Dex.species.get(name).exists === true) {
-				data = {...Dex.species.get(name)};
-			}
-			switch (this.modid) {
-			case 'digimon':
-				if (id in window.Digidex) {
-					data = window.Digidex[id];
-				} else if (!data) {
-					data = {exists: false};
-				}
-				break;
-			default:
-				if (!data) data = {exists: false};
-				break;
-			}
-
-			if (!data.tier && data.baseSpecies && toID(data.baseSpecies) !== id) {
-				data.tier = this.species.get(data.baseSpecies).tier;
-			}
-
-			const species = new Species(id, name, data);
-			this.cache.Species[id] = species;
-			return species;
-		},
-	};
-
-	types = {
-		get: (name: string): Effect => {
-			const id = toID(name) as ID;
-			name = id.substr(0, 1).toUpperCase() + id.substr(1);
-
-			if (this.cache.Types.hasOwnProperty(id)) return this.cache.Types[id];
-
-			let data;
-			if (Dex.types.get(name).exists === true) {
-				data = {...Dex.types.get(name)};
-			}
-			switch (this.modid) {
-			case 'digimon':
-				let typeData = window.DigiTypeChart[id];
-				if (typeData && typeData.damageTaken) {
-					typeData.exists = true;
-					if (!typeData.id) typeData.id = id;
-					if (!typeData.name) typeData.name = name;
-					if (!typeData.effectType) typeData.effectType = 'Type';
-					data = {...typeData};
-				} else if (!data) {
-					data = {exists: false};
-				}
-				break;
-			default:
-				if (!data) data = {exists: false};
-				break;
-			}
-
-			this.cache.Types[id] = data;
-			return data;
-		},
-	};
-
-	getPokeballs() {
-		if (this.pokeballs) return this.pokeballs;
-		this.pokeballs = [];
-		if (!window.BattleItems) window.BattleItems = {};
-		for (const data of Object.values(window.BattleItems) as AnyObject[]) {
-			if (data.gen && data.gen > this.gen) continue;
-			if (!data.isPokeball) continue;
-			this.pokeballs.push(data.name);
-		}
-		return this.pokeballs;
-	}
+	// 		this.cache.Types[id] = data;
+	// 		return data;
+	// 	},
+	// };
 }
 
 /**
@@ -1412,6 +1287,9 @@ const ModModifier: {
 		},
 	},
 	digimon: {
+		movesMod: (data: any): any => {},
+		itemsMod: (data: any): any => {},
+		abilitiesMod: (data: any): any => {},
 		speciesMod: (data: any): any => {
 			if (data.exists) {
 				data = {id: data.id, name: data.name, exists: false};
@@ -1421,6 +1299,7 @@ const ModModifier: {
 				data = window.Digidex[data.id];
 			}
 		},
+		typesMod: (data: any): any => {},
 	}
 }
 
