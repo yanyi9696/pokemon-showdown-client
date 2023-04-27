@@ -1134,7 +1134,7 @@ class ModdedDex {
 			if (this.gen < 3 || this.modid === 'gen7letsgo') {
 				data.abilities = {0: "No Ability"};
 			}
-			if (ModModifier[this.modid]?.speciesMod) data = ModModifier[this.modid].speciesMod(data);
+			if (ModModifier[this.modid]?.speciesMod) ModModifier[this.modid].speciesMod(data);
 
 			const table = window.BattleTeambuilderTable[this.modid];
 			if (id in table.overrideTier) data.tier = table.overrideTier[id];
@@ -1370,6 +1370,13 @@ class BigModdedDex extends ModdedDex{
 	}
 }
 
+/**
+ * todo: we need a real ModdedDex which can take all format names and output corresponding dexes
+ * 1. change ModdedDex.modid from string to string[]
+ * 2. add all old mods in ModModifier
+ * 3. probably delete BidModdedDex
+ * 4. add new mods
+ */
 const ModModifier: {
 	[mod: string]: {
 		movesMod?: any,
@@ -1390,7 +1397,6 @@ const ModModifier: {
 				if (data.baseStats[stat] > 255) data.baseStats[stat] = 255;
 				data.bst += data.baseStats[stat];
 			}
-			return data;
 		},
 	},
 }
