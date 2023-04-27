@@ -171,7 +171,7 @@ interface TeambuilderSpriteData {
 
 const Dex = new class implements ModdedDex {
 	readonly gen = 9;
-	readonly modid = 'gen9' as ID;
+	readonly modid = ['gen9'] as ID[];
 	readonly cache = null!;
 
 	readonly statNames: ReadonlyArray<StatName> = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
@@ -194,19 +194,14 @@ const Dex = new class implements ModdedDex {
 	loadedSpriteData = {xy: 1, bw: 0};
 	moddedDexes: {[mod: string]: ModdedDex} = {};
 
-	mod(modid: ID): ModdedDex {
-		if (modid === 'gen9') return this;
+	mod(formatid: ID): ModdedDex {
+		if (formatid === 'gen9') return this;
 		if (!window.BattleTeambuilderTable) return this;
-		if (modid in this.moddedDexes) {
-			return this.moddedDexes[modid];
+		if (formatid in this.moddedDexes) {
+			return this.moddedDexes[formatid];
 		}
-		const bigModid = ['digimon'];
-		if (bigModid.includes(modid)) {
-			this.moddedDexes[modid] = new BigModdedDex(modid);
-			return this.moddedDexes[modid];
-		}
-		this.moddedDexes[modid] = new ModdedDex(modid);
-		return this.moddedDexes[modid];
+		this.moddedDexes[formatid] = new ModdedDex(formatid);
+		return this.moddedDexes[formatid];
 	}
 	forGen(gen: number) {
 		if (!gen) return this;
@@ -993,7 +988,7 @@ const Dex = new class implements ModdedDex {
 
 class ModdedDex {
 	readonly gen: number;
-	readonly modid: ID;
+	readonly modid: ID[];
 	readonly cache = {
 		Moves: {} as any as {[k: string]: Move},
 		Items: {} as any as {[k: string]: Item},
@@ -1002,17 +997,21 @@ class ModdedDex {
 		Types: {} as any as {[k: string]: Effect},
 	};
 	pokeballs: string[] | null = null;
-	constructor(modid: ID) {
-		this.modid = modid;
-		const gen = parseInt(modid.substr(3, 1), 10);
-		// if (!modid.startsWith('gen') || !gen) throw new Error("Unsupported modid");
-		// this.gen = gen;
-		// Nihilslave: use this for BigModdedDex
-		if (!modid.startsWith('gen') || !gen) {
+	constructor(formatid: ID) {
+		const gen = parseInt(formatid.slice(3, 4), 10);
+		if (!formatid.startsWith('gen') || !gen) {
 			this.gen = Dex.gen;
 		} else {
 			this.gen = gen;
 		}
+		this.modid = [];
+		// oms
+		if (formatid.includes('scalemons')) this.modid.push('scalemons' as ID);
+		// essentially pet mods
+		if (formatid.includes('letsgo')) this.modid.push('gen7letsgo' as ID);
+		if (formatid.includes('bdsp')) this.modid.push('gen8bdsp' as ID);
+		if (formatid.includes('morebalancedhackmons')) this.modid.push('gen9morebalancedhackmons' as ID);
+		if (formatid.includes('digimon')) this.modid.push('digimon' as ID);
 	}
 	moves = {
 		get: (name: string): Move => {
@@ -1125,20 +1124,25 @@ class ModdedDex {
 					Object.assign(data, table.overrideSpeciesData[id]);
 				}
 			}
-			if (this.modid !== `gen${this.gen}` && this.modid in window.BattleTeambuilderTable) {
-				const table = window.BattleTeambuilderTable[this.modid];
-				if (id in table.overrideSpeciesData) {
-					Object.assign(data, table.overrideSpeciesData[id]);
+			for (const mid of this.modid) {
+				if (mid !== `gen${this.gen}` && mid in window.BattleTeambuilderTable) {
+					const table = window.BattleTeambuilderTable[mid];
+					if (id in table.overrideSpeciesData) {
+						Object.assign(data, table.overrideSpeciesData[id]);
+					}
 				}
 			}
 			if (this.gen < 3) {
 				data.abilities = {0: "No Ability"};
 			}
-			if (ModModifier[this.modid]?.speciesMod) ModModifier[this.modid].speciesMod(data);
-
-			if (this.modid in window.BattleTeambuilderTable) {
-				const table = window.BattleTeambuilderTable[this.modid];
-				if (id in table.overrideTier) data.tier = table.overrideTier[id];
+			for (const mid of this.modid) {
+				if (ModModifier[mid]?.speciesMod) ModModifier[mid].speciesMod(data);
+			}
+			for (const mid of this.modid) {
+				if (mid in window.BattleTeambuilderTable) {
+					const table = window.BattleTeambuilderTable[mid];
+					if (id in table.overrideTier) data.tier = table.overrideTier[id];
+				}
 			}
 			if (!data.tier && id.slice(-5) === 'totem') {
 				data.tier = this.species.get(id.slice(0, -5)).tier;
