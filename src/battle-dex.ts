@@ -1007,6 +1007,8 @@ class ModdedDex {
 		this.modid = [];
 		// oms
 		if (formatid.includes('scalemons')) this.modid.push('scalemons' as ID);
+		// species oms
+		if (formatid.includes('infinitefusion')) this.modid.push('infinitefusion' as ID);
 		// essentially pet mods
 		if (formatid.includes('letsgo')) this.modid.push('gen7letsgo' as ID);
 		if (formatid.includes('bdsp')) this.modid.push('gen8bdsp' as ID);
@@ -1193,6 +1195,9 @@ class ModdedDex {
 					data = {...data, ...table.overrideTypeChart[id]};
 				}
 			}
+			for (const mid of this.modid) {
+				if (ModModifier[mid]?.typesMod) ModModifier[mid].typesMod(data);
+			}
 
 			this.cache.Types[id] = data;
 			return data;
@@ -1226,13 +1231,9 @@ const ModModifier: {
 		abilitiesMod?: any,
 		speciesMod?: any,
 		typesMod?: any,
+		ModifySpecies?: any,
 	}
 } = {
-	gen7letsgo: {
-		speciesMod: (data: any): any => {
-			data.abilities = {0: "No Ability"};
-		},
-	},
 	scalemons: {
 		speciesMod: (data: any): any => {
 			const bstWithoutHp: number = data.bst - data.baseStats['hp'];
@@ -1245,6 +1246,14 @@ const ModModifier: {
 				if (data.baseStats[stat] > 255) data.baseStats[stat] = 255;
 				data.bst += data.baseStats[stat];
 			}
+		},
+	},
+	infinitefusion: {
+		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet): any => {},
+	},
+	gen7letsgo: {
+		speciesMod: (data: any): any => {
+			data.abilities = {0: "No Ability"};
 		},
 	},
 	digimon: {
@@ -1274,6 +1283,7 @@ const ModModifier: {
 		},
 		typesMod: (data: any): any => {
 			// todo: don't let fairy type pass
+			// hint: removeType
 			let typeData = window.DigiTypeChart[data.id];
 			if (typeData && typeData.damageTaken) {
 				typeData.exists = true;
