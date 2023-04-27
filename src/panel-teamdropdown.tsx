@@ -641,6 +641,7 @@ class TeamDropdownPanel extends PSRoomPanel {
 				<p>Error: You tried to open a team selector, but you have nothing to select a team for.</p>
 			</PSPanelWrapper>;
 		}
+		// todo: fix
 		const baseFormat = room.parentElem.getAttribute('data-format') || Dex.modid;
 		let isFirstLoad = this.format === null;
 		if (isFirstLoad) {

@@ -211,8 +211,7 @@ class DexSearch {
 		let searchIndex = BattleSearchIndex;
 		let searchIndexOffset = BattleSearchIndexOffset;
 		let closest = DexSearch.getClosest;
-		switch (this.dex.modid) {
-		case 'digimon':
+		if (this.dex.modid.includes('digimon' as ID)) {
 			searchIndex = DigimonSearchIndex;
 			searchIndexOffset = DigimonSearchIndexOffset;
 			closest = function (query: string) {
@@ -235,9 +234,6 @@ class DexSearch {
 				if (left && searchIndex[left - 1][0] === query) left--;
 				return left;
 			}
-			break;
-		default:
-			break;
 		}
 
 		query = toID(query);

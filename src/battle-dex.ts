@@ -194,6 +194,12 @@ const Dex = new class implements ModdedDex {
 	loadedSpriteData = {xy: 1, bw: 0};
 	moddedDexes: {[mod: string]: ModdedDex} = {};
 
+	parseFormatid(formatid: ID): ID[] {
+		// todo: use this to parse formatid for mod()
+		// and also arrange the result IDs
+		// otherwise there will be too many redundant dexes
+		return [];
+	}
 	mod(formatid: ID): ModdedDex {
 		if (formatid === 'gen9') return this;
 		if (!window.BattleTeambuilderTable) return this;
@@ -1005,6 +1011,7 @@ class ModdedDex {
 			this.gen = gen;
 		}
 		this.modid = [];
+		// do i need to push the 'genX' into this.modid?
 		// oms
 		if (formatid.includes('scalemons')) this.modid.push('scalemons' as ID);
 		// species oms
