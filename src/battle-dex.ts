@@ -1125,19 +1125,21 @@ class ModdedDex {
 					Object.assign(data, table.overrideSpeciesData[id]);
 				}
 			}
-			if (this.modid !== `gen${this.gen}`) {
+			if (this.modid !== `gen${this.gen}` && this.modid in window.BattleTeambuilderTable) {
 				const table = window.BattleTeambuilderTable[this.modid];
 				if (id in table.overrideSpeciesData) {
 					Object.assign(data, table.overrideSpeciesData[id]);
 				}
 			}
-			if (this.gen < 3 || this.modid === 'gen7letsgo') {
+			if (this.gen < 3) {
 				data.abilities = {0: "No Ability"};
 			}
 			if (ModModifier[this.modid]?.speciesMod) ModModifier[this.modid].speciesMod(data);
 
-			const table = window.BattleTeambuilderTable[this.modid];
-			if (id in table.overrideTier) data.tier = table.overrideTier[id];
+			if (this.modid in window.BattleTeambuilderTable) {
+				const table = window.BattleTeambuilderTable[this.modid];
+				if (id in table.overrideTier) data.tier = table.overrideTier[id];
+			}
 			if (!data.tier && id.slice(-5) === 'totem') {
 				data.tier = this.species.get(id.slice(0, -5)).tier;
 			}
@@ -1385,6 +1387,11 @@ const ModModifier: {
 		speciesMod?: any,
 	}
 } = {
+	gen7letsgo: {
+		speciesMod: (data: any): any => {
+			data.abilities = {0: "No Ability"};
+		},
+	},
 	scalemons: {
 		speciesMod: (data: any): any => {
 			const bstWithoutHp: number = data.bst - data.baseStats['hp'];
