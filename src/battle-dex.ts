@@ -426,6 +426,10 @@ const Dex = new class implements ModdedDex {
 
 			return species;
 		},
+		// for species oms
+		getFromPokemon: (pokemon: Pokemon | ServerPokemon | PokemonSet): Species => {
+			return new Species('' as ID, '', {});
+		},
 	};
 
 	types = {
@@ -1015,6 +1019,7 @@ class ModdedDex {
 		// oms
 		if (formatid.includes('scalemons')) this.modid.push('scalemons' as ID);
 		// species oms
+		// mnm, camo, ce, ...
 		if (formatid.includes('infinitefusion')) this.modid.push('infinitefusion' as ID);
 		// essentially pet mods
 		if (formatid.includes('letsgo')) this.modid.push('gen7letsgo' as ID);
