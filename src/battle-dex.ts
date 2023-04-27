@@ -1212,45 +1212,6 @@ class ModdedDex {
 	}
 }
 
-class BigModdedDex extends ModdedDex{
-	constructor(modid: ID) {
-		super(modid);
-	}
-	// types = {
-	// 	get: (name: string): Effect => {
-	// 		const id = toID(name) as ID;
-	// 		name = id.substr(0, 1).toUpperCase() + id.substr(1);
-
-	// 		if (this.cache.Types.hasOwnProperty(id)) return this.cache.Types[id];
-
-	// 		let data;
-	// 		if (Dex.types.get(name).exists === true) {
-	// 			data = {...Dex.types.get(name)};
-	// 		}
-	// 		switch (this.modid) {
-	// 		case 'digimon':
-	// 			let typeData = window.DigiTypeChart[id];
-	// 			if (typeData && typeData.damageTaken) {
-	// 				typeData.exists = true;
-	// 				if (!typeData.id) typeData.id = id;
-	// 				if (!typeData.name) typeData.name = name;
-	// 				if (!typeData.effectType) typeData.effectType = 'Type';
-	// 				data = {...typeData};
-	// 			} else if (!data) {
-	// 				data = {exists: false};
-	// 			}
-	// 			break;
-	// 		default:
-	// 			if (!data) data = {exists: false};
-	// 			break;
-	// 		}
-
-	// 		this.cache.Types[id] = data;
-	// 		return data;
-	// 	},
-	// };
-}
-
 /**
  * todo: we need a real ModdedDex which can take all format names and output corresponding dexes
  * 1. change ModdedDex.modid from string to string[]
@@ -1287,9 +1248,21 @@ const ModModifier: {
 		},
 	},
 	digimon: {
-		movesMod: (data: any): any => {},
-		itemsMod: (data: any): any => {},
-		abilitiesMod: (data: any): any => {},
+		movesMod: (data: any): any => {
+			if (data.exists !== true && data.id in window.DigiMovedex) {
+				data = window.DigiMovedex[data.id];
+			}
+		},
+		itemsMod: (data: any): any => {
+			if (data.exists !== true && data.id in window.DigiItems) {
+				data = window.DigiItems[data.id];
+			}
+		},
+		abilitiesMod: (data: any): any => {
+			if (data.exists !== true && data.id in window.DigiAbilities) {
+				data = window.DigiAbilities[data.id];
+			}
+		},
 		speciesMod: (data: any): any => {
 			if (data.exists) {
 				data = {id: data.id, name: data.name, exists: false};
@@ -1299,8 +1272,19 @@ const ModModifier: {
 				data = window.Digidex[data.id];
 			}
 		},
-		typesMod: (data: any): any => {},
-	}
+		typesMod: (data: any): any => {
+			// todo: don't let fairy type pass
+			let typeData = window.DigiTypeChart[data.id];
+			if (typeData && typeData.damageTaken) {
+				typeData.exists = true;
+				// what does the following 3 lines do?
+				if (!typeData.id) typeData.id = data.id;
+				if (!typeData.name) typeData.name = data.name;
+				if (!typeData.effectType) typeData.effectType = 'Type';
+				data = {...typeData};
+			}
+		},
+	},
 }
 
 if (typeof require === 'function') {
