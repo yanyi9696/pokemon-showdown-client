@@ -1407,6 +1407,17 @@ const ModModifier: {
 			}
 		},
 	},
+	digimon: {
+		speciesMod: (data: any): any => {
+			if (data.exists) {
+				data = {id: data.id, name: data.name, exists: false};
+				return;
+			}
+			if (data.id in window.Digidex) {
+				data = window.Digidex[data.id];
+			}
+		},
+	}
 }
 
 if (typeof require === 'function') {
