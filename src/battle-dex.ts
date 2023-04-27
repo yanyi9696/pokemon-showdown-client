@@ -1385,6 +1385,7 @@ const ModModifier: {
 		itemsMod?: any,
 		abilitiesMod?: any,
 		speciesMod?: any,
+		typesMod?: any,
 	}
 } = {
 	gen7letsgo: {
