@@ -210,6 +210,8 @@ def download_sprite(driver:WebDriver, head:str, body:str):
 
 
 if __name__ == '__main__':
+    if not os.path.exists(download_path):
+        os.makedirs(download_path, exist_ok=True)
     print("START")
     head = sys.argv[1]
     body = sys.argv[2]
