@@ -1056,7 +1056,7 @@ class ModdedDex {
 				data.category = Dex.getGen3Category(data.type);
 			}
 			for (const mid of this.modid) {
-				if (ModModifier[mid]?.movesMod) ModModifier[mid].movesMod(data);
+				if (ModModifier[mid]?.movesMod) ModModifier[mid].movesMod!(data);
 			}
 
 			const move = new Move(id, name, data);
@@ -1092,7 +1092,7 @@ class ModdedDex {
 				}
 			}
 			for (const mid of this.modid) {
-				if (ModModifier[mid]?.itemsMod) ModModifier[mid].itemsMod(data);
+				if (ModModifier[mid]?.itemsMod) ModModifier[mid].itemsMod!(data);
 			}
 
 			const item = new Item(id, name, data);
@@ -1127,7 +1127,7 @@ class ModdedDex {
 				}
 			}
 			for (const mid of this.modid) {
-				if (ModModifier[mid]?.abilitiesMod) ModModifier[mid].abilitiesMod(data);
+				if (ModModifier[mid]?.abilitiesMod) ModModifier[mid].abilitiesMod!(data);
 			}
 
 			const ability = new Ability(id, name, data);
@@ -1165,7 +1165,7 @@ class ModdedDex {
 				data.abilities = {0: "No Ability"};
 			}
 			for (const mid of this.modid) {
-				if (ModModifier[mid]?.speciesMod) ModModifier[mid].speciesMod(data);
+				if (ModModifier[mid]?.speciesMod) ModModifier[mid].speciesMod!(data);
 			}
 			for (const mid of this.modid) {
 				if (mid in window.BattleTeambuilderTable) {
@@ -1212,7 +1212,7 @@ class ModdedDex {
 				}
 			}
 			for (const mid of this.modid) {
-				if (ModModifier[mid]?.typesMod) ModModifier[mid].typesMod(data);
+				if (ModModifier[mid]?.typesMod) ModModifier[mid].typesMod!(data);
 			}
 
 			this.cache.Types[id] = data;
@@ -1242,12 +1242,12 @@ class ModdedDex {
  */
 const ModModifier: {
 	[mod: string]: {
-		movesMod?: any,
-		itemsMod?: any,
-		abilitiesMod?: any,
-		speciesMod?: any,
-		typesMod?: any,
-		ModifySpecies?: any,
+		movesMod?: (data: any) => any,
+		itemsMod?: (data: any) => any,
+		abilitiesMod?: (data: any) => any,
+		speciesMod?: (data: any) => any,
+		typesMod?: (data: any) => any,
+		ModifySpecies?: (pokemon: Pokemon | ServerPokemon | PokemonSet) => Species,
 	}
 } = {
 	scalemons: {
@@ -1265,7 +1265,9 @@ const ModModifier: {
 		},
 	},
 	infinitefusion: {
-		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet): any => {},
+		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet): Species => {
+			return new Species('' as ID, '', {});
+		},
 	},
 	gen7letsgo: {
 		speciesMod: (data: any): any => {
