@@ -1185,6 +1185,10 @@ class ModdedDex {
 			this.cache.Species[id] = species;
 			return species;
 		},
+		// for species oms
+		getFromPokemon: (pokemon: Pokemon | ServerPokemon | PokemonSet): Species => {
+			return new Species('' as ID, '', {});
+		},
 	};
 
 	types = {
