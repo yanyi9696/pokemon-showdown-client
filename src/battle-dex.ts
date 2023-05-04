@@ -205,6 +205,8 @@ const Dex = new class implements ModdedDex {
 		if (formatid.includes('thecardgame')) modids.push('thecardgame' as ID);
 		// species oms
 		// mnm, camo, ce, ...
+		if (formatid.includes('createmons')) modids.push('createmons' as ID);
+		if (formatid.includes('crossevolution')) modids.push('crossevolution' as ID);
 		if (formatid.includes('infinitefusion')) modids.push('infinitefusion' as ID);
 		// essentially pet mods
 		if (formatid.includes('letsgo')) modids.push('gen7letsgo' as ID);
@@ -1190,7 +1192,7 @@ class ModdedDex {
 		// for species oms
 		getFromPokemon: (pokemon: Pokemon | ServerPokemon | PokemonSet, extra?: any): Species => {
 			for (const mid of this.modid) {
-				if (ModModifier[mid]?.ModifySpecies) return ModModifier[mid].ModifySpecies!(pokemon, this);
+				if (ModModifier[mid]?.ModifySpecies) return ModModifier[mid].ModifySpecies!(pokemon, this, extra);
 			}
 			const species = (pokemon as PokemonSet).species || (pokemon as (Pokemon | ServerPokemon)).speciesForme;
 			return this.species.get(species);
@@ -1295,13 +1297,13 @@ const ModModifier: {
 		},
 	},
 	createmons: {
-		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex): Species => {
+		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex, extra?: any): Species => {
 			// todo:
 			return dex.species.get(pokemon.name || '');
 		},
 	},
 	crossevolution: {
-		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex): Species => {
+		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex, extra?: any): Species => {
 			const nameString = pokemon.name || '';
 			// note that you can't know ur opponent pokemon's nickname before it is sent in
 			const speciesString = (pokemon as PokemonSet).species || (pokemon as (Pokemon | ServerPokemon)).speciesForme;
@@ -1335,7 +1337,7 @@ const ModModifier: {
 		},
 	},
 	infinitefusion: {
-		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex): Species => {
+		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex, extra?: any): Species => {
 			let name = pokemon.name || '';
 			// tips: ServerPokemon is what you know about your opponent's pokemon
 			if (!name && (pokemon as ServerPokemon).details) {
