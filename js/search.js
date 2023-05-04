@@ -181,9 +181,6 @@
 		if (format.includes('balancedcreatemons')) {
 			this.mod += 'balancedcreatemons';
 		}
-		if (format.includes('thecardgame')) {
-			this.mod += 'thecardgame';
-		}
 		this.find('', firstElem);
 	};
 
@@ -349,16 +346,6 @@
 		// type
 		buf += '<span class="col typecol">';
 		var types = pokemon.types;
-		if (this.mod.includes('thecardgame')) {
-			types = Array.from(new Set(types.map(type => (
-				type.replace(/(Ghost|Fairy)/g, 'Psychic')
-					.replace(/Bug/g, 'Grass')
-					.replace(/Ice/g, 'Water')
-					.replace(/(Rock|Ground)/g, 'Fighting')
-					.replace(/Flying/g, 'Normal')
-					.replace(/Poison/g, 'Dark')
-			))));
-		}
 		for (var i = 0; i < types.length; i++) {
 			buf += Dex.getTypeIcon(types[i]);
 		}
@@ -592,15 +579,6 @@
 		// type
 		buf += '<span class="col typecol">';
 		var type = move.type;
-		if (this.mod.includes('thecardgame')) {
-			type = type
-				.replace(/(Ghost|Fairy)/g, 'Psychic')
-				.replace(/Bug/g, 'Grass')
-				.replace(/Ice/g, 'Water')
-				.replace(/(Rock|Ground)/g, 'Fighting')
-				.replace(/Flying/g, 'Normal')
-				.replace(/Poison/g, 'Dark');
-		}
 		buf += Dex.getTypeIcon(type);
 		buf += Dex.getCategoryIcon(move.category);
 		buf += '</span> ';
