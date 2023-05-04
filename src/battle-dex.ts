@@ -445,7 +445,8 @@ const Dex = new class implements ModdedDex {
 		},
 		// for species oms
 		getFromPokemon: (pokemon: Pokemon | ServerPokemon | PokemonSet): Species => {
-			return this.species.get(pokemon.name);
+			const species = (pokemon as PokemonSet).species || (pokemon as (Pokemon | ServerPokemon)).speciesForme;
+			return this.species.get(species);
 		},
 	};
 
@@ -1191,7 +1192,8 @@ class ModdedDex {
 			for (const mid of this.modid) {
 				if (ModModifier[mid]?.ModifySpecies) return ModModifier[mid].ModifySpecies!(pokemon, this);
 			}
-			return Dex.species.getFromPokemon(pokemon);
+			const species = (pokemon as PokemonSet).species || (pokemon as (Pokemon | ServerPokemon)).speciesForme;
+			return this.species.get(species);
 		},
 	};
 
@@ -1239,10 +1241,10 @@ class ModdedDex {
 
 /**
  * todo: we need a real ModdedDex which can take all format names and output corresponding dexes
- * 1. change ModdedDex.modid from string to string[]
- * 2. add all old mods in ModModifier
- * 3. probably delete BidModdedDex
- * 4. add new mods
+ * 1. change ModdedDex.modid from string to string[] - done
+ * 2. add all old mods in ModModifier - WIP
+ * 3. probably delete BidModdedDex - done
+ * 4. add new mods - WIP
  */
 const ModModifier: {
 	[mod: string]: {
@@ -1292,6 +1294,46 @@ const ModModifier: {
 			))));
 		},
 	},
+	createmons: {
+		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex): Species => {
+			// todo:
+			return dex.species.get(pokemon.name || '');
+		},
+	},
+	crossevolution: {
+		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex): Species => {
+			const nameString = pokemon.name || '';
+			// note that you can't know ur opponent pokemon's nickname before it is sent in
+			const speciesString = (pokemon as PokemonSet).species || (pokemon as (Pokemon | ServerPokemon)).speciesForme;
+			const species = dex.species.get(speciesString);
+			if (nameString !== speciesString) {
+				const crossSpecies = dex.species.get(nameString);
+				if (!!crossSpecies.exists && crossSpecies.prevo) {
+					const crossPrevoSpecies = dex.species.get(crossSpecies.prevo);
+					if (!crossPrevoSpecies.prevo === !species.prevo) {
+						const mixedSpecies = {...species};
+						let stat: StatName;
+						let newStats = {...mixedSpecies.baseStats};
+						for (stat in mixedSpecies.baseStats) {
+							newStats[stat] += crossSpecies.baseStats[stat] - crossPrevoSpecies.baseStats[stat];
+							if (newStats[stat] < 1) newStats[stat] = 1;
+							if (newStats[stat] > 255) newStats[stat] = 255;
+						}
+						mixedSpecies.baseStats = newStats;
+						let newTypes = {...mixedSpecies.types};
+						if (crossSpecies.types[0] !== crossPrevoSpecies.types[0]) newTypes[0] = crossSpecies.types[0];
+						if (crossSpecies.types[1] !== crossPrevoSpecies.types[1]) {
+							newTypes[1] = crossSpecies.types[1] || crossSpecies.types[0];
+						}
+						if (newTypes[0] === newTypes[1]) newTypes = [newTypes[0]];
+						mixedSpecies.types = newTypes;
+						return new Species(mixedSpecies.id, mixedSpecies.name, {...mixedSpecies});
+					}
+				}
+			}
+			return species;
+		},
+	},
 	infinitefusion: {
 		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex): Species => {
 			let name = pokemon.name || '';
@@ -1300,7 +1342,7 @@ const ModModifier: {
 				const details = (pokemon as ServerPokemon).details;
 				name = (details.split(', ').find(value => value.startsWith('headname:')) || '').slice(9);
 			}
-			let species = (pokemon as PokemonSet).species || (pokemon as (Pokemon | ServerPokemon)).speciesForme;
+			const species = (pokemon as PokemonSet).species || (pokemon as (Pokemon | ServerPokemon)).speciesForme;
 			const headSpecies = dex.species.get(name);
 			const bodySpecies = dex.species.get(species);
 			if (!headSpecies.exists || !bodySpecies.exists) return new Species(bodySpecies.id, bodySpecies.name, {...bodySpecies});

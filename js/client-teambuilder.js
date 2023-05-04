@@ -1167,7 +1167,7 @@
 			if ($(window).width() < 640) this.show();
 		},
 		renderSet: function (set, i) {
-			var species = this.curTeam.dex.species.get(set.species);
+			var species = this.curTeam.dex.species.getFromPokemon(set);
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
 			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.includes('natdex') ||
@@ -1291,26 +1291,6 @@
 			buf += '<div class="setcell setcell-typeicons">';
 			if (!isCreatemon) {
 				var types = species.types;
-				if (isCE) {
-					if (this.getCESpecies(set)) {
-						types = this.getCESpecies(set).types;
-					}
-				}
-				if (isIF) {
-					if (this.getIFSpecies(set)) {
-						types = this.getIFSpecies(set).types;
-					}
-				}
-				if (isTCG) {
-					types = Array.from(new Set(types.map(type => (
-						type.replace(/(Ghost|Fairy)/g, 'Psychic')
-							.replace(/Bug/g, 'Grass')
-							.replace(/Ice/g, 'Water')
-							.replace(/(Rock|Ground)/g, 'Fighting')
-							.replace(/Flying/g, 'Normal')
-							.replace(/Poison/g, 'Dark')
-					))));
-				}
 				if (types) {
 					for (var i = 0; i < types.length; i++) buf += Dex.getTypeIcon(types[i]);
 				}
@@ -2276,22 +2256,12 @@
 		updateStatForm: function (setGuessed) {
 			var buf = '';
 			var set = this.curSet;
-			var species = this.curTeam.dex.species.get(this.curSet.species);
+			var species = this.curTeam.dex.species.getFromPokemon(this.curSet);
 			var isCreatemon = this.curTeam.format.includes('createmons');
 			var isCE = this.curTeam.format.includes('crossevolution');
 			var isIF = this.curTeam.format.includes('infinitefusion');
 
 			var baseStats = species.baseStats;
-			if (isCE) {
-				if (this.getCESpecies(set)) {
-					baseStats = this.getCESpecies(set).baseStats;
-				}
-			}
-			if (isIF) {
-				if (this.getIFSpecies(set)) {
-					baseStats = this.getIFSpecies(set).baseStats;
-				}
-			}
 			if (isCreatemon) {
 				if (!set.evs) {
 					set.evs = JSON.parse(JSON.stringify(baseStats));
@@ -3660,12 +3630,6 @@
 				set.item = '';
 			}
 			set.ability = species.abilities['0'];
-			if (this.curTeam.format.includes('infinitefusion')) {
-				const IFSpecies = this.getIFSpecies(set);
-				if (IFSpecies) {
-					set.ability = IFSpecies.abilities['0'];
-				}
-			}
 
 			set.moves = [];
 			set.evs = {};
@@ -3707,25 +3671,13 @@
 
 			// do this after setting set.evs because it's assumed to exist
 			// after getStat is run
-			var species = this.curTeam.dex.species.get(set.species);
+			var species = this.curTeam.dex.species.getFromPokemon(set);
 			if (!species.exists) return 0;
 
 			if (!set.level) set.level = 100;
 			if (typeof set.ivs[stat] === 'undefined') set.ivs[stat] = 31;
 
 			var baseStat = species.baseStats[stat];
-			if (isCE) {
-				const CESpecies = this.getCESpecies(set);
-				if (CESpecies) {
-					baseStat = CESpecies.baseStats[stat];
-				}
-			}
-			if (isIF) {
-				const IFSpecies = this.getIFSpecies(set);
-				if (IFSpecies) {
-					baseStat = IFSpecies.baseStats[stat];
-				}
-			}
 			var iv = (set.ivs[stat] || 0);
 			if (this.curTeam.gen <= 2) iv &= 30;
 			var ev = set.evs[stat];
@@ -3872,120 +3824,6 @@
 				totalPoint += Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10];
 			}
 			return totalPoint;
-		},
-		getCESpecies: function (set) {
-			const species = this.curTeam.dex.species.get(set.species);
-			if (set.name !== set.species) {
-				const crossSpecies = this.curTeam.dex.species.get(set.name);
-				if (!!crossSpecies.exists && crossSpecies.prevo) {
-					const crossPrevoSpecies = this.curTeam.dex.species.get(crossSpecies.prevo);
-					if (!crossPrevoSpecies.prevo === !species.prevo) {
-						const mixedSpecies = this.deepClone(species);
-						for (var stat in mixedSpecies.baseStats) {
-							mixedSpecies.baseStats[stat] += crossSpecies.baseStats[stat] - crossPrevoSpecies.baseStats[stat];
-							if (mixedSpecies.baseStats[stat] < 1) mixedSpecies.baseStats[stat] = 1;
-							if (mixedSpecies.baseStats[stat] > 255) mixedSpecies.baseStats[stat] = 255;
-						}
-						if (crossSpecies.types[0] !== crossPrevoSpecies.types[0]) mixedSpecies.types[0] = crossSpecies.types[0];
-						if (crossSpecies.types[1] !== crossPrevoSpecies.types[1]) {
-							mixedSpecies.types[1] = crossSpecies.types[1] || crossSpecies.types[0];
-						}
-						if (mixedSpecies.types[0] === mixedSpecies.types[1]) mixedSpecies.types = [mixedSpecies.types[0]];
-						return mixedSpecies;
-					}
-				}
-			}
-		},
-		getIFSpecies: function (set) {
-			const headSpecies = this.curTeam.dex.species.get(set.name);
-			const bodySpecies = this.curTeam.dex.species.get(set.species);
-			if (!headSpecies.exists || !bodySpecies.exists) return this.deepClone(bodySpecies);
-			if (headSpecies.baseSpecies !== headSpecies.name || bodySpecies.baseSpecies !== bodySpecies.name) return this.deepClone(bodySpecies);
-			const nonstandard = ['CAP', 'LGPE', 'Custom', 'Gigantamax'];
-			if (headSpecies.isNonstandard && nonstandard.includes(headSpecies.isNonstandard) ||
-				bodySpecies.isNonstandard && nonstandard.includes(bodySpecies.isNonstandard)
-			) return this.deepClone(bodySpecies);
-			if (headSpecies.name === bodySpecies.name) {
-				const specialSelfFusions = {
-					deoxys: 'Deoxys-Attack',
-					rotom: 'Rotom-Heat',
-					shaymin: 'Shaymin-Sky',
-					// darmanitan: 'Darmanitan-Zen',
-					keldeo: 'Keldeo-Resolute',
-					meloetta: 'Meloetta-Pirouette',
-					greninja: 'Greninja-Ash',
-					floette: 'Floette-Eternal',
-					zygarde: 'Zygarde-Complete',
-					hoopa: 'Hoopa-Unbound',
-					lycanroc: 'Lycanroc-Dusk',
-					wishiwashi: 'Wishiwashi-School',
-					necrozma: 'Necrozma-Ultra',
-					// cramorant: 'Cramorant-Gorging',
-					eternatus: 'Eternatus-Eternamax',
-					palafin: 'Palafin-Hero',
-				};
-				if (toID(headSpecies.name) in specialSelfFusions) {
-					return this.curTeam.dex.species.get(specialSelfFusions[toID(headSpecies.name)]);
-				}
-				if (headSpecies.otherFormes) {
-					for (const forme of headSpecies.otherFormes) {
-						if (forme.endsWith('-Mega') || forme.endsWith('-Mega-Y') ||
-							forme.endsWith('-Primal') ||
-							forme.endsWith('-Origin') ||
-							forme.endsWith('-Therian') ||
-							forme.endsWith('-Starter') ||
-							forme.endsWith('-Crowned')
-						) return this.curTeam.dex.species.get(forme);
-					}
-				}
-				return this.deepClone(bodySpecies);
-			}
-			const pair = [headSpecies.name, bodySpecies.name].sort();
-			if (pair[0] === 'Kyurem' && pair[1] === 'Reshiram') return this.curTeam.dex.species.get('Kyurem-White');
-			if (pair[0] === 'Kyurem' && pair[1] === 'Zekrom') return this.curTeam.dex.species.get('Kyurem-Black');
-			if (pair[0] === 'Necrozma' && pair[1] === 'Solgaleo') return this.curTeam.dex.species.get('Necrozma-Dusk-Mane');
-			if (pair[0] === 'Lunala' && pair[1] === 'Necrozma') return this.curTeam.dex.species.get('Necrozma-Dawn-Wings');
-			if (pair[0] === 'Calyrex' && pair[1] === 'Glastrier') return this.curTeam.dex.species.get('Calyrex-Ice');
-			if (pair[0] === 'Calyrex' && pair[1] === 'Spectrier') return this.curTeam.dex.species.get('Calyrex-Shadow');
-			if (pair[0] === 'Arrokuda' && pair[1] === 'Cramorant') return this.curTeam.dex.species.get('Cramorant-Gulping');
-			if (pair[0] === 'Cramorant' && pair[1] === 'Pikachu') return this.curTeam.dex.species.get('Cramorant-Gorging');
-
-			const fusionSpecies = this.deepClone(bodySpecies);
-			fusionSpecies.weightkg = Math.max(0.1, (headSpecies.weightkg + bodySpecies.weightkg) / 2).toFixed(1);
-			fusionSpecies.weighthg = Math.max(0.1, (headSpecies.weighthg + bodySpecies.weighthg) / 2).toFixed(1);
-			fusionSpecies.nfe = headSpecies.nfe || bodySpecies.nfe;
-			// fusionSpecies.evos
-			// fusionSpecies.eggGroups
-			fusionSpecies.abilities = {
-				0: headSpecies.abilities[0],
-				1: bodySpecies.abilities[1] || bodySpecies.abilities[0],
-				H: headSpecies.abilities['H'],
-			};
-			fusionSpecies.bst = 0;
-			// if (headSpecies.id === 'shedinja' || bodySpecies.id === 'shedinja') fusionSpecies.maxHP = 1;
-			if (set.ability === 'Wonder Guard') fusionSpecies.maxHP = 1;
-			let i;
-			for (i in fusionSpecies.baseStats) {
-				let headStat, bodyStat;
-				if (['hp', 'spa', 'spd'].includes(i)) {
-					headStat = headSpecies.baseStats[i] * 2;
-					bodyStat = bodySpecies.baseStats[i];
-				} else {
-					headStat = headSpecies.baseStats[i];
-					bodyStat = bodySpecies.baseStats[i] * 2;
-				}
-				fusionSpecies.baseStats[i] = Math.floor((headStat + bodyStat) / 3);
-				if (fusionSpecies.baseStats[i] < 1) fusionSpecies.baseStats[i] = 1;
-				if (fusionSpecies.baseStats[i] > 255) fusionSpecies.baseStats[i] = 255;
-				// this is needed for client
-				if (i === 'hp' && fusionSpecies.maxHP) fusionSpecies.baseStats[i] = 1;
-				fusionSpecies.bst += fusionSpecies.baseStats[i];
-			}
-			fusionSpecies.types[0] = headSpecies.types[0];
-			fusionSpecies.types[1] = bodySpecies.types[1] || bodySpecies.types[0];
-			if (fusionSpecies.types[1] === fusionSpecies.types[0]) fusionSpecies.types = [fusionSpecies.types[0]];
-
-			return fusionSpecies;
 		},
 		// Nihilslave: end of utility functions
 
