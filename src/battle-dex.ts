@@ -211,8 +211,7 @@ const Dex = new class implements ModdedDex {
 		if (formatid.includes('bdsp')) modids.push('gen8bdsp' as ID);
 		if (formatid.includes('morebalancedhackmons')) modids.push('gen9morebalancedhackmons' as ID);
 		if (formatid.includes('digimon')) modids.push('digimon' as ID);
-		// todo: figure out a way to sort better
-		modids = modids.sort();
+		// todo: figure out a way to arrange the ids
 		const modpid = gen + modids.join('');
 		return [modpid as ID, gen as ID, ...modids];
 	}
@@ -445,8 +444,8 @@ const Dex = new class implements ModdedDex {
 			return species;
 		},
 		// for species oms
-		getFromPokemon: (pokemon: Pokemon | ServerPokemon | PokemonSet): Species => {
-			return new Species('' as ID, '', {});
+		getFromPokemon: (pokemon: Pokemon | ServerPokemon | PokemonSet, extra?: any): Species => {
+			return this.species.get(pokemon.name);
 		},
 	};
 
@@ -1188,7 +1187,7 @@ class ModdedDex {
 			return species;
 		},
 		// for species oms
-		getFromPokemon: (pokemon: Pokemon | ServerPokemon | PokemonSet): Species => {
+		getFromPokemon: (pokemon: Pokemon | ServerPokemon | PokemonSet, extra?: any): Species => {
 			return new Species('' as ID, '', {});
 		},
 	};
@@ -1249,7 +1248,7 @@ const ModModifier: {
 		abilitiesMod?: (data: any) => any,
 		speciesMod?: (data: any) => any,
 		typesMod?: (data: any) => any,
-		ModifySpecies?: (pokemon: Pokemon | ServerPokemon | PokemonSet) => Species,
+		ModifySpecies?: (pokemon: Pokemon | ServerPokemon | PokemonSet, extra?: any) => Species,
 	}
 } = {
 	scalemons: {
@@ -1291,7 +1290,7 @@ const ModModifier: {
 		},
 	},
 	infinitefusion: {
-		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet): Species => {
+		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, extra?: any): Species => {
 			return new Species('' as ID, '', {});
 		},
 	},
