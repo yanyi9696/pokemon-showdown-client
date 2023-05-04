@@ -1264,13 +1264,15 @@ const ModModifier: {
 			const bstWithoutHp: number = data.bst - data.baseStats['hp'];
 			const scale = 600 - data.baseStats['hp'];
 			data.bst = data.baseStats['hp'];
+			let newStats = {...data.baseStats};
 			for (const stat in data.baseStats) {
 				if (stat === 'hp') continue;
-				data.baseStats[stat] = Math.floor(data.baseStats[stat] * scale / bstWithoutHp);
-				if (data.baseStats[stat] < 1) data.baseStats[stat] = 1;
-				if (data.baseStats[stat] > 255) data.baseStats[stat] = 255;
-				data.bst += data.baseStats[stat];
+				newStats[stat] = Math.floor(data.baseStats[stat] * scale / bstWithoutHp);
+				if (newStats[stat] < 1) newStats[stat] = 1;
+				if (newStats[stat] > 255) newStats[stat] = 255;
+				data.bst += newStats[stat];
 			}
+			data.baseStats = newStats;
 		},
 	},
 	thecardgame: {
@@ -1314,19 +1316,19 @@ const ModModifier: {
 					const crossPrevoSpecies = dex.species.get(crossSpecies.prevo);
 					if (!crossPrevoSpecies.prevo === !species.prevo) {
 						const mixedSpecies = {...species};
+						mixedSpecies.bst = 0;
 						let stat: StatName;
 						let newStats = {...mixedSpecies.baseStats};
 						for (stat in mixedSpecies.baseStats) {
 							newStats[stat] += crossSpecies.baseStats[stat] - crossPrevoSpecies.baseStats[stat];
 							if (newStats[stat] < 1) newStats[stat] = 1;
 							if (newStats[stat] > 255) newStats[stat] = 255;
+							mixedSpecies.bst += newStats[stat];
 						}
 						mixedSpecies.baseStats = newStats;
 						let newTypes = {...mixedSpecies.types};
 						if (crossSpecies.types[0] !== crossPrevoSpecies.types[0]) newTypes[0] = crossSpecies.types[0];
-						if (crossSpecies.types[1] !== crossPrevoSpecies.types[1]) {
-							newTypes[1] = crossSpecies.types[1] || crossSpecies.types[0];
-						}
+						if (crossSpecies.types[1] !== crossPrevoSpecies.types[1]) newTypes[1] = crossSpecies.types[1] || crossSpecies.types[0];
 						if (newTypes[0] === newTypes[1]) newTypes = [newTypes[0]];
 						mixedSpecies.types = newTypes;
 						return new Species(mixedSpecies.id, mixedSpecies.name, {...mixedSpecies});
