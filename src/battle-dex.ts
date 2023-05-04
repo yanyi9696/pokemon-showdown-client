@@ -170,8 +170,8 @@ interface TeambuilderSpriteData {
 }
 
 const Dex = new class implements ModdedDex {
-	readonly currentGen = 'gen9';
 	readonly gen = 9;
+	readonly currentGen = `gen${this.gen}`;
 	readonly modid = [this.currentGen, this.currentGen] as ID[];
 	readonly cache = null!;
 
