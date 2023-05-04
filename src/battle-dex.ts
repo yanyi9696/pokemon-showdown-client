@@ -444,7 +444,7 @@ const Dex = new class implements ModdedDex {
 			return species;
 		},
 		// for species oms
-		getFromPokemon: (pokemon: Pokemon | ServerPokemon | PokemonSet, extra?: any): Species => {
+		getFromPokemon: (pokemon: Pokemon | ServerPokemon | PokemonSet): Species => {
 			return this.species.get(pokemon.name);
 		},
 	};
@@ -1188,7 +1188,10 @@ class ModdedDex {
 		},
 		// for species oms
 		getFromPokemon: (pokemon: Pokemon | ServerPokemon | PokemonSet, extra?: any): Species => {
-			return new Species('' as ID, '', {});
+			for (const mid of this.modid) {
+				if (ModModifier[mid]?.ModifySpecies) return ModModifier[mid].ModifySpecies!(pokemon, this);
+			}
+			return Dex.species.getFromPokemon(pokemon);
 		},
 	};
 
@@ -1248,7 +1251,7 @@ const ModModifier: {
 		abilitiesMod?: (data: any) => any,
 		speciesMod?: (data: any) => any,
 		typesMod?: (data: any) => any,
-		ModifySpecies?: (pokemon: Pokemon | ServerPokemon | PokemonSet, extra?: any) => Species,
+		ModifySpecies?: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex, extra?: any) => Species,
 	}
 } = {
 	scalemons: {
@@ -1290,8 +1293,102 @@ const ModModifier: {
 		},
 	},
 	infinitefusion: {
-		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, extra?: any): Species => {
-			return new Species('' as ID, '', {});
+		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex): Species => {
+			let name = pokemon.name || '';
+			// tips: ServerPokemon is what you know about your opponent's pokemon
+			if (!name && (pokemon as ServerPokemon).details) {
+				const details = (pokemon as ServerPokemon).details;
+				name = (details.split(', ').find(value => value.startsWith('headname:')) || '').slice(9);
+			}
+			let species = (pokemon as PokemonSet).species || (pokemon as (Pokemon | ServerPokemon)).speciesForme;
+			const headSpecies = dex.species.get(name);
+			const bodySpecies = dex.species.get(species);
+			if (!headSpecies.exists || !bodySpecies.exists) return new Species(bodySpecies.id, bodySpecies.name, {...bodySpecies});
+			// don't check formes
+			// if (headSpecies.baseSpecies !== headSpecies.name || bodySpecies.baseSpecies !== bodySpecies.name) return new Species(bodySpecies.id, bodySpecies.name, {...bodySpecies});
+			const nonstandard = ['CAP', 'Custom'];
+			if (headSpecies.isNonstandard && nonstandard.includes(headSpecies.isNonstandard) ||
+				bodySpecies.isNonstandard && nonstandard.includes(bodySpecies.isNonstandard)
+			) return new Species(bodySpecies.id, bodySpecies.name, {...bodySpecies});
+			if (headSpecies.name === bodySpecies.name) {
+				const specialSelfFusions: {[k: string]: string} = {
+					deoxys: 'Deoxys-Attack',
+					rotom: 'Rotom-Heat',
+					shaymin: 'Shaymin-Sky',
+					keldeo: 'Keldeo-Resolute',
+					meloetta: 'Meloetta-Pirouette',
+					greninja: 'Greninja-Ash',
+					floette: 'Floette-Eternal',
+					zygarde: 'Zygarde-Complete',
+					hoopa: 'Hoopa-Unbound',
+					lycanroc: 'Lycanroc-Dusk',
+					wishiwashi: 'Wishiwashi-School',
+					necrozma: 'Necrozma-Ultra',
+					eternatus: 'Eternatus-Eternamax',
+					palafin: 'Palafin-Hero',
+				};
+				if (toID(headSpecies.name) in specialSelfFusions) {
+					return dex.species.get(specialSelfFusions[toID(headSpecies.name)]);
+				}
+				if (headSpecies.otherFormes) {
+					for (const forme of headSpecies.otherFormes) {
+						if (forme.endsWith('-Mega') || forme.endsWith('-Mega-Y') ||
+							forme.endsWith('-Primal') ||
+							forme.endsWith('-Origin') ||
+							forme.endsWith('-Therian') ||
+							forme.endsWith('-Starter') ||
+							forme.endsWith('-Crowned')
+						) return dex.species.get(forme);
+					}
+				}
+				return new Species(bodySpecies.id, bodySpecies.name, {...bodySpecies});
+			}
+			const pair = [headSpecies.name, bodySpecies.name].sort();
+			if (pair[0] === 'Kyurem' && pair[1] === 'Reshiram') return dex.species.get('Kyurem-White');
+			if (pair[0] === 'Kyurem' && pair[1] === 'Zekrom') return dex.species.get('Kyurem-Black');
+			if (pair[0] === 'Necrozma' && pair[1] === 'Solgaleo') return dex.species.get('Necrozma-Dusk-Mane');
+			if (pair[0] === 'Lunala' && pair[1] === 'Necrozma') return dex.species.get('Necrozma-Dawn-Wings');
+			if (pair[0] === 'Calyrex' && pair[1] === 'Glastrier') return dex.species.get('Calyrex-Ice');
+			if (pair[0] === 'Calyrex' && pair[1] === 'Spectrier') return dex.species.get('Calyrex-Shadow');
+			if (pair[0] === 'Arrokuda' && pair[1] === 'Cramorant') return dex.species.get('Cramorant-Gulping');
+			if (pair[0] === 'Cramorant' && pair[1] === 'Pikachu') return dex.species.get('Cramorant-Gorging');
+
+			const fusionSpecies = {...bodySpecies};
+			fusionSpecies.weightkg = Math.max(0.1, (headSpecies.weightkg + bodySpecies.weightkg) / 2);
+			// fusionSpecies.evos
+			fusionSpecies.abilities = {
+				0: headSpecies.abilities[0],
+				1: bodySpecies.abilities[1] || bodySpecies.abilities[0],
+				H: headSpecies.abilities['H'],
+				S: headSpecies.abilities['S'],
+			};
+			fusionSpecies.bst = 0;
+			let i: StatName;
+			let newStats = {...fusionSpecies.baseStats};
+			for (i in fusionSpecies.baseStats) {
+				let headStat, bodyStat;
+				if (['hp', 'spa', 'spd'].includes(i)) {
+					headStat = headSpecies.baseStats[i] * 2;
+					bodyStat = bodySpecies.baseStats[i];
+				} else {
+					headStat = headSpecies.baseStats[i];
+					bodyStat = bodySpecies.baseStats[i] * 2;
+				}
+				let stat = Math.floor((headStat + bodyStat) / 3);
+				if (stat < 1) stat = 1;
+				if (stat > 255) stat = 255;
+				if (i === 'hp' && (pokemon as PokemonSet).ability === 'Wonder Guard') stat = 1;
+				newStats[i] = stat;
+				fusionSpecies.bst += stat;
+			}
+			fusionSpecies.baseStats = newStats;
+			let newTypes = {...fusionSpecies.types};
+			newTypes[0] = headSpecies.types[0];
+			newTypes[1] = bodySpecies.types[1] || bodySpecies.types[0];
+			if (newTypes[1] === newTypes[0]) fusionSpecies.types = [fusionSpecies.types[0]];
+			fusionSpecies.types = newTypes;
+
+			return new Species(fusionSpecies.id, fusionSpecies.name, {...fusionSpecies});
 		},
 	},
 	gen7letsgo: {
