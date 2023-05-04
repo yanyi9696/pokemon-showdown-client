@@ -20,19 +20,7 @@
 			if (this.curTeam) {
 				this.curTeam.iconCache = '!';
 				this.curTeam.gen = this.getGen(this.curTeam.format);
-				this.curTeam.dex = Dex.forGen(this.curTeam.gen);
-				if (this.curTeam.format.includes('letsgo')) {
-					this.curTeam.dex = Dex.mod('gen7letsgo');
-				}
-				if (this.curTeam.format.includes('bdsp')) {
-					this.curTeam.dex = Dex.mod('gen8bdsp');
-				}
-				if (this.curTeam.format.includes('morebalancedhackmons')) {
-					this.curTeam.dex = Dex.mod('gen9morebalancedhackmons');
-				}
-				if (this.curTeam.format.includes('digimon')) {
-					this.curTeam.dex = Dex.mod('digimon');
-				}
+				this.curTeam.dex = Dex.mod(this.curTeam.format);
 				Storage.activeSetList = this.curSetList;
 			}
 		},
@@ -694,19 +682,7 @@
 			this.curTeam = teams[i];
 			this.curTeam.iconCache = '!';
 			this.curTeam.gen = this.getGen(this.curTeam.format);
-			this.curTeam.dex = Dex.forGen(this.curTeam.gen);
-			if (this.curTeam.format.includes('letsgo')) {
-				this.curTeam.dex = Dex.mod('gen7letsgo');
-			}
-			if (this.curTeam.format.includes('bdsp')) {
-				this.curTeam.dex = Dex.mod('gen8bdsp');
-			}
-			if (this.curTeam.format.includes('morebalancedhackmons')) {
-				this.curTeam.dex = Dex.mod('gen9morebalancedhackmons');
-			}
-			if (this.curTeam.format.includes('digimon')) {
-				this.curTeam.dex = Dex.mod('digimon');
-			}
+			this.curTeam.dex = Dex.mod(this.curTeam.format);
 			Storage.activeSetList = this.curSetList = Storage.unpackTeam(this.curTeam.team);
 			this.curTeamIndex = i;
 			this.update();
@@ -1613,19 +1589,7 @@
 		changeFormat: function (format) {
 			this.curTeam.format = format;
 			this.curTeam.gen = this.getGen(this.curTeam.format);
-			this.curTeam.dex = Dex.forGen(this.curTeam.gen);
-			if (this.curTeam.format.includes('letsgo')) {
-				this.curTeam.dex = Dex.mod('gen7letsgo');
-			}
-			if (this.curTeam.format.includes('bdsp')) {
-				this.curTeam.dex = Dex.mod('gen8bdsp');
-			}
-			if (this.curTeam.format.includes('morebalancedhackmons')) {
-				this.curTeam.dex = Dex.mod('gen9morebalancedhackmons');
-			}
-			if (this.curTeam.format.includes('digimon')) {
-				this.curTeam.dex = Dex.mod('digimon');
-			}
+			this.curTeam.dex = Dex.mod(this.curTeam.format);
 			this.save();
 			if (this.curTeam.gen === 5 && !Dex.loadedSpriteData['bw']) Dex.loadSpriteData('bw');
 			this.update();
@@ -4029,9 +3993,9 @@
 
 		getGen: function (format) {
 			format = '' + format;
-			if (!format) return 7;
-			if (format.substr(0, 3) !== 'gen') return 6;
-			return parseInt(format.substr(3, 1), 10) || 6;
+			if (!format) return 9;
+			if (format.slice(0, 3) !== 'gen') return 6;
+			return parseInt(format.slice(3), 10) || 6;
 		}
 	});
 

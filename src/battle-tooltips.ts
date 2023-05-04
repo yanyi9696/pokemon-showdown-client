@@ -2320,7 +2320,7 @@ class BattleStatGuesser {
 
 	constructor(formatid: ID) {
 		this.formatid = formatid;
-		this.dex = formatid ? Dex.mod(formatid.slice(0, 4) as ID) : Dex;
+		this.dex = formatid ? Dex.mod(formatid) : Dex;
 		this.ignoreEVLimits = (
 			this.dex.gen < 3 ||
 			((this.formatid.includes('hackmons') || this.formatid.endsWith('bh')) && this.dex.gen !== 6) ||

@@ -608,13 +608,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		this.baseResults = null;
 		this.baseIllegalResults = null;
 
-		if (format.slice(0, 3) === 'gen') {
-			const gen = (Number(format.charAt(3)) || 6);
-			format = (format.slice(4) || 'customgame') as ID;
-			this.dex = Dex.forGen(gen);
-		} else if (!format) {
-			this.dex = Dex;
-		}
+		this.dex = Dex.mod(format);
 
 		if (format.startsWith('dlc1')) {
 			if (format.includes('doubles')) {
@@ -638,14 +632,12 @@ abstract class BattleTypedSearch<T extends SearchType> {
 				this.formatType = 'bdsp';
 			}
 			format = format.slice(4) as ID;
-			this.dex = Dex.mod('gen8bdsp' as ID);
 		}
 		if (format.includes('doubles') && this.dex.gen > 4 && !this.formatType) this.formatType = 'doubles';
 		if (format === 'partnersincrime') this.formatType = 'doubles';
 		if (format.startsWith('ffa') || format.includes('freeforall')) this.formatType = 'doubles';
 		if (format.includes('letsgo')) {
 			this.formatType = 'letsgo';
-			this.dex = Dex.mod('gen7letsgo' as ID);
 		}
 		if (format.includes('nationaldex') || format.startsWith('nd') || format.includes('natdex')) {
 			format = (format.startsWith('nd') ? format.slice(2) :
@@ -669,7 +661,6 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (format.includes('morebalancedhackmons')) {
 			this.formatType = 'natdex';
 			format = 'morebalancedhackmons' as ID;
-			this.dex = Dex.mod('gen9morebalancedhackmons' as ID);
 		}
 		if (format.includes('createmons')) {
 			format = 'balancedcreatemons' as ID;
@@ -678,8 +669,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (format.includes('digimon')) {
 			this.formatType = 'digimon';
 			format = 'digimon' as ID;
-			this.dex = Dex.mod('digimon' as ID);
 		}
+		// todo: deal with this.format
 		this.format = format;
 
 		this.species = '' as ID;
