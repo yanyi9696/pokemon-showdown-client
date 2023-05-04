@@ -170,8 +170,9 @@ interface TeambuilderSpriteData {
 }
 
 const Dex = new class implements ModdedDex {
+	readonly currentGen = 'gen9';
 	readonly gen = 9;
-	readonly modid = ['gen9'] as ID[];
+	readonly modid = [this.currentGen, this.currentGen] as ID[];
 	readonly cache = null!;
 
 	readonly statNames: ReadonlyArray<StatName> = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
@@ -195,19 +196,36 @@ const Dex = new class implements ModdedDex {
 	moddedDexes: {[mod: string]: ModdedDex} = {};
 
 	parseFormatid(formatid: ID): ID[] {
-		// todo: use this to parse formatid for mod()
-		// and also arrange the result IDs
-		// otherwise there will be too many redundant dexes
-		return [];
+		let modids = [];
+
+		const genStrings = formatid.match(/gen\d+/g);
+		const gen = genStrings ? genStrings[0] : this.currentGen;
+		// oms
+		if (formatid.includes('scalemons')) modids.push('scalemons' as ID);
+		if (formatid.includes('thecardgame')) modids.push('thecardgame' as ID);
+		// species oms
+		// mnm, camo, ce, ...
+		if (formatid.includes('infinitefusion')) modids.push('infinitefusion' as ID);
+		// essentially pet mods
+		if (formatid.includes('letsgo')) modids.push('gen7letsgo' as ID);
+		if (formatid.includes('bdsp')) modids.push('gen8bdsp' as ID);
+		if (formatid.includes('morebalancedhackmons')) modids.push('gen9morebalancedhackmons' as ID);
+		if (formatid.includes('digimon')) modids.push('digimon' as ID);
+		// todo: figure out a way to sort better
+		modids = modids.sort();
+		const modpid = gen + modids.join('');
+		return [modpid as ID, gen as ID, ...modids];
 	}
 	mod(formatid: ID): ModdedDex {
-		if (formatid === 'gen9') return this;
+		const modids = this.parseFormatid(formatid);
+		const modpid = modids[0];
+		if (modpid === this.currentGen) return this;
 		if (!window.BattleTeambuilderTable) return this;
-		if (formatid in this.moddedDexes) {
-			return this.moddedDexes[formatid];
+		if (modpid in this.moddedDexes) {
+			return this.moddedDexes[modpid];
 		}
-		this.moddedDexes[formatid] = new ModdedDex(formatid);
-		return this.moddedDexes[formatid];
+		this.moddedDexes[modpid] = new ModdedDex(modids);
+		return this.moddedDexes[modpid];
 	}
 	forGen(gen: number) {
 		if (!gen) return this;
@@ -1007,25 +1025,9 @@ class ModdedDex {
 		Types: {} as any as {[k: string]: Effect},
 	};
 	pokeballs: string[] | null = null;
-	constructor(formatid: ID) {
-		const gen = parseInt(formatid.slice(3, 4), 10);
-		if (!formatid.startsWith('gen') || !gen) {
-			this.gen = Dex.gen;
-		} else {
-			this.gen = gen;
-		}
-		this.modid = [];
-		// do i need to push the 'genX' into this.modid?
-		// oms
-		if (formatid.includes('scalemons')) this.modid.push('scalemons' as ID);
-		// species oms
-		// mnm, camo, ce, ...
-		if (formatid.includes('infinitefusion')) this.modid.push('infinitefusion' as ID);
-		// essentially pet mods
-		if (formatid.includes('letsgo')) this.modid.push('gen7letsgo' as ID);
-		if (formatid.includes('bdsp')) this.modid.push('gen8bdsp' as ID);
-		if (formatid.includes('morebalancedhackmons')) this.modid.push('gen9morebalancedhackmons' as ID);
-		if (formatid.includes('digimon')) this.modid.push('digimon' as ID);
+	constructor(modids: ID[]) {
+		this.gen = parseInt(modids[1].slice(3), 10);
+		this.modid = modids.slice(2);
 	}
 	moves = {
 		get: (name: string): Move => {
@@ -1252,6 +1254,7 @@ const ModModifier: {
 } = {
 	scalemons: {
 		speciesMod: (data: any): any => {
+			if (!data.exists) return;
 			const bstWithoutHp: number = data.bst - data.baseStats['hp'];
 			const scale = 600 - data.baseStats['hp'];
 			data.bst = data.baseStats['hp'];
@@ -1262,6 +1265,29 @@ const ModModifier: {
 				if (data.baseStats[stat] > 255) data.baseStats[stat] = 255;
 				data.bst += data.baseStats[stat];
 			}
+		},
+	},
+	thecardgame: {
+		movesMod: (data: any): any => {
+			if (!data.exists) return;
+			data.type = data.type
+				.replace(/(Ghost|Fairy)/g, 'Psychic')
+				.replace(/Bug/g, 'Grass')
+				.replace(/Ice/g, 'Water')
+				.replace(/(Rock|Ground)/g, 'Fighting')
+				.replace(/Flying/g, 'Normal')
+				.replace(/Poison/g, 'Dark');
+		},
+		speciesMod: (data: any): any => {
+			if (!data.exists) return;
+			data.types = Array.from(new Set(data.types.map((type: TypeName) => (
+				type.replace(/(Ghost|Fairy)/g, 'Psychic')
+					.replace(/Bug/g, 'Grass')
+					.replace(/Ice/g, 'Water')
+					.replace(/(Rock|Ground)/g, 'Fighting')
+					.replace(/Flying/g, 'Normal')
+					.replace(/Poison/g, 'Dark')
+			))));
 		},
 	},
 	infinitefusion: {
