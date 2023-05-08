@@ -572,7 +572,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 	 * This string specifically normalizes out generation number and the words
 	 * "Doubles" and "Let's Go" from the name.
 	 */
-	format = '' as ID;
+	formats = [''] as ID[];
 	/**
 	 * `species` is the second of two base filters. It constrains results to
 	 * things that species can use, and affects the default sort.
@@ -583,9 +583,6 @@ abstract class BattleTypedSearch<T extends SearchType> {
 	 * (Abilities/items can affect what moves are sorted as usable.)
 	 */
 	set: PokemonSet | null = null;
-
-	protected formatType: 'doubles' | 'bdsp' | 'bdspdoubles' | 'letsgo' | 'metronome' | 'natdex' | 'nfe' |
-	'dlc1' | 'dlc1doubles' | 'stadium' | 'lc' | 'digimon' | null = null;
 
 	/**
 	 * Cached copy of what the results list would be with only base filters
@@ -610,68 +607,13 @@ abstract class BattleTypedSearch<T extends SearchType> {
 
 		this.dex = Dex.mod(format);
 
-		if (format.startsWith('dlc1')) {
-			if (format.includes('doubles')) {
-				this.formatType = 'dlc1doubles';
-			} else {
-				this.formatType = 'dlc1';
-			}
-			format = format.slice(4) as ID;
-		}
-		if (format.startsWith('stadium')) {
-			this.formatType = 'stadium';
-			format = format.slice(7) as ID;
-			if (!format) format = 'ou' as ID;
-		}
-		if (format.startsWith('vgc')) this.formatType = 'doubles';
-		if (format === 'vgc2020') this.formatType = 'dlc1doubles';
-		if (format.includes('bdsp')) {
-			if (format.includes('doubles')) {
-				this.formatType = 'bdspdoubles';
-			} else {
-				this.formatType = 'bdsp';
-			}
-			format = format.slice(4) as ID;
-		}
-		if (format.includes('doubles') && this.dex.gen > 4 && !this.formatType) this.formatType = 'doubles';
-		if (format === 'partnersincrime') this.formatType = 'doubles';
-		if (format.startsWith('ffa') || format.includes('freeforall')) this.formatType = 'doubles';
-		if (format.includes('letsgo')) {
-			this.formatType = 'letsgo';
-		}
-		if (format.includes('nationaldex') || format.startsWith('nd') || format.includes('natdex')) {
-			format = (format.startsWith('nd') ? format.slice(2) :
-				format.includes('natdex') ? format.slice(6) : format.slice(11)) as ID;
-			this.formatType = 'natdex';
-			if (!format) format = 'ou' as ID;
-		}
-		if (this.formatType === 'letsgo') format = format.slice(6) as ID;
-		if (format.includes('metronome')) {
-			this.formatType = 'metronome';
-		}
-		if (format.endsWith('nfe')) {
-			format = format.slice(3) as ID;
-			this.formatType = 'nfe';
-			if (!format) format = 'ou' as ID;
-		}
-		if ((format.endsWith('lc') || format.startsWith('lc')) && format !== 'caplc') {
-			this.formatType = 'lc';
-			format = 'lc' as ID;
-		}
-		if (format.includes('morebalancedhackmons')) {
-			this.formatType = 'natdex';
-			format = 'morebalancedhackmons' as ID;
-		}
-		if (format.includes('createmons')) {
-			format = 'balancedcreatemons' as ID;
-			this.formatType = 'natdex';
-		}
-		if (format.includes('digimon')) {
-			this.formatType = 'digimon';
-			format = 'digimon' as ID;
-		}
-		// todo: deal with this.format
-		this.format = format;
+		/**
+		 * formatType and format are two piles of shit, so I removed them
+		 * just use this.formats = this.dex.modid.slice() instead
+		 * generally i think we should let dex handle most things
+		 * since it now can be in any mods
+		 */
+		this.formats = this.dex.modid.slice();
 
 		this.species = '' as ID;
 		this.set = null;
@@ -757,12 +699,11 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		}
 		return results;
 	}
+	// still let this handle learnsets temporarily since i haven't figure out how to do it in battle-dex.ts
+	// todo: figure out how
+	// maybe just add something there like getLearnsetTable()?
 	protected firstLearnsetid(speciesid: ID) {
-		let table = BattleTeambuilderTable;
-		if (this.formatType?.startsWith('bdsp')) table = table['gen8bdsp'];
-		if (this.formatType === 'letsgo') table = table['gen7letsgo'];
-		if (this.format === 'morebalancedhackmons' as ID) table = table['gen9morebalancedhackmons'];
-		if (this.formatType === 'digimon') table = DigimonTable;
+		const table = this.dex.getLearnSetTable();
 		if (speciesid in table.learnsets) return speciesid;
 		const species = this.dex.species.get(speciesid);
 		if (!species.exists) return '' as ID;
@@ -791,45 +732,42 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		return '' as ID;
 	}
 	protected canLearn(speciesid: ID, moveid: ID) {
+		// Nihilslave: i made some unequivalent changes to this function, mainly about VGC and tradebacks
+		// todo: fix it later
 		const move = this.dex.moves.get(moveid);
-		if (this.formatType === 'natdex' && move.isNonstandard && move.isNonstandard !== 'Past') {
+		const isNatDex = this.formats.includes(`gen${this.dex.gen}natdex` as ID);
+		if (isNatDex && move.isNonstandard && move.isNonstandard !== 'Past') {
 			return false;
 		}
 		const gen = this.dex.gen;
 		let genChar = `${gen}`;
-		if (
-			this.format.startsWith('vgc') ||
-			this.format.startsWith('battlespot') ||
-			this.format.startsWith('battlestadium') ||
-			this.format.startsWith('battlefestival') ||
-			(this.dex.gen === 9 && this.formatType !== 'natdex')
-		) {
-			if (gen === 9) {
-				genChar = 'a';
-			} else if (gen === 8) {
-				genChar = 'g';
-			} else if (gen === 7) {
-				genChar = 'q';
-			} else if (gen === 6) {
+		if (!isNatDex) {
+			switch (gen) {
+			case 6:
 				genChar = 'p';
+				break;
+			case 7:
+				genChar = 'q';
+				break;
+			case 8:
+				genChar = 'g';
+				break;
+			case 9:
+				genChar = 'a';
+				break;
 			}
 		}
 		let learnsetid = this.firstLearnsetid(speciesid);
 		while (learnsetid) {
-			let table = BattleTeambuilderTable;
-			if (this.formatType?.startsWith('bdsp')) table = table['gen8bdsp'];
-			if (this.formatType === 'letsgo') table = table['gen7letsgo'];
-			if (this.format === 'morebalancedhackmons' as ID) table = table['gen9morebalancedhackmons'];
-			if (this.formatType === 'digimon') table = DigimonTable;
+			const table = this.dex.getLearnSetTable();
 			let learnset = table.learnsets[learnsetid];
-			if (learnset && (moveid in learnset) && (!this.format.startsWith('tradebacks') ? learnset[moveid].includes(genChar) :
-				learnset[moveid].includes(genChar) ||
-					(learnset[moveid].includes(`${gen + 1}`) && move.gen === gen))) {
+			if (learnset && (moveid in learnset) &&
+				(learnset[moveid].includes(genChar) || (learnset[moveid].includes(`${gen + 1}`) && move.gen === gen))) {
 				return true;
 			}
 			learnsetid = this.nextLearnsetid(learnsetid, speciesid);
 		}
-		if (this.format.includes('digimon') && this.set?.preEvo) {
+		if (this.formats.includes('digimon' as ID) && this.set?.preEvo) {
 			const preEvoSpecies = this.dex.species.get(this.set.preEvo);
 			let preEvoLearnsetid = this.firstLearnsetid(preEvoSpecies.id);
 			while (preEvoLearnsetid) {
@@ -842,44 +780,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		return false;
 	}
 	getTier(pokemon: Species) {
-		if (this.formatType === 'metronome') {
-			return pokemon.num >= 0 ? String(pokemon.num) : pokemon.tier;
-		}
-		let table = window.BattleTeambuilderTable;
-		const gen = this.dex.gen;
-		const tableKey = this.formatType === 'doubles' ? `gen${gen}doubles` :
-			this.formatType === 'letsgo' ? 'gen7letsgo' :
-			this.formatType === 'bdsp' ? 'gen8bdsp' :
-			this.formatType === 'bdspdoubles' ? 'gen8bdspdoubles' :
-			this.formatType === 'nfe' ? `gen${gen}nfe` :
-			this.formatType === 'lc' ? `gen${gen}lc` :
-			this.formatType === 'dlc1' ? 'gen8dlc1' :
-			this.formatType === 'dlc1doubles' ? 'gen8dlc1doubles' :
-			// Nihilslave: looks like we don't need to specify morebalancedhackmons here
-			this.formatType === 'natdex' ? `gen${gen}natdex` :
-			this.formatType === 'stadium' ? `gen${gen}stadium${gen > 1 ? gen : ''}` :
-			`gen${gen}`;
-		if (table && table[tableKey]) {
-			table = table[tableKey];
-		}
-		if (this.formatType === 'digimon') {
-			table = DigimonTable;
-		}
-		if (!table) return pokemon.tier;
-
-		let id = pokemon.id;
-		if (id in table.overrideTier) {
-			return table.overrideTier[id];
-		}
-		if (id.slice(-5) === 'totem' && id.slice(0, -5) in table.overrideTier) {
-			return table.overrideTier[id.slice(0, -5)];
-		}
-		id = toID(pokemon.baseSpecies);
-		if (id in table.overrideTier) {
-			return table.overrideTier[id];
-		}
-
-		return pokemon.tier;
+		return this.dex.species.get(pokemon.name).tier;
 	}
 	abstract getTable(): {[id: string]: any};
 	abstract getDefaultResults(): SearchRow[];

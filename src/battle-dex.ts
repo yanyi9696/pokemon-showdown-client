@@ -198,11 +198,12 @@ const Dex = new class implements ModdedDex {
 	parseFormatid(formatid: ID): ID[] {
 		let modids = [];
 
-		const genStrings = formatid.match(/gen\d+/g);
+		const genStrings = formatid.match(/gen\d+/);
 		const gen = genStrings ? genStrings[0] : this.currentGen;
-		// official formats
-		if (formatid.includes('nationaldex') || formatid.includes('natdex') || formatid.startsWith('nd')) modids.push((gen + 'natdex') as ID);
+		// todo: doubles, nfe, lc
 		// oms
+		if (formatid.match(/\d\d\dcup/)) modids.push(formatid.match(/\d\d\dcup/)![0] as ID);
+		if (formatid.includes('metronome')) modids.push('metronome' as ID);
 		if (formatid.includes('scalemons')) modids.push('scalemons' as ID);
 		if (formatid.includes('thecardgame')) modids.push('thecardgame' as ID);
 		// species oms
@@ -211,6 +212,10 @@ const Dex = new class implements ModdedDex {
 		if (formatid.includes('crossevolution')) modids.push('crossevolution' as ID);
 		if (formatid.includes('infinitefusion')) modids.push('infinitefusion' as ID);
 		// essentially pet mods
+		if (
+			formatid.includes('nationaldex') || formatid.includes('natdex') || formatid.startsWith(gen + 'nd') ||
+			formatid.includes('metronome') || formatid.includes('createmons') || formatid.includes('infinitefusion') || formatid.includes('morebalancedhackmons')
+		) modids.push((gen + 'natdex') as ID);
 		if (formatid.includes('letsgo')) modids.push('gen7letsgo' as ID);
 		if (formatid.includes('bdsp')) modids.push('gen8bdsp' as ID);
 		if (formatid.includes('morebalancedhackmons')) modids.push('gen9morebalancedhackmons' as ID);
@@ -1016,6 +1021,24 @@ const Dex = new class implements ModdedDex {
 		}
 		return this.pokeballs;
 	}
+
+	getLearnSetTable() {
+		return window.BattleTeambuilderTable;
+	}
+
+	getTierSet() {
+		const table = window.BattleTeambuilderTable;
+		if (!table.tierSet) {
+			table.tierSet = table.tiers.map((r: any) => {
+				if (typeof r === 'string') return ['pokemon', r];
+				return [r[0], r[1]];
+			});
+			table.tiers = null;
+		}
+		const tierSet: SearchRow[] = window.BattleTeambuilderTable.tierSet;
+		const slices: {[k: string]: number} = window.BattleTeambuilderTable.formatSlices;
+		return tierSet.slice(slices.OU);
+	}
 };
 
 class ModdedDex {
@@ -1050,14 +1073,6 @@ class ModdedDex {
 					Object.assign(data, table.overrideMoveData[id]);
 				}
 			}
-			for (const mid of this.modid) {
-				if (mid !== `gen${this.gen}` && mid in window.BattleTeambuilderTable) {
-					const table = window.BattleTeambuilderTable[mid];
-					if (id in table.overrideMoveData) {
-						Object.assign(data, table.overrideMoveData[id]);
-					}
-				}
-			}
 			if (this.gen <= 3 && data.category !== 'Status') {
 				data.category = Dex.getGen3Category(data.type);
 			}
@@ -1090,14 +1105,6 @@ class ModdedDex {
 				}
 			}
 			for (const mid of this.modid) {
-				if (mid !== `gen${this.gen}` && mid in window.BattleTeambuilderTable) {
-					const table = window.BattleTeambuilderTable[mid];
-					if (id in table.overrideItemDesc) {
-						data.shortDesc = table.overrideItemDesc[id];
-					}
-				}
-			}
-			for (const mid of this.modid) {
 				if (ModModifier[mid]?.itemsMod) ModModifier[mid].itemsMod!(data);
 			}
 
@@ -1122,14 +1129,6 @@ class ModdedDex {
 				const table = window.BattleTeambuilderTable[`gen${i}`];
 				if (id in table.overrideAbilityData) {
 					Object.assign(data, table.overrideAbilityData[id]);
-				}
-			}
-			for (const mid of this.modid) {
-				if (mid !== `gen${this.gen}` && mid in window.BattleTeambuilderTable) {
-					const table = window.BattleTeambuilderTable[mid];
-					if (id in table.overrideAbilityData) {
-						Object.assign(data, table.overrideAbilityData[id]);
-					}
 				}
 			}
 			for (const mid of this.modid) {
@@ -1159,25 +1158,11 @@ class ModdedDex {
 					Object.assign(data, table.overrideSpeciesData[id]);
 				}
 			}
-			for (const mid of this.modid) {
-				if (mid !== `gen${this.gen}` && mid in window.BattleTeambuilderTable) {
-					const table = window.BattleTeambuilderTable[mid];
-					if (id in table.overrideSpeciesData) {
-						Object.assign(data, table.overrideSpeciesData[id]);
-					}
-				}
-			}
 			if (this.gen < 3) {
 				data.abilities = {0: "No Ability"};
 			}
 			for (const mid of this.modid) {
 				if (ModModifier[mid]?.speciesMod) ModModifier[mid].speciesMod!(data);
-			}
-			for (const mid of this.modid) {
-				if (mid in window.BattleTeambuilderTable) {
-					const table = window.BattleTeambuilderTable[mid];
-					if (id in table.overrideTier) data.tier = table.overrideTier[id];
-				}
 			}
 			if (!data.tier && id.slice(-5) === 'totem') {
 				data.tier = this.species.get(id.slice(0, -5)).tier;
@@ -1241,6 +1226,55 @@ class ModdedDex {
 		}
 		return this.pokeballs;
 	}
+
+	getLearnSetTable() {
+		if (this.modid.includes('gen7letsgo' as ID)) return window.BattleTeambuilderTable['gen7letsgo'];
+		if (this.modid.includes('gen8bdsp' as ID)) return window.BattleTeambuilderTable['gen8bdsp'];
+		if (this.modid.includes('digimon' as ID)) return window.DigimonTable;
+		return window.BattleTeambuilderTable;
+	}
+
+	getTierSet() {
+		// part 1: determine table
+		let tierSet = Dex.getTierSet();
+		// todo: figure out HOW to combine tierSets
+		const petmods = ['gen8natdex', 'gen9natdex', 'gen7letsgo', 'gen8bdsp', 'gen9balancedhackmons', 'digimon']
+		for (const mid of this.modid) {
+			if (!petmods.includes(mid)) continue;
+			const table = mid === ('digimon' as ID) ? DigimonTable : window.BattleTeambuilderTable[mid];
+			if (!table) continue;
+			if (!table.tierSet) {
+				table.tierSet = table.tiers.map((r: any) => {
+					if (typeof r === 'string') return ['pokemon', r];
+					return [r[0], r[1]];
+				});
+				table.tiers = null;
+			}
+			tierSet = table.tierSet;
+			break;
+		}
+		// part 2: filter
+		const cupNum = Number(this.modid.find(value => value.match(/\d\d\dcup/))?.slice(0, 3));
+		if (cupNum > 350) {
+			tierSet = tierSet.filter(([type, id]) => {
+				if (type === 'pokemon') {
+					const bst = this.species.get(id).bst;
+					if (bst > cupNum) return false;
+				}
+				return true;
+			});
+		}
+		if (this.modid.includes('infinitefusion' as ID)) {
+			tierSet = tierSet.filter(([type, id]) => {
+				if (type === 'pokemon') {
+					const sp = this.species.get(id);
+					if (sp.baseSpecies !== sp.name) return false;
+				}
+				return true;
+			});
+		}
+		return tierSet;
+	}
 }
 
 /**
@@ -1260,6 +1294,25 @@ const ModModifier: {
 		ModifySpecies?: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex, extra?: any) => Species,
 	}
 } = {
+	'350cup': {
+		speciesMod: (data: any): any => {
+			if (!data.exists) return;
+			data.bst = 0;
+			let newStats = {...data.baseStats};
+			for (const stat in data.baseStats) {
+				newStats[stat] = data.baseStats[stat] * 2;
+				if (newStats[stat] < 1) newStats[stat] = 1;
+				if (newStats[stat] > 255) newStats[stat] = 255;
+				data.bst += newStats[stat];
+			}
+			data.baseStats = newStats;
+		},
+	},
+	metronome: {
+		speciesMod: (data: any): any => {
+			if (data.num >= 0) data.tier = String(data.num);
+		},
+	},
 	scalemons: {
 		speciesMod: (data: any): any => {
 			if (!data.exists) return;
@@ -1438,9 +1491,73 @@ const ModModifier: {
 			return new Species(fusionSpecies.id, fusionSpecies.name, {...fusionSpecies});
 		},
 	},
-	gen7letsgo: {
+	gen8natdex: {
 		speciesMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen8natdex'];
+			if (data.id in table.overrideTier) data.tier = table.overrideTier[data.id];
+		},
+	},
+	gen9natdex: {
+		speciesMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen9natdex'];
+			if (data.id in table.overrideTier) data.tier = table.overrideTier[data.id];
+		},
+	},
+	gen7letsgo: {
+		movesMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen7letsgo'];
+			if (data.id in table.overrideMoveData) Object.assign(data, table.overrideMoveData[data.id]);
+		},
+		itemsMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen7letsgo'];
+			if (data.id in table.overrideItemDesc) data.shortDesc = table.overrideItemDesc[data.id];
+		},
+		abilitiesMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen7letsgo'];
+			if (data.id in table.overrideAbilityData) Object.assign(data, table.overrideAbilityData[data.id]);
+		},
+		speciesMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen7letsgo'];
+			if (data.id in table.overrideSpeciesData) Object.assign(data, table.overrideSpeciesData[data.id]);
 			data.abilities = {0: "No Ability"};
+			if (data.id in table.overrideTier) data.tier = table.overrideTier[data.id];
+		},
+	},
+	gen8bdsp: {
+		movesMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen8bdsp'];
+			if (data.id in table.overrideMoveData) Object.assign(data, table.overrideMoveData[data.id]);
+		},
+		itemsMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen8bdsp'];
+			if (data.id in table.overrideItemDesc) data.shortDesc = table.overrideItemDesc[data.id];
+		},
+		abilitiesMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen8bdsp'];
+			if (data.id in table.overrideAbilityData) Object.assign(data, table.overrideAbilityData[data.id]);
+		},
+		speciesMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen8bdsp'];
+			if (data.id in table.overrideSpeciesData) Object.assign(data, table.overrideSpeciesData[data.id]);
+			if (data.id in table.overrideTier) data.tier = table.overrideTier[data.id];
+		},
+	},
+	gen9morebalancedhackmons: {
+		movesMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen9morebalancedhackmons'];
+			if (data.id in table.overrideMoveData) Object.assign(data, table.overrideMoveData[data.id]);
+		},
+		itemsMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen9morebalancedhackmons'];
+			if (data.id in table.overrideItemDesc) data.shortDesc = table.overrideItemDesc[data.id];
+		},
+		abilitiesMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen9morebalancedhackmons'];
+			if (data.id in table.overrideAbilityData) Object.assign(data, table.overrideAbilityData[data.id]);
+		},
+		speciesMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['gen9morebalancedhackmons'];
+			if (data.id in table.overrideSpeciesData) Object.assign(data, table.overrideSpeciesData[data.id]);
 		},
 	},
 	digimon: {
