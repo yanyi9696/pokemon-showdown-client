@@ -200,6 +200,8 @@ const Dex = new class implements ModdedDex {
 
 		const genStrings = formatid.match(/gen\d+/g);
 		const gen = genStrings ? genStrings[0] : this.currentGen;
+		// official formats
+		if (formatid.includes('nationaldex') || formatid.includes('natdex') || formatid.startsWith('nd')) modids.push((gen + 'natdex') as ID);
 		// oms
 		if (formatid.includes('scalemons')) modids.push('scalemons' as ID);
 		if (formatid.includes('thecardgame')) modids.push('thecardgame' as ID);
