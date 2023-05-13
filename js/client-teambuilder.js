@@ -2913,7 +2913,8 @@
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
 			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.includes('natdex') ||
-				this.curTeam.format.startsWith('gen8nd') || this.curTeam.format.includes('morebalancedhackmons');
+				this.curTeam.format.startsWith('gen8nd') || this.curTeam.format.startsWith('gen9nd') ||
+				this.curTeam.format.includes('morebalancedhackmons');
 			var isHackmons = this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh');
 			var isDigimon = this.curTeam.format.includes('digimon');
 			var isCreatemon = this.curTeam.format.includes('createmons');
