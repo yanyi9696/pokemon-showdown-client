@@ -3376,18 +3376,18 @@
 				val = (id in BattlePokedex ? this.curTeam.dex.species.get(e.currentTarget.value).name : '');
 				break;
 			case 'ability':
-				if (id in BattleItems && (format.includes("dualwielding") || formats.includes("moveitemability"))) {
+				if (id in BattleItems && (format.includes("dualwielding") || format.includes("moveitemability"))) {
 					val = BattleItems[id].name;
-				} else if (id in BattleMovedex && (format.includes("trademarked") || formats.includes("moveitemability"))) {
+				} else if (id in BattleMovedex && (format.includes("trademarked") || format.includes("moveitemability"))) {
 					val = BattleMovedex[id].name;
 				} else {
 					val = (id in BattleAbilities ? BattleAbilities[id].name : '');
 				}
 				break;
 			case 'item':
-				if (id in BattleMovedex && (format.includes("fortemons") || formats.includes("moveitemability"))) {
+				if (id in BattleMovedex && (format.includes("fortemons") || format.includes("moveitemability"))) {
 					val = BattleMovedex[id].name;
-				} else if (id in BattleAbilities && (format.includes("multibility") || formats.includes("moveitemability"))) {
+				} else if (id in BattleAbilities && (format.includes("multibility") || format.includes("moveitemability"))) {
 					val = BattleAbilities[id].name;
 				} else {
 					val = (id in BattleItems ? BattleItems[id].name : '');
