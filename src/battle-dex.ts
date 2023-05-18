@@ -492,7 +492,7 @@ const Dex = new class implements ModdedDex {
 		let isDynamax = !!options.dynamax;
 		if (pokemon instanceof Pokemon) {
 			// @ts-ignore
-			if (options.mod === 'infinitefusion') return this.getIFSpriteData(pokemon, isFront, options);
+			if (options.mod === 'infinitefusion' && !Dex.prefs('noif')) return this.getIFSpriteData(pokemon, isFront, options);
 			if (pokemon.volatiles.transform) {
 				options.shiny = pokemon.volatiles.transform[2];
 				options.gender = pokemon.volatiles.transform[3];
@@ -940,7 +940,7 @@ const Dex = new class implements ModdedDex {
 	getTeambuilderSprite(pokemon: any, gen: number = 0) {
 		if (!pokemon) return '';
 		// Nihilslave: for IF
-		const data = pokemon.isIF ? this.getIFTeambuilderSpriteData(pokemon, gen) : this.getTeambuilderSpriteData(pokemon, gen);
+		const data = (pokemon.isIF && !Dex.prefs('noif')) ? this.getIFTeambuilderSpriteData(pokemon, gen) : this.getTeambuilderSpriteData(pokemon, gen);
 		if (pokemon.isIF && data.shiny) return data.spriteid.split('/')[1];
 		const shiny = (data.shiny ? '-shiny' : '');
 		return 'background-image:url(' + Dex.resourcePrefix + data.spriteDir + shiny + '/' + data.spriteid + '.png);background-position:' + data.x + 'px ' + data.y + 'px;background-repeat:no-repeat';

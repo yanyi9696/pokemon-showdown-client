@@ -454,6 +454,7 @@
 			'change input[name=nogif]': 'setNogif',
 			'change input[name=bwgfx]': 'setBwgfx',
 			'change input[name=nopastgens]': 'setNopastgens',
+			'change input[name=noif]': 'setNoif',
 			'change select[name=tournaments]': 'setTournaments',
 			'change select[name=language]': 'setLanguage',
 			'change input[name=blockchallenges]': 'setBlockchallenges',
@@ -508,6 +509,7 @@
 			}
 			buf += '<p><label class="optlabel"><input type="checkbox" name="bwgfx"' + (Dex.prefs('bwgfx') ? ' checked' : '') + ' /> Use BW sprites instead of XY models</label></p>';
 			buf += '<p><label class="optlabel"><input type="checkbox" name="nopastgens"' + (Dex.prefs('nopastgens') ? ' checked' : '') + ' /> Use modern sprites for past generations</label></p>';
+			buf += '<p><label class="optlabel"><input type="checkbox" name="noif"' + (Dex.prefs('noif') ? ' checked' : '') + ' /> Disable Infinite Fusion Sprites</label></p>';
 
 			buf += '<hr />';
 			buf += '<p><strong>Chat</strong></p>';
@@ -609,6 +611,10 @@
 		setNopastgens: function (e) {
 			var nopastgens = !!e.currentTarget.checked;
 			Storage.prefs('nopastgens', nopastgens);
+		},
+		setNoif: function (e) {
+			var noif = !!e.currentTarget.checked;
+			Storage.prefs('noif', noif);
 		},
 		setTournaments: function (e) {
 			var tournaments = e.currentTarget.value;
