@@ -2304,6 +2304,7 @@ export class Battle {
 				case 'utilityumbrella':
 					if (this.tier.includes('More Balanced Hackmons')) {
 						this.scene.resultAnim(poke, 'Umbrella', 'good');
+						this.scene.updateWeather();
 					}
 					break;
 				}

@@ -76,6 +76,11 @@ class ModifiableValue {
 					this.comment.push(` (${weatherName} suppressed by ${active.ability})`);
 					return false;
 				}
+				if (this.battle.tier.includes('More Balanced Hackmons') &&
+					active && toID(active.item) === 'utilityumbrella') {
+					this.comment.push(` (${weatherName} suppressed by ${active.item})`);
+					return false;
+				}
 			}
 		}
 		return true;
