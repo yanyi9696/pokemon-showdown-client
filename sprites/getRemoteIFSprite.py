@@ -1,3 +1,5 @@
+# originated from https://github.com/Aegide/autogen-fusion-sprites
+
 from selenium.webdriver import Firefox as firefox
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
