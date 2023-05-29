@@ -407,6 +407,8 @@
 		if (this.mod.includes('350cup') && bst <= 350) {
 			for (i in stats) stats[i] *= 2;
 			if (stats[i] > 255) stats[i] = 255;
+			bst = 0;
+			for (i in stats) bst += stats[i];
 		}
 		buf += '<span class="col statcol"><em>HP</em><br />' + stats.hp + '</span> ';
 		buf += '<span class="col statcol"><em>Atk</em><br />' + stats.atk + '</span> ';
