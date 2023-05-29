@@ -184,6 +184,9 @@
 		if (format.includes('thecardgame')) {
 			this.mod += 'thecardgame';
 		}
+		if (format.includes('350cup')) {
+			this.mod += '350cup';
+		}
 		this.find('', firstElem);
 	};
 
@@ -399,6 +402,12 @@
 
 		// base stats
 		var stats = pokemon.baseStats;
+		var bst = 0;
+		for (i in stats) bst += stats[i];
+		if (this.mod.includes('350cup') && bst <= 350) {
+			for (i in stats) stats[i] *= 2;
+			if (stats[i] > 255) stats[i] = 255;
+		}
 		buf += '<span class="col statcol"><em>HP</em><br />' + stats.hp + '</span> ';
 		buf += '<span class="col statcol"><em>Atk</em><br />' + stats.atk + '</span> ';
 		buf += '<span class="col statcol"><em>Def</em><br />' + stats.def + '</span> ';
@@ -409,8 +418,6 @@
 			buf += '<span class="col statcol"><em>Spc</em><br />' + stats.spa + '</span> ';
 		}
 		buf += '<span class="col statcol"><em>Spe</em><br />' + stats.spe + '</span> ';
-		var bst = 0;
-		for (i in stats) bst += stats[i];
 		buf += '<span class="col bstcol"><em>BST<br />' + bst + '</em></span> ';
 
 		buf += '</a></li>';

@@ -2314,10 +2314,16 @@
 			var set = this.curSet;
 			var species = this.curTeam.dex.species.get(this.curSet.species);
 			var isCreatemon = this.curTeam.format.includes('createmons');
+			var is350 = this.curTeam.format.includes('350cup');
 			var isCE = this.curTeam.format.includes('crossevolution');
 			var isIF = this.curTeam.format.includes('infinitefusion');
 
 			var baseStats = species.baseStats;
+			if (is350) {
+				if (this.get350Species(set)) {
+					baseStats = this.get350Species(set).baseStats;
+				}
+			}
 			if (isCE) {
 				if (this.getCESpecies(set)) {
 					baseStats = this.getCESpecies(set).baseStats;
@@ -3727,6 +3733,7 @@
 		getStat: function (stat, set, evOverride, natureOverride) {
 			var supportsEVs = !this.curTeam.format.includes('letsgo');
 			var supportsAVs = !supportsEVs;
+			var is350 = this.curTeam.format.includes('350cup');
 			var isCE = this.curTeam.format.includes('crossevolution');
 			var isIF = this.curTeam.format.includes('infinitefusion');
 			if (!set) set = this.curSet;
@@ -3751,6 +3758,12 @@
 			if (typeof set.ivs[stat] === 'undefined') set.ivs[stat] = 31;
 
 			var baseStat = species.baseStats[stat];
+			if (is350) {
+				const _350Species = this.get350Species(set);
+				if (_350Species) {
+					baseStat = _350Species.baseStats[stat];
+				}
+			}
 			if (isCE) {
 				const CESpecies = this.getCESpecies(set);
 				if (CESpecies) {
@@ -3909,6 +3922,16 @@
 				totalPoint += Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10];
 			}
 			return totalPoint;
+		},
+		get350Species: function (set) {
+			const species = this.curTeam.dex.species.get(set.species);
+			if (species.bst > 350) return;
+			const resultSpecies = this.deepClone(species);
+			for (var stat in resultSpecies.baseStats) {
+				resultSpecies[stat] *= 2;
+				if (resultSpecies.baseStats[stat] > 255) resultSpecies.baseStats[stat] = 255;
+			}
+			return resultSpecies;
 		},
 		getCESpecies: function (set) {
 			const species = this.curTeam.dex.species.get(set.species);
