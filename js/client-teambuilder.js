@@ -3928,7 +3928,7 @@
 			if (species.bst > 350) return;
 			const resultSpecies = this.deepClone(species);
 			for (var stat in resultSpecies.baseStats) {
-				resultSpecies[stat] *= 2;
+				resultSpecies.baseStats[stat] *= 2;
 				if (resultSpecies.baseStats[stat] > 255) resultSpecies.baseStats[stat] = 255;
 			}
 			return resultSpecies;
