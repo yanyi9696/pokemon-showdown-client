@@ -1545,7 +1545,7 @@ process.stdout.write("Building `data/digimon.js`...");
 	const DigiLearnsets = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/learnsets.js').Learnsets;
 
 	const digimon = Object.keys(Digidex);
-	digimon.sort;
+	digimon.sort();
 	const tierTable = {};
 	for (const id of digimon) {
 		const species = Dex.mod('digimon').species.get(id);
@@ -1841,9 +1841,9 @@ process.stdout.write("Building `data/createmons.js`...");
 	const typeToPoint = requireNoCache('../data/pokemon-showdown/dist/data/mods/createmons/pointchart.js').typeToPoint;
 	const abilityToPoint = requireNoCache('../data/pokemon-showdown/dist/data/mods/createmons/pointchart.js').abilityToPoint;
 	const moveToPoint = requireNoCache('../data/pokemon-showdown/dist/data/mods/createmons/pointchart.js').moveToPoint;
-	const buf = 'exports.typeToPoint = ' + es3stringify(typeToPoint) + ';' 
-			+ 'exports.abilityToPoint = ' + es3stringify(abilityToPoint) + ';' 
-			+ 'exports.moveToPoint = ' + es3stringify(moveToPoint) + ';';
+	const buf = 'exports.typeToPoint = ' + es3stringify(typeToPoint) + ';' +
+			'exports.abilityToPoint = ' + es3stringify(abilityToPoint) + ';' +
+			'exports.moveToPoint = ' + es3stringify(moveToPoint) + ';';
 	fs.writeFileSync('data/createmons.js', buf);
 }
 
