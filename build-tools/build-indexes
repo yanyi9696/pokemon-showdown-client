@@ -1600,7 +1600,7 @@ process.stdout.write("Building `data/digimon.js`...");
 	const badItems = [['header', "Useless items"]];
 	const unreleasedItems = [];
 	for (const id of itemList) {
-		const item = Dex.mod('digimon').items.get(id);
+		// const item = Dex.mod('digimon').items.get(id);
 		switch (id) {
 		default:
 			greatItems.push(id);
