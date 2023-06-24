@@ -841,27 +841,19 @@ const Dex = new class implements ModdedDex {
 			if (modSpecies.exists === true) {
 				const modSpriteData: TeambuilderSpriteData = {
 					spriteid: modSpecies.id,
-					spriteDir: 'sprites/dex',
+					spriteDir: 'sprites/digimon/dex',
 					x: -6,
-					y: -7,
+					y: 0,
 				};
-				if (id === 'hououmon') {
-					modSpriteData.x = -3;
-					modSpriteData.y = 0;
-				}
-				if (id === 'holydramon' || id === 'omegamon') {
-					modSpriteData.y = 0;
-				}
-				if (id === 'rosemon') {
-					modSpriteData.y = 14;
-				}
-				if (id === 'plesiomon' || id === 'vikemon') {
-					modSpriteData.x = 0;
-					modSpriteData.y = 0;
-				}
-				if (id === 'diablomon' || id === 'wargreymon') {
-					modSpriteData.y = 7;
-				}
+				if ([
+					'andromon', 'angewomon', 'bakemon', 'darktyranomon', 'deathmeramon', 'geremon', 'hiandromon', 'numemon',
+					'rosemon',
+				].includes(id)) modSpriteData.y = 14;
+				if ([
+					'agumon', 'agumonblack', 'blackwargreymon', 'boltmon', 'centalmon', 'diablomon', 'garudamon',
+					'grappuleomon', 'ladydevimon', 'leomon', 'mastertyranomon', 'megaseadramon', 'plotmon', 'vamdemon',
+					'wargreymon', 'weregarurumon', 'weregarurumonblack', 'yukiagumon',
+				].includes(id)) modSpriteData.y = 7;
 				return modSpriteData;
 			}
 			return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
