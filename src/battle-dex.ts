@@ -846,13 +846,13 @@ const Dex = new class implements ModdedDex {
 					y: 0,
 				};
 				if ([
-					'andromon', 'angewomon', 'bakemon', 'darktyranomon', 'deathmeramon', 'geremon', 'hiandromon', 'numemon',
+					'andromon', 'angewomon', 'bakemon', 'darktyranomon', 'geremon', 'hiandromon', 'numemon',
 					'rosemon',
 				].includes(id)) modSpriteData.y = 14;
 				if ([
-					'agumon', 'agumonblack', 'blackwargreymon', 'boltmon', 'centalmon', 'diablomon', 'garudamon',
-					'grappuleomon', 'ladydevimon', 'leomon', 'mastertyranomon', 'megaseadramon', 'plotmon', 'vamdemon',
-					'wargreymon', 'weregarurumon', 'weregarurumonblack', 'yukiagumon',
+					'agumon', 'agumonblack', 'blackwargreymon', 'boltmon', 'centalmon', 'deathmeramon', 'diablomon',
+					'garudamon', 'grappuleomon', 'ladydevimon', 'leomon', 'mastertyranomon', 'megaseadramon', 'plotmon',
+					'vamdemon', 'wargreymon', 'weregarurumon', 'weregarurumonblack', 'yukiagumon',
 				].includes(id)) modSpriteData.y = 7;
 				return modSpriteData;
 			}

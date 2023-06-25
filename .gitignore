@@ -1,5 +1,7 @@
 /sprites/*
-!/sprites/getRemoteIFSprite.py
+!/sprites/*.py
+!/sprites/digimon/
+/sprites/digimon/*/
 /audio/
 /index.php
 /index.html
