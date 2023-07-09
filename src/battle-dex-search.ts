@@ -1744,7 +1744,24 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		}
 		if (isIF && this.set?.name) {
 			const headSpecies = dex.species.get(this.set.name);
-			let headLearnsetid;
+			// should have head learnset whether or not it's a special fusion
+			// todo: polish
+			let headLearnsetid = this.firstLearnsetid(headSpecies.id);
+			while (headLearnsetid) {
+				let headLearnset = lsetTable.learnsets[headLearnsetid];
+				if (headLearnset) {
+					for (let moveid in headLearnset) {
+						if (moves.includes(moveid)) continue;
+						moves.push(moveid);
+						if (moveid === 'hiddenpower') {
+							moves.push(
+								'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
+							);
+						}
+					}
+				}
+				headLearnsetid = this.nextLearnsetid(headLearnsetid, headSpecies.id);
+			}
 			if (headSpecies.name === species.name) {
 				const specialSelfFusions: {[k: string]: string} = {
 					deoxys: 'Deoxys-Attack',
