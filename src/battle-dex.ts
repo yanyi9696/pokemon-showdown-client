@@ -208,7 +208,7 @@ const Dex = new class implements ModdedDex {
 		if (formatid.includes('hackmons') || formatid.endsWith('bh')) modids.push('hackmons' as ID);
 		if (formatid.includes('metronome')) modids.push('metronome' as ID);
 		if (formatid.includes('scalemons')) modids.push('scalemons' as ID);
-		if (formatid.includes('stabmons') && formatid.includes('staaabmons')) modids.push('stabmons' as ID);
+		if (formatid.includes('stabmons') || formatid.includes('staaabmons')) modids.push('stabmons' as ID);
 		if (formatid.includes('thecardgame')) modids.push('thecardgame' as ID);
 		// species oms
 		// mnm, camo, ce, ...
