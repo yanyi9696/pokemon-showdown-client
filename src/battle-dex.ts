@@ -1022,6 +1022,10 @@ const Dex = new class implements ModdedDex {
 		return window.BattleTeambuilderTable;
 	}
 
+	getMovedex() {
+		return window.BattleMovedex;
+	}
+
 	getTierSet() {
 		const table = window.BattleTeambuilderTable;
 		if (!table.tierSet) {
@@ -1319,6 +1323,10 @@ class ModdedDex {
 		if (this.modid.includes('gen8bdsp' as ID)) return window.BattleTeambuilderTable['gen8bdsp'];
 		if (this.modid.includes('digimon' as ID)) return window.DigimonTable;
 		return window.BattleTeambuilderTable;
+	}
+
+	getMovedex() {
+		return window.BattleMovedex;
 	}
 
 	getTierSet() {
@@ -1786,6 +1794,19 @@ const ModModifier: {
 			fusionSpecies.types = newTypes;
 
 			return new Species(fusionSpecies.id, fusionSpecies.name, {...fusionSpecies});
+		},
+		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
+			const name = pokemon.name || '';
+			const headSpecies = dex.species.get(name);
+			if (!headSpecies.exists) return learnset;
+			const fusionSpecies = dex.species.getFromPokemon(pokemon);
+			const moveDex = window.BattleMovedex;
+			for (const id in moveDex) {
+				if (learnset.includes(id)) continue;
+				if (!dex.canLearn(headSpecies.id, id as ID) && !dex.canLearn(fusionSpecies.id, id as ID)) continue;
+				learnset.push(id);
+			}
+			return learnset;
 		},
 	},
 	// todo: change isNonStandard of moves in natdex
