@@ -1611,7 +1611,7 @@ const ModModifier: {
 						break;
 					}
 				}
-				learnset.push(id);
+				if (valid) learnset.push(id);
 			}
 			return learnset;
 		},
