@@ -2258,6 +2258,7 @@
 			var set = this.curSet;
 			var species = this.curTeam.dex.species.getFromPokemon(this.curSet);
 			var isCreatemon = this.curTeam.format.includes('createmons');
+			var is350 = this.curTeam.format.includes('350cup');
 			var isCE = this.curTeam.format.includes('crossevolution');
 			var isIF = this.curTeam.format.includes('infinitefusion');
 
@@ -2847,7 +2848,8 @@
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
 			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.includes('natdex') ||
-				this.curTeam.format.startsWith('gen8nd') || this.curTeam.format.includes('morebalancedhackmons');
+				this.curTeam.format.startsWith('gen8nd') || this.curTeam.format.startsWith('gen9nd') ||
+				this.curTeam.format.includes('morebalancedhackmons');
 			var isHackmons = this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh');
 			var isDigimon = this.curTeam.format.includes('digimon');
 			var isCreatemon = this.curTeam.format.includes('createmons');
@@ -3309,18 +3311,18 @@
 				val = (id in BattlePokedex ? this.curTeam.dex.species.get(e.currentTarget.value).name : '');
 				break;
 			case 'ability':
-				if (id in BattleItems && format.includes("dualwielding")) {
+				if (id in BattleItems && (format.includes("dualwielding") || format.includes("moveitemability"))) {
 					val = BattleItems[id].name;
-				} else if (id in BattleMovedex && format.includes("trademarked")) {
+				} else if (id in BattleMovedex && (format.includes("trademarked") || format.includes("moveitemability"))) {
 					val = BattleMovedex[id].name;
 				} else {
 					val = (id in BattleAbilities ? BattleAbilities[id].name : '');
 				}
 				break;
 			case 'item':
-				if (id in BattleMovedex && format.includes("fortemons")) {
+				if (id in BattleMovedex && (format.includes("fortemons") || format.includes("moveitemability"))) {
 					val = BattleMovedex[id].name;
-				} else if (id in BattleAbilities && format.includes("multibility")) {
+				} else if (id in BattleAbilities && (format.includes("multibility") || format.includes("moveitemability"))) {
 					val = BattleAbilities[id].name;
 				} else {
 					val = (id in BattleItems ? BattleItems[id].name : '');
@@ -3654,6 +3656,7 @@
 		getStat: function (stat, set, evOverride, natureOverride) {
 			var supportsEVs = !this.curTeam.format.includes('letsgo');
 			var supportsAVs = !supportsEVs;
+			var is350 = this.curTeam.format.includes('350cup');
 			var isCE = this.curTeam.format.includes('crossevolution');
 			var isIF = this.curTeam.format.includes('infinitefusion');
 			if (!set) set = this.curSet;

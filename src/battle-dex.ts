@@ -524,7 +524,7 @@ const Dex = new class implements ModdedDex {
 		let isDynamax = !!options.dynamax;
 		if (pokemon instanceof Pokemon) {
 			// @ts-ignore
-			if (options.mod === 'infinitefusion') return this.getIFSpriteData(pokemon, isFront, options);
+			if (options.mod === 'infinitefusion' && !Dex.prefs('noif')) return this.getIFSpriteData(pokemon, isFront, options);
 			if (pokemon.volatiles.transform) {
 				options.shiny = pokemon.volatiles.transform[2];
 				options.gender = pokemon.volatiles.transform[3];
@@ -858,7 +858,7 @@ const Dex = new class implements ModdedDex {
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
 		let fainted = ((pokemon as Pokemon | ServerPokemon)?.fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
-		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v12) no-repeat scroll -${left}px -${top}px${fainted}`;
+		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v13) no-repeat scroll -${left}px -${top}px${fainted}`;
 	}
 
 	getTeambuilderSpriteData(pokemon: any, gen: number = 0): TeambuilderSpriteData {
@@ -873,27 +873,19 @@ const Dex = new class implements ModdedDex {
 			if (modSpecies.exists === true) {
 				const modSpriteData: TeambuilderSpriteData = {
 					spriteid: modSpecies.id,
-					spriteDir: 'sprites/dex',
+					spriteDir: 'sprites/digimon/dex',
 					x: -6,
-					y: -7,
+					y: 0,
 				};
-				if (id === 'hououmon') {
-					modSpriteData.x = -3;
-					modSpriteData.y = 0;
-				}
-				if (id === 'holydramon' || id === 'omegamon') {
-					modSpriteData.y = 0;
-				}
-				if (id === 'rosemon') {
-					modSpriteData.y = 14;
-				}
-				if (id === 'plesiomon' || id === 'vikemon') {
-					modSpriteData.x = 0;
-					modSpriteData.y = 0;
-				}
-				if (id === 'diablomon' || id === 'wargreymon') {
-					modSpriteData.y = 7;
-				}
+				if ([
+					'andromon', 'angewomon', 'bakemon', 'darktyranomon', 'geremon', 'hiandromon', 'numemon',
+					'rosemon',
+				].includes(id)) modSpriteData.y = 14;
+				if ([
+					'agumon', 'agumonblack', 'blackwargreymon', 'boltmon', 'centalmon', 'deathmeramon', 'diablomon',
+					'garudamon', 'grappuleomon', 'ladydevimon', 'leomon', 'mastertyranomon', 'megaseadramon', 'plotmon',
+					'vamdemon', 'wargreymon', 'weregarurumon', 'weregarurumonblack', 'yukiagumon',
+				].includes(id)) modSpriteData.y = 7;
 				return modSpriteData;
 			}
 			return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
@@ -972,7 +964,7 @@ const Dex = new class implements ModdedDex {
 	getTeambuilderSprite(pokemon: any, gen: number = 0) {
 		if (!pokemon) return '';
 		// Nihilslave: for IF
-		const data = pokemon.isIF ? this.getIFTeambuilderSpriteData(pokemon, gen) : this.getTeambuilderSpriteData(pokemon, gen);
+		const data = (pokemon.isIF && !Dex.prefs('noif')) ? this.getIFTeambuilderSpriteData(pokemon, gen) : this.getTeambuilderSpriteData(pokemon, gen);
 		if (pokemon.isIF && data.shiny) return data.spriteid.split('/')[1];
 		const shiny = (data.shiny ? '-shiny' : '');
 		return 'background-image:url(' + Dex.resourcePrefix + data.spriteDir + shiny + '/' + data.spriteid + '.png);background-position:' + data.x + 'px ' + data.y + 'px;background-repeat:no-repeat';
