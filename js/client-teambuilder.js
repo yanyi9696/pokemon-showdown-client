@@ -1268,7 +1268,7 @@
 				if (this.curTeam.gen === 9) {
 					if (!isCreatemon && !isDigimon && !isIF) {
 						buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
-					} else if (isCreatemon){
+					} else if (isCreatemon) {
 						// buf += '<span class="detailcell"><label>Second Type</label>' + (set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0])) + '</span>';
 					}
 				}
@@ -1709,14 +1709,14 @@
 		// check/copy/import/export/move/delete
 		checkPoint: function (i, button) {
 			i = +($(button).closest('li').attr('value'));
-			const details = this.getSetPoint(this.curTeam.dex, this.curSetList[i]);
+			var pointDetails = this.getSetPoint(this.curTeam.dex, this.curSetList[i]);
 			app.addPopupMessage(
-				'S: ' + details[0] + '\n' + 
-				'T: ' + details[1].toFixed(1) + ' = ' + details[2] + (details[3] === -1 ? ' * 1.5' : (' + ' + details[3])) + '\n' + 
-				'A: ' + details[4] + '\n' + 
-				'M: ' + details[5] + ' = ' + details[6] + ' + ' + details[7] + ' + ' + details[8] + ' + ' + details[9] + '\n' + 
-				(details[10] ? ('P: ' + details[10] + ' = 2 * ' + details[11] + ' + ' + details[12] + ' + ' + details[13] + ' + ' + details[14] + ' + ' + details[15] + ' + ' + details[16] + '\n') : '') + 
-				'Total: ' + (Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10])
+				'S: ' + pointDetails[0] + '\n' +
+				'T: ' + pointDetails[1].toFixed(1) + ' = ' + pointDetails[2] + (pointDetails[3] === -1 ? ' * 1.5' : (' + ' + pointDetails[3])) + '\n' +
+				'A: ' + pointDetails[4] + '\n' +
+				'M: ' + pointDetails[5] + ' = ' + pointDetails[6] + ' + ' + pointDetails[7] + ' + ' + pointDetails[8] + ' + ' + pointDetails[9] + '\n' +
+				(pointDetails[10] ? ('P: ' + pointDetails[10] + ' = 2 * ' + pointDetails[11] + ' + ' + pointDetails[12] + ' + ' + pointDetails[13] + ' + ' + pointDetails[14] + ' + ' + pointDetails[15] + ' + ' + pointDetails[16] + '\n') : '') +
+				'Total: ' + (Math.floor(pointDetails[0] * pointDetails[1] * pointDetails[4] * pointDetails[5]) + pointDetails[10])
 			);
 			button.blur();
 		},
@@ -2059,7 +2059,7 @@
 			if (this.curTeam.gen > 2 && supportsEVs && !isCreatemon) buf += '<div><em>Remaining:</em></div>';
 			if (isCreatemon) {
 				buf += '<div><em>BST:</em><em>S:</em>';
-				const bcPenalty = this.calcPPoint(set.evs);
+				var bcPenalty = this.calcPPoint(set.evs);
 				if (bcPenalty > 0) {
 					buf += '<em>P:</em></div>';
 				} else {
@@ -2078,8 +2078,8 @@
 				}
 			}
 			if (isCreatemon) {
-				let totalevBuf = '<b>' + totalev + '</b><b>' + this.calcBSPoint(set.evs) + '</b>';
-				const bcPenalty = this.calcPPoint(set.evs);
+				var totalevBuf = '<b>' + totalev + '</b><b>' + this.calcBSPoint(set.evs) + '</b>';
+				var bcPenalty = this.calcPPoint(set.evs);
 				if (bcPenalty > 0) {
 					totalevBuf += '<b>' + bcPenalty + '</b>';
 				}
@@ -2275,7 +2275,7 @@
 					spd: 31,
 					spe: 31
 				};
-			} 
+			}
 
 			buf += '<div class="resultheader"><h3>EVs</h3></div>';
 			buf += '<div class="statform">';
@@ -2374,7 +2374,7 @@
 			if (this.curTeam.gen > 2 && supportsEVs && !isCreatemon) buf += '<div><em>Remaining:</em></div>';
 			if (isCreatemon) {
 				buf += '<div><em>BST:</em><em>S:</em>';
-				const bcPenalty = this.calcPPoint(set.evs);
+				var bcPenalty = this.calcPPoint(set.evs);
 				if (bcPenalty > 0) {
 					buf += '<em>P:</em></div>';
 				} else {
@@ -2417,7 +2417,7 @@
 			}
 			if (isCreatemon) {
 				buf += '<div class="totalev"><b>' + totalev + '</b><b>' + this.calcBSPoint(set.evs) + '</b>';
-				const bcPenalty = this.calcPPoint(set.evs);
+				var bcPenalty = this.calcPPoint(set.evs);
 				if (bcPenalty > 0) {
 					buf += '<b>' + bcPenalty + '</b></div>';
 				} else {
@@ -2949,16 +2949,16 @@
 				buf += '<div class="formrow"><label class="formlabel" title="Pre-Evolution">Pre-Evolution:</label><div><select name="preevo">';
 				buf += '<option value=""' + (!set.preEvo ? ' selected="selected"' : '') + '>(none)</option>'; // unset
 				if (species.evos !== null && species.evos.length) {
-					const preEvos = species.evos;
-					for (const preEvo of preEvos) {
-						buf += '<option value="' + preEvo + '"' + (set.preEvo === preEvo ? ' selected="selected"' : '') + '>' + preEvo + '</option>';
+					var preEvos = species.evos;
+					for (var i = 0; i < preEvos.length; i++) {
+						buf += '<option value="' + preEvos[i] + '"' + (set.preEvo === preEvos[i] ? ' selected="selected"' : '') + '>' + preEvos[i] + '</option>';
 					}
 				} else if (species.forme === "X") {
-					const preXSpecies = this.curTeam.dex.species.get(species.baseSpecies);
+					var preXSpecies = this.curTeam.dex.species.get(species.baseSpecies);
 					if (preXSpecies.evos !== null && preXSpecies.evos.length) {
-						const preEvos = preXSpecies.evos;
-						for (const preEvo of preEvos) {
-							buf += '<option value="' + preEvo + '"' + (set.preEvo === preEvo ? ' selected="selected"' : '') + '>' + preEvo + '</option>';
+						var preEvos = preXSpecies.evos;
+						for (var i = 0; i < preEvos.length; i++) {
+							buf += '<option value="' + preEvos[i] + '"' + (set.preEvo === preEvos[i] ? ' selected="selected"' : '') + '>' + preEvos[i] + '</option>';
 						}
 					}
 				}
@@ -3083,16 +3083,15 @@
 			// preEvo
 			var preEvo = this.$chart.find('select[name=preevo]').val();
 			if (preEvo) {
-				let preEvoSpecies = this.curTeam.dex.species.get(preEvo);
+				var preEvoSpecies = this.curTeam.dex.species.get(preEvo);
 				if (preEvoSpecies.exists) {
-					if (species.evos?.includes(preEvoSpecies.name) || species.forme === "X" && this.curTeam.dex.species.get(species.baseSpecies).evos?.includes(preEvoSpecies.name)) {
+					if ((species.evos || []).includes(preEvoSpecies.name) ||
+						species.forme === "X" && (this.curTeam.dex.species.get(species.baseSpecies).evos || []).includes(preEvoSpecies.name)) {
 						set.preEvo = preEvo;
-					}
-					else {
+					} else {
 						delete set.preEvo;
 					}
-				}
-				else {
+				} else {
 					delete set.preEvo;
 				}
 			} else {
@@ -3713,33 +3712,34 @@
 		// Nihilslave: utility functions
 		deepClone: function (obj) {
 			if (obj === null || typeof obj !== 'object') return obj;
-			if (Array.isArray(obj)) return obj.map(prop => this.deepClone(prop));
-			const clone = Object.create(Object.getPrototypeOf(obj));
-			for (const key of Object.keys(obj)) {
-				clone[key] = this.deepClone(obj[key]);
+			if (Array.isArray(obj)) return obj.map(this.deepClone);
+			var clone = Object.create(Object.getPrototypeOf(obj));
+			var keys = Object.keys(obj);
+			for (var i = 0; i < keys.length; i++) {
+				clone[keys[i]] = this.deepClone(obj[keys[i]]);
 			}
 			return clone;
 		},
 		calcBSPoint: function (stats) {
 			for (var statName in stats) stats[statName] = stats[statName] || 1;
-			const h = stats['hp'];
-			const a = stats['atk'];
-			const b = stats['def'];
-			const c = stats['spa'];
-			const d = stats['spd'];
-			const s = stats['spe'];
-			const actualBs1 = h * b + h * d + s * s + 50 * (2 * h + a + 2 * b + c + 2 * d - 4 * s) + 25000;
-			const sqrtActualBs1 = Math.sqrt(actualBs1);
-			const actualBs2 = Math.max(h, a, b, c, d, s) + 50;
-			const bs = Math.floor(Math.floor(sqrtActualBs1 * actualBs2) * 5 / 1024);
+			var h = stats['hp'];
+			var a = stats['atk'];
+			var b = stats['def'];
+			var c = stats['spa'];
+			var d = stats['spd'];
+			var s = stats['spe'];
+			var actualBs1 = h * b + h * d + s * s + 50 * (2 * h + a + 2 * b + c + 2 * d - 4 * s) + 25000;
+			var sqrtActualBs1 = Math.sqrt(actualBs1);
+			var actualBs2 = Math.max(h, a, b, c, d, s) + 50;
+			var bs = Math.floor(Math.floor(sqrtActualBs1 * actualBs2) * 5 / 1024);
 			return bs;
 		},
 		calcPPoint: function (stats) {
-			let penalty = 0;
-			for (const statName in stats) {
-				const stat = stats[statName];
+			var penalty = 0;
+			for (var statName in stats) {
+				var stat = stats[statName];
 				if (stat > 150) {
-					const pnt = Math.floor((stat - 150) * (stat - 150) * (stat - 150) * 193 / 2048);
+					var pnt = Math.floor((stat - 150) * (stat - 150) * (stat - 150) * 193 / 2048);
 					penalty += pnt;
 					if (statName === 'hp') {
 						penalty += pnt;
@@ -3752,12 +3752,12 @@
 			// different from server side
 			// BS | T | T1 | T2 | A | M | M1 | M2 | M3 | M4 |  P | P1 | P2 | P3 | P4 | P5 | P6 |
 			//  0 | 1 |  2 |  3 | 4 | 5 |  6 |  7 |  8 |  9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
-			const details = [];
-			const species = dex.species.get(set.species);
+			var details = [];
+			var species = dex.species.get(set.species);
 
-			const typeToPoint = exports.typeToPoint;
-			const abilityToPoint = exports.abilityToPoint;
-			const moveToPoint = exports.moveToPoint;
+			var typeToPoint = exports.typeToPoint;
+			var abilityToPoint = exports.abilityToPoint;
+			var moveToPoint = exports.moveToPoint;
 
 			// stats points
 			if (!set.evs) set.evs = JSON.parse(JSON.stringify(species.baseStats));
@@ -3786,31 +3786,31 @@
 			}
 
 			// ability points
-			const abilityPoint = abilityToPoint[dex.abilities.get(set.ability).id] || 1;
+			var abilityPoint = abilityToPoint[dex.abilities.get(set.ability).id] || 1;
 			details.push(abilityPoint);
 
 			// move points
 			// mem: maybe all moves like fly should have 1 point
 			details.push(0);
-			for (const move of set.moves) {
-				const point = moveToPoint[dex.moves.get(move).id] || 0.5
+			for (var i = 0; i < set.moves.length; i++) {
+				var point = moveToPoint[dex.moves.get(set.moves[i]).id] || 0.5;
 				details.push(point);
 				details[5] += point;
 			}
-			for (var i = set.moves.length; i < 4; ++i) {
+			for (var i = set.moves.length; i < 4; i++) {
 				details.push(0.5);
 				details[5] += 0.5;
 			}
 
 			// penalty
 			details.push(0);
-			for (const statName in set.evs) {
-				const stat = set.evs[statName];
-				let penalty = 0;
+			for (var statName in set.evs) {
+				var stat = set.evs[statName];
+				var penalty = 0;
 				if (stat > 150) {
 					penalty = (stat - 150) * (stat - 150) * (stat - 150) * 193 / 2048;
 					penalty = Math.floor(penalty);
-					details[10] += penalty
+					details[10] += penalty;
 					if (statName === 'hp') {
 						details[10] += penalty;
 					}
