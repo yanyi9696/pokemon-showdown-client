@@ -1607,28 +1607,20 @@ const ModModifier: {
 	},
 	digimon: {
 		movesMod: (data: any): any => {
-			if (data.exists !== true && data.id in window.DigiMovedex) {
-				data = window.DigiMovedex[data.id];
-			}
+			if (data.exists === true) return;
+			if (data.id in window.DigiMovedex) Object.assign(data, window.DigiMovedex[data.id]);
 		},
 		itemsMod: (data: any): any => {
-			if (data.exists !== true && data.id in window.DigiItems) {
-				data = window.DigiItems[data.id];
-			}
+			if (data.exists === true) return;
+			if (data.id in window.DigiItems) Object.assign(data, window.DigiItems[data.id]);
 		},
 		abilitiesMod: (data: any): any => {
-			if (data.exists !== true && data.id in window.DigiAbilities) {
-				data = window.DigiAbilities[data.id];
-			}
+			if (data.exists === true) return;
+			if (data.id in window.DigiAbilities) Object.assign(data, window.DigiAbilities[data.id]);
 		},
 		speciesMod: (data: any): any => {
-			if (data.exists) {
-				data = {id: data.id, name: data.name, exists: false};
-				return;
-			}
-			if (data.id in window.Digidex) {
-				data = window.Digidex[data.id];
-			}
+			if (data.exists === true) return;
+			if (data.id in window.Digidex) Object.assign(data, window.Digidex[data.id]);
 		},
 		typesMod: (data: any): any => {
 			// todo: don't let fairy type pass
