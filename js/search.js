@@ -385,15 +385,7 @@
 		}
 
 		// base stats
-		var stats = {...pokemon.baseStats};
-		var bst = 0;
-		for (i in stats) bst += stats[i];
-		if (this.mod.includes('350cup') && bst <= 350) {
-			for (i in stats) stats[i] *= 2;
-			if (stats[i] > 255) stats[i] = 255;
-			bst = 0;
-			for (i in stats) bst += stats[i];
-		}
+		var stats = pokemon.baseStats;
 		buf += '<span class="col statcol"><em>HP</em><br />' + stats.hp + '</span> ';
 		buf += '<span class="col statcol"><em>Atk</em><br />' + stats.atk + '</span> ';
 		buf += '<span class="col statcol"><em>Def</em><br />' + stats.def + '</span> ';
@@ -404,6 +396,8 @@
 			buf += '<span class="col statcol"><em>Spc</em><br />' + stats.spa + '</span> ';
 		}
 		buf += '<span class="col statcol"><em>Spe</em><br />' + stats.spe + '</span> ';
+		var bst = 0;
+		for (i in stats) bst += stats[i];
 		buf += '<span class="col bstcol"><em>BST<br />' + bst + '</em></span> ';
 
 		buf += '</a></li>';
@@ -462,15 +456,7 @@
 		buf += '</span>';
 
 		// base stats
-		var stats = {...pokemon.baseStats};
-		var bst = 0;
-		for (i in stats) bst += stats[i];
-		if (this.mod.includes('350cup') && bst <= 350) {
-			for (i in stats) stats[i] *= 2;
-			if (stats[i] > 255) stats[i] = 255;
-			bst = 0;
-			for (i in stats) bst += stats[i];
-		}
+		var stats = pokemon.baseStats;
 		buf += '<span style="float:left;min-height:26px">';
 		buf += '<span class="col statcol"><em>HP</em><br />' + stats.hp + '</span> ';
 		buf += '<span class="col statcol"><em>Atk</em><br />' + stats.atk + '</span> ';
@@ -478,6 +464,8 @@
 		buf += '<span class="col statcol"><em>SpA</em><br />' + stats.spa + '</span> ';
 		buf += '<span class="col statcol"><em>SpD</em><br />' + stats.spd + '</span> ';
 		buf += '<span class="col statcol"><em>Spe</em><br />' + stats.spe + '</span> ';
+		var bst = 0;
+		for (i in stats) bst += stats[i];
 		buf += '<span class="col bstcol"><em>BST<br />' + bst + '</em></span> ';
 		buf += '</span>';
 
