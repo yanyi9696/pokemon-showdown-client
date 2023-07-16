@@ -699,85 +699,14 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		}
 		return results;
 	}
-	// still let this handle learnsets temporarily since i haven't figure out how to do it in battle-dex.ts
-	// todo: figure out how
-	// maybe just add something there like getLearnsetTable()?
 	protected firstLearnsetid(speciesid: ID) {
-		const table = this.dex.getLearnSetTable();
-		if (speciesid in table.learnsets) return speciesid;
-		const species = this.dex.species.get(speciesid);
-		if (!species.exists) return '' as ID;
-
-		let baseLearnsetid = toID(species.baseSpecies);
-		if (typeof species.battleOnly === 'string' && species.battleOnly !== species.baseSpecies) {
-			baseLearnsetid = toID(species.battleOnly);
-		}
-		if (baseLearnsetid in table.learnsets) return baseLearnsetid;
-		return '' as ID;
+		return this.dex.firstLearnsetid(speciesid);
 	}
 	protected nextLearnsetid(learnsetid: ID, speciesid: ID) {
-		if (learnsetid === 'lycanrocdusk' || (speciesid === 'rockruff' && learnsetid === 'rockruff')) {
-			return 'rockruffdusk' as ID;
-		}
-		const lsetSpecies = this.dex.species.get(learnsetid);
-		if (!lsetSpecies.exists) return '' as ID;
-
-		if (lsetSpecies.id === 'gastrodoneast') return 'gastrodon' as ID;
-		if (lsetSpecies.id === 'pumpkaboosuper') return 'pumpkaboo' as ID;
-		if (lsetSpecies.id === 'sinisteaantique') return 'sinistea' as ID;
-
-		const next = lsetSpecies.battleOnly || lsetSpecies.changesFrom || lsetSpecies.prevo;
-		if (next) return toID(next);
-
-		return '' as ID;
+		return this.dex.nextLearnsetid(learnsetid, speciesid);
 	}
 	protected canLearn(speciesid: ID, moveid: ID) {
-		// Nihilslave: i made some unequivalent changes to this function, mainly about VGC and tradebacks
-		// todo: fix it later
-		const move = this.dex.moves.get(moveid);
-		const isNatDex = this.formats.includes(`gen${this.dex.gen}natdex` as ID);
-		if (isNatDex && move.isNonstandard && move.isNonstandard !== 'Past') {
-			return false;
-		}
-		const gen = this.dex.gen;
-		let genChar = `${gen}`;
-		if (!isNatDex) {
-			switch (gen) {
-			case 6:
-				genChar = 'p';
-				break;
-			case 7:
-				genChar = 'q';
-				break;
-			case 8:
-				genChar = 'g';
-				break;
-			case 9:
-				genChar = 'a';
-				break;
-			}
-		}
-		let learnsetid = this.firstLearnsetid(speciesid);
-		while (learnsetid) {
-			const table = this.dex.getLearnSetTable();
-			let learnset = table.learnsets[learnsetid];
-			if (learnset && (moveid in learnset) &&
-				(learnset[moveid].includes(genChar) || (learnset[moveid].includes(`${gen + 1}`) && move.gen === gen))) {
-				return true;
-			}
-			learnsetid = this.nextLearnsetid(learnsetid, speciesid);
-		}
-		if (this.formats.includes('digimon' as ID) && this.set?.preEvo) {
-			const preEvoSpecies = this.dex.species.get(this.set.preEvo);
-			let preEvoLearnsetid = this.firstLearnsetid(preEvoSpecies.id);
-			while (preEvoLearnsetid) {
-				let table = DigimonTable;
-				let preEvoLearnset = table.learnsets[preEvoLearnsetid];
-				if (preEvoLearnset && (moveid in preEvoLearnset)) return true;
-				preEvoLearnsetid = this.nextLearnsetid(preEvoLearnsetid, preEvoSpecies.id);
-			}
-		}
-		return false;
+		return this.dex.canLearn(speciesid, moveid);
 	}
 	getTier(pokemon: Species) {
 		return this.dex.species.get(pokemon.name).tier;
@@ -1019,13 +948,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		let results: SearchRow[] = [];
 		results.push(['header', "Moves"]);
 		for (let id in BattleMovedex) {
-			switch (id) {
-			case 'paleowave':
-				results.push(['header', "CAP moves"]);
-				break;
-			case 'magikarpsrevenge':
-				continue;
-			}
+			const skipped = ['paleowave', 'shadowstrike'];
+			if (skipped.includes(id)) continue;
 			results.push(['move', id as ID]);
 		}
 		return results;
@@ -1263,238 +1187,238 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		'allyswitch', 'bulldoze', 'coaching', 'electroweb', 'faketears', 'fling', 'followme', 'healpulse', 'helpinghand', 'junglehealing', 'lifedew', 'lunarblessing', 'muddywater', 'pollenpuff', 'psychup', 'ragepowder', 'safeguard', 'skillswap', 'snipeshot', 'wideguard',
 	] as ID[] as readonly ID[];
 	getBaseResults() {
-		if (!this.species) return this.getDefaultResults();
+		if (!this.set) return this.getDefaultResults();
 		const dex = this.dex;
 		let species = dex.species.get(this.species);
-		const format = this.format;
-		const isHackmons = (format.includes('hackmons') || format.endsWith('bh'));
-		const isSTABmons = (format.includes('stabmons') || format === 'staaabmons');
-		const isTradebacks = format.includes('tradebacks');
-		const isCreatemon = format.includes('createmons');
-		const isDigimon = format.includes('digimon');
-		const isIF = format.includes('infinitefusion');
-		const regionBornLegality = dex.gen >= 6 &&
-			/^battle(spot|stadium|festival)/.test(format) || format.startsWith('vgc') ||
-			(dex.gen === 9 && this.formatType !== 'natdex');
+		// const format = this.format;
+		// const isHackmons = (format.includes('hackmons') || format.endsWith('bh'));
+		// const isSTABmons = (format.includes('stabmons') || format === 'staaabmons');
+		// const isTradebacks = format.includes('tradebacks');
+		// const isCreatemon = format.includes('createmons');
+		// const isDigimon = format.includes('digimon');
+		// const isIF = format.includes('infinitefusion');
+		// const regionBornLegality = dex.gen >= 6 &&
+		// 	/^battle(spot|stadium|festival)/.test(format) || format.startsWith('vgc') ||
+		// 	(dex.gen === 9 && this.formatType !== 'natdex');
 
-		let learnsetid = this.firstLearnsetid(species.id);
-		let moves: string[] = [];
+		// let learnsetid = this.firstLearnsetid(species.id);
+		const moves = dex.getLearnsetMoves(this.set);
 		let sketchMoves: string[] = [];
-		let sketch = false;
-		let gen = '' + dex.gen;
-		let lsetTable = BattleTeambuilderTable;
-		if (this.formatType?.startsWith('bdsp')) lsetTable = lsetTable['gen8bdsp'];
-		if (this.formatType === 'letsgo') lsetTable = lsetTable['gen7letsgo'];
-		if (this.format === 'morebalancedhackmons' as ID) lsetTable = lsetTable['gen9morebalancedhackmons'];
-		if (this.formatType === 'digimon') lsetTable = DigimonTable;
-		if (this.formatType?.startsWith('dlc1')) lsetTable = lsetTable['gen8dlc1'];
-		while (learnsetid) {
-			let learnset = lsetTable.learnsets[learnsetid];
-			if (learnset) {
-				for (let moveid in learnset) {
-					let learnsetEntry = learnset[moveid];
-					const move = dex.moves.get(moveid);
-					const minGenCode: {[gen: number]: string} = {6: 'p', 7: 'q', 8: 'g', 9: 'a'};
-					if (regionBornLegality && !learnsetEntry.includes(minGenCode[dex.gen])) {
-						continue;
-					}
-					if (
-						!learnsetEntry.includes(gen) &&
-						(!isTradebacks ? true : !(move.gen <= dex.gen && learnsetEntry.includes('' + (dex.gen + 1))))
-					) {
-						continue;
-					}
-					if (this.formatType !== 'natdex' && move.isNonstandard === "Past") {
-						continue;
-					}
-					if (
-						this.formatType?.startsWith('dlc1') &&
-						BattleTeambuilderTable['gen8dlc1']?.nonstandardMoves.includes(moveid)
-					) {
-						continue;
-					}
-					if (moves.includes(moveid)) continue;
-					moves.push(moveid);
-					if (moveid === 'sketch') sketch = true;
-					if (moveid === 'hiddenpower') {
-						moves.push(
-							'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
-						);
-					}
-				}
-			}
-			learnsetid = this.nextLearnsetid(learnsetid, species.id);
-		}
-		if (isDigimon && this.set?.preEvo) {
-			const preEvoSpecies = dex.species.get(this.set.preEvo);
-			let preEvoLearnsetid = this.firstLearnsetid(preEvoSpecies.id);
-			while (preEvoLearnsetid) {
-				let preEvoLearnset = lsetTable.learnsets[preEvoLearnsetid];
-				if (preEvoLearnset) {
-					for (let moveid in preEvoLearnset) {
-						if (moves.includes(moveid)) continue;
-						moves.push(moveid);
-						if (moveid === 'hiddenpower') {
-							moves.push(
-								'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
-							);
-						}
-					}
-				}
-				preEvoLearnsetid = this.nextLearnsetid(preEvoLearnsetid, preEvoSpecies.id);
-			}
-		}
-		if (isIF && this.set?.name) {
-			const headSpecies = dex.species.get(this.set.name);
-			// should have head learnset whether or not it's a special fusion
-			// todo: polish
-			let headLearnsetid = this.firstLearnsetid(headSpecies.id);
-			while (headLearnsetid) {
-				let headLearnset = lsetTable.learnsets[headLearnsetid];
-				if (headLearnset) {
-					for (let moveid in headLearnset) {
-						if (moves.includes(moveid)) continue;
-						moves.push(moveid);
-						if (moveid === 'hiddenpower') {
-							moves.push(
-								'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
-							);
-						}
-					}
-				}
-				headLearnsetid = this.nextLearnsetid(headLearnsetid, headSpecies.id);
-			}
-			if (headSpecies.name === species.name) {
-				const specialSelfFusions: {[k: string]: string} = {
-					deoxys: 'Deoxys-Attack',
-					rotom: 'Rotom-Heat',
-					shaymin: 'Shaymin-Sky',
-					// darmanitan: 'Darmanitan-Zen',
-					keldeo: 'Keldeo-Resolute',
-					meloetta: 'Meloetta-Pirouette',
-					greninja: 'Greninja-Ash',
-					floette: 'Floette-Eternal',
-					zygarde: 'Zygarde-Complete',
-					hoopa: 'Hoopa-Unbound',
-					lycanroc: 'Lycanroc-Dusk',
-					wishiwashi: 'Wishiwashi-School',
-					necrozma: 'Necrozma-Ultra',
-					// cramorant: 'Cramorant-Gorging',
-					eternatus: 'Eternatus-Eternamax',
-					palafin: 'Palafin-Hero',
-				};
-				if (headSpecies.id in specialSelfFusions) {
-					headLearnsetid = this.firstLearnsetid(toID(specialSelfFusions[headSpecies.id]));
-				} else if (headSpecies.otherFormes) {
-					for (const forme of headSpecies.otherFormes) {
-						if (forme.endsWith('-Mega') || forme.endsWith('-Mega-Y') ||
-							forme.endsWith('-Primal') ||
-							forme.endsWith('-Origin') ||
-							forme.endsWith('-Therian') ||
-							forme.endsWith('-Starter') ||
-							forme.endsWith('-Crowned')
-						) headLearnsetid = this.firstLearnsetid(dex.species.get(forme).id);
-					}
-				} else {
-					headLearnsetid = this.firstLearnsetid(headSpecies.id);
-				}
-			} else {
-				headLearnsetid = this.firstLearnsetid(headSpecies.id);
-				const pair = [headSpecies.name, species.name].sort();
-				if (pair[0] === 'Kyurem' && pair[1] === 'Reshiram') headLearnsetid = this.firstLearnsetid('kyuremwhite' as ID);
-				if (pair[0] === 'Kyurem' && pair[1] === 'Zekrom') headLearnsetid = this.firstLearnsetid('kyuremblack' as ID);
-				if (pair[0] === 'Necrozma' && pair[1] === 'Solgaleo') headLearnsetid = this.firstLearnsetid('necrozmaduskmane' as ID);
-				if (pair[0] === 'Lunala' && pair[1] === 'Necrozma') headLearnsetid = this.firstLearnsetid('necrozmadawnwings' as ID);
-				if (pair[0] === 'Calyrex' && pair[1] === 'Glastrier') headLearnsetid = this.firstLearnsetid('calyrexice' as ID);
-				if (pair[0] === 'Calyrex' && pair[1] === 'Spectrier') headLearnsetid = this.firstLearnsetid('calyrexshadow' as ID);
-				if (pair[0] === 'Arrokuda' && pair[1] === 'Cramorant') headLearnsetid = this.firstLearnsetid('cramorantgulping' as ID);
-				if (pair[0] === 'Cramorant' && pair[1] === 'Pikachu') headLearnsetid = this.firstLearnsetid('cramorantgorging' as ID);
-			}
-			while (headLearnsetid) {
-				let headLearnset = lsetTable.learnsets[headLearnsetid];
-				if (headLearnset) {
-					for (let moveid in headLearnset) {
-						if (moves.includes(moveid)) continue;
-						moves.push(moveid);
-						if (moveid === 'hiddenpower') {
-							moves.push(
-								'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
-							);
-						}
-					}
-				}
-				headLearnsetid = this.nextLearnsetid(headLearnsetid, headSpecies.id);
-			}
-		}
-		if (sketch || isHackmons || isCreatemon) {
-			if (isHackmons || isCreatemon) moves = [];
-			for (let id in BattleMovedex) {
-				if (!format.startsWith('cap') && (id === 'paleowave' || id === 'shadowstrike')) continue;
-				if (!format.includes('gennext') && id === 'magikarpsrevenge') continue;
-				const move = dex.moves.get(id);
-				if (move.gen > dex.gen) continue;
-				if (sketch) {
-					if (move.noSketch || move.isMax || move.isZ) continue;
-					if (move.isNonstandard && move.isNonstandard !== 'Past') continue;
-					if (move.isNonstandard === 'Past' && this.formatType !== 'natdex') continue;
-					sketchMoves.push(move.id);
-				} else {
-					if (!(dex.gen < 8 || this.formatType === 'natdex') && move.isZ) continue;
-					if (typeof move.isMax === 'string') continue;
-					if (move.isMax && dex.gen > 8) continue;
-					if (move.isNonstandard === 'Past' && this.formatType !== 'natdex') continue;
-					if (move.isNonstandard === 'LGPE' && this.formatType !== 'letsgo') continue;
-					moves.push(move.id);
-				}
-			}
-		}
-		if (this.formatType === 'metronome') moves = ['metronome'];
-		if (isSTABmons) {
-			for (let id in this.getTable()) {
-				const move = dex.moves.get(id);
-				if (moves.includes(move.id)) continue;
-				if (move.gen > dex.gen) continue;
-				if (move.isZ || move.isMax || (move.isNonstandard && move.isNonstandard !== 'Unobtainable')) continue;
+		// let sketch = false;
+		// let gen = '' + dex.gen;
+		// let lsetTable = BattleTeambuilderTable;
+		// if (this.formatType?.startsWith('bdsp')) lsetTable = lsetTable['gen8bdsp'];
+		// if (this.formatType === 'letsgo') lsetTable = lsetTable['gen7letsgo'];
+		// if (this.format === 'morebalancedhackmons' as ID) lsetTable = lsetTable['gen9morebalancedhackmons'];
+		// if (this.formatType === 'digimon') lsetTable = DigimonTable;
+		// if (this.formatType?.startsWith('dlc1')) lsetTable = lsetTable['gen8dlc1'];
+		// while (learnsetid) {
+		// 	let learnset = lsetTable.learnsets[learnsetid];
+		// 	if (learnset) {
+		// 		for (let moveid in learnset) {
+		// 			let learnsetEntry = learnset[moveid];
+		// 			const move = dex.moves.get(moveid);
+		// 			const minGenCode: {[gen: number]: string} = {6: 'p', 7: 'q', 8: 'g', 9: 'a'};
+		// 			if (regionBornLegality && !learnsetEntry.includes(minGenCode[dex.gen])) {
+		// 				continue;
+		// 			}
+		// 			if (
+		// 				!learnsetEntry.includes(gen) &&
+		// 				(!isTradebacks ? true : !(move.gen <= dex.gen && learnsetEntry.includes('' + (dex.gen + 1))))
+		// 			) {
+		// 				continue;
+		// 			}
+		// 			if (this.formatType !== 'natdex' && move.isNonstandard === "Past") {
+		// 				continue;
+		// 			}
+		// 			if (
+		// 				this.formatType?.startsWith('dlc1') &&
+		// 				BattleTeambuilderTable['gen8dlc1']?.nonstandardMoves.includes(moveid)
+		// 			) {
+		// 				continue;
+		// 			}
+		// 			if (moves.includes(moveid)) continue;
+		// 			moves.push(moveid);
+		// 			if (moveid === 'sketch') sketch = true;
+		// 			if (moveid === 'hiddenpower') {
+		// 				moves.push(
+		// 					'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
+		// 				);
+		// 			}
+		// 		}
+		// 	}
+		// 	learnsetid = this.nextLearnsetid(learnsetid, species.id);
+		// }
+		// if (isDigimon && this.set?.preEvo) {
+		// 	const preEvoSpecies = dex.species.get(this.set.preEvo);
+		// 	let preEvoLearnsetid = this.firstLearnsetid(preEvoSpecies.id);
+		// 	while (preEvoLearnsetid) {
+		// 		let preEvoLearnset = lsetTable.learnsets[preEvoLearnsetid];
+		// 		if (preEvoLearnset) {
+		// 			for (let moveid in preEvoLearnset) {
+		// 				if (moves.includes(moveid)) continue;
+		// 				moves.push(moveid);
+		// 				if (moveid === 'hiddenpower') {
+		// 					moves.push(
+		// 						'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
+		// 					);
+		// 				}
+		// 			}
+		// 		}
+		// 		preEvoLearnsetid = this.nextLearnsetid(preEvoLearnsetid, preEvoSpecies.id);
+		// 	}
+		// }
+		// if (isIF && this.set?.name) {
+		// 	const headSpecies = dex.species.get(this.set.name);
+		// 	// should have head learnset whether or not it's a special fusion
+		// 	// todo: polish
+		// 	let headLearnsetid = this.firstLearnsetid(headSpecies.id);
+		// 	while (headLearnsetid) {
+		// 		let headLearnset = lsetTable.learnsets[headLearnsetid];
+		// 		if (headLearnset) {
+		// 			for (let moveid in headLearnset) {
+		// 				if (moves.includes(moveid)) continue;
+		// 				moves.push(moveid);
+		// 				if (moveid === 'hiddenpower') {
+		// 					moves.push(
+		// 						'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
+		// 					);
+		// 				}
+		// 			}
+		// 		}
+		// 		headLearnsetid = this.nextLearnsetid(headLearnsetid, headSpecies.id);
+		// 	}
+		// 	if (headSpecies.name === species.name) {
+		// 		const specialSelfFusions: {[k: string]: string} = {
+		// 			deoxys: 'Deoxys-Attack',
+		// 			rotom: 'Rotom-Heat',
+		// 			shaymin: 'Shaymin-Sky',
+		// 			// darmanitan: 'Darmanitan-Zen',
+		// 			keldeo: 'Keldeo-Resolute',
+		// 			meloetta: 'Meloetta-Pirouette',
+		// 			greninja: 'Greninja-Ash',
+		// 			floette: 'Floette-Eternal',
+		// 			zygarde: 'Zygarde-Complete',
+		// 			hoopa: 'Hoopa-Unbound',
+		// 			lycanroc: 'Lycanroc-Dusk',
+		// 			wishiwashi: 'Wishiwashi-School',
+		// 			necrozma: 'Necrozma-Ultra',
+		// 			// cramorant: 'Cramorant-Gorging',
+		// 			eternatus: 'Eternatus-Eternamax',
+		// 			palafin: 'Palafin-Hero',
+		// 		};
+		// 		if (headSpecies.id in specialSelfFusions) {
+		// 			headLearnsetid = this.firstLearnsetid(toID(specialSelfFusions[headSpecies.id]));
+		// 		} else if (headSpecies.otherFormes) {
+		// 			for (const forme of headSpecies.otherFormes) {
+		// 				if (forme.endsWith('-Mega') || forme.endsWith('-Mega-Y') ||
+		// 					forme.endsWith('-Primal') ||
+		// 					forme.endsWith('-Origin') ||
+		// 					forme.endsWith('-Therian') ||
+		// 					forme.endsWith('-Starter') ||
+		// 					forme.endsWith('-Crowned')
+		// 				) headLearnsetid = this.firstLearnsetid(dex.species.get(forme).id);
+		// 			}
+		// 		} else {
+		// 			headLearnsetid = this.firstLearnsetid(headSpecies.id);
+		// 		}
+		// 	} else {
+		// 		headLearnsetid = this.firstLearnsetid(headSpecies.id);
+		// 		const pair = [headSpecies.name, species.name].sort();
+		// 		if (pair[0] === 'Kyurem' && pair[1] === 'Reshiram') headLearnsetid = this.firstLearnsetid('kyuremwhite' as ID);
+		// 		if (pair[0] === 'Kyurem' && pair[1] === 'Zekrom') headLearnsetid = this.firstLearnsetid('kyuremblack' as ID);
+		// 		if (pair[0] === 'Necrozma' && pair[1] === 'Solgaleo') headLearnsetid = this.firstLearnsetid('necrozmaduskmane' as ID);
+		// 		if (pair[0] === 'Lunala' && pair[1] === 'Necrozma') headLearnsetid = this.firstLearnsetid('necrozmadawnwings' as ID);
+		// 		if (pair[0] === 'Calyrex' && pair[1] === 'Glastrier') headLearnsetid = this.firstLearnsetid('calyrexice' as ID);
+		// 		if (pair[0] === 'Calyrex' && pair[1] === 'Spectrier') headLearnsetid = this.firstLearnsetid('calyrexshadow' as ID);
+		// 		if (pair[0] === 'Arrokuda' && pair[1] === 'Cramorant') headLearnsetid = this.firstLearnsetid('cramorantgulping' as ID);
+		// 		if (pair[0] === 'Cramorant' && pair[1] === 'Pikachu') headLearnsetid = this.firstLearnsetid('cramorantgorging' as ID);
+		// 	}
+		// 	while (headLearnsetid) {
+		// 		let headLearnset = lsetTable.learnsets[headLearnsetid];
+		// 		if (headLearnset) {
+		// 			for (let moveid in headLearnset) {
+		// 				if (moves.includes(moveid)) continue;
+		// 				moves.push(moveid);
+		// 				if (moveid === 'hiddenpower') {
+		// 					moves.push(
+		// 						'hiddenpowerbug', 'hiddenpowerdark', 'hiddenpowerdragon', 'hiddenpowerelectric', 'hiddenpowerfighting', 'hiddenpowerfire', 'hiddenpowerflying', 'hiddenpowerghost', 'hiddenpowergrass', 'hiddenpowerground', 'hiddenpowerice', 'hiddenpowerpoison', 'hiddenpowerpsychic', 'hiddenpowerrock', 'hiddenpowersteel', 'hiddenpowerwater'
+		// 					);
+		// 				}
+		// 			}
+		// 		}
+		// 		headLearnsetid = this.nextLearnsetid(headLearnsetid, headSpecies.id);
+		// 	}
+		// }
+		// if (sketch || isHackmons || isCreatemon) {
+		// 	if (isHackmons || isCreatemon) moves = [];
+		// 	for (let id in BattleMovedex) {
+		// 		if (!format.startsWith('cap') && (id === 'paleowave' || id === 'shadowstrike')) continue;
+		// 		if (!format.includes('gennext') && id === 'magikarpsrevenge') continue;
+		// 		const move = dex.moves.get(id);
+		// 		if (move.gen > dex.gen) continue;
+		// 		if (sketch) {
+		// 			if (move.noSketch || move.isMax || move.isZ) continue;
+		// 			if (move.isNonstandard && move.isNonstandard !== 'Past') continue;
+		// 			if (move.isNonstandard === 'Past' && this.formatType !== 'natdex') continue;
+		// 			sketchMoves.push(move.id);
+		// 		} else {
+		// 			if (!(dex.gen < 8 || this.formatType === 'natdex') && move.isZ) continue;
+		// 			if (typeof move.isMax === 'string') continue;
+		// 			if (move.isMax && dex.gen > 8) continue;
+		// 			if (move.isNonstandard === 'Past' && this.formatType !== 'natdex') continue;
+		// 			if (move.isNonstandard === 'LGPE' && this.formatType !== 'letsgo') continue;
+		// 			moves.push(move.id);
+		// 		}
+		// 	}
+		// }
+		// if (this.formatType === 'metronome') moves = ['metronome'];
+		// if (isSTABmons) {
+		// 	for (let id in this.getTable()) {
+		// 		const move = dex.moves.get(id);
+		// 		if (moves.includes(move.id)) continue;
+		// 		if (move.gen > dex.gen) continue;
+		// 		if (move.isZ || move.isMax || (move.isNonstandard && move.isNonstandard !== 'Unobtainable')) continue;
 
-				const speciesTypes: string[] = [];
-				const moveTypes: string[] = [];
-				for (let i = dex.gen; i >= species.gen && i >= move.gen; i--) {
-					const genDex = Dex.forGen(i);
-					moveTypes.push(genDex.moves.get(move.name).type);
+		// 		const speciesTypes: string[] = [];
+		// 		const moveTypes: string[] = [];
+		// 		for (let i = dex.gen; i >= species.gen && i >= move.gen; i--) {
+		// 			const genDex = Dex.forGen(i);
+		// 			moveTypes.push(genDex.moves.get(move.name).type);
 
-					const pokemon = genDex.species.get(species.name);
-					let baseSpecies = genDex.species.get(pokemon.changesFrom || pokemon.name);
-					if (!pokemon.battleOnly) speciesTypes.push(...pokemon.types);
-					let prevo = pokemon.prevo;
-					while (prevo) {
-						const prevoSpecies = genDex.species.get(prevo);
-						speciesTypes.push(...prevoSpecies.types);
-						prevo = prevoSpecies.prevo;
-					}
-					if (pokemon.battleOnly && typeof pokemon.battleOnly === 'string') {
-						species = dex.species.get(pokemon.battleOnly);
-					}
-					const excludedForme = (s: Species) => [
-						'Alola', 'Alola-Totem', 'Galar', 'Galar-Zen', 'Hisui', 'Paldea', 'Paldea-Combat', 'Paldea-Blaze', 'Paldea-Aqua',
-					].includes(s.forme);
-					if (baseSpecies.otherFormes && !['Wormadam', 'Urshifu'].includes(baseSpecies.baseSpecies)) {
-						if (!excludedForme(species)) speciesTypes.push(...baseSpecies.types);
-						for (const formeName of baseSpecies.otherFormes) {
-							const forme = dex.species.get(formeName);
-							if (!forme.battleOnly && !excludedForme(forme)) speciesTypes.push(...forme.types);
-						}
-					}
-				}
-				let valid = false;
-				for (let type of moveTypes) {
-					if (speciesTypes.includes(type)) {
-						valid = true;
-						break;
-					}
-				}
-				if (valid) moves.push(id);
-			}
-		}
+		// 			const pokemon = genDex.species.get(species.name);
+		// 			let baseSpecies = genDex.species.get(pokemon.changesFrom || pokemon.name);
+		// 			if (!pokemon.battleOnly) speciesTypes.push(...pokemon.types);
+		// 			let prevo = pokemon.prevo;
+		// 			while (prevo) {
+		// 				const prevoSpecies = genDex.species.get(prevo);
+		// 				speciesTypes.push(...prevoSpecies.types);
+		// 				prevo = prevoSpecies.prevo;
+		// 			}
+		// 			if (pokemon.battleOnly && typeof pokemon.battleOnly === 'string') {
+		// 				species = dex.species.get(pokemon.battleOnly);
+		// 			}
+		// 			const excludedForme = (s: Species) => [
+		// 				'Alola', 'Alola-Totem', 'Galar', 'Galar-Zen', 'Hisui', 'Paldea', 'Paldea-Combat', 'Paldea-Blaze', 'Paldea-Aqua',
+		// 			].includes(s.forme);
+		// 			if (baseSpecies.otherFormes && !['Wormadam', 'Urshifu'].includes(baseSpecies.baseSpecies)) {
+		// 				if (!excludedForme(species)) speciesTypes.push(...baseSpecies.types);
+		// 				for (const formeName of baseSpecies.otherFormes) {
+		// 					const forme = dex.species.get(formeName);
+		// 					if (!forme.battleOnly && !excludedForme(forme)) speciesTypes.push(...forme.types);
+		// 				}
+		// 			}
+		// 		}
+		// 		let valid = false;
+		// 		for (let type of moveTypes) {
+		// 			if (speciesTypes.includes(type)) {
+		// 				valid = true;
+		// 				break;
+		// 			}
+		// 		}
+		// 		if (valid) moves.push(id);
+		// 	}
+		// }
 
 		moves.sort();
 		sketchMoves.sort();

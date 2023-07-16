@@ -171,6 +171,7 @@ interface TeambuilderSpriteData {
 
 const Dex = new class implements ModdedDex {
 	readonly gen = 9;
+	readonly learnsetGenchar = 'a';
 	readonly currentGen = `gen${this.gen}`;
 	readonly modid = [this.currentGen, this.currentGen] as ID[];
 	readonly cache = null!;
@@ -207,6 +208,7 @@ const Dex = new class implements ModdedDex {
 		if (formatid.includes('hackmons') || formatid.endsWith('bh')) modids.push('hackmons' as ID);
 		if (formatid.includes('metronome')) modids.push('metronome' as ID);
 		if (formatid.includes('scalemons')) modids.push('scalemons' as ID);
+		if (formatid.includes('stabmons') && formatid.includes('staaabmons')) modids.push('stabmons' as ID);
 		if (formatid.includes('thecardgame')) modids.push('thecardgame' as ID);
 		// species oms
 		// mnm, camo, ce, ...
@@ -1016,7 +1018,7 @@ const Dex = new class implements ModdedDex {
 		return this.pokeballs;
 	}
 
-	getLearnSetTable() {
+	getLearnsetTable() {
 		return window.BattleTeambuilderTable;
 	}
 
@@ -1044,6 +1046,77 @@ const Dex = new class implements ModdedDex {
 			table.items = null;
 		}
 		return table.itemSet;
+	}
+
+	firstLearnsetid(speciesid: ID) {
+		const table = this.getLearnsetTable();
+		if (speciesid in table.learnsets) return speciesid;
+		const species = this.species.get(speciesid);
+		if (!species.exists) return '' as ID;
+
+		let baseLearnsetid = toID(species.baseSpecies);
+		if (typeof species.battleOnly === 'string' && species.battleOnly !== species.baseSpecies) {
+			baseLearnsetid = toID(species.battleOnly);
+		}
+		if (baseLearnsetid in table.learnsets) return baseLearnsetid;
+		return '' as ID;
+	}
+	nextLearnsetid(learnsetid: ID, speciesid: ID) {
+		if (learnsetid === 'lycanrocdusk' || (speciesid === 'rockruff' && learnsetid === 'rockruff')) {
+			return 'rockruffdusk' as ID;
+		}
+		const lsetSpecies = this.species.get(learnsetid);
+		if (!lsetSpecies.exists) return '' as ID;
+
+		if (lsetSpecies.id === 'gastrodoneast') return 'gastrodon' as ID;
+		if (lsetSpecies.id === 'pumpkaboosuper') return 'pumpkaboo' as ID;
+		if (lsetSpecies.id === 'sinisteaantique') return 'sinistea' as ID;
+
+		const next = lsetSpecies.battleOnly || lsetSpecies.changesFrom || lsetSpecies.prevo;
+		if (next) return toID(next);
+
+		return '' as ID;
+	}
+	canLearn(speciesid: ID, moveid: ID) {
+		// Nihilslave: i made some unequivalent changes to this function, mainly about VGC and tradebacks
+		// todo: fix it later
+		const move = this.moves.get(moveid);
+		let learnsetid = this.firstLearnsetid(speciesid);
+		while (learnsetid) {
+			const table = this.getLearnsetTable();
+			let learnset = table.learnsets[learnsetid];
+			if (
+				learnset && (moveid in learnset) &&
+				(
+					learnset[moveid].includes(this.learnsetGenchar) ||
+					(learnset[moveid].includes(`${this.gen + 1}`) && move.gen === this.gen)
+				)
+			) {
+				return true;
+			}
+			learnsetid = this.nextLearnsetid(learnsetid, speciesid);
+		}
+		return false;
+	}
+	getLearnsetMoves(pokemon: PokemonSet) {
+		const moveDex = window.BattleMovedex;
+		const moves: string[] = [];
+		let sketch = false;
+		for (const id in moveDex) {
+			if (!this.canLearn(toID(pokemon.species), id as ID)) continue;
+			if (id === 'sketch') sketch = true;
+			moves.push(id);
+		}
+		if (sketch) {
+			for (const id in moveDex) {
+				if (moves.includes(id)) continue;
+				const move = this.moves.get(id);
+				if (move.isNonstandard) continue;
+				if (move.noSketch || move.isMax || move.isZ) continue;
+				moves.push(id);
+			}
+		}
+		return moves;
 	}
 
 	getTypeSet() {
@@ -1241,7 +1314,7 @@ class ModdedDex {
 		return this.pokeballs;
 	}
 
-	getLearnSetTable() {
+	getLearnsetTable() {
 		if (this.modid.includes('gen7letsgo' as ID)) return window.BattleTeambuilderTable['gen7letsgo'];
 		if (this.modid.includes('gen8bdsp' as ID)) return window.BattleTeambuilderTable['gen8bdsp'];
 		if (this.modid.includes('digimon' as ID)) return window.DigimonTable;
@@ -1310,6 +1383,97 @@ class ModdedDex {
 		return table.itemSet;
 	}
 
+	// the following two may look the same as their counterparts in `Dex`
+	// but actually different because of `this`
+	firstLearnsetid(speciesid: ID) {
+		const table = this.getLearnsetTable();
+		if (speciesid in table.learnsets) return speciesid;
+		const species = this.species.get(speciesid);
+		if (!species.exists) return '' as ID;
+
+		let baseLearnsetid = toID(species.baseSpecies);
+		if (typeof species.battleOnly === 'string' && species.battleOnly !== species.baseSpecies) {
+			baseLearnsetid = toID(species.battleOnly);
+		}
+		if (baseLearnsetid in table.learnsets) return baseLearnsetid;
+		return '' as ID;
+	}
+	nextLearnsetid(learnsetid: ID, speciesid: ID) {
+		if (learnsetid === 'lycanrocdusk' || (speciesid === 'rockruff' && learnsetid === 'rockruff')) {
+			return 'rockruffdusk' as ID;
+		}
+		const lsetSpecies = this.species.get(learnsetid);
+		if (!lsetSpecies.exists) return '' as ID;
+
+		if (lsetSpecies.id === 'gastrodoneast') return 'gastrodon' as ID;
+		if (lsetSpecies.id === 'pumpkaboosuper') return 'pumpkaboo' as ID;
+		if (lsetSpecies.id === 'sinisteaantique') return 'sinistea' as ID;
+
+		const next = lsetSpecies.battleOnly || lsetSpecies.changesFrom || lsetSpecies.prevo;
+		if (next) return toID(next);
+
+		return '' as ID;
+	}
+	canLearn(speciesid: ID, moveid: ID) {
+		// Nihilslave: i made some unequivalent changes to this function, mainly about VGC and tradebacks
+		// todo: fix it later
+		const move = this.moves.get(moveid);
+		const isNatDex = this.modid.includes(`gen${this.gen}natdex` as ID);
+		if (isNatDex && move.isNonstandard && move.isNonstandard !== 'Past') {
+			return false;
+		}
+		const gen = this.gen;
+		const genCharTable = ['0', '1', '2', '3', '4', '5', 'p', 'q', 'g', 'a'];
+		const genChar = (gen === 9 && !isNatDex) ? genCharTable[gen] : `${gen}`;
+		let learnsetid = this.firstLearnsetid(speciesid);
+		while (learnsetid) {
+			const table = this.getLearnsetTable();
+			let learnset = table.learnsets[learnsetid];
+			if (learnset && (moveid in learnset) &&
+				(learnset[moveid].includes(genChar) || (learnset[moveid].includes(`${gen + 1}`) && move.gen === gen))) {
+				return true;
+			}
+			learnsetid = this.nextLearnsetid(learnsetid, speciesid);
+		}
+		// todo: handle this in digimon mod
+		// if (this.modid.includes('digimon' as ID) && this.set?.preEvo) {
+		// 	const preEvoSpecies = this.dex.species.get(this.set.preEvo);
+		// 	let preEvoLearnsetid = this.firstLearnsetid(preEvoSpecies.id);
+		// 	while (preEvoLearnsetid) {
+		// 		let table = DigimonTable;
+		// 		let preEvoLearnset = table.learnsets[preEvoLearnsetid];
+		// 		if (preEvoLearnset && (moveid in preEvoLearnset)) return true;
+		// 		preEvoLearnsetid = this.nextLearnsetid(preEvoLearnsetid, preEvoSpecies.id);
+		// 	}
+		// }
+		return false;
+	}
+	getLearnsetMoves(pokemon: PokemonSet) {
+		const moveDex = this.modid.includes('digimon' as ID) ? DigiMovedex : window.BattleMovedex;
+		const isNatDex = this.modid.includes(`gen${this.gen}natdex` as ID);
+		let moves: string[] = [];
+		let sketch = false;
+		for (const id in moveDex) {
+			if (!this.canLearn(toID(pokemon.species), id as ID)) continue;
+			if (id === 'sketch') sketch = true;
+			moves.push(id);
+		}
+		if (sketch) {
+			for (const id in moveDex) {
+				if (moves.includes(id)) continue;
+				const move = this.moves.get(id);
+				if (move.isNonstandard && move.isNonstandard !== 'Past') continue;
+				if (move.isNonstandard === 'Past' && !isNatDex) continue;
+				if (move.noSketch || move.isMax || move.isZ) continue;
+				moves.push(id);
+			}
+		}
+		for (const mid of this.modid) {
+			if (ModModifier[mid]?.ModifyLearnset) moves = ModModifier[mid].ModifyLearnset!(pokemon, this, moves);
+		}
+		return moves;
+	}
+
 	getTypeSet() {
 		const results: SearchRow[] = [];
 		const chart = this.modid.includes('digimon' as ID) ? window.DigiTypeChart : window.BattleTypeChart;
@@ -1335,7 +1499,7 @@ const ModModifier: {
 		speciesMod?: (data: any) => any,
 		typesMod?: (data: any) => any,
 		ModifySpecies?: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex, extra?: any) => Species,
-		ModifyLearnset?: (pokemon: PokemonSet, dex: ModdedDex, extra?: any) => SearchRow[],
+		ModifyLearnset?: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]) => string[],
 	}
 } = {
 	'350cup': {
@@ -1351,6 +1515,30 @@ const ModModifier: {
 				data.bst += newStats[stat];
 			}
 			data.baseStats = newStats;
+		},
+	},
+	hackmons: {
+		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
+			const moveDex = window.BattleMovedex; // todo: write the function `getMovedex`
+			// todo: it seems there will usually be an empty move inserted into `BattleMovedex`
+			// look into it
+			const isNatDex = dex.modid.includes(`gen${dex.gen}natdex` as ID);
+			const isLGPE = dex.modid.includes('gen7letsgo' as ID);
+			const moves: string[] = [];
+			for (const id in moveDex) {
+				const move = dex.moves.get(id);
+				// moves from future gens also filtered by the following line
+				if (move.isNonstandard && !['Past', 'LGPE'].includes(move.isNonstandard)) continue;
+				if (move.isNonstandard === 'Past' && !isNatDex) continue;
+				if (move.isNonstandard === 'LGPE' && !isLGPE) continue;
+				if (move.isMax && dex.gen < 8) continue;
+				if (move.isMax && dex.gen > 8 && !isNatDex) continue;
+				if (typeof move.isMax === 'string') continue;
+				if (move.isZ && dex.gen < 7) continue;
+				if (move.isZ && dex.gen > 7 && !isNatDex) continue;
+				moves.push(id);
+			}
+			return moves;
 		},
 	},
 	metronome: {
@@ -1373,6 +1561,59 @@ const ModModifier: {
 				data.bst += newStats[stat];
 			}
 			data.baseStats = newStats;
+		},
+	},
+	stabmons: {
+		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
+			const moveDex = window.BattleMovedex;
+			const isNatDex = dex.modid.includes(`gen${dex.gen}natdex` as ID);
+			const isLGPE = dex.modid.includes('gen7letsgo' as ID);
+			for (const id in moveDex) {
+				if (learnset.includes(id)) continue;
+				const move = dex.moves.get(id);
+				if (move.isNonstandard && move.isNonstandard !== 'Unobtainable') continue;
+				if (move.isZ || move.isMax) continue;
+
+				let species = dex.species.get(pokemon.species);
+				const speciesTypes: string[] = [];
+				const moveTypes: string[] = [];
+				for (let i = dex.gen; i >= species.gen && i >= move.gen; i--) {
+					const genDex = Dex.forGen(i);
+					moveTypes.push(genDex.moves.get(move.name).type);
+
+					const pokemon = genDex.species.get(species.name);
+					let baseSpecies = genDex.species.get(pokemon.changesFrom || pokemon.name);
+					if (!pokemon.battleOnly) speciesTypes.push(...pokemon.types);
+					let prevo = pokemon.prevo;
+					while (prevo) {
+						const prevoSpecies = genDex.species.get(prevo);
+						speciesTypes.push(...prevoSpecies.types);
+						prevo = prevoSpecies.prevo;
+					}
+					if (pokemon.battleOnly && typeof pokemon.battleOnly === 'string') {
+						species = dex.species.get(pokemon.battleOnly);
+					}
+					const excludedForme = (s: Species) => [
+						'Alola', 'Alola-Totem', 'Galar', 'Galar-Zen', 'Hisui', 'Paldea', 'Paldea-Combat', 'Paldea-Blaze', 'Paldea-Aqua',
+					].includes(s.forme);
+					if (baseSpecies.otherFormes && !['Wormadam', 'Urshifu'].includes(baseSpecies.baseSpecies)) {
+						if (!excludedForme(species)) speciesTypes.push(...baseSpecies.types);
+						for (const formeName of baseSpecies.otherFormes) {
+							const forme = dex.species.get(formeName);
+							if (!forme.battleOnly && !excludedForme(forme)) speciesTypes.push(...forme.types);
+						}
+					}
+				}
+				let valid = false;
+				for (let type of moveTypes) {
+					if (speciesTypes.includes(type)) {
+						valid = true;
+						break;
+					}
+				}
+				learnset.push(id);
+			}
+			return learnset;
 		},
 	},
 	thecardgame: {
@@ -1402,6 +1643,17 @@ const ModModifier: {
 		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex, extra?: any): Species => {
 			// todo:
 			return dex.species.get(pokemon.name || '');
+		},
+		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
+			const moveDex = window.BattleMovedex;
+			const moves: string[] = [];
+			for (const id in moveDex) {
+				const move = dex.moves.get(id);
+				if (move.isNonstandard === 'CAP') continue;
+				if (move.isMax || move.isZ) continue;
+				moves.push(id);
+			}
+			return moves;
 		},
 	},
 	crossevolution: {
@@ -1536,6 +1788,7 @@ const ModModifier: {
 			return new Species(fusionSpecies.id, fusionSpecies.name, {...fusionSpecies});
 		},
 	},
+	// todo: change isNonStandard of moves in natdex
 	gen8natdex: {
 		speciesMod: (data: any): any => {
 			const table = window.BattleTeambuilderTable['gen8natdex'];
