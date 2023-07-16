@@ -203,6 +203,8 @@ const Dex = new class implements ModdedDex {
 		// todo: doubles, nfe, lc
 		// oms
 		if (formatid.match(/\d\d\dcup/)) modids.push(formatid.match(/\d\d\dcup/)![0] as ID);
+		if (formatid.includes('almostanyability') || formatid.includes('aaa')) modids.push('almostanyability' as ID);
+		if (formatid.includes('hackmons') || formatid.endsWith('bh')) modids.push('hackmons' as ID);
 		if (formatid.includes('metronome')) modids.push('metronome' as ID);
 		if (formatid.includes('scalemons')) modids.push('scalemons' as ID);
 		if (formatid.includes('thecardgame')) modids.push('thecardgame' as ID);
@@ -1027,9 +1029,29 @@ const Dex = new class implements ModdedDex {
 			});
 			table.tiers = null;
 		}
-		const tierSet: SearchRow[] = window.BattleTeambuilderTable.tierSet;
-		const slices: {[k: string]: number} = window.BattleTeambuilderTable.formatSlices;
-		return tierSet.slice(slices.OU);
+		return table.tierSet.slice(table.formatSlices.AG);
+	}
+
+	getItemSet() {
+		let table = BattleTeambuilderTable;
+		if (!table.itemSet) {
+			table.itemSet = table.items.map((r: any) => {
+				if (typeof r === 'string') {
+					return ['item', r];
+				}
+				return [r[0], r[1]];
+			});
+			table.items = null;
+		}
+		return table.itemSet;
+	}
+
+	getTypeSet() {
+		const results: SearchRow[] = [];
+		for (let id in window.BattleTypeChart) {
+			results.push(['type', id as ID]);
+		}
+		return results;
 	}
 };
 
@@ -1228,23 +1250,21 @@ class ModdedDex {
 
 	getTierSet() {
 		// part 1: determine table
-		let tierSet = Dex.getTierSet();
-		// todo: figure out HOW to combine tierSets
-		const petmods = ['gen8natdex', 'gen9natdex', 'gen7letsgo', 'gen8bdsp', 'gen9balancedhackmons', 'digimon']
+		let table = window.BattleTeambuilderTable;
+		const petmods = ['gen8natdex', 'gen9natdex', 'gen7letsgo', 'gen8bdsp', 'gen9morebalancedhackmons', 'digimon'];
 		for (const mid of this.modid) {
 			if (!petmods.includes(mid)) continue;
-			const table = mid === ('digimon' as ID) ? DigimonTable : window.BattleTeambuilderTable[mid];
-			if (!table) continue;
-			if (!table.tierSet) {
-				table.tierSet = table.tiers.map((r: any) => {
-					if (typeof r === 'string') return ['pokemon', r];
-					return [r[0], r[1]];
-				});
-				table.tiers = null;
-			}
-			tierSet = table.tierSet;
-			break;
+			table = mid === ('digimon' as ID) ? window.DigimonTable : window.BattleTeambuilderTable[mid];
+			if (table) break;
 		}
+		if (!table.tierSet) {
+			table.tierSet = table.tiers.map((r: any) => {
+				if (typeof r === 'string') return ['pokemon', r];
+				return [r[0], r[1]];
+			});
+			table.tiers = null;
+		}
+		let tierSet: SearchRow[] = table.tierSet.slice(table.formatSlices.AG);
 		// part 2: filter
 		const cupNum = Number(this.modid.find(value => value.match(/\d\d\dcup/))?.slice(0, 3));
 		if (cupNum > 350) {
@@ -1267,13 +1287,44 @@ class ModdedDex {
 		}
 		return tierSet;
 	}
+
+	getItemSet() {
+		let table = BattleTeambuilderTable;
+		const petmods = ['gen8natdex', 'gen9natdex', 'gen8bdsp', 'digimon', 'metronome'];
+		for (const mid of this.modid) {
+			if (!petmods.includes(mid)) continue;
+			const _mid = mid === ('metronome' as ID) ? `gen${this.gen}metronome` : mid;
+			table = _mid === ('digimon' as ID) ? window.DigimonTable : window.BattleTeambuilderTable[_mid];
+			if (table) break;
+		}
+		if (this.gen < Dex.gen) table = window.BattleTeambuilderTable[`gen${this.gen}`];
+		if (!table.itemSet) {
+			table.itemSet = table.items.map((r: any) => {
+				if (typeof r === 'string') {
+					return ['item', r];
+				}
+				return [r[0], r[1]];
+			});
+			table.items = null;
+		}
+		return table.itemSet;
+	}
+
+	getTypeSet() {
+		const results: SearchRow[] = [];
+		const chart = this.modid.includes('digimon' as ID) ? window.DigiTypeChart : window.BattleTypeChart;
+		for (let id in chart) {
+			results.push(['type', id as ID]);
+		}
+		return results;
+	}
 }
 
 /**
  * todo: we need a real ModdedDex which can take all format names and output corresponding dexes
  * 1. change ModdedDex.modid from string to string[] - done
  * 2. add all old mods in ModModifier - WIP
- * 3. probably delete BidModdedDex - done
+ * 3. probably delete BigModdedDex - done
  * 4. add new mods - WIP
  */
 const ModModifier: {
@@ -1284,11 +1335,13 @@ const ModModifier: {
 		speciesMod?: (data: any) => any,
 		typesMod?: (data: any) => any,
 		ModifySpecies?: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex, extra?: any) => Species,
+		ModifyLearnset?: (pokemon: PokemonSet, dex: ModdedDex, extra?: any) => SearchRow[],
 	}
 } = {
 	'350cup': {
 		speciesMod: (data: any): any => {
 			if (!data.exists) return;
+			if (data.bst > 350) return
 			data.bst = 0;
 			let newStats = {...data.baseStats};
 			for (const stat in data.baseStats) {

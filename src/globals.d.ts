@@ -5,6 +5,7 @@ declare var BattlePokedex: any;
 declare var BattleMovedex: any;
 declare var BattleAbilities: any;
 declare var BattleItems: any;
+declare var BattleTypeChart: any;
 declare var BattleAliases: any;
 declare var BattleStatuses: any;
 declare var BattlePokemonSprites: any;

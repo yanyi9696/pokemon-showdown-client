@@ -839,168 +839,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		return results;
 	}
 	getBaseResults(): SearchRow[] {
-		const format = this.format;
-		if (!format) return this.getDefaultResults();
-		const isVGCOrBS = format.startsWith('battlespot') || format.startsWith('battlestadium') || format.startsWith('vgc');
-		let isDoublesOrBS = isVGCOrBS || this.formatType?.includes('doubles');
-		const dex = this.dex;
-
-		let table = BattleTeambuilderTable;
-		if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 9) {
-			table = table['gen' + dex.gen];
-		} else if (isVGCOrBS) {
-			table = table['gen' + dex.gen + 'vgc'];
-		} else if (
-			table['gen' + dex.gen + 'doubles'] && dex.gen > 4 &&
-			this.formatType !== 'letsgo' && this.formatType !== 'bdspdoubles' && this.formatType !== 'dlc1doubles' &&
-			(
-				format.includes('doubles') || format.includes('triples') ||
-				format.includes('freeforall') || format.startsWith('ffa') ||
-				format === 'partnersincrime'
-			)
-		) {
-			table = table['gen' + dex.gen + 'doubles'];
-			isDoublesOrBS = true;
-		} else if (dex.gen < 9 && !this.formatType) {
-			table = table['gen' + dex.gen];
-		} else if (this.formatType?.startsWith('bdsp')) {
-			table = table['gen8' + this.formatType];
-		} else if (this.formatType === 'letsgo') {
-			table = table['gen7letsgo'];
-		} else if (this.format === 'morebalancedhackmons' as ID) {
-			table = table['gen9morebalancedhackmons'];
-		} else if (this.formatType === 'natdex') {
-			table = table['gen' + this.dex.gen + 'natdex'];
-		} else if (this.formatType === 'metronome') {
-			table = table['gen' + dex.gen + 'metronome'];
-		} else if (this.formatType === 'nfe') {
-			table = table['gen' + dex.gen + 'nfe'];
-		} else if (this.formatType === 'lc') {
-			table = table['gen' + dex.gen + 'lc'];
-		} else if (this.formatType?.startsWith('dlc1')) {
-			if (this.formatType.includes('doubles')) {
-				table = table['gen8dlc1doubles'];
-			} else {
-				table = table['gen8dlc1'];
-			}
-		} else if (this.formatType === 'stadium') {
-			table = table['gen' + dex.gen + 'stadium' + (dex.gen > 1 ? dex.gen : '')];
-		} else if (this.formatType === 'digimon') {
-			table = DigimonTable;
-		}
-
-		if (!table.tierSet) {
-			table.tierSet = table.tiers.map((r: any) => {
-				if (typeof r === 'string') return ['pokemon', r];
-				return [r[0], r[1]];
-			});
-			table.tiers = null;
-		}
-		let tierSet: SearchRow[] = table.tierSet;
-		let slices: {[k: string]: number} = table.formatSlices;
-		if (format === 'ubers' || format === 'uber') tierSet = tierSet.slice(slices.Uber);
-		else if (isVGCOrBS) {
-			if (format.endsWith('series13')) {
-				// Show Mythicals
-			} else if (
-				format === 'vgc2010' || format === 'vgc2016' || format.startsWith('vgc2019') ||
-				format === 'vgc2022' || format.endsWith('series10') || format.endsWith('series11')
-			) {
-				tierSet = tierSet.slice(slices["Restricted Legendary"]);
-			} else {
-				tierSet = tierSet.slice(slices.Regular);
-			}
-		} else if (format === 'ou') tierSet = tierSet.slice(slices.OU);
-		else if (format === 'uu') tierSet = tierSet.slice(slices.UU);
-		else if (format === 'ru') tierSet = tierSet.slice(slices.RU || slices.UU);
-		else if (format === 'nu') tierSet = tierSet.slice(slices.NU || slices.RU || slices.UU);
-		else if (format === 'pu') tierSet = tierSet.slice(slices.PU || slices.NU);
-		else if (format === 'zu') tierSet = tierSet.slice(slices.ZU || slices.PU || slices.NU);
-		else if (format === 'lc' || format === 'lcuu' || format.startsWith('lc') || (format !== 'caplc' && format.endsWith('lc'))) tierSet = tierSet.slice(slices.LC);
-		else if (format === 'cap') tierSet = tierSet.slice(0, slices.AG || slices.Uber).concat(tierSet.slice(slices.OU));
-		else if (format === 'caplc') {
-			tierSet = tierSet.slice(slices['CAP LC'], slices.AG || slices.Uber).concat(tierSet.slice(slices.LC));
-		} else if (format === 'anythinggoes' || format.endsWith('ag') || format.startsWith('ag')) {
-			tierSet = tierSet.slice(slices.AG);
-		} else if (format.includes('hackmons') || format.endsWith('bh') || format.includes('createmons')) tierSet = tierSet.slice(slices.AG || slices.Uber);
-		else if (format === 'monotype') tierSet = tierSet.slice(slices.Uber);
-		else if (format === 'doublesubers') tierSet = tierSet.slice(slices.DUber);
-		else if (format === 'doublesou' && dex.gen > 4) tierSet = tierSet.slice(slices.DOU);
-		else if (format === 'doublesuu') tierSet = tierSet.slice(slices.DUU);
-		else if (format === 'doublesnu') tierSet = tierSet.slice(slices.DNU || slices.DUU);
-		else if (this.formatType?.startsWith('bdsp') || this.formatType === 'letsgo' || this.formatType === 'stadium') {
-			tierSet = tierSet.slice(slices.Uber);
-		} else if (!isDoublesOrBS) {
-			tierSet = [
-				...tierSet.slice(slices.OU, slices.UU),
-				...tierSet.slice(slices.AG, slices.Uber),
-				...tierSet.slice(slices.Uber, slices.OU),
-				...tierSet.slice(slices.UU),
-			];
-		} else {
-			tierSet = [
-				...tierSet.slice(slices.DOU, slices.DUU),
-				...tierSet.slice(slices.DUber, slices.DOU),
-				...tierSet.slice(slices.DUU),
-			];
-		}
-
-		if (dex.gen >= 5) {
-			if (format === 'zu' && table.zuBans) {
-				tierSet = tierSet.filter(([type, id]) => {
-					if (id in table.zuBans) return false;
-					return true;
-				});
-			}
-			if (format === 'monotype' && table.monotypeBans) {
-				tierSet = tierSet.filter(([type, id]) => {
-					if (id in table.monotypeBans) return false;
-					return true;
-				});
-			}
-		}
-
-		// Filter out Gmax Pokemon from standard tier selection
-		if (!/^(battlestadium|vgc|doublesubers)/g.test(format)) {
-			tierSet = tierSet.filter(([type, id]) => {
-				if (type === 'header' && id === 'DUber by technicality') return false;
-				if (type === 'pokemon') return !id.endsWith('gmax');
-				return true;
-			});
-		}
-
-		// Nihilslave: 500 Cup filter
-		if (format.includes('500cup')) {
-			tierSet = tierSet.filter(([type, id]) => {
-				if (type === 'pokemon') {
-					const bst = this.dex.species.get(id).bst;
-					if (bst > 500) return false;
-				}
-				return true;
-			});
-		}
-		// Nihilslave: 600 Cup filter
-		if (format.includes('600cup')) {
-			tierSet = tierSet.filter(([type, id]) => {
-				if (type === 'pokemon') {
-					const bst = this.dex.species.get(id).bst;
-					if (bst > 600) return false;
-				}
-				return true;
-			});
-		}
-		// Nihilslave: if filter
-		if (format.includes('infinitefusion')) {
-			tierSet = tierSet.filter(([type, id]) => {
-				if (type === 'pokemon') {
-					const sp = this.dex.species.get(id);
-					if (sp.baseSpecies !== sp.name) return false;
-				}
-				return true;
-			});
-		}
-
-		return tierSet;
+		return this.dex.getTierSet();
 	}
 	filter(row: SearchRow, filters: string[][]) {
 		if (!filters) return true;
@@ -1009,20 +848,8 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		for (const [filterType, value] of filters) {
 			switch (filterType) {
 			case 'type':
-				// if (species.types[0] !== value && species.types[1] !== value) return false;
 				// Nihilslave: change this for digimon, it works better anyway tho
-				let types: string[] = species.types.slice();
-				if (this.format.includes('thecardgame')) {
-					types = Array.from(new Set(types.map(type => (
-						type.replace(/(Ghost|Fairy)/g, 'Psychic')
-							.replace(/Bug/g, 'Grass')
-							.replace(/Ice/g, 'Water')
-							.replace(/(Rock|Ground)/g, 'Fighting')
-							.replace(/Flying/g, 'Normal')
-							.replace(/Poison/g, 'Dark')
-					))));
-				}
-				if (!types.includes(value)) return false;
+				if (!species.types.includes(value as TypeName)) return false;
 				break;
 			case 'egggroup':
 				if (species.eggGroups[0] !== value && species.eggGroups[1] !== value) return false;
@@ -1073,78 +900,29 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 	getDefaultResults(): SearchRow[] {
 		const results: SearchRow[] = [];
 		for (let id in BattleAbilities) {
+			const skipped = ['noability', 'mountaineer', 'rebound', 'persistent', 'allseeingeye'];
+			if (skipped.includes(id)) continue;
 			results.push(['ability', id as ID]);
 		}
 		return results;
 	}
 	getBaseResults() {
-		if (!this.species) return this.getDefaultResults();
-		const format = this.format;
-		const isHackmons = (format.includes('hackmons') || format.endsWith('bh'));
-		const isAAA = (format === 'almostanyability' || format.includes('aaa'));
-		const isCreatemon = format.includes('createmons');
-		const isIF = format.includes('infinitefusion');
+		if (!this.set) return this.getDefaultResults();
+		if (this.formats.includes('gen9morebalancedhackmons' as ID)) {
+			return ([['header', "MBHv4"], ['ability', 'allseeingeye' as ID], ['header', "Abilities"]] as SearchRow[])
+				.concat(this.getDefaultResults());
+		}
+		if (
+			this.formats.includes('almostanyability' as ID) ||
+			this.formats.includes('createmons' as ID) ||
+			this.formats.includes('hackmons' as ID) ||
+			this.formats.includes('metronome' as ID)
+		) return ([['header', "Abilities"]] as SearchRow[]).concat(this.getDefaultResults());
 		const dex = this.dex;
-		let species = dex.species.get(this.species);
+		let species = dex.species.getFromPokemon(this.set);
 		// Nihilslave: add this variable for mods
 		// todo: actually, i really want the dex to tell me the result, EDIT src/battle-dex.ts one day
 		let speciesAbilities = {...species.abilities};
-		if (isIF && this.set?.name) {
-			let headSpecies = dex.species.get(this.set.name);
-			if (headSpecies.exists) {
-				if (headSpecies.name === species.name) {
-					const specialSelfFusions: {[k: string]: string} = {
-						deoxys: 'Deoxys-Attack',
-						rotom: 'Rotom-Heat',
-						shaymin: 'Shaymin-Sky',
-						// darmanitan: 'Darmanitan-Zen',
-						keldeo: 'Keldeo-Resolute',
-						meloetta: 'Meloetta-Pirouette',
-						greninja: 'Greninja-Ash',
-						floette: 'Floette-Eternal',
-						zygarde: 'Zygarde-Complete',
-						hoopa: 'Hoopa-Unbound',
-						lycanroc: 'Lycanroc-Dusk',
-						wishiwashi: 'Wishiwashi-School',
-						necrozma: 'Necrozma-Ultra',
-						// cramorant: 'Cramorant-Gorging',
-						eternatus: 'Eternatus-Eternamax',
-						palafin: 'Palafin-Hero',
-					};
-					if (toID(headSpecies.name) in specialSelfFusions) {
-						speciesAbilities = {...dex.species.get(specialSelfFusions[toID(headSpecies.name)]).abilities};
-					} else if (headSpecies.otherFormes) {
-						for (const forme of headSpecies.otherFormes) {
-							if (forme.endsWith('-Mega') || forme.endsWith('-Mega-Y') ||
-								forme.endsWith('-Primal') ||
-								forme.endsWith('-Origin') ||
-								forme.endsWith('-Therian') ||
-								forme.endsWith('-Starter') ||
-								forme.endsWith('-Crowned')
-							) speciesAbilities = {...dex.species.get(forme).abilities};
-						}
-					}
-				} else {
-					speciesAbilities = {
-						0: headSpecies.abilities['0'],
-						1: speciesAbilities['1'] || speciesAbilities['0'],
-						H: headSpecies.abilities['H'],
-						S: headSpecies.abilities['S'],
-					};
-					if (speciesAbilities['H'] === speciesAbilities[1] || speciesAbilities['H'] === speciesAbilities[0]) delete speciesAbilities['H'];
-					if (speciesAbilities[1] === speciesAbilities[0]) delete speciesAbilities[1];
-					const pair = [headSpecies.name, species.name].sort();
-					if (pair[0] === 'Kyurem' && pair[1] === 'Reshiram') speciesAbilities = {...this.dex.species.get('Kyurem-White').abilities};
-					if (pair[0] === 'Kyurem' && pair[1] === 'Zekrom') speciesAbilities = {...this.dex.species.get('Kyurem-Black').abilities};
-					if (pair[0] === 'Necrozma' && pair[1] === 'Solgaleo') speciesAbilities = {...this.dex.species.get('Necrozma-Dusk-Mane').abilities};
-					if (pair[0] === 'Lunala' && pair[1] === 'Necrozma') speciesAbilities = {...this.dex.species.get('Necrozma-Dawn-Wings').abilities};
-					if (pair[0] === 'Calyrex' && pair[1] === 'Glastrier') speciesAbilities = {...this.dex.species.get('Calyrex-Ice').abilities};
-					if (pair[0] === 'Calyrex' && pair[1] === 'Spectrier') speciesAbilities = {...this.dex.species.get('Calyrex-Shadow').abilities};
-					if (pair[0] === 'Arrokuda' && pair[1] === 'Cramorant') speciesAbilities = {...this.dex.species.get('Cramorant-Gulping').abilities};
-					if (pair[0] === 'Cramorant' && pair[1] === 'Pikachu') speciesAbilities = {...this.dex.species.get('Cramorant-Gorging').abilities};
-				}
-			}
-		}
 		let abilitySet: SearchRow[] = [['header', "Abilities"]];
 
 		if (species.isMega) {
@@ -1166,47 +944,6 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 		if (speciesAbilities['S']) {
 			abilitySet.push(['header', "Special Event Ability"]);
 			abilitySet.push(['ability', toID(speciesAbilities['S'])]);
-		}
-		if (isAAA || format.includes('metronomebattle') || isHackmons || isCreatemon) {
-			let abilities: ID[] = [];
-			for (let i in this.getTable()) {
-				const ability = dex.abilities.get(i);
-				if (ability.isNonstandard) continue;
-				if (ability.gen > dex.gen) continue;
-				abilities.push(ability.id);
-			}
-			// hardcode ase for mbhv4
-			if (format.includes('morebalancedhackmons')) {
-				abilities.push('allseeingeye' as ID);
-			}
-
-			let goodAbilities: SearchRow[] = [['header', "Abilities"]];
-			let poorAbilities: SearchRow[] = [['header', "Situational Abilities"]];
-			let badAbilities: SearchRow[] = [['header', "Unviable Abilities"]];
-			for (const ability of abilities.sort().map(abil => dex.abilities.get(abil))) {
-				let rating = ability.rating;
-				if (ability.id === 'normalize') rating = 3;
-				if (rating >= 3) {
-					goodAbilities.push(['ability', ability.id]);
-				} else if (rating >= 2) {
-					poorAbilities.push(['ability', ability.id]);
-				} else {
-					badAbilities.push(['ability', ability.id]);
-				}
-			}
-			abilitySet = [...goodAbilities, ...poorAbilities, ...badAbilities];
-			if (species.isMega) {
-				if (isAAA) {
-					abilitySet.unshift(['html', `Will be <strong>${speciesAbilities['0']}</strong> after Mega Evolving.`]);
-				}
-				// species is unused after this, so no need to replace
-			}
-			if (species.forme === 'X') {
-				if (isAAA) {
-					abilitySet.unshift(['html', `Will be <strong>${speciesAbilities['0']}</strong> after X-Evolving.`]);
-				}
-				// species is unused after this, so no need to replace
-			}
 		}
 		return abilitySet;
 	}
@@ -1233,30 +970,7 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 		return BattleItems;
 	}
 	getDefaultResults(): SearchRow[] {
-		let table = BattleTeambuilderTable;
-		if (this.formatType?.startsWith('bdsp')) {
-			table = table['gen8bdsp'];
-		} else if (this.format === 'morebalancedhackmons' as ID) {
-			table = table['gen9morebalancedhackmons'];
-		} else if (this.formatType === 'natdex') {
-			table = table['gen' + this.dex.gen + 'natdex'];
-		} else if (this.formatType === 'metronome') {
-			table = table['gen' + this.dex.gen + 'metronome'];
-		} else if (this.formatType === 'digimon') {
-			table = DigimonTable;
-		} else if (this.dex.gen < 9) {
-			table = table['gen' + this.dex.gen];
-		}
-		if (!table.itemSet) {
-			table.itemSet = table.items.map((r: any) => {
-				if (typeof r === 'string') {
-					return ['item', r];
-				}
-				return [r[0], r[1]];
-			});
-			table.items = null;
-		}
-		return table.itemSet;
+		return this.dex.getItemSet();
 	}
 	getBaseResults(): SearchRow[] {
 		if (!this.species) return this.getDefaultResults();
@@ -1818,17 +1532,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		for (const [filterType, value] of filters) {
 			switch (filterType) {
 			case 'type':
-				let type: string = move.type;
-				if (this.format.includes('thecardgame')) {
-					type = type
-						.replace(/(Ghost|Fairy)/g, 'Psychic')
-						.replace(/Bug/g, 'Grass')
-						.replace(/Ice/g, 'Water')
-						.replace(/(Rock|Ground)/g, 'Fighting')
-						.replace(/Flying/g, 'Normal')
-						.replace(/Poison/g, 'Dark');
-				}
-				if (type !== value) return false;
+				if (move.type !== value) return false;
 				break;
 			case 'category':
 				if (move.category !== value) return false;
@@ -1912,20 +1616,7 @@ class BattleTypeSearch extends BattleTypedSearch<'type'> {
 		return window.BattleTypeChart;
 	}
 	getDefaultResults(): SearchRow[] {
-		const results: SearchRow[] = [];
-		// Nihilslave: leaves the only relevant digimon thing here, hoping it reborn in a correct way
-		// Nihilslave: it returns, remember we always need to hardcode here
-		switch (this.formatType) {
-		case 'digimon':
-			for (let id in DigiTypeChart) {
-				results.push(['type', id as ID]);
-			}
-			return results;
-		}
-		for (let id in window.BattleTypeChart) {
-			results.push(['type', id as ID]);
-		}
-		return results;
+		return this.dex.getTypeSet();
 	}
 	getBaseResults() {
 		return this.getDefaultResults();
