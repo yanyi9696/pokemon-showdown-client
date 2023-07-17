@@ -1338,7 +1338,7 @@ class ModdedDex {
 			if (!petmods.includes(mid)) continue;
 			let _mid = mid;
 			if (_mid === 'natdex') _mid = `gen${this.gen}natdex` as ID;
-			table = _mid === ('digimon' as ID) ? window.DigimonTable : window.BattleTeambuilderTable[mid];
+			table = _mid === ('digimon' as ID) ? window.DigimonTable : window.BattleTeambuilderTable[_mid];
 			if (table) break;
 		}
 		if (!table.tierSet) {
@@ -1540,10 +1540,8 @@ const ModModifier: {
 				// moves from future gens also filtered by the following line
 				if (move.isNonstandard && !['Unobtainable', 'LGPE'].includes(move.isNonstandard)) continue;
 				if (move.isNonstandard === 'LGPE' && !isLGPE) continue;
-				if (move.isMax && dex.gen < 8) continue;
 				if (move.isMax && dex.gen > 8 && !isNatDex) continue;
 				if (typeof move.isMax === 'string') continue;
-				if (move.isZ && dex.gen < 7) continue;
 				if (move.isZ && dex.gen > 7 && !isNatDex) continue;
 				moves.push(id);
 			}
