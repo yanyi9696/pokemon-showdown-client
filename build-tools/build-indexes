@@ -435,7 +435,8 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 				if (
 					[
 						'Aegislash', 'Castform', 'Cherrim', 'Cramorant', 'Eiscue', 'Meloetta', 'Mimikyu', 'Minior', 'Morpeko', 'Wishiwashi',
-					].includes(species.baseSpecies) || species.forme.includes('Totem') || species.forme.includes('Zen')
+					].includes(species.baseSpecies) || species.forme.includes('Totem') // || species.forme.includes('Zen')
+					// todo: figure out a good way to deal with dz and dgz
 				) {
 					continue;
 				}
