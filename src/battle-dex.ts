@@ -1570,28 +1570,26 @@ const ModModifier: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
 	},
 	'500cup': {
-		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
-			tierSet = tierSet.filter(([type, id]) => {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.filter(
+			([type, id]) => {
 				if (type === 'pokemon') {
 					const bst = dex.species.get(id).bst;
 					if (bst > 500) return false;
 				}
 				return true;
-			});
-			return tierSet;
-		},
+			}
+		),
 	},
 	'600cup': {
-		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
-			tierSet = tierSet.filter(([type, id]) => {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.filter(
+			([type, id]) => {
 				if (type === 'pokemon') {
 					const bst = dex.species.get(id).bst;
 					if (bst > 600) return false;
 				}
 				return true;
-			});
-			return tierSet;
-		},
+			}
+		),
 	},
 	hackmons: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
@@ -1865,16 +1863,15 @@ const ModModifier: {
 
 			return new Species(fusionSpecies.id, fusionSpecies.name, {...fusionSpecies});
 		},
-		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
-			tierSet = tierSet.filter(([type, id]) => {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.filter(
+			([type, id]) => {
 				if (type === 'pokemon') {
 					const sp = dex.species.get(id);
 					if (sp.baseSpecies !== sp.name) return false;
 				}
 				return true;
-			});
-			return tierSet;
-		},
+			}
+		),
 		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
 			const name = pokemon.name || '';
 			const headSpecies = dex.species.get(name);
