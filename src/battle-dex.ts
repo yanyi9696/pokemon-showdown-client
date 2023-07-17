@@ -1873,10 +1873,8 @@ const ModModifier: {
 				fusionSpecies.bst += stat;
 			}
 			fusionSpecies.baseStats = newStats;
-			let newTypes = {...fusionSpecies.types};
-			newTypes[0] = headSpecies.types[0];
-			newTypes[1] = bodySpecies.types[1] || bodySpecies.types[0];
-			if (newTypes[1] === newTypes[0]) fusionSpecies.types = [fusionSpecies.types[0]];
+			let newTypes = [headSpecies.types[0], bodySpecies.types[1] || bodySpecies.types[0]];
+			if (newTypes[1] === newTypes[0]) newTypes = [newTypes[0]];
 			fusionSpecies.types = newTypes;
 
 			return new Species(fusionSpecies.id, fusionSpecies.name, {...fusionSpecies});
