@@ -990,7 +990,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			case 'triattack': return !moves.includes('bodyslam');
 			}
 			// Useful and Useless moves for Stadium OU, which changes many game mechanics.
-			if (this.formatType === 'stadium') {
+			if (this.dex.modid.includes('stadium' as ID)) {
 				if (['doubleedge', 'focusenergy', 'haze'].includes(id)) return true;
 				if (['hyperbeam', 'sing', 'hypnosis'].includes(id)) return false;
 				switch (id) {
@@ -1000,11 +1000,11 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			}
 		}
 
-		if (this.formatType === 'letsgo') {
+		if (this.dex.modid.includes('gen7letsgo' as ID)) {
 			if (['megadrain', 'teleport'].includes(id)) return true;
 		}
 
-		if (this.formatType === 'metronome') {
+		if (this.dex.modid.includes('metronome' as ID)) {
 			if (id === 'metronome') return true;
 		}
 
@@ -1084,7 +1084,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			return !moves.includes('mountaingale');
 		case 'icywind':
 			// Keldeo needs Hidden Power for Electric/Ghost
-			return species.baseSpecies === 'Keldeo' || this.formatType === 'doubles';
+			return species.baseSpecies === 'Keldeo' || this.dex.modid.includes('doubles' as ID);
 		case 'infestation':
 			return moves.includes('stickyweb');
 		case 'irondefense':
@@ -1108,7 +1108,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		case 'petaldance':
 			return abilityid === 'owntempo';
 		case 'phantomforce':
-			return (!moves.includes('poltergeist') && !moves.includes('shadowclaw')) || this.formatType === 'doubles';
+			return (!moves.includes('poltergeist') && !moves.includes('shadowclaw')) || this.dex.modid.includes('doubles' as ID);
 		case 'poisonfang':
 			return species.types.includes('Poison') && !moves.includes('gunkshot') && !moves.includes('poisonjab');
 		case 'relicsong':
@@ -1134,7 +1134,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		case 'steelwing':
 			return !moves.includes('ironhead');
 		case 'stompingtantrum':
-			return (!moves.includes('earthquake') && !moves.includes('drillrun')) || this.formatType === 'doubles';
+			return (!moves.includes('earthquake') && !moves.includes('drillrun')) || this.dex.modid.includes('doubles' as ID);
 		case 'stunspore':
 			return !moves.includes('thunderwave');
 		case 'technoblast':
@@ -1149,7 +1149,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			return species.baseStats.spe <= 100;
 		}
 
-		if (this.formatType === 'doubles' && BattleMoveSearch.GOOD_DOUBLES_MOVES.includes(id)) {
+		if (this.dex.modid.includes('doubles' as ID) && BattleMoveSearch.GOOD_DOUBLES_MOVES.includes(id)) {
 			return true;
 		}
 
