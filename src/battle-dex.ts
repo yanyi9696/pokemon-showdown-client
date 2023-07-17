@@ -219,7 +219,7 @@ const Dex = new class implements ModdedDex {
 		if (
 			formatid.includes('nationaldex') || formatid.includes('natdex') || formatid.startsWith(gen + 'nd') ||
 			formatid.includes('metronome') || formatid.includes('createmons') || formatid.includes('infinitefusion') || formatid.includes('morebalancedhackmons')
-		) modids.push((gen + 'natdex') as ID);
+		) modids.push('natdex' as ID);
 		if (formatid.includes('letsgo')) modids.push('gen7letsgo' as ID);
 		if (formatid.includes('bdsp')) modids.push('gen8bdsp' as ID);
 		if (formatid.includes('morebalancedhackmons')) modids.push('gen9morebalancedhackmons' as ID);
@@ -1168,7 +1168,7 @@ class ModdedDex {
 				data.category = Dex.getGen3Category(data.type);
 			}
 			for (const mid of this.modid) {
-				if (ModModifier[mid]?.movesMod) ModModifier[mid].movesMod!(data);
+				if (ModModifier[mid]?.movesMod) ModModifier[mid].movesMod!(data, this);
 			}
 
 			const move = new Move(id, name, data);
@@ -1196,7 +1196,7 @@ class ModdedDex {
 				}
 			}
 			for (const mid of this.modid) {
-				if (ModModifier[mid]?.itemsMod) ModModifier[mid].itemsMod!(data);
+				if (ModModifier[mid]?.itemsMod) ModModifier[mid].itemsMod!(data, this);
 			}
 
 			const item = new Item(id, name, data);
@@ -1223,7 +1223,7 @@ class ModdedDex {
 				}
 			}
 			for (const mid of this.modid) {
-				if (ModModifier[mid]?.abilitiesMod) ModModifier[mid].abilitiesMod!(data);
+				if (ModModifier[mid]?.abilitiesMod) ModModifier[mid].abilitiesMod!(data, this);
 			}
 
 			const ability = new Ability(id, name, data);
@@ -1253,7 +1253,7 @@ class ModdedDex {
 				data.abilities = {0: "No Ability"};
 			}
 			for (const mid of this.modid) {
-				if (ModModifier[mid]?.speciesMod) ModModifier[mid].speciesMod!(data);
+				if (ModModifier[mid]?.speciesMod) ModModifier[mid].speciesMod!(data, this);
 			}
 			if (!data.tier && id.slice(-5) === 'totem') {
 				data.tier = this.species.get(id.slice(0, -5)).tier;
@@ -1326,16 +1326,19 @@ class ModdedDex {
 	}
 
 	getMovedex() {
+		if (this.modid.includes('digimon' as ID)) return window.DigiMovedex;
 		return window.BattleMovedex;
 	}
 
 	getTierSet() {
 		// part 1: determine table
 		let table = window.BattleTeambuilderTable;
-		const petmods = ['gen8natdex', 'gen9natdex', 'gen7letsgo', 'gen8bdsp', 'gen9morebalancedhackmons', 'digimon'];
+		const petmods = ['natdex', 'gen7letsgo', 'gen8bdsp', 'digimon'];
 		for (const mid of this.modid) {
 			if (!petmods.includes(mid)) continue;
-			table = mid === ('digimon' as ID) ? window.DigimonTable : window.BattleTeambuilderTable[mid];
+			let _mid = mid;
+			if (_mid === 'natdex') _mid = `gen${this.gen}natdex` as ID;
+			table = _mid === ('digimon' as ID) ? window.DigimonTable : window.BattleTeambuilderTable[mid];
 			if (table) break;
 		}
 		if (!table.tierSet) {
@@ -1371,10 +1374,11 @@ class ModdedDex {
 
 	getItemSet() {
 		let table = BattleTeambuilderTable;
-		const petmods = ['gen8natdex', 'gen9natdex', 'gen8bdsp', 'digimon', 'metronome'];
+		const petmods = ['natdex', 'gen8bdsp', 'digimon', 'metronome'];
 		for (const mid of this.modid) {
 			if (!petmods.includes(mid)) continue;
-			const _mid = mid === ('metronome' as ID) ? `gen${this.gen}metronome` : mid;
+			let _mid = mid;
+			if (['natdex', 'metronome'].includes(_mid)) _mid = `gen${this.gen}${_mid}` as ID;
 			table = _mid === ('digimon' as ID) ? window.DigimonTable : window.BattleTeambuilderTable[_mid];
 			if (table) break;
 		}
@@ -1426,7 +1430,7 @@ class ModdedDex {
 		// Nihilslave: i made some unequivalent changes to this function, mainly about VGC and tradebacks
 		// todo: fix it later
 		const move = this.moves.get(moveid);
-		const isNatDex = this.modid.includes(`gen${this.gen}natdex` as ID);
+		const isNatDex = this.modid.includes('natdex' as ID);
 		if (isNatDex && move.isNonstandard && move.isNonstandard !== 'Past') {
 			return false;
 		}
@@ -1457,8 +1461,7 @@ class ModdedDex {
 		return false;
 	}
 	getLearnsetMoves(pokemon: PokemonSet) {
-		const moveDex = this.modid.includes('digimon' as ID) ? DigiMovedex : window.BattleMovedex;
-		const isNatDex = this.modid.includes(`gen${this.gen}natdex` as ID);
+		const moveDex = this.getMovedex();
 		let moves: string[] = [];
 		let sketch = false;
 		for (const id in moveDex) {
@@ -1470,8 +1473,7 @@ class ModdedDex {
 			for (const id in moveDex) {
 				if (moves.includes(id)) continue;
 				const move = this.moves.get(id);
-				if (move.isNonstandard && move.isNonstandard !== 'Past') continue;
-				if (move.isNonstandard === 'Past' && !isNatDex) continue;
+				if (move.isNonstandard) continue;
 				if (move.noSketch || move.isMax || move.isZ) continue;
 				moves.push(id);
 			}
@@ -1501,13 +1503,13 @@ class ModdedDex {
  */
 const ModModifier: {
 	[mod: string]: {
-		movesMod?: (data: any) => any,
-		itemsMod?: (data: any) => any,
-		abilitiesMod?: (data: any) => any,
-		speciesMod?: (data: any) => any,
-		typesMod?: (data: any) => any,
+		movesMod?: (data: any, extra?: any) => any,
+		itemsMod?: (data: any, extra?: any) => any,
+		abilitiesMod?: (data: any, extra?: any) => any,
+		speciesMod?: (data: any, extra?: any) => any,
+		typesMod?: (data: any, extra?: any) => any,
 		ModifySpecies?: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex, extra?: any) => Species,
-		ModifyLearnset?: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]) => string[],
+		ModifyLearnset?: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[], extra?: any) => string[],
 	}
 } = {
 	'350cup': {
@@ -1527,17 +1529,16 @@ const ModModifier: {
 	},
 	hackmons: {
 		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
-			const moveDex = window.BattleMovedex; // todo: write the function `getMovedex`
+			const moveDex = dex.getMovedex();
 			// todo: it seems there will usually be an empty move inserted into `BattleMovedex`
 			// look into it
-			const isNatDex = dex.modid.includes(`gen${dex.gen}natdex` as ID);
+			const isNatDex = dex.modid.includes('natdex' as ID);
 			const isLGPE = dex.modid.includes('gen7letsgo' as ID);
 			const moves: string[] = [];
 			for (const id in moveDex) {
 				const move = dex.moves.get(id);
 				// moves from future gens also filtered by the following line
-				if (move.isNonstandard && !['Past', 'LGPE'].includes(move.isNonstandard)) continue;
-				if (move.isNonstandard === 'Past' && !isNatDex) continue;
+				if (move.isNonstandard && !['Unobtainable', 'LGPE'].includes(move.isNonstandard)) continue;
 				if (move.isNonstandard === 'LGPE' && !isLGPE) continue;
 				if (move.isMax && dex.gen < 8) continue;
 				if (move.isMax && dex.gen > 8 && !isNatDex) continue;
@@ -1573,8 +1574,8 @@ const ModModifier: {
 	},
 	stabmons: {
 		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
-			const moveDex = window.BattleMovedex;
-			const isNatDex = dex.modid.includes(`gen${dex.gen}natdex` as ID);
+			const moveDex = dex.getMovedex();
+			const isNatDex = dex.modid.includes('natdex' as ID);
 			const isLGPE = dex.modid.includes('gen7letsgo' as ID);
 			for (const id in moveDex) {
 				if (learnset.includes(id)) continue;
@@ -1653,7 +1654,7 @@ const ModModifier: {
 			return dex.species.get(pokemon.name || '');
 		},
 		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
-			const moveDex = window.BattleMovedex;
+			const moveDex = dex.getMovedex();
 			const moves: string[] = [];
 			for (const id in moveDex) {
 				const move = dex.moves.get(id);
@@ -1800,7 +1801,7 @@ const ModModifier: {
 			const headSpecies = dex.species.get(name);
 			if (!headSpecies.exists) return learnset;
 			const fusionSpecies = dex.species.getFromPokemon(pokemon);
-			const moveDex = window.BattleMovedex;
+			const moveDex = dex.getMovedex();
 			for (const id in moveDex) {
 				if (learnset.includes(id)) continue;
 				if (!dex.canLearn(headSpecies.id, id as ID) && !dex.canLearn(fusionSpecies.id, id as ID)) continue;
@@ -1809,16 +1810,14 @@ const ModModifier: {
 			return learnset;
 		},
 	},
-	// todo: change isNonStandard of moves in natdex
-	gen8natdex: {
-		speciesMod: (data: any): any => {
-			const table = window.BattleTeambuilderTable['gen8natdex'];
-			if (data.id in table.overrideTier) data.tier = table.overrideTier[data.id];
+	natdex: {
+		movesMod: (data: any): any => {
+			if (data.isNonstandard === 'Past') data.isNonstandard = null;
 		},
-	},
-	gen9natdex: {
-		speciesMod: (data: any): any => {
-			const table = window.BattleTeambuilderTable['gen9natdex'];
+		speciesMod: (data: any, extra?: any): any => {
+			let gen = 9;
+			if (extra && extra.gen) gen = extra.gen;
+			const table = window.BattleTeambuilderTable[`gen${gen}natdex`];
 			if (data.id in table.overrideTier) data.tier = table.overrideTier[data.id];
 		},
 	},

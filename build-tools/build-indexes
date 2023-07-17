@@ -803,72 +803,11 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	const mod = 'gen9morebalancedhackmons';
 	const pokemon = Object.keys(Dex.data.Pokedex);
 	pokemon.sort();
-	const tierTable = {};
-	const overrideTier = {};
-	const monotypeBans = {};
-	for (const id of pokemon) {
-		const species = Dex.mod(mod).species.get(id);
-		if (species.gen > genNum) continue;
-		const tier = (() => {
-			if (species.tier === 'CAP' || species.tier === 'CAP NFE' || species.tier === 'CAP LC') {
-				return species.tier;
-			}
-			return species.natDexTier;
-		})();
-		overrideTier[species.id] = tier;
-		if (species.forme) {
-			if (
-				[
-					'Aegislash', 'Castform', 'Cherrim', 'Cramorant', 'Eiscue', 'Meloetta', 'Mimikyu', 'Minior', 'Morpeko', 'Wishiwashi',
-				].includes(species.baseSpecies) || species.forme.includes('Totem')// || species.forme.includes('Zen')
-			) {
-				continue;
-			}
-		}
 
-		if (!tierTable[tier]) tierTable[tier] = [];
-		tierTable[tier].push(id);
-	}
-
-	const tiers = [];
 	const items = [];
-	const formatSlices = {};
 
 	BattleTeambuilderTable[mod] = {};
-	BattleTeambuilderTable[mod].tiers = tiers;
-	BattleTeambuilderTable[mod].overrideTier = overrideTier;
 	BattleTeambuilderTable[mod].items = items;
-	BattleTeambuilderTable[mod].monotypeBans = monotypeBans;
-	BattleTeambuilderTable[mod].formatSlices = formatSlices;
-
-	const tierOrder = (() => {
-		return ["CAP", "CAP NFE", "CAP LC", "AG", "Uber", "(Uber)", "OU", "(OU)", "UUBL", "UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "(PU)", "New", "NFE", "LC", "Unreleased"];
-	})();
-
-	for (const tier of tierOrder) {
-		if (tier in {OU:1, AG:1, Uber:1, UU:1, RU:1, NU:1, PU:1, "(PU)":1, NFE:1, LC:1, DOU:1, DUU:1, "(DUU)":1, New:1, Legal:1, Regular:1, "Restricted Legendary":1, "CAP LC":1}) {
-			let usedTier = tier;
-			if (usedTier === "(PU)") usedTier = "ZU";
-			if (usedTier === "(DUU)") usedTier = "DNU";
-			formatSlices[usedTier] = tiers.length;
-		}
-		if (!tierTable[tier]) continue;
-		if (tier === "(PU)") {
-			tiers.push(['header', "Below PU"]);
-		} else if (tier === "(DUU)") {
-			tiers.push(['header', "Below DUU"]);
-		} else if (tier.charAt(0) === '(') {
-			tiers.push(['header', tier.slice(1, -1) + " by technicality"]);
-		} else if (tier === "NFE") {
-			tiers.push(['header', "NFEs not in a higher tier"]);
-		} else {
-			tiers.push(['header', tier]);
-		}
-		tiers.push(...tierTable[tier]);
-	}
-	if (!formatSlices['OU']) formatSlices['OU'] = formatSlices['New'];
-	if (!formatSlices['UU']) formatSlices['UU'] = formatSlices['New'];
-	if (!formatSlices['RU']) formatSlices['RU'] = formatSlices['New'];
 
 	const itemList = Object.keys(Dex.data.Items);
 	itemList.sort();
