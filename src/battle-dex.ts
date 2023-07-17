@@ -202,6 +202,13 @@ const Dex = new class implements ModdedDex {
 		const genStrings = formatid.match(/gen\d+/);
 		const gen = genStrings ? genStrings[0] : this.currentGen;
 		// todo: doubles, nfe, lc
+		// regulars
+		if (formatid.includes('anythinggoes') || formatid.endsWith('ag')) modids.push('anythinggoes' as ID);
+		if (formatid.includes('doubles') ||
+			formatid.includes('freeforall') || formatid.startsWith(gen + 'ffa') ||
+			formatid.includes('multibattle')) modids.push('doubles' as ID);
+		if (formatid.includes('littlecup') || formatid.endsWith('lc')) modids.push('littlecup' as ID);
+		if (formatid.includes('nfe')) modids.push('nfe' as ID);
 		// oms
 		if (formatid.match(/\d\d\dcup/)) modids.push(formatid.match(/\d\d\dcup/)![0] as ID);
 		if (formatid.includes('almostanyability') || formatid.includes('aaa')) modids.push('almostanyability' as ID);
@@ -1018,6 +1025,9 @@ const Dex = new class implements ModdedDex {
 		return this.pokeballs;
 	}
 
+	getTierSetTable() {
+		return window.BattleTeambuilderTable;
+	}
 	getLearnsetTable() {
 		return window.BattleTeambuilderTable;
 	}
@@ -1027,7 +1037,7 @@ const Dex = new class implements ModdedDex {
 	}
 
 	getTierSet() {
-		const table = window.BattleTeambuilderTable;
+		const table = this.getTierSetTable();
 		if (!table.tierSet) {
 			table.tierSet = table.tiers.map((r: any) => {
 				if (typeof r === 'string') return ['pokemon', r];
@@ -1318,6 +1328,19 @@ class ModdedDex {
 		return this.pokeballs;
 	}
 
+	getTierSetTable() {
+		// todo: this is a really bad way to do so, find a better one
+		let table = window.BattleTeambuilderTable;
+		if (this.gen < Dex.gen) table = table[`gen${this.gen}`];
+		if (this.modid.includes('doubles' as ID)) table = table[`gen${this.gen}doubles`];
+		if (this.modid.includes('littlecup' as ID)) table = table[`gen${this.gen}lc`];
+		if (this.modid.includes('nfe' as ID)) table = table[`gen${this.gen}nfe`];
+		if (this.modid.includes('natdex' as ID)) table = table[`gen${this.gen}natdex`];
+		if (this.modid.includes('gen7letsgo' as ID)) table = table['gen7letsgo'];
+		if (this.modid.includes('gen8bdsp' as ID)) table = table['gen8bdsp'];
+		if (this.modid.includes('digimon' as ID)) table = window.DigimonTable;
+		return table;
+	}
 	getLearnsetTable() {
 		if (this.modid.includes('gen7letsgo' as ID)) return window.BattleTeambuilderTable['gen7letsgo'];
 		if (this.modid.includes('gen8bdsp' as ID)) return window.BattleTeambuilderTable['gen8bdsp'];
@@ -1332,15 +1355,7 @@ class ModdedDex {
 
 	getTierSet() {
 		// part 1: determine table
-		let table = window.BattleTeambuilderTable;
-		const petmods = ['natdex', 'gen7letsgo', 'gen8bdsp', 'digimon'];
-		for (const mid of this.modid) {
-			if (!petmods.includes(mid)) continue;
-			let _mid = mid;
-			if (_mid === 'natdex') _mid = `gen${this.gen}natdex` as ID;
-			table = _mid === ('digimon' as ID) ? window.DigimonTable : window.BattleTeambuilderTable[_mid];
-			if (table) break;
-		}
+		const table = this.getTierSetTable();
 		if (!table.tierSet) {
 			table.tierSet = table.tiers.map((r: any) => {
 				if (typeof r === 'string') return ['pokemon', r];
@@ -1348,26 +1363,28 @@ class ModdedDex {
 			});
 			table.tiers = null;
 		}
-		let tierSet: SearchRow[] = table.tierSet.slice(table.formatSlices.AG);
+		const slices = table.formatSlices;
+		let tierSet: SearchRow[] = table.tierSet.slice(slices.AG || slices.Uber || slices.DUber); // remove CAP
 		// part 2: filter
-		const cupNum = Number(this.modid.find(value => value.match(/\d\d\dcup/))?.slice(0, 3));
-		if (cupNum > 350) {
-			tierSet = tierSet.filter(([type, id]) => {
-				if (type === 'pokemon') {
-					const bst = this.species.get(id).bst;
-					if (bst > cupNum) return false;
-				}
-				return true;
-			});
+		let modified = false;
+		for (const mid of this.modid) {
+			if (ModModifier[mid]?.ModifyTierSet) {
+				tierSet = ModModifier[mid].ModifyTierSet!(tierSet, this, slices);
+				modified = true;
+			}
 		}
-		if (this.modid.includes('infinitefusion' as ID)) {
-			tierSet = tierSet.filter(([type, id]) => {
-				if (type === 'pokemon') {
-					const sp = this.species.get(id);
-					if (sp.baseSpecies !== sp.name) return false;
-				}
-				return true;
-			});
+		if (!modified) {
+			if (!this.modid.includes('doubles' as ID)) tierSet = [
+				...table.tierSet.slice(slices.OU, slices.UU),
+				...table.tierSet.slice(slices.AG, slices.Uber),
+				...table.tierSet.slice(slices.Uber, slices.OU),
+				...table.tierSet.slice(slices.UU),
+			];
+			else tierSet = [
+				...tierSet.slice(slices.DOU, slices.DUU),
+				...tierSet.slice(slices.DUber, slices.DOU),
+				...tierSet.slice(slices.DUU),
+			];
 		}
 		return tierSet;
 	}
@@ -1509,9 +1526,33 @@ const ModModifier: {
 		speciesMod?: (data: any, extra?: any) => any,
 		typesMod?: (data: any, extra?: any) => any,
 		ModifySpecies?: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex, extra?: any) => Species,
+		ModifyTierSet?: (tierSet: SearchRow[], dex: ModdedDex, extra?: any) => SearchRow[],
 		ModifyLearnset?: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[], extra?: any) => string[],
 	}
 } = {
+	// regulars
+	anythinggoes: {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
+	},
+	doubles: {
+		speciesMod: (data: any, extra?: any): any => {
+			let gen = 9;
+			if (extra && extra.gen) gen = extra.gen;
+			const table = window.BattleTeambuilderTable[`gen${gen}doubles`];
+			if (data.id in table.overrideTier) data.tier = table.overrideTier[data.id];
+		},
+	},
+	littlecup: {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
+			tierSet.findIndex(([type, value]) => type === 'header' && value === 'LC')
+		),
+	},
+	nfe: {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
+			tierSet.findIndex(([type, value]) => type === 'header' && value === 'NFEs not in a higher tier')
+		),
+	},
+	// oms
 	'350cup': {
 		speciesMod: (data: any): any => {
 			if (!data.exists) return;
@@ -1526,8 +1567,34 @@ const ModModifier: {
 			}
 			data.baseStats = newStats;
 		},
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
+	},
+	'500cup': {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
+			tierSet = tierSet.filter(([type, id]) => {
+				if (type === 'pokemon') {
+					const bst = dex.species.get(id).bst;
+					if (bst > 500) return false;
+				}
+				return true;
+			});
+			return tierSet;
+		},
+	},
+	'600cup': {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
+			tierSet = tierSet.filter(([type, id]) => {
+				if (type === 'pokemon') {
+					const bst = dex.species.get(id).bst;
+					if (bst > 600) return false;
+				}
+				return true;
+			});
+			return tierSet;
+		},
 	},
 	hackmons: {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
 		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
 			const moveDex = dex.getMovedex();
 			// todo: it seems there will usually be an empty move inserted into `BattleMovedex`
@@ -1552,6 +1619,7 @@ const ModModifier: {
 		speciesMod: (data: any): any => {
 			if (data.num >= 0) data.tier = String(data.num);
 		},
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
 	},
 	scalemons: {
 		speciesMod: (data: any): any => {
@@ -1569,6 +1637,7 @@ const ModModifier: {
 			}
 			data.baseStats = newStats;
 		},
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
 	},
 	stabmons: {
 		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
@@ -1646,11 +1715,13 @@ const ModModifier: {
 			))));
 		},
 	},
+	// species oms
 	createmons: {
 		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex, extra?: any): Species => {
 			// todo:
 			return dex.species.get(pokemon.name || '');
 		},
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
 		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
 			const moveDex = dex.getMovedex();
 			const moves: string[] = [];
@@ -1794,6 +1865,16 @@ const ModModifier: {
 
 			return new Species(fusionSpecies.id, fusionSpecies.name, {...fusionSpecies});
 		},
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
+			tierSet = tierSet.filter(([type, id]) => {
+				if (type === 'pokemon') {
+					const sp = dex.species.get(id);
+					if (sp.baseSpecies !== sp.name) return false;
+				}
+				return true;
+			});
+			return tierSet;
+		},
 		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
 			const name = pokemon.name || '';
 			const headSpecies = dex.species.get(name);
@@ -1808,6 +1889,7 @@ const ModModifier: {
 			return learnset;
 		},
 	},
+	// pet mods
 	natdex: {
 		movesMod: (data: any): any => {
 			if (data.isNonstandard === 'Past') data.isNonstandard = null;
@@ -1875,6 +1957,7 @@ const ModModifier: {
 			const table = window.BattleTeambuilderTable['gen9morebalancedhackmons'];
 			if (data.id in table.overrideSpeciesData) Object.assign(data, table.overrideSpeciesData[data.id]);
 		},
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
 	},
 	digimon: {
 		movesMod: (data: any): any => {
