@@ -1716,8 +1716,26 @@ const ModModifier: {
 	// species oms
 	createmons: {
 		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex, extra?: any): Species => {
-			// todo:
-			return dex.species.get(pokemon.name || '');
+			const species = dex.species.get((pokemon as Pokemon | ServerPokemon).speciesForme || (pokemon as PokemonSet).species);
+			// in Teambuilder
+			let evs = (pokemon as PokemonSet).evs;
+			let types = [(pokemon as PokemonSet).hpType, (pokemon as PokemonSet).teraType]; // todo: test
+			// in Battle
+			if (!evs) {
+				const details = (pokemon as Pokemon | ServerPokemon).details;
+				const crtmInfo = (details.split(', ').find(value => value.startsWith('createmons:')) || '').slice(11);
+				if (crtmInfo) {
+					evs = {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
+					const evsArray = crtmInfo.split(',').slice(0, 6).map(Number);
+					let i: StatName;
+					for (i in evs) evs[i] = evsArray.shift() || 0;
+					types = crtmInfo.split(',').slice(6);
+				}
+			}
+			// no extra info
+			if (!evs) return species;
+			types = Array.from(new Set(types));
+			return new Species(species.id, species.name, {...species, baseStats: evs, types: types});
 		},
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
 		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
