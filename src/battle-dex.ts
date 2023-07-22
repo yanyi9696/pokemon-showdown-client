@@ -356,7 +356,7 @@ const Dex = new class implements ModdedDex {
 
 			if (!data) data = {exists: false};
 			let move = new Move(id, name, data);
-			window.BattleMovedex[id] = move;
+			if (move.exists) window.BattleMovedex[id] = move;
 			return move;
 		},
 	};
@@ -384,7 +384,7 @@ const Dex = new class implements ModdedDex {
 			if (data && typeof data.exists === 'boolean') return data;
 			if (!data) data = {exists: false};
 			let item = new Item(id, name, data);
-			window.BattleItems[id] = item;
+			if (item.exists) window.BattleItems[id] = item;
 			return item;
 		},
 	};
@@ -406,7 +406,7 @@ const Dex = new class implements ModdedDex {
 			if (data && typeof data.exists === 'boolean') return data;
 			if (!data) data = {exists: false};
 			let ability = new Ability(id, name, data);
-			window.BattleAbilities[id] = ability;
+			if (ability.exists) window.BattleAbilities[id] = ability;
 			return ability;
 		},
 	};
@@ -448,7 +448,7 @@ const Dex = new class implements ModdedDex {
 					data.tier = this.species.get(data.baseSpecies).tier;
 				}
 				species = new Species(id, name, data);
-				window.BattlePokedex[id] = species;
+				if (species.exists) window.BattlePokedex[id] = species;
 			}
 
 			if (species.cosmeticFormes) {
@@ -1189,7 +1189,7 @@ class ModdedDex {
 			}
 
 			const move = new Move(id, name, data);
-			this.cache.Moves[id] = move;
+			if (move.exists) this.cache.Moves[id] = move;
 			return move;
 		},
 	};
@@ -1217,7 +1217,7 @@ class ModdedDex {
 			}
 
 			const item = new Item(id, name, data);
-			this.cache.Items[id] = item;
+			if (item.exists) this.cache.Items[id] = item;
 			return item;
 		},
 	};
@@ -1244,7 +1244,7 @@ class ModdedDex {
 			}
 
 			const ability = new Ability(id, name, data);
-			this.cache.Abilities[id] = ability;
+			if (ability.exists) this.cache.Abilities[id] = ability;
 			return ability;
 		},
 	};
@@ -1281,7 +1281,7 @@ class ModdedDex {
 			if (data.gen > this.gen) data.tier = 'Illegal';
 
 			const species = new Species(id, name, data);
-			this.cache.Species[id] = species;
+			if (species.exists) this.cache.Species[id] = species;
 			return species;
 		},
 		// for species oms
@@ -1318,7 +1318,7 @@ class ModdedDex {
 				if (ModModifier[mid]?.typesMod) ModModifier[mid].typesMod!(data);
 			}
 
-			this.cache.Types[id] = data;
+			if (data.exists) this.cache.Types[id] = data;
 			return data;
 		},
 	};
