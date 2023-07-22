@@ -1783,11 +1783,13 @@ const ModModifier: {
 	},
 	infinitefusion: {
 		ModifySpecies: (pokemon: Pokemon | ServerPokemon | PokemonSet, dex: ModdedDex, extra?: any): Species => {
-			let name = pokemon.name || '';
+			let name = '';
 			// tips: ServerPokemon is what you know about your opponent's pokemon
-			if (!name && (pokemon as ServerPokemon).details) {
-				const details = (pokemon as ServerPokemon).details;
+			if ((pokemon as Pokemon | ServerPokemon).details) {
+				const details = (pokemon as Pokemon | ServerPokemon).details;
 				name = (details.split(', ').find(value => value.startsWith('headname:')) || '').slice(9);
+			} else {
+				name = (pokemon as PokemonSet).name || '';
 			}
 			const species = (pokemon as PokemonSet).species || (pokemon as (Pokemon | ServerPokemon)).speciesForme;
 			const headSpecies = dex.species.get(name);
