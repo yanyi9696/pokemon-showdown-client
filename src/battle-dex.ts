@@ -1472,17 +1472,6 @@ class ModdedDex {
 			}
 			learnsetid = this.nextLearnsetid(learnsetid, speciesid);
 		}
-		// todo: handle this in digimon mod
-		// if (this.modid.includes('digimon' as ID) && this.set?.preEvo) {
-		// 	const preEvoSpecies = this.dex.species.get(this.set.preEvo);
-		// 	let preEvoLearnsetid = this.firstLearnsetid(preEvoSpecies.id);
-		// 	while (preEvoLearnsetid) {
-		// 		let table = DigimonTable;
-		// 		let preEvoLearnset = table.learnsets[preEvoLearnsetid];
-		// 		if (preEvoLearnset && (moveid in preEvoLearnset)) return true;
-		// 		preEvoLearnsetid = this.nextLearnsetid(preEvoLearnsetid, preEvoSpecies.id);
-		// 	}
-		// }
 		return false;
 	}
 	getLearnsetMoves(pokemon: PokemonSet) {
