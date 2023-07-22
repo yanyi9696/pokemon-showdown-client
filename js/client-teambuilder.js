@@ -1186,15 +1186,17 @@
 
 			var s_Pokemon = isDigimon ? 'Digimon' : 'Pok&eacute;mon';
 			var renderLevel = !isCreatemon;
-			var renderHappiness = this.curTeam.dex.gen < 8 || isNatDex;
+			var renderHappiness = this.curTeam.gen < 8 || isNatDex;
 			var maxHappiness = isLetsGo ? 70 : 255;
 			var renderShiny = !isDigimon;
-			var renderHiddenPower = this.curTeam.dex.gen < 8 && !isLetsGo || isNatDex && !isCreatemon || isBDSP && species.baseSpecies === "Unown";
-			var renderDynamax = this.curTeam.dex.gen === 8 && !isBDSP;
-			var renderTeraType = this.curTeam.dex.gen === 9 && !isDigimon && !isCreatemon && !isIF;
+			var renderHiddenPower = this.curTeam.gen < 8 && !isLetsGo || isNatDex && !isCreatemon || isBDSP && species.baseSpecies === "Unown";
+			var renderDynamax = this.curTeam.gen === 8 && !isBDSP;
+			var renderTeraType = this.curTeam.gen === 9 && !isDigimon && !isCreatemon && !isIF;
+			var renderItem = this.curTeam.gen > 1;
+			var renderAbility = this.curTeam.gen > 2 && !isLetsGo;
 			var s_EV = isCreatemon ? 'BS' : (isLetsGo ? 'AV' : 'EV');
 			var evOverride = isCreatemon ? 252 : undefined;
-			var defaultEV = (this.curTeam.dex.gen > 2 && !isCreatemon) ? 0 : 252;
+			var defaultEV = (this.curTeam.gen > 2 && !isCreatemon) ? 0 : 252;
 
 			var buf = '<li value="' + i + '">';
 			if (!set.species) {
@@ -1288,8 +1290,8 @@
 
 			buf += '<div class="setrow">';
 			// if (this.curTeam.gen > 1 && !isLetsGo) buf += '<div class="setcell setcell-item"><label>Item</label><input type="text" name="item" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.item) + '" /></div>';
-			if (this.curTeam.gen > 1) buf += '<div class="setcell setcell-item"><label>Item</label><input type="text" name="item" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.item) + '" autocomplete="off" /></div>';
-			if (this.curTeam.gen > 2 && !isLetsGo) buf += '<div class="setcell setcell-ability"><label>Ability</label><input type="text" name="ability" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.ability) + '" autocomplete="off" /></div>';
+			if (renderItem) buf += '<div class="setcell setcell-item"><label>Item</label><input type="text" name="item" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.item) + '" autocomplete="off" /></div>';
+			if (renderAbility) buf += '<div class="setcell setcell-ability"><label>Ability</label><input type="text" name="ability" class="textbox chartinput" value="' + BattleLog.escapeHTML(set.ability) + '" autocomplete="off" /></div>';
 			buf += '</div></div>';
 
 			// moves
@@ -1919,7 +1921,7 @@
 			var isCreatemon = this.curTeam.dex.modid.includes('createmons');
 			var isIF = this.curTeam.dex.modid.includes('infinitefusion');
 			var evOverride = isCreatemon ? 252 : undefined;
-			var defaultEV = (this.curTeam.dex.gen > 2 && !isCreatemon) ? 0 : 252;
+			var defaultEV = (this.curTeam.gen > 2 && !isCreatemon) ? 0 : 252;
 			var maxEv = isIF ? 1020 : 510;
 			var renderRemaining = this.curTeam.gen > 2 && supportsEVs && !isCreatemon;
 			var renderRemainingValue = supportsEVs && !isCreatemon && !isIF;
@@ -2223,7 +2225,7 @@
 
 			var supportsEVs = !this.curTeam.dex.modid.includes('gen7letsgo');
 			// var supportsAVs = !supportsEVs && this.curTeam.format.endsWith('norestrictions');
-			var defaultEV = (this.curTeam.dex.gen > 2 && !isCreatemon) ? 0 : 252;
+			var defaultEV = (this.curTeam.gen > 2 && !isCreatemon) ? 0 : 252;
 			var maxEV = supportsEVs ? 252 : 200;
 			var stepEV = (supportsEVs && !isCreatemon) ? 4 : 1;
 
@@ -2738,13 +2740,13 @@
 			var species = this.curTeam.dex.species.getFromPokemon(set);
 
 			var renderLevel = !isCreatemon;
-			var renderHappiness = this.curTeam.dex.gen < 8 || isNatDex;
+			var renderHappiness = this.curTeam.gen < 8 || isNatDex;
 			var s_Happiness = isLetsGo ? 'value="70"' : ('min="0" max="255" step="1" value="' + (typeof set.happiness === 'number' ? set.happiness : 255) + '"');
 			var renderShiny = !isDigimon;
-			var renderDynamax = this.curTeam.dex.gen === 8 && !isBDSP;
+			var renderDynamax = this.curTeam.gen === 8 && !isBDSP;
 			var renderWeight = isCreatemon;
-			var renderHiddenPower = this.curTeam.dex.gen < 8 && !isLetsGo || isNatDex && !isCreatemon || isBDSP && species.baseSpecies === "Unown";
-			var renderTeraType = this.curTeam.dex.gen === 9 && !isDigimon && !isCreatemon && !isIF;
+			var renderHiddenPower = this.curTeam.gen < 8 && !isLetsGo || isNatDex && !isCreatemon || isBDSP && species.baseSpecies === "Unown";
+			var renderTeraType = this.curTeam.gen === 9 && !isDigimon && !isCreatemon && !isIF;
 
 			buf += '<div class="resultheader"><h3>Details</h3></div>';
 			buf += '<form class="detailsform">';
@@ -2987,12 +2989,12 @@
 
 			// update details cell
 			var renderLevel = !isCreatemon;
-			var renderHappiness = this.curTeam.dex.gen < 8 || isNatDex;
+			var renderHappiness = this.curTeam.gen < 8 || isNatDex;
 			var s_Happiness = isLetsGo ? 70 : (typeof set.happiness === 'number' ? set.happiness : 255);
 			var renderShiny = !isDigimon;
-			var renderHiddenPower = this.curTeam.dex.gen < 8 && !isLetsGo || isNatDex && !isCreatemon || isBDSP && species.baseSpecies === "Unown";
-			var renderDynamax = this.curTeam.dex.gen === 8 && !isBDSP;
-			var renderTeraType = this.curTeam.dex.gen === 9 && !isDigimon && !isCreatemon && !isIF;
+			var renderHiddenPower = this.curTeam.gen < 8 && !isLetsGo || isNatDex && !isCreatemon || isBDSP && species.baseSpecies === "Unown";
+			var renderDynamax = this.curTeam.gen === 8 && !isBDSP;
+			var renderTeraType = this.curTeam.gen === 9 && !isDigimon && !isCreatemon && !isIF;
 
 			var buf = '';
 			var GenderChart = {
@@ -3527,7 +3529,7 @@
 			if (set.gigantamax) delete set.gigantamax;
 			if (set.teraType) delete set.teraType;
 			if (set.preEvo) delete set.preEvo;
-			if (!isHackmons && species.requiredItems.length === 1) {
+			if (!isHackmons && !isCreatemon && species.requiredItems.length === 1) {
 				set.item = species.requiredItems[0];
 			} else {
 				set.item = '';
