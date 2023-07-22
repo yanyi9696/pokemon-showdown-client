@@ -19,8 +19,8 @@
 		focus: function () {
 			if (this.curTeam) {
 				this.curTeam.iconCache = '!';
-				this.curTeam.gen = this.getGen(this.curTeam.format);
 				this.curTeam.dex = Dex.mod(this.curTeam.format);
+				this.curTeam.gen = this.curTeam.dex.gen;
 				Storage.activeSetList = this.curSetList;
 			}
 		},
@@ -130,7 +130,12 @@
 		update: function () {
 			teams = Storage.teams;
 			if (this.curTeam) {
-				this.ignoreEVLimits = (this.curTeam.gen < 3 || ((this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh')) && this.curTeam.gen !== 6) || this.curTeam.format.includes('metronomebattle') || this.curTeam.format.includes('createmons'));
+				this.ignoreEVLimits = (
+					this.curTeam.gen < 3 ||
+					this.curTeam.dex.modid.includes('hackmons') && this.curTeam.gen !== 6 ||
+					this.curTeam.dex.modid.includes('metronome') ||
+					this.curTeam.dex.modid.includes('createmons')
+				);
 				if (this.curSet) {
 					return this.updateSetView();
 				}
@@ -681,8 +686,8 @@
 			i = +i;
 			this.curTeam = teams[i];
 			this.curTeam.iconCache = '!';
-			this.curTeam.gen = this.getGen(this.curTeam.format);
 			this.curTeam.dex = Dex.mod(this.curTeam.format);
+			this.curTeam.gen = this.curTeam.dex.gen;
 			Storage.activeSetList = this.curSetList = Storage.unpackTeam(this.curTeam.team);
 			this.curTeamIndex = i;
 			this.update();
@@ -1126,10 +1131,14 @@
 					buf += '<label class="label">Format:</label><button class="select formatselect teambuilderformatselect" name="format" value="' + this.curTeam.format + '">' + (isGenericFormat(this.curTeam.format) ? '<em>Select a format</em>' : BattleLog.escapeFormat(this.curTeam.format)) + '</button>';
 					var btnClass = 'button' + (!this.curSetList.length || app.isDisconnected ? ' disabled' : '');
 					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button></li>';
-					if (this.curTeam.format.includes('createmons')) buf += '<label class="label">Total Point:</label><em>' + this.getTeamPoint() + '</em>';
+					if (this.curTeam.dex.modid.includes('createmons')) buf += '<label class="label">Total Point:</label><em>' + this.getTeamPoint() + '</em>';
 				}
 				if (!this.curSetList.length) {
-					buf += '<li><em>you have no pokemon lol</em></li>';
+					if (this.curTeam.dex.modid.includes('digimon')) {
+						buf += '<li><em>you have no digimon lol</em></li>';
+					} else {
+						buf += '<li><em>you have no pokemon lol</em></li>';
+					}
 				}
 				for (i = 0; i < this.curSetList.length; i++) {
 					if (this.curSetList.length < this.curTeam.capacity && this.deletedSet && i === this.deletedSetLoc) {
@@ -1144,7 +1153,7 @@
 					buf += '<li><button name="import" class="button big"><i class="fa fa-upload"></i> Import from text or URL</button></li>';
 				}
 				if (i < this.curTeam.capacity) {
-					if (this.curTeam.format.includes('digimon')) {
+					if (this.curTeam.dex.modid.includes('digimon')) {
 						buf += '<li><button name="addPokemon" class="button big"><i class="fa fa-plus"></i> Add Digimon</button></li>';
 					} else {
 						buf += '<li><button name="addPokemon" class="button big"><i class="fa fa-plus"></i> Add Pok&eacute;mon</button></li>';
@@ -1157,7 +1166,7 @@
 				buf += '<input type="hidden" name="author" id="pasteAuthor">';
 				buf += '<input type="hidden" name="notes" id="pasteNotes">';
 				buf += '<button name="pokepasteExport" type="submit" class="button exportbutton"><i class="fa fa-upload"></i> Upload to PokePaste</button></form>';
-				if (this.curTeam.format.includes('vgc')) {
+				if (this.curTeam.dex.modid.includes('vgc')) {
 					buf += '<button name="pokepasteExport" value="openteamsheet" type="submit" class="button exportbutton"><i class="fa fa-upload"></i> Upload to PokePaste (Open Team Sheet)</button></form>';
 				}
 				buf += '</div>';
@@ -1401,7 +1410,7 @@
 			this.curChartName = '';
 			this.update();
 			this.$('input[name=pokemon]').select();
-			if (this.curTeam.format.includes('monotype')) {
+			if (this.curTeam.dex.modid.includes('monotype')) {
 				var typeTable = [];
 				var dex = this.curTeam.dex;
 				for (var i = 0; i < this.curSetList.length; i++) {
@@ -1496,9 +1505,13 @@
 			}});
 		},
 		changeFormat: function (format) {
+			// sadly we can't let this.curTeam.format = this.curTeam.dex.modid
+			// since this.curTeam.dex can be initiallized by this.curTeam.format in other places
+			// and also we still need it as a string somewhere
+			// so when check mods, use this.curTeam.dex.modid
 			this.curTeam.format = format;
-			this.curTeam.gen = this.getGen(this.curTeam.format);
 			this.curTeam.dex = Dex.mod(this.curTeam.format);
+			this.curTeam.gen = this.curTeam.dex.gen;
 			this.save();
 			if (this.curTeam.gen === 5 && !Dex.loadedSpriteData['bw']) Dex.loadSpriteData('bw');
 			this.update();
@@ -1509,7 +1522,7 @@
 			var name = $.trim(e.currentTarget.value).replace(/\|/g, '');
 			e.currentTarget.value = set.name = name;
 			this.save();
-			if (this.curTeam.format.includes('crossevolution') || this.curTeam.format.includes('infinitefusion')) {
+			if (this.curTeam.dex.modid.includes('crossevolution') || this.curTeam.dex.modid.includes('infinitefusion')) {
 				this.update();
 				this.updateChart();
 			}
@@ -1855,7 +1868,7 @@
 				var set = this.curSetList[i];
 				var pokemonicon = '<span class="picon pokemonicon-' + i + '" style="' + Dex.getPokemonIcon(set) + '"></span>';
 				if (!set.species) {
-					if (this.curTeam.format.includes('digimon')) {
+					if (this.curTeam.dex.modid.includes('digimon')) {
 						buf += '<button disabled="disabled" class="addpokemon" aria-label="Add Digimon"><i class="fa fa-plus"></i></button> ';
 					} else {
 						buf += '<button disabled="disabled" class="addpokemon" aria-label="Add Pok&eacute;mon"><i class="fa fa-plus"></i></button> ';
@@ -1876,13 +1889,13 @@
 			var set = this.curSet;
 			if (!set) return;
 
-			if (this.curTeam.format.includes('infinitefusion')) set.isIF = true;
+			if (this.curTeam.dex.modid.includes('infinitefusion')) set.isIF = true;
 			var s = Dex.getTeambuilderSprite(set, this.curTeam.gen);
 			if (s.length < 15) {
 				app.send('/ifget ' + s);
 			}
 			this.$('.setchart').attr('style', s);
-			if (this.curTeam.format.includes('infinitefusion')) delete set.isIF;
+			if (this.curTeam.dex.modid.includes('infinitefusion')) delete set.isIF;
 
 			this.$('.pokemonicon-' + this.curSetLoc).css('background', Dex.getPokemonIcon(set).substr(11));
 
@@ -2155,8 +2168,8 @@
 			var buf = '';
 			var set = this.curSet;
 			var species = this.curTeam.dex.species.getFromPokemon(this.curSet);
-			var isCreatemon = this.curTeam.format.includes('createmons');
-			var isIF = this.curTeam.format.includes('infinitefusion');
+			var isCreatemon = this.curTeam.dex.modid.includes('createmons');
+			var isIF = this.curTeam.dex.modid.includes('infinitefusion');
 
 			var baseStats = species.baseStats;
 			// if (isCreatemon) {
@@ -2487,8 +2500,8 @@
 			var inputName = '';
 			inputName = e.currentTarget.name;
 			var val = Math.abs(parseInt(e.currentTarget.value, 10));
-			var supportsEVs = !this.curTeam.format.includes('letsgo');
-			var supportsAVs = !supportsEVs && this.curTeam.format.endsWith('norestrictions');
+			var supportsEVs = !this.curTeam.dex.modid.includes('gen7letsgo');
+			var supportsAVs = !supportsEVs; // && this.curTeam.format.endsWith('norestrictions');
 			var set = this.curSet;
 			if (!set) return;
 
@@ -2523,7 +2536,7 @@
 
 				if (set.evs[stat] !== val || natureChange) {
 					set.evs[stat] = val;
-					if (this.ignoreEVLimits && !this.curTeam.format.includes('createmons')) {
+					if (this.ignoreEVLimits && !this.curTeam.dex.modid.includes('createmons')) {
 						var evNum = supportsEVs ? 252 : supportsAVs ? 200 : 0;
 						if (set.evs['hp'] === undefined) set.evs['hp'] = evNum;
 						if (set.evs['atk'] === undefined) set.evs['atk'] = evNum;
@@ -2609,7 +2622,7 @@
 			var originalVal = val;
 			var result = this.getStat(stat, set, val);
 			var supportsEVs = !this.curTeam.dex.modid.includes('gen7letsgo');
-			var supportsAVs = !supportsEVs && this.curTeam.format.endsWith('norestrictions');
+			var supportsAVs = !supportsEVs; // && this.curTeam.format.endsWith('norestrictions');
 			if (supportsEVs) {
 				while (val > 0 && this.getStat(stat, set, val - 4) == result) val -= 4;
 			}
@@ -3354,7 +3367,7 @@
 		},
 		unChooseMove: function (moveName) {
 			var set = this.curSet;
-			if (!moveName || !set || this.curTeam.format === 'gen7hiddentype') return;
+			if (!moveName || !set || this.curTeam.dex.modid.includes('hiddentype')) return;
 			if (moveName.substr(0, 13) === 'Hidden Power ') {
 				if (set.ivs) {
 					for (var i in set.ivs) {
@@ -3370,7 +3383,7 @@
 			this.chooseMove('', resetSpeed);
 		},
 		canHyperTrain: function (set) {
-			if (this.curTeam.gen < 7 || this.curTeam.format === 'gen7hiddentype') return false;
+			if (this.curTeam.gen < 7 || this.curTeam.dex.modid.includes('hiddentype')) return false;
 			var format = this.curTeam.format;
 			if (!set.level || set.level === 100) return true;
 			if (format.substr(0, 3) === 'gen') format = format.substr(4);
@@ -3418,7 +3431,7 @@
 				minSpe = true;
 			}
 
-			if (this.curTeam.format === 'gen7hiddentype') return;
+			if (this.curTeam.dex.modid.includes('hiddentype')) return;
 
 			var minAtk = true;
 			// only available through an event with 31 Atk IVs
@@ -3542,7 +3555,7 @@
 		// Stat calculator
 
 		getStat: function (stat, set, evOverride, natureOverride) {
-			var supportsEVs = !this.curTeam.format.includes('letsgo');
+			var supportsEVs = !this.curTeam.dex.modid.includes('gen7letsgo');
 			var supportsAVs = !supportsEVs;
 			if (!set) set = this.curSet;
 			if (!set) return 0;
