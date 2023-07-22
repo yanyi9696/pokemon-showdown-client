@@ -642,7 +642,7 @@ class TeamDropdownPanel extends PSRoomPanel {
 			</PSPanelWrapper>;
 		}
 		// todo: fix
-		const baseFormat = room.parentElem.getAttribute('data-format') || Dex.modid;
+		const baseFormat = room.parentElem.getAttribute('data-format') || Dex.currentGen;
 		let isFirstLoad = this.format === null;
 		if (isFirstLoad) {
 			this.format = baseFormat;

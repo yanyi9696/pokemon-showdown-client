@@ -3423,12 +3423,7 @@ export class Battle {
 				this.messageFadeTime = 40;
 				this.isBlitz = true;
 			}
-			if (this.tier.includes(`Let's Go`)) {
-				this.dex = Dex.mod('gen7letsgo' as ID);
-			}
-			if (this.tier.includes('More Balanced Hackmons')) {
-				this.dex = Dex.mod('gen9morebalancedhackmons' as ID);
-			}
+			this.dex = Dex.mod(toID(this.tier));
 			this.log(args);
 			break;
 		}
