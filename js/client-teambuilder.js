@@ -1179,6 +1179,7 @@
 			var renderLevel = !isCreatemon;
 			var renderHappiness = this.curTeam.dex.gen < 8 || isNatDex;
 			var maxHappiness = isLetsGo ? 70 : 255;
+			var renderShiny = !isDigimon;
 			var renderHiddenPower = this.curTeam.dex.gen < 8 && !isLetsGo || isNatDex && !isCreatemon || isBDSP && species.baseSpecies === "Unown";
 			var renderDynamax = this.curTeam.dex.gen === 8 && !isBDSP;
 			var renderTeraType = this.curTeam.dex.gen === 9 && !isDigimon && !isCreatemon && !isIF;
@@ -1236,7 +1237,9 @@
 				if (renderHappiness) {
 					buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : maxHappiness) + '</span>';
 				}
-				buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
+				if (renderShiny) {
+					buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
+				}
 				if (renderHiddenPower) {
 					buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
 				}
@@ -2710,21 +2713,30 @@
 		updateDetailsForm: function () {
 			var buf = '';
 			var set = this.curSet;
-			var isLetsGo = this.curTeam.format.includes('letsgo');
-			var isBDSP = this.curTeam.format.includes('bdsp');
-			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.includes('natdex') ||
-				this.curTeam.format.startsWith('gen8nd') || this.curTeam.format.startsWith('gen9nd') ||
-				this.curTeam.format.includes('morebalancedhackmons');
-			var isHackmons = this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh');
-			var isDigimon = this.curTeam.format.includes('digimon');
-			var isCreatemon = this.curTeam.format.includes('createmons');
-			var isIF = this.curTeam.format.includes('infinitefusion');
-			var species = this.curTeam.dex.species.get(set.species);
 			if (!set) return;
+
+			var isLetsGo = this.curTeam.dex.modid.includes('gen7letsgo');
+			var isBDSP = this.curTeam.dex.modid.includes('gen8bdsp');
+			var isNatDex = this.curTeam.dex.modid.includes('natdex');
+			var isHackmons = this.curTeam.dex.modid.includes('hackmons');
+			var isDigimon = this.curTeam.dex.modid.includes('digimon');
+			var isCreatemon = this.curTeam.dex.modid.includes('createmons');
+			var isIF = this.curTeam.dex.modid.includes('infinitefusion');
+			var species = this.curTeam.dex.species.getFromPokemon(set);
+
+			var renderLevel = !isCreatemon;
+			var renderHappiness = this.curTeam.dex.gen < 8 || isNatDex;
+			var s_Happiness = isLetsGo ? 'value="70"' : ('min="0" max="255" step="1" value="' + (typeof set.happiness === 'number' ? set.happiness : 255) + '"');
+			var renderShiny = !isDigimon;
+			var renderDynamax = this.curTeam.dex.gen === 8 && !isBDSP;
+			var renderWeight = isCreatemon;
+			var renderHiddenPower = this.curTeam.dex.gen < 8 && !isLetsGo || isNatDex && !isCreatemon || isBDSP && species.baseSpecies === "Unown";
+			var renderTeraType = this.curTeam.dex.gen === 9 && !isDigimon && !isCreatemon && !isIF;
+
 			buf += '<div class="resultheader"><h3>Details</h3></div>';
 			buf += '<form class="detailsform">';
 
-			if (!isCreatemon) {
+			if (renderLevel) {
 				buf += '<div class="formrow"><label class="formlabel">Level:</label><div><input type="number" min="1" max="100" step="1" name="level" value="' + (typeof set.level === 'number' ? set.level : 100) + '" class="textbox inputform numform" /></div></div>';
 			}
 
@@ -2744,20 +2756,18 @@
 				}
 				buf += '</div></div>';
 
-				if (isLetsGo) {
-					buf += '<div class="formrow"><label class="formlabel">Happiness:</label><div><input type="number" name="happiness" value="70" class="textbox inputform numform" /></div></div>';
-				} else {
-					if (this.curTeam.gen < 8 || isNatDex || isCreatemon) buf += '<div class="formrow"><label class="formlabel">Happiness:</label><div><input type="number" min="0" max="255" step="1" name="happiness" value="' + (typeof set.happiness === 'number' ? set.happiness : 255) + '" class="textbox inputform numform" /></div></div>';
+				if (renderHappiness) {
+					buf += '<div class="formrow"><label class="formlabel">Happiness:</label><div><input type="number" name="happiness" ' + s_Happiness + ' class="textbox inputform numform" /></div></div>';
 				}
 
-				if (!isDigimon) {
+				if (renderShiny) {
 					buf += '<div class="formrow"><label class="formlabel">Shiny:</label><div>';
 					buf += '<label><input type="radio" name="shiny" value="yes"' + (set.shiny ? ' checked' : '') + ' /> Yes</label> ';
 					buf += '<label><input type="radio" name="shiny" value="no"' + (!set.shiny ? ' checked' : '') + ' /> No</label>';
 					buf += '</div></div>';
 				}
 
-				if (this.curTeam.gen === 8 && !isBDSP && !isDigimon) {
+				if (renderDynamax) {
 					if (!species.cannotDynamax) {
 						buf += '<div class="formrow"><label class="formlabel">Dmax Level:</label><div><input type="number" min="0" max="10" step="1" name="dynamaxlevel" value="' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 10) + '" class="textbox inputform numform" /></div></div>';
 					}
@@ -2773,7 +2783,7 @@
 					}
 				}
 
-				if (isCreatemon) {
+				if (renderWeight) {
 					buf += '<div class="formrow"><label class="formlabel">Weight:</label><div><input type="number" min="1" max="999" step="1" name="dynamaxlevel" value="' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 999) + '" class="textbox inputform numform" /></div></div>';
 				}
 			}
@@ -2788,7 +2798,7 @@
 				buf += '</select></div></div>';
 			}
 
-			if (!isLetsGo && (this.curTeam.gen === 7 || isNatDex || (isBDSP && species.baseSpecies === 'Unown'))) {
+			if (renderHiddenPower) {
 				buf += '<div class="formrow"><label class="formlabel" title="Hidden Power Type">Hidden Power:</label><div><select name="hptype">';
 				buf += '<option value=""' + (!set.hpType ? ' selected="selected"' : '') + '>(automatic type)</option>'; // unset
 				var types = Dex.types.all();
@@ -2829,7 +2839,7 @@
 				}
 			}
 
-			if (this.curTeam.gen === 9 && !isCreatemon && !isDigimon && !isIF) {
+			if (renderTeraType) {
 				buf += '<div class="formrow"><label class="formlabel" title="Tera Type">Tera Type:</label><div><select name="teratype">';
 				var types = Dex.types.all();
 				var teraType = set.teraType || species.types[0];
@@ -2861,14 +2871,13 @@
 			e.stopPropagation();
 			var set = this.curSet;
 			if (!set) return;
-			var species = this.curTeam.dex.species.get(set.species);
-			var isLetsGo = this.curTeam.format.includes('letsgo');
-			var isBDSP = this.curTeam.format.includes('bdsp');
-			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.includes('natdex') ||
-				this.curTeam.format.startsWith('gen8nd') || this.curTeam.format.includes('morebalancedhackmons');
-			var isDigimon = this.curTeam.format.includes('digimon');
-			var isCreatemon = this.curTeam.format.includes('createmons');
-			var isIF = this.curTeam.format.includes('infinitefusion');
+			var species = this.curTeam.dex.species.getFromPokemon(set);
+			var isLetsGo = this.curTeam.dex.modid.includes('gen7letsgo');
+			var isBDSP = this.curTeam.dex.modid.includes('gen8bdsp');
+			var isNatDex = this.curTeam.dex.modid.includes('natdex');
+			var isDigimon = this.curTeam.dex.modid.includes('digimon');
+			var isCreatemon = this.curTeam.dex.modid.includes('createmons');
+			var isIF = this.curTeam.dex.modid.includes('infinitefusion');
 
 			// level
 			var level = parseInt(this.$chart.find('input[name=level]').val(), 10);
@@ -2964,27 +2973,30 @@
 			}
 
 			// update details cell
+			var renderLevel = !isCreatemon;
+			var renderHappiness = this.curTeam.dex.gen < 8 || isNatDex;
+			var s_Happiness = isLetsGo ? 70 : (typeof set.happiness === 'number' ? set.happiness : 255);
+			var renderShiny = !isDigimon;
+			var renderHiddenPower = this.curTeam.dex.gen < 8 && !isLetsGo || isNatDex && !isCreatemon || isBDSP && species.baseSpecies === "Unown";
+			var renderDynamax = this.curTeam.dex.gen === 8 && !isBDSP;
+			var renderTeraType = this.curTeam.dex.gen === 9 && !isDigimon && !isCreatemon && !isIF;
+
 			var buf = '';
 			var GenderChart = {
 				'M': 'Male',
 				'F': 'Female',
 				'N': '&mdash;'
 			};
-			if (!isCreatemon) {
+			if (renderLevel) {
 				buf += '<span class="detailcell detailcell-first"><label>Level</label>' + (set.level || 100) + '</span>';
 			}
 			if (this.curTeam.gen > 1) {
 				buf += '<span class="detailcell"><label>Gender</label>' + GenderChart[set.gender || 'N'] + '</span>';
-				if (isLetsGo) {
-					buf += '<span class="detailcell"><label>Happiness</label>70</span>';
-				} else {
-					if (this.curTeam.gen < 8 || isNatDex || isCreatemon) buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 255) + '</span>';
-				}
-				if (!isDigimon) buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
-				if (!isLetsGo && (this.curTeam.gen < 8 || isNatDex)) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
-				// if (isCreatemon) buf += '<span class="detailcell"><label>First Type</label>' + (set.hpType || species.types[0]) + '</span>';
+				if (renderHappiness) buf += '<span class="detailcell"><label>Happiness</label>' + s_Happiness + '</span>';
+				if (renderShiny) buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
+				if (renderHiddenPower) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
 				if (isDigimon) buf += '<span class="detailcell"><label>Pre-Evolution</label>' + (set.preEvo || 'None') + '</span>';
-				if (this.curTeam.gen === 8 && !isBDSP && !isDigimon) {
+				if (renderDynamax) {
 					if (!species.cannotDynamax) {
 						buf += '<span class="detailcell"><label>Dmax Level</label>' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 10) + '</span>';
 					}
@@ -2992,13 +3004,7 @@
 						buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
 					}
 				}
-				if (this.curTeam.gen === 9) {
-					if (!isCreatemon && !isDigimon && !isIF) {
-						buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
-					} else if (isCreatemon) {
-						// buf += '<span class="detailcell"><label>Second Type</label>' + (set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0])) + '</span>';
-					}
-				}
+				if (renderTeraType) buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
 			}
 			this.$('button[name=details]').html(buf);
 
@@ -3166,34 +3172,49 @@
 		chartChange: function (e, selectNext) {
 			var name = e.currentTarget.name;
 			if (this.curChartName !== name) return;
-			var id = toID(e.currentTarget.value);
+			var value = e.currentTarget.value;
+			var id = toID(value);
 			if (id in BattleAliases) id = toID(BattleAliases[id]);
 			var val = '';
-			var format = this.curTeam.format;
+			var dex = this.curTeam.dex;
+			var modid = this.curTeam.dex.modid;
+			var data;
 			switch (name) {
 			case 'pokemon':
-				val = (id in BattlePokedex ? this.curTeam.dex.species.get(e.currentTarget.value).name : '');
+				data = dex.species.get(value);
+				val = data.exists ? data.name : '';
 				break;
 			case 'ability':
-				if (id in BattleItems && (format.includes("dualwielding") || format.includes("moveitemability"))) {
-					val = BattleItems[id].name;
-				} else if (id in BattleMovedex && (format.includes("trademarked") || format.includes("moveitemability"))) {
-					val = BattleMovedex[id].name;
-				} else {
-					val = (id in BattleAbilities ? BattleAbilities[id].name : '');
+				data = dex.items.get(value);
+				if (data.exists && modid.includes('dualwielding')) {
+					val = data.name;
+					break;
 				}
+				data = dex.moves.get(value);
+				if (data.exists && modid.includes('trademarked')) {
+					val = data.name;
+					break;
+				}
+				data = dex.abilities.get(value);
+				val = data.exists ? data.name : '';
 				break;
 			case 'item':
-				if (id in BattleMovedex && (format.includes("fortemons") || format.includes("moveitemability"))) {
-					val = BattleMovedex[id].name;
-				} else if (id in BattleAbilities && (format.includes("multibility") || format.includes("moveitemability"))) {
-					val = BattleAbilities[id].name;
-				} else {
-					val = (id in BattleItems ? BattleItems[id].name : '');
+				data = dex.moves.get(value);
+				if (data.exists && modid.includes('fortemons')) {
+					val = data.name;
+					break;
 				}
+				data = dex.abilities.get(value);
+				if (data.exists && modid.includes('multibility')) {
+					val = data.name;
+					break;
+				}
+				data = dex.items.get(value);
+				val = data.exists ? data.name : '';
 				break;
 			case 'move1': case 'move2': case 'move3': case 'move4':
-				val = (id in BattleMovedex ? BattleMovedex[id].name : '');
+				data = dex.moves.get(value);
+				val = data.exists ? data.name : '';
 				break;
 			}
 			if (!val) {
@@ -3460,9 +3481,12 @@
 				if (selectNext) this.$('input[name=item]').select();
 				return;
 			}
+			var isIF = this.curTeam.dex.modid.includes('infinitefusion');
+			var isHackmons = this.curTeam.dex.modid.includes('hackmons');
+			var isCreatemon = this.curTeam.dex.modid.includes('createmons');
 
 			set.name = "";
-			if (this.curTeam.format.includes('infinitefusion')) set.name = species.name;
+			if (isIF) set.name = species.name;
 			set.species = val;
 			if (set.level) delete set.level;
 			if (this.curTeam && this.curTeam.format) {
@@ -3490,7 +3514,7 @@
 			if (set.gigantamax) delete set.gigantamax;
 			if (set.teraType) delete set.teraType;
 			if (set.preEvo) delete set.preEvo;
-			if (!(this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh') || this.curTeam.format.includes('createmons')) && species.requiredItems.length === 1) {
+			if (!isHackmons && species.requiredItems.length === 1) {
 				set.item = species.requiredItems[0];
 			} else {
 				set.item = '';
@@ -3502,7 +3526,7 @@
 			set.ivs = {};
 			set.nature = '';
 
-			if (this.curTeam.format.includes('createmons')) {
+			if (isCreatemon) {
 				set.evs = JSON.parse(JSON.stringify(species.baseStats));
 				set.hpType = species.types[0];
 				set.teraType = species.types.length > 1 ? species.types[1] : species.types[0];

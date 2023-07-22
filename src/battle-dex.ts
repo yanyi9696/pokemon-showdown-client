@@ -199,7 +199,8 @@ const Dex = new class implements ModdedDex {
 	parseFormatid(formatid: ID): ID[] {
 		let modids = [];
 
-		const genStrings = formatid.match(/gen\d+/);
+		// this theoratically should be /gen\d+/, but now this to avoid errors when gen9350cup
+		const genStrings = formatid.match(/gen\d/);
 		const gen = genStrings ? genStrings[0] : this.currentGen;
 		// todo: doubles, nfe, lc
 		// regulars
@@ -222,6 +223,12 @@ const Dex = new class implements ModdedDex {
 		if (formatid.includes('createmons')) modids.push('createmons' as ID);
 		if (formatid.includes('crossevolution')) modids.push('crossevolution' as ID);
 		if (formatid.includes('infinitefusion')) modids.push('infinitefusion' as ID);
+		// teambuilder oms
+		// aka mia-like formats
+		if (formatid.includes('fortemons') || formatid.includes('moveitemability')) modids.push('fortemons' as ID);
+		if (formatid.includes('trademarked') || formatid.includes('moveitemability')) modids.push('trademarked' as ID);
+		if (formatid.includes('multibility') || formatid.includes('moveitemability')) modids.push('multibility' as ID);
+		if (formatid.includes('dualwielding') || formatid.includes('moveitemability')) modids.push('dualwielding' as ID);
 		// essentially pet mods
 		if (
 			formatid.includes('nationaldex') || formatid.includes('natdex') || formatid.startsWith(gen + 'nd') ||
