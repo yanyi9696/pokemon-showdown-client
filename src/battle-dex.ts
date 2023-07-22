@@ -2022,6 +2022,17 @@ const ModModifier: {
 				data = {...typeData};
 			}
 		},
+		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
+			if (!pokemon.preEvo) return learnset;
+			const preEvoSpecies = dex.species.get(pokemon.preEvo);
+			const moveDex = dex.getMovedex();
+			for (const id in moveDex) {
+				if (learnset.includes(id)) continue;
+				if (!dex.canLearn(preEvoSpecies.id, id as ID)) continue;
+				learnset.push(id);
+			}
+			return learnset;
+		},
 	},
 }
 
