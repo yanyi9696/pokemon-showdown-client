@@ -544,6 +544,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 			(serverPokemon ? serverPokemon.speciesForme : this.speciesForme);
 	}
 	getSpecies(serverPokemon?: ServerPokemon) {
+		// it's quite hard to show correct speed range on imposter in if, won't fix i think
 		return this.side.battle.dex.species.getFromPokemon({...this, speciesForme: this.getSpeciesForme(serverPokemon)});
 	}
 	getBaseSpecies() {

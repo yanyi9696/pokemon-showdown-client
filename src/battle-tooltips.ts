@@ -1417,7 +1417,7 @@ class BattleTooltips {
 		const tr = Math.trunc || Math.floor;
 		const species = pokemon.getSpecies();
 		let baseSpe = species.baseStats.spe;
-		if (this.battle.rules['Scalemons Mod']) {
+		if (this.battle.rules['Scalemons Mod']) { // useless now, but why not just keep
 			const bstWithoutHp = species.bst - species.baseStats.hp;
 			const scale = 600 - species.baseStats.hp;
 			baseSpe = tr(baseSpe * scale / bstWithoutHp);

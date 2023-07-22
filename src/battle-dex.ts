@@ -202,7 +202,6 @@ const Dex = new class implements ModdedDex {
 		// this theoratically should be /gen\d+/, but now this to avoid errors when gen9350cup
 		const genStrings = formatid.match(/gen\d/);
 		const gen = genStrings ? genStrings[0] : this.currentGen;
-		// todo: doubles, nfe, lc
 		// regulars
 		if (formatid.includes('anythinggoes') || formatid.endsWith('ag')) modids.push('anythinggoes' as ID);
 		if (formatid.includes('doubles') ||
@@ -1100,8 +1099,6 @@ const Dex = new class implements ModdedDex {
 		return '' as ID;
 	}
 	canLearn(speciesid: ID, moveid: ID) {
-		// Nihilslave: i made some unequivalent changes to this function, mainly about VGC and tradebacks
-		// todo: fix it later
 		const move = this.moves.get(moveid);
 		let learnsetid = this.firstLearnsetid(speciesid);
 		while (learnsetid) {
@@ -1453,7 +1450,6 @@ class ModdedDex {
 	}
 	canLearn(speciesid: ID, moveid: ID) {
 		// Nihilslave: i made some unequivalent changes to this function, mainly about VGC and tradebacks
-		// todo: fix it later
 		const move = this.moves.get(moveid);
 		const isNatDex = this.modid.includes('natdex' as ID);
 		if (isNatDex && move.isNonstandard && move.isNonstandard !== 'Past') {
@@ -1511,9 +1507,9 @@ class ModdedDex {
 /**
  * todo: we need a real ModdedDex which can take all format names and output corresponding dexes
  * 1. change ModdedDex.modid from string to string[] - done
- * 2. add all old mods in ModModifier - WIP
+ * 2. add all old mods in ModModifier - maybe done
  * 3. probably delete BigModdedDex - done
- * 4. add new mods - WIP
+ * 4. add new mods - WI long P
  */
 const ModModifier: {
 	[mod: string]: {
@@ -1592,8 +1588,6 @@ const ModModifier: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
 		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
 			const moveDex = dex.getMovedex();
-			// todo: it seems there will usually be an empty move inserted into `BattleMovedex`
-			// look into it
 			const isNatDex = dex.modid.includes('natdex' as ID);
 			const isLGPE = dex.modid.includes('gen7letsgo' as ID);
 			const moves: string[] = [];
@@ -1716,7 +1710,7 @@ const ModModifier: {
 			const species = dex.species.get((pokemon as Pokemon | ServerPokemon).speciesForme || (pokemon as PokemonSet).species);
 			// in Teambuilder
 			let evs = (pokemon as PokemonSet).evs;
-			let types = [(pokemon as PokemonSet).hpType, (pokemon as PokemonSet).teraType]; // todo: test
+			let types = [(pokemon as PokemonSet).hpType, (pokemon as PokemonSet).teraType];
 			// in Battle
 			if (!evs) {
 				const details = (pokemon as Pokemon | ServerPokemon).details;
