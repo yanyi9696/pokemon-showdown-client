@@ -76,7 +76,7 @@ class ModifiableValue {
 					this.comment.push(` (${weatherName} suppressed by ${active.ability})`);
 					return false;
 				}
-				if (this.battle.tier.includes('More Balanced Hackmons') &&
+				if (this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID) &&
 					active && toID(active.item) === 'utilityumbrella') {
 					this.comment.push(` (${weatherName} suppressed by ${active.item})`);
 					return false;
@@ -805,7 +805,7 @@ class BattleTooltips {
 		if (pokemon.speciesForme !== pokemon.name) {
 			name += ' <small>(' + BattleLog.escapeHTML(pokemon.speciesForme) + ')</small>';
 		}
-		if (this.battle.tier.includes('Infinite Fusion')) {
+		if (this.battle.dex.modid.includes('infinitefusion' as ID)) {
 			const headname = pokemon.details.split(', ').find(value => value.startsWith('headname:'));
 			name = headname ? headname.slice(9) : pokemon.name;
 			name = BattleLog.escapeHTML(name);
@@ -878,8 +878,8 @@ class BattleTooltips {
 			text += '</p>';
 		}
 
-		const supportsAbilities = this.battle.gen > 2 && !this.battle.tier.includes("Let's Go");
-		const abilityPossibility = this.battle.tier.includes("Hackmons") || this.battle.tier.endsWith("BH") || this.battle.tier.includes("Createmons");
+		const supportsAbilities = this.battle.gen > 2 && !this.battle.dex.modid.includes("gen7letsgo" as ID);
+		const abilityPossibility = this.battle.dex.modid.includes("hackmons" as ID) || this.battle.dex.modid.includes('createmons' as ID);
 
 		let abilityText = '';
 		if (supportsAbilities) {
@@ -1113,7 +1113,7 @@ class BattleTooltips {
 		if (this.battle.abilityActive(['Air Lock', 'Cloud Nine'])) {
 			weather = '' as ID;
 		}
-		if (this.battle.tier.includes('More Balanced Hackmons')) {
+		if (this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
 			for (const activePokemon of this.battle.getAllActive()) {
 				if (toID(activePokemon.item) === 'utilityumbrella') {
 					weather = '' as ID;
@@ -1125,7 +1125,7 @@ class BattleTooltips {
 		if (item === 'choiceband' && !clientPokemon?.volatiles['dynamax']) {
 			stats.atk = Math.floor(stats.atk * 1.5);
 		}
-		if ((ability === 'purepower' && !this.battle.tier.includes('More Balanced Hackmons')) ||
+		if ((ability === 'purepower' && !this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) ||
 			ability === 'hugepower') {
 			stats.atk *= 2;
 		}
@@ -1153,7 +1153,7 @@ class BattleTooltips {
 					if (ability === 'solarpower') {
 						stats.spa = Math.floor(stats.spa * 1.5);
 					}
-					if (ability === 'orichalcumpulse' && !this.battle.tier.includes('More Balanced Hackmons')) {
+					if (ability === 'orichalcumpulse' && !this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
 						stats.atk = Math.floor(stats.atk * 1.3);
 					}
 					let allyActive = clientPokemon?.side.active;
@@ -1189,7 +1189,7 @@ class BattleTooltips {
 			}
 			for (const statName of Dex.statNamesExceptHP) {
 				if (clientPokemon.volatiles['protosynthesis' + statName] || clientPokemon.volatiles['quarkdrive' + statName]) {
-					if (statName === 'spe' || this.battle.tier.includes('More Balanced Hackmons')) {
+					if (statName === 'spe' || this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
 						speedModifiers.push(1.5);
 					} else {
 						stats[statName] = Math.floor(stats[statName] * 1.3);
@@ -1226,7 +1226,7 @@ class BattleTooltips {
 			if (ability === 'surgesurfer') {
 				speedModifiers.push(2);
 			}
-			if (ability === 'hadronengine' && !this.battle.tier.includes('More Balanced Hackmons')) {
+			if (ability === 'hadronengine' && !this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
 				stats.spa = Math.floor(stats.spa * 1.3);
 			}
 		}
@@ -1236,7 +1236,7 @@ class BattleTooltips {
 		if (item === 'deepseatooth' && species === 'Clamperl') {
 			stats.spa *= 2;
 		}
-		if (item === 'souldew' && (this.battle.gen <= 6 || this.battle.tier.includes('More Balanced Hackmons')) &&
+		if (item === 'souldew' && (this.battle.gen <= 6 || this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) &&
 			(species === 'Latios' || species === 'Latias')) {
 			stats.spa = Math.floor(stats.spa * 1.5);
 			stats.spd = Math.floor(stats.spd * 1.5);
@@ -1270,7 +1270,7 @@ class BattleTooltips {
 		if (ability === 'furcoat') {
 			stats.def *= 2;
 		}
-		if (!this.battle.tier.includes('More Balanced Hackmons')) {
+		if (!this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
 			if (this.battle.abilityActive('Vessel of Ruin')) {
 				if (ability !== 'vesselofruin') {
 					stats.spa = Math.floor(stats.spa * 0.75);
@@ -1425,6 +1425,7 @@ class BattleTooltips {
 			if (baseSpe > 255) baseSpe = 255;
 		}
 		let level = pokemon.volatiles.transform?.[4] || pokemon.level;
+		// todo: change this to this.battle.dex.modid
 		let tier = this.battle.tier;
 		let gen = this.battle.gen;
 		let isCGT = tier.includes('Computer-Generated Teams');
@@ -1655,7 +1656,7 @@ class BattleTooltips {
 			value.itemModify(1.1, "Wide Lens");
 		}
 
-		if (this.battle.tier.includes('More Balanced Hackmons')) {
+		if (this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
 			if (value.tryItem('Muscle Band') && move.category === 'Physical') {
 				accuracyModifiers.push(4915);
 				value.itemModify(1.2, "Muscle Band");
@@ -1900,7 +1901,7 @@ class BattleTooltips {
 		}
 		// Base power based on times hit
 		if (move.id === 'ragefist') {
-			if (!this.battle.tier.includes('More Balanced Hackmons')) {
+			if (!this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
 				value.set(Math.min(350, 50 + 50 * pokemon.timesAttacked),
 					pokemon.timesAttacked > 0
 						? `Hit ${pokemon.timesAttacked} time${pokemon.timesAttacked > 1 ? 's' : ''}`
@@ -2042,7 +2043,7 @@ class BattleTooltips {
 				value.modify(0.5, 'Grassy Terrain + grounded target');
 			}
 		}
-		if (this.battle.tier.includes('More Balanced Hackmons')) {
+		if (this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
 			if (this.battle.weather === 'deltastream' && moveType === 'Flying') {
 				value.modify(1.3, 'Delta Stream boost');
 			}
@@ -2161,7 +2162,7 @@ class BattleTooltips {
 		}
 
 		// Pokemon-specific items
-		if (item.name === 'Soul Dew' && (this.battle.gen < 7 || this.battle.tier.includes('More Balanced Hackmons'))) {
+		if (item.name === 'Soul Dew' && (this.battle.gen < 7 || this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID))) {
 			return value;
 		}
 		if (BattleTooltips.orbUsers[speciesName]?.includes(item.name) &&
@@ -2226,9 +2227,9 @@ class BattleTooltips {
 					abilityData.baseAbility = clientPokemon.baseAbility;
 				}
 			} else {
-				// todo: consider if we need getFromPokemon here
-				const speciesForme = clientPokemon.getSpeciesForme() || serverPokemon?.speciesForme || '';
-				const species = this.battle.dex.species.get(speciesForme);
+				// const speciesForme = clientPokemon.getSpeciesForme() || serverPokemon?.speciesForme || '';
+				// const species = this.battle.dex.species.get(speciesForme);
+				const species = clientPokemon.getSpecies(serverPokemon || undefined); // unequivalent
 				if (species.exists && species.abilities) {
 					abilityData.possibilities = [species.abilities['0']];
 					if (species.abilities['1']) abilityData.possibilities.push(species.abilities['1']);
