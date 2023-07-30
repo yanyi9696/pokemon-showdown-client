@@ -1782,8 +1782,9 @@ const ModModifier: {
 			if ((pokemon as Pokemon | ServerPokemon).details) {
 				const details = (pokemon as Pokemon | ServerPokemon).details;
 				name = (details.split(', ').find(value => value.startsWith('headname:')) || '').slice(9);
-			} else {
-				name = (pokemon as PokemonSet).name || '';
+			}
+			if (name === '') { // teambuilder & mySidePokemon when TeamPreview
+				name = pokemon.name || '';
 			}
 			const species = (pokemon as PokemonSet).species || (pokemon as (Pokemon | ServerPokemon)).speciesForme;
 			const headSpecies = dex.species.get(name);
