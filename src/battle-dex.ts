@@ -1335,14 +1335,15 @@ class ModdedDex {
 
 	getTierSetTable() {
 		// todo: this is a really bad way to do so, find a better one
-		let table = window.BattleTeambuilderTable;
-		if (this.gen < Dex.gen) table = table[`gen${this.gen}`];
-		if (this.modid.includes('doubles' as ID)) table = table[`gen${this.gen}doubles`];
-		if (this.modid.includes('littlecup' as ID)) table = table[`gen${this.gen}lc`];
-		if (this.modid.includes('nfe' as ID)) table = table[`gen${this.gen}nfe`];
-		if (this.modid.includes('natdex' as ID)) table = table[`gen${this.gen}natdex`];
-		if (this.modid.includes('gen7letsgo' as ID)) table = table['gen7letsgo'];
-		if (this.modid.includes('gen8bdsp' as ID)) table = table['gen8bdsp'];
+		let BTTable = window.BattleTeambuilderTable;
+		let table = BTTable;
+		if (this.gen < Dex.gen) table = BTTable[`gen${this.gen}`];
+		if (this.modid.includes('doubles' as ID)) table = BTTable[`gen${this.gen}doubles`];
+		if (this.modid.includes('littlecup' as ID)) table = BTTable[`gen${this.gen}lc`];
+		if (this.modid.includes('nfe' as ID)) table = BTTable[`gen${this.gen}nfe`];
+		if (this.modid.includes('natdex' as ID)) table = BTTable[`gen${this.gen}natdex`];
+		if (this.modid.includes('gen7letsgo' as ID)) table = BTTable['gen7letsgo'];
+		if (this.modid.includes('gen8bdsp' as ID)) table = BTTable['gen8bdsp'];
 		if (this.modid.includes('digimon' as ID)) table = window.DigimonTable;
 		return table;
 	}
