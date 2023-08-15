@@ -1412,6 +1412,7 @@
 			this.curChartName = '';
 			this.update();
 			this.$('input[name=pokemon]').select();
+			// monothreat ignored
 			if (this.curTeam.dex.modid.includes('monotype')) {
 				var typeTable = [];
 				var dex = this.curTeam.dex;
