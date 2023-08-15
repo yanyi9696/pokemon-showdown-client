@@ -1335,12 +1335,14 @@ class ModdedDex {
 
 	getTierSetTable() {
 		// todo: this is a really bad way to do so, find a better one
+		// todo: i think we need to determine the tierset dynamically for each dex
 		let BTTable = window.BattleTeambuilderTable;
 		let table = BTTable;
 		if (this.gen < Dex.gen) table = BTTable[`gen${this.gen}`];
 		if (this.modid.includes('doubles' as ID)) table = BTTable[`gen${this.gen}doubles`];
 		if (this.modid.includes('littlecup' as ID)) table = BTTable[`gen${this.gen}lc`];
 		if (this.modid.includes('nfe' as ID)) table = BTTable[`gen${this.gen}nfe`];
+		if (this.gen === 9 && this.modid.includes('hackmons' as ID)) table = BTTable[`bh`];
 		if (this.modid.includes('natdex' as ID)) table = BTTable[`gen${this.gen}natdex`];
 		if (this.modid.includes('gen7letsgo' as ID)) table = BTTable['gen7letsgo'];
 		if (this.modid.includes('gen8bdsp' as ID)) table = BTTable['gen8bdsp'];
