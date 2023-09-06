@@ -1747,7 +1747,7 @@ export class Battle {
 			break;
 		}
 		case '-heal': {
-			let poke = this.getPokemon(args[1])!;
+			let poke = this.getPokemon(args[1], Dex.getEffect(kwArgs.from).id === 'revivalblessing')!;
 			let damage = poke.healthParse(args[2], true, true);
 			if (damage === null) break;
 			let range = poke.getDamageRange(damage);
@@ -3331,7 +3331,7 @@ export class Battle {
 		}
 		return null;
 	}
-	getPokemon(pokemonid: string | undefined) {
+	getPokemon(pokemonid: string | undefined, faintedOnly = false) {
 		if (!pokemonid || pokemonid === '??' || pokemonid === 'null' || pokemonid === 'false') {
 			return null;
 		}
@@ -3347,6 +3347,7 @@ export class Battle {
 
 		for (const pokemon of side.pokemon) {
 			if (isInactive && side.active.includes(pokemon)) continue;
+			if (faintedOnly && pokemon.hp) continue;
 			if (pokemon.ident === pokemonid) { // name matched, good enough
 				if (slot >= 0) pokemon.slot = slot;
 				return pokemon;
