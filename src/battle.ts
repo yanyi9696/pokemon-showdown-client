@@ -440,8 +440,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 		// this.lastMove = pokemon.lastMove; // I think
 		if (!copySource) {
 			const volatilesToRemove = [
-				// add utility umbrella for mbhv4
-				'airballoon', 'attract', 'autotomize', 'disable', 'encore', 'foresight', 'gmaxchistrike', 'imprison', 'laserfocus', 'mimic', 'miracleeye', 'nightmare', 'saltcure', 'smackdown', 'stockpile1', 'stockpile2', 'stockpile3', 'torment', 'typeadd', 'typechange', 'yawn', 'utilityumbrella',
+				'airballoon', 'attract', 'autotomize', 'disable', 'encore', 'foresight', 'gmaxchistrike', 'imprison', 'laserfocus', 'mimic', 'miracleeye', 'nightmare', 'saltcure', 'smackdown', 'stockpile1', 'stockpile2', 'stockpile3', 'syrupbomb', 'torment', 'typeadd', 'typechange', 'yawn', 'utilityumbrella',
 			];
 			for (const statName of Dex.statNamesExceptHP) {
 				volatilesToRemove.push('protosynthesis' + statName);
@@ -1754,7 +1753,8 @@ export class Battle {
 
 			if (kwArgs.from) {
 				let effect = Dex.getEffect(kwArgs.from);
-				this.activateAbility(poke, effect);
+				let ofpoke = this.getPokemon(kwArgs.of);
+				this.activateAbility(ofpoke || poke, effect);
 				if (effect.effectType === 'Item' && !CONSUMED.includes(poke.prevItemEffect)) {
 					if (poke.prevItem !== effect.name) {
 						poke.item = effect.name;

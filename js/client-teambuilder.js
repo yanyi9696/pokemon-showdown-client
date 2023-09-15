@@ -1263,7 +1263,7 @@
 					}
 				}
 				if (renderTeraType) {
-					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
+					buf += '<span class="detailcell"><label>Tera Type</label>' + (species.forceTeraType || set.teraType || species.types[0]) + '</span>';
 				}
 				if (isDigimon) {
 					buf += '<span class="detailcell"><label>Pre-Evolution</label>' + (set.preEvo || 'None') + '</span>';
@@ -2856,13 +2856,19 @@
 			}
 
 			if (renderTeraType) {
-				buf += '<div class="formrow"><label class="formlabel" title="Tera Type">Tera Type:</label><div><select name="teratype">';
-				var types = Dex.types.all();
-				var teraType = set.teraType || species.types[0];
-				for (var i = 0; i < types.length; i++) {
-					buf += '<option value="' + types[i].name + '"' + (teraType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + '</option>';
+				buf += '<div class="formrow"><label class="formlabel" title="Tera Type">Tera Type:</label><div>';
+				if (species.forceTeraType) {
+					buf += species.forceTeraType;
+				} else {
+					buf += '<select name="teratype">';
+					var types = Dex.types.all();
+					var teraType = set.teraType || species.types[0];
+					for (var i = 0; i < types.length; i++) {
+						buf += '<option value="' + types[i].name + '"' + (teraType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + '</option>';
+					}
+					buf += '</select>';
 				}
-				buf += '</select></div></div>';
+				buf += '</div></div>';
 			}
 
 			if (isCreatemon) {
@@ -3020,7 +3026,7 @@
 						buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
 					}
 				}
-				if (renderTeraType) buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.types[0]) + '</span>';
+				if (renderTeraType) buf += '<span class="detailcell"><label>Tera Type</label>' + (species.forceTeraType || set.teraType || species.types[0]) + '</span>';
 			}
 			this.$('button[name=details]').html(buf);
 

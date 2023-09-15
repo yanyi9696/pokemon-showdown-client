@@ -1339,7 +1339,8 @@ Storage.exportTeam = function (team, gen, hidestats) {
 			text += 'Gigantamax: Yes  \n';
 		}
 		if (gen === 9) {
-			text += 'Tera Type: ' + (curSet.teraType || Dex.species.get(curSet.species).types[0]) + "  \n";
+			var species = Dex.species.get(curSet.species);
+			text += 'Tera Type: ' + (species.forceTeraType || curSet.teraType || species.types[0]) + "  \n";
 		}
 		if (curSet.preEvo) {
 			text += 'Pre-Evolution: ' + curSet.preEvo + "  \n";
