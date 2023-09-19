@@ -1553,7 +1553,7 @@ const ModModifier: {
 	'350cup': {
 		speciesMod: (data: any): any => {
 			if (!data.exists) return;
-			if (data.bst > 350) return
+			if (data.bst > 350) return;
 			data.bst = 0;
 			let newStats = {...data.baseStats};
 			for (const stat in data.baseStats) {
