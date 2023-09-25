@@ -1815,6 +1815,7 @@ const ModModifier: {
 					necrozma: 'Necrozma-Ultra',
 					eternatus: 'Eternatus-Eternamax',
 					palafin: 'Palafin-Hero',
+					ogerpon: 'Ogerpon-Wellspring',
 				};
 				if (toID(headSpecies.name) in specialSelfFusions) {
 					return dex.species.get(specialSelfFusions[toID(headSpecies.name)]);
