@@ -65,6 +65,7 @@ def get_element_by_id(driver:WebDriver, id_element:str) -> WebElement:
         element = WebDriverWait(driver, driver_delay).until(EC.presence_of_element_located(locator))
     except TimeoutException:
         print(f"[get_element_by_id] Failed to get {id_element}")
+        sys.exit(1)
     return element
 
 def get_element_by_class(driver:WebDriver, class_element:str, is_loud=True) -> WebElement:
@@ -75,6 +76,7 @@ def get_element_by_class(driver:WebDriver, class_element:str, is_loud=True) -> W
     except TimeoutException:
         if is_loud:
             print(f"[find_element_by_class] Failed to get {class_element}")
+        sys.exit(1)
     return element
 
 def accept_all_cookies(driver:WebDriver):
@@ -90,6 +92,14 @@ def accept_all_cookies(driver:WebDriver):
         have_cookies = True
         log("accepting all cookies")
         time.sleep(basic_delay)
+
+def click_fusion_start(driver:WebDriver):
+    try:
+        element = get_element_by_id(driver, id_fusion)
+        tryClick(element)
+    except:
+        log("click start failed")
+    time.sleep(driver_delay)
 
 def tryClick(element:WebElement, t=10):
     endTime = time.time() + t
@@ -129,6 +139,11 @@ def init_website(driver:WebDriver):
     log("waiting for the website to load")
     time.sleep(driver_delay)
     accept_all_cookies(driver)
+    # 230819 japeal changed their website
+    # 201002 code modified here
+    log("clicking start")
+    time.sleep(driver_delay)
+    click_fusion_start(driver)
     print(" ")
 
 def getDownLoadedFileName(driver:WebDriver, waitTime):
@@ -221,7 +236,7 @@ if __name__ == '__main__':
     cachename = os.path.join(download_path, filename)
     tbFilename = os.path.join(download_path, '..', 'infinitefusion', head, filename)
     btFilename = os.path.join(download_path, '..', 'infinitefusion-battle', head, filename)
-    if os.path.exists(cachename) or os.path.exists(tbFilename) or os.path.exists(btFilename):
+    if os.path.exists(cachename): # or os.path.exists(tbFilename) or os.path.exists(btFilename):
         log("sprite already exists")
         print("EXIT")
         exit()
