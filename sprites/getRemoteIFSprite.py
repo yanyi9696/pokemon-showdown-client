@@ -32,6 +32,7 @@ id_body_pokemon = "Limagediv"
 id_textbox = "msdropdown20_titleText"
 id_fusion = "fbutton"
 id_download = "downloadBtn"
+class_textbox = "searchbar1"
 class_selected = "selected"
 
 proxy_address = "127.0.0.1:7890"
@@ -182,7 +183,8 @@ def handle_head(driver:WebDriver, head:str):
     tryClick(element)
     
     log(f"writing pokemon name ({head})")
-    element = get_element_by_id(driver, id_textbox)
+    # element = get_element_by_id(driver, id_textbox)
+    element = get_element_by_class(driver, class_textbox)
     clear_element(element)
     trySendkeys(element, head)
 
@@ -198,7 +200,8 @@ def handle_body(driver:WebDriver, body:str):
     tryClick(element)
     
     log(f"writing pokemon name ({body})")
-    element = get_element_by_id(driver, id_textbox)
+    # element = get_element_by_id(driver, id_textbox)
+    element = get_element_by_class(driver, class_textbox)
     clear_element(element)
     trySendkeys(element, body)
 
