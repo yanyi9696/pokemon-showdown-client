@@ -1615,10 +1615,12 @@ const ModModifier: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
 	},
 	scalemons: {
-		speciesMod: (data: any): any => {
+		speciesMod: (data: any, extra?: any): any => {
 			if (!data.exists) return;
+			const cupName = (extra && (extra.modid as ID[]).find(id => id.includes('cup'))) || '600cup';
+			const goalBST = parseInt(cupName.slice(0, 3))
 			const bstWithoutHp: number = data.bst - data.baseStats['hp'];
-			const scale = 600 - data.baseStats['hp'];
+			const scale = goalBST - data.baseStats['hp'];
 			data.bst = data.baseStats['hp'];
 			let newStats = {...data.baseStats};
 			for (const stat in data.baseStats) {
