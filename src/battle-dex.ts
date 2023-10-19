@@ -1781,7 +1781,7 @@ const ModModifier: {
 							mixedSpecies.bst += newStats[stat];
 						}
 						mixedSpecies.baseStats = newStats;
-						let newTypes = {...mixedSpecies.types};
+						let newTypes = [...mixedSpecies.types];
 						if (crossSpecies.types[0] !== crossPrevoSpecies.types[0]) newTypes[0] = crossSpecies.types[0];
 						if (crossSpecies.types[1] !== crossPrevoSpecies.types[1]) newTypes[1] = crossSpecies.types[1] || crossSpecies.types[0];
 						if (newTypes[0] === newTypes[1]) newTypes = [newTypes[0]];
