@@ -1786,11 +1786,23 @@ const ModModifier: {
 						if (crossSpecies.types[1] !== crossPrevoSpecies.types[1]) newTypes[1] = crossSpecies.types[1] || crossSpecies.types[0];
 						if (newTypes[0] === newTypes[1]) newTypes = [newTypes[0]];
 						mixedSpecies.types = newTypes;
+						mixedSpecies.abilities = crossSpecies.abilities;
 						return new Species(mixedSpecies.id, mixedSpecies.name, {...mixedSpecies});
 					}
 				}
 			}
 			return species;
+		},
+		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
+			const name = pokemon.name || '';
+			const crossSpecies = dex.species.get(name);
+			if (!crossSpecies.exists) return learnset;
+			const moveDex = dex.getMovedex();
+			for (const id in moveDex) {
+				if (learnset.includes(id)) continue;
+				if (dex.canLearn(crossSpecies.id, id as ID)) learnset.push(id);
+			}
+			return learnset;
 		},
 	},
 	infinitefusion: {
