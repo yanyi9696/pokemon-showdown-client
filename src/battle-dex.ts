@@ -212,6 +212,7 @@ const Dex = new class implements ModdedDex {
 		// oms
 		if (formatid.match(/\d\d\dcup/)) modids.push(formatid.match(/\d\d\dcup/)![0] as ID);
 		if (formatid.includes('almostanyability') || formatid.includes('aaa')) modids.push('almostanyability' as ID);
+		if (formatid.includes('categoryswap')) modids.push('categoryswap' as ID);
 		if (formatid.includes('hackmons') || formatid.endsWith('bh')) modids.push('hackmons' as ID);
 		if (formatid.includes('metronome')) modids.push('metronome' as ID);
 		if (formatid.includes('scalemons')) modids.push('scalemons' as ID);
@@ -1587,6 +1588,17 @@ const ModModifier: {
 				return true;
 			}
 		),
+	},
+	categoryswap: {
+		movesMod: (data: any): any => {
+			if (!data.exists) return;
+			const categoryMap = {
+				'Physical': 'Special',
+				'Special': 'Physical',
+				'Status': 'Status',
+			};
+			data.category = categoryMap[(data as Move).category];
+		},
 	},
 	hackmons: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
