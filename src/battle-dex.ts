@@ -1999,28 +1999,28 @@ const ModModifier: {
 	},
 	digimon: {
 		movesMod: (data: any): any => {
-			if (data.exists === true) return;
+			// if (data.exists === true) return;
 			if (data.id in window.DigiMovedex) {
 				Object.assign(data, window.DigiMovedex[data.id]);
 				data.exists = true;
 			}
 		},
 		itemsMod: (data: any): any => {
-			if (data.exists === true) return;
+			// if (data.exists === true) return;
 			if (data.id in window.DigiItems) {
 				Object.assign(data, window.DigiItems[data.id]);
 				data.exists = true;
 			}
 		},
 		abilitiesMod: (data: any): any => {
-			if (data.exists === true) return;
+			// if (data.exists === true) return;
 			if (data.id in window.DigiAbilities) {
 				Object.assign(data, window.DigiAbilities[data.id]);
 				data.exists = true;
 			}
 		},
 		speciesMod: (data: any): any => {
-			if (data.exists === true) return;
+			// if (data.exists === true) return;
 			if (data.id in window.Digidex) {
 				Object.assign(data, window.Digidex[data.id]);
 				data.exists = true;
