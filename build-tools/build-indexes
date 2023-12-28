@@ -1705,10 +1705,6 @@ process.stdout.write("Building `data/digimon.js`...");
 	}
 	for (const id in DigiItems) {
 		const item = Dex.mod('digimon').items.get(id);
-		if (item.num <= 40000) {
-			delete DigiItems[id];
-			continue;
-		}
 		if (item.desc) DigiItems[id].desc = item.desc;
 		if (item.shortDesc) DigiItems[id].shortDesc = item.shortDesc;
 	}
