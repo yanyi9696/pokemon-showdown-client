@@ -1718,6 +1718,7 @@ process.stdout.write("Building `data/digimon.js`...");
 		if (ability.shortDesc) DigiAbilities[id].shortDesc = ability.shortDesc;
 	}
 	delete DigiTypeChart['fairy'];
+	delete DigiTypeChart['stellar'];
 	deleteFlag = false;
 	for (const id in DigiLearnsets) {
 		if (id === 'bulbasaur') deleteFlag = true;
