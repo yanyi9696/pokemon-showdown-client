@@ -1601,12 +1601,12 @@ process.stdout.write("Building `data/digimon.js`...");
 
 	let buf = '// DO NOT EDIT - automatically built with build-tools/build-indexes\n\n';
 
-	const Digidex = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/pokedex.js').Pokedex;
-	const DigiMovedex = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/moves.js').Moves;
-	const DigiItems = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/items.js').Items;
-	const DigiAbilities = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/abilities.js').Abilities;
-	const DigiTypeChart = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/typechart.js').TypeChart;
-	const DigiLearnsets = requireNoCache('../data/pokemon-showdown/dist/data/mods/digimon/learnsets.js').Learnsets;
+	const Digidex = requireNoCache('../caches/pokemon-showdown/dist/data/mods/digimon/pokedex.js').Pokedex;
+	const DigiMovedex = requireNoCache('../caches/pokemon-showdown/dist/data/mods/digimon/moves.js').Moves;
+	const DigiItems = requireNoCache('../caches/pokemon-showdown/dist/data/mods/digimon/items.js').Items;
+	const DigiAbilities = requireNoCache('../caches/pokemon-showdown/dist/data/mods/digimon/abilities.js').Abilities;
+	const DigiTypeChart = requireNoCache('../caches/pokemon-showdown/dist/data/mods/digimon/typechart.js').TypeChart;
+	const DigiLearnsets = requireNoCache('../caches/pokemon-showdown/dist/data/mods/digimon/learnsets.js').Learnsets;
 
 	const digimon = Object.keys(Digidex);
 	digimon.sort();
@@ -1890,7 +1890,7 @@ process.stdout.write("Building `data/digimon.js`...");
 	buf += 'exports.DigimonArticleTitles = ' + JSON.stringify(DigimonArticleTitles) + ';\n\n';
 	//#endregion
 
-	fs.writeFileSync('data/digimon.js', buf);
+	fs.writeFileSync('play.pokemonshowdown.com/data/digimon.js', buf);
 }
 
 console.log("DONE");
@@ -1902,13 +1902,13 @@ console.log("DONE");
 process.stdout.write("Building `data/createmons.js`...");
 
 {
-	const typeToPoint = requireNoCache('../data/pokemon-showdown/dist/data/mods/createmons/pointchart.js').typeToPoint;
-	const abilityToPoint = requireNoCache('../data/pokemon-showdown/dist/data/mods/createmons/pointchart.js').abilityToPoint;
-	const moveToPoint = requireNoCache('../data/pokemon-showdown/dist/data/mods/createmons/pointchart.js').moveToPoint;
+	const typeToPoint = requireNoCache('../caches/pokemon-showdown/dist/data/mods/createmons/pointchart.js').typeToPoint;
+	const abilityToPoint = requireNoCache('../caches/pokemon-showdown/dist/data/mods/createmons/pointchart.js').abilityToPoint;
+	const moveToPoint = requireNoCache('../caches/pokemon-showdown/dist/data/mods/createmons/pointchart.js').moveToPoint;
 	const buf = 'exports.typeToPoint = ' + es3stringify(typeToPoint) + ';' +
 			'exports.abilityToPoint = ' + es3stringify(abilityToPoint) + ';' +
 			'exports.moveToPoint = ' + es3stringify(moveToPoint) + ';';
-	fs.writeFileSync('data/createmons.js', buf);
+	fs.writeFileSync('play.pokemonshowdown.com/data/createmons.js', buf);
 }
 
 console.log("DONE");
