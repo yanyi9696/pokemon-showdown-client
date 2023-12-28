@@ -1,1 +1,1 @@
-config/testclient-key.js
+../../config/testclient-key.js
