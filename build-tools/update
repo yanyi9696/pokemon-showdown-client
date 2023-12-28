@@ -182,7 +182,7 @@ replayEmbedContents = replayEmbedContents.replace(/play\.pokemonshowdown\.com/g,
 let date = new Date();
 replayEmbedContents = replayEmbedContents.replace(/a7/g, date.getTime());
 // Nihilslave: we use testclient.html
-let testclientContents = fs.readFileSync('testclient.template.html', {encoding: 'utf-8'});
+let testclientContents = fs.readFileSync('play.pokemonshowdown.com/testclient.template.html', {encoding: 'utf-8'});
 testclientContents = testclientContents.replace(URL_REGEX, addCachebuster);
 testclientContents = testclientContents.replace('Mmm dd, yyyy', date.toDateString().split(" ")[1] + ' ' + date.getDate() + ', ' + date.getFullYear());
 
