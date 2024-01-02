@@ -229,6 +229,7 @@ const Dex = new class implements ModdedDex {
 		if (formatid.includes('trademarked') || formatid.includes('moveitemability')) modids.push('trademarked' as ID);
 		if (formatid.includes('multibility') || formatid.includes('moveitemability')) modids.push('multibility' as ID);
 		if (formatid.includes('dualwielding') || formatid.includes('moveitemability')) modids.push('dualwielding' as ID);
+		if (formatid.includes('abilityspam')) modids.push('abilityspam' as ID);
 		if (formatid.includes('monotype')) modids.push('monotype' as ID);
 		// essentially pet mods
 		if (

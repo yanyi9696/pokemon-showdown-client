@@ -3308,6 +3308,16 @@
 				val = data.exists ? data.name : '';
 				break;
 			case 'move1': case 'move2': case 'move3': case 'move4':
+				data = dex.items.get(value);
+				if (data.exists && modid.includes('abilityspam') && modid.includes('dualwielding')) {
+					val = data.name;
+					break;
+				}
+				data = dex.abilities.get(value);
+				if (data.exists && modid.includes('abilityspam')) {
+					val = data.name;
+					break;
+				}
 				data = dex.moves.get(value);
 				val = data.exists ? data.name : '';
 				break;
