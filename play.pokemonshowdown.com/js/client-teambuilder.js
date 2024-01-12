@@ -1255,7 +1255,7 @@
 			var renderTeraType = this.curTeam.gen === 9 && !isDigimon && !isCreatemon && !isIF;
 			var renderItem = this.curTeam.gen > 1;
 			var renderAbility = this.curTeam.gen > 2 && !isLetsGo;
-			var s_EV = isCreatemon ? 'BS' : (isLetsGo ? 'AV' : 'EV');
+			var s_EV = isCreatemon ? 'Base' : (isLetsGo ? 'AV' : 'EV');
 			var evOverride = isCreatemon ? 252 : undefined;
 			var defaultEV = (this.curTeam.gen > 2 && !isCreatemon) ? 0 : 252;
 
@@ -1997,7 +1997,7 @@
 			var renderRemainingValue = supportsEVs && !isCreatemon && !isIF;
 
 			// stat cell
-			var buf = '<span class="statrow statrow-head"><label></label> <span class="statgraph"></span> <em>' + (supportsEVs ? (isCreatemon ? 'BS' : 'EV') : 'AV') + '</em></span>';
+			var buf = '<span class="statrow statrow-head"><label></label> <span class="statgraph"></span> <em>' + (supportsEVs ? (isCreatemon ? 'Base' : 'EV') : 'AV') + '</em></span>';
 			for (var stat in stats) {
 				if (stat === 'spd' && this.curTeam.gen === 1) continue;
 				stats[stat] = this.getStat(stat, set, evOverride);
@@ -2299,7 +2299,7 @@
 
 			var evOverride = isCreatemon ? 252 : undefined;
 			var maxTotalEVs = isIF ? 1020 : 510;
-			var s_EV = isCreatemon ? 'BS' : (supportsEVs ? 'EV' : 'AV');
+			var s_EV = isCreatemon ? 'Base' : (supportsEVs ? 'EV' : 'AV');
 			var renderRemaining = this.curTeam.gen > 2 && supportsEVs && !isCreatemon;
 			var renderRemainingValue = this.curTeam.gen > 2 && supportsEVs && !isCreatemon && !isIF;
 
