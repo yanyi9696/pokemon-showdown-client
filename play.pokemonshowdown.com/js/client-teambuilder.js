@@ -3759,10 +3759,11 @@
 
 			// stats points
 			if (!set.evs) set.evs = JSON.parse(JSON.stringify(species.baseStats));
-			details.push(this.calcBSPoint(set.evs)[0]);
-			details.push(this.calcBSPoint(set.evs)[1]);
-			details.push(this.calcBSPoint(set.evs)[2]);
-			details.push(this.calcBSPoint(set.evs)[3]);
+			var BSPoints = this.calcBSPoint(set.evs);
+			details.push(BSPoints[0]);
+			details.push(BSPoints[1]);
+			details.push(BSPoints[2]);
+			details.push(BSPoints[3]);
 
 			// type points
 			var types = [];
@@ -3779,10 +3780,10 @@
 				types.push(dex.types.get(species.types[1]).id);
 			}
 			if (types.length < 2 || types[1] === types[0]) {
-				details[1] *= 1.5;
+				details[4] *= 1.5;
 				details.push(-1);
 			} else {
-				details[1] += typeToPoint[types[1]];
+				details[4] += typeToPoint[types[1]];
 				details.push(typeToPoint[types[1]]);
 			}
 
@@ -3796,11 +3797,11 @@
 			for (var i = 0; i < set.moves.length; i++) {
 				var point = moveToPoint[dex.moves.get(set.moves[i]).id] || 0.5;
 				details.push(point);
-				details[5] += point;
+				details[8] += point;
 			}
 			for (var i = set.moves.length; i < 4; i++) {
 				details.push(0.5);
-				details[5] += 0.5;
+				details[8] += 0.5;
 			}
 
 			return details;
