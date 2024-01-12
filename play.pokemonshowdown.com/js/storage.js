@@ -1426,7 +1426,8 @@ Storage.exportTeam = function (team, gen, hidestats) {
 		}
 		if (gen === 9) {
 			var species = Dex.species.get(curSet.species);
-			text += 'Tera Type: ' + (species.forceTeraType || curSet.teraType || species.types[0]) + "  \n";
+			// no check forceTeraType for bc
+			text += 'Tera Type: ' + (/*species.forceTeraType || */curSet.teraType || species.types[0]) + "  \n";
 		}
 		if (curSet.preEvo) {
 			text += 'Pre-Evolution: ' + curSet.preEvo + "  \n";
