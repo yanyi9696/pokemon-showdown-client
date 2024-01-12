@@ -2042,7 +2042,7 @@
 			}
 
 			if (renderRemaining) buf += '<div><em>Remaining:</em></div>';
-			if (isCreatemon) buf += '<div><em>BST:</em><em>S:</em></div>';
+			if (isCreatemon) buf += '<div><em>S:</em><em>BST:</em></div>';
 			this.$chart.find('.graphcol').html(buf);
 
 			if (this.curTeam.gen <= 2) return;
@@ -2054,7 +2054,7 @@
 				}
 			}
 			if (isCreatemon) {
-				var totalevBuf = '<b>' + totalev + '</b><b>' + this.calcBSPoint(set.evs)[0] + '</b>';
+				var totalevBuf = '<b>' + this.calcBSPoint(set.evs)[0] + '</b><b>' + totalev + '</b>';
 				this.$chart.find('.totalev').html(totalevBuf);
 			}
 			if (isIF) {
@@ -2348,7 +2348,7 @@
 				buf += '<div><em><span style="width:' + Math.floor(width) + 'px;background:hsl(' + color + ',85%,45%);border-color:hsl(' + color + ',85%,35%)"></span></em></div>';
 			}
 			if (renderRemaining) buf += '<div><em>Remaining:</em></div>';
-			if (isCreatemon) buf += '<div><em>BST:</em><em>S:</em></div>';
+			if (isCreatemon) buf += '<div><em>S:</em><em>BST:</em></div>';
 			buf += '</div>';
 
 			buf += '<div class="col evcol"><div><strong>' + s_EV + '</strong></div>';
@@ -2377,7 +2377,7 @@
 				}
 			}
 			if (isCreatemon) {
-				buf += '<div class="totalev"><b>' + totalev + '</b><b>' + this.calcBSPoint(set.evs)[0] + '</b></div>';
+				buf += '<div class="totalev"><b>' + this.calcBSPoint(set.evs)[0] + '</b><b>' + totalev + '</b></div>';
 			}
 			if (isIF) {
 				buf += '<div class="totalev"><em>' + (maxTotalEVs - totalev) + '</em></div>';
