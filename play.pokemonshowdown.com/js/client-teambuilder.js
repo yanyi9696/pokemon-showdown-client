@@ -2294,6 +2294,7 @@
 			var supportsEVs = !this.curTeam.dex.modid.includes('gen7letsgo');
 			// var supportsAVs = !supportsEVs && this.curTeam.format.endsWith('norestrictions');
 			var defaultEV = (this.curTeam.gen > 2 && !isCreatemon) ? 0 : 252;
+			var minEV = isCreatemon ? 1 : 0;
 			var maxEV = supportsEVs ? 252 : 200;
 			var stepEV = (supportsEVs && !isCreatemon) ? 4 : 1;
 
@@ -2387,7 +2388,7 @@
 			buf += '<div class="col evslidercol"><div></div>';
 			for (var i in stats) {
 				if (i === 'spd' && this.curTeam.gen === 1) continue;
-				buf += '<div><input type="range" name="evslider-' + i + '" value="' + BattleLog.escapeHTML(set.evs[i] === undefined ? '' + defaultEV : '' + set.evs[i]) + '" min="0" max="' + maxEV + '" step="' + stepEV + '" class="evslider" tabindex="-1" aria-hidden="true" /></div>';
+				buf += '<div><input type="range" name="evslider-' + i + '" value="' + BattleLog.escapeHTML(set.evs[i] === undefined ? '' + defaultEV : '' + set.evs[i]) + '" min="' + minEV + '" max="' + maxEV + '" step="' + stepEV + '" class="evslider" tabindex="-1" aria-hidden="true" /></div>';
 			}
 			buf += '</div>';
 
