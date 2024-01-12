@@ -1726,12 +1726,11 @@
 			i = +($(button).closest('li').attr('value'));
 			var pointDetails = this.getSetPoint(this.curTeam.dex, this.curSetList[i]);
 			app.addPopupMessage(
-				'S: ' + pointDetails[0] + '\n' +
-				'T: ' + pointDetails[1].toFixed(1) + ' = ' + pointDetails[2] + (pointDetails[3] === -1 ? ' * 1.5' : (' + ' + pointDetails[3])) + '\n' +
-				'A: ' + pointDetails[4] + '\n' +
-				'M: ' + pointDetails[5] + ' = ' + pointDetails[6] + ' + ' + pointDetails[7] + ' + ' + pointDetails[8] + ' + ' + pointDetails[9] + '\n' +
-				(pointDetails[10] ? ('P: ' + pointDetails[10] + ' = 2 * ' + pointDetails[11] + ' + ' + pointDetails[12] + ' + ' + pointDetails[13] + ' + ' + pointDetails[14] + ' + ' + pointDetails[15] + ' + ' + pointDetails[16] + '\n') : '') +
-				'Total: ' + (Math.floor(pointDetails[0] * pointDetails[1] * pointDetails[4] * pointDetails[5]) + pointDetails[10])
+				'S: ' + pointDetails[0] + '=' + pointDetails[1].toFixed(2) + '*' + pointDetails[2].toFixed(2) + '*' + pointDetails[3].toFixed(2) + '\n' +
+				'T: ' + pointDetails[4].toFixed(1) + ' = ' + pointDetails[5] + (pointDetails[6] === -1 ? ' * 1.5' : (' + ' + pointDetails[6])) + '\n' +
+				'A: ' + pointDetails[7] + '\n' +
+				'M: ' + pointDetails[8] + ' = ' + pointDetails[9] + ' + ' + pointDetails[10] + ' + ' + pointDetails[11] + ' + ' + pointDetails[12] + '\n' +
+				'Total: ' + Math.floor(pointDetails[0] * pointDetails[4] * pointDetails[7] * pointDetails[8])
 			);
 			button.blur();
 		},
@@ -2043,15 +2042,7 @@
 			}
 
 			if (renderRemaining) buf += '<div><em>Remaining:</em></div>';
-			if (isCreatemon) {
-				buf += '<div><em>BST:</em><em>S:</em>';
-				var bcPenalty = this.calcPPoint(set.evs);
-				if (bcPenalty > 0) {
-					buf += '<em>P:</em></div>';
-				} else {
-					buf += '</div>';
-				}
-			}
+			if (isCreatemon) buf += '<div><em>BST:</em><em>S:</em></div>';
 			this.$chart.find('.graphcol').html(buf);
 
 			if (this.curTeam.gen <= 2) return;
@@ -2063,11 +2054,7 @@
 				}
 			}
 			if (isCreatemon) {
-				var totalevBuf = '<b>' + totalev + '</b><b>' + this.calcBSPoint(set.evs) + '</b>';
-				var bcPenalty = this.calcPPoint(set.evs);
-				if (bcPenalty > 0) {
-					totalevBuf += '<b>' + bcPenalty + '</b>';
-				}
+				var totalevBuf = '<b>' + totalev + '</b><b>' + this.calcBSPoint(set.evs)[0] + '</b>';
 				this.$chart.find('.totalev').html(totalevBuf);
 			}
 			if (isIF) {
@@ -2075,9 +2062,18 @@
 			}
 			// update "Base" column
 			if (isCreatemon) {
-				buf = '<div><em>Base</em></div>';
-				for (var stat in set.evs) {
-					buf += '<div><b>' + set.evs[stat] + '</b></div>';
+				var BSPoint = this.calcBSPoint(set.evs);
+				var BSPoints = {
+					hp: BSPoint[1],
+					atk: BSPoint[0],
+					def: BSPoint[1],
+					spa: BSPoint[0],
+					spd: BSPoint[1],
+					spe: BSPoint[2],
+				};
+				buf = '<div><em>Points</em></div>';
+				for (var stat in BSPoints) {
+					buf += '<div><b>' + BSPoints[stat] + '</b></div>';
 				}
 				this.$chart.find('.basestatscol').html(buf);
 			}
@@ -2317,9 +2313,25 @@
 
 			buf += '<div><label>Speed</label></div></div>';
 
-			buf += '<div class="col basestatscol"><div><em>Base</em></div>';
-			for (var i in stats) {
-				buf += '<div><b>' + baseStats[i] + '</b></div>';
+			if (!isCreatemon) {
+				buf += '<div class="col basestatscol"><div><em>Base</em></div>';
+				for (var i in stats) {
+					buf += '<div><b>' + baseStats[i] + '</b></div>';
+				}
+			} else {
+				var BSPoint = this.calcBSPoint(set.evs);
+				var BSPoints = {
+					hp: BSPoint[1],
+					atk: BSPoint[0],
+					def: BSPoint[1],
+					spa: BSPoint[0],
+					spd: BSPoint[1],
+					spe: BSPoint[2],
+				};
+				buf += '<div class="col basestatscol"><div><em>Points</em></div>';
+				for (var stat in BSPoints) {
+					buf += '<div><b>' + BSPoints[stat] + '</b></div>';
+				}
 			}
 			buf += '</div>';
 
@@ -2334,15 +2346,7 @@
 				buf += '<div><em><span style="width:' + Math.floor(width) + 'px;background:hsl(' + color + ',85%,45%);border-color:hsl(' + color + ',85%,35%)"></span></em></div>';
 			}
 			if (renderRemaining) buf += '<div><em>Remaining:</em></div>';
-			if (isCreatemon) {
-				buf += '<div><em>BST:</em><em>S:</em>';
-				var bcPenalty = this.calcPPoint(set.evs);
-				if (bcPenalty > 0) {
-					buf += '<em>P:</em></div>';
-				} else {
-					buf += '</div>';
-				}
-			}
+			if (isCreatemon) buf += '<div><em>BST:</em><em>S:</em></div>';
 			buf += '</div>';
 
 			buf += '<div class="col evcol"><div><strong>' + s_EV + '</strong></div>';
@@ -2371,13 +2375,7 @@
 				}
 			}
 			if (isCreatemon) {
-				buf += '<div class="totalev"><b>' + totalev + '</b><b>' + this.calcBSPoint(set.evs) + '</b>';
-				var bcPenalty = this.calcPPoint(set.evs);
-				if (bcPenalty > 0) {
-					buf += '<b>' + bcPenalty + '</b></div>';
-				} else {
-					buf += '</div>';
-				}
+				buf += '<div class="totalev"><b>' + totalev + '</b><b>' + this.calcBSPoint(set.evs)[0] + '</b></div>';
 			}
 			if (isIF) {
 				buf += '<div class="totalev"><em>' + (maxTotalEVs - totalev) + '</em></div>';
@@ -3731,30 +3729,25 @@
 			var c = stats['spa'];
 			var d = stats['spd'];
 			var s = stats['spe'];
-			var actualBs1 = h * b + h * d + s * s + 50 * (2 * h + a + 2 * b + c + 2 * d - 4 * s) + 25000;
-			var sqrtActualBs1 = Math.sqrt(actualBs1);
-			var actualBs2 = Math.max(h, a, b, c, d, s) + 50;
-			var bs = Math.floor(Math.floor(sqrtActualBs1 * actualBs2) * 5 / 1024);
-			return bs;
-		},
-		calcPPoint: function (stats) {
-			var penalty = 0;
-			for (var statName in stats) {
-				var stat = stats[statName];
-				if (stat > 150) {
-					var pnt = Math.floor((stat - 150) * (stat - 150) * (stat - 150) * 193 / 2048);
-					penalty += pnt;
-					if (statName === 'hp') {
-						penalty += pnt;
-					}
-				}
-			}
-			return penalty;
+			var A = function (a) { return 2 * a + 100; };
+			var B = function (h, b) { return (2 * h + 200) * (2 * b + 100); };
+			var S = A;
+			var f = function (x) { return x * x * x * 3 - x * x * 6 + x * 5; };
+			var g = function (x) { return x * x * x * 3 - x + 3; };
+			var k = function (x) { return (-x * x * x * x * 3 + x * x * x * 13 - x * x * 14 + x * 4 + 2); };
+			var A_w = (4 * Math.max(A(a), A(c)) + 1 * Math.min(A(a), A(c))) / 15e2;
+			var B_w = (2 * Math.max(B(h, b), B(h, d)) + 1 * Math.min(B(h, b), B(h, d))) / 36e4;
+			var E = S(s) / 300;
+			var f_A_w = f(A_w);
+			var g_B_w = g(B_w);
+			var k_E = k(E);
+			var bs = Math.floor(f_A_w * g_B_w * k_E * 10);
+			return [bs, f_A_w, g_B_w, k_E];
 		},
 		getSetPoint: function (dex, set) {
 			// different from server side
-			// BS | T | T1 | T2 | A | M | M1 | M2 | M3 | M4 |  P | P1 | P2 | P3 | P4 | P5 | P6 |
-			//  0 | 1 |  2 |  3 | 4 | 5 |  6 |  7 |  8 |  9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
+			// BS | BSA | BSB | BSE | T | T1 | T2 | A | M | M1 | M2 | M3 | M4
+			//  0 |  1  |  2  |  3  | 4 |  5 |  6 | 7 | 8 |  9 | 10 | 11 | 12
 			var details = [];
 			var species = dex.species.get(set.species);
 
@@ -3764,7 +3757,10 @@
 
 			// stats points
 			if (!set.evs) set.evs = JSON.parse(JSON.stringify(species.baseStats));
-			details.push(this.calcBSPoint(set.evs));
+			details.push(this.calcBSPoint(set.evs)[0]);
+			details.push(this.calcBSPoint(set.evs)[1]);
+			details.push(this.calcBSPoint(set.evs)[2]);
+			details.push(this.calcBSPoint(set.evs)[3]);
 
 			// type points
 			var types = [];
@@ -3805,29 +3801,13 @@
 				details[5] += 0.5;
 			}
 
-			// penalty
-			details.push(0);
-			for (var statName in set.evs) {
-				var stat = set.evs[statName];
-				var penalty = 0;
-				if (stat > 150) {
-					penalty = (stat - 150) * (stat - 150) * (stat - 150) * 193 / 2048;
-					penalty = Math.floor(penalty);
-					details[10] += penalty;
-					if (statName === 'hp') {
-						details[10] += penalty;
-					}
-				}
-				details.push(penalty);
-			}
-
 			return details;
 		},
 		getTeamPoint: function () {
 			var totalPoint = 0;
 			for (var i in this.curSetList) {
 				var details = this.getSetPoint(this.curTeam.dex, this.curSetList[i]);
-				totalPoint += Math.floor(details[0] * details[1] * details[4] * details[5]) + details[10];
+				totalPoint += Math.floor(details[0] * details[4] * details[7] * details[8]);
 			}
 			return totalPoint;
 		},
