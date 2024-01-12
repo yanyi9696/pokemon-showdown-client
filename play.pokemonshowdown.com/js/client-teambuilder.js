@@ -1726,7 +1726,7 @@
 			i = +($(button).closest('li').attr('value'));
 			var pointDetails = this.getSetPoint(this.curTeam.dex, this.curSetList[i]);
 			app.addPopupMessage(
-				'S: ' + pointDetails[0] + '=' + pointDetails[1].toFixed(2) + '*' + pointDetails[2].toFixed(2) + '*' + pointDetails[3].toFixed(2) + '\n' +
+				'S: ' + pointDetails[0] + ' = ' + pointDetails[1].toFixed(2) + ' * ' + pointDetails[2].toFixed(2) + ' * ' + pointDetails[3].toFixed(2) + '\n' +
 				'T: ' + pointDetails[4].toFixed(1) + ' = ' + pointDetails[5] + (pointDetails[6] === -1 ? ' * 1.5' : (' + ' + pointDetails[6])) + '\n' +
 				'A: ' + pointDetails[7] + '\n' +
 				'M: ' + pointDetails[8] + ' = ' + pointDetails[9] + ' + ' + pointDetails[10] + ' + ' + pointDetails[11] + ' + ' + pointDetails[12] + '\n' +
