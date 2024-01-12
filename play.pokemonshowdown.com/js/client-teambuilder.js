@@ -2897,7 +2897,7 @@
 			}
 
 			if (isCreatemon) {
-				buf += '<div class="formrow"><label class="formlabel" title="First Type">First Type:</label><div><select name="hptype">';
+				buf += '<div class="formrow"><label class="formlabel" title="First Type">First Type:</label><div><select name="hptype" class="button">';
 				var types = Dex.types.all();
 				var hpType = set.hpType || species.types[0];
 				for (var i = 0; i < types.length; i++) {
@@ -2942,7 +2942,7 @@
 			}
 
 			if (isCreatemon) {
-				buf += '<div class="formrow"><label class="formlabel" title="Second Type">Second Type:</label><div><select name="teratype">';
+				buf += '<div class="formrow"><label class="formlabel" title="Second Type">Second Type:</label><div><select name="teratype" class="button">';
 				var types = Dex.types.all();
 				var teraType = set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0]);
 				for (var i = 0; i < types.length; i++) {
