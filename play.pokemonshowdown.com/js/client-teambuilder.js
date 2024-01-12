@@ -2064,17 +2064,18 @@
 			if (isCreatemon) {
 				var BSPoint = this.calcBSPoint(set.evs);
 				var BSPoints = {
-					hp: BSPoint[1],
-					atk: BSPoint[0],
-					def: BSPoint[1],
-					spa: BSPoint[0],
-					spd: BSPoint[1],
-					spe: BSPoint[2],
+					hp: BSPoint[2].toFixed(2),
+					atk: BSPoint[1].toFixed(2),
+					def: BSPoint[2].toFixed(2),
+					spa: BSPoint[1].toFixed(2),
+					spd: BSPoint[2].toFixed(2),
+					spe: BSPoint[3].toFixed(2),
 				};
 				buf = '<div><em>Points</em></div>';
 				for (var stat in BSPoints) {
 					buf += '<div><b>' + BSPoints[stat] + '</b></div>';
 				}
+				buf += '<div><b>x10</b></div>';
 				this.$chart.find('.basestatscol').html(buf);
 			}
 			this.$chart.find('select[name=nature]').val(set.nature || 'Serious');
@@ -2321,17 +2322,18 @@
 			} else {
 				var BSPoint = this.calcBSPoint(set.evs);
 				var BSPoints = {
-					hp: BSPoint[1],
-					atk: BSPoint[0],
-					def: BSPoint[1],
-					spa: BSPoint[0],
-					spd: BSPoint[1],
-					spe: BSPoint[2],
+					hp: BSPoint[2].toFixed(2),
+					atk: BSPoint[1].toFixed(2),
+					def: BSPoint[2].toFixed(2),
+					spa: BSPoint[1].toFixed(2),
+					spd: BSPoint[2].toFixed(2),
+					spe: BSPoint[3].toFixed(2),
 				};
 				buf += '<div class="col basestatscol"><div><em>Points</em></div>';
 				for (var stat in BSPoints) {
 					buf += '<div><b>' + BSPoints[stat] + '</b></div>';
 				}
+				buf += '<div><b>x10</b></div>';
 			}
 			buf += '</div>';
 
