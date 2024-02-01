@@ -1419,14 +1419,8 @@ class BattleTooltips {
 	getSpeedRange(pokemon: Pokemon): [number, number] {
 		const tr = Math.trunc || Math.floor;
 		const species = pokemon.getSpecies();
+		let rules = this.battle.rules;
 		let baseSpe = species.baseStats.spe;
-		if (this.battle.rules['Scalemons Mod']) { // useless now, but why not just keep
-			const bstWithoutHp = species.bst - species.baseStats.hp;
-			const scale = 600 - species.baseStats.hp;
-			baseSpe = tr(baseSpe * scale / bstWithoutHp);
-			if (baseSpe < 1) baseSpe = 1;
-			if (baseSpe > 255) baseSpe = 255;
-		}
 		let level = pokemon.volatiles.transform?.[4] || pokemon.level;
 		// todo: change this to this.battle.dex.modid
 		let tier = this.battle.tier;
@@ -1741,13 +1735,16 @@ class BattleTooltips {
 				value.modify(2, "Acrobatics + no item");
 			}
 		}
-		if (['crushgrip', 'hardpress', 'wringout'].includes(move.id) && target) {
+		let variableBPCap = ['crushgrip', 'wringout'].includes(move.id) ? 120 : move.id === 'hardpress' ? 100 : undefined;
+		if (variableBPCap && target) {
 			value.set(
-				Math.floor(Math.floor((120 * (100 * Math.floor(target.hp * 4096 / target.maxhp)) + 2048 - 1) / 4096) / 100) || 1,
+				Math.floor(
+					Math.floor((variableBPCap * (100 * Math.floor(target.hp * 4096 / target.maxhp)) + 2048 - 1) / 4096) / 100
+				) || 1,
 				'approximate'
 			);
 		}
-		if (['terablast'].includes(move.id) && pokemon.terastallized === 'Stellar') {
+		if (move.id === 'terablast' && pokemon.terastallized === 'Stellar') {
 			value.set(100, 'Tera Stellar boost');
 		}
 		if (move.id === 'brine' && target && target.hp * 2 <= target.maxhp) {
@@ -2125,6 +2122,7 @@ class BattleTooltips {
 		'Black Glasses': 'Dark',
 		'Charcoal': 'Fire',
 		'Dragon Fang': 'Dragon',
+		'Fairy Feather': 'Fairy',
 		'Hard Stone': 'Rock',
 		'Magnet': 'Electric',
 		'Metal Coat': 'Steel',
@@ -2309,7 +2307,10 @@ class BattleTooltips {
 				if (baseAbilityName && baseAbilityName !== abilityName) text += ' (base: ' + baseAbilityName + ')';
 			}
 		}
-		if (!text && abilityData.possibilities.length && !hidePossible) {
+		const tier = this.battle.tier;
+		if (!text && abilityData.possibilities.length && !hidePossible &&
+			!(tier.includes('Almost Any Ability') || tier.includes('Hackmons') ||
+				tier.includes('Inheritance') || tier.includes('Metronome'))) {
 			text = '<small>Possible abilities:</small> ' + abilityData.possibilities.join(', ');
 		}
 		return text;
