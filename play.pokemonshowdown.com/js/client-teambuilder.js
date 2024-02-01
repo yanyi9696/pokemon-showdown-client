@@ -3590,15 +3590,7 @@
 			if (!set.ivs['atk'] && set.ivs['atk'] !== 0) set.ivs['atk'] = 31;
 			if (minAtk) {
 				// min Atk
-				if (['Gouging Fire', 'Iron Boulder', 'Iron Crown', 'Raging Bolt'].includes(set.species)) {
-					// only available with 20 Atk IVs
-					set.ivs['atk'] = 20;
-				} else if (set.species.startsWith('Terapagos')) {
-					// only available with 15 Atk IVs
-					set.ivs['atk'] = 15;
-				} else {
-					set.ivs['atk'] = (hasHiddenPower ? set.ivs['atk'] % hpModulo : 0);
-				}
+				set.ivs['atk'] = (hasHiddenPower ? set.ivs['atk'] % hpModulo : 0);
 			} else {
 				// max Atk
 				set.ivs['atk'] = (hasHiddenPower ? 30 + (set.ivs['atk'] % 2) : 31);
