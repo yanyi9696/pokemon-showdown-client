@@ -2717,6 +2717,12 @@ export class Battle {
 			case 'reflect':
 				this.scene.resultAnim(poke, 'Reflect', 'good');
 				break;
+			// bc, added by Nihilslave
+			case 'bcstats':
+				const stats = Dex.sanitizeName(args[3]);
+				poke.addVolatile('bcstats' as ID, stats);
+				this.scene.updateStatbar(poke);
+				break;
 			}
 			if (!(effect.id === 'typechange' && poke.terastallized)) {
 				poke.addVolatile(effect.id);

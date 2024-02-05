@@ -1776,6 +1776,7 @@ export class PokemonSprite extends Sprite {
 		formechange: null,
 		typechange: null,
 		typeadd: null,
+		bcstats: null, // added by Nihilslave for bc
 		dynamax: ['Dynamaxed', 'good'],
 		trapped: null, // linked volatiles are not implemented yet
 		throatchop: ['Throat Chop', 'bad'],
@@ -2820,6 +2821,10 @@ export class PokemonSprite extends Sprite {
 		if (pokemon.volatiles.typeadd) {
 			const type = pokemon.volatiles.typeadd[1];
 			status += '+<img src="' + Dex.resourcePrefix + 'sprites/types/' + type + '.png" alt="' + type + '" class="pixelated" /> ';
+		}
+		if (pokemon.volatiles.bcstats) {
+			const stats = pokemon.volatiles.bcstats[1];
+			status += '<span class="neutral">' + stats + '</span> ';
 		}
 		for (const stat in pokemon.boosts) {
 			if (pokemon.boosts[stat]) {
