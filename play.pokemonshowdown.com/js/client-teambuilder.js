@@ -3743,10 +3743,10 @@
 			var A = function (a) { return 2 * a + 100; };
 			var B = function (h, b) { return (2 * h + 200) * (2 * b + 100); };
 			var S = A;
-			var f = function (x) { return x * x * x * 3 - x * x * 6 + x * 5; };
+			var f = function (x) { return x * x * x * 6 - x * x * 12 + x * 10; };
 			var g = function (x) { return x * x * x * 3 - x + 3; };
-			var k = function (x) { return (-x * x * x * x * 3 + x * x * x * 13 - x * x * 14 + x * 4 + 2); };
-			var A_w = (4 * Math.max(A(a), A(c)) + 1 * Math.min(A(a), A(c))) / 15e2;
+			var k = function (x) { return (-x * x * x * x + x * x * x * 8 - x * x * 10 + x * 3 + 1); };
+			var A_w = (8 * Math.max(A(a), A(c)) + 1 * Math.min(A(a), A(c))) / 27e2;
 			var B_w = (2 * Math.max(B(h, b), B(h, d)) + 1 * Math.min(B(h, b), B(h, d))) / 36e4;
 			var E = S(s) / 300;
 			var f_A_w = f(A_w);
