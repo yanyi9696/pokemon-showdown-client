@@ -1196,7 +1196,11 @@
 					buf += '<label class="label">Format:</label><button class="select formatselect teambuilderformatselect" name="format" value="' + this.curTeam.format + '">' + (isGenericFormat(this.curTeam.format) ? '<em>Select a format</em>' : BattleLog.escapeFormat(this.curTeam.format)) + '</button>';
 					var btnClass = 'button' + (!this.curSetList.length || app.isDisconnected ? ' disabled' : '');
 					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button></li>';
-					if (this.curTeam.dex.modid.includes('createmons')) buf += '<label class="label">Total Point:</label><em>' + this.getTeamPoint() + '</em>';
+					if (this.curTeam.dex.modid.includes('createmons')) {
+						var teamPoint = this.getTeamPoint();
+						if (teamPoint >= 100000) teamPoint = '<font color="red">' + teamPoint + '</font>';
+						buf += '<label class="label">Total Point:</label><em>' + teamPoint + '</em>';
+					}
 				}
 				if (!this.curSetList.length) {
 					if (this.curTeam.dex.modid.includes('digimon')) {
