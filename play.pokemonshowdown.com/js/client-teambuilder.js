@@ -1282,7 +1282,11 @@
 				return buf;
 			}
 			buf += '<div class="setmenu">';
-			if (isCreatemon) buf += '<button name="checkPoint"><i class="fa fa-check"></i>Check</button> ';
+			if (isCreatemon) {
+				var setPoints = this.getSetPoint(this.curTeam.dex, set);
+				var setPoint = Math.floor(setPoints[0] * setPoints[4] * setPoints[7] * setPoints[8]);
+				buf += '<button name="checkPoint"><i class="fa fa-check"></i>' + setPoint + '</button> ';
+			}
 			buf += '<button name="copySet"><i class="fa fa-files-o"></i>Copy</button> <button name="importSet"><i class="fa fa-upload"></i>Import/Export</button> <button name="moveSet"><i class="fa fa-arrows"></i>Move</button> <button name="deleteSet"><i class="fa fa-trash"></i>Delete</button></div>';
 			buf += '<div class="setchart-nickname">';
 			buf += '<label>Nickname</label><input type="text" name="nickname" class="textbox" value="' + BattleLog.escapeHTML(set.name || '') + '" placeholder="' + BattleLog.escapeHTML(species.baseSpecies) + '" />';
