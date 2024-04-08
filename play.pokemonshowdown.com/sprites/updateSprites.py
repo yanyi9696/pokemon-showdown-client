@@ -19,6 +19,7 @@ important_directories = {
     'gen5-back': '*.png',
     'gen5-back-shiny': '*.png',
     'gen5-shiny': '*.png',
+    'trainers': '*.png',
 }
 cmd_args = '--recursive -np -N -nd -nH --reject="index.html" -e robots=off -A'.split()
 for direct in important_directories:
