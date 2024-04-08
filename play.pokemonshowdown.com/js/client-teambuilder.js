@@ -2887,7 +2887,7 @@
 				}
 
 				if (renderWeight) {
-					buf += '<div class="formrow"><label class="formlabel">Weight:</label><div><input type="number" min="1" max="999" step="1" name="dynamaxlevel" value="' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 999) + '" class="textbox inputform numform" /></div></div>';
+					buf += '<div class="formrow"><label class="formlabel">Weight:</label><div><input type="number" min="1" max="999" step="1" name="dynamaxlevel" value="' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 10) + '" class="textbox inputform numform" /></div></div>';
 				}
 			}
 
@@ -3014,11 +3014,11 @@
 				set.dynamaxLevel = dynamaxLevel;
 				if (set.dynamaxLevel === 10) delete set.dynamaxLevel;
 			} else {
-				if (isNaN(dynamaxLevel)) dynamaxLevel = 999;
+				if (isNaN(dynamaxLevel)) dynamaxLevel = 10;
 				if (dynamaxLevel < 1) dynamaxLevel = 1;
 				if (dynamaxLevel > 999) dynamaxLevel = 999;
 				set.dynamaxLevel = dynamaxLevel;
-				// if (set.dynamaxLevel === 10) delete set.dynamaxLevel;
+				if (set.dynamaxLevel === 10) delete set.dynamaxLevel;
 			}
 
 			// gigantamax
