@@ -1198,7 +1198,7 @@
 					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button></li>';
 					if (this.curTeam.dex.modid.includes('createmons')) {
 						var teamPoint = this.getTeamPoint();
-						if (teamPoint >= 100000) teamPoint = '<font color="red">' + teamPoint + '</font>';
+						if (teamPoint > 100000) teamPoint = '<font color="red">' + teamPoint + '</font>';
 						buf += '<label class="label">Total Point:</label><em>' + teamPoint + '</em>';
 					}
 				}
