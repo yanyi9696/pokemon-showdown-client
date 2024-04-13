@@ -1747,7 +1747,15 @@ const ModModifier: {
 			types = Array.from(new Set(types));
 			return new Species(species.id, species.name, {...species, baseStats: evs, types: types});
 		},
-		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
+			// for bc-specific pokemon
+			const addedTierSet: SearchRow[] = [['header', 'BC-Specific']];
+			const table = window.BattleTeambuilderTable['createmons'];
+			for (const pokemon in table.overrideSpeciesData) {
+				addedTierSet.push(['pokemon', pokemon as ID]);
+			}
+			return addedTierSet.concat(tierSet);
+		},
 		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
 			const moveDex = dex.getMovedex();
 			const moves: string[] = [];
@@ -1758,6 +1766,19 @@ const ModModifier: {
 				moves.push(id);
 			}
 			return moves;
+		},
+		// for desc of tweaked signature moves
+		movesMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['createmons'];
+			if (data.id in table.overrideMoveData) Object.assign(data, table.overrideMoveData[data.id]);
+		},
+		// for bc-specific pokemon
+		speciesMod: (data: any): any => {
+			const table = window.BattleTeambuilderTable['createmons'];
+			if (data.id in table.overrideSpeciesData) {
+				Object.assign(data, table.overrideSpeciesData[data.id]);
+				data.exists = true;
+			}
 		},
 	},
 	crossevolution: {

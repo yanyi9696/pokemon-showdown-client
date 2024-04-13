@@ -1044,7 +1044,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		case 'counter':
 			return species.baseStats.hp >= 65;
 		case 'dazzlinggleam':
-			return !moves.includes('alluringvoice') || this.formatType?.includes('doubles');
+			return !moves.includes('alluringvoice') || this.formats.includes('doubles' as ID);
 		case 'darkvoid':
 			return dex.gen < 7;
 		case 'dualwingbeat':
@@ -1150,7 +1150,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			return dex.gen > 7;
 		case 'temperflare':
 			return (!moves.includes('flareblitz') && !moves.includes('pyroball') && !moves.includes('sacredfire') &&
-				!moves.includes('bitterblade') && !moves.includes('firepunch')) || this.formatType === 'doubles';
+				!moves.includes('bitterblade') && !moves.includes('firepunch')) || this.formats.includes('doubles' as ID);
 		case 'terrainpulse': case 'waterpulse':
 			return ['megalauncher', 'technician'].includes(abilityid) && !moves.includes('originpulse');
 		case 'thief':
@@ -1169,7 +1169,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 
 		const move = dex.moves.get(id);
 		if (!move.exists) return true;
-		if ((move.status === 'slp' || id === 'yawn') && dex.gen === 9 && !this.formatType) {
+		if ((move.status === 'slp' || id === 'yawn') && dex.gen === 9 && !this.formats) {
 			return false;
 		}
 		if (move.category === 'Status') {

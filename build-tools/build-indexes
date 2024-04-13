@@ -1048,6 +1048,9 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 
 	// #endregion mbhv4
 
+	// createmons
+	BattleTeambuilderTable['createmons'] = {};
+
 	//
 	// Learnset table
 	//
@@ -1363,7 +1366,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	// Mods
 	//
 
-	for (const mod of ['gen7letsgo', 'gen8bdsp', 'gen9morebalancedhackmons']) {
+	for (const mod of ['gen7letsgo', 'gen8bdsp', 'gen9morebalancedhackmons', 'createmons']) {
 		const modDex = Dex.mod(mod);
 		const modData = modDex.data;
 		const parentDex = Dex.forGen(modDex.gen);
@@ -1373,7 +1376,11 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		for (const id in modData.Pokedex) {
 			const modEntry = modDex.species.get(id);
 			const parentEntry = parentDex.species.get(id);
-			for (const key of overrideSpeciesKeys) {
+			let keys = overrideSpeciesKeys;
+			if (mod === 'createmons') {
+				keys = keys.concat(["name"]);
+			}
+			for (const key of keys) {
 				if (JSON.stringify(modEntry[key]) !== JSON.stringify(parentEntry[key])) {
 					if (!overrideSpeciesData[id]) overrideSpeciesData[id] = {};
 					overrideSpeciesData[id][key] = modEntry[key];
