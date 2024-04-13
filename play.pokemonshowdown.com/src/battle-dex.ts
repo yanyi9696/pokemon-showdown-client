@@ -889,6 +889,7 @@ const Dex = new class implements ModdedDex {
 			spriteid = species.spriteid || toID(pokemon.species);
 		}
 		if (species.exists === false) {
+			// todo: one day move this to moddeddex
 			let modSpecies = Dex.mod('digimon' as ID).species.get(pokemon.species);
 			if (modSpecies.exists === true) {
 				const modSpriteData: TeambuilderSpriteData = {
@@ -906,6 +907,17 @@ const Dex = new class implements ModdedDex {
 					'garudamon', 'grappuleomon', 'ladydevimon', 'leomon', 'mastertyranomon', 'megaseadramon', 'plotmon',
 					'vamdemon', 'wargreymon', 'weregarurumon', 'weregarurumonblack', 'yukiagumon',
 				].includes(id)) modSpriteData.y = 7;
+				return modSpriteData;
+			}
+			modSpecies = Dex.mod('createmons' as ID).species.get(pokemon.species);
+			if (modSpecies.exists === true) {
+				const modSpriteData: TeambuilderSpriteData = {
+					spriteid: modSpecies.id,
+					spriteDir: 'sprites/dex',
+					x: 0,
+					y: 0,
+				};
+				if (pokemon.shiny) modSpriteData.shiny = true;
 				return modSpriteData;
 			}
 			return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
@@ -1754,7 +1766,7 @@ const ModModifier: {
 			for (const pokemon in table.overrideSpeciesData) {
 				addedTierSet.push(['pokemon', pokemon as ID]);
 			}
-			return addedTierSet.concat(tierSet);
+			return tierSet.concat(addedTierSet);
 		},
 		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
 			const moveDex = dex.getMovedex();
