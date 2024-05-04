@@ -1746,7 +1746,7 @@
 				'T: ' + pointDetails[4].toFixed(1) + ' = ' + pointDetails[5] + (pointDetails[6] === -1 ? ' * 1.5' : (' + ' + pointDetails[6])) + '\n' +
 				'A: ' + pointDetails[7] + '\n' +
 				'M: ' + pointDetails[8] + ' = ' + pointDetails[9] + ' + ' + pointDetails[10] + ' + ' + pointDetails[11] + ' + ' + pointDetails[12] + '\n' +
-				'Total: ' + Math.floor(pointDetails[0] * pointDetails[4] * pointDetails[7] * pointDetails[8])
+				'Total: ' + Math.floor(pointDetails[0] * pointDetails[4] * pointDetails[7] * pointDetails[8]) + ' = ' + pointDetails[0] + ' * ' + (pointDetails[4] * pointDetails[7] * pointDetails[8]).toFixed(1)
 			);
 			button.blur();
 		},
