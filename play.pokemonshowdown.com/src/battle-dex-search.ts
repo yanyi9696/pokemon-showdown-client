@@ -1282,6 +1282,12 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				const name2 = id2;
 				return (name1 < name2 ? -1 : name1 > name2 ? 1 : 0) * sortOrder;
 			});
+		case 'point':
+			return results.sort(([rowType1, id1], [rowType2, id2]) => {
+				const point1 = exports.moveToPoint[id1] || 0.5;
+				const point2 = exports.moveToPoint[id2] || 0.5;
+				return (point2 - point1) * sortOrder;
+			});
 		}
 		throw new Error("invalid sortcol");
 	}
