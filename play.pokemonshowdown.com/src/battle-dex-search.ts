@@ -1284,8 +1284,11 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			});
 		case 'point':
 			return results.sort(([rowType1, id1], [rowType2, id2]) => {
-				const point1 = exports.moveToPoint[id1] || 0.5;
-				const point2 = exports.moveToPoint[id2] || 0.5;
+				let point1 = exports.moveToPoint[id1] || 0.5;
+				let point2 = exports.moveToPoint[id2] || 0.5;
+				// don't show banned moves
+				if (point1 === 1000000) point1 = -1 * sortOrder;
+				if (point2 === 1000000) point2 = -1 * sortOrder;
 				return (point2 - point1) * sortOrder;
 			});
 		}
