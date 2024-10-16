@@ -215,6 +215,7 @@ const Dex = new class implements ModdedDex {
 		if (formatid.includes('categoryswap')) modids.push('categoryswap' as ID);
 		if (formatid.includes('hackmons') || formatid.endsWith('bh')) modids.push('hackmons' as ID);
 		if (formatid.includes('metronome')) modids.push('metronome' as ID);
+		if (formatid.includes('regicup')) modids.push('regicup' as ID);
 		if (formatid.includes('scalemons')) modids.push('scalemons' as ID);
 		if (formatid.includes('stabmons') || formatid.includes('staaabmons')) modids.push('stabmons' as ID);
 		if (formatid.includes('thecardgame')) modids.push('thecardgame' as ID);
@@ -1637,6 +1638,30 @@ const ModModifier: {
 	metronome: {
 		speciesMod: (data: any): any => {
 			if (data.num >= 0) data.tier = String(data.num);
+		},
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
+	},
+	regicup: {
+		speciesMod: (data: any): any => {
+			if (!data.exists) return;
+			data.bst = 0;
+			let bestStatName = 'hp';
+			let bestStat = 0;
+			let newStats = {...data.baseStats};
+			for (const stat in data.baseStats) {
+				const oldStat = data.baseStats[stat];
+				if (oldStat > bestStat) {
+					bestStatName = stat;
+					bestStat = oldStat;
+				}
+				if (oldStat < 75) newStats[stat] = 50;
+				else if (oldStat < 150) newStats[stat] = 100;
+				else newStats[stat] = 200;
+				data.bst += newStats[stat];
+			}
+			data.bst -= newStats[bestStatName] - 200;
+			newStats[bestStatName] = 200;
+			data.baseStats = newStats;
 		},
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
 	},
