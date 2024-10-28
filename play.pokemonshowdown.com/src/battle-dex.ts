@@ -1147,7 +1147,7 @@ const Dex = new class implements ModdedDex {
 				if (moves.includes(id)) continue;
 				const move = this.moves.get(id);
 				if (move.isNonstandard) continue;
-				if (move.noSketch || move.isMax || move.isZ) continue;
+				if (move.flags['nosketch'] || move.isMax || move.isZ) continue;
 				moves.push(id);
 			}
 		}
@@ -1221,12 +1221,6 @@ class ModdedDex {
 
 			for (let i = Dex.gen - 1; i >= this.gen; i--) {
 				const table = window.BattleTeambuilderTable[`gen${i}`];
-				if (id in table.overrideItemData) {
-					Object.assign(data, table.overrideItemData[id]);
-				}
-			}
-			if (this.modid !== `gen${this.gen}`) {
-				const table = window.BattleTeambuilderTable[this.modid];
 				if (id in table.overrideItemData) {
 					Object.assign(data, table.overrideItemData[id]);
 				}
@@ -1509,7 +1503,7 @@ class ModdedDex {
 				if (moves.includes(id)) continue;
 				const move = this.moves.get(id);
 				if (move.isNonstandard) continue;
-				if (move.noSketch || move.isMax || move.isZ) continue;
+				if (move.flags['nosketch'] || move.isMax || move.isZ) continue;
 				moves.push(id);
 			}
 		}
