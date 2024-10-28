@@ -1110,7 +1110,7 @@ Storage.unpackTeam = function (buf) {
 			set.teraType = misc[5];
 			set.preEvo = misc[6];
 		}
-		if (j < 0) break;
+		if (j < 0 || buf.indexOf('|', j) < 0) break;
 		i = j + 1;
 	}
 

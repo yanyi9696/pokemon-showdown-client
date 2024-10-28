@@ -711,6 +711,15 @@ abstract class BattleTypedSearch<T extends SearchType> {
 	getTier(pokemon: Species) {
 		return this.dex.species.get(pokemon.name).tier;
 	}
+	eggMovesOnly(child: ID, father: ID) {
+		if (this.dex.species.get(child).baseSpecies === this.dex.species.get(father).baseSpecies) return false;
+		const baseSpecies = father;
+		while (father) {
+			if (child === father) return false;
+			father = this.nextLearnsetid(father, baseSpecies);
+		}
+		return true;
+	}
 	abstract getTable(): {[id: string]: any};
 	abstract getDefaultResults(): SearchRow[];
 	abstract getBaseResults(): SearchRow[];

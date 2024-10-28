@@ -132,6 +132,8 @@
 		curFolder: '',
 		curFolderKeep: '',
 		curSearchVal: '',
+		// Debounce value for searching in the teambuilder
+		searchTimeout: null,
 
 		exportMode: false,
 		formatResources: {},
@@ -490,7 +492,7 @@
 					// support dragging and dropping buttons.
 					buf += '<li><div name="edit" data-value="' + i + '" class="team';
 					if (team.capacity === 24) buf += ' pc-box';
-					buf += '" draggable="true">' + formatText + '<strong>' + BattleLog.escapeHTML(team.name) + '</strong><br /><small>';
+					buf += '" draggable="true">' + BattleLog.escapeHTML(formatText) + '<strong>' + BattleLog.escapeHTML(team.name) + '</strong><br /><small>';
 					buf += Storage.getTeamIcons(team);
 					buf += '</small></div><button name="edit" value="' + i + '"><i class="fa fa-pencil" aria-label="Edit" title="Edit (you can also just click on the team)"></i></button><button name="duplicate" value="' + i + '" title="Duplicate" aria-label="Duplicate"><i class="fa fa-clone"></i></button><button name="delete" value="' + i + '"><i class="fa fa-trash"></i> Delete</button></li>';
 
@@ -816,6 +818,7 @@
 				if (!selection || selection === 'random') continue;
 				var obj = app.rooms[room].id === "" ? app.rooms[room] : app.rooms[room].tournamentBox;
 				obj.curTeamIndex++;
+				obj.updateTeams();
 			}
 			this.edit(0);
 		},
@@ -2317,6 +2320,7 @@
 				case 'Sawsbuck':
 				case 'Shellos':
 				case 'Sinistea':
+				case 'Tatsugiri':
 				case 'Vivillon':
 					break;
 				default:
@@ -3466,6 +3470,11 @@
 				val = data.exists ? data.name : '';
 				break;
 			case 'move1': case 'move2': case 'move3': case 'move4':
+				data = dex.species.get(value);
+				if (data.exists && modid.endsWith('pokemoves')) {
+					val = data.name;
+					break;
+				}
 				data = dex.items.get(value);
 				if (data.exists && modid.includes('abilityspam') && modid.includes('dualwielding')) {
 					val = data.name;
@@ -3489,11 +3498,24 @@
 			this.chartSet(val, selectNext);
 		},
 		searchChange: function (e) {
-			// 91 for right CMD / 93 for left CMD / 17 for CTL
-			if (e.keyCode !== 91 && e.keyCode !== 93 && e.keyCode !== 17) {
-				this.curSearchVal = e.currentTarget.value;
-				this.updateTeamList();
+			var DEBOUNCE_THRESHOLD_TEAMS = 500;
+			var searchVal = e.currentTarget.value;
+			var self = this;
+			function updateTeamList() {
+				// 91 for right CMD / 93 for left CMD / 17 for CTL
+				if (e.keyCode !== 91 && e.keyCode !== 93 && e.keyCode !== 17) {
+					self.curSearchVal = searchVal;
+				}
+				self.updateTeamList();
 			}
+
+			// If the user has a lot of teams, search is debounced to
+			// ensure this isn't called too frequently while typing
+			if (Storage.teams.length > DEBOUNCE_THRESHOLD_TEAMS) {
+				if (this.searchTimeout) clearTimeout(this.searchTimeout);
+				this.searchTimeout = setTimeout(updateTeamList, 400);
+			} else updateTeamList();
+
 		},
 		chartSetCustom: function (val) {
 			val = toID(val);
@@ -3715,7 +3737,7 @@
 				} else if (move.category === 'Physical' && !move.damage && !move.ohko &&
 					!['foulplay', 'endeavor', 'counter', 'bodypress', 'seismictoss', 'bide', 'metalburst', 'superfang'].includes(move.id) && !(this.curTeam.gen < 8 && move.id === 'rapidspin')) {
 					minAtk = false;
-				} else if (['metronome', 'assist', 'copycat', 'mefirst', 'photongeyser', 'shellsidearm'].includes(move.id) || (this.curTeam.gen === 5 && move.id === 'naturepower')) {
+				} else if (['metronome', 'assist', 'copycat', 'mefirst', 'photongeyser', 'shellsidearm', 'terablast'].includes(move.id) || (this.curTeam.gen === 5 && move.id === 'naturepower')) {
 					minAtk = false;
 				}
 				if (minSpe === false && moveName === 'Gyro Ball') {
