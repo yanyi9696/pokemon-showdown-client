@@ -2005,7 +2005,7 @@ const ModModifier: {
 		},
 		itemsMod: (data: any): any => {
 			const table = window.BattleTeambuilderTable['gen7letsgo'];
-			if (data.id in table.overrideItemDesc) data.shortDesc = table.overrideItemDesc[data.id];
+			if (data.id in table.overrideItemData) Object.assign(data, table.overrideItemData[data.id]);
 		},
 		abilitiesMod: (data: any): any => {
 			const table = window.BattleTeambuilderTable['gen7letsgo'];
@@ -2025,7 +2025,7 @@ const ModModifier: {
 		},
 		itemsMod: (data: any): any => {
 			const table = window.BattleTeambuilderTable['gen8bdsp'];
-			if (data.id in table.overrideItemDesc) data.shortDesc = table.overrideItemDesc[data.id];
+			if (data.id in table.overrideItemData) Object.assign(data, table.overrideItemData[data.id]);
 		},
 		abilitiesMod: (data: any): any => {
 			const table = window.BattleTeambuilderTable['gen8bdsp'];
@@ -2044,7 +2044,7 @@ const ModModifier: {
 		},
 		itemsMod: (data: any): any => {
 			const table = window.BattleTeambuilderTable['gen9morebalancedhackmons'];
-			if (data.id in table.overrideItemDesc) data.shortDesc = table.overrideItemDesc[data.id];
+			if (data.id in table.overrideItemData) Object.assign(data, table.overrideItemData[data.id]);
 		},
 		abilitiesMod: (data: any): any => {
 			const table = window.BattleTeambuilderTable['gen9morebalancedhackmons'];
