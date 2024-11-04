@@ -1901,6 +1901,7 @@ const ModModifier: {
 					eternatus: 'Eternatus-Eternamax',
 					palafin: 'Palafin-Hero',
 					ogerpon: 'Ogerpon-Wellspring',
+					terapagos: 'Terapagos-Stellar',
 				};
 				if (toID(headSpecies.name) in specialSelfFusions) {
 					return dex.species.get(specialSelfFusions[toID(headSpecies.name)]);
