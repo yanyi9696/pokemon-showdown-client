@@ -1114,18 +1114,31 @@ const Dex = new class implements ModdedDex {
 
 		return '' as ID;
 	}
+	eggMovesOnly(child: ID, father: ID) {
+		if (this.species.get(child).baseSpecies === this.species.get(father).baseSpecies) return false;
+		const baseSpecies = father;
+		while (father) {
+			if (child === father) return false;
+			father = this.nextLearnsetid(father, baseSpecies);
+		}
+		return true;
+	}
 	canLearn(speciesid: ID, moveid: ID) {
 		const move = this.moves.get(moveid);
 		let learnsetid = this.firstLearnsetid(speciesid);
 		while (learnsetid) {
 			const table = this.getLearnsetTable();
 			let learnset = table.learnsets[learnsetid];
-			if (
-				learnset && (moveid in learnset) &&
-				(
-					learnset[moveid].includes(this.learnsetGenchar) ||
-					(learnset[moveid].includes(`${this.gen + 1}`) && move.gen === this.gen)
-				)
+			const eggMovesOnly = this.eggMovesOnly(learnsetid, speciesid);
+			// sketch
+			if (learnset && ('sketch' in learnset) && learnset['sketch'].includes(this.learnsetGenchar) &&
+				(!eggMovesOnly || learnset['sketch'].includes('e'))
+			) {
+				if (!move.flags['nosketch'] && !move.isMax && !move.isZ && !move.isNonstandard) return true;
+			}
+			// regular
+			if (learnset && (moveid in learnset) && learnset[moveid].includes(this.learnsetGenchar) &&
+				(!eggMovesOnly || learnset[moveid].includes('e'))
 			) {
 				return true;
 			}
@@ -1136,20 +1149,8 @@ const Dex = new class implements ModdedDex {
 	getLearnsetMoves(pokemon: PokemonSet) {
 		const moveDex = window.BattleMovedex;
 		const moves: string[] = [];
-		let sketch = false;
 		for (const id in moveDex) {
-			if (!this.canLearn(toID(pokemon.species), id as ID)) continue;
-			if (id === 'sketch') sketch = true;
-			moves.push(id);
-		}
-		if (sketch) {
-			for (const id in moveDex) {
-				if (moves.includes(id)) continue;
-				const move = this.moves.get(id);
-				if (move.isNonstandard) continue;
-				if (move.flags['nosketch'] || move.isMax || move.isZ) continue;
-				moves.push(id);
-			}
+			if (this.canLearn(toID(pokemon.species), id as ID)) moves.push(id);
 		}
 		return moves;
 	}
@@ -1435,7 +1436,7 @@ class ModdedDex {
 		return table.itemSet;
 	}
 
-	// the following two may look the same as their counterparts in `Dex`
+	// the following may look the same as their counterparts in `Dex`
 	// but actually different because of `this`
 	firstLearnsetid(speciesid: ID) {
 		const table = this.getLearnsetTable();
@@ -1467,6 +1468,15 @@ class ModdedDex {
 
 		return '' as ID;
 	}
+	eggMovesOnly(child: ID, father: ID) {
+		if (this.species.get(child).baseSpecies === this.species.get(father).baseSpecies) return false;
+		const baseSpecies = father;
+		while (father) {
+			if (child === father) return false;
+			father = this.nextLearnsetid(father, baseSpecies);
+		}
+		return true;
+	}
 	canLearn(speciesid: ID, moveid: ID) {
 		// Nihilslave: i made some unequivalent changes to this function, mainly about VGC and tradebacks
 		const move = this.moves.get(moveid);
@@ -1481,8 +1491,20 @@ class ModdedDex {
 		while (learnsetid) {
 			const table = this.getLearnsetTable();
 			let learnset = table.learnsets[learnsetid];
-			if (learnset && (moveid in learnset) &&
-				(learnset[moveid].includes(genChar) || (learnset[moveid].includes(`${gen + 1}`) && move.gen === gen))) {
+			const eggMovesOnly = this.eggMovesOnly(learnsetid, speciesid);
+			// sketch
+			if (learnset && ('sketch' in learnset) && learnset['sketch'].includes(genChar) &&
+				(!eggMovesOnly || (learnset['sketch'].includes('e') && gen === 9))
+			) {
+				if (!move.flags['nosketch'] &&
+					!move.isMax && !move.isZ &&
+					(!move.isNonstandard || (isNatDex && (move.isNonstandard === 'Past' || move.isNonstandard === 'Unobtainable')))
+				) return true;
+			}
+			// regular
+			if (learnset && (moveid in learnset) && learnset[moveid].includes(genChar) &&
+				(!eggMovesOnly || (learnset[moveid].includes('e') && gen === 9))
+			) {
 				return true;
 			}
 			learnsetid = this.nextLearnsetid(learnsetid, speciesid);
@@ -1492,20 +1514,8 @@ class ModdedDex {
 	getLearnsetMoves(pokemon: PokemonSet) {
 		const moveDex = this.getMovedex();
 		let moves: string[] = [];
-		let sketch = false;
 		for (const id in moveDex) {
-			if (!this.canLearn(toID(pokemon.species), id as ID)) continue;
-			if (id === 'sketch') sketch = true;
-			moves.push(id);
-		}
-		if (sketch) {
-			for (const id in moveDex) {
-				if (moves.includes(id)) continue;
-				const move = this.moves.get(id);
-				if (move.isNonstandard) continue;
-				if (move.flags['nosketch'] || move.isMax || move.isZ) continue;
-				moves.push(id);
-			}
+			if (this.canLearn(toID(pokemon.species), id as ID)) moves.push(id);
 		}
 		for (const mid of this.modid) {
 			if (ModModifier[mid]?.ModifyLearnset) moves = ModModifier[mid].ModifyLearnset!(pokemon, this, moves);
