@@ -1471,7 +1471,7 @@ class ModdedDex {
 		// Nihilslave: i made some unequivalent changes to this function, mainly about VGC and tradebacks
 		const move = this.moves.get(moveid);
 		const isNatDex = this.modid.includes('natdex' as ID);
-		if (isNatDex && move.isNonstandard && move.isNonstandard !== 'Past') {
+		if (isNatDex && move.isNonstandard && move.isNonstandard !== 'Past' && move.isNonstandard !== 'Unobtainable') {
 			return false;
 		}
 		const gen = this.gen;
