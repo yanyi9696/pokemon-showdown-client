@@ -1259,6 +1259,8 @@
 					"Other Metagames": true, "Randomized Format Spotlight": true, "RoA Spotlight": true,
 					// For AFD
 					"Random Meta of the Decade": true,
+					// For psc
+					"Server Special": true, "Server Special OMs": true, "Balanced Hackmons": true, "BH Mashups": true,
 				};
 			}
 			if (!this.starred) this.starred = Storage.prefs('starredformats') || {};
