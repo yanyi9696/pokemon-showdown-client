@@ -1889,11 +1889,12 @@ const ModModifier: {
 			const headSpecies = dex.species.get(name);
 			const bodySpecies = dex.species.get(species);
 			if (!headSpecies.exists || !bodySpecies.exists) return new Species(bodySpecies.id, bodySpecies.name, {...bodySpecies});
-			if (headSpecies.baseSpecies !== headSpecies.name || bodySpecies.baseSpecies !== bodySpecies.name) return new Species(bodySpecies.id, bodySpecies.name, {...bodySpecies});
-			const nonstandard = ['CAP', 'Custom'];
-			if (headSpecies.isNonstandard && nonstandard.includes(headSpecies.isNonstandard) ||
-				bodySpecies.isNonstandard && nonstandard.includes(bodySpecies.isNonstandard)
-			) return new Species(bodySpecies.id, bodySpecies.name, {...bodySpecies});
+			// what does these even do...
+			// if (headSpecies.baseSpecies !== headSpecies.name || bodySpecies.baseSpecies !== bodySpecies.name) return new Species(bodySpecies.id, bodySpecies.name, {...bodySpecies});
+			// const nonstandard = ['CAP', 'Custom'];
+			// if (headSpecies.isNonstandard && nonstandard.includes(headSpecies.isNonstandard) ||
+			// 	bodySpecies.isNonstandard && nonstandard.includes(bodySpecies.isNonstandard)
+			// ) return new Species(bodySpecies.id, bodySpecies.name, {...bodySpecies});
 			if (headSpecies.name === bodySpecies.name) {
 				const specialSelfFusions: {[k: string]: string} = {
 					deoxys: 'Deoxys-Attack',

@@ -848,6 +848,19 @@ class BattleTooltips {
 			} else if (knownPokemon.teraType && !this.battle.rules['Terastal Clause']) {
 				text += `&nbsp; &nbsp; <small>(Tera Type: <span class="textaligned-typeicons">${Dex.getTypeIcon(knownPokemon.teraType)}</span>)</small>`;
 			}
+			if (this.battle.dex.modid.includes('infinitefusion' as ID)) { // todo: for other mods too
+				if (clientPokemon) {
+					text += `&nbsp;`
+					let baseStats = clientPokemon.getSpecies().baseStats;
+					if (clientPokemon.volatiles.transform) {
+						baseStats = {...clientPokemon.volatiles.transform[1].getSpecies().baseStats, 'hp': 0}; // it's too hard to calc the correct hp, so just 0
+					}
+					for (const statName of Dex.statNames) {
+						text += statName === 'hp' ? '<small>' : '<small>/';
+						text += '' + (baseStats[statName] ? baseStats[statName] : '-') + '</small>';
+					}
+				}
+			}
 			text += `</h2>`;
 		}
 
@@ -1512,6 +1525,9 @@ class BattleTooltips {
 		const species = pokemon.getSpecies();
 		let rules = this.battle.rules;
 		let baseSpe = species.baseStats.spe;
+		if (this.battle.dex.modid.includes('infinitefusion' as ID) && pokemon.volatiles.transform) {
+			baseSpe = pokemon.volatiles.transform[1].getSpecies().baseStats.spe;
+		}
 		let level = pokemon.volatiles.transform?.[4] || pokemon.level;
 		// todo: change this to this.battle.dex.modid
 		let tier = this.battle.tier;
