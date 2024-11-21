@@ -1943,12 +1943,15 @@ const ModModifier: {
 			const fusionSpecies = {...bodySpecies};
 			fusionSpecies.weightkg = Math.max(0.1, (headSpecies.weightkg + bodySpecies.weightkg) / 2);
 			// fusionSpecies.evos
-			fusionSpecies.abilities = {
+			let abilities: {0: string, 1?: string, H?: string, S?: string} = {
 				0: headSpecies.abilities[0],
 				1: bodySpecies.abilities[1] || bodySpecies.abilities[0],
 				H: headSpecies.abilities['H'],
 				S: headSpecies.abilities['S'],
 			};
+			if (abilities['H'] === abilities[1] || abilities['H'] === abilities[0]) delete abilities['H'];
+			if (abilities[1] === abilities[0]) delete abilities[1];
+			fusionSpecies.abilities = abilities;
 			fusionSpecies.bst = 0;
 			let i: StatName;
 			let newStats = {...fusionSpecies.baseStats};
