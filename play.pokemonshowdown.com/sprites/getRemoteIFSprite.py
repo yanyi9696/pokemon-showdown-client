@@ -19,13 +19,15 @@ import time
 import sys
 import os
 
+from IFNumMap import NUMMAP
+
 fusion_url = "https://japeal.com/pkm/"
 driver_delay = 5
 basic_delay = 1
 
 is_loud = True
 
-download_path = "/home/mc/pokemon-showdown-client/sprites/cache"
+download_path = "/home/mc/pokemon-showdown-client/play.pokemonshowdown.com/sprites/cache"
 
 id_head_pokemon = "Rimagediv"
 id_body_pokemon = "Limagediv"
@@ -36,7 +38,7 @@ class_textbox = "searchbar1"
 class_selected = "selected"
 
 proxy_address = "127.0.0.1:7890"
-screenshot_path = "/home/mc/pokemon-showdown-client/sprites/cache/test.png" # for debug use
+screenshot_path = "/home/mc/pokemon-showdown-client/play.pokemonshowdown.com/sprites/cache/test.png" # for debug use
 
 def log(message:str):
     if is_loud:
@@ -210,10 +212,10 @@ def handle_body(driver:WebDriver, body:str):
     tryClick(element)
 
 def download_sprite(driver:WebDriver, head:str, body:str):
-    log("pokemon fusion")
-    time.sleep(basic_delay)
-    element = get_element_by_id(driver, id_fusion)
-    tryClick(element, 60)
+    # log("pokemon fusion")
+    # time.sleep(basic_delay)
+    # element = get_element_by_id(driver, id_fusion)
+    # tryClick(element, 60)
     log("downloading sprite")
     element = get_element_by_id(driver, id_download)
     time.sleep(driver_delay)
@@ -235,6 +237,10 @@ if __name__ == '__main__':
     print("START")
     head = sys.argv[1]
     body = sys.argv[2]
+    if not ((int(head) in NUMMAP) and (int(body) in NUMMAP)):
+        log(f"head or body num not in NUMMAP: {head}.{body}")
+        print("EXIT")
+        exit()
     filename = f"{head}.{body}.png"
     cachename = os.path.join(download_path, filename)
     tbFilename = os.path.join(download_path, '..', 'infinitefusion', head, filename)
@@ -245,9 +251,14 @@ if __name__ == '__main__':
         exit()
     driver = create_driver()
     init_website(driver)
+    time.sleep(driver_delay)
     try:
-        handle_head(driver, head.rjust(3, '0'))
-        handle_body(driver, body.rjust(3, '0'))
+        # handle_head(driver, head.rjust(3, '0'))
+        # handle_body(driver, body.rjust(3, '0'))
+        script = f"LoadNewFusionDelay({NUMMAP[int(head)]}, {NUMMAP[int(body)]}, 0)"
+        log(script)
+        driver.execute_script(script)
+        time.sleep(driver_delay)
         download_sprite(driver, head, body)
     finally:
         driver.quit()
