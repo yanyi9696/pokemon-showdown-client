@@ -3905,6 +3905,10 @@
 		},
 		calcBSPoint: function (stats) {
 			for (var statName in stats) stats[statName] = stats[statName] || 1;
+			// adjust stats
+			var values = Object.keys(stats).map(function (key) { return stats[key]; }).sort(function (a, b) { return a - b; });
+			for (var statName in stats) if (stats[statName] === values[0]) stats[statName] = values[1];
+			// end
 			var h = stats['hp'];
 			var a = stats['atk'];
 			var b = stats['def'];
