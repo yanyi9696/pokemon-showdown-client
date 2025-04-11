@@ -200,7 +200,7 @@ const Dex = new class implements ModdedDex {
 		let modids = [];
 
 		// this theoratically should be /gen\d+/, but now this to avoid errors when gen9350cup
-		const genStrings = formatid.match(/gen\d/);
+		const genStrings = formatid.match(/gen\d/); // /gen(10|\d)/ after gen 10 releases
 		const gen = genStrings ? genStrings[0] : this.currentGen;
 		// regulars
 		if (formatid.includes('anythinggoes') || formatid.endsWith('ag')) modids.push('anythinggoes' as ID);
