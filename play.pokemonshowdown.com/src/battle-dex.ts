@@ -1569,7 +1569,6 @@ const Teams = new class {
 				set.gigantamax = !!misc[3];
 				set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
 				set.teraType = misc[5];
-				set.preEvo = misc[6];
 			}
 			if (j < 0) break;
 			i = j + 1;
@@ -1624,9 +1623,6 @@ const Teams = new class {
 				const species = Dex.species.get(curSet.species);
 				// no check forceTeraType for bc
 				text += 'Tera Type: ' + (/*species.forceTeraType || */curSet.teraType || species.types[0]) + "  \n";
-			}
-			if (curSet.preEvo) {
-				text += 'Pre-Evolution: ' + curSet.preEvo + "  \n";
 			}
 			if (!hidestats) {
 				let first = true;

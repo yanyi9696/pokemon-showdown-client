@@ -115,9 +115,7 @@ export class BattleScene implements BattleSceneStub {
 		let numericId = 0;
 		if (battle.id) {
 			numericId = parseInt(battle.id.slice(battle.id.lastIndexOf('-') + 1), 10);
-			if (this.battle.id.includes('digimon')) this.mod = 'digimon';
-			// Nihilslave: enable this when all sprites are ready
-			if (this.battle.id.includes('infinitefusion')) this.mod = 'infinitefusion';
+			// if (this.battle.id.includes('digimon')) this.mod = 'digimon';
 		}
 		if (!numericId) {
 			numericId = Math.floor(Math.random() * 1000000);
@@ -1925,10 +1923,6 @@ export class PokemonSprite extends Sprite {
 		// Gen 1
 		lightscreen: ['Light Screen', 'good'],
 		reflect: ['Reflect', 'good'],
-		// mbhv4
-		utilityumbrella: ['Umbrella', 'good'],
-		// Digimon
-		breathofwyvern: ['Gathering', 'neutral'],
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;

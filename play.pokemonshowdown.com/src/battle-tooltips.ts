@@ -2613,8 +2613,6 @@ interface PokemonSet {
 	gigantamax?: boolean;
 	/** Defaults to the primary type */
 	teraType?: string;
-	/** Digimon Pre-Evolution */
-	preEvo?: string;
 }
 
 class BattleStatGuesser {

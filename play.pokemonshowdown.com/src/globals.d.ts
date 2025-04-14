@@ -13,11 +13,11 @@ declare var BattlePokemonSpritesBW: any;
 
 // digimon
 
-declare var Digidex: any;
-declare var DigiMovedex: any;
-declare var DigiAbilities: any;
-declare var DigiItems: any;
-declare var DigiTypeChart: any;
+// declare var Digidex: any;
+// declare var DigiMovedex: any;
+// declare var DigiAbilities: any;
+// declare var DigiItems: any;
+// declare var DigiTypeChart: any;
 
 // PS globals
 /////////////
