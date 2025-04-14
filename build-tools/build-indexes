@@ -8,11 +8,13 @@ const child_process = require("child_process");
 const rootDir = path.resolve(__dirname, '..');
 process.chdir(rootDir);
 
+const serverGitURL = ""; // NOTE: fill in your server repo url here, e.g. https://github.com/Dark-Night-Base/pokemon-showdown.git
+const serverGitBranch = ""; // NOTE: appoint which branch ur server is in in the above repo
 if (!fs.existsSync('caches/pokemon-showdown')) {
-	// child_process.execSync('git clone https://github.com/smogon/pokemon-showdown.git', {
-	child_process.execSync('git clone -b dev https://github.com/Dark-Night-Base/pokemon-showdown.git', {
-		cwd: 'caches',
-	});
+	let cloneCMD = 'git clone';
+	if (serverGitBranch) cloneCMD += ' -b ' + serverGitBranch;
+	cloneCMD += ' ' + serverGitURL;
+	child_process.execSync(cloneCMD, {cwd: 'caches'});
 }
 
 process.stdout.write("Syncing data from Git repository... ");
@@ -874,223 +876,6 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		items.push(...badItems);
 		items.push(...unreleasedItems);
 	}
-	// #region mbhv4
-	const genNum = 9;
-	const mod = 'gen9morebalancedhackmons';
-	const pokemon = Object.keys(Dex.data.Pokedex);
-	pokemon.sort();
-
-	const items = [];
-
-	BattleTeambuilderTable[mod] = {};
-	BattleTeambuilderTable[mod].items = items;
-
-	const itemList = Object.keys(Dex.data.Items);
-	itemList.sort();
-
-	const greatItems = [['header', "Popular items"]];
-	const goodItems = [['header', "Items"]];
-	const specificItems = [['header', "Pok&eacute;mon-specific items"]];
-	const poorItems = [['header', "Usually useless items"]];
-	const badItems = [['header', "Useless items"]];
-	const unreleasedItems = [];
-	for (const id of itemList) {
-		const item = Dex.mod(mod).items.get(id);
-		if (item.gen > genNum) {
-			continue;
-		}
-		if (item.isNonstandard) {
-			if (item.isNonstandard !== "Past") continue;
-			if (!item.itemUser && !item.zMove) continue;
-		}
-		switch (id) {
-		case 'leftovers':
-		case 'lifeorb':
-		case 'choiceband':
-		case 'choicescarf':
-		case 'choicespecs':
-		case 'eviolite':
-		case 'assaultvest':
-		case 'focussash':
-		case 'powerherb':
-		case 'rockyhelmet':
-		case 'heavydutyboots':
-		case 'expertbelt':
-		case 'salacberry':
-			greatItems.push(id);
-			break;
-		case 'mentalherb':
-			greatItems.push(id);
-			break;
-		case 'lumberry':
-			goodItems.push(id);
-			break;
-		case 'sitrusberry':
-			goodItems.push(id);
-			break;
-		case 'aguavberry':
-		case 'figyberry':
-		case 'iapapaberry':
-		case 'magoberry':
-		case 'wikiberry':
-			greatItems.push(id);
-			break;
-		case 'berryjuice':
-			goodItems.push(id);
-			break;
-		case 'dragonfang':
-			goodItems.push(id);
-			break;
-		case 'dragonscale':
-			badItems.push(id);
-			break;
-		case 'mail':
-			unreleasedItems.push(id);
-			break;
-		// Legendaries
-		case 'adamantorb':
-		case 'griseousorb':
-		case 'lustrousorb':
-		case 'blueorb':
-		case 'redorb':
-		case 'souldew':
-		// Other
-		// fallsthrough
-		case 'stick':
-		case 'thickclub':
-		case 'lightball':
-		case 'luckypunch':
-		case 'quickpowder':
-		case 'metalpowder':
-		case 'deepseascale':
-		case 'deepseatooth':
-			specificItems.push(id);
-			break;
-		// Fling-only
-		case 'rarebone':
-		case 'belueberry':
-		case 'blukberry':
-		case 'cornnberry':
-		case 'durinberry':
-		case 'hondewberry':
-		case 'magostberry':
-		case 'nanabberry':
-		case 'nomelberry':
-		case 'pamtreberry':
-		case 'pinapberry':
-		case 'pomegberry':
-		case 'qualotberry':
-		case 'rabutaberry':
-		case 'razzberry':
-		case 'spelonberry':
-		case 'tamatoberry':
-		case 'watmelberry':
-		case 'wepearberry':
-		case 'energypowder':
-		case 'electirizer':
-		case 'oldamber':
-		case 'dawnstone':
-		case 'dubiousdisc':
-		case 'duskstone':
-		case 'firestone':
-		case 'icestone':
-		case 'leafstone':
-		case 'magmarizer':
-		case 'moonstone':
-		case 'ovalstone':
-		case 'prismscale':
-		case 'protector':
-		case 'reapercloth':
-		case 'sachet':
-		case 'shinystone':
-		case 'sunstone':
-		case 'thunderstone':
-		case 'upgrade':
-		case 'waterstone':
-		case 'whippeddream':
-		case 'bottlecap':
-		case 'goldbottlecap':
-		case 'galaricacuff':
-		case 'chippedpot':
-		case 'crackedpot':
-		case 'galaricawreath':
-			badItems.push(id);
-			break;
-		// outclassed items
-		case 'aspearberry':
-		case 'bindingband':
-		case 'cheriberry':
-		case 'destinyknot':
-		case 'enigmaberry':
-		case 'floatstone':
-		case 'ironball':
-		case 'jabocaberry':
-		case 'oranberry':
-		case 'machobrace':
-		case 'pechaberry':
-		case 'persimberry':
-		case 'poweranklet':
-		case 'powerband':
-		case 'powerbelt':
-		case 'powerbracer':
-		case 'powerlens':
-		case 'powerweight':
-		case 'rawstberry':
-		case 'ringtarget':
-		case 'rowapberry':
-		case 'bigroot':
-		case 'focusband':
-		// gen 2
-		case 'psncureberry':
-		case 'przcureberry':
-		case 'burntberry':
-		case 'bitterberry':
-		case 'iceberry':
-		case 'berry':
-			poorItems.push(id);
-			break;
-		default:
-			if (
-				item.name.endsWith(" Ball") || item.name.endsWith(" Fossil") || item.name.startsWith("Fossilized ") ||
-				item.name.endsWith(" Sweet") || item.name.endsWith(" Apple")
-			) {
-				badItems.push(id);
-			} else if (item.name.startsWith("TR")) {
-				badItems.push(id);
-			} else if (item.name.endsWith(" Gem") && item.name !== "Normal Gem") {
-				if (genNum >= 6) {
-					unreleasedItems.push(id);
-				} else if (item.name === "Flying Gem") {
-					greatItems.push(id);
-				} else {
-					goodItems.push(id);
-				}
-			} else if (item.name.endsWith(" Drive")) {
-				specificItems.push(id);
-			} else if (item.name.endsWith(" Memory")) {
-				specificItems.push(id);
-			} else if (item.name.startsWith("Rusted")) {
-				specificItems.push(id);
-			} else if (item.itemUser) {
-				specificItems.push(id);
-			} else if (item.megaStone) {
-				specificItems.push(id);
-			} else {
-				goodItems.push(id);
-			}
-		}
-	}
-	items.push(...greatItems);
-	items.push(...goodItems);
-	items.push(...specificItems);
-	items.push(...poorItems);
-	items.push(...badItems);
-	items.push(...unreleasedItems);
-
-	// #endregion mbhv4
-
-	// createmons
-	BattleTeambuilderTable['createmons'] = {};
 
 	//
 	// Learnset table
@@ -1422,7 +1207,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	// Mods
 	//
 
-	for (const mod of ['gen5bw1', 'gen7letsgo', 'gen8bdsp', 'gen9ssb', 'gen9morebalancedhackmons', 'createmons']) {
+	for (const mod of ['gen5bw1', 'gen7letsgo', 'gen8bdsp', 'gen9ssb']) {
 		const modDex = Dex.mod(mod);
 		const modData = modDex.data;
 		const parentDex = Dex.forGen(modDex.gen);
@@ -1433,14 +1218,10 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			const modEntry = modDex.species.get(id);
 			const parentEntry = parentDex.species.get(id);
 			let keys = overrideSpeciesKeys;
-			if (mod === 'createmons') {
-				keys = keys.concat(["name"]);
-			}
 			for (const key of keys) {
 				if (JSON.stringify(modEntry[key]) !== JSON.stringify(parentEntry[key])) {
 					if (!overrideSpeciesData[id]) overrideSpeciesData[id] = {};
 					overrideSpeciesData[id][key] = modEntry[key];
-					// console.log(JSON.stringify(modEntry[key]));
 				}
 			}
 		}
@@ -1504,7 +1285,6 @@ process.stdout.write("Building `data/pokedex.js`... ");
 	for (const id in Pokedex) {
 		const entry = Pokedex[id];
 		if (Dex.data.FormatsData[id]) {
-			// console.log('formatsentry:' + id);
 			const formatsEntry = Dex.data.FormatsData[id];
 			if (formatsEntry.tier) entry.tier = formatsEntry.tier;
 			if (formatsEntry.isNonstandard) entry.isNonstandard = formatsEntry.isNonstandard;
@@ -1652,29 +1432,31 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
 console.log("DONE");
 
 /*********************************************************
- * Build digimon.js
+ * Build <YourMod>.js
  *********************************************************/
+const YourModName = ""; // fill in the name of the directory your mod is in of server side
 
-process.stdout.write("Building `data/digimon.js`...");
+process.stdout.write("Building `data/" + YourModName + ".js`...");
 
 {
 	//#region teambuilder-tables
-	const DigimonTable = {};
+	const YourModTable = {};
 
 	let buf = '// DO NOT EDIT - automatically built with build-tools/build-indexes\n\n';
 
-	const Digidex = requireNoCache('../caches/pokemon-showdown/dist/data/mods/digimon/pokedex.js').Pokedex;
-	const DigiMovedex = requireNoCache('../caches/pokemon-showdown/dist/data/mods/digimon/moves.js').Moves;
-	const DigiItems = requireNoCache('../caches/pokemon-showdown/dist/data/mods/digimon/items.js').Items;
-	const DigiAbilities = requireNoCache('../caches/pokemon-showdown/dist/data/mods/digimon/abilities.js').Abilities;
-	const DigiTypeChart = requireNoCache('../caches/pokemon-showdown/dist/data/mods/digimon/typechart.js').TypeChart;
-	const DigiLearnsets = requireNoCache('../caches/pokemon-showdown/dist/data/mods/digimon/learnsets.js').Learnsets;
+	const modDir = '../caches/pokemon-showdown/dist/data/mods/' + YourModName;
+	const YourModdex = requireNoCache(modDir + '/pokedex.js').Pokedex;
+	const YourModMovedex = requireNoCache(modDir + '/moves.js').Moves;
+	const YourModItems = requireNoCache(modDir + '/items.js').Items;
+	const YourModAbilities = requireNoCache(modDir + '/abilities.js').Abilities;
+	const YourModTypeChart = requireNoCache(modDir + '/typechart.js').TypeChart;
+	const YourModLearnsets = requireNoCache(modDir + '/learnsets.js').Learnsets;
 
-	const digimon = Object.keys(Digidex);
-	digimon.sort();
+	const yourmod = Object.keys(YourModdex);
+	yourmod.sort();
 	const tierTable = {};
-	for (const id of digimon) {
-		const species = Dex.mod('digimon').species.get(id);
+	for (const id of yourmod) {
+		const species = Dex.mod(YourModName).species.get(id);
 		const tier = species.tier;
 		if (!tierTable[tier]) tierTable[tier] = [];
 		tierTable[tier].push(id);
@@ -1685,12 +1467,12 @@ process.stdout.write("Building `data/digimon.js`...");
 	const items = [];
 	const formatSlices = {};
 
-	DigimonTable.learnsets = learnsets;
-	DigimonTable.tiers = tiers;
-	DigimonTable.overrideTier = {};
-	DigimonTable.items = items;
-	DigimonTable.monotypeBans = {};
-	DigimonTable.formatSlices = formatSlices;
+	YourModTable.learnsets = learnsets;
+	YourModTable.tiers = tiers;
+	YourModTable.overrideTier = {};
+	YourModTable.items = items;
+	YourModTable.monotypeBans = {};
+	YourModTable.formatSlices = formatSlices;
 
 	const tierOrder = ["Uber", "(Uber)", "OU", "(OU)", "UUBL", "UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "(PU)", "NFE", "LC", "Unreleased"];
 
@@ -1716,7 +1498,7 @@ process.stdout.write("Building `data/digimon.js`...");
 	if (!formatSlices['UU']) formatSlices['UU'] = formatSlices['New'];
 	if (!formatSlices['RU']) formatSlices['RU'] = formatSlices['New'];
 
-	const itemList = Object.keys(DigiItems);
+	const itemList = Object.keys(YourModItems);
 	itemList.sort();
 
 	const greatItems = [['header', "Popular items"]];
@@ -1726,7 +1508,6 @@ process.stdout.write("Building `data/digimon.js`...");
 	const badItems = [['header', "Useless items"]];
 	const unreleasedItems = [];
 	for (const id of itemList) {
-		// const item = Dex.mod('digimon').items.get(id);
 		switch (id) {
 		default:
 			greatItems.push(id);
@@ -1740,7 +1521,7 @@ process.stdout.write("Building `data/digimon.js`...");
 	items.push(...badItems);
 	items.push(...unreleasedItems);
 
-	const lsets = Dex.mod('digimon').data.Learnsets;
+	const lsets = Dex.mod(YourModName).data.Learnsets;
 	for (const id in lsets) {
 		if (id === 'bulbasaur') break;
 		learnsets[id] = {};
@@ -1749,63 +1530,61 @@ process.stdout.write("Building `data/digimon.js`...");
 		}
 	}
 
-	buf += 'exports.DigimonTable = ' + JSON.stringify(DigimonTable).replace(/['\\]/g, "\\$&") + ';';
+	buf += 'exports.YourModTable = ' + JSON.stringify(YourModTable).replace(/['\\]/g, "\\$&") + ';';
 
 	let deleteFlag = false;
-	for (const id in Digidex) {
+	for (const id in YourModdex) {
 		if (id === 'bulbasaur') deleteFlag = true;
-		const fdata = Dex.mod('digimon').data.FormatsData[id];
+		const fdata = Dex.mod(YourModName).data.FormatsData[id];
 		if (fdata && fdata.tier) {
-			Digidex[id].tier = fdata.tier;
+			YourModdex[id].tier = fdata.tier;
 		}
-		if (deleteFlag) delete Digidex[id];
+		if (deleteFlag) delete YourModdex[id];
 	}
-	for (const id in DigiMovedex) {
-		const move = Dex.mod('digimon').moves.get(id);
-		if (move.desc) DigiMovedex[id].desc = move.desc;
-		if (move.shortDesc) DigiMovedex[id].shortDesc = move.shortDesc;
+	for (const id in YourModMovedex) {
+		const move = Dex.mod(YourModName).moves.get(id);
+		if (move.desc) YourModMovedex[id].desc = move.desc;
+		if (move.shortDesc) YourModMovedex[id].shortDesc = move.shortDesc;
 	}
-	for (const id in DigiItems) {
-		const item = Dex.mod('digimon').items.get(id);
-		if (item.desc) DigiItems[id].desc = item.desc;
-		if (item.shortDesc) DigiItems[id].shortDesc = item.shortDesc;
+	for (const id in YourModItems) {
+		const item = Dex.mod(YourModName).items.get(id);
+		if (item.desc) YourModItems[id].desc = item.desc;
+		if (item.shortDesc) YourModItems[id].shortDesc = item.shortDesc;
 	}
-	for (const id in DigiAbilities) {
-		const ability = Dex.mod('digimon').abilities.get(id);
-		if (ability.desc) DigiAbilities[id].desc = ability.desc;
-		if (ability.shortDesc) DigiAbilities[id].shortDesc = ability.shortDesc;
+	for (const id in YourModAbilities) {
+		const ability = Dex.mod(YourModName).abilities.get(id);
+		if (ability.desc) YourModAbilities[id].desc = ability.desc;
+		if (ability.shortDesc) YourModAbilities[id].shortDesc = ability.shortDesc;
 	}
-	delete DigiTypeChart['fairy'];
-	delete DigiTypeChart['stellar'];
 	deleteFlag = false;
-	for (const id in DigiLearnsets) {
+	for (const id in YourModLearnsets) {
 		if (id === 'bulbasaur') deleteFlag = true;
-		if (deleteFlag) delete DigiLearnsets[id];
+		if (deleteFlag) delete YourModLearnsets[id];
 	}
 	// .json is for dex.pokemonshowdown.com, not needed here
-	buf += 'exports.Digidex = ' + es3stringify(Digidex) + ';';
-	buf += 'exports.DigiMovedex = ' + es3stringify(DigiMovedex) + ';';
-	buf += 'exports.DigiItems = ' + es3stringify(DigiItems) + ';';
-	buf += 'exports.DigiAbilities = ' + es3stringify(DigiAbilities) + ';';
-	buf += 'exports.DigiTypeChart = ' + es3stringify(DigiTypeChart) + ';';
-	buf += 'exports.DigiLearnsets = ' + es3stringify(DigiLearnsets) + ';';
+	buf += 'exports.YourModdex = ' + es3stringify(YourModdex) + ';';
+	buf += 'exports.YourModMovedex = ' + es3stringify(YourModMovedex) + ';';
+	buf += 'exports.YourModItems = ' + es3stringify(YourModItems) + ';';
+	buf += 'exports.YourModAbilities = ' + es3stringify(YourModAbilities) + ';';
+	buf += 'exports.YourModTypeChart = ' + es3stringify(YourModTypeChart) + ';';
+	buf += 'exports.YourModLearnsets = ' + es3stringify(YourModLearnsets) + ';';
 	buf += '\n\n';
 	//#endregion
 
 	//#region search-index
 	let index = [];
 
-	index = index.concat(Object.keys(Digidex).map(x => x + ' pokemon'));
-	index = index.concat(Object.keys(DigiMovedex).map(x => x + ' move'));
-	index = index.concat(Object.keys(DigiItems).map(x => x + ' item'));
-	index = index.concat(Object.keys(DigiAbilities).map(x => x + ' ability'));
-	index = index.concat(Object.keys(DigiTypeChart).map(x => toID(x) + ' type'));
+	index = index.concat(Object.keys(YourModdex).map(x => x + ' pokemon'));
+	index = index.concat(Object.keys(YourModMovedex).map(x => x + ' move'));
+	index = index.concat(Object.keys(YourModItems).map(x => x + ' item'));
+	index = index.concat(Object.keys(YourModAbilities).map(x => x + ' ability'));
+	index = index.concat(Object.keys(YourModTypeChart).map(x => toID(x) + ' type'));
 	index = index.concat(['physical', 'special', 'status'].map(x => toID(x) + ' category'));
 	// useless but we just keep this
 	index = index.concat(['monster', 'water1', 'bug', 'flying', 'field', 'fairy', 'grass', 'humanlike', 'water3', 'mineral', 'amorphous', 'water2', 'ditto', 'dragon', 'undiscovered'].map(x => toID(x) + ' egggroup'));
 	index = index.concat(['ou', 'uu', 'ru', 'nu', 'pu', 'lc', 'nfe', 'uber', 'uubl', 'rubl', 'nubl', 'publ'].map(x => toID(x) + ' tier'));
 
-	let DigimonArticleTitles = {};
+	let YourModArticleTitles = {};
 	index.push('pokemon article');
 	index.push('moves article');
 
@@ -1839,16 +1618,16 @@ process.stdout.write("Building `data/digimon.js`...");
 		if (acronym) {
 			index.push('' + acronym + ' ' + type + ' ' + id + ' 0');
 		}
-		// if (name === 'High Jump Kick') {
-		// 	index.push('hjkick ' + type + ' ' + id + ' 0');
-		// } else if (name === 'Wake-Up Slap') {
-		// 	index.push('wuslap ' + type + ' ' + id + ' 0');
-		// 	index.push('wupslap ' + type + ' ' + id + ' 0');
-		// } else if (name === 'Zen Headbutt') {
-		// 	index.push('zhbutt ' + type + ' ' + id + ' 0');
-		// } else if (name === 'Articuno') {
-		// 	index.push('cuno ' + type + ' ' + id + ' 4');
-		// }
+		if (name === 'High Jump Kick') {
+			index.push('hjkick ' + type + ' ' + id + ' 0');
+		} else if (name === 'Wake-Up Slap') {
+			index.push('wuslap ' + type + ' ' + id + ' 0');
+			index.push('wupslap ' + type + ' ' + id + ' 0');
+		} else if (name === 'Zen Headbutt') {
+			index.push('zhbutt ' + type + ' ' + id + ' 0');
+		} else if (name === 'Articuno') {
+			index.push('cuno ' + type + ' ' + id + ' 4');
+		}
 
 		let i2 = name.lastIndexOf(' ', i - 1);
 		if (i2 < 0) i2 = name.lastIndexOf('-', i - 1);
@@ -1858,20 +1637,20 @@ process.stdout.write("Building `data/digimon.js`...");
 		}
 	}
 
-	for (const id in Digidex) {
-		const name = Digidex[id].name;
+	for (const id in YourModdex) {
+		const name = YourModdex[id].name;
 		generateAlias(id, name, 'pokemon');
 	}
-	for (const id in DigiMovedex) {
-		const name = DigiMovedex[id].name;
+	for (const id in YourModMovedex) {
+		const name = YourModMovedex[id].name;
 		generateAlias(id, name, 'move');
 	}
-	for (const id in DigiItems) {
-		const name = DigiItems[id].name;
+	for (const id in YourModItems) {
+		const name = YourModItems[id].name;
 		generateAlias(id, name, 'item');
 	}
-	for (const id in DigiAbilities) {
-		const name = DigiAbilities[id].name;
+	for (const id in YourModAbilities) {
+		const name = YourModAbilities[id].name;
 		generateAlias(id, name, 'ability');
 	}
 
@@ -1899,7 +1678,7 @@ process.stdout.write("Building `data/digimon.js`...");
 	index[index.indexOf('ditto pokemon')] = 'ditto egggroup';
 	index[index.indexOf('ditto egggroup')] = 'ditto pokemon';
 
-	let DigimonSearchIndex = index.map(x => {
+	let YourModSearchIndex = index.map(x => {
 		x = x.split(' ');
 		if (x.length > 3) {
 			x[3] = Number(x[3]);
@@ -1908,15 +1687,15 @@ process.stdout.write("Building `data/digimon.js`...");
 		return x;
 	});
 
-	let DigimonSearchIndexOffset = DigimonSearchIndex.map((entry, i) => {
+	let YourModSearchIndexOffset = YourModSearchIndex.map((entry, i) => {
 		const id = entry[0];
 		let name = '';
 		switch (entry[1]) {
-		case 'pokemon': name = Dex.mod('digimon').species.get(id).name; break;
-		case 'move': name = Dex.mod('digimon').moves.get(id).name; break;
-		case 'item': name = Dex.mod('digimon').items.get(id).name; break;
-		case 'ability': name = Dex.mod('digimon').abilities.get(id).name; break;
-		case 'article': name = DigimonArticleTitles[id] || ''; break;
+		case 'pokemon': name = Dex.mod(YourModName).species.get(id).name; break;
+		case 'move': name = Dex.mod(YourModName).moves.get(id).name; break;
+		case 'item': name = Dex.mod(YourModName).items.get(id).name; break;
+		case 'ability': name = Dex.mod(YourModName).abilities.get(id).name; break;
+		case 'article': name = YourModArticleTitles[id] || ''; break;
 		}
 		let res = '';
 		let nonAlnum = 0;
@@ -1931,43 +1710,25 @@ process.stdout.write("Building `data/digimon.js`...");
 		return '';
 	});
 
-	let DigimonSearchCountIndex = {};
-	for (const type in DigiTypeChart) {
-		DigimonSearchCountIndex[type + ' move'] = Object.keys(DigiMovedex).filter(id => (DigiMovedex[id].type === type)).length;
+	let YourModSearchCountIndex = {};
+	for (const type in YourModTypeChart) {
+		YourModSearchCountIndex[type + ' move'] = Object.keys(YourModMovedex).filter(id => (YourModMovedex[id].type === type)).length;
 	}
 
-	for (const type in DigiTypeChart) {
-		DigimonSearchCountIndex[type + ' pokemon'] = Object.keys(Digidex).filter(id => (Digidex[id].types.indexOf(type) >= 0)).length;
+	for (const type in YourModTypeChart) {
+		YourModSearchCountIndex[type + ' pokemon'] = Object.keys(YourModdex).filter(id => (YourModdex[id].types.indexOf(type) >= 0)).length;
 	}
 
-	buf += 'exports.DigimonSearchIndex = ' + JSON.stringify(DigimonSearchIndex) + ';\n\n';
+	buf += 'exports.YourModSearchIndex = ' + JSON.stringify(YourModSearchIndex) + ';\n\n';
 
-	buf += 'exports.DigimonSearchIndexOffset = ' + JSON.stringify(DigimonSearchIndexOffset) + ';\n\n';
+	buf += 'exports.YourModSearchIndexOffset = ' + JSON.stringify(YourModSearchIndexOffset) + ';\n\n';
 
-	buf += 'exports.DigimonSearchCountIndex = ' + JSON.stringify(DigimonSearchCountIndex) + ';\n\n';
+	buf += 'exports.YourModSearchCountIndex = ' + JSON.stringify(YourModSearchCountIndex) + ';\n\n';
 
-	buf += 'exports.DigimonArticleTitles = ' + JSON.stringify(DigimonArticleTitles) + ';\n\n';
+	buf += 'exports.YourModArticleTitles = ' + JSON.stringify(YourModArticleTitles) + ';\n\n';
 	//#endregion
 
-	fs.writeFileSync('play.pokemonshowdown.com/data/digimon.js', buf);
-}
-
-console.log("DONE");
-
-/*********************************************************
- * Build createmons.js
- *********************************************************/
-
-process.stdout.write("Building `data/createmons.js`...");
-
-{
-	const typeToPoint = requireNoCache('../caches/pokemon-showdown/dist/data/mods/createmons/pointchart.js').typeToPoint;
-	const abilityToPoint = requireNoCache('../caches/pokemon-showdown/dist/data/mods/createmons/pointchart.js').abilityToPoint;
-	const moveToPoint = requireNoCache('../caches/pokemon-showdown/dist/data/mods/createmons/pointchart.js').moveToPoint;
-	const buf = 'exports.typeToPoint = ' + es3stringify(typeToPoint) + ';' +
-			'exports.abilityToPoint = ' + es3stringify(abilityToPoint) + ';' +
-			'exports.moveToPoint = ' + es3stringify(moveToPoint) + ';';
-	fs.writeFileSync('play.pokemonshowdown.com/data/createmons.js', buf);
+	fs.writeFileSync('play.pokemonshowdown.com/data/' + YourModName + '.js', buf);
 }
 
 console.log("DONE");

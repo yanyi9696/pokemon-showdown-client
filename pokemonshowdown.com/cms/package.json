@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "description": "CMS for Pokemon Showdown pages",
   "dependencies": {
+    "cms": "file:",
     "showdown": "^1.9.1"
   }
 }
