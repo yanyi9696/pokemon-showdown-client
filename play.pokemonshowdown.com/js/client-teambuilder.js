@@ -150,8 +150,7 @@
 				this.ignoreEVLimits = (
 					this.curTeam.gen < 3 ||
 					this.curTeam.dex.modid.includes('hackmons') && this.curTeam.gen !== 6 ||
-					this.curTeam.dex.modid.includes('metronome') ||
-					this.curTeam.dex.modid.includes('createmons')
+					this.curTeam.dex.modid.includes('metronome')
 				);
 				if (this.curSet) {
 					return this.updateSetView();
@@ -1217,18 +1216,9 @@
 					buf += '<label class="label">Format:</label><button class="select formatselect teambuilderformatselect" name="format" value="' + this.curTeam.format + '">' + (isGenericFormat(this.curTeam.format) ? '<em>Select a format</em>' : BattleLog.escapeFormat(this.curTeam.format)) + '</button>';
 					var btnClass = 'button' + (!this.curSetList.length || app.isDisconnected ? ' disabled' : '');
 					buf += ' <button name="validate" class="' + btnClass + '"><i class="fa fa-check"></i> Validate</button></li>';
-					if (this.curTeam.dex.modid.includes('createmons')) {
-						var teamPoint = this.getTeamPoint();
-						if (teamPoint > 100000) teamPoint = '<font color="red">' + teamPoint + '</font>';
-						buf += '<label class="label">Total Point:</label><em>' + teamPoint + '</em>';
-					}
 				}
 				if (!this.curSetList.length) {
-					if (this.curTeam.dex.modid.includes('digimon')) {
-						buf += '<li><em>you have no digimon lol</em></li>';
-					} else {
-						buf += '<li><em>you have no pokemon lol</em></li>';
-					}
+					buf += '<li><em>you have no pokemon lol</em></li>';
 				}
 				for (i = 0; i < this.curSetList.length; i++) {
 					if (this.curSetList.length < this.curTeam.capacity && this.deletedSet && i === this.deletedSetLoc) {
@@ -1243,11 +1233,7 @@
 					buf += '<li><button name="import" class="button big"><i class="fa fa-upload"></i> Import from text or URL</button></li>';
 				}
 				if (i < this.curTeam.capacity) {
-					if (this.curTeam.dex.modid.includes('digimon')) {
-						buf += '<li><button name="addPokemon" class="button big"><i class="fa fa-plus"></i> Add Digimon</button></li>';
-					} else {
-						buf += '<li><button name="addPokemon" class="button big"><i class="fa fa-plus"></i> Add Pok&eacute;mon</button></li>';
-					}
+					buf += '<li><button name="addPokemon" class="button big"><i class="fa fa-plus"></i> Add Pok&eacute;mon</button></li>';
 				}
 				buf += '</ol>';
 				var formatInfo = this.formatResources[this.curTeam.format];
@@ -1288,23 +1274,20 @@
 			var isLetsGo = this.curTeam.dex.modid.includes('gen7letsgo');
 			var isBDSP = this.curTeam.dex.modid.includes('gen8bdsp');
 			var isNatDex = this.curTeam.dex.modid.includes('natdex');
-			var isDigimon = this.curTeam.dex.modid.includes('digimon');
-			var isCreatemon = this.curTeam.dex.modid.includes('createmons');
-			var isIF = this.curTeam.dex.modid.includes('infinitefusion');
 
-			var s_Pokemon = isDigimon ? 'Digimon' : 'Pok&eacute;mon';
-			var renderLevel = !isCreatemon;
+			var s_Pokemon = 'Pok&eacute;mon';
+			var renderLevel = true;
 			var renderHappiness = this.curTeam.gen < 8 || isNatDex;
 			var maxHappiness = isLetsGo ? 70 : 255;
-			var renderShiny = !isDigimon;
-			var renderHiddenPower = this.curTeam.gen < 8 && !isLetsGo || isNatDex && !isCreatemon || isBDSP && species.baseSpecies === "Unown";
+			var renderShiny = true;
+			var renderHiddenPower = this.curTeam.gen < 8 && !isLetsGo || isNatDex || isBDSP && species.baseSpecies === "Unown";
 			var renderDynamax = this.curTeam.gen === 8 && !isBDSP;
-			var renderTeraType = this.curTeam.gen === 9 && !isDigimon && !isCreatemon && !isIF;
+			var renderTeraType = this.curTeam.gen === 9;
 			var renderItem = this.curTeam.gen > 1;
 			var renderAbility = this.curTeam.gen > 2 && !isLetsGo;
-			var s_EV = isCreatemon ? 'Base' : (isLetsGo ? 'AV' : 'EV');
-			var evOverride = isCreatemon ? 252 : undefined;
-			var defaultEV = (this.curTeam.gen > 2 && !isCreatemon) ? 0 : 252;
+			var s_EV = isLetsGo ? 'AV' : 'EV';
+			var evOverride = undefined;
+			var defaultEV = (this.curTeam.gen > 2) ? 0 : 252;
 
 			var buf = '<li value="' + i + '">';
 			if (!set.species) {
@@ -1317,22 +1300,15 @@
 				return buf;
 			}
 			buf += '<div class="setmenu">';
-			if (isCreatemon) {
-				var setPoints = this.getSetPoint(this.curTeam.dex, set);
-				var setPoint = Math.floor(setPoints[0] * setPoints[4] * setPoints[7] * setPoints[8]);
-				buf += '<button name="checkPoint"><i class="fa fa-check"></i>' + setPoint + '</button> ';
-			}
 			buf += '<button name="copySet"><i class="fa fa-files-o"></i>Copy</button> <button name="importSet"><i class="fa fa-upload"></i>Import/Export</button> <button name="moveSet"><i class="fa fa-arrows"></i>Move</button> <button name="deleteSet"><i class="fa fa-trash"></i>Delete</button></div>';
 			buf += '<div class="setchart-nickname">';
 			buf += '<label>Nickname</label><input type="text" name="nickname" class="textbox" value="' + BattleLog.escapeHTML(set.name || '') + '" placeholder="' + BattleLog.escapeHTML(species.baseSpecies) + '" />';
 			buf += '</div>';
-			if (isIF) set.isIF = true;
 			var s = Dex.getTeambuilderSprite(set, this.curTeam.gen);
 			if (s.length < 15) {
 				app.send('/ifget ' + s);
 			}
 			buf += '<div class="setchart" style="' + s + ';">';
-			if (isIF) delete set.isIF;
 
 			// icon
 			buf += '<div class="setcol setcol-icon">';
@@ -1377,9 +1353,6 @@
 				if (renderTeraType) {
 					buf += '<span class="detailcell"><label>Tera Type</label>' + (species.forceTeraType || set.teraType || species.types[0]) + '</span>';
 				}
-				if (isDigimon) {
-					buf += '<span class="detailcell"><label>Pre-Evolution</label>' + (set.preEvo || 'None') + '</span>';
-				}
 			}
 			buf += '</button></div></div>';
 
@@ -1423,7 +1396,7 @@
 				if (j === 'spd' && this.curTeam.gen === 1) continue;
 				stats[j] = this.getStat(j, set, evOverride);
 				var ev = (set.evs[j] === undefined ? defaultEV : set.evs[j]);
-				var s_ev = isCreatemon ? species.baseStats[j] : (ev === defaultEV ? '' : ev);
+				var s_ev = ev === defaultEV ? '' : ev;
 				var evBuf = '<em>' + s_ev + '</em>';
 				if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === j) {
 					evBuf += '<small>+</small>';
@@ -1646,7 +1619,7 @@
 			var name = $.trim(e.currentTarget.value).replace(/\|/g, '');
 			e.currentTarget.value = set.name = name;
 			this.save();
-			if (this.curTeam.dex.modid.includes('crossevolution') || this.curTeam.dex.modid.includes('infinitefusion')) {
+			if (this.curTeam.dex.modid.includes('crossevolution')) {
 				this.update();
 				this.updateChart();
 			}
@@ -2057,11 +2030,7 @@
 				var set = this.curSetList[i];
 				var pokemonicon = '<span class="picon pokemonicon-' + i + '" style="' + Dex.getPokemonIcon(set) + '"></span>';
 				if (!set.species) {
-					if (this.curTeam.dex.modid.includes('digimon')) {
-						buf += '<button disabled class="addpokemon" aria-label="Add Digimon"><i class="fa fa-plus"></i></button> ';
-					} else {
-						buf += '<button disabled class="addpokemon" aria-label="Add Pok&eacute;mon"><i class="fa fa-plus"></i></button> ';
-					}
+					buf += '<button disabled class="addpokemon" aria-label="Add Pok&eacute;mon"><i class="fa fa-plus"></i></button> ';
 					isAdd = true;
 				} else if (i == this.curSetLoc) {
 					buf += '<button disabled class="pokemon">' + pokemonicon + BattleLog.escapeHTML(set.name || this.curTeam.dex.species.get(set.species).baseSpecies || '<i class="fa fa-plus"></i>') + '</button> ';
@@ -2078,13 +2047,11 @@
 			var set = this.curSet;
 			if (!set) return;
 
-			if (this.curTeam.dex.modid.includes('infinitefusion')) set.isIF = true;
 			var s = Dex.getTeambuilderSprite(set, this.curTeam.gen);
 			if (s.length < 15) {
 				app.send('/ifget ' + s);
 			}
 			this.$('.setchart').attr('style', s);
-			if (this.curTeam.dex.modid.includes('infinitefusion')) delete set.isIF;
 
 			this.$('.pokemonicon-' + this.curSetLoc).css('background', Dex.getPokemonIcon(set).substr(11));
 
@@ -2105,21 +2072,19 @@
 			var stats = {hp:'', atk:'', def:'', spa:'', spd:'', spe:''};
 
 			var supportsEVs = !this.curTeam.dex.modid.includes('gen7letsgo');
-			var isCreatemon = this.curTeam.dex.modid.includes('createmons');
-			var isIF = this.curTeam.dex.modid.includes('infinitefusion');
-			var evOverride = isCreatemon ? 252 : undefined;
-			var defaultEV = (this.curTeam.gen > 2 && !isCreatemon) ? 0 : 252;
-			var maxEv = isIF ? 1020 : 510;
-			var renderRemaining = this.curTeam.gen > 2 && supportsEVs && !isCreatemon;
-			var renderRemainingValue = supportsEVs && !isCreatemon && !isIF;
+			var evOverride = undefined;
+			var defaultEV = (this.curTeam.gen > 2) ? 0 : 252;
+			var maxEv = 510;
+			var renderRemaining = this.curTeam.gen > 2 && supportsEVs;
+			var renderRemainingValue = supportsEVs;
 
 			// stat cell
-			var buf = '<span class="statrow statrow-head"><label></label> <span class="statgraph"></span> <em>' + (supportsEVs ? (isCreatemon ? 'Base' : 'EV') : 'AV') + '</em></span>';
+			var buf = '<span class="statrow statrow-head"><label></label> <span class="statgraph"></span> <em>' + (supportsEVs ? 'EV' : 'AV') + '</em></span>';
 			for (var stat in stats) {
 				if (stat === 'spd' && this.curTeam.gen === 1) continue;
 				stats[stat] = this.getStat(stat, set, evOverride);
 				var ev = (set.evs[stat] === undefined ? defaultEV : set.evs[stat]);
-				var s_ev = isCreatemon ? species.baseStats[stat] : (ev === defaultEV ? '' : ev);
+				var s_ev = ev === defaultEV ? '' : ev;
 				var evBuf = '<em>' + s_ev + '</em>';
 				if (BattleNatures[set.nature] && BattleNatures[set.nature].plus === stat) {
 					evBuf += '<small>+</small>';
@@ -2159,7 +2124,6 @@
 			}
 
 			if (renderRemaining) buf += '<div><em>Remaining:</em></div>';
-			if (isCreatemon) buf += '<div><em>S:</em><em>BST:</em></div>';
 			this.$chart.find('.graphcol').html(buf);
 
 			if (this.curTeam.gen <= 2) return;
@@ -2169,31 +2133,6 @@
 				} else {
 					this.$chart.find('.totalev').html('<b>' + (maxEv - totalev) + '</b>');
 				}
-			}
-			if (isCreatemon) {
-				var totalevBuf = '<b>' + this.calcBSPoint(set.evs)[0] + '</b><b>' + totalev + '</b>';
-				this.$chart.find('.totalev').html(totalevBuf);
-			}
-			if (isIF) {
-				this.$chart.find('.totalev').html('<b>' + (maxEv - totalev) + '</b>');
-			}
-			// update "Base" column
-			if (isCreatemon) {
-				var BSPoint = this.calcBSPoint(set.evs);
-				var BSPoints = {
-					hp: BSPoint[2].toFixed(2),
-					atk: BSPoint[1].toFixed(2),
-					def: BSPoint[2].toFixed(2),
-					spa: BSPoint[1].toFixed(2),
-					spd: BSPoint[2].toFixed(2),
-					spe: BSPoint[3].toFixed(2),
-				};
-				buf = '<div><em>Points</em></div>';
-				for (var stat in BSPoints) {
-					buf += '<div><b>' + BSPoints[stat] + '</b></div>';
-				}
-				buf += '<div><b>x10</b></div>';
-				this.$chart.find('.basestatscol').html(buf);
 			}
 			this.$chart.find('select[name=nature]').val(set.nature || 'Serious');
 			this.checkStatOptimizations();
@@ -2357,15 +2296,8 @@
 			var buf = '';
 			var set = this.curSet;
 			var species = this.curTeam.dex.species.getFromPokemon(this.curSet);
-			var isCreatemon = this.curTeam.dex.modid.includes('createmons');
-			var isIF = this.curTeam.dex.modid.includes('infinitefusion');
 
 			var baseStats = species.baseStats;
-			// if (isCreatemon) {
-			// 	if (!set.evs) {
-			// 		set.evs = JSON.parse(JSON.stringify(baseStats));
-			// 	}
-			// }
 
 			buf += '<div class="resultheader"><h3>EVs</h3></div>';
 			buf += '<div class="statform">';
@@ -2412,16 +2344,16 @@
 
 			var supportsEVs = !this.curTeam.dex.modid.includes('gen7letsgo');
 			// var supportsAVs = !supportsEVs && this.curTeam.format.endsWith('norestrictions');
-			var defaultEV = (this.curTeam.gen > 2 && !isCreatemon) ? 0 : 252;
-			var minEV = isCreatemon ? 1 : 0;
+			var defaultEV = (this.curTeam.gen > 2) ? 0 : 252;
+			var minEV = 0;
 			var maxEV = supportsEVs ? 252 : 200;
-			var stepEV = (supportsEVs && !isCreatemon) ? 4 : 1;
+			var stepEV = supportsEVs ? 4 : 1;
 
-			var evOverride = isCreatemon ? 252 : undefined;
-			var maxTotalEVs = isIF ? 1020 : 510;
-			var s_EV = isCreatemon ? 'Base' : (supportsEVs ? 'EV' : 'AV');
-			var renderRemaining = this.curTeam.gen > 2 && supportsEVs && !isCreatemon;
-			var renderRemainingValue = this.curTeam.gen > 2 && supportsEVs && !isCreatemon && !isIF;
+			var evOverride = undefined;
+			var maxTotalEVs = 510;
+			var s_EV = supportsEVs ? 'EV' : 'AV';
+			var renderRemaining = this.curTeam.gen > 2 && supportsEVs;
+			var renderRemainingValue = this.curTeam.gen > 2 && supportsEVs;
 
 			// label column
 			buf += '<div class="col labelcol"><div></div>';
@@ -2434,26 +2366,9 @@
 
 			buf += '<div><label>Speed</label></div></div>';
 
-			if (!isCreatemon) {
-				buf += '<div class="col basestatscol"><div><em>Base</em></div>';
-				for (var i in stats) {
-					buf += '<div><b>' + baseStats[i] + '</b></div>';
-				}
-			} else {
-				var BSPoint = this.calcBSPoint(set.evs);
-				var BSPoints = {
-					hp: BSPoint[2].toFixed(2),
-					atk: BSPoint[1].toFixed(2),
-					def: BSPoint[2].toFixed(2),
-					spa: BSPoint[1].toFixed(2),
-					spd: BSPoint[2].toFixed(2),
-					spe: BSPoint[3].toFixed(2),
-				};
-				buf += '<div class="col basestatscol"><div><em>Points</em></div>';
-				for (var stat in BSPoints) {
-					buf += '<div><b>' + BSPoints[stat] + '</b></div>';
-				}
-				buf += '<div><b>x10</b></div>';
+			buf += '<div class="col basestatscol"><div><em>Base</em></div>';
+			for (var i in stats) {
+				buf += '<div><b>' + baseStats[i] + '</b></div>';
 			}
 			buf += '</div>';
 
@@ -2468,7 +2383,6 @@
 				buf += '<div><em><span style="width:' + Math.floor(width) + 'px;background:hsl(' + color + ',85%,45%);border-color:hsl(' + color + ',85%,35%)"></span></em></div>';
 			}
 			if (renderRemaining) buf += '<div><em>Remaining:</em></div>';
-			if (isCreatemon) buf += '<div><em>S:</em><em>BST:</em></div>';
 			buf += '</div>';
 
 			buf += '<div class="col evcol"><div><strong>' + s_EV + '</strong></div>';
@@ -2495,12 +2409,6 @@
 				} else {
 					buf += '<div class="totalev"><b>' + (maxTotalEVs - totalev) + '</b></div>';
 				}
-			}
-			if (isCreatemon) {
-				buf += '<div class="totalev"><b>' + this.calcBSPoint(set.evs)[0] + '</b><b>' + totalev + '</b></div>';
-			}
-			if (isIF) {
-				buf += '<div class="totalev"><em>' + (maxTotalEVs - totalev) + '</em></div>';
 			}
 			buf += '</div>';
 
@@ -2660,10 +2568,8 @@
 				}
 				buf += '</select></p>';
 
-				if (!isCreatemon) {
-					buf += '<p><small><em>Protip:</em> You can also set natures by typing <kbd>+</kbd> and <kbd>-</kbd> next to a stat.</small></p>';
-					buf += '<p id="statoptimizer"></p>';
-				}
+				buf += '<p><small><em>Protip:</em> You can also set natures by typing <kbd>+</kbd> and <kbd>-</kbd> next to a stat.</small></p>';
+				buf += '<p id="statoptimizer"></p>';
 			}
 
 			buf += '</div>';
@@ -2771,7 +2677,7 @@
 
 				if (set.evs[stat] !== val || natureChange) {
 					set.evs[stat] = val;
-					if (this.ignoreEVLimits && !this.curTeam.dex.modid.includes('createmons')) {
+					if (this.ignoreEVLimits) {
 						var evNum = supportsEVs ? 252 : supportsAVs ? 200 : 0;
 						if (set.evs['hp'] === undefined) set.evs['hp'] = evNum;
 						if (set.evs['atk'] === undefined) set.evs['atk'] = evNum;
@@ -2868,7 +2774,6 @@
 					total += (i === stat ? val : set.evs[i]);
 				}
 				var totalLimit = 508;
-				if (this.curTeam.dex.modid.includes('infinitefusion')) totalLimit = 1020;
 				var limit = 252;
 				if (total > totalLimit && val - total + totalLimit >= 0) {
 					// don't allow dragging beyond 508 EVs
@@ -2885,10 +2790,9 @@
 			// I am a trained professional.
 			if (val !== originalVal) slider.value = val;
 
-			var isCreatemon = this.curTeam.dex.modid.includes('createmons');
 			var species = this.curTeam.dex.species.getFromPokemon(set);
-			if (!set.evs) set.evs = isCreatemon ? JSON.parse(JSON.stringify(species.baseStats)) : {};
-			if (this.ignoreEVLimits && !isCreatemon) {
+			if (!set.evs) set.evs = {};
+			if (this.ignoreEVLimits) {
 				var evNum = supportsEVs ? 252 : supportsAVs ? 200 : 0;
 				if (set.evs['hp'] === undefined) set.evs['hp'] = evNum;
 				if (set.evs['atk'] === undefined) set.evs['atk'] = evNum;
@@ -2967,19 +2871,16 @@
 			var isBDSP = this.curTeam.dex.modid.includes('gen8bdsp');
 			var isNatDex = this.curTeam.dex.modid.includes('natdex');
 			var isHackmons = this.curTeam.dex.modid.includes('hackmons');
-			var isDigimon = this.curTeam.dex.modid.includes('digimon');
-			var isCreatemon = this.curTeam.dex.modid.includes('createmons');
-			var isIF = this.curTeam.dex.modid.includes('infinitefusion');
 			var species = this.curTeam.dex.species.getFromPokemon(set);
 
-			var renderLevel = !isCreatemon;
+			var renderLevel = true;
 			var renderHappiness = this.curTeam.gen < 8 || isNatDex;
 			var s_Happiness = isLetsGo ? 'value="70"' : ('min="0" max="255" step="1" value="' + (typeof set.happiness === 'number' ? set.happiness : 255) + '"');
-			var renderShiny = !isDigimon;
+			var renderShiny = true;
 			var renderDynamax = this.curTeam.gen === 8 && !isBDSP;
-			var renderWeight = isCreatemon;
-			var renderHiddenPower = this.curTeam.gen < 8 && !isLetsGo || isNatDex && !isCreatemon || isBDSP && species.baseSpecies === "Unown";
-			var renderTeraType = this.curTeam.gen === 9 && !isDigimon && !isCreatemon && !isIF;
+			var renderWeight = false;
+			var renderHiddenPower = this.curTeam.gen < 8 && !isLetsGo || isNatDex || isBDSP && species.baseSpecies === "Unown";
+			var renderTeraType = this.curTeam.gen === 9;
 
 			buf += '<div class="resultheader"><h3>Details</h3></div>';
 			buf += '<form class="detailsform">';
@@ -3058,35 +2959,6 @@
 				buf += '</select></div></div>';
 			}
 
-			if (isCreatemon) {
-				buf += '<div class="formrow"><label class="formlabel" title="First Type">First Type:</label><div><select name="hptype" class="button">';
-				var types = Dex.types.all();
-				var hpType = set.hpType || species.types[0];
-				for (var i = 0; i < types.length; i++) {
-					buf += '<option value="' + types[i].name + '"' + (hpType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + ' (' + exports.typeToPoint[types[i].id] + ')' + '</option>';
-				}
-				buf += '</select></div></div>';
-			}
-
-			if (isDigimon) {
-				buf += '<div class="formrow"><label class="formlabel" title="Pre-Evolution">Pre-Evolution:</label><div><select name="preevo">';
-				buf += '<option value=""' + (!set.preEvo ? ' selected="selected"' : '') + '>(none)</option>'; // unset
-				if (species.evos !== null && species.evos.length) {
-					var preEvos = species.evos;
-					for (var i = 0; i < preEvos.length; i++) {
-						buf += '<option value="' + preEvos[i] + '"' + (set.preEvo === preEvos[i] ? ' selected="selected"' : '') + '>' + preEvos[i] + '</option>';
-					}
-				} else if (species.forme === "X") {
-					var preXSpecies = this.curTeam.dex.species.get(species.baseSpecies);
-					if (preXSpecies.evos !== null && preXSpecies.evos.length) {
-						var preEvos = preXSpecies.evos;
-						for (var i = 0; i < preEvos.length; i++) {
-							buf += '<option value="' + preEvos[i] + '"' + (set.preEvo === preEvos[i] ? ' selected="selected"' : '') + '>' + preEvos[i] + '</option>';
-						}
-					}
-				}
-			}
-
 			if (renderTeraType) {
 				buf += '<div class="formrow"><label class="formlabel" title="Tera Type">Tera Type:</label><div>';
 				if (species.forceTeraType) {
@@ -3101,16 +2973,6 @@
 					buf += '</select>';
 				}
 				buf += '</div></div>';
-			}
-
-			if (isCreatemon) {
-				buf += '<div class="formrow"><label class="formlabel" title="Second Type">Second Type:</label><div><select name="teratype" class="button">';
-				var types = Dex.types.all();
-				var teraType = set.teraType || (species.types.length > 1 ? species.types[1] : species.types[0]);
-				for (var i = 0; i < types.length; i++) {
-					buf += '<option value="' + types[i].name + '"' + (teraType === types[i].name ? ' selected="selected"' : '') + '>' + types[i].name + ' (' + exports.typeToPoint[types[i].id] + ')' + '</option>';
-				}
-				buf += '</select></div></div>';
 			}
 
 			buf += '</form>';
@@ -3129,9 +2991,6 @@
 			var isLetsGo = this.curTeam.dex.modid.includes('gen7letsgo');
 			var isBDSP = this.curTeam.dex.modid.includes('gen8bdsp');
 			var isNatDex = this.curTeam.dex.modid.includes('natdex');
-			var isDigimon = this.curTeam.dex.modid.includes('digimon');
-			var isCreatemon = this.curTeam.dex.modid.includes('createmons');
-			var isIF = this.curTeam.dex.modid.includes('infinitefusion');
 
 			// level
 			var level = parseInt(this.$chart.find('input[name=level]').val(), 10);
@@ -3154,17 +3013,9 @@
 
 			// dynamax level
 			var dynamaxLevel = parseInt(this.$chart.find('input[name=dynamaxlevel]').val(), 10);
-			if (!isCreatemon) {
-				if (isNaN(dynamaxLevel) || dynamaxLevel > 10 || dynamaxLevel < 0) dynamaxLevel = 10;
-				set.dynamaxLevel = dynamaxLevel;
-				if (set.dynamaxLevel === 10) delete set.dynamaxLevel;
-			} else {
-				if (isNaN(dynamaxLevel)) dynamaxLevel = 10;
-				if (dynamaxLevel < 1) dynamaxLevel = 1;
-				if (dynamaxLevel > 999) dynamaxLevel = 999;
-				set.dynamaxLevel = dynamaxLevel;
-				if (set.dynamaxLevel === 10) delete set.dynamaxLevel;
-			}
+			if (isNaN(dynamaxLevel) || dynamaxLevel > 10 || dynamaxLevel < 0) dynamaxLevel = 10;
+			set.dynamaxLevel = dynamaxLevel;
+			if (set.dynamaxLevel === 10) delete set.dynamaxLevel;
 
 			// gigantamax
 			var gmax = (this.$chart.find('input[name=gigantamax]:checked').val() === 'yes');
@@ -3202,10 +3053,8 @@
 			var teraType = this.$chart.find('select[name=teratype]').val();
 			if (Dex.types.isName(teraType) && teraType !== species.types[0]) {
 				set.teraType = teraType;
-			} else if (!isCreatemon) {
+			} else {
 				delete set.teraType;
-			} else if (Dex.types.isName(teraType)) {
-				set.teraType = teraType;
 			}
 
 			// preEvo
@@ -3227,13 +3076,13 @@
 			}
 
 			// update details cell
-			var renderLevel = !isCreatemon;
+			var renderLevel = true;
 			var renderHappiness = this.curTeam.gen < 8 || isNatDex;
 			var s_Happiness = isLetsGo ? 70 : (typeof set.happiness === 'number' ? set.happiness : 255);
-			var renderShiny = !isDigimon;
-			var renderHiddenPower = this.curTeam.gen < 8 && !isLetsGo || isNatDex && !isCreatemon || isBDSP && species.baseSpecies === "Unown";
+			var renderShiny = true;
+			var renderHiddenPower = this.curTeam.gen < 8 && !isLetsGo || isNatDex || isBDSP && species.baseSpecies === "Unown";
 			var renderDynamax = this.curTeam.gen === 8 && !isBDSP;
-			var renderTeraType = this.curTeam.gen === 9 && !isDigimon && !isCreatemon && !isIF;
+			var renderTeraType = this.curTeam.gen === 9;
 
 			var buf = '';
 			var GenderChart = {
@@ -3249,7 +3098,6 @@
 				if (renderHappiness) buf += '<span class="detailcell"><label>Happiness</label>' + s_Happiness + '</span>';
 				if (renderShiny) buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
 				if (renderHiddenPower) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
-				if (isDigimon) buf += '<span class="detailcell"><label>Pre-Evolution</label>' + (set.preEvo || 'None') + '</span>';
 				if (renderDynamax) {
 					if (!species.cannotDynamax) {
 						buf += '<span class="detailcell"><label>Dmax Level</label>' + (typeof set.dynamaxLevel === 'number' ? set.dynamaxLevel : 10) + '</span>';
@@ -3264,11 +3112,6 @@
 
 			this.save();
 			this.updatePokemonSprite();
-
-			if (isCreatemon) {
-				this.update();
-				this.updateChart();
-			}
 		},
 		altForm: function (e) {
 			var set = this.curSet;
@@ -3774,12 +3617,9 @@
 				if (selectNext) this.$('input[name=item]').select();
 				return;
 			}
-			var isIF = this.curTeam.dex.modid.includes('infinitefusion');
 			var isHackmons = this.curTeam.dex.modid.includes('hackmons');
-			var isCreatemon = this.curTeam.dex.modid.includes('createmons');
 
 			set.name = "";
-			if (isIF) set.name = species.name;
 			set.species = val;
 			if (set.level) delete set.level;
 			if (this.curTeam && this.curTeam.format) {
@@ -3811,7 +3651,7 @@
 			if (set.gigantamax) delete set.gigantamax;
 			if (set.teraType) delete set.teraType;
 			if (set.preEvo) delete set.preEvo;
-			if (!isHackmons && !isCreatemon && species.requiredItems.length === 1) {
+			if (!isHackmons && species.requiredItems.length === 1) {
 				set.item = species.requiredItems[0];
 			} else {
 				set.item = '';
@@ -3823,11 +3663,6 @@
 			set.ivs = {};
 			set.nature = '';
 
-			if (isCreatemon) {
-				set.evs = JSON.parse(JSON.stringify(species.baseStats));
-				set.hpType = species.types[0];
-				set.teraType = species.types.length > 1 ? species.types[1] : species.types[0];
-			}
 			this.updateSetTop();
 			if (selectNext) this.$(set.item || !this.$('input[name=item]').length ? (this.$('input[name=ability]').length ? 'input[name=ability]' : 'input[name=move1]') : 'input[name=item]').select();
 		},
@@ -3870,7 +3705,7 @@
 			if (ev === undefined) ev = (this.curTeam.gen > 2 ? 0 : 252);
 
 			if (stat === 'hp') {
-				if (baseStat === 1 && !this.curTeam.dex.modid.includes('createmons')) return 1;
+				if (baseStat === 1) return 1;
 				if (!supportsEVs) return Math.floor(Math.floor(2 * baseStat + iv + 100) * set.level / 100 + 10) + (supportsAVs ? ev : 0);
 				return Math.floor(Math.floor(2 * baseStat + iv + Math.floor(ev / 4) + 100) * set.level / 100 + 10);
 			}

@@ -503,10 +503,6 @@ class BattleTooltips {
 		Fairy: "Twinkle Tackle",
 		Stellar: "",
 		"???": "",
-		"Light": "",
-		"Vaccine": "",
-		"Data": "",
-		"Virus": "",
 	};
 
 	static maxMoveTable: {[type in TypeName]: string} = {
@@ -530,10 +526,6 @@ class BattleTooltips {
 		Fairy: "Max Starfall",
 		Stellar: "",
 		"???": "",
-		"Light": "",
-		"Vaccine": "",
-		"Data": "",
-		"Virus": "",
 	};
 
 	getMaxMoveFromType(type: TypeName, gmaxMove?: string | Move) {
