@@ -209,7 +209,13 @@ const Dex = new class implements ModdedDex {
 		if (formatid.includes('littlecup') || formatid.endsWith('lc')) modids.push('littlecup' as ID);
 		if (formatid.includes('nfe')) modids.push('nfe' as ID);
 		// oms
+		if (formatid.includes('almostanyability') || formatid.includes('aaa')) modids.push('almostanyability' as ID);
+		if (formatid.includes('categoryswap')) modids.push('categoryswap' as ID);
 		if (formatid.includes('hackmons') || formatid.endsWith('bh')) modids.push('hackmons' as ID);
+		if (formatid.includes('metronome')) modids.push('metronome' as ID);
+		if (formatid.includes('scalemons')) modids.push('scalemons' as ID);
+		if (formatid.includes('stabmons') || formatid.includes('staaabmons')) modids.push('stabmons' as ID);
+		if (formatid.includes('thecardgame')) modids.push('thecardgame' as ID);
 		// effectively pet mods
 		if (formatid.includes('nationaldex') || formatid.includes('natdex') || formatid.startsWith(gen + 'nd') || formatid.includes('metronome')) modids.push('natdex' as ID);
 		if (formatid.includes('letsgo')) modids.push('gen7letsgo' as ID);
@@ -1381,6 +1387,17 @@ const ModModifier: {
 		),
 	},
 	// oms
+	categoryswap: {
+		movesMod: (data: any): any => {
+			if (!data.exists) return;
+			const categoryMap = {
+				'Physical': 'Special',
+				'Special': 'Physical',
+				'Status': 'Status',
+			};
+			data.category = categoryMap[(data as Move).category];
+		},
+	},
 	hackmons: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
 		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
@@ -1399,6 +1416,108 @@ const ModModifier: {
 				moves.push(id);
 			}
 			return moves;
+		},
+	},
+	metronome: {
+		speciesMod: (data: any): any => {
+			if (data.num >= 0) data.tier = String(data.num);
+		},
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
+	},
+	scalemons: {
+		speciesMod: (data: any, extra?: any): any => {
+			if (!data.exists) return;
+			const cupName = (extra && (extra.modid as ID[]).find(id => id.includes('cup'))) || '600cup';
+			const goalBST = parseInt(cupName.slice(0, 3))
+			const bstWithoutHp: number = data.bst - data.baseStats['hp'];
+			const scale = goalBST - data.baseStats['hp'];
+			data.bst = data.baseStats['hp'];
+			let newStats = {...data.baseStats};
+			for (const stat in data.baseStats) {
+				if (stat === 'hp') continue;
+				newStats[stat] = Math.floor(data.baseStats[stat] * scale / bstWithoutHp);
+				if (newStats[stat] < 1) newStats[stat] = 1;
+				if (newStats[stat] > 255) newStats[stat] = 255;
+				data.bst += newStats[stat];
+			}
+			data.baseStats = newStats;
+		},
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
+	},
+	stabmons: {
+		ModifyLearnset: (pokemon: PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
+			const moveDex = dex.getMovedex();
+			const isNatDex = dex.modid.includes('natdex' as ID);
+			const isLGPE = dex.modid.includes('gen7letsgo' as ID);
+			for (const id in moveDex) {
+				if (learnset.includes(id)) continue;
+				const move = dex.moves.get(id);
+				if (move.isNonstandard && move.isNonstandard !== 'Unobtainable') continue;
+				if (move.isZ || move.isMax) continue;
+
+				let species = dex.species.get(pokemon.species);
+				const speciesTypes: string[] = [];
+				const moveTypes: string[] = [];
+				for (let i = dex.gen; i >= species.gen && i >= move.gen; i--) {
+					const genDex = Dex.forGen(i);
+					moveTypes.push(genDex.moves.get(move.name).type);
+
+					const pokemon = genDex.species.get(species.name);
+					let baseSpecies = genDex.species.get(pokemon.changesFrom || pokemon.name);
+					if (!pokemon.battleOnly) speciesTypes.push(...pokemon.types);
+					let prevo = pokemon.prevo;
+					while (prevo) {
+						const prevoSpecies = genDex.species.get(prevo);
+						speciesTypes.push(...prevoSpecies.types);
+						prevo = prevoSpecies.prevo;
+					}
+					if (pokemon.battleOnly && typeof pokemon.battleOnly === 'string') {
+						species = dex.species.get(pokemon.battleOnly);
+					}
+					const excludedForme = (s: Species) => [
+						'Alola', 'Alola-Totem', 'Galar', 'Galar-Zen', 'Hisui', 'Paldea', 'Paldea-Combat', 'Paldea-Blaze', 'Paldea-Aqua',
+					].includes(s.forme);
+					if (baseSpecies.otherFormes && !['Wormadam', 'Urshifu'].includes(baseSpecies.baseSpecies)) {
+						if (!excludedForme(species)) speciesTypes.push(...baseSpecies.types);
+						for (const formeName of baseSpecies.otherFormes) {
+							const forme = dex.species.get(formeName);
+							if (!forme.battleOnly && !excludedForme(forme)) speciesTypes.push(...forme.types);
+						}
+					}
+				}
+				let valid = false;
+				for (let type of moveTypes) {
+					if (speciesTypes.includes(type)) {
+						valid = true;
+						break;
+					}
+				}
+				if (valid) learnset.push(id);
+			}
+			return learnset;
+		},
+	},
+	thecardgame: {
+		movesMod: (data: any): any => {
+			if (!data.exists) return;
+			data.type = data.type
+				.replace(/(Ghost|Fairy)/g, 'Psychic')
+				.replace(/Bug/g, 'Grass')
+				.replace(/Ice/g, 'Water')
+				.replace(/(Rock|Ground)/g, 'Fighting')
+				.replace(/Flying/g, 'Normal')
+				.replace(/Poison/g, 'Dark');
+		},
+		speciesMod: (data: any): any => {
+			if (!data.exists) return;
+			data.types = Array.from(new Set(data.types.map((type: TypeName) => (
+				type.replace(/(Ghost|Fairy)/g, 'Psychic')
+					.replace(/Bug/g, 'Grass')
+					.replace(/Ice/g, 'Water')
+					.replace(/(Rock|Ground)/g, 'Fighting')
+					.replace(/Flying/g, 'Normal')
+					.replace(/Poison/g, 'Dark')
+			))));
 		},
 	},
 	// pet mods
