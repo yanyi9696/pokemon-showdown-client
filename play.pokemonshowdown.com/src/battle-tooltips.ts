@@ -76,11 +76,6 @@ class ModifiableValue {
 					this.comment.push(` (${weatherName} suppressed by ${active.ability})`);
 					return false;
 				}
-				if (this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID) &&
-					active && toID(active.item) === 'utilityumbrella') {
-					this.comment.push(` (${weatherName} suppressed by ${active.item})`);
-					return false;
-				}
 			}
 		}
 		return true;
@@ -801,18 +796,6 @@ class BattleTooltips {
 		if (pokemon.speciesForme !== pokemon.name) {
 			name += ' <small>(' + BattleLog.escapeHTML(pokemon.speciesForme) + ')</small>';
 		}
-		if (this.battle.dex.modid.includes('infinitefusion' as ID)) {
-			const headname = pokemon.details.split(', ').find(value => value.startsWith('headname:'));
-			name = headname ? headname.slice(9) : pokemon.name;
-			name = BattleLog.escapeHTML(name);
-			if (BattleLog.escapeHTML(pokemon.speciesForme) !== name) {
-				if (headname) {
-					name += '&sect;' + BattleLog.escapeHTML(pokemon.speciesForme);
-				} else {
-					name += ' <small>(' + BattleLog.escapeHTML(pokemon.speciesForme) + ')</small>';
-				}
-			}
-		}
 
 		let levelBuf = (pokemon.level !== 100 ? ` <small>L${pokemon.level}</small>` : ``);
 		if (!illusionIndex || illusionIndex === 1) {
@@ -839,19 +822,6 @@ class BattleTooltips {
 				text += `&nbsp; &nbsp; <small>(base: <span class="textaligned-typeicons">${this.getPokemonTypes(pokemon, true).map(type => Dex.getTypeIcon(type)).join(' ')}</span>)</small>`;
 			} else if (knownPokemon.teraType && !this.battle.rules['Terastal Clause']) {
 				text += `&nbsp; &nbsp; <small>(Tera Type: <span class="textaligned-typeicons">${Dex.getTypeIcon(knownPokemon.teraType)}</span>)</small>`;
-			}
-			if (this.battle.dex.modid.includes('infinitefusion' as ID)) { // todo: for other mods too
-				if (clientPokemon) {
-					text += `&nbsp;`
-					let baseStats = clientPokemon.getSpecies().baseStats;
-					if (clientPokemon.volatiles.transform) {
-						baseStats = {...clientPokemon.volatiles.transform[1].getSpecies().baseStats, 'hp': 0}; // it's too hard to calc the correct hp, so just 0
-					}
-					for (const statName of Dex.statNames) {
-						text += statName === 'hp' ? '<small>' : '<small>/';
-						text += '' + (baseStats[statName] ? baseStats[statName] : '-') + '</small>';
-					}
-				}
 			}
 			text += `</h2>`;
 		}
@@ -889,7 +859,7 @@ class BattleTooltips {
 		}
 
 		const supportsAbilities = this.battle.gen > 2 && !this.battle.dex.modid.includes("gen7letsgo" as ID);
-		const abilityPossibility = this.battle.dex.modid.includes("hackmons" as ID) || this.battle.dex.modid.includes('createmons' as ID);
+		const abilityPossibility = this.battle.dex.modid.includes("hackmons" as ID);
 
 		let abilityText = '';
 		if (supportsAbilities) {
@@ -1124,20 +1094,11 @@ class BattleTooltips {
 		if (this.battle.abilityActive(['Air Lock', 'Cloud Nine'])) {
 			weather = '' as ID;
 		}
-		if (this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
-			for (const activePokemon of this.battle.getAllActive()) {
-				if (toID(activePokemon.item) === 'utilityumbrella') {
-					weather = '' as ID;
-					break;
-				}
-			}
-		}
 
 		if (item === 'choiceband' && !clientPokemon?.volatiles['dynamax']) {
 			stats.atk = Math.floor(stats.atk * 1.5);
 		}
-		if ((ability === 'purepower' && !this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) ||
-			ability === 'hugepower') {
+		if (ability === 'purepower' || ability === 'hugepower') {
 			stats.atk *= 2;
 		}
 		if (ability === 'hustle' || (ability === 'gorillatactics' && !clientPokemon?.volatiles['dynamax'])) {
@@ -1164,7 +1125,7 @@ class BattleTooltips {
 					if (ability === 'solarpower') {
 						stats.spa = Math.floor(stats.spa * 1.5);
 					}
-					if (ability === 'orichalcumpulse' && !this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
+					if (ability === 'orichalcumpulse') {
 						stats.atk = Math.floor(stats.atk * 1.3333);
 					}
 					let allyActive = clientPokemon?.side.active;
@@ -1200,14 +1161,6 @@ class BattleTooltips {
 			}
 			for (const statName of Dex.statNamesExceptHP) {
 				if (clientPokemon.volatiles['protosynthesis' + statName] || clientPokemon.volatiles['quarkdrive' + statName]) {
-					if (statName === 'spe' || this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
-						speedModifiers.push(1.5);
-					} else {
-						stats[statName] = Math.floor(stats[statName] * 1.3);
-					}
-				}
-				// only happens in mbhv4
-				if (clientPokemon.volatiles['orichalcumpulse' + statName] || clientPokemon.volatiles['hadronengine' + statName]) {
 					if (statName === 'spe') {
 						speedModifiers.push(1.5);
 					} else {
@@ -1242,7 +1195,7 @@ class BattleTooltips {
 			if (ability === 'surgesurfer') {
 				speedModifiers.push(2);
 			}
-			if (ability === 'hadronengine' && !this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
+			if (ability === 'hadronengine') {
 				stats.spa = Math.floor(stats.spa * 1.3333);
 			}
 		}
@@ -1252,8 +1205,7 @@ class BattleTooltips {
 		if (item === 'deepseatooth' && species === 'Clamperl') {
 			stats.spa *= 2;
 		}
-		if (item === 'souldew' && (this.battle.gen <= 6 || this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) &&
-			(species === 'Latios' || species === 'Latias')) {
+		if (item === 'souldew' && this.battle.gen <= 6 && (species === 'Latios' || species === 'Latias')) {
 			stats.spa = Math.floor(stats.spa * 1.5);
 			stats.spd = Math.floor(stats.spd * 1.5);
 		}
@@ -1286,38 +1238,23 @@ class BattleTooltips {
 		if (ability === 'furcoat') {
 			stats.def *= 2;
 		}
-		if (!this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
-			if (this.battle.abilityActive('Vessel of Ruin')) {
-				if (ability !== 'vesselofruin') {
-					stats.spa = Math.floor(stats.spa * 0.75);
-				}
-			}
-			if (this.battle.abilityActive('Sword of Ruin')) {
-				if (ability !== 'swordofruin') {
-					stats.def = Math.floor(stats.def * 0.75);
-				}
-			}
-			if (this.battle.abilityActive('Tablets of Ruin')) {
-				if (ability !== 'tabletsofruin') {
-					stats.atk = Math.floor(stats.atk * 0.75);
-				}
-			}
-			if (this.battle.abilityActive('Beads of Ruin')) {
-				if (ability !== 'beadsofruin') {
-					stats.spd = Math.floor(stats.spd * 0.75);
-				}
-			}
-		} else {
-			if (this.battle.abilityActive('Vessel of Ruin')) {
+		if (this.battle.abilityActive('Vessel of Ruin')) {
+			if (ability !== 'vesselofruin') {
 				stats.spa = Math.floor(stats.spa * 0.75);
 			}
-			if (this.battle.abilityActive('Sword of Ruin')) {
+		}
+		if (this.battle.abilityActive('Sword of Ruin')) {
+			if (ability !== 'swordofruin') {
 				stats.def = Math.floor(stats.def * 0.75);
 			}
-			if (this.battle.abilityActive('Tablets of Ruin')) {
+		}
+		if (this.battle.abilityActive('Tablets of Ruin')) {
+			if (ability !== 'tabletsofruin') {
 				stats.atk = Math.floor(stats.atk * 0.75);
 			}
-			if (this.battle.abilityActive('Beads of Ruin')) {
+		}
+		if (this.battle.abilityActive('Beads of Ruin')) {
+			if (ability !== 'beadsofruin') {
 				stats.spd = Math.floor(stats.spd * 0.75);
 			}
 		}
@@ -1517,9 +1454,6 @@ class BattleTooltips {
 		const species = pokemon.getSpecies();
 		let rules = this.battle.rules;
 		let baseSpe = species.baseStats.spe;
-		if (this.battle.dex.modid.includes('infinitefusion' as ID) && pokemon.volatiles.transform) {
-			baseSpe = pokemon.volatiles.transform[1].getSpecies().baseStats.spe;
-		}
 		let level = pokemon.volatiles.transform?.[4] || pokemon.level;
 		// todo: change this to this.battle.dex.modid
 		let tier = this.battle.tier;
@@ -1818,16 +1752,6 @@ class BattleTooltips {
 			value.itemModify(1.1, "Wide Lens");
 		}
 
-		if (this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
-			if (value.tryItem('Muscle Band') && move.category === 'Physical') {
-				accuracyModifiers.push(4915);
-				value.itemModify(1.2, "Muscle Band");
-			}
-			if (value.tryItem('Wise Glasses') && move.category === 'Special') {
-				accuracyModifiers.push(4915);
-				value.itemModify(1.2, "Wise Glasses");
-			}
-		}
 		// SSB
 		if (this.battle.tier.includes('Super Staff Bros')) {
 			if (move.id === 'alting' && pokemon.shiny) {
@@ -2100,17 +2024,10 @@ class BattleTooltips {
 		}
 		// Base power based on times hit
 		if (move.id === 'ragefist') {
-			if (!this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
-				value.set(Math.min(350, 50 + 50 * pokemon.timesAttacked),
-					pokemon.timesAttacked > 0
-						? `Hit ${pokemon.timesAttacked} time${pokemon.timesAttacked > 1 ? 's' : ''}`
-						: undefined);
-			} else {
-				value.set(Math.min(200, 50 + 25 * pokemon.timesAttacked),
-					pokemon.timesAttacked > 0
-						? `Hit ${pokemon.timesAttacked} time${pokemon.timesAttacked > 1 ? 's' : ''}`
-						: undefined);
-			}
+			value.set(Math.min(350, 50 + 50 * pokemon.timesAttacked),
+				pokemon.timesAttacked > 0
+					? `Hit ${pokemon.timesAttacked} time${pokemon.timesAttacked > 1 ? 's' : ''}`
+					: undefined);
 		}
 		if (!value.value) return value;
 
@@ -2237,11 +2154,6 @@ class BattleTooltips {
 		) {
 			if (target ? target.isGrounded() : true) {
 				value.modify(0.5, 'Grassy Terrain + grounded target');
-			}
-		}
-		if (this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID)) {
-			if (this.battle.weather === 'deltastream' && moveType === 'Flying') {
-				value.modify(1.3, 'Delta Stream boost');
 			}
 		}
 		if (
@@ -2445,7 +2357,7 @@ class BattleTooltips {
 		}
 
 		// Pokemon-specific items
-		if (item.name === 'Soul Dew' && (this.battle.gen < 7 || this.battle.dex.modid.includes('gen9morebalancedhackmons' as ID))) {
+		if (item.name === 'Soul Dew' && this.battle.gen < 7) {
 			return value;
 		}
 		if (BattleTooltips.orbUsers[speciesName]?.includes(item.name) &&
@@ -2624,8 +2536,7 @@ class BattleStatGuesser {
 			this.dex.gen < 3 ||
 			((this.formatid.includes('hackmons') || this.formatid.endsWith('bh')) && this.dex.gen !== 6) ||
 			this.formatid.includes('metronomebattle') ||
-			this.formatid.endsWith('norestrictions') ||
-			this.formatid.includes('createmons')
+			this.formatid.endsWith('norestrictions')
 		);
 		this.supportsEVs = !this.formatid.includes('letsgo');
 		this.supportsAVs = !this.supportsEVs && this.formatid.endsWith('norestrictions');

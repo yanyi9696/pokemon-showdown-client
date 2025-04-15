@@ -815,9 +815,7 @@ const Dex = new class implements ModdedDex {
 
 	getTeambuilderSprite(pokemon: any, gen: number = 0) {
 		if (!pokemon) return '';
-		// Nihilslave: for IF
 		const data = this.getTeambuilderSpriteData(pokemon, gen);
-		if (pokemon.isIF && data.shiny) return data.spriteid.split('/')[1];
 		const shiny = (data.shiny ? '-shiny' : '');
 		return 'background-image:url(' + Dex.resourcePrefix + data.spriteDir + shiny + '/' + data.spriteid + '.png);background-position:' + data.x + 'px ' + data.y + 'px;background-repeat:no-repeat';
 	}

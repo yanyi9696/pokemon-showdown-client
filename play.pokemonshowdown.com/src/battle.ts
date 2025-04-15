@@ -446,11 +446,6 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 				volatilesToRemove.push('protosynthesis' + statName);
 				volatilesToRemove.push('quarkdrive' + statName);
 			}
-			// mbhv4
-			for (const statName of Dex.statNamesExceptHP) {
-				volatilesToRemove.push('orichalcumpulse' + statName);
-				volatilesToRemove.push('hadronengine' + statName);
-			}
 			for (const volatile of volatilesToRemove) {
 				delete this.volatiles[volatile];
 			}
@@ -2261,12 +2256,7 @@ export class Battle {
 			poke.item = item.name;
 			poke.itemEffect = '';
 			poke.removeVolatile('airballoon' as ID);
-			// mbhv4
-			poke.removeVolatile('utilityumbrella' as ID);
 			if (item.id === 'airballoon') poke.addVolatile('airballoon' as ID);
-			if (this.tier.includes('More Balanced Hackmons') && item.id === 'utilityumbrella') {
-				poke.addVolatile('utilityumbrella' as ID);
-			}
 
 			if (effect.id) {
 				switch (effect.id) {
@@ -2320,13 +2310,6 @@ export class Battle {
 				switch (item.id) {
 				case 'airballoon':
 					this.scene.resultAnim(poke, 'Balloon', 'good');
-					break;
-				// mbhv4
-				case 'utilityumbrella':
-					if (this.tier.includes('More Balanced Hackmons')) {
-						this.scene.resultAnim(poke, 'Umbrella', 'good');
-						this.scene.updateWeather();
-					}
 					break;
 				}
 			}
@@ -2394,10 +2377,6 @@ export class Battle {
 				case 'redcard':
 					poke.prevItemEffect = 'held up';
 					break;
-				// mbhv4
-				case 'utilityumbrella':
-					poke.prevItemEffect = 'consumed';
-					poke.removeVolatile('utilityumbrella' as ID);
 				default:
 					poke.prevItemEffect = 'consumed';
 					break;
@@ -2842,23 +2821,6 @@ export class Battle {
 					poke.removeVolatile('quarkdrivespd' as ID);
 					poke.removeVolatile('quarkdrivespe' as ID);
 					break;
-				// mbhv4
-				case 'orichalcumpulse':
-					if (!this.tier.includes('More Balanced Hackmons')) break;
-					poke.removeVolatile('orichalcumpulseatk' as ID);
-					poke.removeVolatile('orichalcumpulsedef' as ID);
-					poke.removeVolatile('orichalcumpulsespa' as ID);
-					poke.removeVolatile('orichalcumpulsespd' as ID);
-					poke.removeVolatile('orichalcumpulsespe' as ID);
-					break;
-				case 'hadronengine':
-					if (!this.tier.includes('More Balanced Hackmons')) break;
-					poke.removeVolatile('hadronengineatk' as ID);
-					poke.removeVolatile('hadronenginedef' as ID);
-					poke.removeVolatile('hadronenginespa' as ID);
-					poke.removeVolatile('hadronenginespd' as ID);
-					poke.removeVolatile('hadronenginespe' as ID);
-					break;
 				default:
 					if (effect.effectType === 'Move') {
 						if (effect.name === 'Doom Desire') {
@@ -3141,10 +3103,6 @@ export class Battle {
 				}
 				if (this.gen > 6) maxTimeLeft = 8;
 			}
-			// mbhv4
-			if (this.tier.includes('More Balanced Hackmons') && effect.id.endsWith('room')) {
-				maxTimeLeft = 8;
-			}
 			if (kwArgs.persistent) minTimeLeft += 2;
 			this.addPseudoWeather(effect.name, minTimeLeft, maxTimeLeft);
 
@@ -3243,12 +3201,6 @@ export class Battle {
 		output.ident = (!isTeamPreview ? pokemonid : '');
 		output.searchid = (!isTeamPreview ? `${pokemonid}|${details}` : '');
 		let splitDetails = details.split(', ');
-		if (splitDetails[splitDetails.length - 1].startsWith('createmons:')) {
-			splitDetails.pop();
-		}
-		if (splitDetails[splitDetails.length - 1].startsWith('headname:')) {
-			splitDetails.pop();
-		}
 		if (splitDetails[splitDetails.length - 1].startsWith('tera:')) {
 			output.terastallized = splitDetails[splitDetails.length - 1].slice(5);
 			splitDetails.pop();

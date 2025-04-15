@@ -176,11 +176,7 @@
 			firstElem = id;
 			break;
 		}
-		// Nihilslave: add this to help show points in bc teambuilder
-		this.mod = '';
-		if (format.includes('balancedcreatemons')) {
-			this.mod += 'balancedcreatemons';
-		}
+		// this.mod = '';
 		this.find('', firstElem);
 	};
 
@@ -286,11 +282,6 @@
 	Search.prototype.renderMoveSortRow = function () {
 		var buf = '<li class="result"><div class="sortrow">';
 		buf += '<button class="sortcol movenamesortcol' + (this.sortCol === 'name' ? ' cur' : '') + '" data-sort="name">Name</button>';
-		if (this.mod.includes('balancedcreatemons')) {
-			// you cannot sort unless u make some changes to src/battle-dex-search.ts
-			// todo: fix it?
-			buf += '<button class="sortcol pointsortcol' + (this.sortCol === 'point' ? ' cur' : '') + '" data-sort="point">Pt</button>';
-		}
 		buf += '<button class="sortcol movetypesortcol' + (this.sortCol === 'type' ? ' cur' : '') + '" data-sort="type">Type</button>';
 		buf += '<button class="sortcol movetypesortcol' + (this.sortCol === 'category' ? ' cur' : '') + '" data-sort="category">Cat</button>';
 		buf += '<button class="sortcol powersortcol' + (this.sortCol === 'power' ? ' cur' : '') + '" data-sort="power">Pow</button>';
@@ -522,11 +513,6 @@
 			name = name.substr(0, matchStart) + '<b>' + name.substr(matchStart, matchLength) + '</b>' + name.substr(matchStart + matchLength);
 		}
 		buf += '<span class="col namecol">' + name + '</span> ';
-		if (this.mod.includes('balancedcreatemons')) {
-			var point = exports.abilityToPoint[id];
-			if (!point) point = 1;
-			buf += '<span class="col namecol">' + '(' + point + ')' + '</span> ';
-		}
 
 		// error
 		if (errorMessage) {
@@ -571,13 +557,6 @@
 		if (errorMessage) {
 			buf += errorMessage + '</a></li>';
 			return buf;
-		}
-
-		// bc - point
-		if (this.mod.includes('balancedcreatemons')) {
-			var point = exports.moveToPoint[id];
-			if (!point) point = 0.5;
-			buf += '<span class="col labelcol"><em>Point</em><br />' + point + '</span> ';
 		}
 
 		// type

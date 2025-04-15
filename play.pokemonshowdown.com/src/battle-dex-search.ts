@@ -849,13 +849,8 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 	}
 	getBaseResults() {
 		if (!this.set) return this.getDefaultResults();
-		if (this.formats.includes('gen9morebalancedhackmons' as ID)) {
-			return ([['header', "MBHv4"], ['ability', 'allseeingeye' as ID], ['header', "Abilities"]] as SearchRow[])
-				.concat(this.getDefaultResults());
-		}
 		if (
 			this.formats.includes('almostanyability' as ID) ||
-			this.formats.includes('createmons' as ID) ||
 			this.formats.includes('hackmons' as ID) ||
 			this.formats.includes('metronome' as ID)
 		) return ([['header', "Abilities"]] as SearchRow[]).concat(this.getDefaultResults());
