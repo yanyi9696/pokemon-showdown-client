@@ -1,11 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html><head>
 	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0" />
 	<title>Showdown!</title>
 	<link rel="shortcut icon" href="favicon.ico" id="dynamic-favicon" />
 	<link rel="stylesheet" href="style/battle.css" />
 	<link rel="stylesheet" href="style/client2.css" />
+	<link rel="stylesheet" href="style/utilichart.css" />
 	<meta name="robots" content="noindex" />
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
 	<!--[if lte IE 8]><script>
@@ -19,10 +20,10 @@
 		<div class="ps-room scrollable" id="mainmenu"><div class="mainmenuwrapper">
 			<div class="leftmenu">
 				<div class="activitymenu">
-					<div class="pmbox">
-						<div class="pm-window news-embed">
-							<h3><button class="closebutton" tabindex="-1" aria-label="Close"><i class="fa fa-times-circle"></i></button><button class="minimizebutton" tabindex="-1" aria-label="Minimize"><i class="fa fa-minus-circle"></i></button>Latest News</h3>
-							<div class="pm-log" style="max-height:none">
+					<div class="mini-window">
+						<h3><button class="closebutton" tabindex="-1" aria-label="Close"><i class="fa fa-times-circle"></i></button><button class="minimizebutton" tabindex="-1" aria-label="Minimize"><i class="fa fa-minus-circle"></i></button>Latest News</h3>
+						<div id="room-news">
+							<div class="mini-window-body">
 								<div class="newsentry"><h4>Test client</h4><p>Welcome to the test client! You can test client changes here!</p><p>&mdash;<strong>Zarel</strong> <small class="date">on Sep 25, 2015</small></p></div>
 							</div>
 						</div>
@@ -77,6 +78,11 @@
 				customcolors: {}
 			};
 		}
+		function loadRemoteData(src) {
+			var scriptEl = document.createElement('script');
+			scriptEl.src = src.replace(/.*\/(data|js)\//g, 'https://play.pokemonshowdown.com/$1/');
+			document.head.appendChild(scriptEl);
+		}
 		Config.testclient = true;
 		(function() {
 			if (location.search !== '') {
@@ -93,44 +99,48 @@
 			}
 		})();
 	</script>
-	<script src="../config/testclient-key.js"></script>
-	<script src="js/client-core.js"></script>
 	<script nomodule src="/js/lib/ps-polyfill.js"></script>
+	<script src="../config/testclient-key.js"></script>
+	<script src="js/client-core.js" onerror="alert('You must build the client with `node build` before using testclient.html')"></script>
 
+	<script src="js/battle-dex-data.js"></script>
 	<script src="js/battle-dex.js"></script>
 	<script src="js/battle-text-parser.js"></script>
 	<script src="js/client-main.js"></script>
 	<script src="js/lib/sockjs-1.4.0-nwjsfix.min.js"></script>
 	<script src="js/client-connection.js"></script>
+	<script> Net.defaultRoute = 'https://play.pokemonshowdown.com'; </script>
+
+	<script src="js/lib/html-css-sanitizer-minified.js"></script>
+	<script src="src/battle-log-misc.js"></script>
+	<script src="js/server/chat-formatter.js" onerror="loadRemoteData(this.src)"></script>
+	<script src="js/battle-log.js"></script>
+
 	<script src="js/lib/preact.min.js"></script>
 	<script src="js/panels.js"></script>
 	<script src="js/panel-mainmenu.js"></script>
 	<script src="js/panel-rooms.js"></script>
 	<script src="js/panel-topbar.js"></script>
-
-	<script src="js/lib/html-css-sanitizer-minified.js"></script>
-	<script src="src/battle-log-misc.js"></script>
-	<script src="js/server/chat-formatter.js"></script>
-	<script src="js/battle-log.js"></script>
+	<script src="js/panel-popups.js"></script>
 	<script src="js/miniedit.js"></script>
+	<script src="js/panel-chat-tournament.js"></script>
 	<script src="js/panel-chat.js"></script>
 
 	<script src="js/battle-sound.js"></script>
 	<script src="js/lib/jquery-2.2.4.min.js"></script>
-	<script src="data/graphics.js"></script>
-	<script src="data/text.js"></script>
+	<script src="data/graphics.js" onerror="loadRemoteData(this.src)"></script>
+	<script src="data/text.js" onerror="loadRemoteData(this.src)"></script>
 	<script src="js/battle-tooltips.js"></script>
 	<script src="js/battle.js"></script>
 	<script src="js/battle-choices.js"></script>
 	<script src="js/panel-battle.js"></script>
 
-	<script src="js/battle-dex-data.js"></script>
-	<script src="data/pokedex.js"></script>
-	<script src="data/moves.js"></script>
-	<script src="data/items.js"></script>
-	<script src="data/abilities.js"></script>
-	<script src="data/search-index.js"></script>
-	<script src="data/teambuilder-tables.js"></script>
+	<script src="data/pokedex.js" onerror="loadRemoteData(this.src)"></script>
+	<script src="data/moves.js" onerror="loadRemoteData(this.src)"></script>
+	<script src="data/items.js" onerror="loadRemoteData(this.src)"></script>
+	<script src="data/abilities.js" onerror="loadRemoteData(this.src)"></script>
+	<script src="data/search-index.js" onerror="loadRemoteData(this.src)"></script>
+	<script src="data/teambuilder-tables.js" onerror="loadRemoteData(this.src)"></script>
 	<script src="js/panel-teamdropdown.js"></script>
 	<script src="js/panel-teambuilder.js?"></script>
 	<script src="js/battle-dex-search.js?"></script>
@@ -138,8 +148,9 @@
 	<script src="js/panel-teambuilder-team.js?"></script>
 	<script src="js/panel-ladder.js?"></script>
 	<script src="js/panel-page.js?"></script>
-
+	
 	<script src="https://play.pokemonshowdown.com/data/pokedex-mini.js"></script>
 	<script src="https://play.pokemonshowdown.com/data/pokedex-mini-bw.js"></script>
+	<script src="js/lib/d3.v3.min.js"></script>
 
 </body></html>
