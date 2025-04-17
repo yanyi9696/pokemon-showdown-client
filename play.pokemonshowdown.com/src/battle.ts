@@ -443,7 +443,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 		// this.lastMove = pokemon.lastMove; // I think
 		if (!copySource) {
 			const volatilesToRemove = [
-				'airballoon', 'attract', 'autotomize', 'disable', 'encore', 'foresight', 'gmaxchistrike', 'imprison', 'laserfocus', 'mimic', 'miracleeye', 'nightmare', 'saltcure', 'smackdown', 'stockpile1', 'stockpile2', 'stockpile3', 'syrupbomb', 'torment', 'typeadd', 'typechange', 'yawn', 'utilityumbrella',
+				'airballoon', 'attract', 'autotomize', 'disable', 'encore', 'foresight', 'gmaxchistrike', 'imprison', 'laserfocus', 'mimic', 'miracleeye', 'nightmare', 'saltcure', 'smackdown', 'stockpile1', 'stockpile2', 'stockpile3', 'syrupbomb', 'torment', 'typeadd', 'typechange', 'yawn',
 			];
 			for (const statName of Dex.statNamesExceptHP) {
 				volatilesToRemove.push('protosynthesis' + statName);
@@ -1487,9 +1487,6 @@ export class Battle {
 		if (move.id === 'focuspunch') {
 			pokemon.removeTurnstatus('focuspunch' as ID);
 		}
-		if (move.id === 'breathofwyvern') {
-			pokemon.removeTurnstatus('breathofwyvern' as ID);
-		}
 		this.scene.updateStatbar(pokemon);
 		if (fromeffect.id === 'sleeptalk') {
 			pokemon.rememberMove(move.name, 0);
@@ -1638,10 +1635,6 @@ export class Battle {
 			break;
 		case 'attract':
 			this.scene.resultAnim(pokemon, 'Immobilized', 'neutral');
-			break;
-		case 'breathofwyvern':
-			this.scene.resultAnim(pokemon, 'Breath Interrupted', 'neutral');
-			pokemon.removeTurnstatus('breathofwyvern' as ID);
 			break;
 		}
 		this.scene.animReset(pokemon);
@@ -2002,10 +1995,6 @@ export class Battle {
 			let poke = this.getPokemon(args[1]);
 			if (poke) {
 				this.scene.resultAnim(poke, 'Super-effective', 'bad');
-				if (Dex.afdMode === true) {
-					// April Fool's 2018
-					this.scene.runOtherAnim('hitmark' as ID, [poke]);
-				}
 			}
 			if (this.activeMoveIsSpread) kwArgs.spread = '.';
 			this.log(args, kwArgs);
@@ -2333,7 +2322,6 @@ export class Battle {
 				poke.prevItemEffect = '';
 			}
 			poke.removeVolatile('airballoon' as ID);
-			poke.removeVolatile('utilityumbrella' as ID);
 			poke.addVolatile('itemremoved' as ID);
 			if (kwArgs.eat) {
 				poke.prevItemEffect = 'eaten';
@@ -2724,12 +2712,6 @@ export class Battle {
 				break;
 			case 'reflect':
 				this.scene.resultAnim(poke, 'Reflect', 'good');
-				break;
-			// bc, added by Nihilslave
-			case 'bcstats':
-				const stats = Dex.sanitizeName(args[3]);
-				poke.addVolatile('bcstats' as ID, stats);
-				this.scene.updateStatbar(poke);
 				break;
 			}
 			if (!(effect.id === 'typechange' && poke.terastallized)) {

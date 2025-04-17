@@ -970,7 +970,7 @@ export class BattleScene implements BattleSceneStub {
 			} else if (this.battle.weatherTimeLeft !== 0) {
 				weatherhtml += ` <small>(${this.battle.weatherTimeLeft} turn${this.battle.weatherTimeLeft === 1 ? '' : 's'})</small>`;
 			}
-			let nullifyWeather = this.battle.abilityActive(['Air Lock', 'Cloud Nine']);
+			const nullifyWeather = this.battle.abilityActive(['Air Lock', 'Cloud Nine']);
 			weatherhtml = `${nullifyWeather ? '<s>' : ''}${weatherhtml}${nullifyWeather ? '</s>' : ''}`;
 		}
 
@@ -1791,7 +1791,6 @@ export class PokemonSprite extends Sprite {
 		formechange: null,
 		typechange: null,
 		typeadd: null,
-		bcstats: null, // added by Nihilslave for bc
 		dynamax: ['Dynamaxed', 'good'],
 		trapped: null, // linked volatiles are not implemented yet
 		throatchop: ['Throat Chop', 'bad'],
@@ -1842,16 +1841,6 @@ export class PokemonSprite extends Sprite {
 		quarkdrivespa: ['Quark Drive: SpA', 'good'],
 		quarkdrivespd: ['Quark Drive: SpD', 'good'],
 		quarkdrivespe: ['Quark Drive: Spe', 'good'],
-		orichalcumpulseatk: ['Orichalcum Pulse: Atk', 'good'],
-		orichalcumpulsedef: ['Orichalcum Pulse: Def', 'good'],
-		orichalcumpulsespa: ['Orichalcum Pulse: SpA', 'good'],
-		orichalcumpulsespd: ['Orichalcum Pulse: SpD', 'good'],
-		orichalcumpulsespe: ['Orichalcum Pulse: Spe', 'good'],
-		hadronengineatk: ['Hadron Engine: Atk', 'good'],
-		hadronenginedef: ['Hadron Engine: Def', 'good'],
-		hadronenginespa: ['Hadron Engine: SpA', 'good'],
-		hadronenginespd: ['Hadron Engine: SpD', 'good'],
-		hadronenginespe: ['Hadron Engine: Spe', 'good'],
 		fallen1: ['Fallen: 1', 'good'],
 		fallen2: ['Fallen: 2', 'good'],
 		fallen3: ['Fallen: 3', 'good'],
@@ -2842,10 +2831,6 @@ export class PokemonSprite extends Sprite {
 		if (pokemon.volatiles.typeadd) {
 			const type = pokemon.volatiles.typeadd[1];
 			status += '+<img src="' + Dex.resourcePrefix + 'sprites/types/' + type + '.png" alt="' + type + '" class="pixelated" /> ';
-		}
-		if (pokemon.volatiles.bcstats) {
-			const stats = pokemon.volatiles.bcstats[1];
-			status += '<span class="neutral">' + stats + '</span> ';
 		}
 		for (const stat in pokemon.boosts) {
 			if (pokemon.boosts[stat]) {

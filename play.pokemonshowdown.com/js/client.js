@@ -217,14 +217,10 @@ function toId() {
 		 * domain in order to have access to the correct cookies.
 		 */
 		getActionPHP: function () {
-			// Nihilslave: looks like this is the original code? don't use it anyway
-			// var ret = '/~~' + Config.server.id + '/action.php';
-			// if (Config.testclient) {
-			// 	ret = 'https://' + Config.routes.client + ret;
-			// }
-
-			// Nihilslave: return this so that we can get access to official login server
-			var ret = 'https://play.pokemonshowdown.com/action.php';
+			var ret = '/~~' + Config.server.id + '/action.php';
+			if (Config.testclient) {
+				ret = 'https://' + Config.routes.client + ret;
+			}
 			return (this.getActionPHP = function () {
 				return ret;
 			})();
@@ -3043,7 +3039,7 @@ function toId() {
 		initialize: function (data) {
 			var buf = '';
 			buf = '<p>Your replay has been uploaded! It\'s available at:</p>';
-			buf += '<p> <a class="replay-link" href="https://' + Config.routes.replays + '/files/' + data.uri + '" target="_blank" class="no-panel-intercept">https://' + Config.routes.replays + '/files/' + data.uri + '</a> <button name="copyReplayLink" class="button">Copy</button></p>';
+			buf += '<p> <a class="replay-link" href="https://' + Config.routes.replays + '/' + data.id + '" target="_blank" class="no-panel-intercept">https://' + Config.routes.replays + '/' + data.id + '</a> <button name="copyReplayLink" class="button">Copy</button></p>';
 			buf += '<p><button class="button autofocus" name="close">Close</button><p>';
 			this.$el.html(buf).css('max-width', 620);
 		},

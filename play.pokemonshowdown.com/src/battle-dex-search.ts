@@ -393,7 +393,6 @@ export class DexSearch {
 
 			// For pokemon queries, accept types/tier/abilities/moves/eggroups as filters
 			if (searchType === 'pokemon' && (typeIndex === 5 || typeIndex > 7)) continue;
-			if (searchType === 'pokemon' && typeIndex === 3 && this.dex.gen < 9) continue;
 			// For move queries, accept types/categories as filters
 			if (searchType === 'move' && ((typeIndex !== 8 && typeIndex > 4) || typeIndex === 3)) continue;
 			// For move queries in the teambuilder, don't accept pokemon as filters
@@ -847,7 +846,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 	getDefaultResults(): SearchRow[] {
 		const results: SearchRow[] = [];
 		for (let id in BattleAbilities) {
-			const skipped = ['noability', 'mountaineer', 'rebound', 'persistent', 'allseeingeye'];
+			const skipped = ['noability', 'mountaineer', 'rebound', 'persistent'];
 			if (skipped.includes(id)) continue;
 			results.push(['ability', id as ID]);
 		}
@@ -1324,15 +1323,6 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				const name2 = id2;
 				return (name1 < name2 ? -1 : name1 > name2 ? 1 : 0) * sortOrder;
 			});
-		case 'point':
-			return results.sort(([rowType1, id1], [rowType2, id2]) => {
-				let point1 = exports.moveToPoint[id1] || 0.5;
-				let point2 = exports.moveToPoint[id2] || 0.5;
-				// don't show banned moves
-				if (point1 === 1000000) point1 = -1 * sortOrder;
-				if (point2 === 1000000) point2 = -1 * sortOrder;
-				return (point2 - point1) * sortOrder;
-			});
 		}
 		throw new Error("invalid sortcol");
 	}
@@ -1361,7 +1351,6 @@ class BattleCategorySearch extends BattleTypedSearch<'category'> {
 }
 
 class BattleTypeSearch extends BattleTypedSearch<'type'> {
-	
 	getTable() {
 		return window.BattleTypeChart;
 	}

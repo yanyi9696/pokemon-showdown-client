@@ -67,9 +67,6 @@ var Replays = {
 		this.$el.on('click', '.chooser button', function (e) {
 			self.clickChangeSetting(e);
 		});
-		this.$el.on('click', '.replayDownloadButton', function (e) {
-			self.clickReplayDownloadButton(e);
-		});
 		this.$el.on('click', 'button', function (e) {
 			var action = $(e.currentTarget).data('action');
 			if (action) self[action]();
@@ -85,9 +82,7 @@ var Replays = {
 			autoresize: true
 		});
 
-		this.$('.replay-controls-2').html('<div class="chooser leftchooser speedchooser"> <em>Speed:</em> <div><button value="hyperfast">Hyperfast</button><button value="fast">Fast</button><button class="sel" value="normal">Normal</button><button value="slow">Slow</button><button value="reallyslow">Really Slow</button></div> </div> <div class="chooser colorchooser"> <em>Color&nbsp;scheme:</em> <div><button class="sel" value="light">Light</button><button value="dark">Dark</button></div> </div> <div class="chooser soundchooser" style="display:none"> <em>Music:</em> <div><button class="sel" value="on">On</button><button value="off">Off</button></div> </div>');
-
-		this.$('.urlbox').css('margin-right', 120).before('<a class="button replayDownloadButton" style="float:right;margin-top:7px;margin-right:7px" href="#"><i class="fa fa-download"></i> Download</a>');
+		this.$('.replay-controls-2').html('<div class="chooser leftchooser speedchooser"> <em>Speed:</em> <div><button value="hyperfast">Hyperfast</button><button value="fast">Fast</button><button value="normal" class="sel">Normal</button><button value="slow">Slow</button><button value="reallyslow">Really Slow</button></div> </div> <div class="chooser colorchooser"> <em>Color&nbsp;scheme:</em> <div><button class="sel" value="light">Light</button><button value="dark">Dark</button></div> </div> <div class="chooser soundchooser" style="display:none"> <em>Music:</em> <div><button class="sel" value="on">On</button><button value="off">Off</button></div> </div>');
 
 		// this works around a WebKit/Blink bug relating to float layout
 		var rc2 = this.$('.replay-controls-2')[0];
@@ -181,28 +176,6 @@ var Replays = {
 		} else {
 			this.$('.replay-controls').html('<button data-action="pause"><i class="fa fa-pause"></i> Pause</button><button data-action="reset"><i class="fa fa-undo"></i> Reset</button> <button data-action="rewind"><i class="fa fa-step-backward"></i> Last turn</button><button data-action="ff"><i class="fa fa-step-forward"></i> Next turn</button> <button data-action="ffto"><i class="fa fa-fast-forward"></i> Go to turn...</button> <button data-action="switchViewpoint"><i class="fa fa-random"></i> Switch sides</button>');
 		}
-	},
-	clickReplayDownloadButton: function (e) {
-		var filename = (this.battle.tier || 'Battle').replace(/[^A-Za-z0-9]/g, '');
-
-		// ladies and gentlemen, JavaScript dates
-		var timestamp = parseInt(this.$('.uploaddate').data('timestamp'), 10) * 1000;
-		var date = new Date(timestamp);
-		filename += '-' + date.getFullYear();
-		filename += (date.getMonth() >= 9 ? '-' : '-0') + (date.getMonth() + 1);
-		filename += (date.getDate() >= 10 ? '-' : '-0') + date.getDate();
-
-		filename += '-' + toID(this.battle.p1.name);
-		filename += '-' + toID(this.battle.p2.name);
-
-		// Disabling route replacement will cause the function to use official BattleLog here
-		// todo: find out which file to change, battle.js suspected
-		// done: just download the resources and enable the route replacement; the key is config.js, tho
-		// todo: change .replayId of ssr to room.id
-		e.currentTarget.href = BattleLog.createReplayFileHref(this);
-		e.currentTarget.download = filename + '.html';
-
-		e.stopPropagation();
 	},
 	pause: function () {
 		this.battle.pause();

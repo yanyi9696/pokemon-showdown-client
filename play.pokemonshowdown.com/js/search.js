@@ -176,7 +176,6 @@
 			firstElem = id;
 			break;
 		}
-		// this.mod = '';
 		this.find('', firstElem);
 	};
 
