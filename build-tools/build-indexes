@@ -1482,11 +1482,11 @@ console.log("DONE");
 /*********************************************************
  * Build <YourMod>.js
  *********************************************************/
-const YourModName = ""; // fill in the name of the directory your mod is in of server side
+const modNames = [];
 
-process.stdout.write("Building `data/" + YourModName + ".js`...");
-
+for (const YourModName of modNames)
 {
+	process.stdout.write("Building `data/" + YourModName + ".js`...");
 	//#region teambuilder-tables
 	const YourModTable = {};
 
