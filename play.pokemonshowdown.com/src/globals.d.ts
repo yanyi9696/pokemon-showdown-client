@@ -15,13 +15,13 @@ declare const BattlePokemonSprites: any;
 declare const BattlePokemonSpritesBW: any;
 declare const NonBattleGames: { [id: string]: string };
 
-// digimon
+// fantasy
 
-// declare var Digidex: any;
-// declare var DigiMovedex: any;
-// declare var DigiAbilities: any;
-// declare var DigiItems: any;
-// declare var DigiTypeChart: any;
+declare const Gen9fantasydex: any;
+declare const Gen9fantasyMovedex: any;
+declare const Gen9fantasyAbilities: any;
+declare const Gen9fantasyItems: any;
+// declare const Gen9fantasyTypeChart: any;
 
 // PS globals
 /////////////

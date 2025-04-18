@@ -119,6 +119,7 @@ export class BattleScene implements BattleSceneStub {
 		let numericId = 0;
 		if (battle.id) {
 			numericId = parseInt(battle.id.slice(battle.id.lastIndexOf('-') + 1), 10);
+			if (battle.id.includes('fantasy') || battle.id.split('-')[1].startsWith('gen9fc')) this.mod = 'gen9fantasy';
 		}
 		if (!numericId) {
 			numericId = Math.floor(Math.random() * 1000000);

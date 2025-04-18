@@ -1482,7 +1482,7 @@ console.log("DONE");
 /*********************************************************
  * Build <YourMod>.js
  *********************************************************/
-const modNames = [];
+const modNames = ["gen9fantasy"];
 
 for (const mod of modNames)
 {
@@ -1501,7 +1501,7 @@ for (const mod of modNames)
 	const ModTypeChart = requireNoCache(modDir + '/typechart.js').TypeChart;
 	const ModLearnsets = requireNoCache(modDir + '/learnsets.js').Learnsets;
 
-	const modSpecies = Object.keys(Moddex);
+	const modSpecies = Object.keys(Dex.mod(mod).data.Pokedex);
 	modSpecies.sort();
 	const tierTable = {};
 	for (const id of modSpecies) {
@@ -1570,25 +1570,63 @@ for (const mod of modNames)
 	items.push(...badItems);
 	items.push(...unreleasedItems);
 
+	const gen3HMs = new Set(['cut', 'fly', 'surf', 'strength', 'flash', 'rocksmash', 'waterfall', 'dive']);
+	const gen4HMs = new Set(['cut', 'fly', 'surf', 'strength', 'rocksmash', 'waterfall', 'rockclimb']);
 	const lsets = Dex.mod(mod).data.Learnsets;
 	for (const id in lsets) {
-		if (id === 'bulbasaur') break;
+		const learnset = lsets[id].learnset;
+		if (!learnset) continue;
 		learnsets[id] = {};
-		for (const moveid in lsets[id]['learnset']) {
-			learnsets[id][moveid] = '9a';
+		for (const moveid in learnset) {
+			const gens = learnset[moveid].map(x => Number(x[0]));
+			const minGen = Math.min(...gens);
+
+			if (minGen <= 4 && (gen3HMs.has(moveid) || gen4HMs.has(moveid))) {
+				let legalGens = '';
+				let available = false;
+
+				if (minGen === 3) {
+					legalGens += '3';
+					available = true;
+				}
+				if (available) available = !gen3HMs.has(moveid);
+
+				if (available || gens.includes(4)) {
+					legalGens += '4';
+					available = true;
+				}
+				if (available) available = !gen4HMs.has(moveid);
+
+				const minUpperGen = available ? 5 : Math.min(
+					...gens.filter(gen => gen > 4)
+				);
+				legalGens += '0123456789'.slice(minUpperGen);
+				learnsets[id][moveid] = legalGens;
+			} else {
+				learnsets[id][moveid] = '0123456789'.slice(minGen);
+			}
+
+			if (gens.indexOf(6) >= 0) learnsets[id][moveid] += 'p';
+			if (gens.indexOf(7) >= 0 && learnset[moveid].some(x => x[0] === '7' && x !== '7V')) {
+				learnsets[id][moveid] += 'q';
+			}
+			if (gens.indexOf(8) >= 0 && learnset[moveid].some(x => x[0] === '8' && x !== '8V')) {
+				learnsets[id][moveid] += 'g';
+			}
+			if (gens.indexOf(9) >= 0 && learnset[moveid].some(x => x[0] === '9' && x !== '9V')) {
+				learnsets[id][moveid] += 'a';
+			}
+			if (gens.indexOf(9) >= 0 && learnset[moveid].some(x => x === '9E')) learnsets[id][moveid] += 'e';
 		}
 	}
 
 	buf += `exports.${Mod}Table = ` + JSON.stringify(ModTable).replace(/['\\]/g, "\\$&") + ';';
 
-	let deleteFlag = false;
 	for (const id in Moddex) {
-		if (id === 'bulbasaur') deleteFlag = true;
 		const fdata = Dex.mod(mod).data.FormatsData[id];
 		if (fdata && fdata.tier) {
 			Moddex[id].tier = fdata.tier;
 		}
-		if (deleteFlag) delete Moddex[id];
 	}
 	for (const id in ModMovedex) {
 		const move = Dex.mod(mod).moves.get(id);
@@ -1604,11 +1642,6 @@ for (const mod of modNames)
 		const ability = Dex.mod(mod).abilities.get(id);
 		if (ability.desc) ModAbilities[id].desc = ability.desc;
 		if (ability.shortDesc) ModAbilities[id].shortDesc = ability.shortDesc;
-	}
-	deleteFlag = false;
-	for (const id in ModLearnsets) {
-		if (id === 'bulbasaur') deleteFlag = true;
-		if (deleteFlag) delete ModLearnsets[id];
 	}
 	// .json is for dex.pokemonshowdown.com, not needed here
 	buf += `exports.${Mod}dex = ` + es3stringify(Moddex) + ';';

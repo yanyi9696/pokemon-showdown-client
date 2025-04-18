@@ -296,6 +296,7 @@ export const Dex = new class implements ModdedDex {
 		if (formatid.includes('nationaldex') || formatid.includes('natdex') || formatid.startsWith(gen + 'nd') || formatid.includes('metronome')) modids.push('natdex' as ID);
 		if (formatid.includes('letsgo')) modids.push('gen7letsgo' as ID);
 		if (formatid.includes('bdsp')) modids.push('gen8bdsp' as ID);
+		if (formatid.includes('fantasy') || formatid.startsWith(gen + 'fc')) modids.push('gen9fantasy' as ID);
 
 		const modpid = gen + modids.join('');
 		return [modpid as ID, gen as ID, ...modids];
@@ -621,7 +622,13 @@ export const Dex = new class implements ModdedDex {
 			}
 			pokemon = pokemon.getSpeciesForme() + (isGigantamax ? '-Gmax' : '');
 		}
-		const species = Dex.species.get(pokemon);
+		let species = Dex.species.get(pokemon);
+		const modFlag = (species.exists === false && options.mod);
+		if (modFlag) {
+			species = Dex.mod(options.mod as ID).species.get(pokemon as string);
+			// uncomment for animated, another one to comment lines after
+			// if (options.mod === 'gen9fantasy') species = Dex.mod(options.mod as ID).species.get(species.baseSpecies);
+		}
 		// Gmax sprites are already extremely large, so we don't need to double.
 		if (species.name.endsWith('-Gmax')) isDynamax = false;
 		let spriteData = {
@@ -636,6 +643,7 @@ export const Dex = new class implements ModdedDex {
 			shiny: options.shiny,
 		};
 		let name = species.spriteid;
+		if (modFlag && options.mod === 'gen9fantasy') name = name.split('-')[0]; // comment out for animated
 		let dir;
 		let facing;
 		if (isFront) {
@@ -784,6 +792,9 @@ export const Dex = new class implements ModdedDex {
 			num = BattlePokemonSprites[id].num;
 		} else if (window.BattlePokedex?.[id]?.num) {
 			num = BattlePokedex[id].num;
+		} else{
+			const gen9fantasySpecies = Dex.mod('gen9fantasy' as ID).species.get(id);
+			if (gen9fantasySpecies.exists === true) num = gen9fantasySpecies.num;
 		}
 		if (num < 0) num = 0;
 		if (num > 1025) num = 0;
@@ -843,7 +854,11 @@ export const Dex = new class implements ModdedDex {
 		if (pokemon.species && !spriteid) {
 			spriteid = species.spriteid || toID(pokemon.species);
 		}
-		if (species.exists === false) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
+		if (species.exists === false) {
+			let gen9fantasySpecies = Dex.mod('gen9fantasy' as ID).species.get(id);
+			if (gen9fantasySpecies.exists !== true) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
+			spriteid = gen9fantasySpecies.spriteid.split('-')[0];
+		}
 		const spriteData: TeambuilderSpriteData = {
 			spriteid,
 			spriteDir: 'sprites/dex',
@@ -911,14 +926,14 @@ export const Dex = new class implements ModdedDex {
 		const categoryID = toID(category);
 		let sanitizedCategory = '';
 		switch (categoryID) {
-		case 'physical':
-		case 'special':
-		case 'status':
-			sanitizedCategory = categoryID.charAt(0).toUpperCase() + categoryID.slice(1);
-			break;
-		default:
-			sanitizedCategory = 'undefined';
-			break;
+			case 'physical':
+			case 'special':
+			case 'status':
+				sanitizedCategory = categoryID.charAt(0).toUpperCase() + categoryID.slice(1);
+				break;
+			default:
+				sanitizedCategory = 'undefined';
+				break;
 		}
 		return `<img src="${Dex.resourcePrefix}sprites/categories/${sanitizedCategory}.png" alt="${sanitizedCategory}" height="14" width="32" class="pixelated" />`;
 	}
@@ -1167,7 +1182,7 @@ export class ModdedDex {
 				}
 			}
 			if (this.gen < 3) {
-				data.abilities = {0: "No Ability"};
+				data.abilities = { 0: "No Ability" };
 			}
 			for (const mid of this.modid) {
 				if (ModModifier[mid]?.speciesMod) ModModifier[mid].speciesMod!(data, this);
@@ -1254,11 +1269,15 @@ export class ModdedDex {
 		if (this.modid.includes('natdex' as ID)) table = BTTable[`gen${this.gen}natdex`];
 		if (this.modid.includes('gen7letsgo' as ID)) table = BTTable['gen7letsgo'];
 		if (this.modid.includes('gen8bdsp' as ID)) table = BTTable['gen8bdsp'];
+		
+		if (this.modid.includes('gen9fantasy' as ID)) table = window.Gen9fantasyTable;
 		return table;
 	}
 	getLearnsetTable() {
 		if (this.modid.includes('gen7letsgo' as ID)) return window.BattleTeambuilderTable['gen7letsgo'];
 		if (this.modid.includes('gen8bdsp' as ID)) return window.BattleTeambuilderTable['gen8bdsp'];
+
+		if (this.modid.includes('gen9fantasy' as ID)) return window.Gen9fantasyTable;
 		return window.BattleTeambuilderTable;
 	}
 
@@ -1304,12 +1323,12 @@ export class ModdedDex {
 
 	getItemSet() {
 		let table = window.BattleTeambuilderTable;
-		const petmods = ['natdex', 'gen8bdsp', 'metronome'];
+		const petmods = ['natdex', 'gen8bdsp', 'gen9fantasy', 'metronome'];
 		for (const mid of this.modid) {
 			if (!petmods.includes(mid)) continue;
 			let _mid = mid;
 			if (['natdex', 'metronome'].includes(_mid)) _mid = `gen${this.gen}${_mid}` as ID;
-			table = window.BattleTeambuilderTable[_mid];
+			table = _mid === ('gen9fantasy' as ID) ? window.Gen9fantasyTable : window.BattleTeambuilderTable[_mid];
 			if (table) break;
 		}
 		if (this.gen < Dex.gen) table = window.BattleTeambuilderTable[`gen${this.gen}`];
@@ -1502,7 +1521,7 @@ const ModModifier: {
 			const bstWithoutHp: number = data.bst - data.baseStats['hp'];
 			const scale = goalBST - data.baseStats['hp'];
 			data.bst = data.baseStats['hp'];
-			let newStats = {...data.baseStats};
+			let newStats = { ...data.baseStats };
 			for (const stat in data.baseStats) {
 				if (stat === 'hp') continue;
 				newStats[stat] = Math.floor(data.baseStats[stat] * scale / bstWithoutHp);
@@ -1618,7 +1637,7 @@ const ModModifier: {
 		speciesMod: (data: any): any => {
 			const table = window.BattleTeambuilderTable['gen7letsgo'];
 			if (data.id in table.overrideSpeciesData) Object.assign(data, table.overrideSpeciesData[data.id]);
-			data.abilities = {0: "No Ability"};
+			data.abilities = { 0: "No Ability" };
 			if (data.id in table.overrideTier) data.tier = table.overrideTier[data.id];
 		},
 	},
@@ -1639,6 +1658,32 @@ const ModModifier: {
 			const table = window.BattleTeambuilderTable['gen8bdsp'];
 			if (data.id in table.overrideSpeciesData) Object.assign(data, table.overrideSpeciesData[data.id]);
 			if (data.id in table.overrideTier) data.tier = table.overrideTier[data.id];
+		},
+	},
+	gen9fantasy: {
+		speciesMod: (data: any): any => {
+			if (data.id in window.Gen9fantasydex) {
+				Object.assign(data, window.Gen9fantasydex[data.id]);
+				data.exists = true;
+			}
+		},
+		movesMod: (data: any): any => {
+			if (data.id in window.Gen9fantasyMovedex) {
+				Object.assign(data, window.Gen9fantasyMovedex[data.id]);
+				data.exists = true;
+			}
+		},
+		itemsMod: (data: any): any => {
+			if (data.id in window.Gen9fantasyItems) {
+				Object.assign(data, window.Gen9fantasyItems[data.id]);
+				data.exists = true;
+			}
+		},
+		abilitiesMod: (data: any): any => {
+			if (data.id in window.Gen9fantasyAbilities) {
+				Object.assign(data, window.Gen9fantasyAbilities[data.id]);
+				data.exists = true;
+			}
 		},
 	},
 };

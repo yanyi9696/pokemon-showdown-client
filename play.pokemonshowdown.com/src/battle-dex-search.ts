@@ -27,10 +27,10 @@ type SearchFilter = [string, string];
 declare const BattleSearchIndex: [ID, SearchType, number?, number?][];
 declare const BattleSearchIndexOffset: any;
 declare const BattleTeambuilderTable: any;
-// digimon
-// declare const DigimonSearchIndex: [ID, SearchType, number?, number?][];
-// declare const DigimonSearchIndexOffset: any;
-// declare const DigimonTable: any;
+// fantasy
+declare const Gen9fantasySearchIndex: [ID, SearchType, number?, number?][];
+declare const Gen9fantasySearchIndexOffset: any;
+declare const Gen9fantasyTable: any;
 
 /**
  * Backend for search UIs.
@@ -213,30 +213,30 @@ export class DexSearch {
 		let searchIndex = BattleSearchIndex;
 		let searchIndexOffset = BattleSearchIndexOffset;
 		let closest = DexSearch.getClosest;
-		// if (this.dex.modid.includes('digimon' as ID)) {
-		// 	searchIndex = DigimonSearchIndex;
-		// 	searchIndexOffset = DigimonSearchIndexOffset;
-		// 	closest = function (query: string) {
-		// 		// binary search through the index!
-		// 		let left = 0;
-		// 		let right = searchIndex.length - 1;
-		// 		while (right > left) {
-		// 			let mid = Math.floor((right - left) / 2 + left);
-		// 			if (searchIndex[mid][0] === query && (mid === 0 || searchIndex[mid - 1][0] !== query)) {
-		// 				// that's us
-		// 				return mid;
-		// 			} else if (searchIndex[mid][0] < query) {
-		// 				left = mid + 1;
-		// 			} else {
-		// 				right = mid - 1;
-		// 			}
-		// 		}
-		// 		if (left >= searchIndex.length - 1) left = searchIndex.length - 1;
-		// 		else if (searchIndex[left + 1][0] && searchIndex[left][0] < query) left++;
-		// 		if (left && searchIndex[left - 1][0] === query) left--;
-		// 		return left;
-		// 	}
-		// }
+		if (this.dex.modid.includes('gen9fantasy' as ID)) {
+			searchIndex = Gen9fantasySearchIndex;
+			searchIndexOffset = Gen9fantasySearchIndexOffset;
+			closest = function (query: string) {
+				// binary search through the index!
+				let left = 0;
+				let right = searchIndex.length - 1;
+				while (right > left) {
+					let mid = Math.floor((right - left) / 2 + left);
+					if (searchIndex[mid][0] === query && (mid === 0 || searchIndex[mid - 1][0] !== query)) {
+						// that's us
+						return mid;
+					} else if (searchIndex[mid][0] < query) {
+						left = mid + 1;
+					} else {
+						right = mid - 1;
+					}
+				}
+				if (left >= searchIndex.length - 1) left = searchIndex.length - 1;
+				else if (searchIndex[left + 1][0] && searchIndex[left][0] < query) left++;
+				if (left && searchIndex[left - 1][0] === query) left--;
+				return left;
+			}
+		}
 
 		query = toID(query);
 
