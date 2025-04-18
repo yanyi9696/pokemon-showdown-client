@@ -1550,6 +1550,7 @@ for (const mod of modNames)
 	const itemList = Object.keys(ModItems);
 	itemList.sort();
 
+	const modSpecificItems = [['header', `${Mod} specific items`]];
 	const greatItems = [['header', "Popular items"]];
 	const goodItems = [['header', "Items"]];
 	const specificItems = [['header', "Pok&eacute;mon-specific items"]];
@@ -1558,11 +1559,15 @@ for (const mod of modNames)
 	const unreleasedItems = [];
 	for (const id of itemList) {
 		switch (id) {
+		case 'fantasyitem':
+			modSpecificItems.push(id);
+			break;
 		default:
 			greatItems.push(id);
 			break;
 		}
 	}
+	if (modSpecificItems.length > 1) items.push(...modSpecificItems);
 	items.push(...greatItems);
 	items.push(...goodItems);
 	items.push(...specificItems);

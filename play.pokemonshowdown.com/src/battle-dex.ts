@@ -1685,6 +1685,14 @@ const ModModifier: {
 				data.exists = true;
 			}
 		},
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
+			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
+			for (const pokemon in window.Gen9fantasydex) {
+				if (pokemon in window.BattlePokedex) continue;
+				addedTierSet.push(['pokemon', pokemon as ID]);
+			}
+			return addedTierSet.concat(tierSet);
+		},
 	},
 };
 
