@@ -1482,29 +1482,30 @@ console.log("DONE");
 /*********************************************************
  * Build <YourMod>.js
  *********************************************************/
-const YourModName = ""; // fill in the name of the directory your mod is in of server side
+const modNames = [];
 
-process.stdout.write("Building `data/" + YourModName + ".js`...");
-
+for (const mod of modNames)
 {
+	process.stdout.write("Building `data/" + mod + ".js`...");
 	//#region teambuilder-tables
-	const YourModTable = {};
+	const Mod = mod.charAt(0).toUpperCase() + mod.slice(1);
+	const ModTable = {};
 
 	let buf = '// DO NOT EDIT - automatically built with build-tools/build-indexes\n\n';
 
-	const modDir = '../caches/pokemon-showdown/dist/data/mods/' + YourModName;
-	const YourModdex = requireNoCache(modDir + '/pokedex.js').Pokedex;
-	const YourModMovedex = requireNoCache(modDir + '/moves.js').Moves;
-	const YourModItems = requireNoCache(modDir + '/items.js').Items;
-	const YourModAbilities = requireNoCache(modDir + '/abilities.js').Abilities;
-	const YourModTypeChart = requireNoCache(modDir + '/typechart.js').TypeChart;
-	const YourModLearnsets = requireNoCache(modDir + '/learnsets.js').Learnsets;
+	const modDir = '../caches/pokemon-showdown/dist/data/mods/' + mod;
+	const Moddex = requireNoCache(modDir + '/pokedex.js').Pokedex;
+	const ModMovedex = requireNoCache(modDir + '/moves.js').Moves;
+	const ModItems = requireNoCache(modDir + '/items.js').Items;
+	const ModAbilities = requireNoCache(modDir + '/abilities.js').Abilities;
+	const ModTypeChart = requireNoCache(modDir + '/typechart.js').TypeChart;
+	const ModLearnsets = requireNoCache(modDir + '/learnsets.js').Learnsets;
 
-	const yourmod = Object.keys(YourModdex);
-	yourmod.sort();
+	const modSpecies = Object.keys(Moddex);
+	modSpecies.sort();
 	const tierTable = {};
-	for (const id of yourmod) {
-		const species = Dex.mod(YourModName).species.get(id);
+	for (const id of modSpecies) {
+		const species = Dex.mod(mod).species.get(id);
 		const tier = species.tier;
 		if (!tierTable[tier]) tierTable[tier] = [];
 		tierTable[tier].push(id);
@@ -1515,12 +1516,12 @@ process.stdout.write("Building `data/" + YourModName + ".js`...");
 	const items = [];
 	const formatSlices = {};
 
-	YourModTable.learnsets = learnsets;
-	YourModTable.tiers = tiers;
-	YourModTable.overrideTier = {};
-	YourModTable.items = items;
-	YourModTable.monotypeBans = {};
-	YourModTable.formatSlices = formatSlices;
+	ModTable.learnsets = learnsets;
+	ModTable.tiers = tiers;
+	ModTable.overrideTier = {};
+	ModTable.items = items;
+	ModTable.monotypeBans = {};
+	ModTable.formatSlices = formatSlices;
 
 	const tierOrder = ["Uber", "(Uber)", "OU", "(OU)", "UUBL", "UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "(PU)", "NFE", "LC", "Unreleased"];
 
@@ -1546,7 +1547,7 @@ process.stdout.write("Building `data/" + YourModName + ".js`...");
 	if (!formatSlices['UU']) formatSlices['UU'] = formatSlices['New'];
 	if (!formatSlices['RU']) formatSlices['RU'] = formatSlices['New'];
 
-	const itemList = Object.keys(YourModItems);
+	const itemList = Object.keys(ModItems);
 	itemList.sort();
 
 	const greatItems = [['header', "Popular items"]];
@@ -1569,7 +1570,7 @@ process.stdout.write("Building `data/" + YourModName + ".js`...");
 	items.push(...badItems);
 	items.push(...unreleasedItems);
 
-	const lsets = Dex.mod(YourModName).data.Learnsets;
+	const lsets = Dex.mod(mod).data.Learnsets;
 	for (const id in lsets) {
 		if (id === 'bulbasaur') break;
 		learnsets[id] = {};
@@ -1578,81 +1579,162 @@ process.stdout.write("Building `data/" + YourModName + ".js`...");
 		}
 	}
 
-	buf += 'exports.YourModTable = ' + JSON.stringify(YourModTable).replace(/['\\]/g, "\\$&") + ';';
+	buf += `exports.${Mod}Table = ` + JSON.stringify(ModTable).replace(/['\\]/g, "\\$&") + ';';
 
 	let deleteFlag = false;
-	for (const id in YourModdex) {
+	for (const id in Moddex) {
 		if (id === 'bulbasaur') deleteFlag = true;
-		const fdata = Dex.mod(YourModName).data.FormatsData[id];
+		const fdata = Dex.mod(mod).data.FormatsData[id];
 		if (fdata && fdata.tier) {
-			YourModdex[id].tier = fdata.tier;
+			Moddex[id].tier = fdata.tier;
 		}
-		if (deleteFlag) delete YourModdex[id];
+		if (deleteFlag) delete Moddex[id];
 	}
-	for (const id in YourModMovedex) {
-		const move = Dex.mod(YourModName).moves.get(id);
-		if (move.desc) YourModMovedex[id].desc = move.desc;
-		if (move.shortDesc) YourModMovedex[id].shortDesc = move.shortDesc;
+	for (const id in ModMovedex) {
+		const move = Dex.mod(mod).moves.get(id);
+		if (move.desc) ModMovedex[id].desc = move.desc;
+		if (move.shortDesc) ModMovedex[id].shortDesc = move.shortDesc;
 	}
-	for (const id in YourModItems) {
-		const item = Dex.mod(YourModName).items.get(id);
-		if (item.desc) YourModItems[id].desc = item.desc;
-		if (item.shortDesc) YourModItems[id].shortDesc = item.shortDesc;
+	for (const id in ModItems) {
+		const item = Dex.mod(mod).items.get(id);
+		if (item.desc) ModItems[id].desc = item.desc;
+		if (item.shortDesc) ModItems[id].shortDesc = item.shortDesc;
 	}
-	for (const id in YourModAbilities) {
-		const ability = Dex.mod(YourModName).abilities.get(id);
-		if (ability.desc) YourModAbilities[id].desc = ability.desc;
-		if (ability.shortDesc) YourModAbilities[id].shortDesc = ability.shortDesc;
+	for (const id in ModAbilities) {
+		const ability = Dex.mod(mod).abilities.get(id);
+		if (ability.desc) ModAbilities[id].desc = ability.desc;
+		if (ability.shortDesc) ModAbilities[id].shortDesc = ability.shortDesc;
 	}
 	deleteFlag = false;
-	for (const id in YourModLearnsets) {
+	for (const id in ModLearnsets) {
 		if (id === 'bulbasaur') deleteFlag = true;
-		if (deleteFlag) delete YourModLearnsets[id];
+		if (deleteFlag) delete ModLearnsets[id];
 	}
 	// .json is for dex.pokemonshowdown.com, not needed here
-	buf += 'exports.YourModdex = ' + es3stringify(YourModdex) + ';';
-	buf += 'exports.YourModMovedex = ' + es3stringify(YourModMovedex) + ';';
-	buf += 'exports.YourModItems = ' + es3stringify(YourModItems) + ';';
-	buf += 'exports.YourModAbilities = ' + es3stringify(YourModAbilities) + ';';
-	buf += 'exports.YourModTypeChart = ' + es3stringify(YourModTypeChart) + ';';
-	buf += 'exports.YourModLearnsets = ' + es3stringify(YourModLearnsets) + ';';
+	buf += `exports.${Mod}dex = ` + es3stringify(Moddex) + ';';
+	buf += `exports.${Mod}Movedex = ` + es3stringify(ModMovedex) + ';';
+	buf += `exports.${Mod}Items = ` + es3stringify(ModItems) + ';';
+	buf += `exports.${Mod}Abilities = ` + es3stringify(ModAbilities) + ';';
+	buf += `exports.${Mod}TypeChart = ` + es3stringify(ModTypeChart) + ';';
+	buf += `exports.${Mod}Learnsets = ` + es3stringify(ModLearnsets) + ';';
 	buf += '\n\n';
 	//#endregion
 
 	//#region search-index
 	let index = [];
 
-	index = index.concat(Object.keys(YourModdex).map(x => x + ' pokemon'));
-	index = index.concat(Object.keys(YourModMovedex).map(x => x + ' move'));
-	index = index.concat(Object.keys(YourModItems).map(x => x + ' item'));
-	index = index.concat(Object.keys(YourModAbilities).map(x => x + ' ability'));
-	index = index.concat(Object.keys(YourModTypeChart).map(x => toID(x) + ' type'));
+	index = index.concat(Object.keys(Moddex).map(x => x + ' pokemon'));
+	index = index.concat(Object.keys(ModMovedex).map(x => x + ' move'));
+	index = index.concat(Object.keys(ModItems).map(x => x + ' item'));
+	index = index.concat(Object.keys(ModAbilities).map(x => x + ' ability'));
+	index = index.concat(Object.keys(ModTypeChart).map(x => toID(x) + ' type'));
 	index = index.concat(['physical', 'special', 'status'].map(x => toID(x) + ' category'));
 	// useless but we just keep this
 	index = index.concat(['monster', 'water1', 'bug', 'flying', 'field', 'fairy', 'grass', 'humanlike', 'water3', 'mineral', 'amorphous', 'water2', 'ditto', 'dragon', 'undiscovered'].map(x => toID(x) + ' egggroup'));
 	index = index.concat(['ou', 'uu', 'ru', 'nu', 'pu', 'lc', 'nfe', 'uber', 'uubl', 'rubl', 'nubl', 'publ'].map(x => toID(x) + ' tier'));
 
-	let YourModArticleTitles = {};
+	let ModArticleTitles = {};
 	index.push('pokemon article');
 	index.push('moves article');
 
 	function generateAlias(id, name, type) {
-		let i = name.lastIndexOf(' ');
-		if (i < 0) i = name.lastIndexOf('-');
-		// hopefully we can do X formes like this
-		// if (name.endsWith('-Mega')) {
-		// 	index.push('mega' + toID(name.slice(0, -5)) + ' ' + type + ' ' + id + ' 0');
-		// 	index.push('m' + toID(name.slice(0, -5)) + ' ' + type + ' ' + id + ' 0');
-		// 	return;
-		// }
-		let oldI = i;
-		// if (name === 'Alakazam') i = 5;
-		let acronym;
-		if (oldI < 0 && i > 0) {
-			acronym = toID(name.charAt(0) + name.slice(i));
+		let offset = name.lastIndexOf(' ');
+		if (offset < 0) offset = name.lastIndexOf('-');
+		if (name.endsWith('-Mega-X') || name.endsWith('-Mega-Y')) {
+			index.push('mega' + toID(name.slice(0, -7) + name.slice(-1)) + ' ' + type + ' ' + id + ' 0');
+			index.push('m' + toID(name.slice(0, -7) + name.slice(-1)) + ' ' + type + ' ' + id + ' 0');
+			index.push('mega' + toID(name.slice(-1)) + ' ' + type + ' ' + id + ' ' + toID(name.slice(0, -7)).length);
+			return;
 		}
-		if (i < 0) return;
-		index.push('' + toID(name.slice(i)) + ' ' + type + ' ' + id + ' ' + toID(name.slice(0, i)).length);
+		if (name.endsWith('-Mega')) {
+			index.push('mega' + toID(name.slice(0, -5)) + ' ' + type + ' ' + id + ' 0');
+			index.push('m' + toID(name.slice(0, -5)) + ' ' + type + ' ' + id + ' 0');
+			return;
+		}
+		if (name.endsWith('-Alola')) {
+			index.push('alolan' + toID(name.slice(0, -6)) + ' ' + type + ' ' + id + ' 0');
+			return;
+		}
+		const oldOffset = offset;
+		if (name === 'Alakazam') offset = 5;
+		if (name === 'Arctovish') offset = 5;
+		if (name === 'Arctozolt') offset = 5;
+		if (name === 'Articuno') offset = 5;
+		if (name === 'Breloom') offset = 3;
+		if (name === 'Bronzong') offset = 4;
+		if (name === 'Celebi') offset = 4;
+		if (name === 'Charizard') offset = 5;
+		if (name === 'Donphan') offset = 3;
+		if (name === 'Dracovish') offset = 5;
+		if (name === 'Dracozolt') offset = 5;
+		if (name === 'Dragapult') offset = 5;
+		if (name === 'Dusclops') offset = 3;
+		if (name === 'Electabuzz') offset = 6;
+		if (name === 'Exeggutor') offset = 2;
+		if (name === 'Garchomp') offset = 3;
+		if (name === 'Hariyama') offset = 4;
+		if (name === 'Magearna') offset = 2;
+		if (name === 'Magnezone') offset = 5;
+		if (name === 'Mamoswine') offset = 4;
+		if (name === 'Moltres') offset = 3;
+		if (name === 'Nidoking') offset = 4;
+		if (name === 'Nidoqueen') offset = 4;
+		if (name === 'Nidorina') offset = 4;
+		if (name === 'Nidorino') offset = 4;
+		if (name === 'Regice') offset = 3;
+		if (name === 'Regidrago') offset = 4;
+		if (name === 'Regieleki') offset = 4;
+		if (name === 'Regigigas') offset = 4;
+		if (name === 'Regirock') offset = 4;
+		if (name === 'Registeel') offset = 4;
+		if (name === 'Slowbro') offset = 4;
+		if (name === 'Slowking') offset = 4;
+		if (name === 'Starmie') offset = 4;
+		if (name === 'Tyranitar') offset = 6;
+		if (name === 'Zapdos') offset = 3;
+
+		if (name === 'Acupressure') offset = 3;
+		if (name === 'Aromatherapy') offset = 5;
+		if (name === 'Boomburst') offset = 4;
+		if (name === 'Crabhammer') offset = 4;
+		if (name === 'Discharge') offset = 3;
+		if (name === 'Earthquake') offset = 5;
+		if (name === 'Extrasensory') offset = 5;
+		if (name === 'Flamethrower') offset = 5;
+		if (name === 'Headbutt') offset = 4;
+		if (name === 'Moonblast') offset = 4;
+		if (name === 'Moonlight') offset = 4;
+		if (name === 'Overheat') offset = 4;
+		if (name === 'Outrage') offset = 3;
+		if (name === 'Octazooka') offset = 4;
+		if (name === 'Payback') offset = 3;
+		if (name === 'Psyshock') offset = 3;
+		if (name === 'Psywave') offset = 3;
+		if (name === 'Rototiller') offset = 4;
+		if (name === 'Rollout') offset = 4;
+		if (name === 'Safeguard') offset = 4;
+		if (name === 'Sandstorm') offset = 4;
+		if (name === 'Smokescreen') offset = 5;
+		if (name === 'Stockpile') offset = 5;
+		if (name === 'Steamroller') offset = 5;
+		if (name === 'Superpower') offset = 5;
+		if (name === 'Supersonic') offset = 5;
+		if (name === 'Synchronoise') offset = 7;
+		if (name === 'Tailwind') offset = 4;
+		if (name === 'Telekinesis') offset = 4;
+		if (name === 'Teleport') offset = 4;
+		if (name === 'Thunderbolt') offset = 7;
+		if (name === 'Twineedle') offset = 3;
+		if (name === 'Uproar') offset = 2;
+		if (name === 'Venoshock') offset = 4;
+		if (name === 'Whirlpool') offset = 5;
+		if (name === 'Whirlwind') offset = 5;
+		let acronym;
+		if (oldOffset < 0 && offset > 0) {
+			acronym = toID(name.charAt(0) + name.slice(offset));
+		}
+		if (offset < 0) return;
+		index.push('' + toID(name.slice(offset)) + ' ' + type + ' ' + id + ' ' + toID(name.slice(0, offset)).length);
 		if (name.startsWith('Hidden Power ')) {
 			acronym = 'hp' + toID(name.substr(13));
 			index.push('' + acronym + ' ' + type + ' ' + id + ' 0');
@@ -1677,28 +1759,28 @@ process.stdout.write("Building `data/" + YourModName + ".js`...");
 			index.push('cuno ' + type + ' ' + id + ' 4');
 		}
 
-		let i2 = name.lastIndexOf(' ', i - 1);
-		if (i2 < 0) i2 = name.lastIndexOf('-', i - 1);
+		let i2 = name.lastIndexOf(' ', offset - 1);
+		if (i2 < 0) i2 = name.lastIndexOf('-', offset - 1);
 		if (name === 'Zen Headbutt') i2 = 8;
 		if (i2 >= 0) {
 			index.push('' + toID(name.slice(i2)) + ' ' + type + ' ' + id + ' ' + toID(name.slice(0, i2)).length);
 		}
 	}
 
-	for (const id in YourModdex) {
-		const name = YourModdex[id].name;
+	for (const id in Moddex) {
+		const name = Moddex[id].name;
 		generateAlias(id, name, 'pokemon');
 	}
-	for (const id in YourModMovedex) {
-		const name = YourModMovedex[id].name;
+	for (const id in ModMovedex) {
+		const name = ModMovedex[id].name;
 		generateAlias(id, name, 'move');
 	}
-	for (const id in YourModItems) {
-		const name = YourModItems[id].name;
+	for (const id in ModItems) {
+		const name = ModItems[id].name;
 		generateAlias(id, name, 'item');
 	}
-	for (const id in YourModAbilities) {
-		const name = YourModAbilities[id].name;
+	for (const id in ModAbilities) {
+		const name = ModAbilities[id].name;
 		generateAlias(id, name, 'ability');
 	}
 
@@ -1726,7 +1808,7 @@ process.stdout.write("Building `data/" + YourModName + ".js`...");
 	index[index.indexOf('ditto pokemon')] = 'ditto egggroup';
 	index[index.indexOf('ditto egggroup')] = 'ditto pokemon';
 
-	let YourModSearchIndex = index.map(x => {
+	let ModSearchIndex = index.map(x => {
 		x = x.split(' ');
 		if (x.length > 3) {
 			x[3] = Number(x[3]);
@@ -1735,15 +1817,15 @@ process.stdout.write("Building `data/" + YourModName + ".js`...");
 		return x;
 	});
 
-	let YourModSearchIndexOffset = YourModSearchIndex.map((entry, i) => {
+	let ModSearchIndexOffset = ModSearchIndex.map((entry, i) => {
 		const id = entry[0];
 		let name = '';
 		switch (entry[1]) {
-		case 'pokemon': name = Dex.mod(YourModName).species.get(id).name; break;
-		case 'move': name = Dex.mod(YourModName).moves.get(id).name; break;
-		case 'item': name = Dex.mod(YourModName).items.get(id).name; break;
-		case 'ability': name = Dex.mod(YourModName).abilities.get(id).name; break;
-		case 'article': name = YourModArticleTitles[id] || ''; break;
+		case 'pokemon': name = Dex.mod(mod).species.get(id).name; break;
+		case 'move': name = Dex.mod(mod).moves.get(id).name; break;
+		case 'item': name = Dex.mod(mod).items.get(id).name; break;
+		case 'ability': name = Dex.mod(mod).abilities.get(id).name; break;
+		case 'article': name = ModArticleTitles[id] || ''; break;
 		}
 		let res = '';
 		let nonAlnum = 0;
@@ -1758,25 +1840,25 @@ process.stdout.write("Building `data/" + YourModName + ".js`...");
 		return '';
 	});
 
-	let YourModSearchCountIndex = {};
-	for (const type in YourModTypeChart) {
-		YourModSearchCountIndex[type + ' move'] = Object.keys(YourModMovedex).filter(id => (YourModMovedex[id].type === type)).length;
+	let ModSearchCountIndex = {};
+	for (const type in ModTypeChart) {
+		ModSearchCountIndex[type + ' move'] = Object.keys(ModMovedex).filter(id => (ModMovedex[id].type === type)).length;
 	}
 
-	for (const type in YourModTypeChart) {
-		YourModSearchCountIndex[type + ' pokemon'] = Object.keys(YourModdex).filter(id => (YourModdex[id].types.indexOf(type) >= 0)).length;
+	for (const type in ModTypeChart) {
+		ModSearchCountIndex[type + ' pokemon'] = Object.keys(Moddex).filter(id => (Moddex[id].types.indexOf(type) >= 0)).length;
 	}
 
-	buf += 'exports.YourModSearchIndex = ' + JSON.stringify(YourModSearchIndex) + ';\n\n';
+	buf += `exports.${Mod}SearchIndex = ` + JSON.stringify(ModSearchIndex) + ';\n\n';
 
-	buf += 'exports.YourModSearchIndexOffset = ' + JSON.stringify(YourModSearchIndexOffset) + ';\n\n';
+	buf += `exports.${Mod}SearchIndexOffset = ` + JSON.stringify(ModSearchIndexOffset) + ';\n\n';
 
-	buf += 'exports.YourModSearchCountIndex = ' + JSON.stringify(YourModSearchCountIndex) + ';\n\n';
+	buf += `exports.${Mod}SearchCountIndex = ` + JSON.stringify(ModSearchCountIndex) + ';\n\n';
 
-	buf += 'exports.YourModArticleTitles = ' + JSON.stringify(YourModArticleTitles) + ';\n\n';
+	buf += `exports.${Mod}ArticleTitles = ` + JSON.stringify(ModArticleTitles) + ';\n\n';
 	//#endregion
 
-	fs.writeFileSync('play.pokemonshowdown.com/data/' + YourModName + '.js', buf);
+	fs.writeFileSync(`play.pokemonshowdown.com/data/${mod}.js`, buf);
 }
 
 console.log("DONE");
