@@ -193,37 +193,7 @@ class PSPrefs extends PSStreamModel<string | null> {
 		}
 	}
 
-	setAFD(mode?: typeof this['afd']) {
-		if (mode === undefined) {
-			// init
-			if (typeof BattleTextAFD !== 'undefined') {
-				for (const id in BattleTextNotAFD) {
-					if (!BattleTextAFD[id]) {
-						BattleTextAFD[id] = BattleTextNotAFD[id];
-					} else {
-						BattleTextAFD[id] = { ...BattleTextNotAFD[id], ...BattleTextAFD[id] };
-					}
-				}
-			}
-
-			if (Config.server.afd) {
-				mode = true;
-			} else if (this.afd !== undefined) {
-				mode = this.afd;
-			} else {
-				// uncomment on April Fools' Day
-				// mode = true;
-			}
-		}
-
-		Dex.afdMode = mode;
-
-		if (mode === true) {
-			(BattleText as any) = BattleTextAFD;
-		} else {
-			(BattleText as any) = BattleTextNotAFD;
-		}
-	}
+	setAFD(mode?: typeof this['afd']) {}
 	doAutojoin() {
 		let autojoin = PS.prefs.autojoin;
 		if (autojoin) {
