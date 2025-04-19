@@ -277,6 +277,8 @@ export const Dex = new class implements ModdedDex {
 
 		const genStrings = formatid.match(/gen\d/); // /gen(10|\d)/ after gen 10 releases
 		const gen = genStrings ? genStrings[0] : this.currentGen;
+		// tiers
+		if (formatid.endsWith('ou')) modids.push('ou' as ID);
 		// regulars
 		if (formatid.includes('anythinggoes') || formatid.endsWith('ag')) modids.push('anythinggoes' as ID);
 		if (formatid.includes('doubles') ||
@@ -1453,6 +1455,12 @@ const ModModifier: {
 		ModifyLearnset?: (pokemon: Dex.PokemonSet, dex: ModdedDex, learnset: string[], extra?: any) => string[],
 	}
 } = {
+	// tiers
+	ou: {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
+			tierSet.findIndex(([type, value]) => type === 'header' && value === 'OU')
+		),
+	},
 	// regulars
 	anythinggoes: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet,
