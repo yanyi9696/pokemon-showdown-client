@@ -279,6 +279,7 @@ export const Dex = new class implements ModdedDex {
 		const gen = genStrings ? genStrings[0] : this.currentGen;
 		// tiers
 		if (formatid.endsWith('ou')) modids.push('ou' as ID);
+		if (formatid.endsWith('ubuu')) modids.push('ubuu' as ID);
 		// regulars
 		if (formatid.includes('anythinggoes') || formatid.endsWith('ag')) modids.push('anythinggoes' as ID);
 		if (formatid.includes('doubles') ||
@@ -1459,6 +1460,11 @@ const ModModifier: {
 	ou: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
 			tierSet.findIndex(([type, value]) => type === 'header' && value === 'OU')
+		),
+	},
+	ubuu: {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
+			tierSet.findIndex(([type, value]) => type === 'header' && value === '(Uber)')
 		),
 	},
 	// regulars
