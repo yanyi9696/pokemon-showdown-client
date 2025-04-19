@@ -1693,6 +1693,16 @@ const ModModifier: {
 			}
 			return addedTierSet.concat(tierSet);
 		},
+		ModifyLearnset: (pokemon: Dex.PokemonSet, dex: ModdedDex, learnset: string[]): string[] => {
+			const moveDex = dex.getMovedex();
+			const speciesId = dex.species.get(pokemon.species).id;
+			for (const id in moveDex) {
+				if (learnset.includes(id)) continue;
+				if (!dex.canLearn(speciesId, id as ID)) continue;
+				learnset.push(id);
+			}
+			return learnset;
+		},
 	},
 };
 
