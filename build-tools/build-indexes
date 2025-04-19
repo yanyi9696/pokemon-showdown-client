@@ -8,8 +8,8 @@ const child_process = require("child_process");
 const rootDir = path.resolve(__dirname, '..');
 process.chdir(rootDir);
 
-const serverGitURL = "https://github.com/Dark-Night-Base/pokemon-showdown.git"; // NOTE: fill in your server repo url here, e.g. https://github.com/Dark-Night-Base/pokemon-showdown.git
-const serverGitBranch = "framework"; // NOTE: appoint which branch ur server is in in the above repo
+const serverGitURL = "https://github.com/yanyi9696/pokemon-showdown.git"; // NOTE: fill in your server repo url here, e.g. https://github.com/Dark-Night-Base/pokemon-showdown.git
+const serverGitBranch = "fantasy"; // NOTE: appoint which branch ur server is in in the above repo
 if (!fs.existsSync('caches/pokemon-showdown')) {
 	let cloneCMD = 'git clone';
 	if (serverGitBranch) cloneCMD += ' -b ' + serverGitBranch;
