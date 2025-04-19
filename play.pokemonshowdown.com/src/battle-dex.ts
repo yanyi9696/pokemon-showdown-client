@@ -1282,6 +1282,7 @@ export class ModdedDex {
 	}
 
 	getMovedex() {
+		if (this.modid.includes('gen9fantasy' as ID)) return window.Gen9fantasyMovedex;
 		return window.BattleMovedex;
 	}
 
