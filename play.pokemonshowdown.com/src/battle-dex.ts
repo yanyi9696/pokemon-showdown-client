@@ -596,6 +596,7 @@ export const Dex = new class implements ModdedDex {
 		el.src = path + 'data/pokedex-mini-bw.js' + qs;
 		document.getElementsByTagName('body')[0].appendChild(el);
 	}
+	// sprite in battle
 	getSpriteData(pokemon: Pokemon | Species | string, isFront: boolean, options: {
 		gen?: number,
 		shiny?: boolean,
@@ -789,6 +790,7 @@ export const Dex = new class implements ModdedDex {
 		return spriteData;
 	}
 
+	// 小图标
 	getPokemonIconNum(id: ID, isFemale?: boolean, facingLeft?: boolean) {
 		let num = 0;
 		if (window.BattlePokemonSprites?.[id]?.num) {
@@ -850,6 +852,7 @@ export const Dex = new class implements ModdedDex {
 		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v18) no-repeat scroll -${left}px -${top}px${fainted}`;
 	}
 
+	// sprite in teambuilder
 	getTeambuilderSpriteData(pokemon: any, gen = 0): TeambuilderSpriteData {
 		let id = toID(pokemon.species);
 		let spriteid = pokemon.spriteid;
@@ -860,6 +863,10 @@ export const Dex = new class implements ModdedDex {
 		if (species.exists === false) {
 			let gen9fantasySpecies = Dex.mod('gen9fantasy' as ID).species.get(id);
 			if (gen9fantasySpecies.exists !== true) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
+			// gen9fantasySpecies.spriteid = garchomp-fantasy // sprites/dex/garchomp-fantasy.png
+			// spriteid = gen9fantasySpecies.spriteid;
+			// if (spriteid === ...) {}
+			// else {}
 			spriteid = gen9fantasySpecies.spriteid.split('-')[0];
 		}
 		const spriteData: TeambuilderSpriteData = {
@@ -1462,9 +1469,9 @@ const ModModifier: {
 			tierSet.findIndex(([type, value]) => type === 'header' && value === 'OU')
 		),
 	},
-	ubuu: {
+	ubersuu: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
-			tierSet.findIndex(([type, value]) => type === 'header' && value === '(Uber)')
+			tierSet.findIndex(([type, value]) => type === 'header' && value === 'Uber by technicality')
 		),
 	},
 	// regulars
