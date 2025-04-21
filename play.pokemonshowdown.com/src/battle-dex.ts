@@ -280,6 +280,10 @@ export const Dex = new class implements ModdedDex {
 		// tiers
 		if (formatid.endsWith('ou')) modids.push('ou' as ID);
 		if (formatid.endsWith('ubersuu')) modids.push('ubersuu' as ID);
+		if (formatid.endsWith('uubl')) modids.push('uubl' as ID);
+		if (formatid.endsWith('uu')) modids.push('uu' as ID);
+		if (formatid.endsWith('rubl')) modids.push('rubl' as ID);
+		if (formatid.endsWith('ru')) modids.push('ru' as ID);
 		// regulars
 		if (formatid.includes('anythinggoes') || formatid.endsWith('ag')) modids.push('anythinggoes' as ID);
 		if (formatid.includes('doubles') ||
@@ -1479,6 +1483,26 @@ const ModModifier: {
 	ubersuu: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
 			tierSet.findIndex(([type, value]) => type === 'header' && value === 'Uber by technicality')
+		),
+	},
+	uubl: {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
+			tierSet.findIndex(([type, value]) => type === 'header' && value === 'UUBL')
+		),
+	},
+	ubersuu: {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
+			tierSet.findIndex(([type, value]) => type === 'header' && value === 'UU')
+		),
+	},
+	ubersuu: {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
+			tierSet.findIndex(([type, value]) => type === 'header' && value === 'RUBL')
+		),
+	},
+	ubersuu: {
+		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
+			tierSet.findIndex(([type, value]) => type === 'header' && value === 'RU')
 		),
 	},
 	// regulars
