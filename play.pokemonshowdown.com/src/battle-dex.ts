@@ -1490,17 +1490,17 @@ const ModModifier: {
 			tierSet.findIndex(([type, value]) => type === 'header' && value === 'UUBL')
 		),
 	},
-	ubersuu: {
+	uu: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
 			tierSet.findIndex(([type, value]) => type === 'header' && value === 'UU')
 		),
 	},
-	ubersuu: {
+	rubl: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
 			tierSet.findIndex(([type, value]) => type === 'header' && value === 'RUBL')
 		),
 	},
-	ubersuu: {
+	ru: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
 			tierSet.findIndex(([type, value]) => type === 'header' && value === 'RU')
 		),
