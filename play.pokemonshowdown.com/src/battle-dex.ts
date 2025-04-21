@@ -877,7 +877,7 @@ export const Dex = new class implements ModdedDex {
 			// spriteid = gen9fantasySpecies.spriteid;
 			// if (spriteid === ...) {}
 			// else {}
-			spriteid = gen9fantasySpecies.spriteid.split('-')[0];
+			spriteid = gen9fantasySpecies.spriteid.split('-')[0];if (gen9fantasySpecies.spriteid.split('-')[1]==='mega') spriteid += '-mega';
 		}
 		const spriteData: TeambuilderSpriteData = {
 			spriteid,
