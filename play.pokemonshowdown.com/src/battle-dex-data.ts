@@ -265,7 +265,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	furfroupharaoh: 1032 + 113,
 	furfroustar: 1032 + 114,
 	meowsticf: 1032 + 115,
-	aegislashblade: 1032 + 116,
+	aegislashblade: 1032 + 116,aegislashbladefantasy: 1032 + 116,
 	xerneasneutral: 1032 + 117,
 	hoopaunbound: 1032 + 118,
 	rattataalola: 1032 + 119,
