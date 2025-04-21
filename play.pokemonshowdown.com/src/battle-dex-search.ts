@@ -964,7 +964,7 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 class BattleMoveSearch extends BattleTypedSearch<'move'> {
 	override sortRow: SearchRow = ['sortmove', ''];
 	getTable() {
-		return BattleMovedex;
+		return this.dex.getMovedex();
 	}
 	getDefaultResults(): SearchRow[] {
 		let results: SearchRow[] = [];

@@ -296,7 +296,13 @@ export const Dex = new class implements ModdedDex {
 		if (formatid.includes('stabmons') || formatid.includes('staaabmons')) modids.push('stabmons' as ID);
 		if (formatid.includes('thecardgame')) modids.push('thecardgame' as ID);
 		// effectively pet mods
-		if (formatid.includes('nationaldex') || formatid.includes('natdex') || formatid.startsWith(gen + 'nd') || formatid.includes('metronome')) modids.push('natdex' as ID);
+		if (
+			formatid.includes('nationaldex') ||
+			formatid.includes('natdex') ||
+			formatid.startsWith(gen + 'nd') ||
+			formatid.includes('metronome') ||
+			formatid.includes('fantasy') || formatid.startsWith(gen + 'fc')
+		) modids.push('natdex' as ID);
 		if (formatid.includes('letsgo')) modids.push('gen7letsgo' as ID);
 		if (formatid.includes('bdsp')) modids.push('gen8bdsp' as ID);
 		if (formatid.includes('fantasy') || formatid.startsWith(gen + 'fc')) modids.push('gen9fantasy' as ID);
@@ -1276,7 +1282,7 @@ export class ModdedDex {
 		if (this.modid.includes('littlecup' as ID)) table = BTTable[`gen${this.gen}lc`];
 		if (this.modid.includes('nfe' as ID)) table = BTTable[`gen${this.gen}nfe`];
 		if (this.gen === 9 && this.modid.includes('hackmons' as ID)) table = BTTable[`bh`];
-		if (this.modid.includes('natdex' as ID)) table = BTTable[`gen${this.gen}natdex`];
+		if (this.modid.includes('natdex' as ID) && !this.modid.includes('gen9fantasy' as ID)) table = BTTable[`gen${this.gen}natdex`];
 		if (this.modid.includes('gen7letsgo' as ID)) table = BTTable['gen7letsgo'];
 		if (this.modid.includes('gen8bdsp' as ID)) table = BTTable['gen8bdsp'];
 		
@@ -1292,6 +1298,7 @@ export class ModdedDex {
 	}
 
 	getMovedex() {
+		if (this.modid.includes('gen9fantasy' as ID)) return window.Gen9fantasyMovedex;
 		return window.BattleMovedex;
 	}
 
@@ -1636,7 +1643,7 @@ const ModModifier: {
 			if (data.isNonstandard === 'Past') data.isNonstandard = null;
 		},
 		speciesMod: (data: any, extra?: any): any => {
-			let gen = 9;
+			let gen = Dex.gen;
 			if (extra && extra.gen) gen = extra.gen;
 			const table = window.BattleTeambuilderTable[`gen${gen}natdex`];
 			if (data.id in table.overrideTier) data.tier = table.overrideTier[data.id];
