@@ -279,7 +279,7 @@ export const Dex = new class implements ModdedDex {
 		const gen = genStrings ? genStrings[0] : this.currentGen;
 		// tiers
 		if (formatid.endsWith('ou')) modids.push('ou' as ID);
-		if (formatid.endsWith('uberuu')) modids.push('uberuu' as ID);
+		if (formatid.endsWith('ubersuu')) modids.push('ubersuu' as ID);
 		// regulars
 		if (formatid.includes('anythinggoes') || formatid.endsWith('ag')) modids.push('anythinggoes' as ID);
 		if (formatid.includes('doubles') ||
