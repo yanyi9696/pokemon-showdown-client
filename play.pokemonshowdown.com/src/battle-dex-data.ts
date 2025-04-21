@@ -506,7 +506,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	groudonprimal: 1320 + 41,
 	rayquazamega: 1320 + 42,
 	lopunnymega: 1320 + 43,
-	garchompmega: 1320 + 44,
+	garchompmega: 1320 + 44,garchompmegafantasy: 1320 + 44,
 	lucariomega: 1320 + 45,
 	abomasnowmega: 1320 + 46,
 	gallademega: 1320 + 47,
