@@ -872,7 +872,6 @@ export const Dex = new class implements ModdedDex {
 		}
 		if (species.exists === false) {
 			let gen9fantasySpecies = Dex.mod('gen9fantasy' as ID).species.get(id);
-			if (gen9fantasySpecies.exists !== true) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
 			// gen9fantasySpecies.spriteid = garchomp-fantasy // sprites/dex/garchomp-fantasy.png
 			// spriteid = gen9fantasySpecies.spriteid;
 			// if (spriteid === ...) {}
