@@ -279,7 +279,7 @@ export const Dex = new class implements ModdedDex {
 		const gen = genStrings ? genStrings[0] : this.currentGen;
 		// tiers
 		if (formatid.endsWith('ou')) modids.push('ou' as ID);
-		if (formatid.endsWith('ubers uu')) modids.push('ubers uu' as ID);
+		if (formatid.endsWith('ubersuu')) modids.push('ubersuu' as ID);
 		if (formatid.endsWith('uubl')) modids.push('uubl' as ID);
 		if (formatid.endsWith('uu')) modids.push('uu' as ID);
 		if (formatid.endsWith('rubl')) modids.push('rubl' as ID);
@@ -1484,7 +1484,7 @@ const ModModifier: {
 	},
 	ubersuu: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
-			tierSet.findIndex(([type, value]) => type === 'header' && value === 'Uber by technicality')
+			tierSet.findIndex(([type, value]) => type === 'header' && value === '(Uber)')
 		),
 	},
 	uubl: {
