@@ -1484,7 +1484,7 @@ const ModModifier: {
 	},
 	ubersuu: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => tierSet.slice(
-			tierSet.findIndex(([type, value]) => type === 'header' && value === '(Uber)')
+			tierSet.findIndex(([type, value]) => type === 'header' && value === 'Uber by technicality')
 		),
 	},
 	uubl: {
