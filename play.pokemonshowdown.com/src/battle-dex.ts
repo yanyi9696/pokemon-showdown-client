@@ -881,10 +881,14 @@ export const Dex = new class implements ModdedDex {
 			// spriteid = gen9fantasySpecies.spriteid;
 			// if (spriteid === ...) {}
 			// else {}
-			spriteid = gen9fantasySpecies.spriteid.split('-')[0];
-			if (gen9fantasySpecies.spriteid.split('-')[1]==='mega') spriteid += '-mega';
-			if (gen9fantasySpecies.spriteid.split('-')[1]==='blade') spriteid += '-blade';
-			if (gen9fantasySpecies.spriteid.split('-')[1]==='hisui') spriteid += '-hisui';
+		    // 提取 spriteid 和第二部分
+			let spriteid = gen9fantasySpecies.spriteid.split('-')[0];
+			let secondPart = gen9fantasySpecies.spriteid.split('-')[1]; // 提取第二部分
+		
+			if (secondPart === 'mega') spriteid += '-mega';
+			if (secondPart === 'blade') spriteid += '-blade';
+			if (secondPart === 'hisui') spriteid += '-hisui';
+			if (secondPart === 'rapid-strike') spriteid += '-rapid-strike'; // 修改为直接匹配
 		}
 		const spriteData: TeambuilderSpriteData = {
 			spriteid,
