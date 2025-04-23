@@ -368,7 +368,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	zoroarkhisui: 1032 + 216,
 	braviaryhisui: 1032 + 217,
 	sliggoohisui: 1032 + 218,
-	goodrahisui: 1032 + 219,
+	goodrahisui: 1032 + 219,goodrahisuifantasy: 1032 + 219,
 	avalugghisui: 1032 + 220,
 	decidueyehisui: 1032 + 221,
 	basculegionf: 1032 + 222,
