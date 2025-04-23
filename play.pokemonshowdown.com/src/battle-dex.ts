@@ -881,7 +881,7 @@ export const Dex = new class implements ModdedDex {
 			// spriteid = gen9fantasySpecies.spriteid;
 			// if (spriteid === ...) {}
 			// else {}
-			let spriteid = gen9fantasySpecies.spriteid.split('-')[0];
+			spriteid = gen9fantasySpecies.spriteid.split('-')[0];
 			let secondPart = gen9fantasySpecies.spriteid.split('-')[1]; 
 			// 提取第二部分
 			if (secondPart === 'mega') spriteid += '-mega';
