@@ -923,86 +923,75 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 		if (!this.species) return this.getDefaultResults();
 
 		const currentSpecies = this.dex.species.get(this.species);
-		const baseSpeciesName = currentSpecies.baseSpecies;
-		const currentSpeciesName = currentSpecies.name;
-        const isGen9FantasyModActive = this.dex.modid.includes('gen9fantasy' as ID);
+		const speciesName = currentSpecies.name;
+		// 获取基础道具列表
+		const results = this.getDefaultResults();
 
-		// 1. 获取基础道具列表 (来自 getItemSet)
-		const originalItemSet = this.getDefaultResults();
-        const originalItemIds = new Set(
-            originalItemSet.filter(row => row[0] === 'item').map(row => row[1])
-        );
-
-		const fantasyModItems: SearchRow[] = [];
-		const speciesItems: SearchRow[] = [];
-		const abilityItems: SearchRow[] = [];
-		const specificItemIds = new Set<ID>();
-
+		const speciesSpecific: SearchRow[] = [];
+		const abilitySpecific: SearchRow[] = [];
 		const abilityItem = {
 			protosynthesis: 'boosterenergy',
 			quarkdrive: 'boosterenergy',
 		}[toID(this.set?.ability) as string];
 
-		// --- 2. 识别 Mod 专属道具 (通过对比 Object.keys(this.dex.items) 和 originalItemIds) ---
-        if (isGen9FantasyModActive) {
-            // 遍历 this.dex.items 的键 (即所有已知道具的 ID)
-            for (const itemIdString of Object.keys(this.dex.items)) {
-                const itemId = itemIdString as ID;
-                const item = this.dex.items.get(itemId); // 获取道具对象
+		const addedItems = new Set<ID>(); // 用于避免重复添加专属类别
 
-                if (!item || !item.exists) continue; // 跳过无效或不存在的道具
-
-                // 如果道具不在 originalItemSet 返回的基础列表中，认为是 Mod 道具
-                if (!originalItemIds.has(item.id)) {
-                     if (!specificItemIds.has(item.id)) {
-                        fantasyModItems.push(['item', item.id]);
-                        specificItemIds.add(item.id);
-                    }
-                }
-            }
-        }
-
-		// --- 3. 识别基础列表中的物种和特性专属道具 ---
-		for (const row of originalItemSet) {
+		// 遍历基础列表查找专属道具
+		for (const row of results) {
 			if (row[0] !== 'item') continue;
 
 			const item = this.dex.items.get(row[1]);
 			const itemId = item.id;
 
-            // 跳过已被识别为 Mod 专属的道具
-            if (specificItemIds.has(itemId)) continue;
+			// 检查物种专属 (主要基于 itemUser)
+			// 包含了 Mega 石、部分 Z 纯晶、特殊形态道具等，如果 items.ts 数据正确的话
+			let isSpeciesSpecific = false;
+			if (item.itemUser?.includes(speciesName)) {
+				isSpeciesSpecific = true;
+			}
+			// 需要为 Groudon/Kyogre Orb 保留硬编码检查，因为它们可能不依赖 itemUser
+			if (!isSpeciesSpecific && currentSpecies.baseSpecies === 'Groudon' && itemId === 'redorb') isSpeciesSpecific = true;
+			if (!isSpeciesSpecific && currentSpecies.baseSpecies === 'Kyogre' && itemId === 'blueorb') isSpeciesSpecific = true;
 
-            // b. 检查特性专属
-            if (abilityItem === itemId) {
-                 if (!specificItemIds.has(itemId)) {
-                    abilityItems.push(['item', itemId]);
-                    specificItemIds.add(itemId);
-                 }
-                continue;
-            }
+			if (isSpeciesSpecific && !addedItems.has(itemId)) {
+				speciesSpecific.push(row); // 直接添加原始行
+				addedItems.add(itemId);
+			}
 
-            // c. 检查物种专属
-            let isStrictlySpeciesSpecific = false;
-            if (item.itemUser?.includes(currentSpeciesName)) isStrictlySpeciesSpecific = true;
-            if (!isStrictlySpeciesSpecific && item.megaEvolves === baseSpeciesName) isStrictlySpeciesSpecific = true;
-            if (!isStrictlySpeciesSpecific) {
-                if (baseSpeciesName === 'Groudon' && itemId === 'redorb') isStrictlySpeciesSpecific = true;
-                if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isStrictlySpeciesSpecific = true;
-            }
-			if (isStrictlySpeciesSpecific) {
-                 if (!specificItemIds.has(itemId)) {
-                    speciesItems.push(['item', itemId]);
-                    specificItemIds.add(itemId);
-                 }
+			// 检查特性专属
+			if (abilityItem === itemId && !addedItems.has(itemId)) {
+				abilitySpecific.push(row); // 直接添加原始行
+				addedItems.add(itemId);
 			}
 		}
 
-		// --- 4. 构建最终输出列表 ---
 		let output: SearchRow[] = [];
-        // ... (添加 fantasyModItems, speciesItems, abilityItems 的 Header 和内容)
-        // ... (添加过滤后的 originalItemSet)
-        // ... (应用 defaultFilter)
-        // ... (清理空 Header)
+
+		// 添加物种专属部分
+		if (speciesSpecific.length) {
+			output.push(['header', "Specific to " + speciesName], ...speciesSpecific);
+		}
+		// 添加特性专属部分
+		if (abilitySpecific.length) {
+			// 再次过滤确保不与物种专属重叠 (安全起见)
+			const finalAbilityItems = abilitySpecific.filter(a => !speciesSpecific.some(s => s[1] === a[1]));
+			if (finalAbilityItems.length > 0) {
+				output.push(['header', `Specific to ${this.set!.ability!}`], ...finalAbilityItems);
+			}
+		}
+
+		// 添加完整的原始列表 (官方逻辑包含重复项，我们这里也遵循)
+		output = output.concat(results);
+
+		// 应用默认过滤器 (如辉石)
+		if (this.defaultFilter) {
+			output = this.defaultFilter(output);
+		}
+
+		// 清理可能因 defaultFilter 产生的空 Header
+		output = output.filter((row, index, self) =>
+			!(row[0] === 'header' && (index === self.length - 1 || self[index + 1][0] === 'header'))
+		);
 
 		return output;
 	}
