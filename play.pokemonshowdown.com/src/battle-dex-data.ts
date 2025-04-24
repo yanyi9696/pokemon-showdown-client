@@ -497,7 +497,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	altariamega: 1320 + 32,
 	banettemega: 1320 + 33,
 	absolmega: 1320 + 34,
-	glaliemega: 1320 + 35,
+	glaliemega: 1320 + 35,glaliemegafantesy: 1320 + 35,
 	salamencemega: 1320 + 36,
 	metagrossmega: 1320 + 37,
 	latiasmega: 1320 + 38,
