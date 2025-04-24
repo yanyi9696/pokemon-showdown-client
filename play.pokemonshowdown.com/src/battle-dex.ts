@@ -816,7 +816,6 @@ export const Dex = new class implements ModdedDex {
 			if (gen9fantasySpecies.exists === true) num = gen9fantasySpecies.num;
 		}
 		if (num < 0) num = 0;
-		if (num > 1025) num = 0;
 
 		if (window.BattlePokemonIconIndexes?.[id]) {
 			num = BattlePokemonIconIndexes[id];
@@ -868,78 +867,84 @@ export const Dex = new class implements ModdedDex {
 
 	// sprite in teambuilder
 	getTeambuilderSpriteData(pokemon: any, gen = 0): TeambuilderSpriteData {
-		let id = toID(pokemon.species);
-		let spriteid = pokemon.spriteid;
-		let species = Dex.species.get(pokemon.species);
-		if (pokemon.species && !spriteid) {
-			spriteid = species.spriteid || toID(pokemon.species);
-		}
+		let id = toID(pokemon.species); // e.g., glaliefantasy, goodrahisuifantasy
+		let spriteid: string = id; // Explicitly type spriteid as string
+
+		// Always attempt to remove '-fantasy' suffix to get the base sprite ID
 		if (spriteid.endsWith('-fantasy')) {
-			spriteid = spriteid.slice(0, -8); // Remove '-fantasy' suffix
+			spriteid = spriteid.slice(0, -8); // e.g., glalie, goodrahisui
 		}
-		if (species.exists === false) {
-			let gen9fantasySpecies = Dex.mod('gen9fantasy' as ID).species.get(id);
-			if (gen9fantasySpecies.exists !== true) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
-			// gen9fantasySpecies.spriteid = garchomp-fantasy // sprites/dex/garchomp-fantasy.png
-			// spriteid = gen9fantasySpecies.spriteid;
-			// if (spriteid === ...) {}
-			// else {}
+		// If the original ID didn't end with -fantasy, spriteid remains unchanged.
 
-			// The existing logic below seems incorrect for general fantasy forms,
-			// let's rely on the '-fantasy' suffix removal added above.
-			// We might need to revisit this if spriteid derivation needs more complex logic.
-			// spriteid = gen9fantasySpecies.spriteid.split('-')[0];
-			// let secondPart = gen9fantasySpecies.spriteid.split('-')[1];
-			// // 提取第二部分
-			// if (secondPart === 'mega') spriteid += '-mega';
-			// if (secondPart === 'blade') spriteid += '-blade';
-			// if (secondPart === 'hisui') spriteid += '-hisui';
-			// if (secondPart === 'rapid-strike') spriteid += '-rapid-strike';
-			//  // 修改为直接匹配
-
-			// Ensure the corrected spriteid (without -fantasy) is used
-			if (gen9fantasySpecies.spriteid.endsWith('-fantasy')) {
-				spriteid = gen9fantasySpecies.spriteid.slice(0, -8);
-			} else {
-				// Fallback or handle cases where fantasy spriteid doesn't end with -fantasy?
-				// For now, let's assume the suffix convention holds.
-				spriteid = gen9fantasySpecies.spriteid;
+		// Get species data, potentially from the mod
+		// Use the original ID (with -fantasy if present) for mod lookup
+		let species = Dex.mod('gen9fantasy' as ID).species.get(id);
+		if (!species.exists) {
+			// Fallback to base dex species if mod species doesn't exist
+			species = Dex.species.get(id);
+			if (!species.exists) {
+			   // If neither exists, return a default sprite.
+			   return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
 			}
 		}
+
+		// Use the cleaned spriteid derived earlier for the image filename
 		const spriteData: TeambuilderSpriteData = {
-			spriteid,
-			spriteDir: 'sprites/dex',
+			spriteid, // Use the ID without '-fantasy'
+			spriteDir: 'sprites/dex', // Default to dex, will adjust below
 			x: -2,
 			y: -3,
 		};
+
+		// Apply shiny if needed
 		if (pokemon.shiny) spriteData.shiny = true;
+
+		// --- Gen checks and offsets ---
 		if (Dex.prefs('nopastgens')) gen = 6;
 		if (Dex.prefs('bwgfx') && gen > 5) gen = 5;
-		let xydexExists = (!species.isNonstandard || species.isNonstandard === 'Past' || species.isNonstandard === 'CAP') || [
+
+		// Use the looked-up species (could be modded or base) for gen checks.
+		// For XY checks, use the base species if available and appropriate.
+		let speciesForChecks = species;
+		let baseSpeciesForChecks = Dex.species.get(species.baseSpecies);
+		if (baseSpeciesForChecks.exists) {
+			 speciesForChecks = baseSpeciesForChecks;
+		}
+
+		let xydexExists = (!speciesForChecks.isNonstandard || speciesForChecks.isNonstandard === 'Past' || speciesForChecks.isNonstandard === 'CAP') || [
 			"pikachustarter", "eeveestarter", "meltan", "melmetal", "pokestarufo", "pokestarufo2", "pokestarbrycenman", "pokestarmt", "pokestarmt2", "pokestargiant", "pokestarhumanoid", "pokestarmonster", "pokestarf00", "pokestarf002", "pokestarspirit",
-		].includes(species.id);
-		if (species.gen >= 8 && species.isNonstandard !== 'CAP') xydexExists = false;
+		].includes(speciesForChecks.id);
+		if (speciesForChecks.gen >= 8 && speciesForChecks.isNonstandard !== 'CAP') xydexExists = false;
+
 		if ((!gen || gen >= 6) && xydexExists) {
-			if (species.gen >= 7) {
-				spriteData.x = -6;
-				spriteData.y = -7;
-			} else if (id.substr(0, 6) === 'arceus') {
-				spriteData.x = -2;
-				spriteData.y = 7;
-			} else if (id === 'garchomp') {
+			spriteData.spriteDir = 'sprites/dex'; // Ensure dex dir for XY sprites
+			// Apply specific XY offsets based on the final spriteid (cleaned)
+			if (speciesForChecks.gen >= 7) {
+				 spriteData.x = -6;
+				 spriteData.y = -7;
+			} else if (spriteid.startsWith('arceus')) { // Use cleaned spriteid for checks
+				 spriteData.x = -2;
+				 spriteData.y = 7;
+			} else if (spriteid === 'garchomp') {
 				spriteData.x = -2;
 				spriteData.y = 2;
-			} else if (id === 'garchompmega') {
-				spriteData.x = -2;
-				spriteData.y = 0;
+			} else if (spriteid === 'garchompmega') {
+				 spriteData.x = -2;
+				 spriteData.y = 0;
+			} else {
+				 // Default XY offsets
+				 spriteData.x = -2;
+				 spriteData.y = -3;
 			}
 			return spriteData;
 		}
+
+		// Fallback to older gen sprites if XY check fails
 		spriteData.spriteDir = 'sprites/gen5';
-		if (gen <= 1 && species.gen <= 1) spriteData.spriteDir = 'sprites/gen1';
-		else if (gen <= 2 && species.gen <= 2) spriteData.spriteDir = 'sprites/gen2';
-		else if (gen <= 3 && species.gen <= 3) spriteData.spriteDir = 'sprites/gen3';
-		else if (gen <= 4 && species.gen <= 4) spriteData.spriteDir = 'sprites/gen4';
+		if (gen <= 1 && speciesForChecks.gen <= 1) spriteData.spriteDir = 'sprites/gen1';
+		else if (gen <= 2 && speciesForChecks.gen <= 2) spriteData.spriteDir = 'sprites/gen2';
+		else if (gen <= 3 && speciesForChecks.gen <= 3) spriteData.spriteDir = 'sprites/gen3';
+		else if (gen <= 4 && speciesForChecks.gen <= 4) spriteData.spriteDir = 'sprites/gen4';
 		spriteData.x = 10;
 		spriteData.y = 5;
 		return spriteData;
