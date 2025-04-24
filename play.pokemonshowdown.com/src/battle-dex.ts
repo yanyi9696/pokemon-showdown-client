@@ -641,14 +641,32 @@ export const Dex = new class implements ModdedDex {
 			pokemon = pokemon.getSpeciesForme() + (isGigantamax ? '-Gmax' : '');
 		}
 		let species = Dex.species.get(pokemon);
+		let originalSpecies = species; // Keep track of the originally looked up species (could be modded)
 		const modFlag = (species.exists === false && options.mod);
 		if (modFlag) {
 			species = Dex.mod(options.mod as ID).species.get(pokemon as string);
-			// uncomment for animated, another one to comment lines after
-			// if (options.mod === 'gen9fantasy') species = Dex.mod(options.mod as ID).species.get(species.baseSpecies);
+			originalSpecies = species; // Update originalSpecies if mod species is found
 		}
+
+		// --- Determine the sprite ID to use for the filename ---
+		let baseSpriteId = species.spriteid || species.id; // Start with current species' sprite ID or ID
+		if (baseSpriteId.endsWith('-fantasy')) {
+			baseSpriteId = baseSpriteId.slice(0, -8) as ID; // Remove suffix
+		}
+
+		// --- Determine which species data to use for generation checks ---
+		let speciesForGenCheck = species; // Default to the looked up species (mod or base)
+		let baseSpecies = Dex.species.get(species.baseSpecies); // Try to get the base species from base dex
+		if (!baseSpecies.exists && baseSpriteId !== species.id) {
+			// If baseSpecies not in base dex, try looking up baseSpriteId in base dex
+			baseSpecies = Dex.species.get(baseSpriteId);
+		}
+		if (baseSpecies.exists) {
+			speciesForGenCheck = baseSpecies; // Use base species for gen checks if found
+		}
+
 		// Gmax sprites are already extremely large, so we don't need to double.
-		if (species.name.endsWith('-Gmax')) isDynamax = false;
+		if (originalSpecies.name.endsWith('-Gmax')) isDynamax = false;
 		let spriteData = {
 			gen: mechanicsGen,
 			w: 96,
@@ -660,8 +678,10 @@ export const Dex = new class implements ModdedDex {
 			cryurl: '',
 			shiny: options.shiny,
 		};
-		let name = species.spriteid;
-		if (modFlag && options.mod === 'gen9fantasy') name = name.split('-')[0]; // comment out for animated
+		// Use baseSpriteId determined above for the filename
+		let name = baseSpriteId;
+		// Remove the specific name modification for fantasy mod, as baseSpriteId handles it
+		// if (modFlag && options.mod === 'gen9fantasy') name = name.split('-')[0];
 		let dir;
 		let facing;
 		if (isFront) {
@@ -687,13 +707,14 @@ export const Dex = new class implements ModdedDex {
 		let graphicsGen = mechanicsGen;
 		if (Dex.prefs('nopastgens')) graphicsGen = 6;
 		if (Dex.prefs('bwgfx') && graphicsGen >= 6) graphicsGen = 5;
-		spriteData.gen = Math.max(graphicsGen, Math.min(species.gen, 5));
+		spriteData.gen = Math.max(graphicsGen, Math.min(speciesForGenCheck.gen, 5));
 		const baseDir = ['', 'gen1', 'gen2', 'gen3', 'gen4', 'gen5', '', '', '', ''][spriteData.gen];
 
 		let animationData = null;
 		let miscData = null;
-		let speciesid = species.id;
-		if (species.isTotem) speciesid = toID(name);
+		// Use baseSpriteId for looking up animation/misc data
+		let speciesid = toID(name); // name should be baseSpriteId here
+		// if (species.isTotem) speciesid = toID(name); // Totem check might need original species ID? Revisit if needed.
 		if (baseDir === '' && window.BattlePokemonSprites) {
 			animationData = BattlePokemonSprites[speciesid];
 		}
@@ -706,10 +727,12 @@ export const Dex = new class implements ModdedDex {
 		if (!miscData) miscData = {};
 
 		if (miscData.num !== 0 && miscData.num > -5000) {
-			let baseSpeciesid = toID(species.baseSpecies);
+			// Use speciesForGenCheck to determine cry URL base ID
+			let baseSpeciesid = toID(speciesForGenCheck.baseSpecies);
 			spriteData.cryurl = 'audio/cries/' + baseSpeciesid;
-			let formeid = species.formeid;
-			if (species.isMega || formeid && (
+			// Use originalSpecies to check forme for cry URL suffix
+			let formeid = originalSpecies.formeid;
+			if (originalSpecies.isMega || formeid && (
 				formeid === '-crowned' ||
 				formeid === '-eternal' ||
 				formeid === '-eternamax' ||
@@ -770,10 +793,10 @@ export const Dex = new class implements ModdedDex {
 			// Gender differences don't exist prior to Gen 4,
 			// so there are no sprites for it
 			if (spriteData.gen >= 4 && miscData['frontf'] && options.gender === 'F') {
-				name += '-f';
+				name += '-f'; // Append -f to baseSpriteId if needed
 			}
 
-			spriteData.url += dir + '/' + name + '.png';
+			spriteData.url += dir + '/' + name + '.png'; // Use potentially gendered baseSpriteId
 		}
 
 		if (!options.noScale) {
@@ -781,8 +804,8 @@ export const Dex = new class implements ModdedDex {
 				// no scaling
 			} else if (spriteData.isFrontSprite) {
 				spriteData.w *= 2;
-				spriteData.h *= 2;
-				spriteData.y += -16;
+					spriteData.h *= 2;
+					spriteData.y += -16;
 			} else {
 				// old gen backsprites are multiplied by 1.5x by the 3D engine
 				spriteData.w *= 2 / 1.5;
@@ -795,7 +818,7 @@ export const Dex = new class implements ModdedDex {
 			spriteData.w *= 2;
 			spriteData.h *= 2;
 			spriteData.y += -22;
-		} else if (species.isTotem && !options.noScale) {
+		} else if (speciesForGenCheck.isTotem && !options.noScale) { // Use speciesForGenCheck for totem check
 			spriteData.w *= 1.5;
 			spriteData.h *= 1.5;
 			spriteData.y += -11;
