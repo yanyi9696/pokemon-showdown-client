@@ -906,13 +906,29 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 
 class BattleItemSearch extends BattleTypedSearch<'item'> {
 	getTable() {
-		return BattleItems;
-	}
-	getDefaultResults(): SearchRow[] {
 		return this.dex.getItemSet();
 	}
+	getDefaultResults(): SearchRow[] {
+		const results = this.dex.getItemSet();
+
+		// --- 添加日志 ---
+		console.log("[Debug] Raw default results include fantasyitem?", results.some((row: SearchRow) => row[0] === 'item' && row[1] === 'fantasyitem'));
+		// console.log("[Debug] Raw default results list:", results); // 可以取消注释查看完整列表
+		// --- 结束日志 ---
+
+		return results; // 返回列表
+	}
 	getBaseResults(): SearchRow[] {
-		if (!this.species) return this.getDefaultResults();
+		// --- 添加日志 ---
+		console.log("[Debug] Current Dex Mod ID:", this.dex.modid);
+		const fantasyItemExists = this.dex.items.get('fantasyitem').exists;
+		console.log("[Debug] Does fantasyitem exist in this.dex.items?", fantasyItemExists);
+		if (fantasyItemExists) {
+			console.log("[Debug] Fantasy Item Data from Dex:", this.dex.items.get('fantasyitem'));
+		}
+		// --- 结束日志 ---
+
+		if (!this.species) return this.getDefaultResults(); // No species? Return all.
 
 		const currentSpecies = this.dex.species.get(this.species);
 		const baseSpeciesName = currentSpecies.baseSpecies;
