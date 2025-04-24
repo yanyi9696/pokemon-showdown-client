@@ -937,33 +937,62 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 		// 获取基础道具列表 (可能包含 "Popular items" 等)
 		const originalItemSet = this.getDefaultResults();
 
-		const speciesItems: SearchRow[] = [];
-		const abilityItems: SearchRow[] = [];
-		// 记录专属道具 ID，用于过滤
-		const specificItemIds = new Set<ID>();
+		const isGen9FantasyModActive = this.dex.modid.includes('gen9fantasy' as ID);
+
+		// 创建一个 Set 以便快速查找基础列表中的道具 ID
+		const originalItemIds = new Set(
+			originalItemSet.filter(row => row[0] === 'item').map(row => row[1])
+		);
+
+		const fantasyModItems: SearchRow[] = []; // 存放 Mod 专属道具
+		const speciesItems: SearchRow[] = [];    // 存放物种专属道具
+		const abilityItems: SearchRow[] = [];    // 存放特性专属道具
+		const specificItemIds = new Set<ID>(); // 记录所有被归为专属的道具ID
 
 		const abilityItem = {
 			protosynthesis: 'boosterenergy',
 			quarkdrive: 'boosterenergy',
 		}[toID(this.set?.ability) as string];
 
-		// --- 识别物种和特性专属道具 ---
+		// --- 2. 识别 Mod 专属道具 ---
+		if (isGen9FantasyModActive) {
+			// 遍历全局 BattleItems 对象来获取所有已知道具 ID
+			for (const itemId in BattleItems) {
+				// 确保是 ID 格式，并检查它是否存在于 Dex 中 (可能有些 BattleItems 条目是非标准的或已过时)
+				const item = this.dex.items.get(itemId as ID);
+				if (!item.exists) continue; // 跳过无效或不存在的道具
+
+				// 如果道具不在基础列表 originalItemIds 中，则认为是 Mod 道具
+				if (!originalItemIds.has(item.id)) {
+					 if (!specificItemIds.has(item.id)) {
+						fantasyModItems.push(['item', item.id]);
+						specificItemIds.add(item.id);
+					}
+				}
+			}
+		}
+
+		// --- 3. 识别基础列表中的物种和特性专属道具 ---
 		for (const row of originalItemSet) {
 			if (row[0] !== 'item') continue;
 
 			const item = this.dex.items.get(row[1]);
 			const itemId = item.id;
 
-			if (specificItemIds.has(itemId)) continue; // 跳过已分类的
+			// 跳过已被识别为 Mod 专属的道具
+			if (specificItemIds.has(itemId)) continue;
 
-			// 检查特性专属
+			// b. 检查特性专属
 			if (abilityItem === itemId) {
-				abilityItems.push(['item', itemId]);
-				specificItemIds.add(itemId);
+				// 检查是否已被添加 (避免重复，虽然理论上不太可能)
+				 if (!specificItemIds.has(itemId)) {
+					abilityItems.push(['item', itemId]);
+					specificItemIds.add(itemId);
+				 }
 				continue;
 			}
 
-			// 检查物种专属
+			// c. 检查物种专属
 			let isStrictlySpeciesSpecific = false;
 			if (item.itemUser?.includes(currentSpeciesName)) isStrictlySpeciesSpecific = true;
 			if (!isStrictlySpeciesSpecific && item.megaEvolves === baseSpeciesName) isStrictlySpeciesSpecific = true;
@@ -972,39 +1001,52 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 				if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isStrictlySpeciesSpecific = true;
 			}
 			if (isStrictlySpeciesSpecific) {
-				speciesItems.push(['item', itemId]);
-				specificItemIds.add(itemId);
+				 // 检查是否已被添加
+				 if (!specificItemIds.has(itemId)) {
+					speciesItems.push(['item', itemId]);
+					specificItemIds.add(itemId);
+				 }
 			}
 		}
 
-		// --- 构建最终列表 ---
+		// --- 4. 构建最终输出列表 ---
 		let output: SearchRow[] = [];
 
-		// 添加物种专属部分
-		if (speciesItems.length) {
-			output.push(['header', "Specific to " + currentSpeciesName], ...speciesItems);
+		// a. 添加 Mod 专属道具部分
+		if (fantasyModItems.length) {
+			output.push(['header', "Gen9fantasy specific items"], ...fantasyModItems);
 		}
-		// 添加特性专属部分 (过滤掉可能与物种重叠的)
+		// b. 添加物种专属道具部分 (过滤掉可能与 Mod 重叠的，虽然不太可能)
+		if (speciesItems.length) {
+			const finalSpeciesItems = speciesItems.filter(s => !fantasyModItems.some(f => f[1] === s[1]));
+			 if (finalSpeciesItems.length > 0) {
+				output.push(['header', "Specific to " + currentSpeciesName], ...finalSpeciesItems);
+			 }
+		}
+		// c. 添加特性专属道具部分 (过滤掉可能与 Mod/物种 重叠的)
 		if (abilityItems.length) {
-			const finalAbilityItems = abilityItems.filter(a => !speciesItems.some(s => s[1] === a[1]));
+			const finalAbilityItems = abilityItems.filter(a =>
+				!fantasyModItems.some(f => f[1] === a[1]) &&
+				!speciesItems.some(s => s[1] === a[1])
+			);
 			if (finalAbilityItems.length > 0) {
 				output.push(['header', `Specific to ${this.set!.ability!}`], ...finalAbilityItems);
 			}
 		}
 
-		// 添加过滤后的原始列表 (保留 Header，移除已分类的专属道具)
+		// d. 添加过滤后的原始列表 (保留 Header 和非专属道具)
 		const filteredOriginalList = originalItemSet.filter(row => {
-			if (row[0] !== 'item') return true; // 保留 Header
-			return !specificItemIds.has(row[1]); // 移除专属道具
+			if (row[0] !== 'item') return true;
+			return !specificItemIds.has(row[1]); // 过滤掉所有已分类的专属道具
 		});
 		output = output.concat(filteredOriginalList);
 
-		// 应用默认过滤器 (如辉石)
+		// --- 5. 应用默认过滤器 ---
 		if (this.defaultFilter) {
 			output = this.defaultFilter(output);
 		}
 
-		// 清理空 Header
+		// --- 6. 清理空 Header ---
 		output = output.filter((row, index, self) =>
 			!(row[0] === 'header' && (index === self.length - 1 || self[index + 1][0] === 'header'))
 		);
