@@ -835,58 +835,57 @@ export const Dex = new class implements ModdedDex {
 	}
 
 	getPokemonIcon(pokemon: string | Pokemon | ServerPokemon | Dex.PokemonSet | null, facingLeft?: boolean) {
-		if (pokemon === 'pokeball') {
-			return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -0px 4px`;
-		} else if (pokemon === 'pokeball-statused') {
-			return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -40px 4px`;
-		} else if (pokemon === 'pokeball-fainted') {
-			return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px;opacity:.4;filter:contrast(0)`;
-		} else if (pokemon === 'pokeball-none') {
-			return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px`;
+		// Handle pokeball cases first
+		if (pokemon === 'pokeball') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -0px 4px`;
+		if (pokemon === 'pokeball-statused') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -40px 4px`;
+		if (pokemon === 'pokeball-fainted') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px;opacity:.4;filter:contrast(0)`;
+		if (pokemon === 'pokeball-none') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px`;
+
+		let id: ID = '' as ID;
+		let gender: Dex.GenderName | '' = '';
+		let fainted = false;
+
+		if (typeof pokemon === 'string') {
+			id = toID(pokemon);
+		} else if (pokemon) {
+			// Determine base ID (species or speciesForme)
+			if ('speciesForme' in pokemon) { // Pokemon or ServerPokemon like structure
+				 id = toID(pokemon.speciesForme);
+				 gender = pokemon.gender || '';
+				 fainted = !!pokemon.fainted;
+			} else if ('species' in pokemon) { // PokemonSet like structure
+				 id = toID(pokemon.species);
+				 gender = (pokemon as Dex.PokemonSet).gender as Dex.GenderName || '';
+			}
+
+			// Check for formechange override (only applicable to Pokemon type)
+			// Use type assertion carefully as ServerPokemon lacks volatiles
+			const p = pokemon as Pokemon;
+			if (p.volatiles?.formechange && !p.volatiles?.transform) {
+				 id = toID(p.volatiles.formechange![1]);
+			}
 		}
 
-		let id = toID(pokemon);
-        let gender = ''; // Determine gender later
-        let fainted = false; // Determine fainted later
+		// If ID couldn't be determined, default to 0 (question mark icon)
+		if (!id) id = '0' as ID;
 
-		if (!pokemon || typeof pokemon === 'string') {
-            pokemon = null;
-        } else {
-            // If pokemon object exists, use its properties to refine ID and state
-            let speciesId: ID;
-            if (pokemon instanceof Pokemon || pokemon.hasOwnProperty('speciesForme')) { // Check if it's likely Pokemon or ServerPokemon
-                speciesId = toID((pokemon as Pokemon | ServerPokemon).speciesForme); // Always use speciesForme for these types
-                id = speciesId; // Initial id is speciesForme
-                gender = (pokemon as Pokemon | ServerPokemon).gender || '';
-                fainted = !!(pokemon as Pokemon | ServerPokemon).fainted;
-                 // formechange overrides speciesForme
-                 // @ts-expect-error safe, but too lazy to cast
-                if (pokemon?.volatiles?.formechange && !pokemon.volatiles.transform) {
-                    // @ts-expect-error safe, but too lazy to cast
-                    id = toID(pokemon.volatiles.formechange[1]);
-                }
-            } else { // Assume PokemonSet
-                speciesId = toID((pokemon as Dex.PokemonSet).species);
-                id = speciesId; // Initial id is species for PokemonSet
-                gender = (pokemon as Dex.PokemonSet).gender || '';
-                // PokemonSet doesn't have fainted status
-            }
-        }
+		// ID for icon number lookup (strip fantasy)
+		let idForIconNum = id;
+		if (idForIconNum.endsWith('fantasy')) {
+			 idForIconNum = idForIconNum.slice(0, -8) as ID;
+		}
 
-        // Handle fantasy suffix for icon lookup *before* getPokemonIconNum
-        // Use the final determined id from above
-        let idForIconNum = id;
-        if (idForIconNum.endsWith('fantasy')) {
-             idForIconNum = idForIconNum.slice(0, -8) as ID;
-        }
-
+		// Get the number using the potentially stripped ID
 		let num = this.getPokemonIconNum(idForIconNum, gender === 'F', facingLeft);
 
+		// Generate CSS
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
 		let faintedString = (fainted ?
 			`;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
-		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v18) no-repeat scroll -${left}px -${top}px${faintedString}`;
+		// Ensure URL is correct
+		const iconSheetUrl = `${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v18`;
+		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}`;
 	}
 
 	// sprite in teambuilder
