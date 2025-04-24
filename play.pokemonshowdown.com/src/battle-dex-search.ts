@@ -32,6 +32,13 @@ declare const Gen9fantasySearchIndex: [ID, SearchType, number?, number?][];
 declare const Gen9fantasySearchIndexOffset: any;
 declare const Gen9fantasyTable: any;
 
+// 在文件顶部或其他合适位置添加全局类型声明
+declare global {
+	interface Window {
+		Gen9FantasyModItemIDs?: Set<ID>; // 声明全局变量及其类型 (Set of IDs)
+	}
+}
+
 /**
  * Backend for search UIs.
  */
@@ -910,7 +917,7 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 	}
 	getDefaultResults(): SearchRow[] {
 		const results = this.dex.getItemSet();
-		return results; // 返回列表
+		return results;
 	}
 	getBaseResults(): SearchRow[] {
 		if (!this.species) return this.getDefaultResults();
@@ -918,7 +925,6 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 		const currentSpecies = this.dex.species.get(this.species);
 		const baseSpeciesName = currentSpecies.baseSpecies;
 		const currentSpeciesName = currentSpecies.name;
-		const isGen9FantasyModActive = this.dex.modid.includes('gen9fantasy' as ID);
 
 		const originalItemSet = this.getDefaultResults();
 
@@ -932,37 +938,29 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			quarkdrive: 'boosterenergy',
 		}[toID(this.set?.ability) as string];
 
-		// --- 2. 识别并分类所有专属道具 (只遍历基础列表) ---
+		// 获取全局变量 (如果存在)
+		const fantasyItemSet = window.Gen9FantasyModItemIDs;
+
+		// --- 2. 识别并分类所有专属道具 ---
 		for (const row of originalItemSet) {
 			if (row[0] !== 'item') continue;
 
 			const item = this.dex.items.get(row[1]);
 			const itemId = item.id;
-			const itemIsNonstandard = (item as any).isNonstandard; // 获取属性值
-
-			// --- 添加精确日志 ---
-			if (itemId === 'fantasyitem' || itemId === 'firegem') {
-				console.log(`[Debug] Item: ${itemId}, isNonstandard value:`, itemIsNonstandard, typeof itemIsNonstandard);
-			}
-			// --- 结束日志 ---
 
 			// a. 检查是否为 Mod 专属道具 (最高优先级)
-			if (isGen9FantasyModActive && itemIsNonstandard) { // 使用获取到的值
-				// --- 添加分类日志 ---
-				if (itemId === 'fantasyitem' || itemId === 'firegem') {
-					console.log(`[Debug] Item: ${itemId} would be categorized as Mod item.`);
-				}
-				// --- 结束分类日志 ---
+			// 使用注入的全局 Set
+			if (fantasyItemSet?.has(itemId)) {
 				if (!specificItemIds.has(itemId)) {
 					fantasyModItems.push(['item', itemId]);
 					specificItemIds.add(itemId);
 				}
-				continue;
+				continue; // 如果是 Mod 专属，不再进行其他检查
 			}
 
 			// b. 检查是否为特性专属道具 (如果不是 Mod 专属)
 			if (abilityItem === itemId) {
-				if (!specificItemIds.has(itemId)) { // 检查是否已被添加
+				if (!specificItemIds.has(itemId)) {
 					abilityItems.push(['item', itemId]);
 					specificItemIds.add(itemId);
 				}
@@ -978,7 +976,7 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 				if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isStrictlySpeciesSpecific = true;
 			}
 			if (isStrictlySpeciesSpecific) {
-				if (!specificItemIds.has(itemId)) { // 检查是否已被添加
+				if (!specificItemIds.has(itemId)) {
 					speciesItems.push(['item', itemId]);
 					specificItemIds.add(itemId);
 				}
@@ -1012,8 +1010,8 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 
 		// d. 添加过滤后的原始列表
 		const filteredOriginalList = originalItemSet.filter(row => {
-			if (row[0] !== 'item') return true; // 保留 Header
-			return !specificItemIds.has(row[1]); // 移除所有已分类的专属道具
+			if (row[0] !== 'item') return true;
+			return !specificItemIds.has(row[1]);
 		});
 		output = output.concat(filteredOriginalList);
 
