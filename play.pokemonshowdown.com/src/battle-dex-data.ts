@@ -265,7 +265,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	furfroupharaoh: 1032 + 113,
 	furfroustar: 1032 + 114,
 	meowsticf: 1032 + 115,
-	aegislashblade: 1032 + 116,aegislashbladefantasy: 1032 + 116,
+	aegislashblade: 1032 + 116, aegislashbladefantasy: 1032 + 116, // Added fantasy mapping
 	xerneasneutral: 1032 + 117,
 	hoopaunbound: 1032 + 118,
 	rattataalola: 1032 + 119,
@@ -368,9 +368,9 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	zoroarkhisui: 1032 + 216,
 	braviaryhisui: 1032 + 217,
 	sliggoohisui: 1032 + 218,
-	goodrahisui: 1032 + 219,goodrahisuifantasy: 1032 + 219,
+	goodrahisui: 1032 + 219, goodrahisuifantasy: 1032 + 219, // Added fantasy mapping
 	avalugghisui: 1032 + 220,
-	decidueyehisui: 1032 + 221,decidueyehisuifantasy:1032 + 221,
+	decidueyehisui: 1032 + 221, decidueyehisuifantasy: 1032 + 221, // Added fantasy mapping
 	basculegionf: 1032 + 222,
 	enamorustherian: 1032 + 223,
 	taurospaldeacombat: 1032 + 224,
@@ -497,7 +497,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	altariamega: 1320 + 32,
 	banettemega: 1320 + 33,
 	absolmega: 1320 + 34,
-	glaliemega: 1320 + 35,glaliemegafantasy: 1320 + 35,
+	glaliemega: 1320 + 35, glaliemegafantasy: 1320 + 35, // Added fantasy mapping
 	salamencemega: 1320 + 36,
 	metagrossmega: 1320 + 37,
 	latiasmega: 1320 + 38,
@@ -506,7 +506,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	groudonprimal: 1320 + 41,
 	rayquazamega: 1320 + 42,
 	lopunnymega: 1320 + 43,
-	garchompmega: 1320 + 44,garchompmegafantasy: 1320 + 44,
+	garchompmega: 1320 + 44, garchompmegafantasy: 1320 + 44, // Added fantasy mapping
 	lucariomega: 1320 + 45,
 	abomasnowmega: 1320 + 46,
 	gallademega: 1320 + 47,

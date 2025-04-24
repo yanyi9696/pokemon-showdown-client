@@ -874,6 +874,9 @@ export const Dex = new class implements ModdedDex {
 		if (pokemon.species && !spriteid) {
 			spriteid = species.spriteid || toID(pokemon.species);
 		}
+		if (spriteid.endsWith('-fantasy')) {
+			spriteid = spriteid.slice(0, -8); // Remove '-fantasy' suffix
+		}
 		if (species.exists === false) {
 			let gen9fantasySpecies = Dex.mod('gen9fantasy' as ID).species.get(id);
 			if (gen9fantasySpecies.exists !== true) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
@@ -881,14 +884,27 @@ export const Dex = new class implements ModdedDex {
 			// spriteid = gen9fantasySpecies.spriteid;
 			// if (spriteid === ...) {}
 			// else {}
-			spriteid = gen9fantasySpecies.spriteid.split('-')[0];
-			let secondPart = gen9fantasySpecies.spriteid.split('-')[1]; 
-			// 提取第二部分
-			if (secondPart === 'mega') spriteid += '-mega';
-			if (secondPart === 'blade') spriteid += '-blade';
-			if (secondPart === 'hisui') spriteid += '-hisui';
-			if (secondPart === 'rapid-strike') spriteid += '-rapid-strike';
-			 // 修改为直接匹配
+
+			// The existing logic below seems incorrect for general fantasy forms,
+			// let's rely on the '-fantasy' suffix removal added above.
+			// We might need to revisit this if spriteid derivation needs more complex logic.
+			// spriteid = gen9fantasySpecies.spriteid.split('-')[0];
+			// let secondPart = gen9fantasySpecies.spriteid.split('-')[1];
+			// // 提取第二部分
+			// if (secondPart === 'mega') spriteid += '-mega';
+			// if (secondPart === 'blade') spriteid += '-blade';
+			// if (secondPart === 'hisui') spriteid += '-hisui';
+			// if (secondPart === 'rapid-strike') spriteid += '-rapid-strike';
+			//  // 修改为直接匹配
+
+			// Ensure the corrected spriteid (without -fantasy) is used
+			if (gen9fantasySpecies.spriteid.endsWith('-fantasy')) {
+				spriteid = gen9fantasySpecies.spriteid.slice(0, -8);
+			} else {
+				// Fallback or handle cases where fantasy spriteid doesn't end with -fantasy?
+				// For now, let's assume the suffix convention holds.
+				spriteid = gen9fantasySpecies.spriteid;
+			}
 		}
 		const spriteData: TeambuilderSpriteData = {
 			spriteid,
