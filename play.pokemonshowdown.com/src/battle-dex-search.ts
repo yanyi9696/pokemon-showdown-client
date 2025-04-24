@@ -938,14 +938,26 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 
 			const item = this.dex.items.get(row[1]);
 			const itemId = item.id;
+			const itemIsNonstandard = (item as any).isNonstandard; // 获取属性值
+
+			// --- 添加精确日志 ---
+			if (itemId === 'fantasyitem' || itemId === 'firegem') {
+				console.log(`[Debug] Item: ${itemId}, isNonstandard value:`, itemIsNonstandard, typeof itemIsNonstandard);
+			}
+			// --- 结束日志 ---
 
 			// a. 检查是否为 Mod 专属道具 (最高优先级)
-			if (isGen9FantasyModActive && (item as any).isNonstandard) {
+			if (isGen9FantasyModActive && itemIsNonstandard) { // 使用获取到的值
+				// --- 添加分类日志 ---
+				if (itemId === 'fantasyitem' || itemId === 'firegem') {
+					console.log(`[Debug] Item: ${itemId} would be categorized as Mod item.`);
+				}
+				// --- 结束分类日志 ---
 				if (!specificItemIds.has(itemId)) {
 					fantasyModItems.push(['item', itemId]);
 					specificItemIds.add(itemId);
 				}
-				continue; // 如果是 Mod 专属，不再进行其他检查
+				continue;
 			}
 
 			// b. 检查是否为特性专属道具 (如果不是 Mod 专属)
