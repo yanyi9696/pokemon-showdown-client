@@ -846,100 +846,121 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		let id = toID(pokemon);
-		if (!pokemon || typeof pokemon === 'string') pokemon = null;
-		// @ts-expect-error safe, but too lazy to cast
-		if (pokemon?.speciesForme) id = toID(pokemon.speciesForme);
-		// @ts-expect-error safe, but too lazy to cast
-		if (pokemon?.species) id = toID(pokemon.species);
-		// @ts-expect-error safe, but too lazy to cast
-		if (pokemon?.volatiles?.formechange && !pokemon.volatiles.transform) {
-			// @ts-expect-error safe, but too lazy to cast
-			id = toID(pokemon.volatiles.formechange[1]);
-		}
-		let num = this.getPokemonIconNum(id, pokemon?.gender === 'F', facingLeft);
+        let gender = ''; // Determine gender later
+        let fainted = false; // Determine fainted later
+
+		if (!pokemon || typeof pokemon === 'string') {
+            pokemon = null;
+        } else {
+            // If pokemon object exists, use its properties to refine ID and state
+            let speciesId: ID;
+            if (pokemon instanceof Pokemon || pokemon.hasOwnProperty('speciesForme')) { // Check if it's likely Pokemon or ServerPokemon
+                speciesId = toID((pokemon as Pokemon | ServerPokemon).speciesForme); // Always use speciesForme for these types
+                id = speciesId; // Initial id is speciesForme
+                gender = (pokemon as Pokemon | ServerPokemon).gender || '';
+                fainted = !!(pokemon as Pokemon | ServerPokemon).fainted;
+                 // formechange overrides speciesForme
+                 // @ts-expect-error safe, but too lazy to cast
+                if (pokemon?.volatiles?.formechange && !pokemon.volatiles.transform) {
+                    // @ts-expect-error safe, but too lazy to cast
+                    id = toID(pokemon.volatiles.formechange[1]);
+                }
+            } else { // Assume PokemonSet
+                speciesId = toID((pokemon as Dex.PokemonSet).species);
+                id = speciesId; // Initial id is species for PokemonSet
+                gender = (pokemon as Dex.PokemonSet).gender || '';
+                // PokemonSet doesn't have fainted status
+            }
+        }
+
+        // Handle fantasy suffix for icon lookup *before* getPokemonIconNum
+        // Use the final determined id from above
+        let idForIconNum = id;
+        if (idForIconNum.endsWith('fantasy')) {
+             idForIconNum = idForIconNum.slice(0, -8) as ID;
+        }
+
+		let num = this.getPokemonIconNum(idForIconNum, gender === 'F', facingLeft);
 
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
-		let fainted = ((pokemon as Pokemon | ServerPokemon)?.fainted ?
+		let faintedString = (fainted ?
 			`;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
-		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v18) no-repeat scroll -${left}px -${top}px${fainted}`;
+		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v18) no-repeat scroll -${left}px -${top}px${faintedString}`;
 	}
 
 	// sprite in teambuilder
 	getTeambuilderSpriteData(pokemon: any, gen = 0): TeambuilderSpriteData {
-		let id = toID(pokemon.species); // e.g., glaliefantasy, goodrahisuifantasy
-		let spriteid: string = id; // Explicitly type spriteid as string
-
-		// Always attempt to remove '-fantasy' suffix to get the base sprite ID
-		if (spriteid.endsWith('-fantasy')) {
-			spriteid = spriteid.slice(0, -8); // e.g., glalie, goodrahisui
+		let id = toID(pokemon.species);
+		let spriteid = pokemon.spriteid;
+		let species = Dex.species.get(pokemon.species);
+		if (pokemon.species && !spriteid) {
+			spriteid = species.spriteid || toID(pokemon.species);
 		}
-		// If the original ID didn't end with -fantasy, spriteid remains unchanged.
-
-		// Get species data, potentially from the mod
-		// Use the original ID (with -fantasy if present) for mod lookup
-		let species = Dex.mod('gen9fantasy' as ID).species.get(id);
-		if (!species.exists) {
-			// Fallback to base dex species if mod species doesn't exist
-			species = Dex.species.get(id);
-			if (!species.exists) {
-			   // If neither exists, return a default sprite.
-			   return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
+		// Handle spriteid if the species doesn't exist in the base dex (could be a mod species)
+		if (species.exists === false) {
+			let modSpecies = Dex.mod('gen9fantasy' as ID).species.get(id);
+			if (modSpecies.exists) {
+				species = modSpecies; // Use mod species data for checks
+				// Use spriteid from mod if available, otherwise derive from species id
+				spriteid = modSpecies.spriteid || id;
+			} else {
+				// Neither base nor mod species found
+				return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5 };
 			}
 		}
 
-		// Use the cleaned spriteid derived earlier for the image filename
+		// Ensure spriteid is defined and remove '-fantasy' suffix for filename
+		if (!spriteid) spriteid = id;
+		if (spriteid.endsWith('-fantasy')) {
+			spriteid = spriteid.slice(0, -8);
+		}
+
 		const spriteData: TeambuilderSpriteData = {
-			spriteid, // Use the ID without '-fantasy'
-			spriteDir: 'sprites/dex', // Default to dex, will adjust below
+			spriteid, // Use cleaned spriteid for filename
+			spriteDir: 'sprites/dex',
 			x: -2,
 			y: -3,
 		};
-
-		// Apply shiny if needed
 		if (pokemon.shiny) spriteData.shiny = true;
 
-		// --- Gen checks and offsets ---
+		// Determine display generation based on preferences and species data
 		if (Dex.prefs('nopastgens')) gen = 6;
 		if (Dex.prefs('bwgfx') && gen > 5) gen = 5;
 
-		// Use the looked-up species (could be modded or base) for gen checks.
-		// For XY checks, use the base species if available and appropriate.
+		// Use the determined species (mod or base) for gen checks
 		let speciesForChecks = species;
-		let baseSpeciesForChecks = Dex.species.get(species.baseSpecies);
-		if (baseSpeciesForChecks.exists) {
-			 speciesForChecks = baseSpeciesForChecks;
-		}
 
+		// Check if XY sprites should be used
 		let xydexExists = (!speciesForChecks.isNonstandard || speciesForChecks.isNonstandard === 'Past' || speciesForChecks.isNonstandard === 'CAP') || [
 			"pikachustarter", "eeveestarter", "meltan", "melmetal", "pokestarufo", "pokestarufo2", "pokestarbrycenman", "pokestarmt", "pokestarmt2", "pokestargiant", "pokestarhumanoid", "pokestarmonster", "pokestarf00", "pokestarf002", "pokestarspirit",
 		].includes(speciesForChecks.id);
 		if (speciesForChecks.gen >= 8 && speciesForChecks.isNonstandard !== 'CAP') xydexExists = false;
 
 		if ((!gen || gen >= 6) && xydexExists) {
-			spriteData.spriteDir = 'sprites/dex'; // Ensure dex dir for XY sprites
-			// Apply specific XY offsets based on the final spriteid (cleaned)
+			spriteData.spriteDir = 'sprites/dex'; // Keep XY dir
+			// Apply specific offsets based on the *cleaned* spriteid
 			if (speciesForChecks.gen >= 7) {
-				 spriteData.x = -6;
-				 spriteData.y = -7;
-			} else if (spriteid.startsWith('arceus')) { // Use cleaned spriteid for checks
-				 spriteData.x = -2;
-				 spriteData.y = 7;
+				spriteData.x = -6;
+				spriteData.y = -7;
+			} else if (spriteid.startsWith('arceus')) {
+				spriteData.x = -2;
+				spriteData.y = 7;
 			} else if (spriteid === 'garchomp') {
 				spriteData.x = -2;
 				spriteData.y = 2;
 			} else if (spriteid === 'garchompmega') {
-				 spriteData.x = -2;
-				 spriteData.y = 0;
+				spriteData.x = -2;
+				spriteData.y = 0;
 			} else {
-				 // Default XY offsets
-				 spriteData.x = -2;
-				 spriteData.y = -3;
+				// Default XY offsets
+				spriteData.x = -2;
+				spriteData.y = -3;
 			}
 			return spriteData;
 		}
 
-		// Fallback to older gen sprites if XY check fails
+		// Fallback to older gen sprites
 		spriteData.spriteDir = 'sprites/gen5';
 		if (gen <= 1 && speciesForChecks.gen <= 1) spriteData.spriteDir = 'sprites/gen1';
 		else if (gen <= 2 && speciesForChecks.gen <= 2) spriteData.spriteDir = 'sprites/gen2';
