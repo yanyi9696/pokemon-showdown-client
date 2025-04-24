@@ -917,13 +917,13 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 		const currentSpecies = this.dex.species.get(this.species);
 		const baseSpeciesName = currentSpecies.baseSpecies;
 		const currentSpeciesName = currentSpecies.name;
-		const isFantasyPokemon = currentSpecies.id.endsWith('-fantasy') || currentSpecies.isNonstandard === 'Custom';
 
+		// 获取基础道具列表 (可能包含 "Popular items" 等)
 		const originalItemSet = this.getDefaultResults();
 
-		const fantasySpecificItems: SearchRow[] = [];
-		const speciesSpecificItems: SearchRow[] = [];
-		const abilitySpecificItems: SearchRow[] = [];
+		const speciesItems: SearchRow[] = [];
+		const abilityItems: SearchRow[] = [];
+		// 记录专属道具 ID，用于过滤
 		const specificItemIds = new Set<ID>();
 
 		const abilityItem = {
@@ -931,80 +931,64 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			quarkdrive: 'boosterenergy',
 		}[toID(this.set?.ability) as string];
 
+		// --- 识别物种和特性专属道具 ---
 		for (const row of originalItemSet) {
 			if (row[0] !== 'item') continue;
 
 			const item = this.dex.items.get(row[1]);
 			const itemId = item.id;
 
-			if (isFantasyPokemon && window.Gen9fantasyItems?.[itemId]) {
-				if (!specificItemIds.has(itemId)) {
-					fantasySpecificItems.push(['item', itemId]);
-					specificItemIds.add(itemId);
-				}
-				continue;
-			}
+			if (specificItemIds.has(itemId)) continue; // 跳过已分类的
 
+			// 检查特性专属
 			if (abilityItem === itemId) {
-				if (!specificItemIds.has(itemId)) {
-					abilitySpecificItems.push(['item', itemId]);
-					specificItemIds.add(itemId);
-				}
+				abilityItems.push(['item', itemId]);
+				specificItemIds.add(itemId);
 				continue;
 			}
 
+			// 检查物种专属
 			let isStrictlySpeciesSpecific = false;
-			if (item.itemUser?.includes(currentSpeciesName)) {
-				isStrictlySpeciesSpecific = true;
-			}
-			if (!isStrictlySpeciesSpecific && item.megaEvolves === baseSpeciesName) {
-				isStrictlySpeciesSpecific = true;
-			}
+			if (item.itemUser?.includes(currentSpeciesName)) isStrictlySpeciesSpecific = true;
+			if (!isStrictlySpeciesSpecific && item.megaEvolves === baseSpeciesName) isStrictlySpeciesSpecific = true;
 			if (!isStrictlySpeciesSpecific) {
 				if (baseSpeciesName === 'Groudon' && itemId === 'redorb') isStrictlySpeciesSpecific = true;
 				if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isStrictlySpeciesSpecific = true;
 			}
 			if (isStrictlySpeciesSpecific) {
-				if (!specificItemIds.has(itemId)) {
-					speciesSpecificItems.push(['item', itemId]);
-					specificItemIds.add(itemId);
-				}
+				speciesItems.push(['item', itemId]);
+				specificItemIds.add(itemId);
 			}
 		}
 
+		// --- 构建最终列表 ---
 		let output: SearchRow[] = [];
 
-		if (fantasySpecificItems.length) {
-			output = output.concat([['header', "Gen9fantasy specific items"]], fantasySpecificItems);
+		// 添加物种专属部分
+		if (speciesItems.length) {
+			output.push(['header', "Specific to " + currentSpeciesName], ...speciesItems);
 		}
-
-		if (speciesSpecificItems.length) {
-			const finalSpeciesItems = speciesSpecificItems.filter(s => !fantasySpecificItems.some(f => f[1] === s[1]));
-			if (finalSpeciesItems.length > 0) {
-				output = output.concat([['header', "Specific to " + currentSpeciesName]], finalSpeciesItems);
-			}
-		}
-
-		if (abilitySpecificItems.length) {
-			const finalAbilityItems = abilitySpecificItems.filter(a =>
-				!fantasySpecificItems.some(f => f[1] === a[1]) &&
-				!speciesSpecificItems.some(s => s[1] === a[1])
-			);
+		// 添加特性专属部分 (过滤掉可能与物种重叠的)
+		if (abilityItems.length) {
+			const finalAbilityItems = abilityItems.filter(a => !speciesItems.some(s => s[1] === a[1]));
 			if (finalAbilityItems.length > 0) {
-				output = output.concat([['header', `Specific to ${this.set!.ability!}`]], finalAbilityItems);
+				output.push(['header', `Specific to ${this.set!.ability!}`], ...finalAbilityItems);
 			}
 		}
 
+		// 添加过滤后的原始列表 (保留 Header，移除已分类的专属道具)
 		const filteredOriginalList = originalItemSet.filter(row => {
-			if (row[0] !== 'item') return true;
-			return !specificItemIds.has(row[1]);
+			if (row[0] !== 'item') return true; // 保留 Header
+			return !specificItemIds.has(row[1]); // 移除专属道具
 		});
 		output = output.concat(filteredOriginalList);
 
+		// 应用默认过滤器 (如辉石)
 		if (this.defaultFilter) {
 			output = this.defaultFilter(output);
 		}
 
+		// 清理空 Header
 		output = output.filter((row, index, self) =>
 			!(row[0] === 'header' && (index === self.length - 1 || self[index + 1][0] === 'header'))
 		);
@@ -1298,7 +1282,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		return !BattleMoveSearch.BAD_STRONG_MOVES.includes(id);
 	}
 	static readonly GOOD_STATUS_MOVES = [
-		'acidarmor', 'agility', 'aromatherapy', 'auroraveil', 'autotomize', 'banefulbunker', 'batonpass', 'bellydrum', 'bulkup', 'burningbulwark', 'calmmind', 'chillyreception', 'clangoroussoul', 'coil', 'cottonguard', 'courtchange', 'curse', 'defog', 'destinybond', 'detect', 'disable', 'dragondance', 'encore', 'extremeevoboost', 'filletaway', 'geomancy', 'glare', 'haze', 'healbell', 'healingwish', 'healorder', 'heartswap', 'honeclaws', 'kingsshield', 'leechseed', 'lightscreen', 'lovelykiss', 'lunardance', 'magiccoat', 'maxguard', 'memento', 'milkdrink', 'moonlight', 'morningsun', 'nastyplot', 'naturesmadness', 'noretreat', 'obstruct', 'painsplit', 'partingshot', 'perishsong', 'protect', 'quiverdance', 'recover', 'reflect', 'reflecttype', 'rest', 'revivalblessing', 'roar', 'rockpolish', 'roost', 'shedtail', 'shellsmash', 'shiftgear', 'shoreup', 'silktrap', 'slackoff', 'sleeppowder', 'sleeptalk', 'softboiled', 'spikes', 'spikyshield', 'spore', 'stealthrock', 'stickyweb', 'strengthsap', 'substitute', 'switcheroo', 'swordsdance', 'synthesis', 'tailglow', 'tailwind', 'taunt', 'thunderwave', 'tidyup', 'toxic', 'transform', 'trick', 'victorydance', 'whirlwind', 'willowisp', 'wish', 'yawn',
+		'acidarmor', 'agility', 'aromatherapy', 'auroraveil', 'autotomize', 'banefulbunker', 'batonpass', 'bulkup', 'burningbulwark', 'calmmind', 'chillyreception', 'clangoroussoul', 'coil', 'cottonguard', 'courtchange', 'curse', 'defog', 'destinybond', 'detect', 'disable', 'dragondance', 'encore', 'extremeevoboost', 'filletaway', 'geomancy', 'glare', 'haze', 'healbell', 'healingwish', 'healorder', 'heartswap', 'honeclaws', 'kingsshield', 'leechseed', 'lightscreen', 'lovelykiss', 'lunardance', 'magiccoat', 'maxguard', 'memento', 'milkdrink', 'moonlight', 'morningsun', 'nastyplot', 'naturesmadness', 'noretreat', 'obstruct', 'painsplit', 'partingshot', 'perishsong', 'protect', 'quiverdance', 'recover', 'reflect', 'reflecttype', 'rest', 'revivalblessing', 'roar', 'rockpolish', 'roost', 'shedtail', 'shellsmash', 'shiftgear', 'shoreup', 'silktrap', 'slackoff', 'sleeppowder', 'sleeptalk', 'softboiled', 'spikes', 'spikyshield', 'spore', 'stealthrock', 'stickyweb', 'strengthsap', 'substitute', 'switcheroo', 'swordsdance', 'synthesis', 'tailglow', 'tailwind', 'taunt', 'thunderwave', 'tidyup', 'toxic', 'transform', 'trick', 'victorydance', 'whirlwind', 'willowisp', 'wish', 'yawn',
 	] as ID[] as readonly ID[];
 	static readonly GOOD_WEAK_MOVES = [
 		'accelerock', 'acrobatics', 'aquacutter', 'avalanche', 'barbbarrage', 'bonemerang', 'bouncybubble', 'bulletpunch', 'buzzybuzz', 'ceaselessedge', 'circlethrow', 'clearsmog', 'doubleironbash', 'dragondarts', 'dragontail', 'drainingkiss', 'endeavor', 'facade', 'firefang', 'flipturn', 'flowertrick', 'freezedry', 'frustration', 'geargrind', 'gigadrain', 'grassknot', 'gyroball', 'icefang', 'iceshard', 'iciclespear', 'infernalparade', 'knockoff', 'lastrespects', 'lowkick', 'machpunch', 'mortalspin', 'mysticalpower', 'naturesmadness', 'nightshade', 'nuzzle', 'pikapapow', 'populationbomb', 'psychocut', 'psyshieldbash', 'pursuit', 'quickattack', 'ragefist', 'rapidspin', 'return', 'rockblast', 'ruination', 'saltcure', 'scorchingsands', 'seismictoss', 'shadowclaw', 'shadowsneak', 'sizzlyslide', 'stoneaxe', 'storedpower', 'stormthrow', 'suckerpunch', 'superfang', 'surgingstrikes', 'tachyoncutter', 'tailslap', 'thunderclap', 'tripleaxel', 'tripledive', 'twinbeam', 'uturn', 'veeveevolley', 'voltswitch', 'watershuriken', 'weatherball',
