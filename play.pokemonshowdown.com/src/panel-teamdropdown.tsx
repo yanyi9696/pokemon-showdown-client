@@ -309,8 +309,36 @@ export class PSTeambuilder {
 			let item;
 			[line, item] = line.split(' @ ');
 			if (item) {
-				set.item = item;
+				set.item = Dex.items.get(item.trim()).name;
 				if (toID(set.item) === 'noitem') set.item = '';
+			} else {
+				// Auto-set Mega Stone ONLY if no item is specified via '@' and format is gen9fantasy
+				if (format === ('gen9fantasy' as ID)) {
+					const baseSpeciesData = Dex.species.get(set.species); // Get data for the base species added
+					let megaStoneName: string | undefined = undefined;
+
+					if (baseSpeciesData.otherFormes) {
+						for (const otherFormeId of baseSpeciesData.otherFormes) {
+							const otherFormeData = Dex.species.get(otherFormeId);
+							// Check if the other forme is a Mega forme and requires items
+							if (otherFormeData.exists && otherFormeData.forme.startsWith('Mega') && otherFormeData.requiredItems && otherFormeData.requiredItems.length > 0) {
+								// Get the first required item's ID
+								const requiredItemId = otherFormeData.requiredItems[0];
+								const requiredItemData = Dex.items.get(requiredItemId);
+								// Check if the required item exists and is indeed a Mega Stone for this species
+								if (requiredItemData.exists && (requiredItemData.megaStone || requiredItemData.megaEvolves === baseSpeciesData.name)) {
+									megaStoneName = requiredItemData.name;
+									break; // Found the relevant Mega Stone, no need to check other formes
+								}
+							}
+						}
+					}
+
+					// If a valid Mega Stone was found, set it as the item
+					if (megaStoneName) {
+						set.item = megaStoneName;
+					}
+				}
 			}
 			if (line.endsWith(' (M)')) {
 				set.gender = 'M';
