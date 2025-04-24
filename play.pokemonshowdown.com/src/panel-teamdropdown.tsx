@@ -304,7 +304,7 @@ export class PSTeambuilder {
 		if (delimIndex < 0) return [buffer, ''];
 		return [buffer.slice(0, delimIndex), buffer.slice(delimIndex + delimiter.length)];
 	}
-	static parseExportedTeamLine(line: string, isFirstLine: boolean, set: Dex.PokemonSet) {
+	static parseExportedTeamLine(line: string, isFirstLine: boolean, set: Dex.PokemonSet, format: ID) {
 		if (isFirstLine) {
 			let item;
 			[line, item] = line.split(' @ ');
@@ -405,7 +405,7 @@ export class PSTeambuilder {
 			set.moves.push(line);
 		}
 	}
-	static importTeam(buffer: string): Dex.PokemonSet[] {
+	static importTeam(buffer: string, format: ID): Dex.PokemonSet[] {
 		const lines = buffer.split("\n");
 
 		const sets: Dex.PokemonSet[] = [];
@@ -424,7 +424,6 @@ export class PSTeambuilder {
 			} else if (line.startsWith('===')) {
 				// team backup format; ignore
 			} else if (line.includes('|')) {
-				// packed format
 				const team = PS.teams.unpackLine(line);
 				if (!team) continue;
 				return this.unpackTeam(team.packedTeam);
@@ -434,9 +433,9 @@ export class PSTeambuilder {
 					moves: [],
 				};
 				sets.push(curSet);
-				this.parseExportedTeamLine(line, true, curSet);
+				this.parseExportedTeamLine(line, true, curSet, format);
 			} else {
-				this.parseExportedTeamLine(line, false, curSet);
+				this.parseExportedTeamLine(line, false, curSet, format);
 			}
 		}
 		return sets;
@@ -497,9 +496,9 @@ export class PSTeambuilder {
 					moves: [],
 				};
 				sets.push(curSet);
-				this.parseExportedTeamLine(line, true, curSet);
+				this.parseExportedTeamLine(line, true, curSet, curTeam?.format || 'gen8' as ID);
 			} else {
-				this.parseExportedTeamLine(line, false, curSet);
+				this.parseExportedTeamLine(line, false, curSet, curTeam?.format || 'gen8' as ID);
 			}
 		}
 		if (curTeam) {

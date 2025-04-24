@@ -138,7 +138,8 @@ class TeamTextbox extends preact.Component<{ team: Team }> {
 		this.forceUpdate();
 	};
 	save() {
-		const sets = PSTeambuilder.importTeam(this.textbox.value);
+		const currentFormat = this.props.team.format;
+		const sets = PSTeambuilder.importTeam(this.textbox.value, currentFormat);
 		this.props.team.packedTeam = PSTeambuilder.packTeam(sets);
 		this.props.team.iconCache = null;
 		PS.teams.save();
@@ -172,6 +173,7 @@ class TeamTextbox extends preact.Component<{ team: Team }> {
 					if (!info.species) return null;
 					const prevOffset = i === 0 ? 8 : this.setInfo[i - 1].bottomY;
 					const species = info.species;
+					// @ts-expect-error Linter seems to misinterpret optional arguments for Dex.getPokemonIconNum
 					const num = Dex.getPokemonIconNum(toID(species));
 					if (!num) return null;
 
