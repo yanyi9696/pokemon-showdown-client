@@ -930,7 +930,7 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			// flareboost: 'flameorb',
 		}[toID(this.set?.ability) as string];
 
-		for (const row of results) {
+		for (var row of results) {
 			if (row[0] !== 'item') continue;
 			const item = this.dex.items.get(row[1]);
 
