@@ -923,75 +923,85 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 		if (!this.species) return this.getDefaultResults();
 
 		const currentSpecies = this.dex.species.get(this.species);
-		const speciesName = currentSpecies.name;
-		// 获取基础道具列表
-		const results = this.getDefaultResults();
+		const currentSpeciesName = currentSpecies.name;
+		const baseSpeciesName = currentSpecies.baseSpecies;
 
-		const speciesSpecific: SearchRow[] = [];
-		const abilitySpecific: SearchRow[] = [];
+		const originalItemSet = this.getDefaultResults();
+
+		const speciesSpecificItems: SearchRow[] = [];
+		const abilitySpecificItems: SearchRow[] = [];
+		const specificItemIds = new Set<ID>();
+
 		const abilityItem = {
 			protosynthesis: 'boosterenergy',
 			quarkdrive: 'boosterenergy',
 		}[toID(this.set?.ability) as string];
 
-		const addedItems = new Set<ID>(); // 用于避免重复添加专属类别
-
-		// 遍历基础列表查找专属道具
-		for (const row of results) {
+		// --- 识别专属道具 ---
+		for (const row of originalItemSet) {
 			if (row[0] !== 'item') continue;
 
 			const item = this.dex.items.get(row[1]);
 			const itemId = item.id;
 
-			// 检查物种专属 (主要基于 itemUser)
-			// 包含了 Mega 石、部分 Z 纯晶、特殊形态道具等，如果 items.ts 数据正确的话
-			let isSpeciesSpecific = false;
-			if (item.itemUser?.includes(speciesName)) {
-				isSpeciesSpecific = true;
-			}
-			// 需要为 Groudon/Kyogre Orb 保留硬编码检查，因为它们可能不依赖 itemUser
-			if (!isSpeciesSpecific && currentSpecies.baseSpecies === 'Groudon' && itemId === 'redorb') isSpeciesSpecific = true;
-			if (!isSpeciesSpecific && currentSpecies.baseSpecies === 'Kyogre' && itemId === 'blueorb') isSpeciesSpecific = true;
+            if (specificItemIds.has(itemId)) continue;
 
-			if (isSpeciesSpecific && !addedItems.has(itemId)) {
-				speciesSpecific.push(row); // 直接添加原始行
-				addedItems.add(itemId);
-			}
+            // 1. 检查特性专属 (优先级较高)
+            if (abilityItem === itemId) {
+                abilitySpecificItems.push(['item', itemId]);
+                specificItemIds.add(itemId);
+                continue;
+            }
 
-			// 检查特性专属
-			if (abilityItem === itemId && !addedItems.has(itemId)) {
-				abilitySpecific.push(row); // 直接添加原始行
-				addedItems.add(itemId);
+            // 2. 检查物种/形态专属 (核心检查：itemUser)
+            let isStrictlySpeciesSpecific = false;
+            // 主要依赖 itemUser 是否包含当前精确形态名称
+            if (item.itemUser?.includes(currentSpeciesName)) {
+                isStrictlySpeciesSpecific = true;
+            }
+            // 硬编码检查 (基于基础形态)
+            if (!isStrictlySpeciesSpecific) {
+                if (baseSpeciesName === 'Groudon' && itemId === 'redorb') isStrictlySpeciesSpecific = true;
+                if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isStrictlySpeciesSpecific = true;
+            }
+
+			if (isStrictlySpeciesSpecific) {
+                speciesSpecificItems.push(['item', itemId]);
+                specificItemIds.add(itemId);
 			}
 		}
 
+		// --- 构建最终列表 ---
 		let output: SearchRow[] = [];
 
-		// 添加物种专属部分
-		if (speciesSpecific.length) {
-			output.push(['header', "Specific to " + speciesName], ...speciesSpecific);
+		// a. 添加物种专属道具部分
+		if (speciesSpecificItems.length) {
+			output.push(['header', "Specific to " + currentSpeciesName], ...speciesSpecificItems);
 		}
-		// 添加特性专属部分
-		if (abilitySpecific.length) {
-			// 再次过滤确保不与物种专属重叠 (安全起见)
-			const finalAbilityItems = abilitySpecific.filter(a => !speciesSpecific.some(s => s[1] === a[1]));
-			if (finalAbilityItems.length > 0) {
-				output.push(['header', `Specific to ${this.set!.ability!}`], ...finalAbilityItems);
-			}
+		// b. 添加特性专属道具部分 (确保不与物种重叠)
+		if (abilitySpecificItems.length) {
+             const finalAbilityItems = abilitySpecificItems.filter(a => !speciesSpecificItems.some(s => s[1] === a[1]));
+             if (finalAbilityItems.length > 0) {
+			    output.push(['header', `Specific to ${this.set!.ability!}`], ...finalAbilityItems);
+             }
 		}
 
-		// 添加完整的原始列表 (官方逻辑包含重复项，我们这里也遵循)
-		output = output.concat(results);
+        // c. 添加过滤后的原始列表 (移除所有专属道具，避免重复)
+		const filteredOriginalList = originalItemSet.filter(row => {
+            if (row[0] !== 'item') return true;
+            return !specificItemIds.has(row[1]);
+        });
+		output = output.concat(filteredOriginalList);
 
-		// 应用默认过滤器 (如辉石)
+		// --- 应用默认过滤器 (如辉石) ---
 		if (this.defaultFilter) {
 			output = this.defaultFilter(output);
 		}
 
-		// 清理可能因 defaultFilter 产生的空 Header
-		output = output.filter((row, index, self) =>
-			!(row[0] === 'header' && (index === self.length - 1 || self[index + 1][0] === 'header'))
-		);
+        // --- 清理空 Header ---
+        output = output.filter((row, index, self) =>
+            !(row[0] === 'header' && (index === self.length - 1 || self[index + 1][0] === 'header'))
+        );
 
 		return output;
 	}
