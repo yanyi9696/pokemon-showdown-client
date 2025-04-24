@@ -805,32 +805,59 @@ export const Dex = new class implements ModdedDex {
 	}
 
 	// 小图标
-	getPokemonIconNum(id: ID, isFemale?: boolean, facingLeft?: boolean) {
+	getPokemonIconNum(finalId: ID, lookupId: ID, isFemale?: boolean, facingLeft?: boolean) {
 		let num = 0;
-		if (window.BattlePokemonSprites?.[id]?.num) {
-			num = BattlePokemonSprites[id].num;
-		} else if (window.BattlePokedex?.[id]?.num) {
-			num = BattlePokedex[id].num;
-		} else{
-			const gen9fantasySpecies = Dex.mod('gen9fantasy' as ID).species.get(id);
-			if (gen9fantasySpecies.exists === true) num = gen9fantasySpecies.num;
+		let found = false;
+
+		// 1. Prioritize BattlePokemonIconIndexes using the final ID (which might have -fantasy)
+		if (window.BattlePokemonIconIndexes?.[finalId]) {
+			num = BattlePokemonIconIndexes[finalId];
+			found = true;
 		}
+
+		// 2. If not found in index, try base dex data using the lookup ID (no -fantasy)
+		if (!found) {
+			if (window.BattlePokemonSprites?.[lookupId]?.num) {
+				num = BattlePokemonSprites[lookupId].num;
+				found = true;
+			} else if (window.BattlePokedex?.[lookupId]?.num) {
+				num = BattlePokedex[lookupId].num;
+				found = true;
+			}
+		}
+
+		// 3. If still not found, try the mod dex using the lookup ID
+		if (!found) {
+			const gen9fantasySpecies = Dex.mod('gen9fantasy' as ID).species.get(lookupId);
+			// Also check the original finalId in mod dex in case it's a fantasy-only species without a base form num
+			const gen9fantasyOriginalSpecies = Dex.mod('gen9fantasy' as ID).species.get(finalId);
+
+			if (gen9fantasySpecies.exists && gen9fantasySpecies.num) {
+				 num = gen9fantasySpecies.num;
+				 found = true;
+			} else if (gen9fantasyOriginalSpecies.exists && gen9fantasyOriginalSpecies.num) {
+				 num = gen9fantasyOriginalSpecies.num;
+				 found = true;
+			}
+		}
+
+		// Ensure num is valid
 		if (num < 0) num = 0;
 
-		if (window.BattlePokemonIconIndexes?.[id]) {
-			num = BattlePokemonIconIndexes[id];
-		}
-
+		// 4. Apply gender/facing overrides (use lookupId for consistency as these usually apply to base forms)
 		if (isFemale) {
-			if (['unfezant', 'frillish', 'jellicent', 'meowstic', 'pyroar'].includes(id)) {
-				num = BattlePokemonIconIndexes[id + 'f'];
+			const femaleId = lookupId + 'f';
+			if (['unfezant', 'frillish', 'jellicent', 'meowstic', 'pyroar'].includes(lookupId) && window.BattlePokemonIconIndexes?.[femaleId]) {
+				num = BattlePokemonIconIndexes[femaleId];
 			}
 		}
 		if (facingLeft) {
-			if (BattlePokemonIconIndexesLeft[id]) {
-				num = BattlePokemonIconIndexesLeft[id];
+			if (BattlePokemonIconIndexesLeft[lookupId]) {
+				num = BattlePokemonIconIndexesLeft[lookupId];
 			}
 		}
+
+		// If still not found after all checks, num remains 0 (question mark)
 		return num;
 	}
 
@@ -841,49 +868,44 @@ export const Dex = new class implements ModdedDex {
 		if (pokemon === 'pokeball-fainted') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px;opacity:.4;filter:contrast(0)`;
 		if (pokemon === 'pokeball-none') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px`;
 
-		let id: ID = '' as ID;
+		let finalId: ID = '' as ID;
 		let gender: Dex.GenderName | '' = '';
 		let fainted = false;
 
+		// Determine the final ID based on the input type
 		if (typeof pokemon === 'string') {
-			id = toID(pokemon);
+			finalId = toID(pokemon);
 		} else if (pokemon) {
-			// Determine base ID (species or speciesForme)
 			if ('speciesForme' in pokemon) { // Pokemon or ServerPokemon like structure
-				 id = toID(pokemon.speciesForme);
+				 finalId = toID(pokemon.speciesForme);
 				 gender = pokemon.gender || '';
 				 fainted = !!pokemon.fainted;
+				 // Check formechange
+				 const p = pokemon as Pokemon;
+				 if (p.volatiles?.formechange && !p.volatiles?.transform) {
+					  finalId = toID(p.volatiles.formechange[1]);
+				 }
 			} else if ('species' in pokemon) { // PokemonSet like structure
-				 id = toID(pokemon.species);
+				 finalId = toID(pokemon.species);
 				 gender = (pokemon as Dex.PokemonSet).gender as Dex.GenderName || '';
 			}
-
-			// Check for formechange override (only applicable to Pokemon type)
-			// Use type assertion carefully as ServerPokemon lacks volatiles
-			const p = pokemon as Pokemon;
-			if (p.volatiles?.formechange && !p.volatiles?.transform) {
-				 id = toID(p.volatiles.formechange![1]);
-			}
 		}
 
-		// If ID couldn't be determined, default to 0 (question mark icon)
-		if (!id) id = '0' as ID;
+		if (!finalId) finalId = '0' as ID; // Default if ID determination failed
 
-		// ID for icon number lookup (strip fantasy)
-		let idForIconNum = id;
-		if (idForIconNum.endsWith('fantasy')) {
-			 idForIconNum = idForIconNum.slice(0, -8) as ID;
+		// ID for base sprite/data lookup (strip fantasy)
+		let lookupId = finalId;
+		if (lookupId.endsWith('fantasy')) {
+			 lookupId = lookupId.slice(0, -8) as ID;
 		}
 
-		// Get the number using the potentially stripped ID
-		let num = this.getPokemonIconNum(idForIconNum, gender === 'F', facingLeft);
+		// Get the icon number, passing both IDs
+		let num = this.getPokemonIconNum(finalId, lookupId, gender === 'F', facingLeft);
 
 		// Generate CSS
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
-		let faintedString = (fainted ?
-			`;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
-		// Ensure URL is correct
+		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
 		const iconSheetUrl = `${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v18`;
 		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}`;
 	}
