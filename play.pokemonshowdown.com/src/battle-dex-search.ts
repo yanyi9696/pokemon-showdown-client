@@ -913,7 +913,12 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 	}
 	getBaseResults(): SearchRow[] {
 		if (!this.species) return this.getDefaultResults();
-		const speciesName = this.dex.species.get(this.species).name;
+
+		// Get the current species object and its base species name
+		const currentSpecies = this.dex.species.get(this.species);
+		const baseSpeciesName = currentSpecies.baseSpecies;
+		const currentSpeciesName = currentSpecies.name; // For the header
+
 		const results = this.getDefaultResults();
 		const speciesSpecific: SearchRow[] = [];
 		const abilitySpecific: SearchRow[] = [];
@@ -924,15 +929,43 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			// toxicboost: 'toxicorb',
 			// flareboost: 'flameorb',
 		}[toID(this.set?.ability) as string];
+
 		for (const row of results) {
 			if (row[0] !== 'item') continue;
 			const item = this.dex.items.get(row[1]);
-			if (item.itemUser?.includes(speciesName)) speciesSpecific.push(row);
+
+			// Check if the item is specific to the current species OR its base species
+			let isSpecific = false;
+			if (item.itemUser) {
+				if (item.itemUser.includes(currentSpecies.name) || (baseSpeciesName && item.itemUser.includes(baseSpeciesName))) {
+					isSpecific = true;
+				}
+			}
+            // Also consider mega stones and primal orbs based on base species name
+            if (!isSpecific && baseSpeciesName) {
+                if (item.megaEvolves === baseSpeciesName || item.itemUser?.includes(baseSpeciesName)) {
+                    isSpecific = true;
+                }
+                // Add specific checks for primal orbs etc. if needed
+                if (baseSpeciesName === 'Groudon' && item.id === 'redorb') isSpecific = true;
+                if (baseSpeciesName === 'Kyogre' && item.id === 'blueorb') isSpecific = true;
+                // Add Z-crystal checks if needed (though less common now)
+            }
+
+			if (isSpecific) {
+                 // Avoid adding duplicates if base and current form share specific items
+                 if (!speciesSpecific.some(existingRow => existingRow[1] === item.id)) {
+                    speciesSpecific.push(row);
+                 }
+            }
+
 			if (abilityItem === item.id) abilitySpecific.push(row);
 		}
+
 		if (speciesSpecific.length) {
+			// Use the currently selected species name for the header
 			return [
-				['header', "Specific to " + speciesName],
+				['header', "Specific to " + currentSpeciesName],
 				...speciesSpecific,
 				...results,
 			];
