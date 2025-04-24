@@ -919,96 +919,87 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 		const currentSpeciesName = currentSpecies.name;
 		const isFantasyPokemon = currentSpecies.id.endsWith('-fantasy') || currentSpecies.isNonstandard === 'Custom';
 
-		const fullItemSet = this.getDefaultResults();
+		const originalItemSet = this.getDefaultResults();
 
-		const fantasySpecific: SearchRow[] = [];
-		const speciesSpecific: SearchRow[] = [];
-		const abilitySpecific: SearchRow[] = [];
-		const generalItems: SearchRow[] = [];
+		const fantasySpecificItems: SearchRow[] = [];
+		const speciesSpecificItems: SearchRow[] = [];
+		const abilitySpecificItems: SearchRow[] = [];
+		const specificItemIds = new Set<ID>();
 
 		const abilityItem = {
 			protosynthesis: 'boosterenergy',
 			quarkdrive: 'boosterenergy',
 		}[toID(this.set?.ability) as string];
 
-		const addedItems = new Set<ID>();
-
-		for (const row of fullItemSet) {
+		for (const row of originalItemSet) {
 			if (row[0] !== 'item') continue;
 
 			const item = this.dex.items.get(row[1]);
 			const itemId = item.id;
 
-			let categorized = false;
-
 			if (isFantasyPokemon && window.Gen9fantasyItems?.[itemId]) {
-				if (!addedItems.has(itemId)) {
-					fantasySpecific.push(['item', itemId]);
-					addedItems.add(itemId);
-					categorized = true;
+				if (!specificItemIds.has(itemId)) {
+					fantasySpecificItems.push(['item', itemId]);
+					specificItemIds.add(itemId);
 				}
+				continue;
 			}
 
-			if (!categorized && abilityItem === itemId) {
-				if (!addedItems.has(itemId)) {
-					abilitySpecific.push(['item', itemId]);
-					addedItems.add(itemId);
-					categorized = true;
+			if (abilityItem === itemId) {
+				if (!specificItemIds.has(itemId)) {
+					abilitySpecificItems.push(['item', itemId]);
+					specificItemIds.add(itemId);
 				}
+				continue;
 			}
 
-			if (!categorized) {
-				let isStrictlySpeciesSpecific = false;
-				if (item.itemUser?.includes(currentSpeciesName)) {
-					isStrictlySpeciesSpecific = true;
-				}
-				if (!isStrictlySpeciesSpecific && item.megaEvolves === baseSpeciesName) {
-					isStrictlySpeciesSpecific = true;
-				}
-				if (!isStrictlySpeciesSpecific) {
-					if (baseSpeciesName === 'Groudon' && itemId === 'redorb') isStrictlySpeciesSpecific = true;
-					if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isStrictlySpeciesSpecific = true;
-				}
-
-				if (isStrictlySpeciesSpecific) {
-					if (!addedItems.has(itemId)) {
-						speciesSpecific.push(['item', itemId]);
-						addedItems.add(itemId);
-						categorized = true;
-					}
-				}
+			let isStrictlySpeciesSpecific = false;
+			if (item.itemUser?.includes(currentSpeciesName)) {
+				isStrictlySpeciesSpecific = true;
 			}
-
-			if (!categorized && !addedItems.has(itemId)) {
-				generalItems.push(['item', itemId]);
-				addedItems.add(itemId);
+			if (!isStrictlySpeciesSpecific && item.megaEvolves === baseSpeciesName) {
+				isStrictlySpeciesSpecific = true;
+			}
+			if (!isStrictlySpeciesSpecific) {
+				if (baseSpeciesName === 'Groudon' && itemId === 'redorb') isStrictlySpeciesSpecific = true;
+				if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isStrictlySpeciesSpecific = true;
+			}
+			if (isStrictlySpeciesSpecific) {
+				if (!specificItemIds.has(itemId)) {
+					speciesSpecificItems.push(['item', itemId]);
+					specificItemIds.add(itemId);
+				}
 			}
 		}
 
 		let output: SearchRow[] = [];
 
-		if (fantasySpecific.length) {
-			output = output.concat([['header', "Gen9fantasy specific items"]], fantasySpecific);
+		if (fantasySpecificItems.length) {
+			output = output.concat([['header', "Gen9fantasy specific items"]], fantasySpecificItems);
 		}
-		if (speciesSpecific.length) {
-			const finalSpeciesSpecific = speciesSpecific.filter(r => !fantasySpecific.some(f => f[1] === r[1]));
-			if (finalSpeciesSpecific.length > 0) {
-				output = output.concat([['header', "Specific to " + currentSpeciesName]], finalSpeciesSpecific);
-			}
-		}
-		if (abilitySpecific.length) {
-			const finalAbilitySpecific = abilitySpecific.filter(r =>
-				!fantasySpecific.some(f => f[1] === r[1]) &&
-				!speciesSpecific.some(s => s[1] === r[1])
-			);
-			if (finalAbilitySpecific.length > 0) {
-				output = output.concat([['header', `Specific to ${this.set!.ability!}`]], finalAbilitySpecific);
+
+		if (speciesSpecificItems.length) {
+			const finalSpeciesItems = speciesSpecificItems.filter(s => !fantasySpecificItems.some(f => f[1] === s[1]));
+			if (finalSpeciesItems.length > 0) {
+				output = output.concat([['header', "Specific to " + currentSpeciesName]], finalSpeciesItems);
 			}
 		}
 
-		if (generalItems.length > 0) {
-			output = output.concat([['header', "Items"]], generalItems);
+		if (abilitySpecificItems.length) {
+			const finalAbilityItems = abilitySpecificItems.filter(a =>
+				!fantasySpecificItems.some(f => f[1] === a[1]) &&
+				!speciesSpecificItems.some(s => s[1] === a[1])
+			);
+			if (finalAbilityItems.length > 0) {
+				output = output.concat([['header', `Specific to ${this.set!.ability!}`]], finalAbilityItems);
+			}
 		}
+
+		const filteredOriginalList = originalItemSet.filter(row => {
+			if (row[0] !== 'item') return true;
+			return !specificItemIds.has(row[1]);
+		});
+		output = output.concat(filteredOriginalList);
 
 		if (this.defaultFilter) {
 			output = this.defaultFilter(output);
