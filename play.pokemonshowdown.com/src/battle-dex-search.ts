@@ -914,70 +914,105 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 	getBaseResults(): SearchRow[] {
 		if (!this.species) return this.getDefaultResults();
 
-		// Get the current species object and its base species name
 		const currentSpecies = this.dex.species.get(this.species);
 		const baseSpeciesName = currentSpecies.baseSpecies;
-		const currentSpeciesName = currentSpecies.name; // For the header
+		const currentSpeciesName = currentSpecies.name;
 
-		const results = this.getDefaultResults();
+		const isFantasyPokemon = currentSpecies.id.endsWith('-fantasy') || currentSpecies.isNonstandard === 'Custom';
+
+		const fullItemSet = this.dex.getItemSet();
+		const results: SearchRow[] = [];
+
+		const fantasySpecific: SearchRow[] = [];
 		const speciesSpecific: SearchRow[] = [];
 		const abilitySpecific: SearchRow[] = [];
+
 		const abilityItem = {
 			protosynthesis: 'boosterenergy',
 			quarkdrive: 'boosterenergy',
-			// poisonheal: 'toxicorb',
-			// toxicboost: 'toxicorb',
-			// flareboost: 'flameorb',
 		}[toID(this.set?.ability) as string];
 
-		for (var row of results) {
-			if (row[0] !== 'item') continue;
-			var item = this.dex.items.get(row[1]);
+		const addedItems = new Set<ID>();
 
-			// Check if the item is specific to the current species OR its base species
-			var isSpecific = false;
-			if (item.itemUser) {
-				if (item.itemUser.includes(currentSpecies.name) || (baseSpeciesName && item.itemUser.includes(baseSpeciesName))) {
-					isSpecific = true;
+		if (isFantasyPokemon && window.Gen9fantasyItems) {
+			for (const row of fullItemSet) {
+				if (row[0] !== 'item') continue;
+				const itemId = row[1];
+				if (itemId in window.Gen9fantasyItems) {
+					if (!addedItems.has(itemId)) {
+						fantasySpecific.push(row);
+						addedItems.add(itemId);
+					}
 				}
 			}
-            // Also consider mega stones and primal orbs based on base species name
-            if (!isSpecific && baseSpeciesName) {
-                if (item.megaEvolves === baseSpeciesName || item.itemUser?.includes(baseSpeciesName)) {
-                    isSpecific = true;
-                }
-                // Add specific checks for primal orbs etc. if needed
-                if (baseSpeciesName === 'Groudon' && item.id === 'redorb') isSpecific = true;
-                if (baseSpeciesName === 'Kyogre' && item.id === 'blueorb') isSpecific = true;
-                // Add Z-crystal checks if needed (though less common now)
-            }
-
-			if (isSpecific) {
-                 // Avoid adding duplicates if base and current form share specific items
-                 if (!speciesSpecific.some(existingRow => existingRow[1] === item.id)) {
-                    speciesSpecific.push(row);
-                 }
-            }
-
-			if (abilityItem === item.id) abilitySpecific.push(row);
 		}
 
+		for (const row of fullItemSet) {
+			if (row[0] !== 'item') continue;
+			const item = this.dex.items.get(row[1]);
+			const itemId = item.id;
+			if (addedItems.has(itemId)) continue;
+
+			let isSpeciesSpecific = false;
+			if (item.itemUser) {
+				if (item.itemUser.includes(currentSpecies.name) || (baseSpeciesName && item.itemUser.includes(baseSpeciesName))) {
+					isSpeciesSpecific = true;
+				}
+			}
+			if (!isSpeciesSpecific && baseSpeciesName) {
+				if (item.megaEvolves === baseSpeciesName || item.itemUser?.includes(baseSpeciesName)) {
+					isSpeciesSpecific = true;
+				}
+				if (baseSpeciesName === 'Groudon' && itemId === 'redorb') isSpeciesSpecific = true;
+				if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isSpeciesSpecific = true;
+			}
+			if (isSpeciesSpecific) {
+				if (!addedItems.has(itemId)) {
+					speciesSpecific.push(row);
+					addedItems.add(itemId);
+				}
+			}
+
+			if (abilityItem === itemId && !addedItems.has(itemId)) {
+				abilitySpecific.push(row);
+				addedItems.add(itemId);
+			}
+		}
+
+		for (const row of fullItemSet) {
+			const idForRow = row[0] === 'item' ? this.dex.items.get(row[1]).id : row[1] as ID;
+			if (row[0] === 'item' && !addedItems.has(idForRow)) {
+				const newRow: SearchRow = ['item', idForRow];
+				results.push(newRow);
+			} else if (row[0] !== 'item') {
+				const newRow: SearchRow = [row[0], idForRow];
+				results.push(newRow);
+			}
+		}
+
+		let output: SearchRow[] = [];
+		if (fantasySpecific.length) {
+			const typedFantasySpecific: SearchRow[] = fantasySpecific.map(r => ['item', r[1] as ID]);
+			output = output.concat([['header', "Gen9fantasy specific items"]], typedFantasySpecific);
+		}
 		if (speciesSpecific.length) {
-			// Use the currently selected species name for the header
-			return [
-				['header', "Specific to " + currentSpeciesName],
-				...speciesSpecific,
-				...results,
-			];
+			const typedSpeciesSpecific: SearchRow[] = speciesSpecific.map(r => ['item', r[1] as ID]);
+			output = output.concat([['header', "Specific to " + currentSpeciesName]], typedSpeciesSpecific);
 		}
 		if (abilitySpecific.length) {
-			return [
-				['header', `Specific to ${this.set!.ability!}`],
-				...abilitySpecific,
-				...results,
-			];
+			const typedAbilitySpecific: SearchRow[] = abilitySpecific.map(r => ['item', r[1] as ID]);
+			const filteredAbilitySpecific = typedAbilitySpecific.filter(r => !addedItems.has(r[1] as ID));
+			if (filteredAbilitySpecific.length > 0) {
+				output = output.concat([['header', `Specific to ${this.set!.ability!}`]], filteredAbilitySpecific);
+			}
 		}
-		return results;
+		output = output.concat(results);
+
+		if (this.defaultFilter) {
+			output = this.defaultFilter(output);
+		}
+
+		return output;
 	}
 	override defaultFilter(results: SearchRow[]) {
 		if (this.species && !this.dex.species.get(this.species).nfe) {
