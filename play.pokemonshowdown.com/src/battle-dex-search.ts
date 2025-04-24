@@ -932,10 +932,10 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 
 		for (var row of results) {
 			if (row[0] !== 'item') continue;
-			const item = this.dex.items.get(row[1]);
+			var item = this.dex.items.get(row[1]);
 
 			// Check if the item is specific to the current species OR its base species
-			let isSpecific = false;
+			var isSpecific = false;
 			if (item.itemUser) {
 				if (item.itemUser.includes(currentSpecies.name) || (baseSpeciesName && item.itemUser.includes(baseSpeciesName))) {
 					isSpecific = true;
