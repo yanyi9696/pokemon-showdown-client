@@ -1786,7 +1786,7 @@ export class BattleTooltips {
 			if (move.category !== 'Status' && typeof move.accuracy === 'number' && move.accuracy < 100) {
 				// 检查技能是否满足条件：非状态类技能且命中率小于100%
 				accuracyModifiers.push(4915); // 提升命中率1.2倍
-				value.itemModify(1.2, "Fantasy Power Lens"); // 提升技能威力1.2倍
+				value.itemModify(1.2, "Fantasy Power Lens"); 
 			}
 		}
 
@@ -2093,6 +2093,10 @@ export class BattleTooltips {
 		}
 		if (move.secondaries) {
 			value.abilityModify(1.3, "Sheer Force");
+		}
+		if (value.tryItem('Fantasy Power Lens')) {
+			if (move.category !== 'Status' && typeof move.accuracy === 'number' && move.accuracy < 100) {
+			value.abilityModify(1.2, "Fantasy Power Lens");
 		}
 		if (move.flags['contact']) {
 			value.abilityModify(1.3, "Tough Claws");
