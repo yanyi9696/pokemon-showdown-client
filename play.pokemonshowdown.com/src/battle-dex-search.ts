@@ -32,13 +32,6 @@ declare const Gen9fantasySearchIndex: [ID, SearchType, number?, number?][];
 declare const Gen9fantasySearchIndexOffset: any;
 declare const Gen9fantasyTable: any;
 
-// 在文件顶部或其他合适位置添加全局类型声明
-declare global {
-	interface Window {
-		Gen9FantasyModItemIDs?: Set<ID>; // 声明全局变量及其类型 (Set of IDs)
-	}
-}
-
 /**
  * Backend for search UIs.
  */
@@ -913,21 +906,22 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 
 class BattleItemSearch extends BattleTypedSearch<'item'> {
 	getTable() {
-		return this.dex.getItemSet();
+		return BattleItems;
 	}
 	getDefaultResults(): SearchRow[] {
-		const results = this.dex.getItemSet();
-		return results;
+		return this.dex.getItemSet();
 	}
 	getBaseResults(): SearchRow[] {
 		if (!this.species) return this.getDefaultResults();
 
 		const currentSpecies = this.dex.species.get(this.species);
-		const currentSpeciesName = currentSpecies.name;
 		const baseSpeciesName = currentSpecies.baseSpecies;
+		const currentSpeciesName = currentSpecies.name;
+		const isFantasyPokemon = currentSpecies.id.endsWith('-fantasy') || currentSpecies.isNonstandard === 'Custom';
 
 		const originalItemSet = this.getDefaultResults();
 
+		const fantasySpecificItems: SearchRow[] = [];
 		const speciesSpecificItems: SearchRow[] = [];
 		const abilitySpecificItems: SearchRow[] = [];
 		const specificItemIds = new Set<ID>();
@@ -937,71 +931,83 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			quarkdrive: 'boosterenergy',
 		}[toID(this.set?.ability) as string];
 
-		// --- 识别专属道具 ---
 		for (const row of originalItemSet) {
 			if (row[0] !== 'item') continue;
 
 			const item = this.dex.items.get(row[1]);
 			const itemId = item.id;
 
-            if (specificItemIds.has(itemId)) continue;
+			if (isFantasyPokemon && window.Gen9fantasyItems?.[itemId]) {
+				if (!specificItemIds.has(itemId)) {
+					fantasySpecificItems.push(['item', itemId]);
+					specificItemIds.add(itemId);
+				}
+				continue;
+			}
 
-            // 1. 检查特性专属 (优先级较高)
-            if (abilityItem === itemId) {
-                abilitySpecificItems.push(['item', itemId]);
-                specificItemIds.add(itemId);
-                continue;
-            }
+			if (abilityItem === itemId) {
+				if (!specificItemIds.has(itemId)) {
+					abilitySpecificItems.push(['item', itemId]);
+					specificItemIds.add(itemId);
+				}
+				continue;
+			}
 
-            // 2. 检查物种/形态专属 (核心检查：itemUser)
-            let isStrictlySpeciesSpecific = false;
-            // 主要依赖 itemUser 是否包含当前精确形态名称
-            if (item.itemUser?.includes(currentSpeciesName)) {
-                isStrictlySpeciesSpecific = true;
-            }
-            // 硬编码检查 (基于基础形态)
-            if (!isStrictlySpeciesSpecific) {
-                if (baseSpeciesName === 'Groudon' && itemId === 'redorb') isStrictlySpeciesSpecific = true;
-                if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isStrictlySpeciesSpecific = true;
-            }
-
+			let isStrictlySpeciesSpecific = false;
+			if (item.itemUser?.includes(currentSpeciesName)) {
+				isStrictlySpeciesSpecific = true;
+			}
+			if (!isStrictlySpeciesSpecific && item.megaEvolves === baseSpeciesName) {
+				isStrictlySpeciesSpecific = true;
+			}
+			if (!isStrictlySpeciesSpecific) {
+				if (baseSpeciesName === 'Groudon' && itemId === 'redorb') isStrictlySpeciesSpecific = true;
+				if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isStrictlySpeciesSpecific = true;
+			}
 			if (isStrictlySpeciesSpecific) {
-                speciesSpecificItems.push(['item', itemId]);
-                specificItemIds.add(itemId);
+				if (!specificItemIds.has(itemId)) {
+					speciesSpecificItems.push(['item', itemId]);
+					specificItemIds.add(itemId);
+				}
 			}
 		}
 
-		// --- 构建最终列表 ---
 		let output: SearchRow[] = [];
 
-		// a. 添加物种专属道具部分
-		if (speciesSpecificItems.length) {
-			output.push(['header', "Specific to " + currentSpeciesName], ...speciesSpecificItems);
-		}
-		// b. 添加特性专属道具部分 (确保不与物种重叠)
-		if (abilitySpecificItems.length) {
-             const finalAbilityItems = abilitySpecificItems.filter(a => !speciesSpecificItems.some(s => s[1] === a[1]));
-             if (finalAbilityItems.length > 0) {
-			    output.push(['header', `Specific to ${this.set!.ability!}`], ...finalAbilityItems);
-             }
+		if (fantasySpecificItems.length) {
+			output = output.concat([['header', "Gen9fantasy specific items"]], fantasySpecificItems);
 		}
 
-        // c. 添加过滤后的原始列表 (移除所有专属道具，避免重复)
+		if (speciesSpecificItems.length) {
+			const finalSpeciesItems = speciesSpecificItems.filter(s => !fantasySpecificItems.some(f => f[1] === s[1]));
+			if (finalSpeciesItems.length > 0) {
+				output = output.concat([['header', "Specific to " + currentSpeciesName]], finalSpeciesItems);
+			}
+		}
+
+		if (abilitySpecificItems.length) {
+			const finalAbilityItems = abilitySpecificItems.filter(a =>
+				!fantasySpecificItems.some(f => f[1] === a[1]) &&
+				!speciesSpecificItems.some(s => s[1] === a[1])
+			);
+			if (finalAbilityItems.length > 0) {
+				output = output.concat([['header', `Specific to ${this.set!.ability!}`]], finalAbilityItems);
+			}
+		}
+
 		const filteredOriginalList = originalItemSet.filter(row => {
-            if (row[0] !== 'item') return true;
-            return !specificItemIds.has(row[1]);
-        });
+			if (row[0] !== 'item') return true;
+			return !specificItemIds.has(row[1]);
+		});
 		output = output.concat(filteredOriginalList);
 
-		// --- 应用默认过滤器 (如辉石) ---
 		if (this.defaultFilter) {
 			output = this.defaultFilter(output);
 		}
 
-        // --- 清理空 Header ---
-        output = output.filter((row, index, self) =>
-            !(row[0] === 'header' && (index === self.length - 1 || self[index + 1][0] === 'header'))
-        );
+		output = output.filter((row, index, self) =>
+			!(row[0] === 'header' && (index === self.length - 1 || self[index + 1][0] === 'header'))
+		);
 
 		return output;
 	}
@@ -1292,7 +1298,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		return !BattleMoveSearch.BAD_STRONG_MOVES.includes(id);
 	}
 	static readonly GOOD_STATUS_MOVES = [
-		'acidarmor', 'agility', 'aromatherapy', 'auroraveil', 'autotomize', 'banefulbunker', 'batonpass', 'bulkup', 'burningbulwark', 'calmmind', 'chillyreception', 'clangoroussoul', 'coil', 'cottonguard', 'courtchange', 'curse', 'defog', 'destinybond', 'detect', 'disable', 'dragondance', 'encore', 'extremeevoboost', 'filletaway', 'geomancy', 'glare', 'haze', 'healbell', 'healingwish', 'healorder', 'heartswap', 'honeclaws', 'kingsshield', 'leechseed', 'lightscreen', 'lovelykiss', 'lunardance', 'magiccoat', 'maxguard', 'memento', 'milkdrink', 'moonlight', 'morningsun', 'nastyplot', 'naturesmadness', 'noretreat', 'obstruct', 'painsplit', 'partingshot', 'perishsong', 'protect', 'quiverdance', 'recover', 'reflect', 'reflecttype', 'rest', 'revivalblessing', 'roar', 'rockpolish', 'roost', 'shedtail', 'shellsmash', 'shiftgear', 'shoreup', 'silktrap', 'slackoff', 'sleeppowder', 'sleeptalk', 'softboiled', 'spikes', 'spikyshield', 'spore', 'stealthrock', 'stickyweb', 'strengthsap', 'substitute', 'switcheroo', 'swordsdance', 'synthesis', 'tailglow', 'tailwind', 'taunt', 'thunderwave', 'tidyup', 'toxic', 'transform', 'trick', 'victorydance', 'whirlwind', 'willowisp', 'wish', 'yawn',
+		'acidarmor', 'agility', 'aromatherapy', 'auroraveil', 'autotomize', 'banefulbunker', 'batonpass', 'bellydrum', 'bulkup', 'burningbulwark', 'calmmind', 'chillyreception', 'clangoroussoul', 'coil', 'cottonguard', 'courtchange', 'curse', 'defog', 'destinybond', 'detect', 'disable', 'dragondance', 'encore', 'extremeevoboost', 'filletaway', 'geomancy', 'glare', 'haze', 'healbell', 'healingwish', 'healorder', 'heartswap', 'honeclaws', 'kingsshield', 'leechseed', 'lightscreen', 'lovelykiss', 'lunardance', 'magiccoat', 'maxguard', 'memento', 'milkdrink', 'moonlight', 'morningsun', 'nastyplot', 'naturesmadness', 'noretreat', 'obstruct', 'painsplit', 'partingshot', 'perishsong', 'protect', 'quiverdance', 'recover', 'reflect', 'reflecttype', 'rest', 'revivalblessing', 'roar', 'rockpolish', 'roost', 'shedtail', 'shellsmash', 'shiftgear', 'shoreup', 'silktrap', 'slackoff', 'sleeppowder', 'sleeptalk', 'softboiled', 'spikes', 'spikyshield', 'spore', 'stealthrock', 'stickyweb', 'strengthsap', 'substitute', 'switcheroo', 'swordsdance', 'synthesis', 'tailglow', 'tailwind', 'taunt', 'thunderwave', 'tidyup', 'toxic', 'transform', 'trick', 'victorydance', 'whirlwind', 'willowisp', 'wish', 'yawn',
 	] as ID[] as readonly ID[];
 	static readonly GOOD_WEAK_MOVES = [
 		'accelerock', 'acrobatics', 'aquacutter', 'avalanche', 'barbbarrage', 'bonemerang', 'bouncybubble', 'bulletpunch', 'buzzybuzz', 'ceaselessedge', 'circlethrow', 'clearsmog', 'doubleironbash', 'dragondarts', 'dragontail', 'drainingkiss', 'endeavor', 'facade', 'firefang', 'flipturn', 'flowertrick', 'freezedry', 'frustration', 'geargrind', 'gigadrain', 'grassknot', 'gyroball', 'icefang', 'iceshard', 'iciclespear', 'infernalparade', 'knockoff', 'lastrespects', 'lowkick', 'machpunch', 'mortalspin', 'mysticalpower', 'naturesmadness', 'nightshade', 'nuzzle', 'pikapapow', 'populationbomb', 'psychocut', 'psyshieldbash', 'pursuit', 'quickattack', 'ragefist', 'rapidspin', 'return', 'rockblast', 'ruination', 'saltcure', 'scorchingsands', 'seismictoss', 'shadowclaw', 'shadowsneak', 'sizzlyslide', 'stoneaxe', 'storedpower', 'stormthrow', 'suckerpunch', 'superfang', 'surgingstrikes', 'tachyoncutter', 'tailslap', 'thunderclap', 'tripleaxel', 'tripledive', 'twinbeam', 'uturn', 'veeveevolley', 'voltswitch', 'watershuriken', 'weatherball',

@@ -831,9 +831,6 @@ export const Dex = new class implements ModdedDex {
 	getPokemonIconNum(finalId: ID, lookupId: ID, isFemale?: boolean, facingLeft?: boolean) {
 		let num = 0;
 		let found = false;
-		
-		// 始终使用 lookupId (剥离了 -fantasy) 进行所有查找
-		const idToUse = lookupId;
 
 		// 1. Prioritize BattlePokemonIconIndexes using the final ID (which might have -fantasy)
 		if (window.BattlePokemonIconIndexes?.[finalId]) {

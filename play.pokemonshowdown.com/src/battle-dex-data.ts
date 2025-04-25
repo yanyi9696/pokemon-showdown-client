@@ -331,7 +331,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	stunfiskgalar: 1032 + 179,
 	cramorantgulping: 1032 + 180,
 	cramorantgorging: 1032 + 181,
-	toxtricitylowkey: 1032 + 182, toxtricitylowkeyfantasy: 1032 + 182,
+	toxtricitylowkey: 1032 + 182,
 	alcremierubycream: 1032 + 183,
 	alcremiematchacream: 1032 + 184,
 	alcremiemintcream: 1032 + 185,
