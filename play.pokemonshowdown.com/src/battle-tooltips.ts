@@ -1782,7 +1782,7 @@ export class BattleTooltips {
 			value.itemModify(1.1, "Wide Lens");
 		}
 
-		if (value.tryItem('Fantasy Power Lens')) {
+		if (value && value.tryItem('Fantasy Power Lens')) { // 检查 value 是否有效
 			if (move.category !== 'Status' && typeof move.accuracy === 'number' && move.accuracy < 100) {
 				// 检查技能是否满足条件：非状态类技能且命中率小于100%
 				accuracyModifiers.push(4915); // 提升命中率1.2倍
@@ -2386,6 +2386,15 @@ export class BattleTooltips {
 		if (BattleTooltips.incenseTypes[item.name] === moveType) {
 			value.itemModify(1.2);
 			return value;
+		}
+
+		// Fantasy Power Lens
+		if (value && value.tryItem('Fantasy Power Lens')) { // 检查 value 是否有效
+			if (move.category !== 'Status' && typeof move.accuracy === 'number' && move.accuracy < 100) {
+				// 检查技能是否满足条件：非状态类技能且命中率小于100%
+				value.itemModify(1.2); 
+				return value;
+			}
 		}
 
 		// Type-enhancing items
