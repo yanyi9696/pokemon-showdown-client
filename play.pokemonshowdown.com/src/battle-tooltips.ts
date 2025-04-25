@@ -1787,7 +1787,6 @@ export class BattleTooltips {
 				// 检查技能是否满足条件：非状态类技能且命中率小于100%
 				accuracyModifiers.push(4915); // 提升命中率1.2倍
 				value.itemModify(1.2, "Fantasy Power Lens"); 
-				value.abilityModify(1.2, "Fantasy Power Lens");
 			}
 		}
 
