@@ -1782,10 +1782,9 @@ export class BattleTooltips {
 			value.itemModify(1.1, "Wide Lens");
 		}
 
-		if (move.category !== 'Status' && typeof move.accuracy === 'number' && move.accuracy < 100) {
-			// 检查技能是否满足条件：非状态类技能且命中率小于100%
-			if (value.tryItem('Fantasy Power Lens')) {
-				// 增加命中率提升
+		if (value.tryItem('Fantasy Power Lens')) {
+			if (move.category !== 'Status' && typeof move.accuracy === 'number' && move.accuracy < 100) {
+				// 检查技能是否满足条件：非状态类技能且命中率小于100%
 				accuracyModifiers.push(4915); // 提升命中率1.2倍
 				value.itemModify(1.2, "Fantasy Power Lens"); // 提升技能威力1.2倍
 			}
