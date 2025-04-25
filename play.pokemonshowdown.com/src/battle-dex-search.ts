@@ -963,6 +963,10 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			if (!isStrictlySpeciesSpecific) {
 				if (baseSpeciesName === 'Groudon' && itemId === 'redorb') isStrictlySpeciesSpecific = true;
 				if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isStrictlySpeciesSpecific = true;
+				// Add check for Toxtricity Z
+				if ((this.species === 'toxtricityfantasy' || this.species === 'toxtricitylowkeyfantasy') && itemId === 'toxtricityz') {
+					isStrictlySpeciesSpecific = true;
+				}
 			}
 			if (isStrictlySpeciesSpecific) {
 				if (!specificItemIds.has(itemId)) {
