@@ -953,17 +953,13 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
                 continue;
             }
 
-            // 2. 检查物种/形态专属 (核心检查：itemUser + megaEvolves)
+            // 2. 检查物种/形态专属 (核心检查：itemUser)
             let isStrictlySpeciesSpecific = false;
-            // a. 检查 itemUser 是否包含当前精确形态名称
+            // 主要依赖 itemUser 是否包含当前精确形态名称
             if (item.itemUser?.includes(currentSpeciesName)) {
                 isStrictlySpeciesSpecific = true;
             }
-            // b. 重新加入检查：Mega 石是否对应基础形态
-            if (!isStrictlySpeciesSpecific && item.megaEvolves === baseSpeciesName) {
-                isStrictlySpeciesSpecific = true;
-            }
-            // c. 硬编码检查 (基于基础形态)
+            // 硬编码检查 (基于基础形态)
             if (!isStrictlySpeciesSpecific) {
                 if (baseSpeciesName === 'Groudon' && itemId === 'redorb') isStrictlySpeciesSpecific = true;
                 if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isStrictlySpeciesSpecific = true;
