@@ -137,12 +137,12 @@ class TeamTextbox extends preact.Component<{ team: Team }> {
 		}
 		this.forceUpdate();
 	};
-	save() {
-		const sets = PSTeambuilder.importTeam(this.textbox.value);
-		this.props.team.packedTeam = PSTeambuilder.packTeam(sets);
-		this.props.team.iconCache = null;
-		PS.teams.save();
-	}
+    save() {
+    	const sets = PSTeambuilder.importTeam(this.textbox.value, 'gen8ou' as ID); // 添加第二个参数
+    	this.props.team.packedTeam = PSTeambuilder.packTeam(sets);
+    	this.props.team.iconCache = null;
+    	PS.teams.save();
+    }
 	override componentDidMount() {
 		this.textbox = this.base!.getElementsByClassName('teamtextbox')[0] as HTMLTextAreaElement;
 		this.heightTester = this.base!.getElementsByClassName('heighttester')[0] as HTMLTextAreaElement;
@@ -172,13 +172,14 @@ class TeamTextbox extends preact.Component<{ team: Team }> {
 					if (!info.species) return null;
 					const prevOffset = i === 0 ? 8 : this.setInfo[i - 1].bottomY;
 					const species = info.species;
-					const num = Dex.getPokemonIconNum(toID(species));
+					const speciesId = toID(species); // 将 toID 结果存入变量
+					const num = Dex.getPokemonIconNum(speciesId, speciesId); // 传入两个参数
 					if (!num) return null;
-
+			
 					const top = Math.floor(num / 12) * 30;
 					const left = (num % 12) * 40;
 					const iconStyle = `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png) no-repeat scroll -${left}px -${top}px`;
-
+			
 					return <span
 						class="picon" style={`top:${prevOffset + 1}px;left:50px;position:absolute;${iconStyle}`}
 					></span>;
