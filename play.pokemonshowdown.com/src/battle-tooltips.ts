@@ -1578,6 +1578,15 @@ export class BattleTooltips {
 		if (move.id === 'aurawheel' && pokemon.getSpeciesForme() === 'Morpeko-Hangry') {
 			moveType = 'Dark';
 		}
+		
+		// Aura Wheel as Toxtricity-Low-Key-Fantasy changes the type to Ice
+		if (move.id === 'overdrive' && pokemon.getSpeciesForme() === 'Toxtricity-Low-Key-Fantasy') {
+			moveType = 'Ice';
+		}
+		if (move.id === 'chaopinyaogunpoyinbo' && pokemon.getSpeciesForme() === 'Toxtricity-Low-Key-Fantasy') {
+			moveType = 'Ice';
+		}
+
 		// Raging Bull's type depends on the Tauros forme
 		if (move.id === 'ragingbull') {
 			switch (pokemon.getSpeciesForme()) {
