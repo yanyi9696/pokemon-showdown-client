@@ -9,7 +9,6 @@ namespace Wikimedia\CSS\Sanitizer;
 use Wikimedia\CSS\Objects\CSSObject;
 use Wikimedia\CSS\Objects\CSSObjectList;
 use Wikimedia\CSS\Objects\RuleList;
-use Wikimedia\ScopedCallback;
 
 /**
  * Base class for CSS sanitizers
@@ -28,22 +27,6 @@ abstract class Sanitizer {
 	}
 
 	/**
-	 * Temporarily clear sanitization errors
-	 *
-	 * Errors will be cleared, then restored when the returned ScopedCallback
-	 * goes out of scope or is consumed.
-	 *
-	 * @return ScopedCallback
-	 */
-	public function stashSanitizationErrors() {
-		$reset = new ScopedCallback( function ( $e ) {
-			$this->sanitizationErrors = $e;
-		}, [ $this->sanitizationErrors ] );
-		$this->sanitizationErrors = [];
-		return $reset;
-	}
-
-	/**
 	 * Clear sanitization errors
 	 */
 	public function clearSanitizationErrors() {
@@ -57,7 +40,7 @@ abstract class Sanitizer {
 	 * @param array $data Extra data about the error.
 	 */
 	protected function sanitizationError( $tag, CSSObject $object, array $data = [] ) {
-		[ $line, $pos ] = $object->getPosition();
+		list( $line, $pos ) = $object->getPosition();
 		$this->sanitizationErrors[] = array_merge( [ $tag, $line, $pos ], $data );
 	}
 
@@ -116,7 +99,7 @@ abstract class Sanitizer {
 				if ( $sanitizer->handlesRule( $rule ) ) {
 					$indexes = $sanitizer->getIndex();
 					if ( is_array( $indexes ) ) {
-						[ $testIndex, $setIndex ] = $indexes;
+						list( $testIndex, $setIndex ) = $indexes;
 					} else {
 						$testIndex = $setIndex = $indexes;
 					}

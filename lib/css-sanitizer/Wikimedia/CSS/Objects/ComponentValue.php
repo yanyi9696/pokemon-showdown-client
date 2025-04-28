@@ -11,11 +11,8 @@ namespace Wikimedia\CSS\Objects;
  */
 abstract class ComponentValue implements CSSObject {
 
-	/** @var int Line in the input where this component value starts */
-	protected $line = -1;
-
-	/** @var int Position in the input where this component value starts */
-	protected $pos = -1;
+	/** @var int Line and position in the input where this component value starts */
+	protected $line = -1, $pos = -1;
 
 	/**
 	 * Get the position of this ComponentValue in the input stream
@@ -25,7 +22,6 @@ abstract class ComponentValue implements CSSObject {
 		return [ $this->line, $this->pos ];
 	}
 
-	/** @inheritDoc */
 	public function toComponentValueArray() {
 		return [ $this ];
 	}

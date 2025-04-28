@@ -6,8 +6,6 @@
 
 namespace Wikimedia\CSS\Grammar;
 
-use InvalidArgumentException;
-use UnexpectedValueException;
 use Wikimedia\CSS\Objects\ComponentValueList;
 use Wikimedia\CSS\Objects\CSSFunction;
 use Wikimedia\CSS\Objects\SimpleBlock;
@@ -17,7 +15,7 @@ use Wikimedia\CSS\Objects\Token;
  * Matcher that matches anything except bad strings, bad urls, and unmatched
  * left-paren, left-brace, or left-bracket.
  * @warning Be very careful using this!
- * @see https://www.w3.org/TR/2019/CR-css-syntax-3-20190716/#any-value
+ * @see https://drafts.csswg.org/css-syntax/#any-value for where this roughly comes from.
  */
 class AnythingMatcher extends Matcher {
 
@@ -44,9 +42,9 @@ class AnythingMatcher extends Matcher {
 	 */
 	public function __construct( array $options = [] ) {
 		$this->toplevel = !empty( $options['toplevel'] );
-		$this->quantifier = $options['quantifier'] ?? '';
+		$this->quantifier = isset( $options['quantifier'] ) ? $options['quantifier'] : '';
 		if ( !in_array( $this->quantifier, [ '', '+', '*' ], true ) ) {
-			throw new InvalidArgumentException( 'Invalid quantifier' );
+			throw new \InvalidArgumentException( 'Invalid quantifier' );
 		}
 
 		$recurse = !$this->toplevel && $this->quantifier === '*'
@@ -57,13 +55,12 @@ class AnythingMatcher extends Matcher {
 		}
 	}
 
-	/** @inheritDoc */
 	protected function generateMatches( ComponentValueList $values, $start, array $options ) {
 		$origStart = $start;
 		$lastMatch = $this->quantifier === '*' ? $this->makeMatch( $values, $start, $start ) : null;
 		do {
 			$newMatch = null;
-			$cv = $values[$start] ?? null;
+			$cv = isset( $values[$start] ) ? $values[$start] : null;
 			if ( $cv instanceof Token ) {
 				switch ( $cv->type() ) {
 					case Token::T_BAD_STRING:
@@ -95,7 +92,7 @@ class AnythingMatcher extends Matcher {
 						// If we encounter whitespace, assume it's significant.
 						$newMatch = $this->makeMatch(
 							$values, $origStart, $this->next( $values, $start, $options ),
-							new GrammarMatch( $values, $start, 1, 'significantWhitespace' ),
+							new Match( $values, $start, 1, 'significantWhitespace' ),
 							[ [ $lastMatch ] ]
 						);
 						break;
@@ -106,7 +103,7 @@ class AnythingMatcher extends Matcher {
 					case Token::T_LEFT_BRACKET:
 						// Should never happen
 						// @codeCoverageIgnoreStart
-						throw new UnexpectedValueException( "How did a \"{$cv->type()}\" token get here?" );
+						throw new \UnexpectedValueException( "How did a \"{$cv->type()}\" token get here?" );
 						// @codeCoverageIgnoreEnd
 
 					default:

@@ -6,9 +6,9 @@
 
 namespace Wikimedia\CSS\Sanitizer;
 
-use Wikimedia\CSS\Grammar\MatcherFactory;
 use Wikimedia\CSS\Objects\CSSObject;
 use Wikimedia\CSS\Objects\DeclarationList;
+use Wikimedia\CSS\Grammar\MatcherFactory;
 use Wikimedia\CSS\Parser\Parser;
 
 /**
@@ -43,10 +43,11 @@ class StyleAttributeSanitizer extends Sanitizer {
 		$propertySanitizer = new StylePropertySanitizer( $matcherFactory );
 
 		// StyleAttributeSanitizer brings it all together
-		return new StyleAttributeSanitizer( $propertySanitizer );
+		$sanitizer = new StyleAttributeSanitizer( $propertySanitizer );
+
+		return $sanitizer;
 	}
 
-	/** @inheritDoc */
 	protected function doSanitize( CSSObject $object ) {
 		if ( !$object instanceof DeclarationList ) {
 			$this->sanitizationError( 'expected-declaration-list', $object );
@@ -64,7 +65,6 @@ class StyleAttributeSanitizer extends Sanitizer {
 		$parser = Parser::newFromString( $string );
 		$declarations = $parser->parseDeclarationList();
 		$this->sanitizationErrors = array_merge( $this->sanitizationErrors, $parser->getParseErrors() );
-		// @phan-suppress-next-line PhanTypeMismatchReturnSuperType
 		return $this->sanitizeList( $this->propertySanitizer, $declarations );
 	}
 }

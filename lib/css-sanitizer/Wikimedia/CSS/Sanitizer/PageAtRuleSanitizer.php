@@ -25,7 +25,7 @@ use Wikimedia\CSS\Util;
 
 /**
  * Sanitizes a CSS \@page rule
- * @see https://www.w3.org/TR/2018/WD-css-page-3-20181018/
+ * @see https://www.w3.org/TR/2013/WD-css3-page-20130314/
  */
 class PageAtRuleSanitizer extends RuleSanitizer {
 
@@ -63,43 +63,26 @@ class PageAtRuleSanitizer extends RuleSanitizer {
 		] );
 		$this->pageSelectorMatcher->setDefaultOptions( [ 'skip-whitespace' => false ] );
 
-		// Clone the $propertySanitizer and inject the special properties
-		$this->propertySanitizer = clone $propertySanitizer;
-		$this->propertySanitizer->addKnownProperties( [
-			'size' => new Alternative( [
-				Quantifier::count( $matcherFactory->length(), 1, 2 ),
-				new KeywordMatcher( 'auto' ),
-				UnorderedGroup::someOf( [
-					new KeywordMatcher( [
-						'A5', 'A4', 'A3', 'B5', 'B4', 'JIS-B5', 'JIS-B4', 'letter', 'legal', 'ledger',
-					] ),
-					new KeywordMatcher( [ 'portrait', 'landscape' ] ),
-				] ),
+		// Clone the $propertySanitizer and inject the special "size" property
+		$this->propertySanitizer = clone( $propertySanitizer );
+		$this->propertySanitizer->addKnownProperties( [ 'size' => new Alternative( [
+			Quantifier::count( $matcherFactory->length(), 1, 2 ),
+			new KeywordMatcher( 'auto' ),
+			UnorderedGroup::someOf( [
+				new KeywordMatcher( [ 'A5', 'A4', 'A3', 'B5', 'B4', 'letter', 'legal', 'ledger' ] ),
+				new KeywordMatcher( [ 'portrait', 'landscape' ] ),
 			] ),
-			'marks' => new Alternative( [
-				new KeywordMatcher( 'none' ),
-				UnorderedGroup::someOf( [
-					new KeywordMatcher( 'crop' ),
-					new KeywordMatcher( 'cross' ),
-				] ),
-			] ),
-			'bleed' => new Alternative( [
-				new KeywordMatcher( 'auto' ),
-				$matcherFactory->length(),
-			] ),
-		] );
+		] ) ] );
 
 		$this->ruleSanitizer = new MarginAtRuleSanitizer( $propertySanitizer );
 	}
 
-	/** @inheritDoc */
 	public function handlesRule( Rule $rule ) {
 		return $rule instanceof AtRule && !strcasecmp( $rule->getName(), 'page' );
 	}
 
-	/** @inheritDoc */
 	protected function doSanitize( CSSObject $object ) {
-		if ( !$object instanceof AtRule || !$this->handlesRule( $object ) ) {
+		if ( !$object instanceof Rule || !$this->handlesRule( $object ) ) {
 			$this->sanitizationError( 'expected-at-rule', $object, [ 'page' ] );
 			return null;
 		}
@@ -110,7 +93,7 @@ class PageAtRuleSanitizer extends RuleSanitizer {
 		}
 
 		// Test the page selector
-		$match = $this->pageSelectorMatcher->matchAgainst(
+		$match = $this->pageSelectorMatcher->match(
 			$object->getPrelude(), [ 'mark-significance' => true ]
 		);
 		if ( !$match ) {
@@ -119,7 +102,7 @@ class PageAtRuleSanitizer extends RuleSanitizer {
 			return null;
 		}
 
-		$ret = clone $object;
+		$ret = clone( $object );
 		$this->fixPreludeWhitespace( $ret, false );
 
 		// Parse the block's contents into a list of declarations and at-rules,

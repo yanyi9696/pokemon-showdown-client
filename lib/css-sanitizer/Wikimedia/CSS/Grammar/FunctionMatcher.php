@@ -6,10 +6,9 @@
 
 namespace Wikimedia\CSS\Grammar;
 
-use Closure;
-use InvalidArgumentException;
 use Wikimedia\CSS\Objects\ComponentValueList;
 use Wikimedia\CSS\Objects\CSSFunction;
+use Wikimedia\CSS\Objects\Token;
 
 /**
  * Matcher that matches a CSSFunction
@@ -30,26 +29,25 @@ class FunctionMatcher extends Matcher {
 	protected $matcher;
 
 	/**
-	 * @param string|Closure|null $name Function name, case-insensitive, or a
+	 * @param string|callable|null $name Function name, case-insensitive, or a
 	 *  function to check the name.
 	 * @param Matcher $matcher Matcher for the contents of the function
 	 */
 	public function __construct( $name, Matcher $matcher ) {
 		if ( is_string( $name ) ) {
-			$this->nameCheck = static function ( $s ) use ( $name ) {
+			$this->nameCheck = function ( $s ) use ( $name ) {
 				return !strcasecmp( $s, $name );
 			};
 		} elseif ( is_callable( $name ) || $name === null ) {
 			$this->nameCheck = $name;
 		} else {
-			throw new InvalidArgumentException( '$name must be a string, callable, or null' );
+			throw new \InvalidArgumentException( '$name must be a string, callable, or null' );
 		}
 		$this->matcher = $matcher;
 	}
 
-	/** @inheritDoc */
 	protected function generateMatches( ComponentValueList $values, $start, array $options ) {
-		$cv = $values[$start] ?? null;
+		$cv = isset( $values[$start] ) ? $values[$start] : null;
 		if ( $cv instanceof CSSFunction &&
 			( !$this->nameCheck || call_user_func( $this->nameCheck, $cv->getName() ) )
 		) {

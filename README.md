@@ -62,13 +62,12 @@ contents:
     const POKEMON_SHOWDOWN_TESTCLIENT_KEY = 'sid';
 
 Replace `sid` with the contents of your actual PS `sid` cookie. You can quickly
-grab it from:
+access this on Chrome through the URL bar:
 
-> https://play.pokemonshowdown.com/testclient-key.php
+![image](https://user-images.githubusercontent.com/551184/53414680-def43480-3994-11e9-89d0-c06098c23fa0.png)
+![image](https://user-images.githubusercontent.com/551184/53414760-119e2d00-3995-11e9-80f8-ecd17467310a.png)
 
-Make sure to put it in `config/` and not `play.pokemonshowdown.com/config/`.
-
-(This is the only supported method of logging in on the beta Preact testclient.)
+(This is the only supported method of logging in on the beta Preact client.)
 
   [5]: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
 

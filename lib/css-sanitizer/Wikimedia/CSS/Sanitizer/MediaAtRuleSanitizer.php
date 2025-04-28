@@ -7,6 +7,7 @@
 namespace Wikimedia\CSS\Sanitizer;
 
 use Wikimedia\CSS\Grammar\Matcher;
+use Wikimedia\CSS\Grammar\MatcherFactory;
 use Wikimedia\CSS\Objects\AtRule;
 use Wikimedia\CSS\Objects\CSSObject;
 use Wikimedia\CSS\Objects\Rule;
@@ -49,14 +50,12 @@ class MediaAtRuleSanitizer extends RuleSanitizer {
 		$this->ruleSanitizers = $ruleSanitizers;
 	}
 
-	/** @inheritDoc */
 	public function handlesRule( Rule $rule ) {
 		return $rule instanceof AtRule && !strcasecmp( $rule->getName(), 'media' );
 	}
 
-	/** @inheritDoc */
 	protected function doSanitize( CSSObject $object ) {
-		if ( !$object instanceof AtRule || !$this->handlesRule( $object ) ) {
+		if ( !$object instanceof Rule || !$this->handlesRule( $object ) ) {
 			$this->sanitizationError( 'expected-at-rule', $object, [ 'media' ] );
 			return null;
 		}
@@ -67,7 +66,7 @@ class MediaAtRuleSanitizer extends RuleSanitizer {
 		}
 
 		// Test the media query
-		$match = $this->mediaQueryListMatcher->matchAgainst(
+		$match = $this->mediaQueryListMatcher->match(
 			$object->getPrelude(), [ 'mark-significance' => true ]
 		);
 		if ( !$match ) {
@@ -76,7 +75,7 @@ class MediaAtRuleSanitizer extends RuleSanitizer {
 			return null;
 		}
 
-		$ret = clone $object;
+		$ret = clone( $object );
 		$this->fixPreludeWhitespace( $ret, false );
 		$this->sanitizeRuleBlock( $ret->getBlock(), $this->ruleSanitizers );
 

@@ -20,10 +20,9 @@ process.chdir(rootDir);
 
 const AUTOCONFIG_START = '/*** Begin automatically generated configuration ***/';
 const AUTOCONFIG_END = '/*** End automatically generated configuration ***/';
-const UTF8 = { encoding: 'utf8' };
 
 function escapeRegex(string) {
-	return string.replace(/[/*.]/g, '\\$&');
+	return string.replace(/[\/\*\.]/g, '\\$&');
 }
 
 /*********************************************************
@@ -43,7 +42,7 @@ try {
 	});
 	const origin = ('' + commit).trim();
 	version += ` (${head.slice(0, 8)}${head !== origin ? `/${origin.slice(0, 8)}` : ''})`;
-} catch {}
+} catch (e) {}
 
 const routes = JSON.parse(fs.readFileSync('config/routes.json'));
 const autoconfigRegex = new RegExp(`${escapeRegex(AUTOCONFIG_START)}[^]+${escapeRegex(AUTOCONFIG_END)}`);
@@ -56,12 +55,11 @@ Config.routes = {
 	dex: '${routes.dex}',
 	replays: '${routes.replays}',
 	users: '${routes.users}',
-	teams: '${routes.teams}',
 };
 ${AUTOCONFIG_END}`;
 
 // remove old automatically generated configuration and add the new one
-let configBuf = fs.readFileSync('config/config.js', UTF8);
+let configBuf = fs.readFileSync('config/config.js', {encoding: 'utf8'});
 if (autoconfigRegex.test(configBuf)) {
 	configBuf = configBuf.replace(autoconfigRegex, autoconfig);
 } else {
@@ -76,56 +74,44 @@ console.log("DONE");
 
 process.stdout.write("Compiling TS files... ");
 
-const compileStartTime = process.hrtime();
+let compileStartTime = process.hrtime();
 let compiledFiles = 0;
 
-// Babel can't find babelrc if we try to compile stuff in caches/pokemon-showdown/ fsr
-// eslint-disable-next-line no-eval
-const compileOpts = Object.assign(eval('(' + fs.readFileSync('.babelrc') + ')'), {
+// Babel can't find babelrc if we try to compile stuff in data/pokemon-showdown/ fsr
+let compileOpts = Object.assign(eval('(' + fs.readFileSync('.babelrc') + ')'), {
 	babelrc: false,
 	incremental: true,
-	ignore: ['play.pokemonshowdown.com/src/battle-animations.js', 'play.pokemonshowdown.com/src/battle-animations-moves.js'],
+	ignore: ['src/battle-animations.js', 'src/battle-animations-moves.js'],
 });
 if (process.argv[2] === 'full') {
 	delete compileOpts.ignore;
 	compiler.compileToDir(
-		['caches/pokemon-showdown/server/chat-formatter.ts', 'caches/pokemon-showdown/sim/teams.ts'],
-		'play.pokemonshowdown.com/js/server/',
+		['data/pokemon-showdown/server/chat-formatter.ts'],
+		'js/server/',
 		compileOpts
 	);
 } else {
 	try {
-		fs.statSync('play.pokemonshowdown.com/data/graphics.js');
+		fs.statSync('data/graphics.js');
 		// graphics.js exists, recompile it
 		delete compileOpts.ignore;
-	} catch {}
+	} catch (e) {}
 }
 
-compiledFiles += compiler.compileToDir(`play.pokemonshowdown.com/src`, `play.pokemonshowdown.com/js`, compileOpts);
+compiledFiles += compiler.compileToDir(`src`, `js`, compileOpts);
 
-compiledFiles += compiler.compileToDir(`replay.pokemonshowdown.com/src`, `replay.pokemonshowdown.com/js`, compileOpts);
-
-compiledFiles += compiler.compileToDir(`teams.pokemonshowdown.com/src`, `teams.pokemonshowdown.com/js`, compileOpts);
+compiledFiles += compiler.compileToDir(`src`, `js`, compileOpts);
 
 compiledFiles += compiler.compileToFile(
-	[
-		'play.pokemonshowdown.com/src/battle-dex.ts',
-		'play.pokemonshowdown.com/src/battle-dex-data.ts',
-		'play.pokemonshowdown.com/src/battle-log.ts',
-		'play.pokemonshowdown.com/src/battle-log-misc.js',
-		'caches/pokemon-showdown/server/chat-formatter.ts',
-		'play.pokemonshowdown.com/data/text.js',
-		'play.pokemonshowdown.com/data/text-afd.js',
-		'play.pokemonshowdown.com/src/battle-text-parser.ts',
-	],
-	'play.pokemonshowdown.com/js/battledata.js',
+	['src/battle-dex.ts', 'src/battle-dex-data.ts', 'src/battle-log.ts', 'src/battle-log-misc.js', 'data/pokemon-showdown/server/chat-formatter.ts', 'data/text.js', 'src/battle-text-parser.ts'],
+	'js/battledata.js',
 	compileOpts
 );
 
 if (!compileOpts.ignore) {
 	compiledFiles += compiler.compileToFile(
-		['play.pokemonshowdown.com/src/battle-animations.ts', 'play.pokemonshowdown.com/src/battle-animations-moves.ts'],
-		'play.pokemonshowdown.com/data/graphics.js',
+		['src/battle-animations.ts', 'src/battle-animations-moves.ts'],
+		'data/graphics.js',
 		compileOpts
 	);
 }
@@ -141,109 +127,72 @@ console.log(
 
 process.stdout.write("Updating cachebuster and URLs... ");
 
-const URL_REGEX = /(src|href)="(.*?)(\?[a-z0-9]*?)?"/g;
+const URL_REGEX = /(src|href)="\/(.*?)(\?[a-z0-9]*?)?"/g;
 
-function addCachebuster(_, attr, url, urlQuery) {
-	url = url.replace('/replay.pokemonshowdown.com/', '/' + routes.replays + '/');
-	url = url.replace('/dex.pokemonshowdown.com/', '/' + routes.dex + '/');
-	url = url.replace('/play.pokemonshowdown.com/', '/' + routes.client + '/');
-	url = url.replace('/pokemonshowdown.com/', '/' + routes.root + '/');
-	url = url.replace('/teams.pokemonshowdown.com/', '/' + routes.teams + '/');
+function updateURL(a, b, c, d) {
+	c = c.replace('/replay.pokemonshowdown.com/', '/' + routes.replays + '/');
+	c = c.replace('/dex.pokemonshowdown.com/', '/' + routes.dex + '/');
+	c = c.replace('/play.pokemonshowdown.com/', '/' + routes.client + '/');
+	c = c.replace('/pokemonshowdown.com/', '/' + routes.root + '/');
 
-	if (urlQuery) {
-		if (url.startsWith('/')) {
-			let hash = Math.random(); // just in case creating the hash fails
-			try {
-				const filename = url.slice(1).replace('/' + routes.client + '/', '');
-				const fstr = fs.readFileSync(filename, UTF8);
-				hash = crypto.createHash('md5').update(fstr).digest('hex').substr(0, 8);
-			} catch {}
+	if (d) {
+		let hash = Math.random(); // just in case creating the hash fails
+		try {
+			const filename = c.replace('/' + routes.client + '/', '');
+			const fstr = fs.readFileSync(filename, {encoding: 'utf8'});
+			hash = crypto.createHash('md5').update(fstr).digest('hex').substr(0, 8);
+		} catch (e) {}
 
-			return attr + '="' + url + '?' + hash + '"';
-		} else {
-			// TODO: generalize better
-			let hash;
-			for (const subdir of ['teams', 'replays']) {
-				if (hash) break;
+		return b + '="/' + c + '?' + hash + '"';
+	} else {
+		return b + '="/' + c + '"';
+	}
+}
+
+function writeFiles(indexContents, preactIndexContents, crossprotocolContents, replayEmbedContents) {
+	fs.writeFileSync('index.html', indexContents);
+	fs.writeFileSync('preactalpha.html', preactIndexContents);
+	fs.writeFileSync('crossprotocol.html', crossprotocolContents);
+	fs.writeFileSync('js/replay-embed.js', replayEmbedContents);
+	console.log("DONE");
+}
+
+function updateFiles() {
+	// add hashes to js and css files and rewrite URLs
+	let indexContents = fs.readFileSync('index.template.html', {encoding: 'utf8'});
+	indexContents = indexContents.replace(URL_REGEX, updateURL);
+	let preactIndexContents = fs.readFileSync('preactalpha.template.html', {encoding: 'utf8'});
+	preactIndexContents = preactIndexContents.replace(URL_REGEX, updateURL);
+	let crossprotocolContents = fs.readFileSync('crossprotocol.template.html', {encoding: 'utf8'});
+	crossprotocolContents = crossprotocolContents.replace(URL_REGEX, updateURL);
+	let replayEmbedContents = fs.readFileSync('js/replay-embed.template.js', {encoding: 'utf8'});
+	replayEmbedContents = replayEmbedContents.replace(/play\.pokemonshowdown\.com/g, routes.client);
+
+	// add news, only if it's actually likely to exist
+	if (__dirname.endsWith('play.pokemonshowdown.com/build-tools')) {
+		process.stdout.write("and news... ");
+		child_process.exec('php ' + path.resolve(thisDir, 'news-data.php'), function (error, stdout, stderr) {
+			let newsData = [0, '[failed to retrieve news]'];
+			if (!error && !stderr) {
 				try {
-					const fstr = fs.readFileSync(subdir + '.pokemonshowdown.com/' + url, UTF8);
-					hash = crypto.createHash('md5').update(fstr).digest('hex').substr(0, 8);
-				} catch {}
+					newsData = JSON.parse(stdout);
+				} catch (e) {
+					console.log("git hook failed to retrieve news (parsing JSON failed):\n" + e.stack);
+				}
+			} else {
+				console.log("git hook failed to retrieve news (exec command failed):\n" + (error + stderr + stdout));
 			}
 
-			return attr + '="' + url + '?' + (hash || 'v1') + '"';
-		}
+			indexContents = indexContents.replace(/<!-- newsid -->/g, newsData[0]);
+			indexContents = indexContents.replace(/<!-- news -->/g, newsData[1]);
+
+			indexContents = indexContents.replace(/<!-- head custom -->/g, '' + fs.readFileSync('config/head-custom.html'));
+
+			writeFiles(indexContents, preactIndexContents, crossprotocolContents, replayEmbedContents);
+		});
 	} else {
-		return attr + '="' + url + '"';
+		writeFiles(indexContents, preactIndexContents, crossprotocolContents, replayEmbedContents);
 	}
 }
 
-// add hashes to js and css files and rewrite URLs
-let indexContents = fs.readFileSync('play.pokemonshowdown.com/index.template.html', UTF8);
-indexContents = indexContents.replace(URL_REGEX, addCachebuster);
-let preactIndexContents = fs.readFileSync('play.pokemonshowdown.com/preactalpha.template.html', UTF8);
-preactIndexContents = preactIndexContents.replace(URL_REGEX, addCachebuster);
-let crossprotocolContents = fs.readFileSync('play.pokemonshowdown.com/crossprotocol.template.html', UTF8);
-crossprotocolContents = crossprotocolContents.replace(URL_REGEX, addCachebuster);
-let replayEmbedContents = fs.readFileSync('play.pokemonshowdown.com/js/replay-embed.template.js', UTF8);
-// Nihilslave: Disable this to get correct sprites if ur client doesn't have them.
-replayEmbedContents = replayEmbedContents.replace(/play\.pokemonshowdown\.com/g, routes.client);
-// Nihilslave: update the url over time
-let date = new Date();
-replayEmbedContents = replayEmbedContents.replace(/a7/g, date.getTime());
-// Nihilslave: we use testclient.html
-let testclientContents = fs.readFileSync('play.pokemonshowdown.com/testclient.template.html', {encoding: 'utf-8'});
-testclientContents = testclientContents.replace(URL_REGEX, addCachebuster);
-testclientContents = testclientContents.replace('Mmm dd, yyyy', date.toDateString().split(" ")[1] + ' ' + date.getDate() + ', ' + date.getFullYear());
-
-// add news, only if it's actually likely to exist
-process.stdout.write("and news... ");
-let stdout = '';
-let newsid = 0;
-let news = '[failed to retrieve news]';
-try {
-	stdout = child_process.execSync('php ' + path.resolve(thisDir, 'news-embed.php'), {
-		stdio: 'pipe',
-	});
-} catch (e) {
-	console.log("git hook failed to retrieve news (exec command failed):\n" + (e.error + e.stderr + e.stdout));
-}
-try {
-	if (stdout) [newsid, news] = JSON.parse(stdout);
-} catch (e) {
-	if (stdout.includes("config/news.inc.php): Failed to open stream: No such file or directory")) {
-		console.log("news.inc.php unavailable");
-	} else {
-		console.log("git hook failed to retrieve news (parsing JSON failed):\n\n" + e.message + '\n\n' + stdout);
-	}
-}
-
-indexContents = indexContents.replace(/<!-- newsid -->/g, newsid);
-indexContents = indexContents.replace(/<!-- news -->/g, news);
-
-let indexContents2 = '';
-try {
-	const indexContentsOld = indexContents;
-	indexContents = indexContents.replace(/<!-- head custom -->/g, '' + fs.readFileSync('config/head-custom.html'));
-	indexContents2 = indexContentsOld
-		.replace(/<!-- head custom -->/g, '' + fs.readFileSync('config/head-custom-test.html'));
-} catch {}
-
-fs.writeFileSync('play.pokemonshowdown.com/index.html', indexContents);
-if (indexContents2) {
-	fs.writeFileSync('play.pokemonshowdown.com/index-test.html', indexContents2);
-}
-fs.writeFileSync('play.pokemonshowdown.com/preactalpha.html', preactIndexContents);
-fs.writeFileSync('play.pokemonshowdown.com/crossprotocol.html', crossprotocolContents);
-fs.writeFileSync('play.pokemonshowdown.com/js/replay-embed.js', replayEmbedContents);
-fs.writeFileSync('play.pokemonshowdown.com/testclient.html', testclientContents);
-
-let replaysContents = fs.readFileSync('replay.pokemonshowdown.com/index.template.php', UTF8);
-replaysContents = replaysContents.replace(URL_REGEX, addCachebuster);
-fs.writeFileSync('replay.pokemonshowdown.com/index.php', replaysContents);
-
-let teamsContents = fs.readFileSync('teams.pokemonshowdown.com/index.template.html', UTF8);
-teamsContents = teamsContents.replace(URL_REGEX, addCachebuster);
-fs.writeFileSync('teams.pokemonshowdown.com/index.html', teamsContents);
-
-console.log("DONE");
+updateFiles();

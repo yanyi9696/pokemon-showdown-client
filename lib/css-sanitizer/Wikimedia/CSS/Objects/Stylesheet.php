@@ -7,6 +7,7 @@
 namespace Wikimedia\CSS\Objects;
 
 use Wikimedia\CSS\Util;
+use Wikimedia\CSS\Sanitizer\Sanitizer;
 
 /**
  * Represent a stylesheet
@@ -22,14 +23,14 @@ class Stylesheet implements CSSObject {
 	protected $ruleList;
 
 	/**
-	 * @param RuleList|null $rules
+	 * @param RuleList $rules
 	 */
 	public function __construct( RuleList $rules = null ) {
 		$this->ruleList = $rules ?: new RuleList();
 	}
 
 	public function __clone() {
-		$this->ruleList = clone $this->ruleList;
+		$this->ruleList = clone( $this->ruleList );
 	}
 
 	/**
@@ -39,18 +40,15 @@ class Stylesheet implements CSSObject {
 		return $this->ruleList;
 	}
 
-	/** @inheritDoc */
 	public function getPosition() {
 		// Stylesheets don't really have a position
 		return [ 0, 0 ];
 	}
 
-	/** @inheritDoc */
 	public function toTokenArray() {
 		return $this->ruleList->toTokenArray();
 	}
 
-	/** @inheritDoc */
 	public function toComponentValueArray() {
 		return $this->ruleList->toComponentValueArray();
 	}

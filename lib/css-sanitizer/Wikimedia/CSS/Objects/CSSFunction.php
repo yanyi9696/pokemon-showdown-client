@@ -6,7 +6,6 @@
 
 namespace Wikimedia\CSS\Objects;
 
-use InvalidArgumentException;
 use Wikimedia\CSS\Util;
 
 /**
@@ -25,18 +24,18 @@ class CSSFunction extends ComponentValue {
 	 */
 	public function __construct( Token $token ) {
 		if ( $token->type() !== Token::T_FUNCTION ) {
-			throw new InvalidArgumentException(
+			throw new \InvalidArgumentException(
 				"CSS function must begin with a function token, got {$token->type()}"
 			);
 		}
 
-		[ $this->line, $this->pos ] = $token->getPosition();
+		list( $this->line, $this->pos ) = $token->getPosition();
 		$this->name = $token->value();
 		$this->value = new ComponentValueList();
 	}
 
 	public function __clone() {
-		$this->value = clone $this->value;
+		$this->value = clone( $this->value );
 	}
 
 	/**
@@ -49,7 +48,7 @@ class CSSFunction extends ComponentValue {
 	}
 
 	/**
-	 * Return the function's name
+	 * Return the functions's name
 	 * @return string
 	 */
 	public function getName() {
@@ -75,7 +74,7 @@ class CSSFunction extends ComponentValue {
 			Token::T_FUNCTION,
 			[ 'value' => $this->name, 'position' => [ $this->line, $this->pos ] ]
 		);
-		// Manually looping and appending turns out to be noticeably faster than array_merge.
+		// Manually looping and appending turns out to be noticably faster than array_merge.
 		foreach ( $this->value->toTokenArray() as $v ) {
 			$ret[] = $v;
 		}

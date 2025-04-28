@@ -6,7 +6,6 @@
 
 namespace Wikimedia\CSS\Objects;
 
-use InvalidArgumentException;
 use Wikimedia\CSS\Util;
 
 /**
@@ -20,7 +19,6 @@ class QualifiedRule extends Rule {
 	/** @var SimpleBlock */
 	protected $block;
 
-	/** @inheritDoc */
 	public function __construct( Token $token = null ) {
 		parent::__construct( $token ?: new Token( Token::T_EOF ) );
 		$this->prelude = new ComponentValueList();
@@ -28,8 +26,8 @@ class QualifiedRule extends Rule {
 	}
 
 	public function __clone() {
-		$this->prelude = clone $this->prelude;
-		$this->block = clone $this->block;
+		$this->prelude = clone( $this->prelude );
+		$this->block = clone( $this->block );
 	}
 
 	/**
@@ -50,23 +48,22 @@ class QualifiedRule extends Rule {
 
 	/**
 	 * Set the block
-	 * @param SimpleBlock|null $block
+	 * @param SimpleBlock $block
 	 */
 	public function setBlock( SimpleBlock $block = null ) {
 		if ( $block->getStartTokenType() !== Token::T_LEFT_BRACE ) {
-			throw new InvalidArgumentException( 'Qualified rule block must be delimited by {}' );
+			throw new \InvalidArgumentException( 'Qualified rule block must be delimited by {}' );
 		}
 		$this->block = $block;
 	}
 
 	/**
 	 * @param string $function Function to call, toTokenArray() or toComponentValueArray()
-	 * @return Token[]|ComponentValue[]
 	 */
 	private function toTokenOrCVArray( $function ) {
 		$ret = [];
 
-		// Manually looping and appending turns out to be noticeably faster than array_merge.
+		// Manually looping and appending turns out to be noticably faster than array_merge.
 		foreach ( $this->prelude->$function() as $v ) {
 			$ret[] = $v;
 		}
@@ -76,12 +73,10 @@ class QualifiedRule extends Rule {
 		return $ret;
 	}
 
-	/** @inheritDoc */
 	public function toTokenArray() {
 		return $this->toTokenOrCVArray( __FUNCTION__ );
 	}
 
-	/** @inheritDoc */
 	public function toComponentValueArray() {
 		return $this->toTokenOrCVArray( __FUNCTION__ );
 	}

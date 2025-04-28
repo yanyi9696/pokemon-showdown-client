@@ -6,13 +6,12 @@
 
 namespace Wikimedia\CSS\Grammar;
 
-use InvalidArgumentException;
 use Wikimedia\CSS\Objects\ComponentValueList;
 use Wikimedia\CSS\Objects\CSSFunction;
 use Wikimedia\CSS\Objects\Token;
 
 /**
- * Matcher that matches a CSSFunction for a URL or a T_URL token
+ * Matcher that matches a CSSFunction for a url or a T_URL token
  */
 class UrlMatcher extends FunctionMatcher {
 	/** @var callable|null */
@@ -29,7 +28,7 @@ class UrlMatcher extends FunctionMatcher {
 		if ( isset( $options['modifierMatcher'] ) ) {
 			$modifierMatcher = $options['modifierMatcher'];
 			if ( !$modifierMatcher instanceof Matcher ) {
-				throw new InvalidArgumentException( 'modifierMatcher must be a Matcher' );
+				throw new \InvalidArgumentException( 'modifierMatcher must be a Matcher' );
 			}
 		} else {
 			$modifierMatcher = new NothingMatcher;
@@ -55,14 +54,13 @@ class UrlMatcher extends FunctionMatcher {
 		] );
 	}
 
-	/** @inheritDoc */
 	protected function generateMatches( ComponentValueList $values, $start, array $options ) {
 		// First, is it a URL token?
-		$cv = $values[$start] ?? null;
+		$cv = isset( $values[$start] ) ? $values[$start] : null;
 		if ( $cv instanceof Token && $cv->type() === Token::T_URL ) {
 			$url = $cv->value();
 			if ( !$this->urlCheck || call_user_func( $this->urlCheck, $url, [] ) ) {
-				$match = new GrammarMatch( $values, $start, 1, 'url' );
+				$match = new Match( $values, $start, 1, 'url' );
 				yield $this->makeMatch( $values, $start, $this->next( $values, $start, $options ), $match );
 			}
 			return;
@@ -75,12 +73,12 @@ class UrlMatcher extends FunctionMatcher {
 			$modifiers = [];
 			foreach ( $match->getCapturedMatches() as $submatch ) {
 				$cvs = $submatch->getValues();
-				if ( $cvs[0] instanceof Token && $submatch->getName() === 'url' ) {
+				if ( $submatch->getName() === 'url' ) {
 					$url = $cvs[0]->value();
 				} elseif ( $submatch->getName() === 'modifier' ) {
 					if ( $cvs[0] instanceof CSSFunction ) {
 						$modifiers[] = $cvs[0];
-					} elseif ( $cvs[0] instanceof Token && $cvs[0]->type() === Token::T_IDENT ) {
+					} elseif ( $cvs[0]->type() === Token::T_IDENT ) {
 						$modifiers[] = $cvs[0];
 					}
 				}

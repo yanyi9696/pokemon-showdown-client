@@ -6,17 +6,12 @@
 
 namespace Wikimedia\CSS\Objects;
 
-use ArrayAccess;
-use Countable;
-use InvalidArgumentException;
-use OutOfBoundsException;
-use SeekableIterator;
 use Wikimedia\CSS\Util;
 
 /**
  * Represent a list of CSS objects
  */
-class CSSObjectList implements Countable, SeekableIterator, ArrayAccess, CSSObject {
+class CSSObjectList implements \Countable, \SeekableIterator, \ArrayAccess, CSSObject {
 
 	/** @var string The specific class of object contained */
 	protected static $objectType;
@@ -46,7 +41,7 @@ class CSSObjectList implements Countable, SeekableIterator, ArrayAccess, CSSObje
 	/**
 	 * Insert one or more objects into the list
 	 * @param CSSObject|CSSObject[]|CSSObjectList $objects An object to add, or an array of objects.
-	 * @param int|null $index Insert the objects at this index. If omitted, the
+	 * @param int $index Insert the objects at this index. If omitted, the
 	 *  objects are added at the end.
 	 */
 	public function add( $objects, $index = null ) {
@@ -58,7 +53,7 @@ class CSSObjectList implements Countable, SeekableIterator, ArrayAccess, CSSObje
 			static::testObjects( $objects );
 		} else {
 			if ( !$objects instanceof static::$objectType ) {
-				throw new InvalidArgumentException(
+				throw new \InvalidArgumentException(
 					static::class . ' may only contain instances of ' . static::$objectType . '.'
 				);
 			}
@@ -69,7 +64,7 @@ class CSSObjectList implements Countable, SeekableIterator, ArrayAccess, CSSObje
 		if ( $index === null ) {
 			$index = count( $this->objects );
 		} elseif ( $index < 0 || $index > count( $this->objects ) ) {
-			throw new OutOfBoundsException( 'Index is out of range.' );
+			throw new \OutOfBoundsException( 'Index is out of range.' );
 		}
 
 		array_splice( $this->objects, $index, 0, $objects );
@@ -85,7 +80,7 @@ class CSSObjectList implements Countable, SeekableIterator, ArrayAccess, CSSObje
 	 */
 	public function remove( $index ) {
 		if ( $index < 0 || $index >= count( $this->objects ) ) {
-			throw new OutOfBoundsException( 'Index is out of range.' );
+			throw new \OutOfBoundsException( 'Index is out of range.' );
 		}
 		$ret = $this->objects[$index];
 		array_splice( $this->objects, $index, 1 );
@@ -116,101 +111,88 @@ class CSSObjectList implements Countable, SeekableIterator, ArrayAccess, CSSObje
 		$this->offset = 0;
 	}
 
-	// Countable interface
+	// \Countable interface
 
-	/** @inheritDoc */
-	public function count(): int {
+	public function count() {
 		return count( $this->objects );
 	}
 
-	// SeekableIterator interface
+	// \SeekableIterator interface
 
-	/** @inheritDoc */
-	public function seek( int $offset ): void {
+	public function seek( $offset ) {
 		if ( $offset < 0 || $offset >= count( $this->objects ) ) {
-			throw new OutOfBoundsException( 'Offset is out of range.' );
+			throw new \OutOfBoundsException( 'Offset is out of range.' );
 		}
 		$this->offset = $offset;
 	}
 
-	/** @inheritDoc */
-	#[\ReturnTypeWillChange]
 	public function current() {
-		return $this->objects[$this->offset] ?? null;
+		return isset( $this->objects[$this->offset] ) ? $this->objects[$this->offset] : null;
 	}
 
-	/** @inheritDoc */
-	public function key(): int {
+	public function key() {
 		return $this->offset;
 	}
 
-	/** @inheritDoc */
-	public function next(): void {
+	public function next() {
 		$this->offset++;
 	}
 
-	/** @inheritDoc */
-	public function rewind(): void {
+	public function rewind() {
 		$this->offset = 0;
 	}
 
-	/** @inheritDoc */
-	public function valid(): bool {
+	public function valid() {
 		return isset( $this->objects[$this->offset] );
 	}
 
-	// ArrayAccess interface
+	// \ArrayAccess interface
 
-	/** @inheritDoc */
-	public function offsetExists( $offset ): bool {
+	public function offsetExists( $offset ) {
 		return isset( $this->objects[$offset] );
 	}
 
-	/** @inheritDoc */
-	public function offsetGet( $offset ): CSSObject {
+	public function offsetGet( $offset ) {
 		if ( !is_numeric( $offset ) || (float)(int)$offset !== (float)$offset ) {
-			throw new InvalidArgumentException( 'Offset must be an integer.' );
+			throw new \InvalidArgumentException( 'Offset must be an integer.' );
 		}
 		if ( $offset < 0 || $offset > count( $this->objects ) ) {
-			throw new OutOfBoundsException( 'Offset is out of range.' );
+			throw new \OutOfBoundsException( 'Offset is out of range.' );
 		}
 		return $this->objects[$offset];
 	}
 
-	/** @inheritDoc */
-	public function offsetSet( $offset, $value ): void {
+	public function offsetSet( $offset, $value ) {
 		if ( !$value instanceof static::$objectType ) {
-			throw new InvalidArgumentException(
+			throw new \InvalidArgumentException(
 				static::class . ' may only contain instances of ' . static::$objectType . '.'
 			);
 		}
 		static::testObjects( [ $value ] );
 		if ( !is_numeric( $offset ) || (float)(int)$offset !== (float)$offset ) {
-			throw new InvalidArgumentException( 'Offset must be an integer.' );
+			throw new \InvalidArgumentException( 'Offset must be an integer.' );
 		}
 		if ( $offset < 0 || $offset > count( $this->objects ) ) {
-			throw new OutOfBoundsException( 'Offset is out of range.' );
+			throw new \OutOfBoundsException( 'Offset is out of range.' );
 		}
 		$this->objects[$offset] = $value;
 	}
 
-	/** @inheritDoc */
-	public function offsetUnset( $offset ): void {
+	public function offsetUnset( $offset ) {
 		if ( isset( $this->objects[$offset] ) && $offset !== count( $this->objects ) - 1 ) {
-			throw new OutOfBoundsException( 'Cannot leave holes in the list.' );
+			throw new \OutOfBoundsException( 'Cannot leave holes in the list.' );
 		}
 		unset( $this->objects[$offset] );
 	}
 
 	// CSSObject interface
 
-	/** @inheritDoc */
 	public function getPosition() {
 		$ret = null;
 		foreach ( $this->objects as $obj ) {
 			$pos = $obj->getPosition();
 			if ( $pos[0] >= 0 && (
-				!$ret || $pos[0] < $ret[0] || ( $pos[0] === $ret[0] && $pos[1] < $ret[1] )
+				!$ret || $pos[0] < $ret[0] || $pos[0] === $ret[0] && $pos[1] < $ret[1]
 			) ) {
 				$ret = $pos;
 			}
@@ -230,31 +212,27 @@ class CSSObjectList implements Countable, SeekableIterator, ArrayAccess, CSSObje
 
 	/**
 	 * @param string $function Function to call, toTokenArray() or toComponentValueArray()
-	 * @return Token[]|ComponentValue[]
 	 */
 	private function toTokenOrCVArray( $function ) {
 		$ret = [];
 		$l = count( $this->objects );
-		foreach ( $this->objects as $i => $iValue ) {
-			// Manually looping and appending turns out to be noticeably faster than array_merge.
-			foreach ( $iValue->$function() as $v ) {
+		for ( $i = 0; $i < $l; $i++ ) {
+			// Manually looping and appending turns out to be noticably faster than array_merge.
+			foreach ( $this->objects[$i]->$function() as $v ) {
 				$ret[] = $v;
 			}
-			$sep = $this->getSeparator( $iValue, $i + 1 < $l ? $this->objects[$i + 1] : null );
+			$sep = $this->getSeparator( $this->objects[$i], $i + 1 < $l ? $this->objects[$i + 1] : null );
 			foreach ( $sep as $v ) {
 				$ret[] = $v;
 			}
 		}
-
 		return $ret;
 	}
 
-	/** @inheritDoc */
 	public function toTokenArray() {
 		return $this->toTokenOrCVArray( __FUNCTION__ );
 	}
 
-	/** @inheritDoc */
 	public function toComponentValueArray() {
 		return $this->toTokenOrCVArray( __FUNCTION__ );
 	}

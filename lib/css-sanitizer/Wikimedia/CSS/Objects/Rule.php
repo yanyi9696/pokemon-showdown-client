@@ -6,22 +6,21 @@
 
 namespace Wikimedia\CSS\Objects;
 
+use Wikimedia\CSS\Util;
+
 /**
  * Represent an abstract CSS rule
  */
 abstract class Rule implements CSSObject {
 
-	/** @var int Line in the input where this rule starts */
-	protected $line = -1;
-
-	/** @var int Position in the input where this rule starts */
-	protected $pos = -1;
+	/** @var int Line and position in the input where this rule starts */
+	protected $line = -1, $pos = -1;
 
 	/**
 	 * @param Token $token Token starting the rule
 	 */
 	public function __construct( Token $token ) {
-		[ $this->line, $this->pos ] = $token->getPosition();
+		list( $this->line, $this->pos ) = $token->getPosition();
 	}
 
 	/**
