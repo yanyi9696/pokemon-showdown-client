@@ -2713,6 +2713,12 @@ export class Battle {
 			case 'reflect':
 				this.scene.resultAnim(poke, 'Reflect', 'good');
 				break;
+			// fantasy
+			case 'fantasystats': 
+				const stats = Dex.sanitizeName(args[3]);
+				poke.addVolatile('fantasystats' as ID, stats);
+				this.scene.updateStatbar(poke);
+				break;
 			}
 			if (!(effect.id === 'typechange' && poke.terastallized)) {
 				poke.addVolatile(effect.id);

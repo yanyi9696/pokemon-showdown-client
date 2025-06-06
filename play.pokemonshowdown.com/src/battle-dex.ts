@@ -1447,7 +1447,7 @@ export class ModdedDex {
 			let _mid = mid;
 			if (['natdex', 'metronome'].includes(_mid)) _mid = `gen${this.gen}${_mid}` as ID;
 			table = _mid === ('gen9fantasy' as ID) ? window.Gen9fantasyTable : window.BattleTeambuilderTable[_mid];
-			if (table) break;
+			// if (table) break;
 		}
 		if (this.gen < Dex.gen) table = window.BattleTeambuilderTable[`gen${this.gen}`];
 		if (!table.itemSet) {
