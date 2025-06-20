@@ -525,6 +525,8 @@ export class BattleTextParser {
 				case 'darmanitangalar': id = 'zenmode'; templateName = 'transformEnd'; break;
 				case 'aegislashblade': id = 'stancechange'; break;
 				case 'aegislash': id = 'stancechange'; templateName = 'transformEnd'; break;
+				case 'aegislashbladefantasy': id = 'stancechange'; break;
+				case 'aegislashfantasy': id = 'stancechange'; templateName = 'transformEnd'; break;
 				case 'wishiwashischool': id = 'schooling'; break;
 				case 'wishiwashi': id = 'schooling'; templateName = 'transformEnd'; break;
 				case 'miniormeteor': id = 'shieldsdown'; break;
