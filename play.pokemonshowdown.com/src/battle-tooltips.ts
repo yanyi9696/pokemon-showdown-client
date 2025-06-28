@@ -1601,6 +1601,25 @@ export class BattleTooltips {
 				break;
 			}
 		}
+
+			// Lu Jiao 的属性切换
+		if (move.id === 'lujiao') {
+			switch (pokemon.getSpeciesForme()) {
+			case 'Sawsbuck-Fantasy':
+				moveType = 'Fairy';
+				break;
+			case 'Sawsbuck-Summer-Fantasy':
+				moveType = 'Grass';
+				break;
+			case 'Sawsbuck-Autumn-Fantasy':
+				moveType = 'Ground';
+				break;
+			case 'Sawsbuck-Winter-Fantasy':
+				moveType = 'Ice';
+				break;
+			}
+		}
+		
 		// Ivy Cudgel's type depends on the Ogerpon forme
 		if (move.id === 'ivycudgel') {
 			switch (pokemon.getSpeciesForme()) {
