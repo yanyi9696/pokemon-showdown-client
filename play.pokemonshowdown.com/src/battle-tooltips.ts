@@ -2412,20 +2412,21 @@ export class BattleTooltips {
 		}
 
 		// Fantasy Power Lens
-		if (value && value.tryItem('fantasypowerlens')) { // 建议使用全小写的ID 'fantasypowerlens'
-			// 和 getHmAccuracy 一样，我们首先需要判断活力是否生效
-			const isHustleAffected = value.tryAbility('Hustle') && move.category === 'Physical';
+		if (value && value.tryItem('Fantasy Power Lens')) { // 检查 value 是否有效，并且宝可梦携带了“幻想能量镜”
+			// 检查技能是否为非变化类技能且拥有一个数字类型的命中率
+			if (move.category !== 'Status' && typeof move.accuracy === 'number') { 
+				
+				// 检查宝可梦是否拥有“活力”特性，并且当前技能是物理技能
+				const isHustleAffected = value.tryAbility('Hustle') && move.category === 'Physical';
 
-			// 现在使用我们完整的、最终的判断条件
-			if (
-				move.category !== 'Status' &&
-				typeof move.accuracy === 'number' &&
-				(move.accuracy < 100 || (move.accuracy === 100 && isHustleAffected))
-			) {
-				// 条件满足，修改威力显示。这里的 1.2 也可以写成 4915 / 4096
-				value.itemModify(4915 / 4096); 
-				return value;
-			}
+				// 威力提升的条件判断：
+				// 1. 技能本身的基础命中率就小于100
+				// 2. 或者，技能的基础命中率等于100，但它是一个会受到“活力”特性影响的物理技能
+				if (move.accuracy < 100 || (move.accuracy === 100 && isHustleAffected)) {
+					value.itemModify(1.2); // 将威力乘以1.2倍
+					return value; 
+				} 
+			} 
 		}
 
 		// Type-enhancing items
