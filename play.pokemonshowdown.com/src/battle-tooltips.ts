@@ -1808,7 +1808,7 @@ export class BattleTooltips {
 				const isHustleAffected = value.tryAbility('Hustle') && move.category === 'Physical';
 
 				if (move.accuracy < 100 || (move.accuracy === 100 && isHustleAffected)) {
-					accuracyModifiers.push(4915 / 4096);
+					accuracyModifiers.push(4915);
 					value.itemModify(1.2, 'Fantasy Power Lens');
 				}
 			}
