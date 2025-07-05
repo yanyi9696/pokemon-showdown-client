@@ -1805,7 +1805,7 @@ export class BattleTooltips {
 			if (typeof move.accuracy === 'number') {
 				
 				// 检查技能是否满足条件：非状态类技能且命中率小于100%
-				const isHustleAffected = value.tryAbility('hustle') && move.category === 'Physical';
+				const isHustleAffected = value.tryAbility('Hustle') && move.category === 'Physical';
 
 				if (move.accuracy < 100 || (move.accuracy === 100 && isHustleAffected)) {
 					accuracyModifiers.push(4915 / 4096);
