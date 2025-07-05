@@ -1789,17 +1789,8 @@ export class BattleTooltips {
 		}
 
 		if (value.tryAbility('Hustle') && move.category === 'Physical') {
-			// 检查是否携带了你的道具
-			if (value.tryItem('fantasypowerlens')) {
-				// 如果同时有活力和力量镜
-				accuracyModifiers.push(3277); // 来自活力的0.8倍
-				accuracyModifiers.push(4915); // 来自力量镜的1.2倍
-				value.abilityModify(0.96, "Hustle + Fantasy Power Lens");
-			} else {
-				// 如果只有活力
-				accuracyModifiers.push(3277);
-				value.abilityModify(0.8, "Hustle");
-			}
+			accuracyModifiers.push(3277);
+			value.abilityModify(0.8, "Hustle");
 		} else if (value.tryAbility('Compound Eyes')) {
 			accuracyModifiers.push(5325);
 			value.abilityModify(1.3, "Compound Eyes");
@@ -1810,14 +1801,18 @@ export class BattleTooltips {
 			value.itemModify(1.1, "Wide Lens");
 		}
 
-		if (value && value.tryItem('Fantasy Power Lens')) { // 检查 value 是否有效
-			if (move.category !== 'Status' && typeof move.accuracy === 'number' && move.accuracy < 100) {
+		if (value.tryItem('Fantasy Power Lens')) {
+			if (typeof move.accuracy === 'number') {
+				
 				// 检查技能是否满足条件：非状态类技能且命中率小于100%
-				accuracyModifiers.push(4915); // 提升命中率1.2倍
-				value.itemModify(1.2, "Fantasy Power Lens"); 
+				const isHustleAffected = value.tryAbility('hustle') && move.category === 'Physical';
+
+				if (move.accuracy < 100 || (move.accuracy === 100 && isHustleAffected)) {
+					accuracyModifiers.push(4915 / 4096);
+					value.itemModify(1.2, 'Fantasy Power Lens');
+				}
 			}
 		}
-
 		// SSB
 		if (this.battle.tier.includes('Super Staff Bros')) {
 			if (move.id === 'alting' && pokemon.shiny) {
