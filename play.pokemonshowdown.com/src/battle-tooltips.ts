@@ -1789,8 +1789,17 @@ export class BattleTooltips {
 		}
 
 		if (value.tryAbility('Hustle') && move.category === 'Physical') {
-			accuracyModifiers.push(3277);
-			value.abilityModify(0.8, "Hustle");
+			// 检查是否携带了你的道具
+			if (value.tryItem('fantasypowerlens')) {
+				// 如果同时有活力和力量镜
+				accuracyModifiers.push(3277); // 来自活力的0.8倍
+				accuracyModifiers.push(4915); // 来自力量镜的1.2倍
+				value.abilityModify(0.96, "Hustle + Fantasy Power Lens");
+			} else {
+				// 如果只有活力
+				accuracyModifiers.push(3277);
+				value.abilityModify(0.8, "Hustle");
+			}
 		} else if (value.tryAbility('Compound Eyes')) {
 			accuracyModifiers.push(5325);
 			value.abilityModify(1.3, "Compound Eyes");
