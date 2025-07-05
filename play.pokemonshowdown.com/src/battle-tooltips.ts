@@ -2412,10 +2412,18 @@ export class BattleTooltips {
 		}
 
 		// Fantasy Power Lens
-		if (value && value.tryItem('Fantasy Power Lens')) { // 检查 value 是否有效
-			if (move.category !== 'Status' && typeof move.accuracy === 'number' && move.accuracy < 100) {
-				// 检查技能是否满足条件：非状态类技能且命中率小于100%
-				value.itemModify(1.2); 
+		if (value && value.tryItem('fantasypowerlens')) { // 建议使用全小写的ID 'fantasypowerlens'
+			// 和 getHmAccuracy 一样，我们首先需要判断活力是否生效
+			const isHustleAffected = value.tryAbility('Hustle') && move.category === 'Physical';
+
+			// 现在使用我们完整的、最终的判断条件
+			if (
+				move.category !== 'Status' &&
+				typeof move.accuracy === 'number' &&
+				(move.accuracy < 100 || (move.accuracy === 100 && isHustleAffected))
+			) {
+				// 条件满足，修改威力显示。这里的 1.2 也可以写成 4915 / 4096
+				value.itemModify(4915 / 4096); 
 				return value;
 			}
 		}
