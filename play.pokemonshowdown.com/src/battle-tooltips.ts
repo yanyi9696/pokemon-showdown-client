@@ -2159,6 +2159,10 @@ export class BattleTooltips {
 		if (move.recoil || move.hasCrashDamage) {
 			value.abilityModify(1.2, 'Reckless');
 		}
+		
+		if (moveType === 'Bug') {
+			value.abilityModify(1.5, "Fengchao");
+		}
 
 		if (move.category !== 'Status') {
 			let auraBoosted = '';
