@@ -1563,6 +1563,8 @@ for (const mod of modNames)
 		case 'fantasypowerlens':
 		case 'fantasyringtarget':
 		case 'fantasylifeorb':
+		case 'fantasysachet':
+
 			modSpecificItems.push(id);
 			break;
 		default:
