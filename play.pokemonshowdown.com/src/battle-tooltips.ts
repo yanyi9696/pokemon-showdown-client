@@ -2114,6 +2114,16 @@ export class BattleTooltips {
 		if (['Rock', 'Ground', 'Steel'].includes(moveType) && this.battle.weather === 'sandstorm') {
 			if (value.tryAbility("Sand Force")) value.weatherModify(1.3, "Sandstorm", "Sand Force");
 		}
+		// 在这里添加你的新代码
+		if (this.battle.weather === 'hail' || this.battle.weather === 'snow') {
+			if (value.tryAbility("Xue Zhi Li")) value.weatherModify(1.3, "Snow", "Xue Zhi Li");
+			if (value.tryAbility("Bao Xue Zhi Li")) value.weatherModify(1.3, "Snow", "Bao Xue Zhi Li");
+		}
+		// ---
+
+		if (move.secondaries) {
+			value.abilityModify(1.3, "Sheer Force");
+		}
 		if (move.secondaries) {
 			value.abilityModify(1.3, "Sheer Force");
 		}
