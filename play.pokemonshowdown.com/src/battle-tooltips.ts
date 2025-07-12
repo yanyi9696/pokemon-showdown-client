@@ -2119,11 +2119,6 @@ export class BattleTooltips {
 			if (value.tryAbility("Xue Zhi Li")) value.weatherModify(1.3, "Snow", "Xue Zhi Li");
 			if (value.tryAbility("Bao Xue Zhi Li")) value.weatherModify(1.3, "Snow", "Bao Xue Zhi Li");
 		}
-		// ---
-
-		if (move.secondaries) {
-			value.abilityModify(1.3, "Sheer Force");
-		}
 		if (move.secondaries) {
 			value.abilityModify(1.3, "Sheer Force");
 		}
