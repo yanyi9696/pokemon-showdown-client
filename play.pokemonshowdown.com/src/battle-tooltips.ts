@@ -2166,7 +2166,7 @@ export class BattleTooltips {
 		}
 		
 		if (moveType === 'Bug') {
-			value.abilityModify(1.5, "Fengchao");
+			value.abilityModify(1.5, "Feng Chao");
 		}
 
 		if (move.category !== 'Status') {
