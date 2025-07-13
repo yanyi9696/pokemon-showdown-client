@@ -2115,8 +2115,8 @@ export class BattleTooltips {
 			if (value.tryAbility("Sand Force")) value.weatherModify(1.3, "Sandstorm", "Sand Force");
 		}
 		if (this.battle.weather === 'hail' || this.battle.weather === 'snowscape') {
-			if (value.tryAbility("Xue Zhi Li")) value.weatherModify(1.3, "Sowscape", "Xue Zhi Li");
-			if (value.tryAbility("Bao Xue Zhi Li")) value.weatherModify(1.3, "Sowscape", "Bao Xue Zhi Li");
+			if (value.tryAbility("Xue Zhi Li")) value.weatherModify(1.3, "Snowscape", "Xue Zhi Li");
+			if (value.tryAbility("Bao Xue Zhi Li")) value.weatherModify(1.3, "Snowscape", "Bao Xue Zhi Li");
 		}
 		if (move.secondaries) {
 			value.abilityModify(1.3, "Sheer Force");
