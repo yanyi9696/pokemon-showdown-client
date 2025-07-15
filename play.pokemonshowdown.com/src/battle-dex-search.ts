@@ -1320,6 +1320,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			case 'yuannengshifang':
 			case 'longzhige':
 			case 'huanzhiwu':
+			case 'chabuduowanan':
 				return true;
 			return false;
 		}
