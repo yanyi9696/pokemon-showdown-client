@@ -861,13 +861,20 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 		) return ([['header', "Abilities"]] as SearchRow[]).concat(this.getDefaultResults());
 		const dex = this.dex;
 		let species = dex.species.getFromPokemon(this.set);
-		let speciesAbilities = {...species.abilities};
+		//let speciesAbilities = { ...species.abilities }; 移到下面去了
 		let abilitySet: SearchRow[] = [['header', "Abilities"]];
 
 		if (species.isMega) {
-			abilitySet.unshift(['html', `Will be <strong>${speciesAbilities['0']}</strong> after Mega Evolving.`]);
+			// 1. 先从Mega形态中获取正确的Mega后特性名
+			const megaAbilityName = dex.abilities.get(species.abilities['0']).name;
+			abilitySet.unshift(['html', `Will be <strong>${megaAbilityName}</strong> after Mega Evolving.`]);
+			// 2. 然后将 species 变量替换为基础形态
 			species = dex.species.get(species.baseSpecies);
 		}
+		
+		//在这里正常地获取特性
+		let speciesAbilities = { ...species.abilities };
+
 		if (species.forme === 'X') {
 			abilitySet.unshift(['html', `Will be <strong>${speciesAbilities['0']}</strong> after X-Evolving.`]);
 			species = dex.species.get(species.baseSpecies);
