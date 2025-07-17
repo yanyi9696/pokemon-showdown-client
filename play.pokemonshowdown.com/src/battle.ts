@@ -2306,6 +2306,9 @@ export class Battle {
 				case 'airballoon':
 					this.scene.resultAnim(poke, 'Balloon', 'good');
 					break;
+				case 'fantasyringtarget':
+					this.scene.resultAnim(poke, 'Fantasy Ring Target', 'good');
+					break;
 				}
 			}
 			this.log(args, kwArgs);
@@ -2360,6 +2363,10 @@ export class Battle {
 					poke.prevItemEffect = 'popped';
 					poke.removeVolatile('airballoon' as ID);
 					this.scene.resultAnim(poke, 'Balloon popped', 'neutral');
+					break;
+				case 'fantasyringtarget':
+					poke.prevItemEffect = 'popped';
+					this.scene.resultAnim(poke, 'Fantasy Ring Target popped', 'neutral');
 					break;
 				case 'focussash':
 					poke.prevItemEffect = 'consumed';
