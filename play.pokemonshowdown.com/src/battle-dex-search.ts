@@ -869,7 +869,15 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 			const megaAbilityName = dex.abilities.get(species.abilities['0']).name;
 			abilitySet.unshift(['html', `Will be <strong>${megaAbilityName}</strong> after Mega Evolving.`]);
 			// 2. 然后将 species 变量替换为基础形态
-			species = dex.species.get(species.baseSpecies);
+			let baseSpeciesId = toID(species.baseSpecies);
+			if (species.id.endsWith('fantasy')) {
+				const fantasyBaseId = toID(species.baseSpecies + 'fantasy');
+				if (dex.species.get(fantasyBaseId).exists) {
+					// 如果“幻想”版本的基础形态存在，就用它
+					baseSpeciesId = fantasyBaseId;
+				}
+			}
+			species = dex.species.get(baseSpeciesId);
 		}
 		
 		//在这里正常地获取特性
@@ -877,7 +885,15 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 
 		if (species.forme === 'X') {
 			abilitySet.unshift(['html', `Will be <strong>${speciesAbilities['0']}</strong> after X-Evolving.`]);
-			species = dex.species.get(species.baseSpecies);
+            // 应用和上面Mega进化部分完全相同的逻辑
+            let baseSpeciesId = toID(species.baseSpecies);
+            if (species.id.endsWith('fantasy')) {
+                const fantasyBaseId = toID(species.baseSpecies + 'fantasy');
+                if (dex.species.get(fantasyBaseId).exists) {
+                    baseSpeciesId = fantasyBaseId;
+                }
+            }
+			species = dex.species.get(baseSpeciesId);
 		}
 		abilitySet.push(['ability', toID(speciesAbilities['0'])]);
 		if (speciesAbilities['1']) {
