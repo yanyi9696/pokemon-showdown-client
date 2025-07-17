@@ -2251,8 +2251,8 @@ export class Battle {
 			poke.item = item.name;
 			poke.itemEffect = '';
 			poke.removeVolatile('airballoon' as ID);
-			poke.removeVolatile('fantasyringtarget' as ID);
 			if (item.id === 'airballoon') poke.addVolatile('airballoon' as ID);
+			poke.removeVolatile('fantasyringtarget' as ID);
 			if (item.id === 'fantasyringtarget') poke.addVolatile('fantasyringtarget' as ID);
 
 			if (effect.id) {
