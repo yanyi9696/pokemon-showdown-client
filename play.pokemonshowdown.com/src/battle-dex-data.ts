@@ -499,7 +499,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	absolmega: 1320 + 34, absolmegafantasy: 1320 + 34, // Added fantasy mapping
 	glaliemega: 1320 + 35, glaliemegafantasy: 1320 + 35, // Added fantasy mapping
 	salamencemega: 1320 + 36,
-	metagrossmega: 1320 + 37,
+	metagrossmega: 1320 + 37, metagrossmegafantasy: 1320 + 37, // Added fantasy mapping
 	latiasmega: 1320 + 38,
 	latiosmega: 1320 + 39,
 	kyogreprimal: 1320 + 40,
