@@ -730,6 +730,9 @@ export class Side {
 		case 'waterpledge':
 			this.sideConditions[condition] = ['Rainbow', 1, 4, 0];
 			break;
+		case 'seaoffire':
+			this.sideConditions[condition] = ['Sea of Fire', 1, 0, 0];
+			break;
 		case 'firepledge':
 			this.sideConditions[condition] = ['Sea of Fire', 1, 4, 0];
 			break;
