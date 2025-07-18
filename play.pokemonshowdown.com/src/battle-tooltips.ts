@@ -2090,6 +2090,35 @@ export class BattleTooltips {
 					`Hit ${pokemon.timesAttacked} time${pokemon.timesAttacked > 1 ? 's' : ''}` :
 					undefined);
 		}
+		// 凤行 (Feng Xing) 的威力计算
+		if (move.id === 'fengxing') {
+			// 从 value 对象中获取当前宝可梦信息
+			const pokemon = value.pokemon;
+			// 技能的基础威力
+			let finalPower = 80;
+			// 定义需要检查的基础宝可梦ID列表（小写）
+			const legendaries = ['hooh', 'raikou', 'entei', 'suicune'];
+
+			// 遍历使用者所在队伍的每一只宝可梦
+			for (const ally of pokemon.side.pokemon) {
+				// 【已移除】不再检查宝可梦是否濒死
+
+				// 获取宝可梦的物种ID
+				const speciesId = ally.getSpecies().id;
+				// 检查该宝可梦的物种ID是否以列表中的任何一个名字开头
+				for (const legendary of legendaries) {
+					if (speciesId.startsWith(legendary)) {
+						// 如果条件符合，威力+20
+						finalPower += 20;
+						// 找到后就跳出内层循环
+						break;
+					}
+				}
+			}
+			// 使用 value.set() 来设置最终的威力，并可以附带一个原因，它会显示在tooltips中
+			value.set(finalPower, '队伍加成');
+		}
+
 		if (!value.value) return value;
 
 		// Other ability boosts
