@@ -1567,12 +1567,12 @@ export class BattleTooltips {
 				moveType = 'Psychic';
 			}
 		}
-		// 添加此代码块来处理“等离子浴” (Ion Deluge) 的视觉效果
-		if (this.battle.hasPseudoWeather('iondeluge') && moveType === 'Normal') {
-			// 如果场上存在等离子浴，并且当前判断的技能是普通系
-			// 注意：这里我们不应该影响招式 "Struggle" (挣扎)
-			if (move.id !== 'struggle') {
-				moveType = 'Electric'; // 将其类型显示为电系
+		// 全新的修改方案：直接检查宝可梦是否拥有“雷霆行者”特性
+		// This is a more direct approach that ties the visual change to the ability itself.
+		if (moveType === 'Normal' && move.id !== 'struggle') {
+			// 将 'thunderingwalker' 替换为你的特性ID。根据之前的日志，你的ID应该是 'leitingxingzhe'
+			if (value.tryAbility('leitingxingzhe')) {
+				moveType = 'Electric'; // 将招式类型在UI上显示为电系
 			}
 		}
 		if (move.id === 'terablast' && pokemon.terastallized) {
