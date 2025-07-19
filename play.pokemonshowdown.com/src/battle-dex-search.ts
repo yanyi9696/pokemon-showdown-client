@@ -1333,8 +1333,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			case 'zuishenluanda':
 			case 'biansuzhefan':
 			case 'chuanyun':
-			case 'souyusheji':
-			case 'yanzu':
+			case 'baoyulihua':
+			case 'yanjian':
 			case 'yaojingzhiya':
 			case 'yuzhaozhijian':
 			case 'dongchadaji':
@@ -1344,7 +1344,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			case 'longzhige':
 			case 'huanzhiwu':
 			case 'chabuduowanan':
-			case 'chiyanbodong':
+			case 'yanzhibodong':
 			case 'fengxing':
 				return true;
 			return false;
