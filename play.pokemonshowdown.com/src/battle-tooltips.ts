@@ -1570,8 +1570,8 @@ export class BattleTooltips {
 		// 全新的修改方案：直接检查宝可梦是否拥有“雷霆行者”特性
 		// This is a more direct approach that ties the visual change to the ability itself.
 		if (moveType === 'Normal' && move.id !== 'struggle') {
-			// 将 'thunderingwalker' 替换为你的特性ID。根据之前的日志，你的ID应该是 'leitingxingzhe'
-			if (value.tryAbility('leitingxingzhe')) {
+			// 将 'thunderingwalker' 替换为你的特性ID。根据之前的日志，你的ID应该是 'Lei Ting Xing Zhe'
+			if (value.tryAbility('Lei Ting Xing Zhe')) {
 				moveType = 'Electric'; // 将招式类型在UI上显示为电系
 			}
 		}
