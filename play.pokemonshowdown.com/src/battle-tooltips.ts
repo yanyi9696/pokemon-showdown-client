@@ -1567,6 +1567,14 @@ export class BattleTooltips {
 				moveType = 'Psychic';
 			}
 		}
+		// 添加此代码块来处理“等离子浴” (Ion Deluge) 的视觉效果
+		if (this.battle.hasPseudoWeather('iondeluge') && moveType === 'Normal') {
+			// 如果场上存在等离子浴，并且当前判断的技能是普通系
+			// 注意：这里我们不应该影响招式 "Struggle" (挣扎)
+			if (move.id !== 'struggle') {
+				moveType = 'Electric'; // 将其类型显示为电系
+			}
+		}
 		if (move.id === 'terablast' && pokemon.terastallized) {
 			moveType = pokemon.terastallized as Dex.TypeName;
 		}
