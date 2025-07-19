@@ -1437,7 +1437,7 @@ export class Battle {
 	}
 	swapSideConditions() {
 		const sideConditions = [
-			'mist', 'lightscreen', 'reflect', 'spikes', 'safeguard', 'tailwind', 'toxicspikes', 'stealthrock', 'waterpledge', 'firepledge', 'grasspledge', 'stickyweb', 'auroraveil', 'gmaxsteelsurge', 'gmaxcannonade', 'gmaxvinelash', 'gmaxwildfire',
+			'mist', 'lightscreen', 'reflect', 'spikes', 'safeguard', 'tailwind', 'toxicspikes', 'stealthrock', 'waterpledge', 'firepledge', 'grasspledge', 'stickyweb', 'auroraveil', 'gmaxsteelsurge', 'gmaxcannonade', 'gmaxvinelash', 'gmaxwildfire','seaoffire',
 		];
 		if (this.gameType === 'freeforall') {
 			// TODO: Add FFA support
@@ -3070,6 +3070,7 @@ export class Battle {
 			case 'grasspledge':
 			case 'firepledge':
 			case 'waterpledge':
+			case 'seaoffire':
 				this.scene.updateWeather();
 				break;
 			}
