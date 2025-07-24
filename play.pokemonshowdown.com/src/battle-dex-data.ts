@@ -319,7 +319,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	ponytagalar: 1032 + 167,
 	rapidashgalar: 1032 + 168,
 	farfetchdgalar: 1032 + 169,
-	weezinggalar: 1032 + 170,
+	weezinggalar: 1032 + 170, weezinggalarfantasy: 1032 + 170,
 	mrmimegalar: 1032 + 171,
 	corsolagalar: 1032 + 172,
 	zigzagoongalar: 1032 + 173,
