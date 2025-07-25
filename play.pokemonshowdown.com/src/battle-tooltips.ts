@@ -2550,42 +2550,27 @@ export class BattleTooltips {
 		const abilityData: { ability: string, baseAbility: string, possibilities: string[] } = {
 			ability: '', baseAbility: '', possibilities: [],
 		};
-
-		// 情况一：这是玩家自己的宝可梦 (serverPokemon 存在)，我们知道它的一切信息。
+		if (clientPokemon) {
+			if (clientPokemon.ability) {
+				abilityData.ability = clientPokemon.ability || clientPokemon.baseAbility;
+				if (clientPokemon.baseAbility) {
+					abilityData.baseAbility = clientPokemon.baseAbility;
+				}
+			} else {
+				// const speciesForme = clientPokemon.getSpeciesForme() || serverPokemon?.speciesForme || '';
+				// const species = this.battle.dex.species.get(speciesForme);
+				const species = clientPokemon.getSpecies(serverPokemon || undefined); // unequivalent
+				if (species.exists && species.abilities) {
+					abilityData.possibilities = Object.values(species.abilities);
+				}
+			}
+		}
 		if (serverPokemon) {
-			abilityData.ability = serverPokemon.ability || serverPokemon.baseAbility;
-			if (serverPokemon.baseAbility) abilityData.baseAbility = serverPokemon.baseAbility;
-			return abilityData;
+			if (!abilityData.ability) abilityData.ability = serverPokemon.ability || serverPokemon.baseAbility;
+			if (!abilityData.baseAbility && serverPokemon.baseAbility) {
+				abilityData.baseAbility = serverPokemon.baseAbility;
+			}
 		}
-
-		// 如果没有 clientPokemon 信息，直接返回空数据。
-		if (!clientPokemon) return abilityData;
-
-		// 情况二：这是对手的宝可梦。
-		const species = clientPokemon.getSpecies();
-		if (!species.exists || !species.abilities) return abilityData;
-
-		const possibleAbilities = Object.values(species.abilities);
-
-		// 客户端判断特性是否“已揭露”的唯一可靠方法，就是检查 baseAbility 是否被赋值。
-		// 这个值应该只在服务器发送对战日志中的 |-ability| 指令后才会被设置。
-		const isRevealed = !!clientPokemon.baseAbility;
-
-		// 如果特性确实已被揭露，我们就安全地显示它。
-		if (isRevealed) {
-			abilityData.ability = clientPokemon.ability || clientPokemon.baseAbility;
-			abilityData.baseAbility = clientPokemon.baseAbility;
-		}
-        // 或者，如果这个宝可梦只有一个可能的特性（例如请假王），那就不是秘密，直接显示。
-        else if (possibleAbilities.length === 1) {
-			abilityData.ability = this.battle.dex.abilities.get(possibleAbilities[0]).name;
-		}
-        // 在所有其他情况下，都意味着这是对手未揭露的特性，并且有多种可能性。
-        // 此时，我们必须显示“可能的特性”列表。
-        else {
-			abilityData.possibilities = possibleAbilities;
-		}
-
 		return abilityData;
 	}
 	getPokemonAbilityText(
