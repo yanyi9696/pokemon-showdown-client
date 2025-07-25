@@ -2551,25 +2551,41 @@ export class BattleTooltips {
 			ability: '', baseAbility: '', possibilities: [],
 		};
 		if (clientPokemon) {
-			if (clientPokemon.ability) {
+			const isOpponent = !serverPokemon;
+			// 一个特性被“揭露”的标志是它的 baseAbility 被设置。这是一个可靠的判断依据。
+			const isAbilityRevealed = !!clientPokemon.baseAbility;
+
+			// 决定我们是否应该显示已知特性
+			const showKnownAbility = clientPokemon.ability && (!isOpponent || isAbilityRevealed);
+
+			if (showKnownAbility) {
 				abilityData.ability = clientPokemon.ability || clientPokemon.baseAbility;
 				if (clientPokemon.baseAbility) {
 					abilityData.baseAbility = clientPokemon.baseAbility;
 				}
 			} else {
-				// const speciesForme = clientPokemon.getSpeciesForme() || serverPokemon?.speciesForme || '';
-				// const species = this.battle.dex.species.get(speciesForme);
-				const species = clientPokemon.getSpecies(serverPokemon || undefined); // unequivalent
+				// 如果特性是未知的，我们罗列出所有可能性。
+				const species = clientPokemon.getSpecies(serverPokemon || undefined);
 				if (species.exists && species.abilities) {
-					abilityData.possibilities = Object.values(species.abilities);
+					const possibilities = Object.values(species.abilities);
+					abilityData.possibilities = possibilities;
+
+					// 如果一个宝可梦只有一个可能的特性，那就不是什么秘密了，可以直接显示。
+					if (possibilities.length === 1) {
+						abilityData.ability = this.battle.dex.abilities.get(possibilities[0]).name;
+						// 既然只有一个，就没必要再显示“可能的特性”列表了。
+						abilityData.possibilities = [];
+					}
 				}
 			}
 		}
 		if (serverPokemon) {
+			// 对于玩家自己的宝可梦，我们总是知道它的特性。
+			// 这也确保了我们在查看自己宝可梦时不会意外地隐藏了特性。
 			if (!abilityData.ability) abilityData.ability = serverPokemon.ability || serverPokemon.baseAbility;
-			if (!abilityData.baseAbility && serverPokemon.baseAbility) {
-				abilityData.baseAbility = serverPokemon.baseAbility;
-			}
+			if (!abilityData.baseAbility) abilityData.baseAbility = serverPokemon.baseAbility;
+			// 清空“可能性”，因为我们百分之百确定是什么特性。
+			abilityData.possibilities = [];
 		}
 		return abilityData;
 	}
