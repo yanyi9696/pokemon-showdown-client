@@ -1255,8 +1255,6 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			return dex.gen < 5 && !moves.includes('explosion');
 		case 'shadowpunch':
 			return abilityid === 'ironfist' && !moves.includes('ragefist');
-		case 'shelter':
-			return !moves.includes('acidarmor') && !moves.includes('irondefense');
 		case 'skyuppercut':
 			return dex.gen < 4;
 		case 'smackdown':
@@ -1326,8 +1324,9 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 	}
 	private moveIsFantasy(id: ID, species: Dex.Species, moves: string[], set: Dex.PokemonSet | null) {
 		switch (id) {
-            case 'overdrive':
-            case 'flyingpress':
+			case 'overdrive':
+			case 'flyingpress':
+			case 'shelter':
 			case 'xianxingzhiling':
 			case 'fuzhuzhiling':
 			case 'mijianbairenchuan':
