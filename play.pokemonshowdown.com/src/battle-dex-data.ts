@@ -474,7 +474,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	kangaskhanmega: 1320 + 9,
 	pinsirmega: 1320 + 10,
 	gyaradosmega: 1320 + 11,
-	aerodactylmega: 1320 + 12,
+	aerodactylmega: 1320 + 12, aerodactylmegafantasy: 1320 + 12,// Added fantasy mapping
 	mewtwomegax: 1320 + 13,
 	mewtwomegay: 1320 + 14,
 	ampharosmega: 1320 + 15,
@@ -505,7 +505,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	kyogreprimal: 1320 + 40,
 	groudonprimal: 1320 + 41,
 	rayquazamega: 1320 + 42,
-	lopunnymega: 1320 + 43,
+	lopunnymega: 1320 + 43, lopunnymegafantasy: 1320 + 43, // Added fantasy mapping
 	garchompmega: 1320 + 44, garchompmegafantasy: 1320 + 44, // Added fantasy mapping
 	lucariomega: 1320 + 45,
 	abomasnowmega: 1320 + 46, abomasnowmegafantasy: 1320 + 46, // Added fantasy mapping
