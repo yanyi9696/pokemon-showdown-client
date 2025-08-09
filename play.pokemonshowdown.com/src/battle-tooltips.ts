@@ -1966,7 +1966,7 @@ export class BattleTooltips {
 				value.modify(2, 'Smelling Salts + Paralysis');
 			}
 		}
-		if (['storedpower', 'powertrip'].includes(move.id) && target) {
+		if (['storedpower', 'powertrip', 'fuzhuzhiling'].includes(move.id) && target) {
 			let boostCount = 0;
 			for (const boost of Object.values(pokemon.boosts)) {
 				if (boost > 0) boostCount += boost;
