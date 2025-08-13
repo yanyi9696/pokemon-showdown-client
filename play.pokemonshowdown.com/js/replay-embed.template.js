@@ -28,27 +28,27 @@ function requireScript(url) {
 	document.head.appendChild(scriptEl);
 }
 
-linkStyle('../style/font-awesome.css?');
-linkStyle('../style/battle.css?a7');
-linkStyle('../style/replay.css?a7');
-linkStyle('../style/utilichart.css?a7');
+linkStyle('https://play.psfantasy.xyz/style/font-awesome.css?');
+linkStyle('https://play.psfantasy.xyz/style/battle.css?a7');
+linkStyle('https://play.psfantasy.xyz/style/replay.css?a7');
+linkStyle('https://play.psfantasy.xyz/style/utilichart.css?a7');
 
-requireScript('../js/lib/ps-polyfill.js');
-requireScript('../config/config.js?a7'); // Config file not found locally
-requireScript('../js/lib/jquery-1.11.0.min.js');
-requireScript('../js/lib/html-sanitizer-minified.js');
-requireScript('../js/battle-sound.js');
-requireScript('../js/battledata.js?a7');
-requireScript('../data/pokedex-mini.js?a7'); // File not found locally
-requireScript('../data/pokedex-mini-bw.js?a7'); // File not found locally
-requireScript('../data/graphics.js?a7');
-requireScript('../data/pokedex.js?a7');
-requireScript('../data/moves.js?a7');
-requireScript('../data/abilities.js?a7');
-requireScript('../data/items.js?a7');
-requireScript('../data/teambuilder-tables.js?a7');
-requireScript('../js/battle-tooltips.js?a7');
-requireScript('../js/battle.js?a7');
+requireScript('https://play.psfantasy.xyz/js/lib/ps-polyfill.js');
+requireScript('https://play.psfantasy.xyz/config/config.js?a7');
+requireScript('https://play.psfantasy.xyz/js/lib/jquery-1.11.0.min.js');
+requireScript('https://play.psfantasy.xyz/js/lib/html-sanitizer-minified.js');
+requireScript('https://play.psfantasy.xyz/js/battle-sound.js');
+requireScript('https://play.psfantasy.xyz/js/battledata.js?a7');
+requireScript('https://play.psfantasy.xyz/data/pokedex-mini.js?a7');
+requireScript('https://play.psfantasy.xyz/data/pokedex-mini-bw.js?a7');
+requireScript('https://play.psfantasy.xyz/data/graphics.js?a7');
+requireScript('https://play.psfantasy.xyz/data/pokedex.js?a7');
+requireScript('https://play.psfantasy.xyz/data/moves.js?a7');
+requireScript('https://play.psfantasy.xyz/data/abilities.js?a7');
+requireScript('https://play.psfantasy.xyz/data/items.js?a7');
+requireScript('https://play.psfantasy.xyz/data/teambuilder-tables.js?a7');
+requireScript('https://play.psfantasy.xyz/js/battle-tooltips.js?a7');
+requireScript('https://play.psfantasy.xyz/js/battle.js?a7');
 
 var Replays = {
 	battle: null,
