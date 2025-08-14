@@ -49,6 +49,7 @@ requireScript('https://play.psfantasy.xyz/data/items.js?a7');
 requireScript('https://play.psfantasy.xyz/data/teambuilder-tables.js?a7');
 requireScript('https://play.pokemonshowdown.com/js/battle-tooltips.js?a7');
 requireScript('https://play.psfantasy.xyz/js/battle.js?a7');
+requireScript('https://play.psfantasy.xyz/js/battle-dex.js?a7');
 
 var Replays = {
 	battle: null,
