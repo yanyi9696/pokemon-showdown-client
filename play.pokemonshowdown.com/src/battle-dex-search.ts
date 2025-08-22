@@ -1349,6 +1349,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			case 'yanzhibodong':
 			case 'fengxing':
 			case 'popipa':
+			case 'punishment':
 				return true;
 			return false;
 		}
