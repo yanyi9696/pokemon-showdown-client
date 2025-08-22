@@ -447,7 +447,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	salazzletotem: 758,
 	vikavolttotem: 738,
 	togedemarutotem: 777,
-	mimikyutotem: 778, mimikyufantasy: 778, // Added fantasy mapping
+	mimikyutotem: 778,
 	mimikyubustedtotem: 778,
 	ribombeetotem: 743,
 	kommoototem: 784,
