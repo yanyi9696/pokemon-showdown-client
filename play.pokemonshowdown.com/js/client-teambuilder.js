@@ -2252,6 +2252,7 @@
 				case 'Genesect':
 				case 'Keldeo':
 				case 'Mimikyu':
+				case 'Mimikyu-Fantasy':
 				case 'Minior':
 				case 'Pikachu':
 				case 'Polteageist':
