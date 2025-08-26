@@ -3610,47 +3610,14 @@
 		setPokemon: function (val, selectNext) {
 			var set = this.curSet;
 			var species = this.curTeam.dex.species.get(val);
-
 			if (!species.exists || set.species === species.name) {
 				if (selectNext) this.$('input[name=item]').select();
 				return;
 			}
+			var isHackmons = this.curTeam.dex.modid.includes('hackmons');
 
-			// ====================== 最终版修改逻辑 START ======================
-			if (species.forme === 'Mega' && species.preMegaForme) {
-				// 这是我们特殊的-Mega-Fantasy形态
-				var baseSpecies = this.curTeam.dex.species.get(species.preMegaForme);
-				if (baseSpecies.exists) {
-					set.species = baseSpecies.name;
-					set.item = species.requiredItem; // 设置Mega石
-					set.ability = baseSpecies.abilities['0']; // 设置-Fantasy形态的默认特性
-				} else {
-					// Failsafe, a-Mega-Fantasy的preMegaForme没有找到对应的-Fantasy宝可梦
-					set.species = species.baseSpecies;
-					set.item = species.requiredItem;
-					set.ability = this.curTeam.dex.species.get(species.baseSpecies).abilities['0'];
-				}
-			} else {
-				// 这是普通的宝可梦或普通的Mega形态
-				var isHackmons = this.curTeam.dex.modid.includes('hackmons');
-				set.species = val;
-				
-				// 处理普通Mega形态，让它们也能正确设置道具
-				if (species.forme === 'Mega') {
-					set.species = species.baseSpecies;
-					set.item = species.requiredItem;
-					species = this.curTeam.dex.species.get(set.species); // 更新species为基础形态
-				} else if (!isHackmons && species.requiredItems && species.requiredItems.length === 1) {
-					set.item = species.requiredItems[0];
-				} else {
-					set.item = '';
-				}
-				set.ability = species.abilities['0'];
-			}
-			// ====================== 最终版修改逻辑 END ========================
-
-			// 重置其他所有属性
 			set.name = "";
+			set.species = val;
 			if (set.level) delete set.level;
 			if (this.curTeam && this.curTeam.format) {
 				var baseFormat = this.curTeam.format;
@@ -3673,9 +3640,7 @@
 				}
 			}
 			if (set.gender) delete set.gender;
-			var finalSpecies = this.curTeam.dex.species.get(set.species); // 使用最终确认的species来设置性别
-			if (finalSpecies.gender && finalSpecies.gender !== 'N') set.gender = finalSpecies.gender;
-
+			if (species.gender && species.gender !== 'N') set.gender = species.gender;
 			if (set.happiness) delete set.happiness;
 			if (set.shiny) delete set.shiny;
 			if (set.hpType) delete set.hpType;
@@ -3683,15 +3648,17 @@
 			if (set.gigantamax) delete set.gigantamax;
 			if (set.teraType) delete set.teraType;
 			if (set.preEvo) delete set.preEvo;
+			if (!isHackmons && species.requiredItems.length === 1) {
+				set.item = species.requiredItems[0];
+			} else {
+				set.item = '';
+			}
+			set.ability = species.abilities['0'];
 
 			set.moves = [];
 			set.evs = {};
 			set.ivs = {};
 			set.nature = '';
-
-            // ====================== 在这里加入新的诊断 alert！ ======================
-            alert("准备更新UI，此时 set.species 的值是: " + set.species);
-            // ======================================================================
 
 			this.updateSetTop();
 			if (selectNext) this.$(set.item || !this.$('input[name=item]').length ? (this.$('input[name=ability]').length ? 'input[name=ability]' : 'input[name=move1]') : 'input[name=item]').select();
