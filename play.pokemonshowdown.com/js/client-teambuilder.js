@@ -3610,6 +3610,10 @@
 		setPokemon: function (val, selectNext) {
 			var set = this.curSet;
 			var species = this.curTeam.dex.species.get(val);
+
+			 // 在这里加入 alert 用于诊断
+			alert("setPokemon函数正在处理: " + val); 
+			
 			if (!species.exists || set.species === species.name) {
 				if (selectNext) this.$('input[name=item]').select();
 				return;
