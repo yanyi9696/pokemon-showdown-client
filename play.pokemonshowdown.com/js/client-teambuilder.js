@@ -3616,6 +3616,26 @@
 			}
 			var isHackmons = this.curTeam.dex.modid.includes('hackmons');
 
+			// ====================== 我们新增的逻辑 START ======================
+			var isMega = species.forme === 'Mega';
+			var requiredItem = '';
+
+			if (isMega) {
+				// 1. 保存这个 Mega 形态需要的道具
+				requiredItem = species.requiredItem;
+
+				// 2. 决定基础形态：优先使用 preMegaForme，如果没有，再用 baseSpecies
+				var baseSpeciesName = species.preMegaForme || species.baseSpecies;
+				var baseSpecies = this.curTeam.dex.species.get(baseSpeciesName);
+
+				if (baseSpecies.exists) {
+					// 3. 更新 val 和 species 变量，让后续的函数逻辑都基于正确的基础形态来执行
+					val = baseSpecies.name;
+					species = baseSpecies;
+				}
+			}
+			// ====================== 我们新增的逻辑 END ========================
+
 			set.name = "";
 			set.species = val;
 			if (set.level) delete set.level;
@@ -3648,11 +3668,18 @@
 			if (set.gigantamax) delete set.gigantamax;
 			if (set.teraType) delete set.teraType;
 			if (set.preEvo) delete set.preEvo;
-			if (!isHackmons && species.requiredItems.length === 1) {
+			
+			// ====================== 我们修改的道具逻辑 START ======================
+			if (isMega) {
+				// 如果是 Mega 形态，直接设置我们之前保存的道具
+				set.item = requiredItem;
+			} else if (!isHackmons && species.requiredItems.length === 1) {
 				set.item = species.requiredItems[0];
 			} else {
 				set.item = '';
 			}
+			// ====================== 我们修改的道具逻辑 END ========================
+			
 			set.ability = species.abilities['0'];
 
 			set.moves = [];
