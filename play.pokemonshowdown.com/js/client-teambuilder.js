@@ -3689,6 +3689,10 @@
 			set.ivs = {};
 			set.nature = '';
 
+            // ====================== 在这里加入新的诊断 alert！ ======================
+            alert("准备更新UI，此时 set.species 的值是: " + set.species);
+            // ======================================================================
+
 			this.updateSetTop();
 			if (selectNext) this.$(set.item || !this.$('input[name=item]').length ? (this.$('input[name=ability]').length ? 'input[name=ability]' : 'input[name=move1]') : 'input[name=item]').select();
 		},
