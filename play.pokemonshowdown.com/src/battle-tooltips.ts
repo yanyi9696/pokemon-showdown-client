@@ -1902,6 +1902,23 @@ export class BattleTooltips {
 
 		value.reset(move.basePower);
 
+   		// =================================================================
+		// == 自制技能：源能释放 (Yuan Neng Shi Fang) 的动态威力显示 ==
+		// =================================================================
+		if (move.id === 'yuannengshifang') {
+			// 从 value 对象中获取当前宝可梦信息
+			const pokemon = value.pokemon;
+
+			// 在这个文件中，pokemon.lastMove 直接就是招式的ID字符串。
+			// 因此我们直接用 pokemon.lastMove 与 move.id 进行比较。
+			if (pokemon.lastMove && pokemon.lastMove === move.id) {
+				// 如果是连续使用，则调用 value.modify 方法将威力乘以1.5
+				// 第二个参数 "连续使用加成" 会作为提示文字显示在浮窗中
+				value.modify(1.5, "连续使用加成");
+			}
+		}
+		// =================================================================
+
 		if (move.id === 'acrobatics') {
 			if (!serverPokemon.item) {
 				value.modify(2, "Acrobatics + no item");
