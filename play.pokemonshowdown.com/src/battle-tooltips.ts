@@ -2037,6 +2037,11 @@ export class BattleTooltips {
 		) {
 			value.set(20, 'Battle Bond');
 		}
+		if (
+			move.id === 'watershuriken' && pokemon.getSpeciesForme() === 'Greninja-Ash-Fantasy' 
+		) {
+			value.set(20, 'Battle Bond');
+		}
 		// Moves that check opponent speed
 		if (move.id === 'electroball' && target) {
 			let [minSpe, maxSpe] = this.getSpeedRange(target);
