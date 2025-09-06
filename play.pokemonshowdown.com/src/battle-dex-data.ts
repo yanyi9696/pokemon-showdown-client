@@ -286,7 +286,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	mukalola: 1032 + 134,
 	exeggutoralola: 1032 + 135,
 	marowakalola: 1032 + 136,
-	greninjaash: 1032 + 137,
+	greninjaash: 1032 + 137, greninjaashfantasy: 1032 + 137, // Added fantasy mapping
 	zygarde10: 1032 + 138,
 	zygardecomplete: 1032 + 139,
 	oricoriopompom: 1032 + 140,
@@ -704,7 +704,7 @@ export const BattlePokemonIconIndexesLeft: { [id: string]: number } = {
 	meloetta: 1404 + 72,
 	greninja: 1404 + 73,
 	greninjabond: 1404 + 73,
-	greninjaash: 1404 + 74,
+	greninjaash: 1404 + 74, greninjaashfantasy: 1404 + 74, // Added fantasy mapping
 	furfroudebutante: 1404 + 75,
 	barbaracle: 1404 + 76,
 	clauncher: 1404 + 77,
