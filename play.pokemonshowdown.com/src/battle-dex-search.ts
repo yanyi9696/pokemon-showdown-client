@@ -990,6 +990,10 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 				if ((this.species === 'toxtricityfantasy' || this.species === 'toxtricitylowkeyfantasy') && itemId === 'toxtricityz') {
 					isStrictlySpeciesSpecific = true;
 				}
+				// Add check for Greninja-Ash Z
+				if ((this.species === 'greninjabondfantasy' || this.species === 'greninjaashfantasy') && itemId === 'greninjaashz') {
+					isStrictlySpeciesSpecific = true;
+				}
 			}
 			if (isStrictlySpeciesSpecific) {
 				if (!specificItemIds.has(itemId)) {
@@ -1352,6 +1356,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			case 'punishment':
 			case 'zhukaibo':
 			case 'juenianpo':
+			case 'huangjinjibanshoulijian':
 				return true;
 			return false;
 		}
