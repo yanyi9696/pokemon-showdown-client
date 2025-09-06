@@ -1356,6 +1356,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			case 'punishment':
 			case 'zhukaibo':
 			case 'juenianpo':
+			case 'watershuriken':
 			case 'huangjinjibanshoulijian':
 				return true;
 			return false;
