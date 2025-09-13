@@ -1894,6 +1894,7 @@ export class PokemonSprite extends Sprite {
 		clamp: ['Clamp', 'bad'],
 		firespin: ['Fire Spin', 'bad'],
 		infestation: ['Infestation', 'bad'],
+
 		magmastorm: ['Magma Storm', 'bad'],
 		sandtomb: ['Sand Tomb', 'bad'],
 		snaptrap: ['Snap Trap', 'bad'],
@@ -1905,6 +1906,11 @@ export class PokemonSprite extends Sprite {
 		// Gen 1
 		lightscreen: ['Light Screen', 'good'],
 		reflect: ['Reflect', 'good'],
+		// FC的自制效果
+		longzhige: ['龙之歌', 'bad'],
+		woju: ['蜗居', 'good'],
+		xianxingzhiling: ['先行指令', 'good'],
+		yuannengshifang: ['源能释放', 'good'],
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;
