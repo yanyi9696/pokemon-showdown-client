@@ -12,6 +12,13 @@
 import { type AnimTable, BattleOtherAnims } from './battle-animations';
 
 export const BattleMoveAnims: AnimTable = {
+	//FC自制技能对动画效果的自定义修改
+	longzhige: {
+		anim(scene, [attacker]) {
+			BattleOtherAnims.sound.anim(scene, [attacker]);
+		},
+	},
+	//
 	taunt: {
 		anim(scene, [attacker, defender]) {
 			BattleOtherAnims.dance.anim(scene, [attacker, defender]);
