@@ -18,8 +18,174 @@ export const BattleMoveAnims: AnimTable = {
 			BattleOtherAnims.sound.anim(scene, [attacker]);
 		},
 	},
+	huanji: {
+		anim(scene, [attacker]) {
+			scene.backgroundEffect('#987058', 800, 0.3, 400);
+			BattleOtherAnims.shake.anim(scene, [attacker]);
+			scene.showEffect('flareball', {
+				x: attacker.x + 40,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 1,
+				time: 0,
+			}, {
+				y: attacker.y + 60,
+				opacity: 0,
+				time: 400,
+			}, 'accel');
+			scene.showEffect('flareball', {
+				x: attacker.x - 40,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 1,
+				time: 200,
+			}, {
+				y: attacker.y + 60,
+				opacity: 0,
+				time: 600,
+			}, 'accel');
+			scene.showEffect('flareball', {
+				x: attacker.x,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 1,
+				time: 400,
+			}, {
+				y: attacker.y + 60,
+				opacity: 0,
+				time: 800,
+			}, 'accel');
+		},
+	},
+	xianxingzhiling: {
+		anim(scene, [attacker]) {
+			scene.backgroundEffect('#987058', 800, 0.3, 400);
+			BattleOtherAnims.shake.anim(scene, [attacker]);
+			scene.showEffect('wisp', {
+				x: attacker.x + 40,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 1,
+				time: 0,
+			}, {
+				y: attacker.y + 60,
+				opacity: 0,
+				time: 400,
+			}, 'accel');
+			scene.showEffect('wisp', {
+				x: attacker.x - 40,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 1,
+				time: 200,
+			}, {
+				y: attacker.y + 60,
+				opacity: 0,
+				time: 600,
+			}, 'accel');
+			scene.showEffect('wisp', {
+				x: attacker.x,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 1,
+				time: 400,
+			}, {
+				y: attacker.y + 60,
+				opacity: 0,
+				time: 800,
+			}, 'accel');
+		},
+	},
 	huanzhiwu: {
-    	anim: BattleOtherAnims.dance.anim,
+		anim(scene, [attacker]) {
+			// 首先，执行舞蹈动作
+			BattleOtherAnims.dance.anim(scene, [attacker]);
+			// 然后，同时添加月光的背景和粒子特效
+			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/bg-space.jpg')`, 800, 0.6);
+			scene.showEffect('moon', {
+				x: attacker.x,
+				y: attacker.y + 150,
+				z: attacker.z,
+				scale: 1,
+				opacity: 0,
+				time: 200,
+			}, {
+				opacity: 0.8,
+				time: 900,
+			}, 'accel', 'fade');
+			scene.showEffect('shine', {
+				x: attacker.x + 40,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 0.8,
+				time: 200,
+			}, {
+				y: attacker.y + 130,
+				opacity: 0,
+				time: 600,
+			}, 'accel', 'fade');
+			scene.showEffect('wisp', {
+				x: attacker.x - 40,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 0.8,
+				time: 300,
+			}, {
+				y: attacker.y + 130,
+				opacity: 0,
+				time: 700,
+			}, 'accel', 'fade');
+			scene.showEffect('wisp', {
+				x: attacker.x + 20,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 0.8,
+				time: 400,
+			}, {
+				y: attacker.y + 130,
+				opacity: 0,
+				time: 800,
+			}, 'accel', 'fade');
+			scene.showEffect('shine', {
+				x: attacker.x - 20,
+				y: attacker.y - 40,
+				z: attacker.z,
+				scale: 0.2,
+				opacity: 0.8,
+				time: 500,
+			}, {
+				y: attacker.y + 130,
+				opacity: 0,
+				time: 900,
+			}, 'accel', 'fade');
+			scene.showEffect('wisp', {
+				x: 0,
+				y: +175,
+				z: +50,
+				scale: 1.5,
+				opacity: 1,
+			}, {
+				time: 700,
+			}, 'accel', 'fade');
+			scene.showEffect('iceball', {
+				x: 0,
+				y: +175,
+				z: +50,
+				scale: 0.5,
+				opacity: 0.8,
+			}, {
+				time: 700,
+			}, 'accel', 'fade');
+		},
 	},
 	fengxing: {
 		anim(scene, [attacker, defender]) {
@@ -762,7 +928,7 @@ export const BattleMoveAnims: AnimTable = {
 					time: 1550,
 				}, 'decel');
 			}
-			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/weather-hail.png')`, 750, 1, 800);
+			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/weather-mist.png')`, 750, 1, 800);
 		},
 	},
 	zuishenluanda: {
