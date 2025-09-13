@@ -928,7 +928,7 @@ export const BattleMoveAnims: AnimTable = {
 					time: 1550,
 				}, 'decel');
 			}
-			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/weather-deltastream.png')`, 750, 1, 800);
+			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/weather-mistyterrain.png')`, 750, 1, 800);
 		},
 	},
 	zuishenluanda: {
