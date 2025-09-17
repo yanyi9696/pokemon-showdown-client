@@ -18,6 +18,120 @@ export const BattleMoveAnims: AnimTable = {
 			BattleOtherAnims.sound.anim(scene, [attacker]);
 		},
 	},
+	jiaozhunxiangong: {
+		anim(scene, [attacker, defender]) {
+			scene.backgroundEffect('#7d7d7dff', 600, 0.3, 400);
+			scene.showEffect('electroball', {
+				x: attacker.x,
+				y: attacker.y + 60,
+				z: attacker.z,
+				scale: 0.5,
+				opacity: 1,
+			}, {
+				scale: 0.25,
+				opacity: 0,
+				time: 400,
+			}, 'linear');
+			scene.showEffect('electroball', {
+				x: attacker.x,
+				y: attacker.y + 100,
+				z: attacker.z,
+				scale: 0.5,
+				xscale: 0.25,
+				yscale: 0.75,
+				opacity: 1,
+			}, {
+				scale: 0.25,
+				opacity: 0,
+				time: 400,
+			}, 'linear');
+			scene.showEffect('electroball', {
+				x: defender.x,
+				y: defender.y + 60,
+				z: defender.z,
+				scale: 0.5,
+				opacity: 1,
+			}, {
+				scale: 0.25,
+				opacity: 0,
+				time: 400,
+			}, 'linear');
+			scene.showEffect('electroball', {
+				x: defender.x,
+				y: defender.y + 100,
+				z: defender.z,
+				scale: 0.5,
+				xscale: 0.25,
+				yscale: 0.75,
+				opacity: 1,
+			}, {
+				scale: 0.25,
+				opacity: 0,
+				time: 400,
+			}, 'linear');
+
+			scene.showEffect('impact', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				scale: 0,
+				opacity: 0.5,
+				time: 500,
+			}, {
+				scale: 3,
+				opacity: 0,
+				time: 800,
+			}, 'linear');
+			scene.showEffect('impact', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				scale: 0,
+				opacity: 0.5,
+				time: 700,
+			}, {
+				scale: 3,
+				opacity: 0,
+				time: 1000,
+			}, 'linear');
+
+			attacker.anim({
+				y: attacker.y + 5,
+				xscale: 0.9,
+				yscale: 1.1,
+				time: 100,
+			}, 'swing');
+			attacker.anim({
+				time: 100,
+			}, 'swing');
+			attacker.anim({
+				x: defender.x,
+				y: defender.y,
+				z: defender.behind(-5),
+				time: 300,
+			}, 'accel');
+			attacker.anim({
+				time: 500,
+			}, 'ballistic2Back');
+			defender.anim({
+				y: defender.y + 5,
+				xscale: 0.9,
+				yscale: 1.1,
+				time: 100,
+			}, 'swing');
+			defender.anim({
+				time: 100,
+			}, 'swing');
+			defender.delay(280);
+			defender.anim({
+				z: defender.behind(20),
+				time: 100,
+			}, 'swing');
+			defender.anim({
+				time: 300,
+			}, 'swing');
+		},
+	},
 	huanji: {
 		anim(scene, [attacker]) {
 			scene.backgroundEffect('#987058', 800, 0.3, 400);

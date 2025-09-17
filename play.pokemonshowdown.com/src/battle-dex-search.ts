@@ -1358,6 +1358,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			case 'juenianpo':
 			case 'watershuriken':
 			case 'huangjinjibanshoulijian':
+			case 'jiaozhunxiangong':
+			case 'suilinggang':
 				return true;
 			return false;
 		}
