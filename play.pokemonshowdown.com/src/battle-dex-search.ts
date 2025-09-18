@@ -1356,7 +1356,6 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			case 'punishment':
 			case 'zhukaibo':
 			case 'juenianpo':
-			case 'watershuriken':
 			case 'huangjinjibanshoulijian':
 			case 'jiaozhunxiangong':
 			case 'suilinggang':
