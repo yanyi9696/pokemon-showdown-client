@@ -18,6 +18,9 @@ export const BattleMoveAnims: AnimTable = {
 			BattleOtherAnims.sound.anim(scene, [attacker]);
 		},
 	},
+	raoliangzhiyin: {
+		anim: BattleOtherAnims.sound.anim,
+	},
 	yaolan: {
 		anim(scene, [attacker, defender]) {
 			scene.showEffect('poisonwisp', {
