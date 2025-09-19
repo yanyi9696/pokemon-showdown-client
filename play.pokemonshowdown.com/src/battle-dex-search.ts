@@ -1361,6 +1361,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			case 'suilinggang':
 			case 'yaolan':
 			case 'raoliangzhiyin':
+			case 'qingshengluye':
 				return true;
 			return false;
 		}
