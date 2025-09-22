@@ -467,7 +467,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	charizardmegay: 1320 + 2,
 	blastoisemega: 1320 + 3,
 	beedrillmega: 1320 + 4,
-	pidgeotmega: 1320 + 5,
+	pidgeotmega: 1320 + 5, 	pidgeotmegafantasy: 1320 + 5,// Added fantasy mapping
 	alakazammega: 1320 + 6,
 	slowbromega: 1320 + 7,
 	gengarmega: 1320 + 8,
@@ -478,7 +478,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	mewtwomegax: 1320 + 13,
 	mewtwomegay: 1320 + 14,
 	ampharosmega: 1320 + 15,
-	steelixmega: 1320 + 16,
+	steelixmega: 1320 + 16, steelixmegafantasy: 1320 + 16,// Added fantasy mapping
 	scizormega: 1320 + 17,
 	heracrossmega: 1320 + 18,
 	houndoommega: 1320 + 19,
