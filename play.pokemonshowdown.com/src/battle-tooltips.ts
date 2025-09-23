@@ -1673,6 +1673,7 @@ export class BattleTooltips {
 					if (value.abilityModify(0, 'Pixilate')) moveType = 'Fairy';
 					if (value.abilityModify(0, 'Refrigerate')) moveType = 'Ice';
 					if (value.abilityModify(0, 'Du Wu Pi Fu')) moveType = 'Poison';
+					if (value.abilityModify(0, 'Long Zhi Hu Xi')) moveType = 'Dragon';
 				}
 				if (value.abilityModify(0, 'Normalize')) moveType = 'Normal';
 			}

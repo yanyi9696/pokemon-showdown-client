@@ -21,6 +21,233 @@ export const BattleMoveAnims: AnimTable = {
 	raoliangzhiyin: {
 		anim: BattleOtherAnims.sound.anim,
 	},
+	qibaoliuxing: {
+		anim(scene, [attacker, defender]) {
+			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/bg-space.jpg')`, 1100, 0.8);
+			scene.showEffect('flareball', {
+				x: defender.leftof(-200),
+				y: defender.y + 175,
+				z: defender.z,
+				scale: 0.1,
+				opacity: 0,
+			}, {
+				x: defender.x + 50,
+				y: defender.y,
+				scale: 1.5,
+				opacity: 0.8,
+			}, 'accel', 'explode');
+			scene.showEffect('flareball', {
+				x: defender.leftof(-200),
+				y: defender.y + 20 + 175,
+				z: defender.z,
+				scale: 0.1,
+				opacity: 0,
+				time: 150,
+			}, {
+				x: defender.x - 30,
+				y: defender.y - 5,
+				scale: 1.5,
+				opacity: 0.8,
+			}, 'accel', 'explode');
+			scene.showEffect('flareball', {
+				x: defender.leftof(-200),
+				y: defender.y - 20 + 175,
+				z: defender.z,
+				scale: 0.1,
+				opacity: 0,
+				time: 300,
+			}, {
+				x: defender.x + 30,
+				y: defender.y - 10,
+				scale: 1.5,
+				opacity: 0.8,
+			}, 'accel', 'explode');
+			scene.showEffect('rock3', {
+				x: defender.leftof(-200),
+				y: defender.y + 175,
+				z: defender.z,
+				scale: 0.1,
+				opacity: 0,
+			}, {
+				x: defender.x + 30,
+				y: defender.y,
+				scale: 1.5,
+				opacity: 0.4,
+			}, 'accel', 'explode');
+			scene.showEffect('rock3', {
+				x: defender.leftof(-200),
+				y: defender.y + 20 + 175,
+				z: defender.z,
+				scale: 0.1,
+				opacity: 0,
+				time: 150,
+			}, {
+				x: defender.x - 20,
+				y: defender.y - 5,
+				scale: 1.5,
+				opacity: 0.4,
+			}, 'accel', 'explode');
+			scene.showEffect('rock3', {
+				x: defender.leftof(-200),
+				y: defender.y - 20 + 175,
+				z: defender.z,
+				scale: 0.1,
+				opacity: 0,
+				time: 300,
+			}, {
+				x: defender.x + 20,
+				y: defender.y,
+				scale: 1.5,
+				opacity: 0.4,
+			}, 'accel', 'explode');
+
+			scene.showEffect('shadowball', {
+				x: defender.x + 30,
+				y: defender.y - 50,
+				z: defender.z,
+				scale: 1,
+				xscale: 2,
+				opacity: 0.5,
+				time: 500,
+			}, {
+				scale: 3,
+				xscale: 8,
+				opacity: 0.1,
+				time: 700,
+			}, 'linear', 'fade');
+			scene.showEffect('shadowball', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				opacity: 0.3,
+				scale: 0,
+				time: 500,
+			}, {
+				scale: 3,
+				opacity: 0,
+				time: 700,
+			}, 'linear');
+			scene.showEffect('shadowball', {
+				x: defender.x - 20,
+				y: defender.y - 50,
+				z: defender.z,
+				scale: 1,
+				xscale: 2,
+				opacity: 0.5,
+				time: 650,
+			}, {
+				scale: 3,
+				xscale: 8,
+				opacity: 0.1,
+				time: 850,
+			}, 'linear', 'fade');
+			scene.showEffect('shadowball', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				opacity: 0.3,
+				scale: 0,
+				time: 650,
+			}, {
+				scale: 4,
+				opacity: 0,
+				time: 850,
+			}, 'linear');
+			scene.showEffect('shadowball', {
+				x: defender.x + 20,
+				y: defender.y - 50,
+				z: defender.z,
+				scale: 1,
+				xscale: 2,
+				opacity: 0.5,
+				time: 700,
+			}, {
+				scale: 3,
+				xscale: 8,
+				opacity: 0.1,
+				time: 900,
+			}, 'linear', 'fade');
+			scene.showEffect('shadowball', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				opacity: 0.3,
+				scale: 0,
+				time: 700,
+			}, {
+				scale: 4,
+				opacity: 0,
+				time: 900,
+			}, 'linear');
+
+			scene.showEffect('rock3', {
+				x: defender.leftof(-200),
+				y: defender.y - 20 + 150,
+				z: defender.z,
+				scale: 0.1,
+				opacity: 0.6,
+				time: 50,
+			}, {
+				x: defender.x - 250,
+				y: defender.y - 80,
+				z: defender.behind(60),
+				scale: 0.8,
+				opacity: 0,
+			}, 'accel', 'fade');
+			scene.showEffect('rock3', {
+				x: defender.leftof(-220),
+				y: defender.y + 20 + 130,
+				z: defender.z,
+				scale: 0.1,
+				opacity: 0.6,
+				time: 150,
+			}, {
+				x: defender.x + 80,
+				y: defender.y - 50,
+				z: defender.behind(30),
+				scale: 0.8,
+				opacity: 0,
+			}, 'accel', 'fade');
+			scene.showEffect('rock3', {
+				x: defender.leftof(-180),
+				y: defender.y + 20 + 130,
+				z: defender.z,
+				scale: 0.1,
+				opacity: 0.6,
+				time: 300,
+			}, {
+				x: defender.x - 200,
+				y: defender.y + 20,
+				z: defender.behind(30),
+				scale: 0.8,
+				opacity: 0,
+			}, 'accel', 'fade');
+
+			defender.delay(500);
+			defender.anim({
+				x: defender.x + 30,
+				z: defender.behind(10),
+				time: 75,
+			});
+			defender.anim({
+				x: defender.x - 30,
+				time: 100,
+			});
+			defender.anim({
+				x: defender.x + 30,
+				time: 100,
+			});
+			defender.anim({
+				x: defender.x - 30,
+				z: defender.behind(10),
+				time: 100,
+			});
+			defender.anim({
+				x: defender.x,
+				time: 100,
+			});
+		},
+	},
 	zhishareshe: {
 		anim(scene, [attacker, ...defenders]) {
 			scene.backgroundEffect('#B47F1F', 1000, 0.3);
