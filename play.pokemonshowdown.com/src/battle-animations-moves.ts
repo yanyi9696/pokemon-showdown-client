@@ -21,6 +21,76 @@ export const BattleMoveAnims: AnimTable = {
 	raoliangzhiyin: {
 		anim: BattleOtherAnims.sound.anim,
 	},
+	zhishareshe: {
+		anim(scene, [attacker, ...defenders]) {
+			scene.backgroundEffect('#B47F1F', 1000, 0.3);
+
+			for (const defender of defenders) {
+				for (let i = 0; i < 4; i++) {
+					scene.showEffect('mudwisp', {
+						x: defender.x + 50,
+						y: defender.y - 35,
+						z: defender.z,
+						scale: 0.2,
+						opacity: 1,
+						time: 200 * i,
+					}, {
+						x: defender.x - 50,
+						y: defender.y,
+						z: defender.z,
+						scale: 0.4,
+						opacity: 0.4,
+						time: 200 * i + 200,
+					}, 'linear', 'fade');
+					scene.showEffect('mudwisp', {
+						x: defender.x - 50,
+						y: defender.y + 35,
+						z: defender.z,
+						scale: 0.2,
+						opacity: 1,
+						time: 200 * i,
+					}, {
+						x: defender.x + 50,
+						y: defender.y,
+						z: defender.z,
+						scale: 0.4,
+						opacity: 0.4,
+						time: 200 * i + 200,
+					}, 'linear', 'fade');
+					scene.showEffect('mudwisp', {
+						x: defender.x + 50,
+						y: defender.y,
+						z: defender.z,
+						scale: 0.2,
+						opacity: 1,
+						time: 200 * i,
+					}, {
+						x: defender.x - 50,
+						y: defender.y - 35,
+						z: defender.z,
+						scale: 0.4,
+						opacity: 0.4,
+						time: 200 * i + 200,
+					}, 'linear', 'fade');
+					scene.showEffect('mudwisp', {
+						x: defender.x - 50,
+						y: defender.y,
+						z: defender.z,
+						scale: 0.2,
+						opacity: 1,
+						time: 200 * i,
+					}, {
+						x: defender.x + 50,
+						y: defender.y - 35,
+						z: defender.z,
+						scale: 0.4,
+						opacity: 0.4,
+						time: 200 * i + 200,
+					}, 'linear', 'fade');
+				}
+			}
+		},
+	},
 	yaolan: {
 		anim(scene, [attacker, defender]) {
 			scene.showEffect('poisonwisp', {
