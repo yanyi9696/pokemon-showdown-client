@@ -1328,6 +1328,14 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 	}
 	private moveIsFantasy(id: ID, species: Dex.Species, moves: string[], set: Dex.PokemonSet | null) {
 		switch (id) {
+			case 'xiangongjiaozhun':
+			case 'suilinggang':
+			case 'yaolan':
+			case 'raoliangzhiyin':
+			case 'qingshengluye':
+			case 'fanchen':
+			case 'zhishareshe':
+			case 'qibaoliuxing':
 			case 'overdrive':
 			case 'flyingpress':
 			case 'shelter':
@@ -1357,14 +1365,6 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			case 'zhukaibo':
 			case 'juenianpo':
 			case 'huangjinjibanshoulijian':
-			case 'xiangongjiaozhun':
-			case 'suilinggang':
-			case 'yaolan':
-			case 'raoliangzhiyin':
-			case 'qingshengluye':
-			case 'fanchen':
-			case 'zhishareshe':
-			case 'qibaoliuxing':
 				return true;
 			return false;
 		}
