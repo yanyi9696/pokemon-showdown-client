@@ -355,7 +355,7 @@ export const BattleMoveAnims: AnimTable = {
 			BattleOtherAnims.contactattack.anim(scene, [attacker, defender]);
 		},
 	},
-	jiaozhunxiangong: {
+	xiangongjiaozhun: {
 		anim(scene, [attacker, defender]) {
 			scene.backgroundEffect('#7d7d7dff', 600, 0.3, 400);
 			scene.showEffect('electroball', {
