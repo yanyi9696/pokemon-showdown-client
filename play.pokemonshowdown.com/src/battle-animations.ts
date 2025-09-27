@@ -1911,7 +1911,7 @@ export class PokemonSprite extends Sprite {
 		woju: ['蜗居', 'good'],
 		xianxingzhiling: ['先行指令', 'good'],
 		yuannengshifang: ['源能释放', 'good'],
-		tundu: ['垃圾回收者', 'good'],
+		tundu: ['吞毒', 'good'],
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;

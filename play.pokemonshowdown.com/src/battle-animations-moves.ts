@@ -21,6 +21,59 @@ export const BattleMoveAnims: AnimTable = {
 	raoliangzhiyin: {
 		anim: BattleOtherAnims.sound.anim,
 	},
+	huanxiangbaofa: {
+		anim(scene, [attacker, defender]) {
+			BattleOtherAnims.hydroshot.anim(scene, [attacker, defender]);
+			scene.showEffect('wisp', {
+				x: defender.x + 30,
+				y: defender.y,
+				z: defender.z,
+				scale: 1,
+				opacity: 1,
+				time: 300,
+			}, {
+				y: defender.y + 60,
+				opacity: 0.2,
+				time: 700,
+			}, 'linear', 'fade');
+			scene.showEffect('wisp', {
+				x: defender.x - 30,
+				y: defender.y,
+				z: defender.z,
+				scale: 1,
+				opacity: 1,
+				time: 400,
+			}, {
+				y: defender.y + 60,
+				opacity: 0.2,
+				time: 800,
+			}, 'linear', 'fade');
+			scene.showEffect('wisp', {
+				x: defender.x + 15,
+				y: defender.y,
+				z: defender.z,
+				scale: 1,
+				opacity: 1,
+				time: 500,
+			}, {
+				y: defender.y + 60,
+				opacity: 0.2,
+				time: 900,
+			}, 'linear', 'fade');
+			scene.showEffect('wisp', {
+				x: defender.x - 15,
+				y: defender.y,
+				z: defender.z,
+				scale: 1,
+				opacity: 1,
+				time: 600,
+			}, {
+				y: defender.y + 60,
+				opacity: 0.2,
+				time: 1000,
+			}, 'linear', 'fade');
+		},
+	},
 	qibaoliuxing: {
 		anim(scene, [attacker, defender]) {
 			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/bg-space.jpg')`, 1100, 0.8);
