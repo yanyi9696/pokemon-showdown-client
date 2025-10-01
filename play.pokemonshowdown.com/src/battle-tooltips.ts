@@ -2032,6 +2032,9 @@ export class BattleTooltips {
 		if (move.id === 'hydrosteam') {
 			value.weatherModify(1.5, 'Sunny Day');
 		}
+		if (move.id === 'zhishareshe') {
+			value.weatherModify(2, 'Sandstorm');
+		}
 		if (move.id === 'psyblade' && this.battle.hasPseudoWeather('Electric Terrain')) {
 			value.modify(1.5, 'Electric Terrain');
 		}
