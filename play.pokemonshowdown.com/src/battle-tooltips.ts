@@ -1271,7 +1271,7 @@ export class BattleTooltips {
 			}
 		}
 		// ==================== 新增：自制道具的面板显示 (START) ====================
-		if (item === 'protector') {
+		if (item === 'fantasyprotector') {
 			stats.def = Math.floor(stats.def * 1.3);
 			stats.spd = Math.floor(stats.spd * 1.3);
 		}
