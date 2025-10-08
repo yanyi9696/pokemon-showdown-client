@@ -1565,6 +1565,8 @@ for (const mod of modNames)
 		case 'fantasylifeorb':
 		case 'fantasysachet':
 		case 'fantasyscopelens':
+		case 'fantasysyrupyapple':
+		case 'fantasyprotector':
 
 			modSpecificItems.push(id);
 			break;
