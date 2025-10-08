@@ -1270,6 +1270,16 @@ export class BattleTooltips {
 				stats.spd = Math.floor(stats.spd * 0.75);
 			}
 		}
+		// ==================== 新增：自制道具的面板显示 (START) ====================
+		if (item === 'protector') {
+			stats.def = Math.floor(stats.def * 1.3);
+			stats.spd = Math.floor(stats.spd * 1.3);
+		}
+		if (item === 'fantasysyrupyapple') {
+			stats.atk = Math.floor(stats.atk * 0.7);
+			stats.spa = Math.floor(stats.spa * 0.7);
+		}
+		// ==================== 新增：自制道具的面板显示 (END) ======================
 
 		// SSB
 		if (this.battle.tier.includes('Super Staff Bros')) {
