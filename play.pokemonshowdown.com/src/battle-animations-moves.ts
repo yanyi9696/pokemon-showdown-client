@@ -22,7 +22,6 @@ export const BattleMoveAnims: AnimTable = {
 		anim: BattleOtherAnims.sound.anim,
 	},
 	youzhipeiyu: {
-		// 技能首次使用时的动画
 		anim(scene, [attacker]) {
 			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/bg-space.jpg')`, 600, 0.4);
 
@@ -37,24 +36,8 @@ export const BattleMoveAnims: AnimTable = {
 				opacity: 0,
 			}, 'accel');
 		},
-		// 后续治疗效果触发时的动画
 		residualAnim(scene, [attacker]) {
-			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/bg-space.jpg')`, 600, 0.4);
-
-			scene.showEffect('wisp', {
-				x: attacker.x,
-				y: attacker.y + 130,
-				z: attacker.z,
-				scale: 1,
-				opacity: 0,
-			}, {
-				x: attacker.x,
-				y: attacker.y,
-				z: attacker.z,
-				opacity: 1,
-			}, 'decel', 'explode');
-
-			scene.timeOffset += 500;
+			BattleOtherAnims.consume.anim(scene, [attacker]);
 		},
 	},
 	huanxiangbaofa: {
