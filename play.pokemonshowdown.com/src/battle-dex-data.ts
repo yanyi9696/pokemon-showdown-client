@@ -346,7 +346,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	zaciancrowned: 1032 + 194,
 	zamazentacrowned: 1032 + 195,
 	slowpokegalar: 1032 + 196,
-	slowbrogalar: 1032 + 197,
+	slowbrogalar: 1032 + 197, slowbrogalarfantasy: 1032 + 197, // Added fantasy mapping
 	zarudedada: 1032 + 198,
 	pikachuworld: 1032 + 199,
 	articunogalar: 1032 + 200,
@@ -467,9 +467,9 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	charizardmegay: 1320 + 2,
 	blastoisemega: 1320 + 3,
 	beedrillmega: 1320 + 4,
-	pidgeotmega: 1320 + 5, 	pidgeotmegafantasy: 1320 + 5,// Added fantasy mapping
+	pidgeotmega: 1320 + 5, pidgeotmegafantasy: 1320 + 5,// Added fantasy mapping
 	alakazammega: 1320 + 6,
-	slowbromega: 1320 + 7,
+	slowbromega: 1320 + 7, slowbromegafantasy: 1320 + 7,// Added fantasy mapping
 	gengarmega: 1320 + 8,
 	kangaskhanmega: 1320 + 9,
 	pinsirmega: 1320 + 10,
