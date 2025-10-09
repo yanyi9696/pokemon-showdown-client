@@ -1553,7 +1553,7 @@ export class Battle {
 		}
 		pokemon.lastMove = move.id;
 		this.lastMove = move.id;
-		if (move.id === 'wish' || move.id === 'healingwish') {
+		if (move.id === 'wish' || move.id === 'healingwish'|| move.id === 'youzhipeiyu') {
 			pokemon.side.wisher = pokemon;
 		}
 	}
@@ -1792,6 +1792,10 @@ export class Battle {
 					poke.fainted = false;
 					poke.status = '';
 					this.scene.updateSidebar(side);
+					break;
+					// 在这里添加您的新技能！！！
+				case 'youzhipeiyu':
+					this.scene.runResidualAnim('youzhipeiyu' as ID, poke);
 					break;
 				}
 			}
