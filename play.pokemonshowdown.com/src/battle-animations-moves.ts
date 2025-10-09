@@ -22,15 +22,10 @@ export const BattleMoveAnims: AnimTable = {
 		anim: BattleOtherAnims.sound.anim,
 	},
 	youzhipeiyu: {
-		/**
-		 * anim - 技能使用时的动画
-		 * 效果：一个光球从使用者身上升起。
-		 */
+		// 技能首次使用时的动画
 		anim(scene, [attacker]) {
-			// 设置宇宙背景
 			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/bg-space.jpg')`, 600, 0.4);
 
-			// 显示一个 'wisp' (光球) 特效
 			scene.showEffect('wisp', {
 				x: attacker.x,
 				y: attacker.y,
@@ -38,35 +33,27 @@ export const BattleMoveAnims: AnimTable = {
 				scale: 1,
 				opacity: 1,
 			}, {
-				y: attacker.y + 130, // 移动到上方
-				opacity: 0, // 最终消失
+				y: attacker.y + 130,
+				opacity: 0,
 			}, 'accel');
 		},
-
-		/**
-		 * residualAnim - 延迟效果触发时的动画 (核心部分)
-		 * 效果：在下一回合结束时，一个光球从天而降，落在宝可梦身上并触发治疗效果。
-		 * '[attacker]' 在这里指的是接受治疗的宝可梦。
-		 */
+		// 后续治疗效果触发时的动画
 		residualAnim(scene, [attacker]) {
-			// 再次显示宇宙背景，以保持动画连贯性
 			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/bg-space.jpg')`, 600, 0.4);
 
-			// 显示一个 'wisp' (光球) 特效
 			scene.showEffect('wisp', {
 				x: attacker.x,
-				y: attacker.y + 130, // 从上方开始
+				y: attacker.y + 130,
 				z: attacker.z,
 				scale: 1,
 				opacity: 0,
 			}, {
 				x: attacker.x,
-				y: attacker.y, // 移动到宝可梦身上
+				y: attacker.y,
 				z: attacker.z,
 				opacity: 1,
-			}, 'decel', 'explode'); // 以 'explode' (爆炸) 效果结束
+			}, 'decel', 'explode');
 
-			// 增加一点时间偏移，让后续的血条变化动画更自然
 			scene.timeOffset += 500;
 		},
 	},
