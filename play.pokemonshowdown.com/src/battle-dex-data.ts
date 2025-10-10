@@ -206,13 +206,13 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	shayminsky: 1032 + 54,
 	unfezantf: 1032 + 55,
 	basculinbluestriped: 1032 + 56,
-	darmanitanzen: 1032 + 57,
+	darmanitanzen: 1032 + 57, darmanitanzenfantasy: 1032 + 57, // Added fantasy mapping
 	deerlingautumn: 1032 + 58,
 	deerlingsummer: 1032 + 59,
 	deerlingwinter: 1032 + 60,
-	sawsbuckautumn: 1032 + 61, sawsbuckautumnfantasy: 1032 + 61,
-	sawsbucksummer: 1032 + 62, sawsbucksummerfantasy: 1032 + 62,
-	sawsbuckwinter: 1032 + 63, sawsbuckwinterfantasy: 1032 + 63,
+	sawsbuckautumn: 1032 + 61, sawsbuckautumnfantasy: 1032 + 61, // Added fantasy mapping
+	sawsbucksummer: 1032 + 62, sawsbucksummerfantasy: 1032 + 62, // Added fantasy mapping
+	sawsbuckwinter: 1032 + 63, sawsbuckwinterfantasy: 1032 + 63, // Added fantasy mapping
 	frillishf: 1032 + 64,
 	jellicentf: 1032 + 65,
 	tornadustherian: 1032 + 66,
@@ -319,19 +319,19 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	ponytagalar: 1032 + 167,
 	rapidashgalar: 1032 + 168,
 	farfetchdgalar: 1032 + 169,
-	weezinggalar: 1032 + 170, weezinggalarfantasy: 1032 + 170,
+	weezinggalar: 1032 + 170, weezinggalarfantasy: 1032 + 170, // Added fantasy mapping
 	mrmimegalar: 1032 + 171,
 	corsolagalar: 1032 + 172,
 	zigzagoongalar: 1032 + 173,
 	linoonegalar: 1032 + 174,
 	darumakagalar: 1032 + 175,
-	darmanitangalar: 1032 + 176,
-	darmanitangalarzen: 1032 + 177,
+	darmanitangalar: 1032 + 176, darmanitangalarfantasy: 1032 + 176, // Added fantasy mapping
+	darmanitangalarzen: 1032 + 177, darmanitangalarzenfantasy: 1032 + 177, // Added fantasy mapping
 	yamaskgalar: 1032 + 178,
 	stunfiskgalar: 1032 + 179,
 	cramorantgulping: 1032 + 180,
 	cramorantgorging: 1032 + 181,
-	toxtricitylowkey: 1032 + 182, toxtricitylowkeyfantasy: 1032 + 182,
+	toxtricitylowkey: 1032 + 182, toxtricitylowkeyfantasy: 1032 + 182, // Added fantasy mapping
 	alcremierubycream: 1032 + 183,
 	alcremiematchacream: 1032 + 184,
 	alcremiemintcream: 1032 + 185,
