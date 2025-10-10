@@ -1583,43 +1583,61 @@ for (const mod of modNames)
 			case 'leftovers':
 			case 'lifeorb':
 			case 'loadeddice':
+			case 'lumberry':
 			case 'mentalherb':
 			case 'powerherb':
 			case 'rockyhelmet':
 			case 'salacberry':
+			// 根据您的要求添加的常用道具
+			case 'abilityshield':
+			case 'lightclay':
+			case 'throatspray':
+			case 'damprock':
+			case 'heatrock':
+			case 'icyrock':
+			case 'sitrusberry':
+			case 'smoothrock':
+			case 'terrainextender':
+			case 'whiteherb':
+			// 所有Z纯晶
+			case 'normaliumz': case 'firiumz': case 'wateriumz': case 'electriumz': case 'grassiumz':
+			case 'iciumz': case 'fightiniumz': case 'poisoniumz': case 'groundiumz': case 'flyiniumz':
+			case 'psychiumz': case 'buginiumz': case 'rockiumz': case 'ghostiumz': case 'dragoniumz':
+			case 'darkiniumz': case 'steeliumz': case 'fairiumz':
 				greatItems.push(id);
 				break;
 
 			// ### Items ###
-			case 'abilityshield': case 'absorbbulb': case 'adrenalineorb': case 'aguavberry': case 'apricotberry':
+			case 'absorbbulb': case 'adrenalineorb': case 'aguavberry': case 'apricotberry':
 			case 'babiriberry': case 'berryjuice': case 'blackbelt': case 'blackglasses': case 'blacksludge':
-			case 'blunderpolicy': case 'boosterenergy': case 'brightpowder': case 'buginiumz': case 'cellbattery':
+			case 'blunderpolicy': case 'boosterenergy': case 'brightpowder': case 'cellbattery':
 			case 'charcoal': case 'chartiberry': case 'chestoberry': case 'chilanberry': case 'chopleberry':
 			case 'clearamulet': case 'cobaberry': case 'colburberry': case 'covertcloak': case 'custapberry':
-			case 'damprock': case 'darkiniumz': case 'dracoplate': case 'dragonfang': case 'dragoniumz':
+			case 'dracoplate': case 'dragonfang':
 			case 'dreadplate': case 'earthplate': case 'ejectbutton': case 'ejectpack': case 'electricseed':
-			case 'electriumz': case 'fairiumz': case 'fairyfeather': case 'fightiniumz': case 'figyberry':
-			case 'firiumz': case 'fistplate': case 'flameorb': case 'flameplate': case 'flyiniumz':
-			case 'fullincense': case 'ganlonberry': case 'ghostiumz': case 'grassiumz': case 'grassyseed':
-			case 'grepaberry': case 'gripclaw': case 'groundiumz': case 'habanberry': case 'hardstone':
-			case 'heatrock': case 'iapapaberry': case 'icicleplate': case 'iciumz': case 'icyrock':
+			case 'fairyfeather': case 'figyberry':
+			case 'fistplate': case 'flameorb': case 'flameplate':
+			case 'fullincense': case 'ganlonberry': case 'grassyseed':
+			case 'grepaberry': case 'gripclaw': 
+			case 'habanberry': case 'hardstone':
+			case 'iapapaberry': case 'icicleplate':
 			case 'insectplate': case 'ironplate': case 'kasibberry': case 'kebiaberry': case 'keeberry':
-			case 'kelpsyberry': case 'kingsrock': case 'laggingtail': case 'lansatberry': case 'laxincense':
-			case 'leppaberry': case 'liechiberry': case 'lightclay': case 'lumberry': case 'luminousmoss':
+			case 'kelpsyberry': case 'kingsrock': case 'laggingtail': case 'lansatberry': 
+			case 'laxincense':	case 'leppaberry': case 'liechiberry': case 'luminousmoss':
 			case 'magnet': case 'magoberry': case 'marangaberry': case 'meadowplate': case 'metalcoat':
 			case 'metronome': case 'micleberry': case 'mindplate': case 'miracleseed': case 'mirrorherb':
 			case 'mistyseed': case 'muscleband': case 'mysticwater': case 'nevermeltice': case 'normalgem':
-			case 'normaliumz': case 'occaberry': case 'oddincense': case 'passhoberry': case 'payapaberry':
-			case 'petayaberry': case 'pixieplate': case 'poisonbarb': case 'poisoniumz': case 'protectivepads':
-			case 'psychicseed': case 'psychiumz': case'punchingglove': case 'quickclaw': case 'razorclaw':
-			case 'razorfang': case 'redcard': case 'rindoberry': case 'rockincense': case 'rockiumz':
+			case 'occaberry': case 'oddincense': case 'passhoberry': case 'payapaberry':
+			case 'petayaberry': case 'pixieplate': case 'poisonbarb': case 'protectivepads':
+			case 'psychicseed': case 'punchingglove': case 'quickclaw': case 'razorclaw':
+			case 'razorfang': case 'redcard': case 'rindoberry': case 'rockincense':
 			case 'roomservice': case 'roseincense': case 'roseliberry': case 'safetygoggles': case 'scopelens':
 			case 'seaincense': case 'sharpbeak': case 'shedshell': case 'shellbell': case 'shucaberry':
-			case 'silkscarf': case 'silverpowder': case 'sitrusberry': case 'skyplate': case 'smoothrock':
-			case 'snowball': case 'softsand': case 'spelltag': case 'splashplate': case 'spookyplate':
-			case 'starfberry': case 'steeliumz': case 'stickybarb': case 'stoneplate': case 'tangaberry':
-			case 'terrainextender': case 'throatspray': case 'toxicorb': case 'toxicplate': case 'twistedspoon':
-			case 'utilityumbrella': case 'wacanberry': case 'wateriumz': case 'waveincense': case 'weaknesspolicy':
+			case 'silkscarf': case 'silverpowder': case 'skyplate': case 'snowball': 
+			case 'softsand': case 'spelltag': case 'splashplate': case 'spookyplate':
+			case 'starfberry': case 'stickybarb': case 'stoneplate': case 'tangaberry':
+			case 'toxicorb': case 'toxicplate': case 'twistedspoon':
+			case 'utilityumbrella': case 'wacanberry': case 'waveincense': case 'weaknesspolicy':
 			case 'whiteherb': case 'widelens': case 'wikiberry': case 'wiseglasses': case 'yacheberry':
 			case 'zapplate': case 'zoomlens':
 				goodItems.push(id);
@@ -1647,6 +1665,8 @@ for (const mod of modNames)
 			case 'slowbronite': case 'snorliumz': case 'solganiumz': case 'souldew': case 'steelixite':
 			case 'steelmemory': case 'stick': case 'swampertite': case 'tapuniumz': case 'thickclub':
 			case 'tyranitarite': case 'ultranecroziumz': case 'venusaurite': case 'watermemory': case 'wellspringmask':
+			// 根据您的要求添加的专用道具
+			case 'vilevial': case 'lustrousglobe': case 'toxtricityz': case 'greninjaashz': case 'leek': case 'marshadiumz':
 				specificItems.push(id);
 				break;
 
@@ -1677,7 +1697,23 @@ for (const mod of modNames)
 			case 'skullfossil': case 'sportball': case 'starsweet': case 'strawberrysweet': case 'sunstone':
 			case 'sweetapple': case 'syrupyapple': case 'tamatoberry': case 'tartapple': case 'thunderstone':
 			case 'timerball': case 'ultraball': case 'unremarkableteacup': case 'upgrade': case 'waterstone':
-			// 默认分类，处理所有其他道具
+			// 所有化石
+			case 'armorfossil': case 'clawfossil': case 'coverfossil': case 'domefossil': case 'helixfossil':
+			case 'jawfossil': case 'plumefossil': case 'rootfossil': case 'sailfossil': case 'skullfossil':
+			case 'fossilizedfish': case 'fossilizeddrake': case 'fossilizeddino': case 'fossilizedbird': case 'oldamber':
+			// 其他无用道具
+			case 'mail': case 'cherishball': case 'strangeball': case 'parkball': case 'whippeddream':
+			// 所有TR
+			case 'tr00': case 'tr01': case 'tr02': case 'tr03': case 'tr04': case 'tr05': case 'tr06': case 'tr07': case 'tr08': case 'tr09':
+			case 'tr10': case 'tr11': case 'tr12': case 'tr13': case 'tr14': case 'tr15': case 'tr16': case 'tr17': case 'tr18': case 'tr19':
+			case 'tr20': case 'tr21': case 'tr22': case 'tr23': case 'tr24': case 'tr25': case 'tr26': case 'tr27': case 'tr28': case 'tr29':
+			case 'tr30': case 'tr31': case 'tr32': case 'tr33': case 'tr34': case 'tr35': case 'tr36': case 'tr37': case 'tr38': case 'tr39':
+			case 'tr40': case 'tr41': case 'tr42': case 'tr43': case 'tr44': case 'tr45': case 'tr46': case 'tr47': case 'tr48': case 'tr49':
+			case 'tr50': case 'tr51': case 'tr52': case 'tr53': case 'tr54': case 'tr55': case 'tr56': case 'tr57': case 'tr58': case 'tr59':
+			case 'tr60': case 'tr61': case 'tr62': case 'tr63': case 'tr64': case 'tr65': case 'tr66': case 'tr67': case 'tr68': case 'tr69':
+			case 'tr70': case 'tr71': case 'tr72': case 'tr73': case 'tr74': case 'tr75': case 'tr76': case 'tr77': case 'tr78': case 'tr79':
+			case 'tr80': case 'tr81': case 'tr82': case 'tr83': case 'tr84': case 'tr85': case 'tr86': case 'tr87': case 'tr88': case 'tr89':
+			case 'tr90': case 'tr91': case 'tr92': case 'tr93': case 'tr94': case 'tr95': case 'tr96': case 'tr97': case 'tr98': case 'tr99':
 				badItems.push(id);
 				break;
 
@@ -1686,7 +1722,11 @@ for (const mod of modNames)
 				// 比如超级石(Mega Stones)等，并将它们放入一个合理的分类
 				if (item.megaStone) {
 					specificItems.push(id);
-				} else {
+				} else if (item.name.endsWith(" Z") && !item.isPokeball) {
+					// 捕捉剩余的专用Z纯晶
+					specificItems.push(id);
+				}
+				else {
 					goodItems.push(id); // 将未明确分类的其他道具放入 "Items"
 				}
 				break;
