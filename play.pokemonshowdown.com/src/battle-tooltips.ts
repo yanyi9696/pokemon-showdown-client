@@ -2253,6 +2253,11 @@ export class BattleTooltips {
 			value.abilityModify(1.5, "Feng Chao");
 		}
 
+		if (moveType === 'Bug') {
+			value.abilityModify(1.5, "Zui Jia Ni Tai");
+		}
+
+
 		if (move.category !== 'Status') {
 			let auraBoosted = '';
 			let auraBroken = false;
