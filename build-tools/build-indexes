@@ -1558,21 +1558,138 @@ for (const mod of modNames)
 	const badItems = [['header', "Useless items"]];
 	const unreleasedItems = [];
 	for (const id of itemList) {
-		switch (id) {
-		case 'fantasyitem':
-		case 'fantasypowerlens':
-		case 'fantasyringtarget':
-		case 'fantasylifeorb':
-		case 'fantasysachet':
-		case 'fantasyscopelens':
-		case 'fantasysyrupyapple':
-		case 'fantasyprotector':
+		const item = Dex.mod(mod).items.get(id);
 
+		// 您的自定义MOD道具
+		if ([
+			'fantasyitem', 'fantasypowerlens', 'fantasyringtarget', 'fantasylifeorb',
+			'fantasysachet', 'fantasyscopelens', 'fantasysyrupyapple', 'fantasyprotector'
+		].includes(id)) {
 			modSpecificItems.push(id);
-			break;
-		default:
-			greatItems.push(id);
-			break;
+			continue;
+		}
+
+		// 对标准道具进行分类
+		switch (id) {
+			// ### Popular items ###
+			case 'airballoon':
+			case 'assaultvest':
+			case 'choiceband':
+			case 'choicescarf':
+			case 'choicespecs':
+			case 'expertbelt':
+			case 'focussash':
+			case 'heavydutyboots':
+			case 'leftovers':
+			case 'lifeorb':
+			case 'loadeddice':
+			case 'mentalherb':
+			case 'powerherb':
+			case 'rockyhelmet':
+			case 'salacberry':
+				greatItems.push(id);
+				break;
+
+			// ### Items ###
+			case 'abilityshield': case 'absorbbulb': case 'adrenalineorb': case 'aguavberry': case 'apricotberry':
+			case 'babiriberry': case 'berryjuice': case 'blackbelt': case 'blackglasses': case 'blacksludge':
+			case 'blunderpolicy': case 'boosterenergy': case 'brightpowder': case 'buginiumz': case 'cellbattery':
+			case 'charcoal': case 'chartiberry': case 'chestoberry': case 'chilanberry': case 'chopleberry':
+			case 'clearamulet': case 'cobaberry': case 'colburberry': case 'covertcloak': case 'custapberry':
+			case 'damprock': case 'darkiniumz': case 'dracoplate': case 'dragonfang': case 'dragoniumz':
+			case 'dreadplate': case 'earthplate': case 'ejectbutton': case 'ejectpack': case 'electricseed':
+			case 'electriumz': case 'fairiumz': case 'fairyfeather': case 'fightiniumz': case 'figyberry':
+			case 'firiumz': case 'fistplate': case 'flameorb': case 'flameplate': case 'flyiniumz':
+			case 'fullincense': case 'ganlonberry': case 'ghostiumz': case 'grassiumz': case 'grassyseed':
+			case 'grepaberry': case 'gripclaw': case 'groundiumz': case 'habanberry': case 'hardstone':
+			case 'heatrock': case 'iapapaberry': case 'icicleplate': case 'iciumz': case 'icyrock':
+			case 'insectplate': case 'ironplate': case 'kasibberry': case 'kebiaberry': case 'keeberry':
+			case 'kelpsyberry': case 'kingsrock': case 'laggingtail': case 'lansatberry': case 'laxincense':
+			case 'leppaberry': case 'liechiberry': case 'lightclay': case 'lumberry': case 'luminousmoss':
+			case 'magnet': case 'magoberry': case 'marangaberry': case 'meadowplate': case 'metalcoat':
+			case 'metronome': case 'micleberry': case 'mindplate': case 'miracleseed': case 'mirrorherb':
+			case 'mistyseed': case 'muscleband': case 'mysticwater': case 'nevermeltice': case 'normalgem':
+			case 'normaliumz': case 'occaberry': case 'oddincense': case 'passhoberry': case 'payapaberry':
+			case 'petayaberry': case 'pixieplate': case 'poisonbarb': case 'poisoniumz': case 'protectivepads':
+			case 'psychicseed': case 'psychiumz': case'punchingglove': case 'quickclaw': case 'razorclaw':
+			case 'razorfang': case 'redcard': case 'rindoberry': case 'rockincense': case 'rockiumz':
+			case 'roomservice': case 'roseincense': case 'roseliberry': case 'safetygoggles': case 'scopelens':
+			case 'seaincense': case 'sharpbeak': case 'shedshell': case 'shellbell': case 'shucaberry':
+			case 'silkscarf': case 'silverpowder': case 'sitrusberry': case 'skyplate': case 'smoothrock':
+			case 'snowball': case 'softsand': case 'spelltag': case 'splashplate': case 'spookyplate':
+			case 'starfberry': case 'steeliumz': case 'stickybarb': case 'stoneplate': case 'tangaberry':
+			case 'terrainextender': case 'throatspray': case 'toxicorb': case 'toxicplate': case 'twistedspoon':
+			case 'utilityumbrella': case 'wacanberry': case 'wateriumz': case 'waveincense': case 'weaknesspolicy':
+			case 'whiteherb': case 'widelens': case 'wikiberry': case 'wiseglasses': case 'yacheberry':
+			case 'zapplate': case 'zoomlens':
+				goodItems.push(id);
+				break;
+
+			// ### Pokémon-specific items ###
+			case 'abomasite': case 'absolite': case 'adamantcrystal': case 'adamantorb': case 'aerodactylite':
+			case 'aggronite': case 'alakazite': case 'aloraichiumz': case 'altarianite': case 'ampharosite':
+			case 'audinite': case 'banettite': case 'beedrillite': case 'blastoisinite': case 'blazikenite':
+			case 'blueorb': case 'bugmemory': case 'burndrive': case 'cameruptite': case 'charizarditex':
+			case 'charizarditey': case 'chilldrive': case 'cornerstonemask': case 'darkmemory': case 'decidiumz':
+			case 'deepseascale': case 'deepseatooth': case 'diancite': case 'dousedrive': case 'dragonmemory':
+			case 'eeviumz': case 'electricmemory': case 'fairymemory': case 'fightingmemory': case 'firememory':
+			case 'flyingmemory': case 'galladite': case 'garchompite': case 'gardevoirite': case 'gengarite':
+			case 'ghostmemory': case 'glalitite': case 'grassmemory': case 'griseousorb': case 'groundmemory':
+			case 'gyaradosite': case 'hearthflamemask': case 'heracronite': case 'houndoominite': case 'icememory':
+			case 'inciniumz': case 'kangaskhanite': case 'kommoniumz': case 'latiasite': case 'latiosite':
+			case 'lightball': case 'lopunnite': case 'lucarionite': case 'luckypunch': case 'lunaliumz':
+			case 'lustrousorb': case 'lycaniumz': case 'manectite': case 'marshadowz': case 'mawilite':
+			case 'medichamite': case 'metagrossite': case 'metalpowder': case 'mewniumz': case 'mewtwonitex':
+			case 'mewtwonitey': case 'mimikiumz': case 'pidgeotite': case 'pikaniumz': case 'pikashuniumz':
+			case 'pinsirite': case 'poisonmemory': case 'primariumz': case 'psychicmemory': case 'quickpowder':
+			case 'redorb': case 'rockmemory': case 'rustedshield': case 'rustedsword': case 'sablenite':
+			case 'salamencite': case 'sceptilite': case 'scizorite': case 'sharpedonite': case 'shockdrive':
+			case 'slowbronite': case 'snorliumz': case 'solganiumz': case 'souldew': case 'steelixite':
+			case 'steelmemory': case 'stick': case 'swampertite': case 'tapuniumz': case 'thickclub':
+			case 'tyranitarite': case 'ultranecroziumz': case 'venusaurite': case 'watermemory': case 'wellspringmask':
+				specificItems.push(id);
+				break;
+
+			// ### Usually useless items ###
+			case 'aspearberry': case 'bigroot': case 'bindingband': case 'cheriberry': case 'destinyknot':
+			case 'enigmaberry': case 'floatstone': case 'focusband': case 'ironball': case 'jabocaberry':
+			case 'oranberry': case 'pechaberry': case 'persimberry': case 'poweranklet': case 'powerband':
+			case 'powerbelt': case 'powerbracer': case 'powerlens': case 'powerweight': case 'rawstberry':
+			case 'ringtarget': case 'rowapberry':
+				poorItems.push(id);
+				break;
+
+			// ### Useless items ###
+			case 'armor_fossil': case 'auspiciousarmor': case 'beastball': case 'berrysweet': case 'bignugget':
+			case 'blukberry': case 'bottlecap': case 'chippedpot': case 'clawfossil': case 'cloversweet':
+			case 'coverfossil': case 'crackedpot': case 'dawnstone': case 'diveball': case 'domefossil':
+			case 'dragonscale': case 'dreamball': case 'dubiousdisc': case 'duskball': case 'duskstone':
+			case 'electirizer': case 'fastball': case 'firestone': case 'flowersweet': case 'friendball':
+			case 'galaricacuff': case 'galaricawreath': case 'goldbottlecap': case 'greatball': case 'healball':
+			case 'heavyball': case 'helixfossil': case 'hondewberry': case 'icestone': case 'jawfossil':
+			case 'leaffossil': case 'leafstone': case 'levelball': case 'loveball': case 'lovesweet':
+			case 'lureball': case 'luxuryball': case 'magmarizer': case 'maliciousarmor': case 'masterball':
+			case 'masterpieceteacup': case 'metalalloy': case 'moonball': case 'moonstone': case 'nestball':
+			case 'netball': case 'ovalstone': case 'pinapberry': case 'plumefossil': case 'pokeball':
+			case 'pomegberry': case 'premierball': case 'prismscale': case 'protector': case 'qualotberry':
+			case 'quickball': case 'rarebone': case 'reapercloth': case 'repeatball': case 'ribbonsweet':
+			case 'rootfossil': case 'sachet': case 'safariball': case 'sailfossil': case 'shinystone':
+			case 'skullfossil': case 'sportball': case 'starsweet': case 'strawberrysweet': case 'sunstone':
+			case 'sweetapple': case 'syrupyapple': case 'tamatoberry': case 'tartapple': case 'thunderstone':
+			case 'timerball': case 'ultraball': case 'unremarkableteacup': case 'upgrade': case 'waterstone':
+			// 默认分类，处理所有其他道具
+				badItems.push(id);
+				break;
+
+			default:
+				// 这个 default 分类逻辑会捕捉剩下的所有道具
+				// 比如超级石(Mega Stones)等，并将它们放入一个合理的分类
+				if (item.megaStone) {
+					specificItems.push(id);
+				} else {
+					goodItems.push(id); // 将未明确分类的其他道具放入 "Items"
+				}
+				break;
 		}
 	}
 	if (modSpecificItems.length > 1) items.push(...modSpecificItems);
