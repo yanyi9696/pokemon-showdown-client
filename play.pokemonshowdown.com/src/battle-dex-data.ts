@@ -546,8 +546,6 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	inteleongmax: 1320 + 81,
 	urshifugmax: 1320 + 82,
 	urshifurapidstrikegmax: 1320 + 83,
-	// ZA的新mega，暂用普通形态的贴图
-    victreebelmegafantasy: 71,
 
 	// CAP
 	syclant: 1512 + 0,
