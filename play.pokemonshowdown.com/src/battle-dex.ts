@@ -511,6 +511,13 @@ export const Dex = new class implements ModdedDex {
 			}
 			if (!window.BattlePokedex) window.BattlePokedex = {};
 			let data = window.BattlePokedex[id];
+			
+		// ===== 我们添加的强制贴图修正代码 开始 =====
+		if (id === 'victreebelmegafantasy') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'victreebel';
+		}
+		// ===== 我们添加的强制贴图修正代码 结束 =====
 
 			let species: Species;
 			if (data && typeof data.exists === 'boolean') {
