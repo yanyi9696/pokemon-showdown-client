@@ -1667,6 +1667,7 @@ for (const mod of modNames)
 			case 'tyranitarite': case 'ultranecroziumz': case 'venusaurite': case 'watermemory': case 'wellspringmask':
 			// 根据您的要求添加的专用道具
 			case 'vilevial': case 'lustrousglobe': case 'toxtricityz': case 'greninjaashz': case 'leek': case 'marshadiumz':
+			case 'victreebelite':
 				specificItems.push(id);
 				break;
 
