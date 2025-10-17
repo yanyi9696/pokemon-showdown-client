@@ -1152,10 +1152,14 @@ export class BattleTooltips {
 						for (const ally of allyActive) {
 							if (!ally || ally.fainted) continue;
 							let allyAbility = this.getAllyAbility(ally);
-							if (allyAbility === 'Flower Gift' && (ally.getSpecies().baseSpecies === 'Cherrim' || this.battle.gen <= 4)) {
+							// ==================== 修改点 (START) ====================
+							// 移除了 `&& (ally.getSpecies().baseSpecies === 'Cherrim' || this.battle.gen <= 4)` 的检查
+							// 现在只要队友有花之礼特性，就会在晴天下提供加成
+							if (allyAbility === 'Flower Gift') {
 								stats.atk = Math.floor(stats.atk * 1.5);
 								stats.spd = Math.floor(stats.spd * 1.5);
 							}
+							// ==================== 修改点 (END) ======================
 						}
 					}
 				}
