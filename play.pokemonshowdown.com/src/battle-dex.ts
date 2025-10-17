@@ -1843,7 +1843,7 @@ const ModModifier: {
 		},
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
 			// 【新代码】创建一个“钉选”白名单
-			const pinnedPokemon = ['victreebelmegafantasy'];
+			const pinnedPokemon = ['victreebelmegafantasy', 'hawluchamegafantasy'];
 
 			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
 			for (const pokemon in window.Gen9fantasydex) {
