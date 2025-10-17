@@ -537,6 +537,10 @@ export const Dex = new class implements ModdedDex {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'dragalge';
 		}
+		if (id === 'excadrillmegafantasy') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'excadrill';
+		}
 		// ===== 我们添加的强制贴图修正代码 结束 =====
 
 			let species: Species;
@@ -1865,7 +1869,7 @@ const ModModifier: {
 			// 【新代码】创建一个“钉选”白名单
 			const pinnedPokemon = [
 				'victreebelmegafantasy', 'hawluchamegafantasy', 'chandeluremegafantasy', 'froslassmegafantasy', 'delphoxmegafantasy', 
-				'dragalgemegafantasy', 
+				'dragalgemegafantasy', 'excadrillmegafantasy', 
 			];
 
 			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
