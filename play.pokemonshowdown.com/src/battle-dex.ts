@@ -511,7 +511,7 @@ export const Dex = new class implements ModdedDex {
 			}
 			if (!window.BattlePokedex) window.BattlePokedex = {};
 			let data = window.BattlePokedex[id];
-			
+
 		// ===== 我们添加的强制贴图修正代码 开始 =====
 		if (id === 'victreebelmegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
@@ -1842,8 +1842,18 @@ const ModModifier: {
 			}
 		},
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
+			// 【新代码】创建一个“钉选”白名单
+			const pinnedPokemon = ['victreebelmegafantasy'];
+
 			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
 			for (const pokemon in window.Gen9fantasydex) {
+				// 【核心修正】如果一个宝可梦在白名单里，就无视所有规则，直接添加！
+				// 否则，才执行原来的检查逻辑。
+				if (pinnedPokemon.includes(pokemon)) {
+					addedTierSet.push(['pokemon', pokemon as ID]);
+					continue; // 添加后，跳过后续检查
+				}
+
 				if (pokemon in window.BattlePokedex) continue;
 				addedTierSet.push(['pokemon', pokemon as ID]);
 			}
