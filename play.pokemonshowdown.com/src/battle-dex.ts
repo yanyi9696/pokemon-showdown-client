@@ -513,6 +513,10 @@ export const Dex = new class implements ModdedDex {
 			let data = window.BattlePokedex[id];
 
 		// ===== 我们添加的强制贴图修正代码 开始 =====
+		if (id === 'victreebelmega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'victreebel';
+		}
 		if (id === 'victreebelmegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'victreebel';
@@ -1876,7 +1880,7 @@ const ModModifier: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
 			// 【新代码】创建一个“钉选”白名单
 			const pinnedPokemon = [
-				'victreebelmegafantasy', 'hawluchamegafantasy', 'chandeluremegafantasy', 'froslassmegafantasy', 'delphoxmegafantasy', 
+				'hawluchamegafantasy', 'chandeluremegafantasy', 'froslassmegafantasy', 'delphoxmegafantasy', 
 				'dragalgemegafantasy', 'excadrillmegafantasy', 'meganiummegafantasy', 'greninjamegafantasy',
 			];
 
