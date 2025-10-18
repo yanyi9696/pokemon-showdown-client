@@ -826,7 +826,7 @@ License: GPLv2
 
 	/* 5. 添加柔和的白色光晕 (Glow) 以提高可读性 */
 	-webkit-text-stroke: 0; /* 禁用描边 */
-	text-shadow: 0 0 1px #000000; /* 1px 柔和的黑色光晕 */
+	text-shadow: 0 0 1px #ffffff; /* 1px 柔和的白色光晕 */
 
 	/* 6. 与其他状态标签(如 BRN, PSN) 保持一致的边距和圆角 */
 	padding: 1px 2px;
