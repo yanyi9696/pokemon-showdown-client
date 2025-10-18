@@ -813,50 +813,50 @@ License: GPLv2
 }
 
 /* * 自定义 Fantasy 宝可梦的状态标识样式
+ * (模拟 "Mega Evolution" 按钮风格)
  */
 
-/* 1. 这是外框 (黑色背景) */
+/* 1. 这是外框 (彩虹背景 + 圆角) */
 .statbar .status.status-fantasy-box {
-    /* 黑色填充 (我用了深灰色 #333，比纯黑 #000 质感更好) */
-    background: #333;
+    /* 1. 模拟 "Mega" 按钮的彩虹渐变背景 */
+    background: linear-gradient(to right, #F9DD68, #B0E5A8, #A8D8EA, #C7B0E1, #F3B0C3);
 
-    /* 一个更暗的边框，让它在UI中很精致 */
-    border: 1px solid #555;
-
-    /* 与其他标签一致的内边距、圆角、边距 */
-    padding: 1px 2px;
-    border-radius: 3px;
+    /* 2. 移除边框，调整圆角和边距 */
+    border: none; /* 移除所有边框 */
+    border-radius: 4px; /* 更圆的角 */
     margin-right: 2px;
 
-    /* 确保内部的 span 正常显示 */
+    /* 3. 调整内边距，让文字周围空间更足 */
+    padding: 1px 4px; /* 左右内边距增加到 4px */
+
+    /* 4. 确保布局正确 */
     display: inline-block;
     line-height: 1; /* 修正行高 */
 
-    /* 移除从 .status 继承的样式，防止干扰 */
+    /* 5. 移除继承的样式 */
     color: inherit; 
     text-shadow: none;
-    animation: none;
+    animation: none; /* 移除动画 */
 }
 
-/* 2. 这是内部的文字 (彩虹效果) */
+/* 2. 这是内部的文字 (黑色 + 白色描边) */
 .status-fantasy-box .status-fantasy-text {
-    /* 太晶化彩虹渐变 */
-    background: linear-gradient(90deg, #F678F6, #63C6F7, #79DF73, #F9DD68, #F08D5A, #EB7068, #A98FF3);
-
-    /* 放大背景并添加动画 */
-    background-size: 200% auto;
-    animation: tera-rainbow 3s linear infinite;
-
-    /* 将背景裁剪为文字的形状 */
-    -webkit-background-clip: text;
-    background-clip: text;
-
-    /* 使文字颜色透明 */
-    color: transparent;
-
-    /* 细微的 *半透明白色* 描边，让彩虹字在 *黑色* 背景上更清晰 */
-    -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.5);
-
-    /* 字体加粗 */
+    /* 1. 字体样式：黑色、加粗 */
+    color: #000;
     font-weight: bold;
+
+    /* 2. 白色描边 (使用 text-shadow 模拟 "Mega" 按钮的文字效果) */
+    /* 这会在文字周围创建一圈1px的白色 "辉光" */
+    text-shadow: 
+        1px 1px 0 #FFF,
+        -1px -1px 0 #FFF,
+        1px -1px 0 #FFF,
+        -1px 1px 0 #FFF;
+
+    /* 3. 移除之前的所有文字渐变和描边效果 */
+    background: none;
+    animation: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-stroke: 0;
 }
