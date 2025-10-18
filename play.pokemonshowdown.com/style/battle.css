@@ -813,68 +813,65 @@ License: GPLv2
     100% { background-position: 0% 50%; }
 }
 
-/* * 动画：用于 "太晶化" 彩虹流动效果 (我们把它加回来了!)
- */
-@keyframes tera-rainbow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-/* * 动画：用于 "太晶化" 彩虹流动效果
- */
-@keyframes tera-rainbow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
 /* * 自定义 Fantasy 宝可梦的状态标识样式
- * (移到名字后面)
+ * (位于名字上方, 动态彩虹文字 + 黑边)
  */
 
-/* 1. 这是外框 (动态彩虹背景) */
-/* (!!!) 注意选择器已更改 (!!!) */
-.statbar strong .status-fantasy-box {
-    /* 1. 动态彩虹渐变背景 */
-    background: linear-gradient(to right, #F9DD68, #B0E5A8, #A8D8EA, #C7B0E1, #F3B0C3, #F9DD68);
+/* 1. 容器 Div (用于定位) */
+.statbar .status-fantasy-container {
+    /* 将其定位在 statbar 内 */
+    position: relative;
+    height: 14px; /* 创建一些空间 */
+    margin-bottom: -2px; /* 减少与名字的间距 */
+    text-align: center; /* 文字居中 */
+}
+
+/* 2. 外框 Span (现在是透明的) */
+.statbar .status-fantasy-box {
+    display: inline-block; /* 允许居中 */
+    background: none; /* 无背景 */
+    border: none !important; /* (!!!) 移除红色边框 (!!!) */
+    padding: 0;
+    margin: 0;
+    line-height: 1; 
+
+    /* 移除继承的样式 */
+    color: inherit; 
+    text-shadow: none;
+    animation: none;
+    vertical-align: baseline; /* 重置对齐 */
+    position: static; /* 重置定位 */
+}
+
+/* 3. 内部的文字 (动态彩虹 + 黑边) */
+.status-fantasy-box .status-fantasy-text {
+    /* 1. 字体样式：加粗 */
+    font-weight: bold;
+    font-size: 9pt; /* 稍微调大一点点 */
+
+    /* 2. 动态彩虹渐变 */
+    background: linear-gradient(90deg, #F678F6, #63C6F7, #79DF73, #F9DD68, #F08D5A, #EB7068, #A98FF3);
     background-size: 200% auto;
     animation: tera-rainbow 4s linear infinite;
 
-    /* 2. 边框和布局 */
-    border: none !important; /* 移除任何继承的边框 */
-    border-radius: 4px;
+    /* 3. 将背景裁剪为文字形状 */
+    -webkit-background-clip: text;
+    background-clip: text;
 
-    /* 3. 内外边距 */
-    padding: 1px 4px;
-    margin-left: 4px; /* 在名字和标签之间添加一点间距 */
+    /* 4. 使文字颜色透明以显示背景 */
+    color: transparent;
 
-    /* 4. (!!!) 新的垂直对齐 (!!!) */
-    display: inline-block;
-    line-height: 1; 
-    vertical-align: middle; /* 使其与名字文本垂直居中 */
-
-    /* 5. 移除继承的样式 */
-    color: inherit; 
-    text-shadow: none;
-}
-
-/* 2. 这是内部的文字 (黑色 + 白色描边) */
-.status-fantasy-box .status-fantasy-text {
-    /* 1. 字体样式：黑色、加粗 */
-    color: #000;
-    font-weight: bold;
-
-    /* 2. 白色描边 */
+    /* 5. (!!!) 添加黑色描边 (!!!) */
+    /* 使用 text-shadow 模拟描边，兼容性更好 */
     text-shadow: 
-        1px 1px 0 #FFF,
-        -1px -1px 0 #FFF,
-        1px -1px 0 #FFF,
-        -1px 1px 0 #FFF;
+        1px 1px 0 #000,
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000;
 
-    /* 3. 移除之前的所有文字渐变和描边效果 */
-    background: none;
-    animation: none;
-    -webkit-background-clip: unset;
-    background-clip: unset;
-    -webkit-text-stroke: 0;
+    /* 如果你的浏览器支持 -webkit-text-stroke, 下面这行效果更好 */
+    /* -webkit-text-stroke: 1px black; */
+
+    /* 6. 移除其他效果 */
+    animation: none; /* 文字本身不应该有动画 */
 }

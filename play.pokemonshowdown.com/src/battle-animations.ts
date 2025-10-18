@@ -2738,18 +2738,18 @@ export class PokemonSprite extends Sprite {
 
 	getStatbarHTML(pokemon: Pokemon) {
 		let buf = '<div class="statbar' + (this.isFrontSprite ? ' lstatbar' : ' rstatbar') + this.getClassForPosition(pokemon.slot) + '" style="display: none">';
-		const ignoreNick = this.isFrontSprite && (this.scene.battle.ignoreOpponent || this.scene.battle.ignoreNicks);
-
-		// =========== 自定义 FANTASY 标识 (移到名字后面) - 开始 ===========
+		// =========== 自定义 FANTASY 标识 (移到名字上方) - 开始 ===========
+		// 检查状态，如果存在，则添加标签 HTML
 		if (pokemon.volatiles.fantasystats) {
-			// 我们把标签加到 <strong> 标签内部，名字的旁边
-			// 注意我们不再需要 'status' 类了
-			buf += ' <span class="status-fantasy-box" title="Fantasy Pokémon">' +
-					'<span class="status-fantasy-text">Fantasy</span>' +
-				'</span>';
+			// 我们把标签放在 <strong> 名字标签之前
+			buf += '<div class="status-fantasy-container">' + // 新增一个容器 div 用于定位
+					'<span class="status-fantasy-box" title="Fantasy Pokémon">' +
+						'<span class="status-fantasy-text">Fantasy</span>' +
+					'</span>' +
+				'</div>';
 		}
-		// =========== 自定义 FANTASY 标识 (移到名字后面) - 结束 ===========
-
+		// =========== 自定义 FANTASY 标识 (移到名字上方) - 结束 ===========
+		const ignoreNick = this.isFrontSprite && (this.scene.battle.ignoreOpponent || this.scene.battle.ignoreNicks);
 		buf += `<strong>${BattleLog.escapeHTML(ignoreNick ? pokemon.speciesForme : pokemon.name)}`;
 		const gender = pokemon.gender;
 		if (gender === 'M' || gender === 'F') {
