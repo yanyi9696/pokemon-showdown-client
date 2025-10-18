@@ -2739,6 +2739,15 @@ export class PokemonSprite extends Sprite {
 	getStatbarHTML(pokemon: Pokemon) {
 		let buf = '<div class="statbar' + (this.isFrontSprite ? ' lstatbar' : ' rstatbar') + this.getClassForPosition(pokemon.slot) + '" style="display: none">';
 		const ignoreNick = this.isFrontSprite && (this.scene.battle.ignoreOpponent || this.scene.battle.ignoreNicks);
+
+		// =========== 自定义 FANTASY 标识 (名字前面) - 开始 ===========
+		// 使用 pokemon.volatiles.fantasystats 判断，保证双方可见
+		let fantasyTag = '';
+		if (pokemon.volatiles.fantasystats) {
+			fantasyTag = '<span class="status-fantasy" title="Fantasy Pokémon">Fantasy</span> '; // 在标签后加一个空格
+		}
+		// =========== 自定义 FANTASY 标识 (名字前面) - 结束 ===========
+
 		buf += `<strong>${BattleLog.escapeHTML(ignoreNick ? pokemon.speciesForme : pokemon.name)}`;
 		const gender = pokemon.gender;
 		if (gender === 'M' || gender === 'F') {
@@ -2756,14 +2765,6 @@ export class PokemonSprite extends Sprite {
 		if (pokemon.terastallized) {
 			buf += ` <img src="${Dex.resourcePrefix}sprites/types/Tera${pokemon.terastallized}.png" alt="Tera-${pokemon.terastallized}" style="vertical-align:text-bottom;" height="16" width="16" />`;
 		}
-		
-// =========== 自定义 FANTASY 标识 (名字旁边, 最终版) - 开始 ===========
-// 使用 speciesForme 判断，保证双方可见
-if (pokemon.speciesForme.includes('Fantasy')) {
-    // 使用单个 span 标签，简化结构
-    buf += ' <span class="status-fantasy" title="Fantasy Pokémon">Fantasy</span>';
-}
-// =========== 自定义 FANTASY 标识 (名字旁边, 最终版) - 结束 ===========
 
 		buf += `</strong><div class="hpbar"><div class="hptext"></div><div class="hptextborder"></div><div class="prevhp"><div class="hp"></div></div><div class="status"></div>`;
 		buf += `</div>`;
