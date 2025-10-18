@@ -1,0 +1,24 @@
+/* 用于为所有 Fantasy 宝可梦添加一个“Fantasy”标签
+*/
+div.pokemon[data-species$="-Fantasy"] .sprite::before {
+  /* --- 显示的文本 --- */
+  content: 'Fantasy';
+
+  /* --- 标签样式 --- */
+  background: linear-gradient(to right, #6A5ACD, #836FFF); /* 渐变背景 (蓝紫色) */
+  color: #FFFFFF;                 /* 白色文字 */
+  font-weight: bold;              /* 粗体 */
+  font-size: 10px;                /* 字体大小 */
+  padding: 1px 5px;               /* 内边距 (上下 1px, 左右 5px) */
+  border-radius: 4px;             /* 圆角 */
+  border: 1px solid #FFF;         /* 白色边框 */
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5); /* 轻微的阴影 */
+
+  /* --- 标签定位 --- */
+  position: absolute;             /* 绝对定位 (相对于 .sprite 元素) */
+  top: -5px;                      /* 放在精灵图像的“头顶”靠上 5px 的位置 */
+  left: 50%;                      /* 水平居中 */
+  transform: translateX(-50%);    /* 精确水平居中 */
+  z-index: 10;                    /* 确保标签在精灵图像上方 */
+  white-space: nowrap;            /* 确保 "Fantasy" 不会换行 */
+}
