@@ -2739,15 +2739,6 @@ export class PokemonSprite extends Sprite {
 	getStatbarHTML(pokemon: Pokemon) {
 		let buf = '<div class="statbar' + (this.isFrontSprite ? ' lstatbar' : ' rstatbar') + this.getClassForPosition(pokemon.slot) + '" style="display: none">';
 		const ignoreNick = this.isFrontSprite && (this.scene.battle.ignoreOpponent || this.scene.battle.ignoreNicks);
-
-		// =========== 自定义 FANTASY 标识 (名字前面) - 开始 ===========
-		// 使用 pokemon.volatiles.fantasystats 判断，保证双方可见
-		let fantasyTag = '';
-		if (pokemon.volatiles.fantasystats) {
-			fantasyTag = '<span class="status-fantasy" title="Fantasy Pokémon">Fantasy</span> '; // 在标签后加一个空格
-		}
-		// =========== 自定义 FANTASY 标识 (名字前面) - 结束 ===========
-
 		buf += `<strong>${BattleLog.escapeHTML(ignoreNick ? pokemon.speciesForme : pokemon.name)}`;
 		const gender = pokemon.gender;
 		if (gender === 'M' || gender === 'F') {
@@ -2826,6 +2817,16 @@ export class PokemonSprite extends Sprite {
 			else $prevhp.addClass('prevhp-yellow prevhp-red');
 		}
 		let status = '';
+
+		// =========== 自定义 FANTASY 标识 - 开始 ===========
+		if (pokemon.speciesForme.includes('Fantasy')) { // <--- 关键修改在这里！
+			// 我们在这里添加一个自定义的 div 标签。
+			// 'title' 属性会让你在鼠标悬停时看到 "Fantasy Pokémon"
+			// "FTSY" 是一个简短的标识，你也可以改成 "Fantasy"
+			status += '<div class="status status-fantasy" title="Fantasy Pokémon">FTSY</div>';
+		}
+		// =========== 自定义 FANTASY 标识 - 结束 ===========
+
 
 
 		if (pokemon.status === 'brn') {

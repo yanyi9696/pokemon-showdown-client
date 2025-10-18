@@ -805,43 +805,21 @@ License: GPLv2
 	background: #DEDEDE;
 }
 
-/* * 动画：用于 "太晶化" 彩虹流动效果
+/* * 自定义 Fantasy 宝可梦的状态标识样式
  */
-@keyframes tera-rainbow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+.status-fantasy {
+	/* 你可以随意调整颜色，这里用了一个紫色的渐变 */
+	background: linear-gradient(#A040F0, #8A2BE2);
+	
+	color: white; /* 文字颜色 */
+	
+	/* 文本阴影，让它更有立体感 */
+	text-shadow: 1px 1px 0 #4B0082; 
 }
 
-/* * 自定义 Fantasy 宝可梦的状态标识样式
- * (位于名字前面, 动态彩虹文字 + 黑边)
- */
-.statbar strong .status-fantasy {
-    /* 1. 字体样式：加粗 */
-    font-weight: bold;
-    font-size: 9pt; /* 与名字大小一致 */
-
-    /* 2. 动态彩虹渐变 */
-    background: linear-gradient(90deg, #F678F6, #63C6F7, #79DF73, #F9DD68, #F08D5A, #EB7068, #A98FF3);
-    background-size: 200% auto;
-    animation: tera-rainbow 4s linear infinite;
-
-    /* 3. 将背景裁剪为文字形状 */
-    -webkit-background-clip: text;
-    background-clip: text;
-
-    /* 4. 使文字颜色透明以显示背景 */
-    color: transparent;
-
-    /* 5. (!!!) 添加黑色描边 (使用 text-stroke) (!!!) */
-    -webkit-text-stroke: 1px black; /* Webkit browsers (Chrome, Safari, Edge) */
-    text-stroke: 1px black; /* Standard property (Firefox might need config) */
-    text-shadow: none; /* 移除旧的 text-shadow */
-
-    /* 6. (!!!) 移除红色边框并调整布局 (!!!) */
-    border: none !important; /* 强制移除边框 */
-    padding: 0; /* 移除内边距 */
-    margin-right: 4px; /* 在标签和名字间加点距离 */
-    vertical-align: middle; /* 垂直居中对齐 */
-    line-height: 1; /* 确保行高正常 */
+/* 确保它能正确覆盖默认的 .status 颜色 */
+.status.status-fantasy {
+	background: linear-gradient(#A040F0, #8A2BE2);
+	color: white;
+	text-shadow: 1px 1px 0 #4B0082;
 }
