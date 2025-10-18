@@ -2819,15 +2819,13 @@ export class PokemonSprite extends Sprite {
 		let status = '';
 
 		// =========== 自定义 FANTASY 标识 - 开始 ===========
-		if (pokemon.speciesForme.includes('Fantasy')) { // <--- 关键修改在这里！
-			// 我们在这里添加一个自定义的 div 标签。
-			// 'title' 属性会让你在鼠标悬停时看到 "Fantasy Pokémon"
-			// "FTSY" 是一个简短的标识，你也可以改成 "Fantasy"
-			status += '<div class="status status-fantasy" title="Fantasy Pokémon">FTSY</div>';
+		// 我们检查 fantasystats 状态，这个状态对双方都可见
+		if (pokemon.volatiles.fantasystats) {
+			// 我们使用 <span> 标签（而不是 <div>）来确保标签宽度贴合文字
+			// 并且我们将文本从 "FTSY" 改为 "Fantasy"
+			status += '<span class="status status-fantasy" title="Fantasy Pokémon">Fantasy</span>';
 		}
 		// =========== 自定义 FANTASY 标识 - 结束 ===========
-
-
 
 		if (pokemon.status === 'brn') {
 			status += '<span class="brn">BRN</span> ';

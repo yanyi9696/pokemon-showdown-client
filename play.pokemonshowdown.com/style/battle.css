@@ -805,21 +805,40 @@ License: GPLv2
 	background: #DEDEDE;
 }
 
-/* * 自定义 Fantasy 宝可梦的状态标识样式
+/* * 动画：用于 "太晶化" 彩虹流动效果
  */
-.status-fantasy {
-	/* 你可以随意调整颜色，这里用了一个紫色的渐变 */
-	background: linear-gradient(#A040F0, #8A2BE2);
-	
-	color: white; /* 文字颜色 */
-	
-	/* 文本阴影，让它更有立体感 */
-	text-shadow: 1px 1px 0 #4B0082; 
+@keyframes tera-rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
-/* 确保它能正确覆盖默认的 .status 颜色 */
-.status.status-fantasy {
-	background: linear-gradient(#A040F0, #8A2BE2);
-	color: white;
-	text-shadow: 1px 1px 0 #4B0082;
+/* * 自定义 Fantasy 宝可梦的状态标识样式
+ * (替换掉你之前添加的 .status-fantasy 规则)
+ */
+.statbar .status.status-fantasy {
+	/* 1. 太晶化彩虹渐变 (这是一个模拟太晶的漂亮渐变) */
+	background: linear-gradient(90deg, #F678F6, #63C6F7, #79DF73, #F9DD68, #F08D5A, #EB7068, #A98FF3);
+
+	/* 2. 放大背景并添加动画，使其流动 */
+	background-size: 200% auto;
+	animation: tera-rainbow 3s linear infinite;
+
+	/* 3. 将背景裁剪为文字的形状 */
+	-webkit-background-clip: text;
+	background-clip: text;
+
+	/* 4. 使文字颜色透明，以显示背景 */
+	color: transparent;
+
+	/* 5. 添加细微的黑色描边以提高可读性 */
+	-webkit-text-stroke: 0.4px #333;
+	text-shadow: none; /* 移除旧的阴影 */
+
+	/* 6. 与其他状态标签(如 BRN, PSN) 保持一致的边距和圆角 */
+	padding: 1px 2px;
+	border: 0;
+	border-radius: 3px;
+	font-weight: bold; /* 字体加粗 */
+	margin-right: 2px; /* 右边距 */
 }
