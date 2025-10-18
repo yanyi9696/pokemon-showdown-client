@@ -521,33 +521,65 @@ export const Dex = new class implements ModdedDex {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'victreebel';
 		}
+		if (id === 'hawluchamega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'hawlucha';
+		}
 		if (id === 'hawluchamegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'hawlucha';
+		}
+		if (id === 'chandeluremega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'chandelure';
 		}
 		if (id === 'chandeluremegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'chandelure';
 		}
+		if (id === 'froslassmega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'froslass';
+		}
 		if (id === 'froslassmegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'froslass';
+		}
+		if (id === 'delphoxmega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'delphox';
 		}
 		if (id === 'delphoxmegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'delphox';
 		}
+		if (id === 'dragalgemega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'dragalge';
+		}
 		if (id === 'dragalgemegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'dragalge';
+		}
+		if (id === 'excadrillmega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'excadrill';
 		}
 		if (id === 'excadrillmegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'excadrill';
 		}
+		if (id === 'meganiummega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'meganium';
+		}
 		if (id === 'meganiummegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'meganium';
+		}
+		if (id === 'greninjamega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'greninja';
 		}
 		if (id === 'greninjamegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
