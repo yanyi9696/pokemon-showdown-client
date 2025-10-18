@@ -2739,6 +2739,17 @@ export class PokemonSprite extends Sprite {
 	getStatbarHTML(pokemon: Pokemon) {
 		let buf = '<div class="statbar' + (this.isFrontSprite ? ' lstatbar' : ' rstatbar') + this.getClassForPosition(pokemon.slot) + '" style="display: none">';
 		const ignoreNick = this.isFrontSprite && (this.scene.battle.ignoreOpponent || this.scene.battle.ignoreNicks);
+
+		// =========== 自定义 FANTASY 标识 (移到名字后面) - 开始 ===========
+		if (pokemon.volatiles.fantasystats) {
+			// 我们把标签加到 <strong> 标签内部，名字的旁边
+			// 注意我们不再需要 'status' 类了
+			buf += ' <span class="status-fantasy-box" title="Fantasy Pokémon">' +
+					'<span class="status-fantasy-text">Fantasy</span>' +
+				'</span>';
+		}
+		// =========== 自定义 FANTASY 标识 (移到名字后面) - 结束 ===========
+
 		buf += `<strong>${BattleLog.escapeHTML(ignoreNick ? pokemon.speciesForme : pokemon.name)}`;
 		const gender = pokemon.gender;
 		if (gender === 'M' || gender === 'F') {
@@ -2818,17 +2829,6 @@ export class PokemonSprite extends Sprite {
 		}
 		let status = '';
 
-// =========== 自定义 FANTASY 标识 - 开始 ===========
-// 我们检查 fantasystats 状态，这个状态对双方都可见
-if (pokemon.volatiles.fantasystats) {
-    // 我们使用一个 "box" 标签包裹一个 "text" 标签
-    // status-fantasy-box 将是黑色底图
-    // status-fantasy-text 将是彩虹色的文字
-	status += '<span class="status status-fantasy-box" title="Fantasy Pokémon">' +
-                  '<span class="status-fantasy-text">Fantasy</span>' +
-              '</span>';
-}
-// =========== 自定义 FANTASY 标识 - 结束 ===========
 
 		if (pokemon.status === 'brn') {
 			status += '<span class="brn">BRN</span> ';
