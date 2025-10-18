@@ -1880,8 +1880,8 @@ const ModModifier: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
 			// 【新代码】创建一个“钉选”白名单
 			const pinnedPokemon = [
-				'hawluchamegafantasy', 'chandeluremegafantasy', 'froslassmegafantasy', 'delphoxmegafantasy', 
-				'dragalgemegafantasy', 'excadrillmegafantasy', 'meganiummegafantasy', 'greninjamegafantasy',
+				'victreebelmega', 'hawluchamega', 'chandeluremega', 'froslassmega', 'delphoxmega', 'dragalgemega', 'excadrillmega', 
+				'meganiummega', 'greninjamega',
 			];
 
 			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
