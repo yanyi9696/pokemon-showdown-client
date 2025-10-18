@@ -1878,21 +1878,8 @@ const ModModifier: {
 			}
 		},
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
-			// 【新代码】创建一个“钉选”白名单
-			const pinnedPokemon = [
-				'hawluchamegafantasy', 'chandeluremegafantasy', 'froslassmegafantasy', 'delphoxmegafantasy', 
-				'dragalgemegafantasy', 'excadrillmegafantasy', 'meganiummegafantasy', 'greninjamegafantasy',
-			];
-
 			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
 			for (const pokemon in window.Gen9fantasydex) {
-				// 【核心修正】如果一个宝可梦在白名单里，就无视所有规则，直接添加！
-				// 否则，才执行原来的检查逻辑。
-				if (pinnedPokemon.includes(pokemon)) {
-					addedTierSet.push(['pokemon', pokemon as ID]);
-					continue; // 添加后，跳过后续检查
-				}
-
 				if (pokemon in window.BattlePokedex) continue;
 				addedTierSet.push(['pokemon', pokemon as ID]);
 			}
