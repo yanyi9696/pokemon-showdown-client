@@ -804,3 +804,21 @@ License: GPLv2
 	border: 2px solid #444444;
 	background: #DEDEDE;
 }
+/* * 自定义 Fantasy 宝可梦的状态标识样式
+ */
+.status-fantasy {
+	/* 你可以随意调整颜色，这里用了一个紫色的渐变 */
+	background: linear-gradient(#A040F0, #8A2BE2);
+	
+	color: white; /* 文字颜色 */
+	
+	/* 文本阴影，让它更有立体感 */
+	text-shadow: 1px 1px 0 #4B0082; 
+}
+
+/* 确保它能正确覆盖默认的 .status 颜色 */
+.status.status-fantasy {
+	background: linear-gradient(#A040F0, #8A2BE2);
+	color: white;
+	text-shadow: 1px 1px 0 #4B0082;
+}

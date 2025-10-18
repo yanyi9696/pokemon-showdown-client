@@ -2817,6 +2817,16 @@ export class PokemonSprite extends Sprite {
 			else $prevhp.addClass('prevhp-yellow prevhp-red');
 		}
 		let status = '';
+
+// =========== 自定义 FANTASY 标识 - 开始 ===========
+if (pokemon.speciesForme.includes('Fantasy')) { // <--- 关键修改在这里！
+	// 我们在这里添加一个自定义的 div 标签。
+	// 'title' 属性会让你在鼠标悬停时看到 "Fantasy Pokémon"
+	// "FTSY" 是一个简短的标识，你也可以改成 "Fantasy"
+	status += '<div class="status status-fantasy" title="Fantasy Pokémon">FTSY</div>';
+}
+// =========== 自定义 FANTASY 标识 - 结束 ===========
+
 		if (pokemon.status === 'brn') {
 			status += '<span class="brn">BRN</span> ';
 		} else if (pokemon.status === 'psn') {
