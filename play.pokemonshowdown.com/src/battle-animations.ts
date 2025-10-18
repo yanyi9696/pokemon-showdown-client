@@ -2738,17 +2738,6 @@ export class PokemonSprite extends Sprite {
 
 	getStatbarHTML(pokemon: Pokemon) {
 		let buf = '<div class="statbar' + (this.isFrontSprite ? ' lstatbar' : ' rstatbar') + this.getClassForPosition(pokemon.slot) + '" style="display: none">';
-		// =========== 自定义 FANTASY 标识 (移到名字上方) - 开始 ===========
-		// 检查状态，如果存在，则添加标签 HTML
-		if (pokemon.volatiles.fantasystats) {
-			// 我们把标签放在 <strong> 名字标签之前
-			buf += '<div class="status-fantasy-container">' + // 新增一个容器 div 用于定位
-					'<span class="status-fantasy-box" title="Fantasy Pokémon">' +
-						'<span class="status-fantasy-text">Fantasy</span>' +
-					'</span>' +
-				'</div>';
-		}
-		// =========== 自定义 FANTASY 标识 (移到名字上方) - 结束 ===========
 		const ignoreNick = this.isFrontSprite && (this.scene.battle.ignoreOpponent || this.scene.battle.ignoreNicks);
 		buf += `<strong>${BattleLog.escapeHTML(ignoreNick ? pokemon.speciesForme : pokemon.name)}`;
 		const gender = pokemon.gender;
@@ -2767,6 +2756,14 @@ export class PokemonSprite extends Sprite {
 		if (pokemon.terastallized) {
 			buf += ` <img src="${Dex.resourcePrefix}sprites/types/Tera${pokemon.terastallized}.png" alt="Tera-${pokemon.terastallized}" style="vertical-align:text-bottom;" height="16" width="16" />`;
 		}
+		
+// =========== 自定义 FANTASY 标识 (名字旁边, 最终版) - 开始 ===========
+// 使用 speciesForme 判断，保证双方可见
+if (pokemon.speciesForme.includes('Fantasy')) {
+    // 使用单个 span 标签，简化结构
+    buf += ' <span class="status-fantasy" title="Fantasy Pokémon">Fantasy</span>';
+}
+// =========== 自定义 FANTASY 标识 (名字旁边, 最终版) - 结束 ===========
 
 		buf += `</strong><div class="hpbar"><div class="hptext"></div><div class="hptextborder"></div><div class="prevhp"><div class="hp"></div></div><div class="status"></div>`;
 		buf += `</div>`;
