@@ -816,7 +816,7 @@ License: GPLv2
 	 */
 	background:
 		linear-gradient(90deg, #F678F6, #63C6F7, #79DF73, #F9DD68, #F08D5A, #EB7068, #A98FF3),
-		#000; /* 黑色底图 */
+		#00000060; /* 黑色底图 */
 
 	/* 2. 分别设置背景大小：
 	 * - 层 1 (渐变): 200% auto (用于动画)
@@ -847,4 +847,24 @@ License: GPLv2
 	border-radius: 3px;
 	font-weight: bold; /* 字体加粗 */
 	margin-right: 2px; /* 右边距 */
+}
+/*
+ * (上面这个 } 结束了 .status-fantasy 规则)
+ */
+
+
+/*
+ * 定义 "tera-rainbow" 动画
+ * (让彩虹渐变动起来)
+ * (这个 @keyframes 必须在 .status-fantasy 的 {} 外面)
+ */
+@keyframes tera-rainbow {
+	0% {
+		/* 动画开始时，背景在最左边 */
+		background-position: 0% 50%;
+	}
+	100% {
+		/* 动画结束时，背景移动到最右边 */
+		background-position: 100% 50%;
+	}
 }
