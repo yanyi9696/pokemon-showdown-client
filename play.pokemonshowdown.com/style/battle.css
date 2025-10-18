@@ -807,28 +807,41 @@ License: GPLv2
 
 /*
  * 自定义 Fantasy 宝可梦的状态标识样式
- * (方案一：添加柔和的白色光晕)
+ * (方案：黑色背景 + 彩虹文字)
  */
 .statbar .status.status-fantasy {
-	/* 1. 太晶化彩虹渐变 (这是一个模拟太晶的漂亮渐变) */
-	background: linear-gradient(90deg, #F678F6, #63C6F7, #79DF73, #F9DD68, #F08D5A, #EB7068, #A98FF3);
+	/* 1. 设置多重背景：
+	 * - 层 1 (顶层): 彩虹渐变
+	 * - 层 2 (底层): 纯黑色
+	 */
+	background:
+		linear-gradient(90deg, #F678F6, #63C6F7, #79DF73, #F9DD68, #F08D5A, #EB7068, #A98FF3),
+		#000; /* 黑色底图 */
 
-	/* 2. 放大背景并添加动画，使其流动 */
-	background-size: 200% auto;
+	/* 2. 分别设置背景大小：
+	 * - 层 1 (渐变): 200% auto (用于动画)
+	 * - 层 2 (黑色): auto (默认大小)
+	 */
+	background-size: 200% auto, auto;
+
+	/* 3. 设置多重背景裁剪：
+	 * - 层 1 (渐变): 裁剪为文字
+	 * - 层 2 (黑色): 裁剪为内边距框 (padding-box)，即充满整个方块
+	 */
+	-webkit-background-clip: text, padding-box;
+	background-clip: text, padding-box;
+
+	/* 4. 应用动画 (只会应用到第一个背景，即彩虹渐变) */
 	animation: tera-rainbow 3s linear infinite;
 
-	/* 3. 将背景裁剪为文字的形状 */
-	-webkit-background-clip: text;
-	background-clip: text;
-
-	/* 4. 使文字颜色透明，以显示背景 */
+	/* 5. 使文字颜色透明，以显示被裁剪的背景(彩虹) */
 	color: transparent;
 
-	/* 5. 添加柔和的白色光晕 (Glow) 以提高可读性 */
-	-webkit-text-stroke: 0; /* 禁用描边 */
-	text-shadow: 0 0 1px #ffffff; /* 1px 柔和的白色光晕 */
+	/* 6. 移除所有描边/阴影，因为不再需要它们 */
+	-webkit-text-stroke: 0;
+	text-shadow: none;
 
-	/* 6. 与其他状态标签(如 BRN, PSN) 保持一致的边距和圆角 */
+	/* 7. 与其他状态标签(如 BRN, PSN) 保持一致的边距和圆角 */
 	padding: 1px 2px;
 	border: 0;
 	border-radius: 3px;
