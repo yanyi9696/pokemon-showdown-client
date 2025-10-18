@@ -805,15 +805,8 @@ License: GPLv2
 	background: #DEDEDE;
 }
 
-/* * 动画：用于 "太晶化" 彩虹流动效果
- */
-@keyframes tera-rainbow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* * 自定义 Fantasy 宝可梦的状态标识样式
+/*
+ * 自定义 Fantasy 宝可梦的状态标识样式
  * (替换掉你之前添加的 .status-fantasy 规则)
  */
 .statbar .status.status-fantasy {
@@ -831,9 +824,13 @@ License: GPLv2
 	/* 4. 使文字颜色透明，以显示背景 */
 	color: transparent;
 
-	/* 5. 添加细微的黑色描边以提高可读性 */
-	-webkit-text-stroke: 0.4px #333;
-	text-shadow: none; /* 移除旧的阴影 */
+	/* 5. 尝试使用 'text-shadow' 添加细微的白色勾边 (0.5px) */
+	-webkit-text-stroke: 0; /* 禁用旧的描边 */
+	text-shadow:
+		-0.5px -0.5px 0 #fff,
+		 0.5px -0.5px 0 #fff,
+		-0.5px  0.5px 0 #fff,
+		 0.5px  0.5px 0 #fff; /* 0.5px 白色描边 */
 
 	/* 6. 与其他状态标签(如 BRN, PSN) 保持一致的边距和圆角 */
 	padding: 1px 2px;
