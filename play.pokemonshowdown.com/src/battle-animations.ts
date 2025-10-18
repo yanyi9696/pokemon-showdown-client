@@ -2821,9 +2821,12 @@ export class PokemonSprite extends Sprite {
 // =========== 自定义 FANTASY 标识 - 开始 ===========
 // 我们检查 fantasystats 状态，这个状态对双方都可见
 if (pokemon.volatiles.fantasystats) {
-    // 我们使用 <span> 标签（而不是 <div>）来确保标签宽度贴合文字
-    // 并且我们将文本从 "FTSY" 改为 "Fantasy"
-	status += '<span class="status status-fantasy" title="Fantasy Pokémon">Fantasy</span>';
+    // 我们使用一个 "box" 标签包裹一个 "text" 标签
+    // status-fantasy-box 将是白色带边框的底图
+    // status-fantasy-text 将是彩虹色的文字
+	status += '<span class="status status-fantasy-box" title="Fantasy Pokémon">' +
+                  '<span class="status-fantasy-text">Fantasy</span>' +
+              '</span>';
 }
 // =========== 自定义 FANTASY 标识 - 结束 ===========
 

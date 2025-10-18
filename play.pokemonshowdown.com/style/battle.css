@@ -804,7 +804,7 @@ License: GPLv2
 	border: 2px solid #444444;
 	background: #DEDEDE;
 }
-/* * 动画：用于 "太晶化" 彩虹流动效果
+/* * 动画：用于 "太晶化" 彩虹流动效果 (保留)
  */
 @keyframes tera-rainbow {
     0% { background-position: 0% 50%; }
@@ -813,31 +813,50 @@ License: GPLv2
 }
 
 /* * 自定义 Fantasy 宝可梦的状态标识样式
- * (替换掉你之前添加的 .status-fantasy 规则)
  */
-.statbar .status.status-fantasy {
-	/* 1. 太晶化彩虹渐变 (这是一个模拟太晶的漂亮渐变) */
-	background: linear-gradient(90deg, #F678F6, #63C6F7, #79DF73, #F9DD68, #F08D5A, #EB7068, #A98FF3);
 
-	/* 2. 放大背景并添加动画，使其流动 */
-	background-size: 200% auto;
-	animation: tera-rainbow 3s linear infinite;
+/* 1. 这是外框 (白色背景 + 黑色边框) */
+.statbar .status.status-fantasy-box {
+    /* 白色填充 */
+    background: white;
 
-	/* 3. 将背景裁剪为文字的形状 */
-	-webkit-background-clip: text;
-	background-clip: text;
+    /* 黑色边框 (我用了深灰色 #333，比纯黑 #000 好看一些) */
+    border: 1px solid #333;
 
-	/* 4. 使文字颜色透明，以显示背景 */
-	color: transparent;
+    /* 与其他标签一致的内边距、圆角、边距 */
+    padding: 1px 2px;
+    border-radius: 3px;
+    margin-right: 2px;
 
-	/* 5. 添加细微的黑色描边以提高可读性 */
-	-webkit-text-stroke: 0.4px #333;
-	text-shadow: none; /* 移除旧的阴影 */
+    /* 确保内部的 span 正常显示 */
+    display: inline-block;
+    line-height: 1; /* 修正行高，防止文字被切 */
 
-	/* 6. 与其他状态标签(如 BRN, PSN) 保持一致的边距和圆角 */
-	padding: 1px 2px;
-	border: 0;
-	border-radius: 3px;
-	font-weight: bold; /* 字体加粗 */
-	margin-right: 2px; /* 右边距 */
+    /* 移除从 .status 继承的样式，防止干扰 */
+    color: inherit; 
+    text-shadow: none;
+    animation: none;
+}
+
+/* 2. 这是内部的文字 (彩虹效果) */
+.status-fantasy-box .status-fantasy-text {
+    /* 太晶化彩虹渐变 */
+    background: linear-gradient(90deg, #F678F6, #63C6F7, #79DF73, #F9DD68, #F08D5A, #EB7068, #A98FF3);
+
+    /* 放大背景并添加动画 */
+    background-size: 200% auto;
+    animation: tera-rainbow 3s linear infinite;
+
+    /* 将背景裁剪为文字的形状 */
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    /* 使文字颜色透明 */
+    color: transparent;
+
+    /* 细微的黑色描边，让彩虹字更清晰 */
+    -webkit-text-stroke: 0.4px #333;
+
+    /* 字体加粗 */
+    font-weight: bold;
 }
