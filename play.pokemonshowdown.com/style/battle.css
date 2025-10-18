@@ -813,33 +813,50 @@ License: GPLv2
 }
 
 /* * 自定义 Fantasy 宝可梦的状态标识样式
- * (彩虹文字 + 黑色边框)
  */
-.statbar .status.status-fantasy {
-    /* 1. 纯黑色边框 和 基础布局 */
-    border: 1px solid #000; /* 纯黑色边框 */
-    padding: 0px 2px; /* 调整了内边距，使其更贴合 */
+
+/* 1. 这是外框 (黑色背景) */
+.statbar .status.status-fantasy-box {
+    /* 黑色填充 (我用了深灰色 #333，比纯黑 #000 质感更好) */
+    background: #333;
+
+    /* 一个更暗的边框，让它在UI中很精致 */
+    border: 1px solid #555;
+
+    /* 与其他标签一致的内边距、圆角、边距 */
+    padding: 1px 2px;
     border-radius: 3px;
     margin-right: 2px;
-    font-weight: bold;
-    background: none; /* 确保没有背景色 */
-    line-height: 1.1; /* 保证文字垂直居中 */
 
-    /* 2. 太晶化彩虹渐变 (文字) */
-    background-image: linear-gradient(90deg, #F678F6, #63C6F7, #79DF73, #F9DD68, #F08D5A, #EB7068, #A98FF3);
+    /* 确保内部的 span 正常显示 */
+    display: inline-block;
+    line-height: 1; /* 修正行高 */
 
-    /* 3. 放大背景并添加动画 */
+    /* 移除从 .status 继承的样式，防止干扰 */
+    color: inherit; 
+    text-shadow: none;
+    animation: none;
+}
+
+/* 2. 这是内部的文字 (彩虹效果) */
+.status-fantasy-box .status-fantasy-text {
+    /* 太晶化彩虹渐变 */
+    background: linear-gradient(90deg, #F678F6, #63C6F7, #79DF73, #F9DD68, #F08D5A, #EB7068, #A98FF3);
+
+    /* 放大背景并添加动画 */
     background-size: 200% auto;
     animation: tera-rainbow 3s linear infinite;
 
-    /* 4. 将背景裁剪为文字的形状 */
+    /* 将背景裁剪为文字的形状 */
     -webkit-background-clip: text;
     background-clip: text;
 
-    /* 5. 使文字颜色透明 */
+    /* 使文字颜色透明 */
     color: transparent;
 
-    /* 6. 细微的黑色描边 (让彩虹字在亮色背景上也清晰) */
-    -webkit-text-stroke: 0.4px #333;
-    text-shadow: none; /* 移除旧的阴影 */
+    /* 细微的 *半透明白色* 描边，让彩虹字在 *黑色* 背景上更清晰 */
+    -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.5);
+
+    /* 字体加粗 */
+    font-weight: bold;
 }
