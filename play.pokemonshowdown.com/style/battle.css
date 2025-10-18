@@ -812,31 +812,48 @@ License: GPLv2
     100% { background-position: 0% 50%; }
 }
 
+/* * 动画：用于 "太晶化" 彩虹流动效果 (我们把它加回来了!)
+ */
+@keyframes tera-rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
 /* * 自定义 Fantasy 宝可梦的状态标识样式
- * (模拟 "Mega Evolution" 按钮风格)
+ * (动态彩虹背景 + 黑色描边文字)
  */
 
-/* 1. 这是外框 (彩虹背景 + 圆角) */
+/* 1. 这是外框 (动态彩虹背景 + 圆角) */
 .statbar .status.status-fantasy-box {
     /* 1. 模拟 "Mega" 按钮的彩虹渐变背景 */
-    background: linear-gradient(to right, #F9DD68, #B0E5A8, #A8D8EA, #C7B0E1, #F3B0C3);
+    background: linear-gradient(to right, #F9DD68, #B0E5A8, #A8D8EA, #C7B0E1, #F3B0C3, #F9DD68); /* 在末尾加回开头的颜色，让循环更自然 */
 
-    /* 2. 移除边框，调整圆角和边距 */
-    border: none; /* 移除所有边框 */
-    border-radius: 4px; /* 更圆的角 */
+    /* 2. (!!!) 新增：应用动态效果 (!!!) */
+    background-size: 200% auto; /* 放大背景，为动画做准备 */
+    animation: tera-rainbow 4s linear infinite; /* 应用动画！ */
+
+    /* 3. 移除红色边框 */
+    border: none !important; 
+
+    border-radius: 4px; /* 圆角 */
     margin-right: 2px;
 
-    /* 3. 调整内边距，让文字周围空间更足 */
-    padding: 1px 4px; /* 左右内边距增加到 4px */
+    /* 4. 调整内边距 */
+    padding: 1px 4px;
 
-    /* 4. 确保布局正确 */
+    /* 5. 确保布局正确 */
     display: inline-block;
-    line-height: 1; /* 修正行高 */
+    line-height: 1; 
 
-    /* 5. 移除继承的样式 */
+    /* 6. (!!!) 垂直对齐 (!!!) */
+    vertical-align: top;
+    position: relative;
+    top: -2px;
+
+    /* 7. 移除继承的样式 */
     color: inherit; 
     text-shadow: none;
-    animation: none; /* 移除动画 */
 }
 
 /* 2. 这是内部的文字 (黑色 + 白色描边) */
@@ -845,8 +862,7 @@ License: GPLv2
     color: #000;
     font-weight: bold;
 
-    /* 2. 白色描边 (使用 text-shadow 模拟 "Mega" 按钮的文字效果) */
-    /* 这会在文字周围创建一圈1px的白色 "辉光" */
+    /* 2. 白色描边 */
     text-shadow: 
         1px 1px 0 #FFF,
         -1px -1px 0 #FFF,
