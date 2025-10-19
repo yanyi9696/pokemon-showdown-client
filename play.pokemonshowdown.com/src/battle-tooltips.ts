@@ -1276,12 +1276,12 @@ export class BattleTooltips {
 		}
 		// ==================== 新增：自制道具的面板显示 (START) ====================
 		if (item === 'fantasyprotector') {
-			stats.def = Math.floor(stats.def * 1.3);
-			stats.spd = Math.floor(stats.spd * 1.3);
+			stats.def = Math.floor(stats.def * 1.25);
+			stats.spd = Math.floor(stats.spd * 1.25);
 		}
 		if (item === 'fantasysyrupyapple') {
-			stats.atk = Math.floor(stats.atk * 0.7);
-			stats.spa = Math.floor(stats.spa * 0.7);
+			stats.atk = Math.floor(stats.atk * 0.75);
+			stats.spa = Math.floor(stats.spa * 0.75);
 		}
 		// ==================== 新增：自制道具的面板显示 (END) ======================
 
