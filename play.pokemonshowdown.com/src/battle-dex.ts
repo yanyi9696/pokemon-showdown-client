@@ -257,17 +257,19 @@ export const Dex = new class implements ModdedDex {
 
 	pokeballs: string[] | null = null;
 
-	resourcePrefix = (() => {
-		let prefix = '';
-		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
-		return `${prefix}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/`;
-		// return `${prefix}//play.pokemonshowdown.com/`;
-	})();
+	// resourcePrefix = (() => {
+	// 	let prefix = '';
+	// 	if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
+	// 	return `${prefix}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/`;
+	// 	// return `${prefix}//play.pokemonshowdown.com/`;
+	// })();
+	resourcePrefix = 'https://raw.githubusercontent.com/Fr4nK2hN/pokemon-sprites/main/'
 
-	fxPrefix = (() => {
-		const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
-		return `${protocol}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/fx/`;
-	})();
+	// fxPrefix = (() => {
+	// 	const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
+	// 	return `${protocol}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/fx/`;
+	// })();
+	fxPrefix = 'https://raw.githubusercontent.com/Fr4nK2hN/pokemon-sprites/main/fx/'
 
 	loadedSpriteData = { xy: 1, bw: 0 };
 	moddedDexes: { [mod: string]: ModdedDex } = {};
@@ -287,7 +289,7 @@ export const Dex = new class implements ModdedDex {
 		}
 		if (formatid.endsWith('rubl')) modids.push('rubl' as ID);
 		if (formatid.endsWith('ru')) modids.push('ru' as ID);
-		
+
 		// regulars
 		if (formatid.includes('anythinggoes') || formatid.endsWith('ag')) modids.push('anythinggoes' as ID);
 		if (formatid.includes('doubles') ||
@@ -1465,7 +1467,7 @@ export class ModdedDex {
 		if (this.modid.includes('natdex' as ID) && !this.modid.includes('gen9fantasy' as ID)) table = BTTable[`gen${this.gen}natdex`];
 		if (this.modid.includes('gen7letsgo' as ID)) table = BTTable['gen7letsgo'];
 		if (this.modid.includes('gen8bdsp' as ID)) table = BTTable['gen8bdsp'];
-		
+
 		if (this.modid.includes('gen9fantasy' as ID)) table = window.Gen9fantasyTable;
 		return table;
 	}
@@ -1916,10 +1918,10 @@ const ModModifier: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
 			// 【新代码】创建一个“钉选”白名单
 			const pinnedPokemon = [
-				'victreebelmega','victreebelmegafantasy', 'hawluchamega', 'hawluchamegafantasy', 
-				'chandeluremega', 'chandeluremegafantasy', 'froslassmega', 'froslassmegafantasy', 
-				'delphoxmega', 'delphoxmegafantasy', 'dragalgemega', 'dragalgemegafantasy', 
-				'excadrillmega', 'excadrillmegafantasy', 'meganiummega', 'meganiummegafantasy', 
+				'victreebelmega','victreebelmegafantasy', 'hawluchamega', 'hawluchamegafantasy',
+				'chandeluremega', 'chandeluremegafantasy', 'froslassmega', 'froslassmegafantasy',
+				'delphoxmega', 'delphoxmegafantasy', 'dragalgemega', 'dragalgemegafantasy',
+				'excadrillmega', 'excadrillmegafantasy', 'meganiummega', 'meganiummegafantasy',
 				'greninjamega', 'greninjamegafantasy', 'starmiemega',
 			];
 
