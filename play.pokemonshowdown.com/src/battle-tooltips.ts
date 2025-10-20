@@ -1278,6 +1278,7 @@ export class BattleTooltips {
 		if (item === 'fantasyprotector') {
 			stats.def = Math.floor(stats.def * 1.2);
 			stats.spd = Math.floor(stats.spd * 1.2);
+			speedModifiers.push(0.5);
 		}
 		if (item === 'fantasysyrupyapple') {
 			stats.atk = Math.floor(stats.atk * 0.8);
