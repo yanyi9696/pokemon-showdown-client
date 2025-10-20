@@ -2535,31 +2535,6 @@ export class Battle {
 				this.activateAbility(poke, fromeffect);
 			}
 			poke.addVolatile('formechange' as ID, species.name); // the formechange volatile reminds us to revert the sprite change on switch-out
-
-			// [!!] 在这里添加修复代码，确保在 animTransform 之前更新 fantasystats
-			// 检查宝可梦原本是否有 fantasystats (意味着它应该显示种族值)
-			// 并且我们能成功获取新形态的种族值数据
-			if (poke.volatiles.fantasystats && species?.baseStats) {
-				const newStats = species.baseStats;
-				// 再次检查 newStats 是否有效 (防止 0/0/0/0/0/0)
-				if (typeof newStats.hp === 'number' && newStats.hp > 0) { // 检查 hp 是否是有效数字且大于0
-					const statsOrder: (keyof Dex.StatsTable)[] = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
-					const statsArray = statsOrder.map(stat => newStats[stat] ?? 0);
-					const statsString = statsArray.join('/');
-					// 直接更新客户端的 volatile 状态
-					poke.addVolatile('fantasystats' as ID, statsString);
-                    // 可选：添加日志确认更新成功
-                    // console.log(`[FormeChange Client Update] ${poke.name} stats updated to: ${statsString}`);
-				} else {
-					console.error(`[FormeChange Client Update] Failed to get valid baseStats for ${species.name}`, newStats);
-                    // 保留旧值或设置错误提示，避免显示 0/0/0/0/0/0
-                    // poke.addVolatile('fantasystats' as ID, 'Error'); 
-				}
-			} else if (poke.volatiles.fantasystats && !species?.baseStats) {
-                 console.error(`[FormeChange Client Update] Could not find species data or baseStats for ${args[2]}`);
-            }
-			// [!!] 修复代码结束
-
 			this.scene.animTransform(poke, true);
 			this.log(args, kwArgs);
 			break;
@@ -2757,12 +2732,16 @@ export class Battle {
 				this.scene.resultAnim(poke, 'Reflect', 'good');
 				break;
 			// fantasy
-			case 'fantasystats': 
-				const stats = Dex.sanitizeName(args[3]);
-				poke.addVolatile('fantasystats' as ID, stats);
-				this.scene.updateStatbar(poke);
-				break;
-			}
+            case 'fantasystats': { // 使用花括号明确作用域
+                 // 直接使用 args[3]，通常不需要 sanitizeName
+                 const statsString = args[3] || '';
+                 poke.addVolatile('fantasystats' as ID, statsString); // 只更新内部状态
+                 // [!!] 不在这里强制调用 updateStatbar
+                 // 让 -formechange 触发的 animTransform 在动画结束时负责更新
+                 // console.log(`[Start Fantasystats] ${poke.name} volatile updated to: ${statsString}`); // 可选：添加日志确认内部状态已更新
+                 break;
+            	} 
+			} 
 			if (!(effect.id === 'typechange' && poke.terastallized)) {
 				poke.addVolatile(effect.id);
 			}
