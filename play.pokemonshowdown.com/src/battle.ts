@@ -2487,7 +2487,29 @@ export class Battle {
 			poke.details = args[2];
 			poke.searchid = args[1].substr(0, 2) + args[1].substr(3) + '|' + args[2];
 
+			// --- 开始修复 (添加于此处) ---
+			// 检查 'fantasystats' volatile 是否存在
+			// 这修复了 'Fantasy' 宝可梦在永久形态变化（如牵绊变身）时种族值显示不更新的问题
+			if (poke.volatiles['fantasystats']) {
+				// 'species' 变量已经在此块的开头被获取，它包含了新形态的数据
+				const newSpeciesData = species; 
+
+				if (newSpeciesData.baseStats) {
+					const stats = newSpeciesData.baseStats;
+					const statsString = `${stats.hp}/${stats.atk}/${stats.def}/${stats.spa}/${stats.spd}/${stats.spe}`;
+					// 重新设置 'fantasystats' 易变状态为新的种族值字符串
+					poke.addVolatile('fantasystats' as ID, statsString);
+				}
+			}
+			// --- 结束修复 ---
+
 			this.scene.animTransform(poke, true, true);
+			
+			// --- 开始修复 (添加于此处) ---
+			// 告诉场景更新状态栏，这将重绘种族值
+			this.scene.updateStatbar(poke);
+			// --- 结束修复 ---
+			
 			this.log(args, kwArgs);
 			break;
 		}
@@ -2557,7 +2579,7 @@ export class Battle {
 			// 告诉场景更新状态栏，这将重绘种族值
 			this.scene.updateStatbar(poke);
 			// --- 结束修复 ---
-			
+
 			this.log(args, kwArgs);
 			break;
 		}
