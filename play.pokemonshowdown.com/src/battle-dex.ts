@@ -517,79 +517,79 @@ export const Dex = new class implements ModdedDex {
 		// ===== 我们添加的强制贴图修正代码 开始 =====
 		if (id === 'victreebelmega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'victreebel-mega';
+			data.spriteid = 'victreebel';
 		}
 		if (id === 'victreebelmegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'victreebel-mega';
+			data.spriteid = 'victreebel';
 		}
 		if (id === 'hawluchamega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'hawlucha-mega';
+			data.spriteid = 'hawlucha';
 		}
 		if (id === 'hawluchamegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'hawlucha-mega';
+			data.spriteid = 'hawlucha';
 		}
 		if (id === 'chandeluremega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'chandelure-mega';
+			data.spriteid = 'chandelure';
 		}
 		if (id === 'chandeluremegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'chandelure-mega';
+			data.spriteid = 'chandelure';
 		}
 		if (id === 'froslassmega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'froslass-mega';
+			data.spriteid = 'froslass';
 		}
 		if (id === 'froslassmegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'froslass-mega';
+			data.spriteid = 'froslass';
 		}
 		if (id === 'delphoxmega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'delphox-mega';
+			data.spriteid = 'delphox';
 		}
 		if (id === 'delphoxmegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'delphox-mega';
+			data.spriteid = 'delphox';
 		}
 		if (id === 'dragalgemega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'dragalge-mega';
+			data.spriteid = 'dragalge';
 		}
 		if (id === 'dragalgemegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'dragalge-mega';
+			data.spriteid = 'dragalge';
 		}
 		if (id === 'excadrillmega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'excadrill-mega';
+			data.spriteid = 'excadrill';
 		}
 		if (id === 'excadrillmegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'excadrill-mega';
+			data.spriteid = 'excadrill';
 		}
 		if (id === 'meganiummega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'meganium-mega';
+			data.spriteid = 'meganium';
 		}
 		if (id === 'meganiummegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'meganium-mega';
+			data.spriteid = 'meganium';
 		}
 		if (id === 'greninjamega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'greninja-mega';
+			data.spriteid = 'greninja';
 		}
 		if (id === 'greninjamegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'greninja-mega';
+			data.spriteid = 'greninja';
 		}
 		if (id === 'starmiemega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'starmie-mega';
+			data.spriteid = 'starmie';
 		}
 		// ===== 我们添加的强制贴图修正代码 结束 =====
 
