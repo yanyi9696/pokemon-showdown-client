@@ -2536,27 +2536,28 @@ export class Battle {
 			}
 			poke.addVolatile('formechange' as ID, species.name); // the formechange volatile reminds us to revert the sprite change on switch-out
 
-			// [!!] 在这里添加修复代码
-			// 检查 'fantasystats' 状态是否存在
-			if (poke.volatiles.fantasystats) {
+			// [!!] 在这里添加修复代码，确保在 animTransform 之前更新 fantasystats
+			// 检查宝可梦原本是否有 fantasystats (意味着它应该显示种族值)
+			// 并且我们能成功获取新形态的种族值数据
+			if (poke.volatiles.fantasystats && species?.baseStats) {
 				const newStats = species.baseStats;
-				// [!!] 添加检查：确保 newStats 和它的属性存在且是数字
-				if (newStats && typeof newStats.hp === 'number') {
-					// 定义我们期望的顺序
+				// 再次检查 newStats 是否有效 (防止 0/0/0/0/0/0)
+				if (typeof newStats.hp === 'number' && newStats.hp > 0) { // 检查 hp 是否是有效数字且大于0
 					const statsOrder: (keyof Dex.StatsTable)[] = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
-					// 按顺序从 newStats 对象中提取值，如果某个值不存在则默认为 0
 					const statsArray = statsOrder.map(stat => newStats[stat] ?? 0);
-					// 生成字符串
 					const statsString = statsArray.join('/');
-					// 更新 volatile 状态
+					// 直接更新客户端的 volatile 状态
 					poke.addVolatile('fantasystats' as ID, statsString);
+                    // 可选：添加日志确认更新成功
+                    // console.log(`[FormeChange Client Update] ${poke.name} stats updated to: ${statsString}`);
 				} else {
-					// 如果获取 newStats 失败，可以选择记录一个错误或保持旧值不变
-					console.error("未能获取形态变化的正确种族值:", species.name, newStats);
-                    // 或者，为了防止显示 0/0/0/0/0/0，可以不更新或设置一个默认提示
-                    // poke.addVolatile('fantasystats' as ID, 'N/A'); 
+					console.error(`[FormeChange Client Update] Failed to get valid baseStats for ${species.name}`, newStats);
+                    // 保留旧值或设置错误提示，避免显示 0/0/0/0/0/0
+                    // poke.addVolatile('fantasystats' as ID, 'Error'); 
 				}
-			}
+			} else if (poke.volatiles.fantasystats && !species?.baseStats) {
+                 console.error(`[FormeChange Client Update] Could not find species data or baseStats for ${args[2]}`);
+            }
 			// [!!] 修复代码结束
 
 			this.scene.animTransform(poke, true);
