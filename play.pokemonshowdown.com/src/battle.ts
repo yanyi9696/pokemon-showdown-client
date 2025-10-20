@@ -2537,17 +2537,28 @@ export class Battle {
 			poke.addVolatile('formechange' as ID, species.name); // the formechange volatile reminds us to revert the sprite change on switch-out
 
 			// [!!] 在这里添加修复代码
-			// 检查 'fantasystats' 状态是否存在 (你的自制宝可梦应该有)
+			// 检查 'fantasystats' 状态是否存在
 			if (poke.volatiles.fantasystats) {
-				// 从新形态(species)获取种族值对象
 				const newStats = species.baseStats;
-				// 将种族值格式化为 "H/A/B/C/D/S" 字符串
-				const statsString = Object.values(newStats).join('/');
-				// 用新的种族值字符串更新 'fantasystats' 状态
-				poke.addVolatile('fantasystats' as ID, statsString);
+				// [!!] 添加检查：确保 newStats 和它的属性存在且是数字
+				if (newStats && typeof newStats.hp === 'number') {
+					// 定义我们期望的顺序
+					const statsOrder: (keyof Dex.StatsTable)[] = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+					// 按顺序从 newStats 对象中提取值，如果某个值不存在则默认为 0
+					const statsArray = statsOrder.map(stat => newStats[stat] ?? 0);
+					// 生成字符串
+					const statsString = statsArray.join('/');
+					// 更新 volatile 状态
+					poke.addVolatile('fantasystats' as ID, statsString);
+				} else {
+					// 如果获取 newStats 失败，可以选择记录一个错误或保持旧值不变
+					console.error("未能获取形态变化的正确种族值:", species.name, newStats);
+                    // 或者，为了防止显示 0/0/0/0/0/0，可以不更新或设置一个默认提示
+                    // poke.addVolatile('fantasystats' as ID, 'N/A'); 
+				}
 			}
 			// [!!] 修复代码结束
-			
+
 			this.scene.animTransform(poke, true);
 			this.log(args, kwArgs);
 			break;
