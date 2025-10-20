@@ -2535,22 +2535,29 @@ export class Battle {
 				this.activateAbility(poke, fromeffect);
 			}
 			poke.addVolatile('formechange' as ID, species.name); // the formechange volatile reminds us to revert the sprite change on switch-out
-			// --- 开始修复 ---
-			// 检查 'fantasystats' volatile 是否存在，如果存在，则用新形态的种族值更新它
-			// 这修复了 'Fantasy' 宝可梦形态变化时种族值显示不更新的问题
-			// (我们假设 'species.baseStats' 存在并且包含 hp, atk, def, spa, spd, spe)
-			if (poke.volatiles['fantasystats'] && species.baseStats) {
-				const stats = species.baseStats;
-				const statsString = `${stats.hp}/${stats.atk}/${stats.def}/${stats.spa}/${stats.spd}/${stats.spe}`;
-				// 重新设置 'fantasystats' 易变状态为新的种族值字符串
-				poke.addVolatile('fantasystats' as ID, statsString);
-			}
 
+			// --- 开始修复 (版本 2) ---
+			// 检查 'fantasystats' volatile 是否存在
+			if (poke.volatiles['fantasystats']) {
+				// 不再使用 'species.baseStats'，因为它可能不完整。
+				// 而是调用 poke.getSpecies()，它现在会因为我们刚刚设置的 'formechange' volatile
+				// 而返回新形态的完整物种数据。
+				const newSpeciesData = poke.getSpecies();
+
+				if (newSpeciesData.baseStats) {
+					const stats = newSpeciesData.baseStats;
+					const statsString = `${stats.hp}/${stats.atk}/${stats.def}/${stats.spa}/${stats.spd}/${stats.spe}`;
+					// 重新设置 'fantasystats' 易变状态为新的种族值字符串
+					poke.addVolatile('fantasystats' as ID, statsString);
+				}
+			}
+			
 			this.scene.animTransform(poke, true);
 
 			// 告诉场景更新状态栏，这将重绘种族值
 			this.scene.updateStatbar(poke);
 			// --- 结束修复 ---
+			
 			this.log(args, kwArgs);
 			break;
 		}
