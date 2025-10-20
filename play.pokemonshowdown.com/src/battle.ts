@@ -2535,6 +2535,19 @@ export class Battle {
 				this.activateAbility(poke, fromeffect);
 			}
 			poke.addVolatile('formechange' as ID, species.name); // the formechange volatile reminds us to revert the sprite change on switch-out
+
+			// [!!] 在这里添加修复代码
+			// 检查 'fantasystats' 状态是否存在 (你的自制宝可梦应该有)
+			if (poke.volatiles.fantasystats) {
+				// 从新形态(species)获取种族值对象
+				const newStats = species.baseStats;
+				// 将种族值格式化为 "H/A/B/C/D/S" 字符串
+				const statsString = Object.values(newStats).join('/');
+				// 用新的种族值字符串更新 'fantasystats' 状态
+				poke.addVolatile('fantasystats' as ID, statsString);
+			}
+			// [!!] 修复代码结束
+			
 			this.scene.animTransform(poke, true);
 			this.log(args, kwArgs);
 			break;
