@@ -639,6 +639,10 @@ export const Dex = new class implements ModdedDex {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'floetteeternal';
 		}
+		if (id === 'floetteeternalmegafantasy') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'floetteeternal';
+		}
 		if (id === 'scolipedemega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'scolipede';
@@ -1999,7 +2003,7 @@ const ModModifier: {
 				'emboarmega',
 				'scraftymega',
 				'eelektrossmega',
-				'floetteeternalmega',
+				'floetteeternalmega', 'floetteeternalmegafantasy',
 				'scolipedemega',
 				'feraligatrmega',
 				'pyroarmega',
