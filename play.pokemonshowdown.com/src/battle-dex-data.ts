@@ -247,7 +247,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	flabebewhite: 1032 + 95,
 	flabebeyellow: 1032 + 96,
 	floetteblue: 1032 + 97,
-	floetteeternal: 1032 + 98, floetteeternalfantasy: 1032 + 98, floettemega: 1032 + 98,	floettemegafantasy: 1032 + 98,
+	floetteeternal: 1032 + 98, floetteeternalfantasy: 1032 + 98, floetteeternalmega: 1032 + 98,	floetteeternalmegafantasy: 1032 + 98,
 	floetteorange: 1032 + 99,
 	floettewhite: 1032 + 100,
 	floetteyellow: 1032 + 101,
