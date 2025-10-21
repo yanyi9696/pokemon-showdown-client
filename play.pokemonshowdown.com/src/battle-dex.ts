@@ -591,6 +591,70 @@ export const Dex = new class implements ModdedDex {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'starmie';
 		}
+		if (id === 'barbaraclemega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'barbaracle';
+		}
+		if (id === 'greninjamega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'greninja';
+		}
+		if (id === 'chesnaughtmega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'chesnaught';
+		}
+		if (id === 'dragonitemega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'dragonite';
+		}
+		if (id === 'drampamega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'drampa';
+		}
+		if (id === 'falinksmega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'falinks';
+		}
+		if (id === 'skarmoryamega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'skarmorya';
+		}
+		if (id === 'clefablemega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'clefable';
+		}
+		if (id === 'emboarmega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'emboar';
+		}
+		if (id === 'scraftymega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'scrafty';
+		}
+		if (id === 'eelektrossmega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'eelektross';
+		}
+		if (id === 'floetteeternalmega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'floetteeternal';
+		}
+		if (id === 'scolipedemega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'scolipede';
+		}
+		if (id === 'feraligatrmega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'feraligatr';
+		}
+		if (id === 'pyroarmega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'pyroar';
+		}
+		if (id === 'malamarmega') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'malamar';
+		}
 		// ===== 我们添加的强制贴图修正代码 结束 =====
 
 			let species: Species;
@@ -1922,7 +1986,25 @@ const ModModifier: {
 				'chandeluremega', 'chandeluremegafantasy', 'froslassmega', 'froslassmegafantasy',
 				'delphoxmega', 'delphoxmegafantasy', 'dragalgemega', 'dragalgemegafantasy',
 				'excadrillmega', 'excadrillmegafantasy', 'meganiummega', 'meganiummegafantasy',
-				'greninjamega', 'greninjamegafantasy', 'starmiemega',
+				'greninjamega', 'greninjamegafantasy',
+				'starmiemega',
+				'barbaraclemega',
+				'greninjamega',
+				'chesnaughtmega',
+				'dragonitemega',
+				'drampamega',
+				'falinksmega',
+				'skarmoryamega',
+				'clefablemega',
+				'emboarmega',
+				'scraftymega',
+				'eelektrossmega',
+				'floetteeternalmega',
+				'scolipedemega',
+				'feraligatrmega',
+				'pyroarmega',
+				'malamarmega',
+				 
 			];
 
 			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
