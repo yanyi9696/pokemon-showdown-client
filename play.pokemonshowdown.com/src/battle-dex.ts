@@ -638,11 +638,11 @@ export const Dex = new class implements ModdedDex {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'eelektross';
 		}
-		if (id === 'floetteeternalmega') {
+		if (id === 'floettmega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'floetteeternal';
 		}
-		if (id === 'floetteeternalmegafantasy') {
+		if (id === 'floettmegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'floetteeternal';
 		}
@@ -2006,7 +2006,7 @@ const ModModifier: {
 				'emboarmega',
 				'scraftymega',
 				'eelektrossmega',
-				'floetteeternalmega', 'floetteeternalmegafantasy',
+				'floettmega', 'floettmegafantasy',
 				'scolipedemega',
 				'feraligatrmega',
 				'pyroarmega',
