@@ -503,7 +503,10 @@ export const Dex = new class implements ModdedDex {
 			if (window.BattleAliases && id in BattleAliases) {
 				name = BattleAliases[id];
 				id = toID(name);
-			} else if (window.BattlePokedex && !(id in BattlePokedex) && window.BattleBaseSpeciesChart && !(formid.startsWith("sawsbuck") && formid.includes("fantasy"))) {
+			} else if (window.BattlePokedex && !(id in BattlePokedex) && window.BattleBaseSpeciesChart && !(
+                    (formid.startsWith("sawsbuck") && formid.includes("fantasy")) ||
+                    (formid.startsWith("floette") && formid.includes("fantasy")) // <-- 新增的 floette 排除规则
+                )) {
 				for (const baseSpeciesId of BattleBaseSpeciesChart) {
 					if (formid.startsWith(baseSpeciesId)) {
 						id = baseSpeciesId;
