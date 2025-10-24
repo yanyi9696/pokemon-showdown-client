@@ -519,14 +519,6 @@ export const Dex = new class implements ModdedDex {
 			let data = window.BattlePokedex[id];
 
 		// ===== 我们添加的强制贴图修正代码 开始 =====
-		if (id === 'victreebelmega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'victreebel';
-		}
-		if (id === 'victreebelmegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'victreebel';
-		}
 		if (id === 'hawluchamega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'hawlucha';
@@ -606,10 +598,6 @@ export const Dex = new class implements ModdedDex {
 		if (id === 'chesnaughtmega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'chesnaught';
-		}
-		if (id === 'dragonitemega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'dragonite';
 		}
 		if (id === 'drampamega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
