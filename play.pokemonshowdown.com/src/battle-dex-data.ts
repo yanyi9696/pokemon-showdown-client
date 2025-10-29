@@ -247,7 +247,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	flabebewhite: 1032 + 95,
 	flabebeyellow: 1032 + 96,
 	floetteblue: 1032 + 97,
-	floetteeternal: 1032 + 98, floetteeternalfantasy: 1032 + 98, floetteeternalmega: 1032 + 98,	floetteeternalmegafantasy: 1032 + 98,
+	floetteeternal: 1032 + 98, floetteeternalfantasy: 1032 + 98, // Added fantasy mapping
 	floetteorange: 1032 + 99,
 	floettewhite: 1032 + 100,
 	floetteyellow: 1032 + 101,
@@ -546,6 +546,32 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	inteleongmax: 1320 + 81,
 	urshifugmax: 1320 + 82,
 	urshifurapidstrikegmax: 1320 + 83,
+	clefablemega: 1320 + 84,
+	victreebelmega: 1320 + 85, victreebelmegafantasy: 1320 + 85, // Added fantasy mapping
+	starmiemega: 1320 + 86,
+	dragonitemega: 1320 + 87,
+	meganiummega: 1320 + 88, meganiummegafantasy: 1320 + 88, // Added fantasy mapping
+	feraligatrmega: 1320 + 89,
+	skarmorymega: 1320 + 90, skarmorymegafantasy: 1320 + 90, // Added fantasy mapping
+	froslassmega: 1320 + 91, froslassmegafantasy: 1320 + 91, // Added fantasy mapping
+	emboarmega: 1320 + 92,
+	excadrillmega: 1320 + 93, excadrillmegafantasy: 1320 + 93, // Added fantasy mapping
+	scolipedemega: 1320 + 94,
+	scraftymega: 1320 + 95,
+	eelektrossmega: 1320 + 96,
+	chandeluremega: 1320 + 97, chandeluremegafantasy: 1320 + 97, // Added fantasy mapping
+	chesnaughtmega: 1320 + 98,
+	delphoxmega: 1320 + 99, delphoxmegafantasy: 1320 + 99, // Added fantasy mapping
+	greninjamega: 1320 + 100, greninjamegafantasy: 1320 + 100, // Added fantasy mapping
+	pyroarmega: 1320 + 101,
+	floetteeternalmega: 1320 + 102, floetteeternalmegafantasy: 1320 + 102, // Added fantasy mapping
+	malamarmega: 1320 + 103,
+	barbaraclemega: 1320 + 104,
+	dragalgemega: 1320 + 105, dragalgemegafantasy: 1320 + 105, // Added fantasy mapping
+	hawluchamega: 1320 + 106, hawluchamegafantasy: 1320 + 106, // Added fantasy mapping
+	zygardemega: 1320 + 107,
+	drampamega: 1320 + 108,
+	falinksmega: 1320 + 109,
 
 	// CAP
 	syclant: 1512 + 0,
