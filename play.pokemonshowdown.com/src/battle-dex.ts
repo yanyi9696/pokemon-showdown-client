@@ -506,6 +506,7 @@ export const Dex = new class implements ModdedDex {
 			} else if (window.BattlePokedex && !(id in BattlePokedex) && window.BattleBaseSpeciesChart && !(
                     (formid.startsWith("sawsbuck") && formid.includes("fantasy")) ||
                     (formid.startsWith("floette") && formid.includes("fantasy")) ||
+					(formid.startsWith("floette") && formid.includes("eternal")) ||
                     (formid.startsWith("floette") && formid.includes("mega")) // <-- 新增的 floette "mega" 排除规则
                 )) {
 				for (const baseSpeciesId of BattleBaseSpeciesChart) {
