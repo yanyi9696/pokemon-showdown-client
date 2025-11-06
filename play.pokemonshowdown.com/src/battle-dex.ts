@@ -506,7 +506,6 @@ export const Dex = new class implements ModdedDex {
 			} else if (window.BattlePokedex && !(id in BattlePokedex) && window.BattleBaseSpeciesChart && !(
                     (formid.startsWith("sawsbuck") && formid.includes("fantasy")) ||
                     (formid.startsWith("floette") && formid.includes("fantasy")) ||
-					(formid.startsWith("floette") && formid.includes("eternal")) ||
                     (formid.startsWith("floette") && formid.includes("mega")) // <-- 新增的 floette "mega" 排除规则
                 )) {
 				for (const baseSpeciesId of BattleBaseSpeciesChart) {
@@ -634,11 +633,11 @@ export const Dex = new class implements ModdedDex {
 		}
 		if (id === 'floettemega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'floetteeternal';
+			data.spriteid = 'floette';
 		}
 		if (id === 'floettemegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'floetteeternal';
+			data.spriteid = 'floette';
 		}
 		if (id === 'scolipedemega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
