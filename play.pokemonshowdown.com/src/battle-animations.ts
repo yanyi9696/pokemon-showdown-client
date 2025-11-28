@@ -1910,8 +1910,9 @@ export class PokemonSprite extends Sprite {
 		longzhige: ['龙之歌', 'bad'],
 		woju: ['蜗居', 'good'],
 		xianxingzhiling: ['先行指令', 'good'],
-		yuannengshifang: ['源能释放', 'good'],
+		yuannengshifang: ['源能释放', 'neutral'],
 		tundu: ['吞毒', 'good'],
+		qianghuawuxiao: ['强化无效', 'bad'],
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;

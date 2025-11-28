@@ -535,14 +535,6 @@ export const Dex = new class implements ModdedDex {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'chandelure';
 		}
-		if (id === 'froslassmega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'froslass';
-		}
-		if (id === 'froslassmegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'froslass';
-		}
 		if (id === 'delphoxmega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'delphox';
@@ -567,14 +559,6 @@ export const Dex = new class implements ModdedDex {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'excadrill';
 		}
-		if (id === 'meganiummega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'meganium';
-		}
-		if (id === 'meganiummegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'meganium';
-		}
 		if (id === 'greninjamega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'greninja';
@@ -582,10 +566,6 @@ export const Dex = new class implements ModdedDex {
 		if (id === 'greninjamegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'greninja';
-		}
-		if (id === 'starmiemega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'starmie';
 		}
 		if (id === 'barbaraclemega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
@@ -607,22 +587,6 @@ export const Dex = new class implements ModdedDex {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'falinks';
 		}
-		if (id === 'skarmorymega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'skarmory';
-		}
-		if (id === 'skarmorymegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'skarmory';
-		}
-		if (id === 'clefablemega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'clefable';
-		}
-		if (id === 'emboarmega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'emboar';
-		}
 		if (id === 'scraftymega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'scrafty';
@@ -642,10 +606,6 @@ export const Dex = new class implements ModdedDex {
 		if (id === 'scolipedemega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'scolipede';
-		}
-		if (id === 'feraligatrmega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'feraligatr';
 		}
 		if (id === 'pyroarmega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
