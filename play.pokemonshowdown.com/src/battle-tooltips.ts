@@ -2003,7 +2003,7 @@ export class BattleTooltips {
 			for (const boost of Object.values(target.boosts)) {
 				if (boost > 0) boostCount += boost;
 			}
-			value.set(Math.min(80 + 20 * boostCount, 200));
+			value.set(Math.min(80 + 10 * boostCount, 200));
 		}
 		if (move.id === 'smellingsalts' && target) {
 			if (target.status === 'par') {
