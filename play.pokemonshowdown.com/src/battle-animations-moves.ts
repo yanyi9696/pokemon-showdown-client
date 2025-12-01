@@ -1881,7 +1881,7 @@ export const BattleMoveAnims: AnimTable = {
 			}, 'swing');
 		},
 	},
-	dianshanshunji: {
+	dianshanxunji: {
 		anim(scene, [attacker, defender]) {
 			// 1. 保留子弹拳的快速突进动作
 			BattleOtherAnims.fastattack.anim(scene, [attacker, defender]);
