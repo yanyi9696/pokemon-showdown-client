@@ -1720,7 +1720,7 @@ for (const mod of modNames)
 
 			default:
 				// 这个 default 分类逻辑会捕捉剩下的所有道具
-				// 比如超级石(Mega Stones)等，并将它们放入一个合理的分类
+				// 比如进化石(Mega Stones)等，并将它们放入一个合理的分类
 				if (item.megaStone) {
 					specificItems.push(id);
 				} else if (item.name.endsWith(" Z") && !item.isPokeball) {
