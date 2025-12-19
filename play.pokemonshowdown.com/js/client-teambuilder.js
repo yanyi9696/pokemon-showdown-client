@@ -3655,6 +3655,9 @@
 			};
 			if (!isHackmons && species.requiredItems.length === 1) {
 				set.item = species.requiredItems[0];
+			} else if (customMegaStones[species.name]) {
+				// 如果匹配到自制 Mega 列表，则自动填充道具
+				set.item = customMegaStones[species.name];
 			} else {
 				set.item = '';
 			}
