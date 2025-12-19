@@ -572,6 +572,8 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	zygardemega: 1320 + 107,
 	drampamega: 1320 + 108,
 	falinksmega: 1320 + 109,
+	//自制的mega沙漠蜻蜓
+	flygonmegafantasy: 330,
 
 	// CAP
 	syclant: 1548 + 0,

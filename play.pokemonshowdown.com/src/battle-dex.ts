@@ -571,10 +571,6 @@ export const Dex = new class implements ModdedDex {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'barbaracle';
 		}
-		if (id === 'greninjamega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'greninja';
-		}
 		if (id === 'chesnaughtmega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'chesnaught';
@@ -614,6 +610,11 @@ export const Dex = new class implements ModdedDex {
 		if (id === 'malamarmega') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'malamar';
+		}
+		//自制的mega沙漠蜻蜓
+		if (id === 'flygonmegafantasy') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'flygon';
 		}
 		// ===== 我们添加的强制贴图修正代码 结束 =====
 
@@ -1953,7 +1954,6 @@ const ModModifier: {
 				'greninjamega', 'greninjamegafantasy',
 				'starmiemega',
 				'barbaraclemega',
-				'greninjamega',
 				'chesnaughtmega',
 				'dragonitemega',
 				'drampamega',
@@ -1970,6 +1970,8 @@ const ModModifier: {
 				'malamarmega',
 				'raichumegax',
 				'raichumegay',
+				//自制的mega沙漠蜻蜓
+				'flygonmegafantasy',
 			];
 
 			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
