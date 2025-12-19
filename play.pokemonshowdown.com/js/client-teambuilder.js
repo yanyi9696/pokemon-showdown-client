@@ -3648,6 +3648,11 @@
 			if (set.gigantamax) delete set.gigantamax;
 			if (set.teraType) delete set.teraType;
 			if (set.preEvo) delete set.preEvo;
+			var customMegaStones = {
+				'Barbaracle-Mega': 'Barbaracite',
+				// 如果以后有更多自制 Mega，可以在这里继续添加，例如：
+				// 'Pikachu-Mega': 'Pikachunite'
+			};
 			if (!isHackmons && species.requiredItems.length === 1) {
 				set.item = species.requiredItems[0];
 			} else {
