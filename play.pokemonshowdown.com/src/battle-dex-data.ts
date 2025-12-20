@@ -544,8 +544,8 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	rillaboomgmax: 1320 + 79,
 	cinderacegmax: 1320 + 80,
 	inteleongmax: 1320 + 81,
-	urshifugmax: 1320 + 82,
-	urshifurapidstrikegmax: 1320 + 83,
+	urshifugmax: 1320 + 82, urshifumegafantasy: 1320 + 82, // Added fantasy mapping
+	urshifurapidstrikegmax: 1320 + 83, urshifurapidstrikemegafantasy: 1320 + 83, // Added fantasy mapping
 	clefablemega: 1320 + 84,
 	victreebelmega: 1320 + 85, victreebelmegafantasy: 1320 + 85, // Added fantasy mapping
 	starmiemega: 1320 + 86,

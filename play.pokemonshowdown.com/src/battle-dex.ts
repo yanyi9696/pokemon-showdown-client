@@ -638,7 +638,15 @@ export const Dex = new class implements ModdedDex {
 		}
 		if (id === 'toxtricitylowkeymegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'toxtricity-low-key-gmax';
+			data.spriteid = 'toxtricity-gmax';
+		}
+		if (id === 'urshifumegafantasy') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'urshifu-gmax';
+		}
+		if (id === 'urshifurapidstrikemegafantasy') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'urshifu-rapid-strike-gmax';
 		}
 		// ===== 我们添加的强制贴图修正代码 结束 =====
 
@@ -2001,6 +2009,8 @@ const ModModifier: {
 				'sandacondamegafantasy',
 				'toxtricitymegafantasy',
 				'toxtricitylowkeymegafantasy',
+				'urshifumegafantasy',
+				'urshifurapidstrikemegafantasy',
 			];
 
 			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
