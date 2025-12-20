@@ -645,15 +645,8 @@ export const Dex = new class implements ModdedDex {
 			data.spriteid = 'urshifu-gmax';
 		}
 		if (id === 'urshifurapidstrikemegafantasy') {
-			if (!data || !data.exists) {
-				data = {exists: true};
-			}
-			// 1. 指定正确的精灵图片 ID（对应服务器上的文件名）
-			data.spriteid = 'urshifu-rapid-strike-gmax';
-			// 2. 必须指定 gen 为 8 或更高，否则系统会去旧版本目录找图
-			data.gen = 8; 
-			// 3. 建议指定 baseSpecies，有助于系统关联音频和基础属性
-			data.baseSpecies = 'Urshifu';
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'urshifurapidstrikegmax';
 		}
 		// ===== 我们添加的强制贴图修正代码 结束 =====
 
