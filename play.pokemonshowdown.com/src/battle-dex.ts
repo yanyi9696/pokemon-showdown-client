@@ -615,7 +615,7 @@ export const Dex = new class implements ModdedDex {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'malamar';
 		}
-		//自制的mega沙漠蜻蜓
+		//自制mega
 		if (id === 'flygonmegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'flygon';
@@ -623,6 +623,10 @@ export const Dex = new class implements ModdedDex {
 		if (id === 'garbodormegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'garbodor-gmax';
+		}
+		if (id === 'corviknightmegafantasy') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'corviknight-gmax';
 		}
 		// ===== 我们添加的强制贴图修正代码 结束 =====
 
