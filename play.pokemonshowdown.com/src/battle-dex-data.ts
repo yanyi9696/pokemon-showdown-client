@@ -459,7 +459,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	ogerponwellspringtera: 1032 + 241,
 	ogerponhearthflametera: 1032 + 242,
 	ogerponcornerstonetera: 1032 + 243,
-	toxtricitylowkeygmax: 1320 + 69,
+	toxtricitylowkeygmax: 1320 + 69, toxtricitylowkeymegafantasy: 1320 + 69,// Added fantasy mapping
 
 	// Mega/G-Max
 	venusaurmega: 1320 + 0,
@@ -531,7 +531,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	flapplegmax: 1320 + 66,
 	appletungmax: 1320 + 67,
 	sandacondagmax: 1320 + 68, sandacondamegafantasy: 1320 + 68, // Added fantasy mapping
-	toxtricitygmax: 1320 + 69,
+	toxtricitygmax: 1320 + 69, toxtricitymegafantasy: 1320 + 69, // Added fantasy mapping
 	centiskorchgmax: 1320 + 70,
 	hatterenegmax: 1320 + 71,
 	grimmsnarlgmax: 1320 + 72,
