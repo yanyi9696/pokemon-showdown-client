@@ -556,7 +556,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	froslassmega: 1320 + 91, froslassmegafantasy: 1320 + 91, // Added fantasy mapping
 	emboarmega: 1320 + 92,
 	excadrillmega: 1320 + 93, excadrillmegafantasy: 1320 + 93, // Added fantasy mapping
-	scolipedemega: 1320 + 94,
+	scolipedemega: 1320 + 94, scolipedemegafantasy: 1320 + 94, // Added fantasy mapping
 	scraftymega: 1320 + 95,
 	eelektrossmega: 1320 + 96,
 	chandeluremega: 1320 + 97, chandeluremegafantasy: 1320 + 97, // Added fantasy mapping
