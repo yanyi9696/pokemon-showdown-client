@@ -616,11 +616,11 @@ export const Dex = new class implements ModdedDex {
 			data.spriteid = 'malamar';
 		}
 		//自制的mega沙漠蜻蜓
-		if (id === 'flygonmega') {
+		if (id === 'flygonmegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'flygon';
 		}
-		if (id === 'garbodormega') {
+		if (id === 'garbodormegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'garbodorgmax';
 		}
@@ -1980,6 +1980,7 @@ const ModModifier: {
 				'raichumegay',
 				//自制的mega沙漠蜻蜓
 				'flygonmegafantasy',
+				'garbodormegafantasy',
 			];
 
 			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
