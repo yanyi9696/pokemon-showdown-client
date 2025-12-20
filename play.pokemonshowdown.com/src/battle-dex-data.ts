@@ -530,7 +530,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	coalossalgmax: 1320 + 65,
 	flapplegmax: 1320 + 66,
 	appletungmax: 1320 + 67,
-	sandacondagmax: 1320 + 68,
+	sandacondagmax: 1320 + 68, sandacondamegafantasy: 1320 + 68, // Added fantasy mapping
 	toxtricitygmax: 1320 + 69,
 	centiskorchgmax: 1320 + 70,
 	hatterenegmax: 1320 + 71,

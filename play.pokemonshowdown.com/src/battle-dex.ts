@@ -628,6 +628,10 @@ export const Dex = new class implements ModdedDex {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'corviknight-gmax';
 		}
+		if (id === 'sandacondamegafantasy') {
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			data.spriteid = 'sandaconda-gmax';
+		}
 		// ===== 我们添加的强制贴图修正代码 结束 =====
 
 			let species: Species;
@@ -1985,6 +1989,8 @@ const ModModifier: {
 				//自制的mega沙漠蜻蜓
 				'flygonmegafantasy',
 				'garbodormegafantasy',
+				'corviknightmegafantasy',
+				'sandacondamegafantasy',
 			];
 
 			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
