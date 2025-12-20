@@ -522,7 +522,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	laprasgmax: 1320 + 57,
 	eeveegmax: 1320 + 58,
 	snorlaxgmax: 1320 + 59,
-	garbodorgmax: 1320 + 60, garbodormegafantasy: 1320 + 60, // Added fantasy mapping
+	garbodorgmax: 1320 + 60, garbodormega: 1320 + 60, // Added fantasy mapping
 	melmetalgmax: 1320 + 61,
 	corviknightgmax: 1320 + 62,
 	orbeetlegmax: 1320 + 63,
@@ -573,7 +573,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	drampamega: 1320 + 108,
 	falinksmega: 1320 + 109,
 	//自制的mega沙漠蜻蜓
-	flygonmegafantasy: 330,
+	flygonmega: 330,
 
 	// CAP
 	syclant: 1548 + 0,
