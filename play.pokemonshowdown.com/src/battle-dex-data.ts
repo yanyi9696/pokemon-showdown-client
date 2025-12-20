@@ -522,7 +522,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	laprasgmax: 1320 + 57,
 	eeveegmax: 1320 + 58,
 	snorlaxgmax: 1320 + 59,
-	garbodorgmax: 1320 + 60,
+	garbodorgmax: 1320 + 60, garbodormegafantasy: 1320 + 60, // Added fantasy mapping
 	melmetalgmax: 1320 + 61,
 	corviknightgmax: 1320 + 62,
 	orbeetlegmax: 1320 + 63,
