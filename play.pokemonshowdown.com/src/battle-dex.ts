@@ -645,8 +645,15 @@ export const Dex = new class implements ModdedDex {
 			data.spriteid = 'urshifu-gmax';
 		}
 		if (id === 'urshifurapidstrikemegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			if (!data) data = {};
+			
+			// 1. 设置 spriteid 为 Showdown 标准的超极巨化连击流文件名
+			// 注意：不要在 rapid 和 strike 之间加连字符，这是最常见的错误点
 			data.spriteid = 'urshifurapidstrike-gmax';
+			
+			// 2. 明确指定基础物种，确保 getSpriteData 能正确识别它是一个武道熊师变体
+			// 这有助于处理 cryurl (叫声) 和可能的模型偏移
+			data.baseSpecies = 'Urshifu-Rapid-Strike';
 		}
 		// ===== 我们添加的强制贴图修正代码 结束 =====
 
