@@ -645,7 +645,8 @@ export const Dex = new class implements ModdedDex {
 			data.spriteid = 'urshifu-gmax';
 		}
 		if (id === 'urshifurapidstrikemegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
+			if (!data) data = {exists: true}; // 确保数据对象存在且标记为存在
+			// 使用官方标准的连击流超巨化 ID
 			data.spriteid = 'urshifu-rapidstrike-gmax';
 		}
 		// ===== 我们添加的强制贴图修正代码 结束 =====
