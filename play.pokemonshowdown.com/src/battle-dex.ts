@@ -645,16 +645,8 @@ export const Dex = new class implements ModdedDex {
 			data.spriteid = 'urshifu-gmax';
 		}
 		if (id === 'urshifurapidstrikemegafantasy') {
-			if (!data) data = {};
-			// 1. 设置正确的图片文件名（必须带连字符，对应 PS 资源服务器文件名）
+			if (!data) data = {}; // 确保 data 对象存在，以防万一
 			data.spriteid = 'urshifurapidstrike-gmax';
-			data.baseSpecies = 'Urshifu-Rapid-Strike';
-			// 2. 【核心修正】注入尺寸数据，防止系统回退到 gen5 目录
-			// 我们直接让它引用基础形态（urshifurapidstrike）的尺寸
-			if (typeof window !== 'undefined' && window.BattlePokemonSprites) {
-				window.BattlePokemonSprites['urshifurapidstrikegmax'] = 
-					window.BattlePokemonSprites['urshifurapidstrike'] || {w: 96, h: 96};
-			}
 		}
 		// ===== 我们添加的强制贴图修正代码 结束 =====
 
