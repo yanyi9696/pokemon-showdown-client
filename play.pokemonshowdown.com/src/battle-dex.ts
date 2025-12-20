@@ -622,7 +622,7 @@ export const Dex = new class implements ModdedDex {
 		}
 		if (id === 'garbodormegafantasy') {
 			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'garbodorgmax';
+			data.spriteid = 'garbodor-gmax';
 		}
 		// ===== 我们添加的强制贴图修正代码 结束 =====
 
