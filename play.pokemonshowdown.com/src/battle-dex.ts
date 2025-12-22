@@ -1579,7 +1579,10 @@ export class ModdedDex {
 			table.tiers = null;
 		}
 		const slices = table.formatSlices;
-		let tierSet: SearchRow[] = table.tierSet.slice(slices.AG || slices.Uber || slices.DUber); // remove CAP
+		let start = slices.AG;
+		if (start === undefined) start = slices.Uber;
+		if (start === undefined) start = slices.DUber;
+		let tierSet: SearchRow[] = table.tierSet.slice(start); // remove CAP
 		// part 2: filter
 		let modified = false;
 		for (const mid of this.modid) {
