@@ -504,10 +504,10 @@ export const Dex = new class implements ModdedDex {
 				name = BattleAliases[id];
 				id = toID(name);
 			} else if (window.BattlePokedex && !(id in BattlePokedex) && window.BattleBaseSpeciesChart && !(
-                    (formid.startsWith("sawsbuck") && formid.includes("fantasy")) ||
-                    (formid.startsWith("floette") && formid.includes("fantasy")) ||
-                    (formid.startsWith("floette") && formid.includes("mega")) // <-- 新增的 floette "mega" 排除规则
-                )) {
+				(formid.startsWith("sawsbuck") && formid.includes("fantasy")) ||
+				(formid.startsWith("floette") && formid.includes("fantasy")) ||
+				(formid.startsWith("floette") && formid.includes("mega")) // <-- 新增的 floette "mega" 排除规则
+			)) {
 				for (const baseSpeciesId of BattleBaseSpeciesChart) {
 					if (formid.startsWith(baseSpeciesId)) {
 						id = baseSpeciesId;
@@ -518,137 +518,137 @@ export const Dex = new class implements ModdedDex {
 			if (!window.BattlePokedex) window.BattlePokedex = {};
 			let data = window.BattlePokedex[id];
 
-		// ===== 我们添加的强制贴图修正代码 开始 =====
-		if (id === 'hawluchamega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'hawlucha';
-		}
-		if (id === 'hawluchamegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'hawlucha';
-		}
-		if (id === 'chandeluremega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'chandelure';
-		}
-		if (id === 'chandeluremegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'chandelure';
-		}
-		if (id === 'delphoxmega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'delphox';
-		}
-		if (id === 'delphoxmegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'delphox';
-		}
-		if (id === 'dragalgemega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'dragalge';
-		}
-		if (id === 'dragalgemegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'dragalge';
-		}
-		if (id === 'excadrillmega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'excadrill';
-		}
-		if (id === 'excadrillmegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'excadrill';
-		}
-		if (id === 'greninjamega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'greninja';
-		}
-		if (id === 'greninjamegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'greninja';
-		}
-		if (id === 'barbaraclemega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'barbaracle';
-		}
-		if (id === 'chesnaughtmega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'chesnaught';
-		}
-		if (id === 'drampamega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'drampa';
-		}
-		if (id === 'falinksmega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'falinks';
-		}
-		if (id === 'scraftymega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'scrafty';
-		}
-		if (id === 'eelektrossmega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'eelektross';
-		}
-		if (id === 'floettemega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'floette';
-		}
-		if (id === 'floettemegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'floette';
-		}
-		if (id === 'scolipedemega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'scolipede';
-		}
-		if (id === 'scolipedemegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'scolipede';
-		}
-		if (id === 'pyroarmega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'pyroar';
-		}
-		if (id === 'malamarmega') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'malamar';
-		}
-		//自制mega
-		if (id === 'flygonmegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'flygon';
-		}
-		if (id === 'garbodormegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'garbodor-gmax';
-		}
-		if (id === 'corviknightmegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'corviknight-gmax';
-		}
-		if (id === 'sandacondamegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'sandaconda-gmax';
-		}
-		if (id === 'toxtricitymegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'toxtricity-gmax';
-		}
-		if (id === 'toxtricitylowkeymegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'toxtricity-gmax';
-		}
-		if (id === 'urshifumegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'urshifu-gmax';
-		}
-		if (id === 'urshifurapidstrikemegafantasy') {
-			if (!data) data = {}; // 确保 data 对象存在，以防万一
-			data.spriteid = 'urshifurapidstrike-gmax';
-		}
-		// ===== 我们添加的强制贴图修正代码 结束 =====
+			// ===== 我们添加的强制贴图修正代码 开始 =====
+			if (id === 'hawluchamega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'hawlucha';
+			}
+			if (id === 'hawluchamegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'hawlucha';
+			}
+			if (id === 'chandeluremega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'chandelure';
+			}
+			if (id === 'chandeluremegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'chandelure';
+			}
+			if (id === 'delphoxmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'delphox';
+			}
+			if (id === 'delphoxmegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'delphox';
+			}
+			if (id === 'dragalgemega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'dragalge';
+			}
+			if (id === 'dragalgemegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'dragalge';
+			}
+			if (id === 'excadrillmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'excadrill';
+			}
+			if (id === 'excadrillmegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'excadrill';
+			}
+			if (id === 'greninjamega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'greninja';
+			}
+			if (id === 'greninjamegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'greninja';
+			}
+			if (id === 'barbaraclemega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'barbaracle';
+			}
+			if (id === 'chesnaughtmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'chesnaught';
+			}
+			if (id === 'drampamega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'drampa';
+			}
+			if (id === 'falinksmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'falinks';
+			}
+			if (id === 'scraftymega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'scrafty';
+			}
+			if (id === 'eelektrossmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'eelektross';
+			}
+			if (id === 'floettemega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'floette';
+			}
+			if (id === 'floettemegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'floette';
+			}
+			if (id === 'scolipedemega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'scolipede';
+			}
+			if (id === 'scolipedemegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'scolipede';
+			}
+			if (id === 'pyroarmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'pyroar';
+			}
+			if (id === 'malamarmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'malamar';
+			}
+			//自制mega
+			if (id === 'flygonmegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'flygon';
+			}
+			if (id === 'garbodormegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'garbodor-gmax';
+			}
+			if (id === 'corviknightmegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'corviknight-gmax';
+			}
+			if (id === 'sandacondamegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'sandaconda-gmax';
+			}
+			if (id === 'toxtricitymegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'toxtricity-gmax';
+			}
+			if (id === 'toxtricitylowkeymegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'toxtricity-gmax';
+			}
+			if (id === 'urshifumegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'urshifu-gmax';
+			}
+			if (id === 'urshifurapidstrikemegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'urshifurapidstrike-gmax';
+			}
+			// ===== 我们添加的强制贴图修正代码 结束 =====
 
 			let species: Species;
 			if (data && typeof data.exists === 'boolean') {
@@ -951,8 +951,8 @@ export const Dex = new class implements ModdedDex {
 				// no scaling
 			} else if (spriteData.isFrontSprite) {
 				spriteData.w *= 2;
-					spriteData.h *= 2;
-					spriteData.y += -16;
+				spriteData.h *= 2;
+				spriteData.y += -16;
 			} else {
 				// old gen backsprites are multiplied by 1.5x by the 3D engine
 				spriteData.w *= 2 / 1.5;
@@ -1003,11 +1003,11 @@ export const Dex = new class implements ModdedDex {
 			const gen9fantasyOriginalSpecies = Dex.mod('gen9fantasy' as ID).species.get(finalId);
 
 			if (gen9fantasySpecies.exists && gen9fantasySpecies.num) {
-				 num = gen9fantasySpecies.num;
-				 found = true;
+				num = gen9fantasySpecies.num;
+				found = true;
 			} else if (gen9fantasyOriginalSpecies.exists && gen9fantasyOriginalSpecies.num) {
-				 num = gen9fantasyOriginalSpecies.num;
-				 found = true;
+				num = gen9fantasyOriginalSpecies.num;
+				found = true;
 			}
 		}
 
@@ -1047,17 +1047,17 @@ export const Dex = new class implements ModdedDex {
 			finalId = toID(pokemon);
 		} else if (pokemon) {
 			if ('speciesForme' in pokemon) { // Pokemon or ServerPokemon like structure
-				 finalId = toID(pokemon.speciesForme);
-				 gender = pokemon.gender || '';
-				 fainted = !!pokemon.fainted;
-				 // Check formechange
-				 const p = pokemon as Pokemon;
-				 if (p.volatiles?.formechange && !p.volatiles?.transform) {
-					  finalId = toID(p.volatiles.formechange[1]);
-				 }
+				finalId = toID(pokemon.speciesForme);
+				gender = pokemon.gender || '';
+				fainted = !!pokemon.fainted;
+				// Check formechange
+				const p = pokemon as Pokemon;
+				if (p.volatiles?.formechange && !p.volatiles?.transform) {
+					finalId = toID(p.volatiles.formechange[1]);
+				}
 			} else if ('species' in pokemon) { // PokemonSet like structure
-				 finalId = toID(pokemon.species);
-				 gender = (pokemon as Dex.PokemonSet).gender as Dex.GenderName || '';
+				finalId = toID(pokemon.species);
+				gender = (pokemon as Dex.PokemonSet).gender as Dex.GenderName || '';
 			}
 		}
 
@@ -1071,7 +1071,7 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		if (lookupId.endsWith('fantasy')) {
-			 lookupId = lookupId.slice(0, -8) as ID;
+			lookupId = lookupId.slice(0, -8) as ID;
 		}
 
 		// Get the icon number, passing both IDs
@@ -1127,6 +1127,11 @@ export const Dex = new class implements ModdedDex {
 			y: -3,
 		};
 		if (pokemon.shiny) spriteData.shiny = true;
+
+		if (spriteid.endsWith('gmax') || spriteid.endsWith('gigantamax')) {
+			spriteData.spriteDir = 'sprites/gen5';
+			return spriteData;
+		}
 
 		// Determine display generation based on preferences and species data
 		if (Dex.prefs('nopastgens')) gen = 6;
@@ -1997,7 +2002,7 @@ const ModModifier: {
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
 			// 【新代码】创建一个“钉选”白名单
 			const pinnedPokemon = [
-				'victreebelmega','victreebelmegafantasy',
+				'victreebelmega', 'victreebelmegafantasy',
 				'hawluchamega', 'hawluchamegafantasy',
 				'chandeluremega', 'chandeluremegafantasy',
 				'froslassmega', 'froslassmegafantasy',
@@ -2018,7 +2023,7 @@ const ModModifier: {
 				'scraftymega',
 				'eelektrossmega',
 				'floettemega', 'floettemegafantasy',
-				'scolipedemega','scolipedemegafantasy',
+				'scolipedemega', 'scolipedemegafantasy',
 				'feraligatrmega',
 				'pyroarmega',
 				'malamarmega',
