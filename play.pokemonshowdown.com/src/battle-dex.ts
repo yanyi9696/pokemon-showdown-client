@@ -788,6 +788,15 @@ export const Dex = new class implements ModdedDex {
 
 		// --- Determine the sprite ID to use for the filename ---
 		let baseSpriteId = species.spriteid || species.id; // Start with current species' sprite ID or ID
+
+		// Special handling for Urshifu-Rapid-Strike-Mega-Fantasy to use Gmax sprites
+		if (species.id === 'urshifurapidstrikemegafantasy') {
+			const target = Dex.species.get('urshifurapidstrikegmax');
+			if (target.exists) {
+				baseSpriteId = target.spriteid || target.id;
+			}
+		}
+
 		if (baseSpriteId.endsWith('-fantasy')) {
 			baseSpriteId = baseSpriteId.slice(0, -8) as ID; // Remove suffix
 		}
@@ -1056,6 +1065,11 @@ export const Dex = new class implements ModdedDex {
 
 		// ID for base sprite/data lookup (strip fantasy)
 		let lookupId = finalId;
+
+		if (finalId === 'urshifurapidstrikemegafantasy') {
+			lookupId = 'urshifurapidstrikegmax' as ID;
+		}
+
 		if (lookupId.endsWith('fantasy')) {
 			 lookupId = lookupId.slice(0, -8) as ID;
 		}
@@ -1094,6 +1108,14 @@ export const Dex = new class implements ModdedDex {
 
 		// Ensure spriteid is defined and remove '-fantasy' suffix for filename
 		if (!spriteid) spriteid = id;
+
+		if (id === 'urshifurapidstrikemegafantasy') {
+			const target = Dex.species.get('urshifurapidstrikegmax');
+			if (target.exists) {
+				spriteid = target.spriteid || target.id;
+			}
+		}
+
 		if (spriteid.endsWith('-fantasy')) {
 			spriteid = spriteid.slice(0, -8);
 		}
