@@ -2000,27 +2000,30 @@ const ModModifier: {
 			}
 		},
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
-			// 1. 定义分级权重表（数字越大级别越高）
+			// 1. 定义详细的分级权重 (数字越大，排序越靠前)
 			const tierWeights: { [k: string]: number } = {
 				'AG': 100,
+				'Illegal': 100, // 根据要求，摆在最高挡位 (与 AG 齐平)
 				'Uber': 90,
-				'(Uber)': 90,
-				'OU': 80,
-				'UUBL': 75,
-				'UU': 70,
-				'RUBL': 65,
-				'RU': 60,
+				'(Uber)': 85,   // 略低于 Uber，确保排序在 Uber 之后
+				'Ubers UU': 80,
+				'OU': 70,
+				'UUBL': 65,
+				'UU': 60,
+				'RUBL': 55,
+				'RU': 50,
 				'LC': 10
 			};
 
-			// 2. 确定当前编辑器所处的分级环境
-			let currentMaxWeight = 100; // 默认为最高（如 AG 或未识别时显示全部）
-			if (dex.modid.includes('ou' as ID)) currentMaxWeight = 80;
-			else if (dex.modid.includes('uu' as ID)) currentMaxWeight = 70;
-			else if (dex.modid.includes('ru' as ID)) currentMaxWeight = 60;
-			else if (dex.modid.includes('ubersuu' as ID)) currentMaxWeight = 90; // 如果有 Uber UU
-			// 如果是 Uber 或其它高分级，currentMaxWeight 保持 100 或 90
-			// 【新代码】创建一个“钉选”白名单
+			// 2. 确定当前编辑器环境的过滤阈值 (实现你要求的按分级过滤)
+			let currentMaxWeight = 100; // 默认 AG 环境显示全部
+			const modidStr = dex.modid.join('');
+			if (modidStr.includes('ou')) currentMaxWeight = 70; // OU 环境不显示 Uber (90) 和 Illegal (100)
+			else if (modidStr.includes('uu') && !modidStr.includes('ubersuu')) currentMaxWeight = 60;
+			else if (modidStr.includes('ru')) currentMaxWeight = 50;
+			else if (modidStr.includes('ubersuu')) currentMaxWeight = 80;
+
+			// 3. 你的手动维护列表 (保持原样，用于确保“必顶置”)
 			const pinnedPokemon = [
 				'victreebelmega', 'victreebelmegafantasy',
 				'hawluchamega', 'hawluchamegafantasy',
@@ -2049,7 +2052,7 @@ const ModModifier: {
 				'malamarmega',
 				'raichumegax',
 				'raichumegay',
-				//自制的mega沙漠蜻蜓
+				//自制的mega（沙漠蜻蜓等等）
 				'flygonmegafantasy',
 				'garbodormegafantasy',
 				'corviknightmegafantasy',
@@ -2060,34 +2063,49 @@ const ModModifier: {
 				'urshifurapidstrikemegafantasy',
 			];
 
-			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
-			
-			// 3. 遍历白名单并进行权重对比
-			for (const pokemonId of pinnedPokemon) {
-				const species = dex.species.get(pokemonId as ID);
-				
-				// 获取该宝可梦在当前 Mod 下的分级
-				const pokemonTier = species.tier || 'Illegal';
-				const pokemonWeight = tierWeights[pokemonTier] || 0;
+			// 4. 收集符合当前分级条件的宝可梦
+			const collected: {id: ID, weight: number, name: string}[] = [];
+			const seen = new Set<string>();
 
-				// 【核心判断】：只有当宝可梦级别 <= 当前环境级别时，才置顶显示
-				// 例如：当前是 OU (80)，那么权重为 90 的 Uber 宝可梦就不会被加入 addedTierSet
-				if (pokemonWeight <= currentMaxWeight) {
-					addedTierSet.push(['pokemon', pokemonId as ID]);
+			for (const id of pinnedPokemon) {
+				const species = dex.species.get(id as ID);
+				const tier = species.tier || 'Illegal';
+				const weight = tierWeights[tier] || 0;
+
+				// 过滤：只有权重 <= 当前环境上限的才加入
+				if (weight <= currentMaxWeight) {
+					collected.push({ id: id as ID, weight, name: species.name });
+					seen.add(id);
 				}
 			}
 
-			// 处理那些不在白名单里但在 window.Gen9fantasydex 里的其它自定义宝可梦
-			for (const pokemon in window.Gen9fantasydex) {
-				if (pinnedPokemon.includes(pokemon)) continue; // 已经处理过了
-				if (pokemon in window.BattlePokedex) continue;
-
-				const species = dex.species.get(pokemon as ID);
-				const pokemonWeight = tierWeights[species.tier || ''] || 0;
-
-				if (pokemonWeight <= currentMaxWeight) {
-					addedTierSet.push(['pokemon', pokemon as ID]);
+			// [可选] 自动扫描保底：处理 window.Gen9fantasydex 中未手动录入的项
+			if (window.Gen9fantasydex) {
+				for (const id in window.Gen9fantasydex) {
+					if (seen.has(id)) continue;
+					if (id in window.BattlePokedex) continue;
+					const species = dex.species.get(id as ID);
+					const weight = tierWeights[species.tier || 'Illegal'] || 0;
+					if (weight <= currentMaxWeight) {
+						collected.push({ id: id as ID, weight, name: species.name });
+					}
 				}
+			}
+
+			// 5. 执行排序逻辑 (关键步骤)
+			collected.sort((a, b) => {
+				// 第一优先级：权重降序 (100 -> 90 -> 70 ...)
+				if (b.weight !== a.weight) return b.weight - a.weight;
+				// 第二优先级：同分级内按字母升序 (A -> Z)
+				return a.name.localeCompare(b.name);
+			});
+
+			// 6. 生成置顶显示列表
+			if (collected.length === 0) return tierSet;
+
+			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy Custom Pokemon']];
+			for (const item of collected) {
+				addedTierSet.push(['pokemon', item.id]);
 			}
 
 			return addedTierSet.concat(tierSet);
