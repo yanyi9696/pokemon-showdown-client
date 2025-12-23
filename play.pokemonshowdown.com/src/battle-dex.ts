@@ -291,18 +291,7 @@ export const Dex = new class implements ModdedDex {
 		if (formatid.endsWith('ru')) modids.push('ru' as ID);
 
 		// regulars
-		// regulars
-		if (formatid.includes('anythinggoes') || 
-			formatid.endsWith('ag') || 
-			formatid.includes('fcag') || 
-			formatid.includes('fcchampionsdoubles')
-		) {
-			modids.push('anythinggoes' as ID);
-            // --- 新增这一行：添加一个标记 ---
-            if (formatid.includes('fcag') || formatid.includes('fcchampionsdoubles')) {
-                modids.push('fccustom' as ID);
-            }
-		}
+		if (formatid.includes('anythinggoes') || formatid.endsWith('ag')) modids.push('anythinggoes' as ID);
 		if (formatid.includes('doubles') ||
 			formatid.includes('freeforall') || formatid.startsWith(gen + 'ffa') ||
 			formatid.includes('multibattle')) modids.push('doubles' as ID);
@@ -1590,22 +1579,7 @@ export class ModdedDex {
 			table.tiers = null;
 		}
 		const slices = table.formatSlices;
-		// --- 强硬修改：检查我们在第一步设置的标记 ---
-		const isMyCustomFormat = this.modid.includes('fccustom' as ID);
-
-		let startIdx = slices.Uber || slices.DUber || 0;
-
-		if (isMyCustomFormat) {
-			startIdx = 0; // 强制从索引 0 开始显示，即包含 AG 和自制宝可梦
-		} else if (this.modid.includes('anythinggoes' as ID)) {
-			// 其他普通的 AG 分级逻辑
-			startIdx = 0;
-			if (slices.AG !== undefined) startIdx = slices.AG;
-			else if (slices.DAG !== undefined) startIdx = slices.DAG;
-		}
-
-		let tierSet: SearchRow[] = table.tierSet.slice(startIdx);
-		// --- 修改结束 ---
+		let tierSet: SearchRow[] = table.tierSet.slice(slices.AG || slices.Uber || slices.DUber); // remove CAP
 		// part 2: filter
 		let modified = false;
 		for (const mid of this.modid) {
