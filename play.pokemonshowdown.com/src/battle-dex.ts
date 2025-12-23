@@ -285,6 +285,7 @@ export const Dex = new class implements ModdedDex {
 		// ----------------------------
 		// tiers
 		if (formatid.endsWith('ou')) modids.push('ou' as ID);
+		if (formatid.endsWith('uber')) modids.push('uber' as ID);
 		if (formatid.endsWith('ubersuu')) modids.push('ubersuu' as ID);
 		if (formatid.endsWith('uubl')) modids.push('uubl' as ID);
 		// 先排除 'ubersuu' 和 'uubl'，再判断 'uu'
@@ -293,6 +294,7 @@ export const Dex = new class implements ModdedDex {
 		}
 		if (formatid.endsWith('rubl')) modids.push('rubl' as ID);
 		if (formatid.endsWith('ru')) modids.push('ru' as ID);
+		if (formatid.endsWith('lc')) modids.push('lc' as ID);
 
 		// regulars
 		if (formatid.includes('anythinggoes') || formatid.endsWith('ag')) modids.push('anythinggoes' as ID);
