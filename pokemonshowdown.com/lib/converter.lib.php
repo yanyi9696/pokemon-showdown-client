@@ -429,6 +429,9 @@ function pokeConvertInner($text) {
 			$out[] = '|-fail|'.resolvePokemon($line).'|psn';
 		} else if (endsRemove($line, ' is already burnt.')) {
 			$out[] = '|-fail|'.resolvePokemon($line).'|brn';
+		//冻伤
+		} else if (endsRemove($line, ' is already frostbite.')) {
+			$out[] = '|-fail|'.resolvePokemon($line).'|fst';
 		} else if (endsRemove($line, ' is already paralyzed.')) {
 			$out[] = '|-fail|'.resolvePokemon($line).'|par';
 		} else if (endsRemove($line, ' calmed down!')) {
@@ -463,6 +466,14 @@ function pokeConvertInner($text) {
 			markLastDamage($out);
 		} else if (endsRemove($line, ' was burned!')) {
 			$out[] = '|-status|'.resolvePokemon($line).'|brn';
+			// 添加识别冻伤被施加的提示
+		} else if (endsRemove($line, ' was frostbitten!')) {
+			$out[] = '|-status|'.resolvePokemon($line).'|fst';
+
+		// 添加识别冻伤每回合扣血的提示
+		} else if (endsRemove($line, ' is hurt by its frostbite!')) {
+			$out[] = '|-damage|'.resolvePokemon($line).'|??|[from]fst';
+			markLastDamage($out);
 		} else if (endsRemove($line, ' is paralyzed! It may be unable to move!')) {
 			$out[] = '|-status|'.resolvePokemon($line).'|par';
 		} else if (endsRemove($line, ' is paralyzed! It can\'t move!')) {

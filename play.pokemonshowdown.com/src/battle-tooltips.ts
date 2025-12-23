@@ -1042,6 +1042,10 @@ export class BattleTooltips {
 			} else if (this.battle.gen < 2 && pokemon.status === 'brn') {
 				stats.atk = Math.floor(stats.atk * 0.5);
 			}
+		// 1. 处理冻伤导致的特攻减半显示
+			if (pokemon.status === 'fst' && toID(serverPokemon.item) !== 'fantasylifeorb') {
+				stats.spa = Math.floor(stats.spa * 0.5);
+			}
 
 			// Paralysis is calculated later in newer generations, so we need to apply it early here
 			if (this.battle.gen <= 2 && pokemon.status === 'par') {

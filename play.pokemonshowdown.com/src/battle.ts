@@ -97,7 +97,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	teraType = '';
 
 	boosts: { [stat: string]: number } = {};
-	status: Dex.StatusName | 'tox' | '' | '???' = '';
+	status: Dex.StatusName | 'tox' | 'fst' | '' | '???' = '';
 	statusStage = 0;
 	volatiles: { [effectid: string]: EffectState } = {};
 	turnstatuses: { [effectid: string]: EffectState } = {};
@@ -991,7 +991,7 @@ export interface PokemonHealth {
 	hp: number;
 	maxhp: number;
 	hpcolor: HPColor | '';
-	status: Dex.StatusName | 'tox' | '' | '???';
+	status: Dex.StatusName | 'tox' | 'fst' | '' | '???';
 	fainted?: boolean;
 }
 export interface ServerPokemon extends PokemonDetails, PokemonHealth {
@@ -2061,6 +2061,10 @@ export class Battle {
 			case 'frz':
 				this.scene.resultAnim(poke, 'Already frozen', 'neutral');
 				break;
+			//冻伤
+			case 'fst':
+				this.scene.resultAnim(poke, 'Already frostbitten', 'neutral');
+				break;
 			case 'unboost':
 				this.scene.resultAnim(poke, 'Stat drop blocked', 'neutral');
 				break;
@@ -2173,6 +2177,12 @@ export class Battle {
 				this.scene.resultAnim(poke, 'Frozen', 'frz');
 				this.scene.runStatusAnim('frz' as ID, [poke]);
 				break;
+			case 'fst':
+				// 显示“冻伤”文字提示
+				this.scene.resultAnim(poke, 'Frostbite', 'psn'); // 这里借用 psn 的颜色，或自定义颜色
+				// 播放对应的动画（如果没有专门的 fst 动画，可以先借用 frz 的）
+				this.scene.runStatusAnim('frz' as ID, [poke]); 
+				break;
 			default:
 				this.scene.updateStatbar(poke);
 				break;
@@ -2216,6 +2226,9 @@ export class Battle {
 					break;
 				case 'frz':
 					this.scene.resultAnim(poke, 'Thawed', 'good');
+					break;
+				case 'fst':
+					this.scene.resultAnim(poke, 'Frostbite cured', 'good');
 					break;
 				default:
 					poke.removeVolatile('confusion' as ID);
@@ -3315,7 +3328,7 @@ export class Battle {
 		// status parse
 		if (!status) {
 			output.status = '';
-		} else if (status === 'par' || status === 'brn' || status === 'slp' || status === 'frz' || status === 'tox') {
+		} else if (status === 'par' || status === 'brn' || status === 'slp' || status === 'frz' || status === 'fst' || status === 'tox') {
 			output.status = status;
 		} else if (status === 'psn' && output.status !== 'tox') {
 			output.status = status;

@@ -1563,7 +1563,8 @@ for (const mod of modNames)
 		// 您的自定义MOD道具
 		if ([
 			'fantasyitem', 'fantasypowerlens', 'fantasyringtarget', 'fantasylifeorb',
-			'fantasysachet', 'fantasyscopelens', 'fantasysyrupyapple', 'fantasyprotector'
+			'fantasysachet', 'fantasyscopelens', 'fantasysyrupyapple', 'fantasyprotector',
+			'fantasyicestone'
 		].includes(id)) {
 			modSpecificItems.push(id);
 			continue;
