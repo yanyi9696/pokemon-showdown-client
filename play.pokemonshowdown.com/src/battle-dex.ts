@@ -279,6 +279,14 @@ export const Dex = new class implements ModdedDex {
 
 		const genStrings = formatid.match(/gen\d/); // /gen(10|\d)/ after gen 10 releases
 		const gen = genStrings ? genStrings[0] : this.currentGen;
+
+		// --- 强硬修改开始 ---
+		// 强制识别你的自定义分级 ID (通常是 gen9fcag 和 gen9fcchampionsdoubles)
+		if (formatid.includes('fcag') || formatid.includes('championsdoubles')) {
+			modids.push('anythinggoes' as ID);
+		}
+		// --- 强硬修改结束 ---
+		
 		// tiers
 		if (formatid.endsWith('ou')) modids.push('ou' as ID);
 		if (formatid.endsWith('ubersuu')) modids.push('ubersuu' as ID);
@@ -1579,7 +1587,21 @@ export class ModdedDex {
 			table.tiers = null;
 		}
 		const slices = table.formatSlices;
-		let tierSet: SearchRow[] = table.tierSet.slice(slices.AG || slices.Uber || slices.DUber); // remove CAP
+
+		// --- 强硬修改开始 ---
+		// 检查当前 Modid 是否包含你强制添加的标记，或者直接匹配分级 ID
+		const isForceAG = this.modid.includes('anythinggoes' as ID);
+		
+		let tierSet: SearchRow[];
+		if (isForceAG) {
+			// 如果是 AG 类分级，强制不进行任何 Slice 切割，从 0 开始显示所有
+			tierSet = table.tierSet.slice(0);
+		} else {
+			// 原有的切割逻辑
+			tierSet = table.tierSet.slice(slices.AG || slices.Uber || slices.DUber); 
+		}
+		// --- 强硬修改结束 ---
+		
 		// part 2: filter
 		let modified = false;
 		for (const mid of this.modid) {
