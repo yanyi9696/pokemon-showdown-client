@@ -291,7 +291,13 @@ export const Dex = new class implements ModdedDex {
 		if (formatid.endsWith('ru')) modids.push('ru' as ID);
 
 		// regulars
-		if (formatid.includes('anythinggoes') || formatid.endsWith('ag')) modids.push('anythinggoes' as ID);
+		if (formatid.includes('anythinggoes') || 
+			formatid.endsWith('ag') || 
+			formatid.includes('fcag') || // 新增：识别 [Gen 9] FC AG
+			formatid.includes('fcchampionsdoubles') // 新增：识别 [Gen 9] FC Champions Doubles
+		) {
+			modids.push('anythinggoes' as ID);
+		}
 		if (formatid.includes('doubles') ||
 			formatid.includes('freeforall') || formatid.startsWith(gen + 'ffa') ||
 			formatid.includes('multibattle')) modids.push('doubles' as ID);
@@ -1579,7 +1585,16 @@ export class ModdedDex {
 			table.tiers = null;
 		}
 		const slices = table.formatSlices;
-		let tierSet: SearchRow[] = table.tierSet.slice(slices.AG || slices.Uber || slices.DUber); // remove CAP
+		// --- 修改开始 ---
+		// 确定起始切片位置：如果是 AG 模式且表中定义了 AG，则从 AG 开始；否则按原逻辑
+		let startIdx = slices.Uber || slices.DUber || 0;
+		if (this.modid.includes('anythinggoes' as ID)) {
+			if (slices.AG !== undefined) startIdx = slices.AG;
+			else if (slices.DAG !== undefined) startIdx = slices.DAG; // 针对双打 AG
+		}
+
+		let tierSet: SearchRow[] = table.tierSet.slice(startIdx);
+		// --- 修改结束 ---
 		// part 2: filter
 		let modified = false;
 		for (const mid of this.modid) {
