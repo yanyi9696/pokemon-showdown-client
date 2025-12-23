@@ -1579,10 +1579,7 @@ export class ModdedDex {
 			table.tiers = null;
 		}
 		const slices = table.formatSlices;
-		let start = slices.AG;
-		if (start === undefined) start = slices.Uber;
-		if (start === undefined) start = slices.DUber;
-		let tierSet: SearchRow[] = table.tierSet.slice(start); // remove CAP
+		let tierSet: SearchRow[] = table.tierSet.slice(slices.AG || slices.Uber || slices.DUber); // remove CAP
 		// part 2: filter
 		let modified = false;
 		for (const mid of this.modid) {
@@ -1594,7 +1591,7 @@ export class ModdedDex {
 		if (!modified) {
 			if (!this.modid.includes('doubles' as ID)) tierSet = [
 				...table.tierSet.slice(slices.OU, slices.UU),
-				...table.tierSet.slice(start, slices.Uber),
+				...table.tierSet.slice(slices.AG, slices.Uber),
 				...table.tierSet.slice(slices.Uber, slices.OU),
 				...table.tierSet.slice(slices.UU),
 			];
@@ -2003,6 +2000,7 @@ const ModModifier: {
 			}
 		},
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
+			// 【新代码】创建一个“钉选”白名单
 			const pinnedPokemon = [
 				'victreebelmega', 'victreebelmegafantasy',
 				'hawluchamega', 'hawluchamegafantasy',
@@ -2031,6 +2029,7 @@ const ModModifier: {
 				'malamarmega',
 				'raichumegax',
 				'raichumegay',
+				//自制的mega沙漠蜻蜓
 				'flygonmegafantasy',
 				'garbodormegafantasy',
 				'corviknightmegafantasy',
@@ -2043,48 +2042,16 @@ const ModModifier: {
 
 			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
 			for (const pokemon in window.Gen9fantasydex) {
+				// 【核心修正】如果一个宝可梦在白名单里，就无视所有规则，直接添加！
+				// 否则，才执行原来的检查逻辑。
 				if (pinnedPokemon.includes(pokemon)) {
 					addedTierSet.push(['pokemon', pokemon as ID]);
-					continue;
+					continue; // 添加后，跳过后续检查
 				}
 
 				if (pokemon in window.BattlePokedex) continue;
 				addedTierSet.push(['pokemon', pokemon as ID]);
 			}
-
-			// 修正: 对于 FC AG, FC Champions Doubles, FC Free-For-All 允许 AG 宝可梦
-			// 这里的 extra.format 应该包含当前的 format id
-			const format = extra?.format;
-			// 这些 format 允许 AG
-			const allowAG = format && (
-				format.includes('fcag') ||
-				format.includes('fcchampionsdoubles') ||
-				format.includes('fcfreeforall')
-			);
-
-			if (allowAG) {
-				// 如果允许 AG，确保 tierSet 包含 AG 分级
-				// 之前的修复可能不完整，这里我们显式添加 AG 分级的内容
-				// 实际上，getTierSet 的 tierSet 参数已经经过了 slice 处理
-				// 如果 allowAG 为真，我们需要确保 AG 宝可梦不会因为 slice 而丢失
-				// 但是这里传入的 tierSet 已经是切片过的了
-				// 所以我们需要在 getTierSet 外部处理切片逻辑，或者在这里补救
-
-				// 由于我们无法直接修改调用处的切片逻辑，我们需要在这里重新获取完整的 tierSet 并进行正确的切片
-				// 但是这里我们没有 table 的引用，所以只能依赖于调用者传入正确的 tierSet
-				// 然而，调用者是在 getTierSet 方法中调用 ModifyTierSet 的
-
-				// 让我们回头看 getTierSet 方法
-				// getTierSet 方法中：
-				// let start = slices.AG;
-				// ...
-				// let tierSet: SearchRow[] = table.tierSet.slice(start);
-				// 这部分逻辑是正确的，它应该包含了 AG 及以下的宝可梦
-
-				// 问题可能在于某些宝可梦被标记为 Illegal 或者 Unreleased
-				// 对于 gen9fantasy，我们需要确保这些宝可梦显示出来
-			}
-
 			return addedTierSet.concat(tierSet);
 		},
 	},
