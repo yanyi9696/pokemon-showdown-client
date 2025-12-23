@@ -1954,7 +1954,15 @@ const ModModifier: {
 			let gen = Dex.gen;
 			if (extra && extra.gen) gen = extra.gen;
 			const table = window.BattleTeambuilderTable[`gen${gen}natdex`];
-			if (data.id in table.overrideTier) data.tier = table.overrideTier[data.id];
+			// --- 强硬修改：如果当前是 AG 类分级，跳过强制 Illegal 的覆盖 ---
+			const isAG = extra?.modid?.includes('anythinggoes');
+			if (data.id in table.overrideTier) {
+				if (isAG && table.overrideTier[data.id] === 'Illegal') {
+					// 如果是 AG 模式且表里说是 Illegal，我们保持它原来的 AG/Uber 身份
+					return;
+				}
+				data.tier = table.overrideTier[data.id];
+			}
 		},
 	},
 	gen7letsgo: {
@@ -2073,6 +2081,38 @@ const ModModifier: {
 
 				if (pokemon in window.BattlePokedex) continue;
 				addedTierSet.push(['pokemon', pokemon as ID]);
+			}
+			// 只有在 FC AG 或 FC Champions Doubles 时才执行
+			const formatid = window.Battle?.[window.Battle.length - 1]?.formatid || ''; 
+			const isFCAG = dex.modid.includes('anythinggoes' as ID);
+
+			if (isFCAG) {
+				const table = dex.getTierSetTable();
+				const slices = table.formatSlices;
+				
+				// 强制提取 AG 和 Uber 的切片内容
+				const agSection = table.tierSet.slice(0, slices.Uber);
+				const uberSection = table.tierSet.slice(slices.Uber, slices.OU);
+				const restSection = table.tierSet.slice(slices.OU);
+
+				// 强制将这些宝可梦的 Tier 属性改为非 Illegal，防止被 UI 隐藏
+				agSection.forEach((row: any) => {
+					if (row[0] === 'pokemon') {
+						const spec = dex.species.get(row[1]);
+						// 【修复报错】使用 (spec as any) 绕过只读检查
+						if (spec.tier === 'Illegal') (spec as any).tier = 'AG';
+					}
+				});
+
+				uberSection.forEach((row: any) => {
+					if (row[0] === 'pokemon') {
+						const spec = dex.species.get(row[1]);
+						// 【修复报错】同样处理 Uber 区域
+						if (spec.tier === 'Illegal') (spec as any).tier = 'Uber';
+					}
+				});
+				// 重新拼接：自制宝可梦 -> AG -> Uber -> 其他
+				return addedTierSet.concat(agSection).concat(uberSection).concat(restSection);
 			}
 			return addedTierSet.concat(tierSet);
 		},
