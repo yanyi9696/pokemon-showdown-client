@@ -1585,12 +1585,15 @@ export class ModdedDex {
 			table.tiers = null;
 		}
 		const slices = table.formatSlices;
-		// --- 修改开始 ---
-		// 确定起始切片位置：如果是 AG 模式且表中定义了 AG，则从 AG 开始；否则按原逻辑
+		// --- 修改点：优化起始位置计算 ---
 		let startIdx = slices.Uber || slices.DUber || 0;
+
 		if (this.modid.includes('anythinggoes' as ID)) {
+			// 如果是 AG 分级，默认从 0 (列表最顶端) 开始，确保包含所有宝可梦
+			startIdx = 0; 
+			// 如果表中定义了具体的 AG 位置，则使用定义的
 			if (slices.AG !== undefined) startIdx = slices.AG;
-			else if (slices.DAG !== undefined) startIdx = slices.DAG; // 针对双打 AG
+			else if (slices.DAG !== undefined) startIdx = slices.DAG;
 		}
 
 		let tierSet: SearchRow[] = table.tierSet.slice(startIdx);
