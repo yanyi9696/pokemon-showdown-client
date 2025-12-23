@@ -2000,6 +2000,26 @@ const ModModifier: {
 			}
 		},
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
+			// 1. 定义分级权重表（数字越大级别越高）
+			const tierWeights: { [k: string]: number } = {
+				'AG': 100,
+				'Uber': 90,
+				'(Uber)': 90,
+				'OU': 80,
+				'UUBL': 75,
+				'UU': 70,
+				'RUBL': 65,
+				'RU': 60,
+				'LC': 10
+			};
+
+			// 2. 确定当前编辑器所处的分级环境
+			let currentMaxWeight = 100; // 默认为最高（如 AG 或未识别时显示全部）
+			if (dex.modid.includes('ou' as ID)) currentMaxWeight = 80;
+			else if (dex.modid.includes('uu' as ID)) currentMaxWeight = 70;
+			else if (dex.modid.includes('ru' as ID)) currentMaxWeight = 60;
+			else if (dex.modid.includes('ubersuu' as ID)) currentMaxWeight = 90; // 如果有 Uber UU
+			// 如果是 Uber 或其它高分级，currentMaxWeight 保持 100 或 90
 			// 【新代码】创建一个“钉选”白名单
 			const pinnedPokemon = [
 				'victreebelmega', 'victreebelmegafantasy',
@@ -2041,17 +2061,35 @@ const ModModifier: {
 			];
 
 			const addedTierSet: SearchRow[] = [['header', 'Gen9fantasy specific Pokemon']];
-			for (const pokemon in window.Gen9fantasydex) {
-				// 【核心修正】如果一个宝可梦在白名单里，就无视所有规则，直接添加！
-				// 否则，才执行原来的检查逻辑。
-				if (pinnedPokemon.includes(pokemon)) {
-					addedTierSet.push(['pokemon', pokemon as ID]);
-					continue; // 添加后，跳过后续检查
-				}
+			
+			// 3. 遍历白名单并进行权重对比
+			for (const pokemonId of pinnedPokemon) {
+				const species = dex.species.get(pokemonId as ID);
+				
+				// 获取该宝可梦在当前 Mod 下的分级
+				const pokemonTier = species.tier || 'Illegal';
+				const pokemonWeight = tierWeights[pokemonTier] || 0;
 
-				if (pokemon in window.BattlePokedex) continue;
-				addedTierSet.push(['pokemon', pokemon as ID]);
+				// 【核心判断】：只有当宝可梦级别 <= 当前环境级别时，才置顶显示
+				// 例如：当前是 OU (80)，那么权重为 90 的 Uber 宝可梦就不会被加入 addedTierSet
+				if (pokemonWeight <= currentMaxWeight) {
+					addedTierSet.push(['pokemon', pokemonId as ID]);
+				}
 			}
+
+			// 处理那些不在白名单里但在 window.Gen9fantasydex 里的其它自定义宝可梦
+			for (const pokemon in window.Gen9fantasydex) {
+				if (pinnedPokemon.includes(pokemon)) continue; // 已经处理过了
+				if (pokemon in window.BattlePokedex) continue;
+
+				const species = dex.species.get(pokemon as ID);
+				const pokemonWeight = tierWeights[species.tier || ''] || 0;
+
+				if (pokemonWeight <= currentMaxWeight) {
+					addedTierSet.push(['pokemon', pokemon as ID]);
+				}
+			}
+
 			return addedTierSet.concat(tierSet);
 		},
 	},
