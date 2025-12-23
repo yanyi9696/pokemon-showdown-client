@@ -279,6 +279,10 @@ export const Dex = new class implements ModdedDex {
 
 		const genStrings = formatid.match(/gen\d/); // /gen(10|\d)/ after gen 10 releases
 		const gen = genStrings ? genStrings[0] : this.currentGen;
+		// --- 新增：识别特殊分级关键字 ---
+		if (formatid.includes('champions')) modids.push('champions' as ID);
+		if (formatid.includes('freeforall')) modids.push('freeforall' as ID);
+		// ----------------------------
 		// tiers
 		if (formatid.endsWith('ou')) modids.push('ou' as ID);
 		if (formatid.endsWith('ubersuu')) modids.push('ubersuu' as ID);
@@ -2018,10 +2022,27 @@ const ModModifier: {
 			// 2. 确定当前编辑器环境的过滤阈值 (实现你要求的按分级过滤)
 			let currentMaxWeight = 100; // 默认 AG 环境显示全部
 			const modidStr = dex.modid.join('');
-			if (modidStr.includes('ou')) currentMaxWeight = 70; // OU 环境不显示 Uber (90) 和 Illegal (100)
-			else if (modidStr.includes('uu') && !modidStr.includes('ubersuu')) currentMaxWeight = 60;
-			else if (modidStr.includes('ru')) currentMaxWeight = 50;
-			else if (modidStr.includes('ubersuu')) currentMaxWeight = 80;
+			if (modidStr.includes('champions')) {
+			currentMaxWeight = 100; // 冠军组：显示包括 AG 的所有宝可梦
+			} else if (modidStr.includes('freeforall')) {
+			currentMaxWeight = 90;  // FFA：显示到 Uber 为止
+			} else if (modidStr.includes('ubersuu')) { // 必须放在 uber 之前判断
+			currentMaxWeight = 80;
+			} else if (modidStr.includes('uber')) {
+				currentMaxWeight = 90;
+			} else if (modidStr.includes('ou')) {
+				currentMaxWeight = 70;
+			} else if (modidStr.includes('uubl')) {
+				currentMaxWeight = 65; // UUBL 环境允许显示权重 <= 65 的宝可梦
+			} else if (modidStr.includes('uu')) {
+				currentMaxWeight = 60; // 纯 UU 环境不显示 UUBL (65)
+			} else if (modidStr.includes('rubl')) {
+				currentMaxWeight = 55; // RUBL 环境允许显示权重 <= 55 的宝可梦
+			} else if (modidStr.includes('ru')) {
+				currentMaxWeight = 50; // 纯 RU 环境不显示 RUBL (55)
+			} else if (modidStr.includes('lc')) {
+				currentMaxWeight = 10;
+			}
 
 			// 3. 你的手动维护列表 (保持原样，用于确保“必顶置”)
 			const pinnedPokemon = [
