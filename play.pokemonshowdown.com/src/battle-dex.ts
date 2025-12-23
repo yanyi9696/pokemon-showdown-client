@@ -2005,8 +2005,8 @@ const ModModifier: {
 				'AG': 100,
 				'Illegal': 100, // 根据要求，摆在最高挡位 (与 AG 齐平)
 				'Uber': 90,
-				'(Uber)': 85,   // 略低于 Uber，确保排序在 Uber 之后
-				'Ubers UU': 80,
+				'(Uber)': 80,   // 略低于 Uber，确保排序在 Uber 之后
+				'Ubers UU': 80, // 将 (Uber) 和 Ubers UU 设为相同的权重
 				'OU': 70,
 				'UUBL': 65,
 				'UU': 60,
