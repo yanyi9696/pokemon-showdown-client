@@ -868,7 +868,13 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 		let megaBaseSpeciesFromItem: string | null = null;
 		if (!species.isMega && item.megaStone && item.megaEvolves) {
 			const megaStones = Array.isArray(item.megaStone) ? item.megaStone : [item.megaStone];
-			const idx = megaStones.map(s => toID(s as string)).indexOf(species.id);
+			const megaStoneIds = megaStones.map(s => toID(s as string));
+			let idx = megaStoneIds.indexOf(species.id);
+			if (idx < 0 && species.id.endsWith('fantasy')) {
+				idx = megaStoneIds.indexOf(toID(species.id.slice(0, -'fantasy'.length)));
+			} else if (idx < 0) {
+				idx = megaStoneIds.indexOf(toID(species.id + 'fantasy'));
+			}
 			if (idx >= 0) {
 				if (Array.isArray(item.megaEvolves)) {
 					megaBaseSpeciesFromItem = item.megaEvolves[idx] || item.megaEvolves[0] || null;
@@ -883,7 +889,8 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 			abilitySet.unshift(['html', `Will be <strong>${megaAbilityName}</strong> after Mega Evolving.`]);
 			let baseSpeciesId = toID(species.isMega ? species.baseSpecies : megaBaseSpeciesFromItem!);
 			if (species.id.endsWith('fantasy')) {
-				const fantasyBaseId = toID((species.isMega ? species.baseSpecies : megaBaseSpeciesFromItem!) + 'fantasy');
+				const rawBaseId = toID(species.isMega ? species.baseSpecies : megaBaseSpeciesFromItem!);
+				const fantasyBaseId = rawBaseId.endsWith('fantasy') ? rawBaseId : toID(rawBaseId + 'fantasy');
 				if (dex.species.get(fantasyBaseId).exists) {
 					baseSpeciesId = fantasyBaseId;
 				}
