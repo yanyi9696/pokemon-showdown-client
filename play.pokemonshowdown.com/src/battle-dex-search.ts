@@ -864,16 +864,27 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 		//let speciesAbilities = { ...species.abilities }; 移到下面去了
 		let abilitySet: SearchRow[] = [['header', "Abilities"]];
 
-		if (species.isMega) {
-			// 1. 先从Mega形态中获取正确的Mega后特性名
+		const item = dex.items.get(this.set.item || '');
+		let megaBaseSpeciesFromItem: string | null = null;
+		if (!species.isMega && item.megaStone && item.megaEvolves) {
+			const megaStones = Array.isArray(item.megaStone) ? item.megaStone : [item.megaStone];
+			const idx = megaStones.map(s => toID(s as string)).indexOf(species.id);
+			if (idx >= 0) {
+				if (Array.isArray(item.megaEvolves)) {
+					megaBaseSpeciesFromItem = item.megaEvolves[idx] || item.megaEvolves[0] || null;
+				} else {
+					megaBaseSpeciesFromItem = item.megaEvolves;
+				}
+			}
+		}
+
+		if (species.isMega || megaBaseSpeciesFromItem) {
 			const megaAbilityName = dex.abilities.get(species.abilities['0']).name;
 			abilitySet.unshift(['html', `Will be <strong>${megaAbilityName}</strong> after Mega Evolving.`]);
-			// 2. 然后将 species 变量替换为基础形态
-			let baseSpeciesId = toID(species.baseSpecies);
+			let baseSpeciesId = toID(species.isMega ? species.baseSpecies : megaBaseSpeciesFromItem!);
 			if (species.id.endsWith('fantasy')) {
-				const fantasyBaseId = toID(species.baseSpecies + 'fantasy');
+				const fantasyBaseId = toID((species.isMega ? species.baseSpecies : megaBaseSpeciesFromItem!) + 'fantasy');
 				if (dex.species.get(fantasyBaseId).exists) {
-					// 如果“幻想”版本的基础形态存在，就用它
 					baseSpeciesId = fantasyBaseId;
 				}
 			}
