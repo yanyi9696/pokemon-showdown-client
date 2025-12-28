@@ -3698,7 +3698,7 @@
 				'Malamar-Mega': 'Malamarite',
 				'Pyroar-Mega': 'Pyroarite',
 				'Scolipede-Mega': 'Scolipite', 'Scolipede-Mega-Fantasy': 'Scolipite',
-				'Absol-Mega-Z': 'Absolite Z',
+				'Absol-Mega-Z': 'Absolite Z', 'Absol-Mega-Z-Fantasy': 'Absolite Z',
 				'Baxcalibur-Mega': 'Baxcalibrite',
 				'Chimecho-Mega': 'Chimechite',
 				'Crabominable-Mega': 'Crabominite',
