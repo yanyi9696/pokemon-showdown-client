@@ -623,23 +623,23 @@ export const Dex = new class implements ModdedDex {
 			}
 			if (id === 'raichumegax') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
-				data.spriteid = 'malamar';
+				data.spriteid = 'raichu';
 			}
 			if (id === 'raichumegay') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
-				data.spriteid = 'malamar';
+				data.spriteid = 'raichu';
 			}
 			if (id === 'chimechomega') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
-				data.spriteid = 'malamar';
+				data.spriteid = 'chimecho';
 			}
 			if (id === 'absolmegaz') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
-				data.spriteid = 'malamar';
+				data.spriteid = 'absol';
 			}
 			if (id === 'absolmegazfantasy') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
-				data.spriteid = 'malamar';
+				data.spriteid = 'absol';
 			}
 			//自制mega
 			if (id === 'flygonmegafantasy') {
