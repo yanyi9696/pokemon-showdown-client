@@ -3675,7 +3675,7 @@
 				//ZA的新宝可梦
 				'Victreebel-Mega': 'Victreebelite', 'Victreebel-Mega-Fantasy': 'Victreebelite',
 				'Hawlucha-Mega': 'Hawluchanite', 'Hawlucha-Mega-Fantasy': 'Hawluchanite',
-				'Chandelure-Mega': 'Chandelurite',
+				'Chandelure-Mega': 'Chandelurite', 'Chandelure-Mega-Fantasy': 'Chandelurite',
 				'Froslass-Mega': 'Froslassite', 'Froslass-Mega-Fantasy': 'Froslassite',
 				'Delphox-Mega': 'Delphoxite', 'Delphox-Mega-Fantasy': 'Delphoxite',
 				'Dragalge-Mega': 'Dragalgite', 'Dragalge-Mega-Fantasy': 'Dragalgite',
