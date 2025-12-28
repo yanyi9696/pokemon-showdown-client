@@ -1913,6 +1913,7 @@ export class PokemonSprite extends Sprite {
 		yuannengshifang: ['源能释放', 'neutral'],
 		tundu: ['吞毒', 'good'],
 		qianghuawuxiao: ['强化无效', 'bad'],
+		shiyingli: ['噬影力', 'good'],
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;
