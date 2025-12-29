@@ -3149,7 +3149,7 @@ export class Battle {
 			if (effect.id === 'seaoffire') {
 				this.scene.updateWeather();
 			}
-			
+
 			this.log(args, kwArgs);
 			break;
 		}
@@ -3177,6 +3177,12 @@ export class Battle {
 			this.activateAbility(poke, fromeffect);
 			let minTimeLeft = 5;
 			let maxTimeLeft = 0;
+			// --- 新增逻辑：如果是火海，强制设为 0 回合（即不显示数字） ---
+			if (effect.id === 'seaoffire') {
+				minTimeLeft = 0;
+				maxTimeLeft = 0;
+			}
+			// -------------------------------------------------------
 			if (effect.id.endsWith('terrain')) {
 				for (let i = this.pseudoWeather.length - 1; i >= 0; i--) {
 					let pwID = toID(this.pseudoWeather[i][0]);
