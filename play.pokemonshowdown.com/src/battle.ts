@@ -3144,6 +3144,12 @@ export class Battle {
 			// let from = Dex.getEffect(kwArgs.from);
 			// let ofpoke = this.getPokemon(kwArgs.of);
 			side.removeSideCondition(effect.name);
+
+			// 新增：如果火海消失，立即刷新左上角 UI
+			if (effect.id === 'seaoffire') {
+				this.scene.updateWeather();
+			}
+			
 			this.log(args, kwArgs);
 			break;
 		}
