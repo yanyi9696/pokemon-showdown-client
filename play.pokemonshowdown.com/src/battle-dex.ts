@@ -699,7 +699,7 @@ export const Dex = new class implements ModdedDex {
 			}
 			if (id === 'magearnaoriginalmega') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
-				data.spriteid = 'magearna';
+				data.spriteid = 'magearna-original';
 			}
 			if (id === 'zeraoramega') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
@@ -712,6 +712,18 @@ export const Dex = new class implements ModdedDex {
 			if (id === 'glimmoramega') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'glimmora';
+			}
+			if (id === 'tatsugiricurlymega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'tatsugiri-curly';
+			}
+			if (id === 'tatsugiridroopymega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'tatsugiri-droopy';
+			}
+			if (id === 'tatsugiristretchymega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'tatsugiri-stretchy';
 			}
 			//自制mega
 			if (id === 'flygonmegafantasy') {
@@ -2184,6 +2196,9 @@ const ModModifier: {
 				'zeraoramega',
 				'scovillainmega',
 				'glimmoramega',
+				'tatsugiricurlymega',
+				'tatsugiridroopymega',
+				'tatsugiristretchymega',
 				//自制的mega（沙漠蜻蜓等等）
 				'flygonmegafantasy',
 				'garbodormegafantasy',
