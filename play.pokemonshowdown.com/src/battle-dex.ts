@@ -657,6 +657,10 @@ export const Dex = new class implements ModdedDex {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'lucario';
 			}
+			if (id === 'heatranmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'heatran';
+			}
 			//自制mega
 			if (id === 'flygonmegafantasy') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
@@ -2116,6 +2120,7 @@ const ModModifier: {
 				'staraptormega',
 				'garchompmegaz','garchompmegazfantasy',
 				'lucariomegaz',
+				'heatranmega',
 				//自制的mega（沙漠蜻蜓等等）
 				'flygonmegafantasy',
 				'garbodormegafantasy',
