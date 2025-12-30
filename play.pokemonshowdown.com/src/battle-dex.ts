@@ -680,7 +680,7 @@ export const Dex = new class implements ModdedDex {
 			}
 			if (id === 'meowsticfmega') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
-				data.spriteid = 'meowstic';
+				data.spriteid = 'meowstic-f';
 			}
 			if (id === 'crabominablemega') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
