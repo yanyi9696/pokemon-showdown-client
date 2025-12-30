@@ -3736,15 +3736,23 @@
 				set.item = '';
 			}
 			var abilitySpecies = species;
-			if (species.isMega || (species.forme && species.forme.indexOf('Mega') === 0)) {
+			if (species.isMega || (species.forme && species.forme.indexOf('Mega') === 0) || species.name.indexOf('-Mega') >= 0) {
 				var baseSpecies = null;
+				var megaIndex = species.name.indexOf('-Mega');
+				var preMegaName = (megaIndex >= 0 ? species.name.substr(0, megaIndex) : species.baseSpecies);
 				if (species.id.endsWith('fantasy')) {
-					baseSpecies = this.curTeam.dex.species.get(toID(species.baseSpecies) + 'fantasy');
+					baseSpecies = this.curTeam.dex.species.get(preMegaName + '-Fantasy');
+					if (!baseSpecies || !baseSpecies.exists) {
+						baseSpecies = this.curTeam.dex.species.get(toID(species.baseSpecies) + 'fantasy');
+					}
+				}
+				if (!baseSpecies || !baseSpecies.exists) {
+					baseSpecies = this.curTeam.dex.species.get(preMegaName);
 				}
 				if (!baseSpecies || !baseSpecies.exists) {
 					baseSpecies = this.curTeam.dex.species.get(species.baseSpecies);
 				}
-				if (baseSpecies.exists) abilitySpecies = baseSpecies;
+				if (baseSpecies && baseSpecies.exists) abilitySpecies = baseSpecies;
 			}
 			set.ability = abilitySpecies.abilities['0'];
 
