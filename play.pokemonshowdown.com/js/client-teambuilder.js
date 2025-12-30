@@ -3711,7 +3711,7 @@
 				'Lucario-Mega-Z': 'Lucarionite Z',
 				'Magearna-Mega': 'Magearnite',
 				'Magearna-Original-Mega': 'Magearnite',
-				'Meowstic-Mega': 'Meowsticite',
+				'Meowstic-M-Mega': 'Meowsticite',
 				'Meowstic-F-Mega': 'Meowsticite',
 				'Raichu-Mega-X': 'Raichunite X',
 				'Raichu-Mega-Y': 'Raichunite Y',
