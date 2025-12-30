@@ -3649,14 +3649,14 @@
 			if (set.teraType) delete set.teraType;
 			if (set.preEvo) delete set.preEvo;
 			var customMegaStones = {
-				//mega石对应
-				//G-mega超巨进化的mega
+				// mega石对应
+				// G-mega超巨进化的mega
 				'Garbodor-Mega-Fantasy': 'G-Mega Wishing Star',
 				'Corviknight-Mega-Fantasy': 'G-Mega Wishing Star',
 				'Sandaconda-Mega-Fantasy': 'G-Mega Wishing Star',
 				'Toxtricity-Mega-Fantasy': 'G-Mega Wishing Star',
 				'Toxtricity-Low-Key-Mega-Fantasy': 'G-Mega Wishing Star',
-				//megafantasy
+				// megafantasy
 				'Altaria-Mega-Fantasy': 'Altarianite',
 				'Metagross-Mega-Fantasy': 'Metagrossite',
 				'Abomasnow-Mega-Fantasy': 'Abomasite',
@@ -3672,7 +3672,7 @@
 				'Salamence-Mega-Fantasy': 'Salamencite',
 				'Slowbro-Mega-Fantasy': 'Slowbronite',
 				'Steelix-Mega-Fantasy': 'Steelixite',
-				//ZA的新宝可梦
+				// ZA的新宝可梦
 				'Victreebel-Mega': 'Victreebelite', 'Victreebel-Mega-Fantasy': 'Victreebelite',
 				'Hawlucha-Mega': 'Hawluchanite', 'Hawlucha-Mega-Fantasy': 'Hawluchanite',
 				'Chandelure-Mega': 'Chandelurite', 'Chandelure-Mega-Fantasy': 'Chandelurite',
@@ -3721,9 +3721,9 @@
 				'Tatsugiri-Droopy-Mega': 'Tatsugirinite',
 				'Tatsugiri-Stretchy-Mega': 'Tatsugirinite',
 				'Zeraora-Mega': 'Zeraorite',
-				//自制的沙漠蜻蜓、智蛙 等等
+				// 自制的沙漠蜻蜓、智蛙 等等
 				'Flygon-Mega-Fantasy': 'Flygonite',
-				'Greninja-Ash-Fantasy':'Greninja-Ash Z'
+				'Greninja-Ash-Fantasy': 'Greninja-Ash Z'
 				// 如果以后有更多自制 Mega，可以在这里继续添加，例如：
 				// 'Pikachu-Mega': 'Pikachunite'
 			};
@@ -3737,9 +3737,12 @@
 			}
 			var abilitySpecies = species;
 			if (species.isMega || (species.forme && species.forme.indexOf('Mega') === 0)) {
-				var baseSpecies = this.curTeam.dex.species.get(species.baseSpecies);
-				if (!baseSpecies.exists && species.id.endsWith('fantasy')) {
+				var baseSpecies = null;
+				if (species.id.endsWith('fantasy')) {
 					baseSpecies = this.curTeam.dex.species.get(toID(species.baseSpecies) + 'fantasy');
+				}
+				if (!baseSpecies || !baseSpecies.exists) {
+					baseSpecies = this.curTeam.dex.species.get(species.baseSpecies);
 				}
 				if (baseSpecies.exists) abilitySpecies = baseSpecies;
 			}
@@ -3849,8 +3852,8 @@
 			var f = function (x) { return x * x * x * 11 - x * x * 25 + x * 19 - 0.75; };
 			var g = function (x) { return x * x * x * 10 - x * x * 18 + x * 10 + 2; };
 			var k = function (x) { return (-x * x * x * x + x * x * x * 8 - x * x * 10 + x * 3 + 1); };
-			var A_w = (4 * Math.max(A(a), A(c)) + 1 * Math.min(A(a), A(c))) / 15e2;
-			var B_w = (2 * Math.max(B(h, b), B(h, d)) + 1 * Math.min(B(h, b), B(h, d))) / 36e4;
+			var A_w = (4 * Math.max(A(a), A(c)) + Math.min(A(a), A(c))) / 1500;
+			var B_w = (2 * Math.max(B(h, b), B(h, d)) + Math.min(B(h, b), B(h, d))) / 360000;
 			var E = S(s) / 300;
 			var f_A_w = f(A_w);
 			var g_B_w = g(B_w);

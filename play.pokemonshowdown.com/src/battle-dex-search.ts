@@ -216,26 +216,26 @@ export class DexSearch {
 		if (this.dex.modid.includes('gen9fantasy' as ID)) {
 			searchIndex = Gen9fantasySearchIndex;
 			searchIndexOffset = Gen9fantasySearchIndexOffset;
-			closest = function (query: string) {
+			closest = function (q: string) {
 				// binary search through the index!
 				let left = 0;
 				let right = searchIndex.length - 1;
 				while (right > left) {
 					let mid = Math.floor((right - left) / 2 + left);
-					if (searchIndex[mid][0] === query && (mid === 0 || searchIndex[mid - 1][0] !== query)) {
+					if (searchIndex[mid][0] === q && (mid === 0 || searchIndex[mid - 1][0] !== q)) {
 						// that's us
 						return mid;
-					} else if (searchIndex[mid][0] < query) {
+					} else if (searchIndex[mid][0] < q) {
 						left = mid + 1;
 					} else {
 						right = mid - 1;
 					}
 				}
 				if (left >= searchIndex.length - 1) left = searchIndex.length - 1;
-				else if (searchIndex[left + 1][0] && searchIndex[left][0] < query) left++;
-				if (left && searchIndex[left - 1][0] === query) left--;
+				else if (searchIndex[left + 1][0] && searchIndex[left][0] < q) left++;
+				if (left && searchIndex[left - 1][0] === q) left--;
 				return left;
-			}
+			};
 		}
 
 		query = toID(query);
@@ -861,7 +861,6 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 		) return ([['header', "Abilities"]] as SearchRow[]).concat(this.getDefaultResults());
 		const dex = this.dex;
 		let species = dex.species.getFromPokemon(this.set);
-		//let speciesAbilities = { ...species.abilities }; 移到下面去了
 		let abilitySet: SearchRow[] = [['header', "Abilities"]];
 
 		const item = dex.items.get(this.set.item || '');
@@ -910,22 +909,20 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 			}
 			species = dex.species.get(baseSpeciesId);
 		}
-		
-		//在这里正常地获取特性
-		let speciesAbilities = { ...species.abilities };
 
 		if (species.forme === 'X') {
-			abilitySet.unshift(['html', `Will be <strong>${speciesAbilities['0']}</strong> after X-Evolving.`]);
-            // 应用和上面Mega进化部分完全相同的逻辑
-            let baseSpeciesId = toID(species.baseSpecies);
-            if (species.id.endsWith('fantasy')) {
-                const fantasyBaseId = toID(species.baseSpecies + 'fantasy');
-                if (dex.species.get(fantasyBaseId).exists) {
-                    baseSpeciesId = fantasyBaseId;
-                }
-            }
+			const xAbilityName = dex.abilities.get(species.abilities['0']).name;
+			abilitySet.unshift(['html', `Will be <strong>${xAbilityName}</strong> after X-Evolving.`]);
+			let baseSpeciesId = toID(species.baseSpecies);
+			if (species.id.endsWith('fantasy')) {
+				const fantasyBaseId = toID(species.baseSpecies + 'fantasy');
+				if (dex.species.get(fantasyBaseId).exists) {
+					baseSpeciesId = fantasyBaseId;
+				}
+			}
 			species = dex.species.get(baseSpeciesId);
 		}
+		const speciesAbilities = { ...species.abilities };
 		abilitySet.push(['ability', toID(speciesAbilities['0'])]);
 		if (speciesAbilities['1']) {
 			abilitySet.push(['ability', toID(speciesAbilities['1'])]);
@@ -978,7 +975,7 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 		const fantasySpecificItems: SearchRow[] = [];
 		const speciesSpecificItems: SearchRow[] = [];
 		const abilitySpecificItems: SearchRow[] = [];
-		const specificItemIds = new Set<ID>();
+		const specificItemIds: { [id: string]: true } = Object.create(null);
 
 		const abilityItem = {
 			protosynthesis: 'boosterenergy',
@@ -992,17 +989,17 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			const itemId = item.id;
 
 			if (isFantasyPokemon && window.Gen9fantasyItems?.[itemId]) {
-				if (!specificItemIds.has(itemId)) {
+				if (!specificItemIds[itemId]) {
 					fantasySpecificItems.push(['item', itemId]);
-					specificItemIds.add(itemId);
+					specificItemIds[itemId] = true;
 				}
 				continue;
 			}
 
 			if (abilityItem === itemId) {
-				if (!specificItemIds.has(itemId)) {
+				if (!specificItemIds[itemId]) {
 					abilitySpecificItems.push(['item', itemId]);
-					specificItemIds.add(itemId);
+					specificItemIds[itemId] = true;
 				}
 				continue;
 			}
@@ -1017,19 +1014,17 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			if (!isStrictlySpeciesSpecific) {
 				if (baseSpeciesName === 'Groudon' && itemId === 'redorb') isStrictlySpeciesSpecific = true;
 				if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isStrictlySpeciesSpecific = true;
-				// Add check for Toxtricity Z
 				if ((this.species === 'toxtricityfantasy' || this.species === 'toxtricitylowkeyfantasy') && itemId === 'toxtricityz') {
 					isStrictlySpeciesSpecific = true;
 				}
-				// Add check for Greninja-Ash Z
 				if ((this.species === 'greninjabondfantasy' || this.species === 'greninjaashfantasy') && itemId === 'greninjaashz') {
 					isStrictlySpeciesSpecific = true;
 				}
 			}
 			if (isStrictlySpeciesSpecific) {
-				if (!specificItemIds.has(itemId)) {
+				if (!specificItemIds[itemId]) {
 					speciesSpecificItems.push(['item', itemId]);
-					specificItemIds.add(itemId);
+					specificItemIds[itemId] = true;
 				}
 			}
 		}
@@ -1059,7 +1054,7 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 
 		const filteredOriginalList = originalItemSet.filter(row => {
 			if (row[0] !== 'item') return true;
-			return !specificItemIds.has(row[1]);
+			return !specificItemIds[row[1]];
 		});
 		output = output.concat(filteredOriginalList);
 
@@ -1359,48 +1354,49 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 	}
 	private moveIsFantasy(id: ID, species: Dex.Species, moves: string[], set: Dex.PokemonSet | null) {
 		switch (id) {
-			case 'renzhenouda':
-			case 'yishunqianji':
-			case 'huanxiangbaofa':
-			case 'youzhipeiyu':
-			case 'xiangongjiaozhun':
-			case 'suilinggang':
-			case 'yaolan':
-			case 'raoliangzhiyin':
-			case 'qingshengluye':
-			case 'fanchen':
-			case 'zhishareshe':
-			case 'qibaoliuxing':
-			case 'overdrive':
-			case 'flyingpress':
-			case 'shelter':
-			case 'xianxingzhiling':
-			case 'fuzhuzhiling':
-			case 'mijianbairenchuan':
-			case 'dianshanxunji':
-			case 'zuishenluanda':
-			case 'biansuzhefan':
-			case 'chuanyun':
-			case 'baoyulihua':
-			case 'yanjian':
-			case 'chaopinyaogunpoyinbo':
-			case 'yaojingzhiya':
-			case 'yuzhaozhijian':
-			case 'dongchadaji':
-			case 'lujiao':
-			case 'huanji':
-			case 'yuannengshifang':
-			case 'longzhige':
-			case 'huanzhiwu':
-			case 'chabuduowanan':
-			case 'yanzhibodong':
-			case 'fengxing':
-			case 'popipa':
-			case 'punishment':
-			case 'zhukaibo':
-			case 'juenianpo':
-			case 'huangjinjibanshoulijian':
-				return true;
+		case 'renzhenouda':
+		case 'yishunqianji':
+		case 'huanxiangbaofa':
+		case 'youzhipeiyu':
+		case 'xiangongjiaozhun':
+		case 'suilinggang':
+		case 'yaolan':
+		case 'raoliangzhiyin':
+		case 'qingshengluye':
+		case 'fanchen':
+		case 'zhishareshe':
+		case 'qibaoliuxing':
+		case 'overdrive':
+		case 'flyingpress':
+		case 'shelter':
+		case 'xianxingzhiling':
+		case 'fuzhuzhiling':
+		case 'mijianbairenchuan':
+		case 'dianshanxunji':
+		case 'zuishenluanda':
+		case 'biansuzhefan':
+		case 'chuanyun':
+		case 'baoyulihua':
+		case 'yanjian':
+		case 'chaopinyaogunpoyinbo':
+		case 'yaojingzhiya':
+		case 'yuzhaozhijian':
+		case 'dongchadaji':
+		case 'lujiao':
+		case 'huanji':
+		case 'yuannengshifang':
+		case 'longzhige':
+		case 'huanzhiwu':
+		case 'chabuduowanan':
+		case 'yanzhibodong':
+		case 'fengxing':
+		case 'popipa':
+		case 'punishment':
+		case 'zhukaibo':
+		case 'juenianpo':
+		case 'huangjinjibanshoulijian':
+			return true;
+		default:
 			return false;
 		}
 	}
