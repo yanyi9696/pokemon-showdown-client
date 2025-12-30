@@ -3735,7 +3735,15 @@
 			} else {
 				set.item = '';
 			}
-			set.ability = species.abilities['0'];
+			var abilitySpecies = species;
+			if (species.isMega || (species.forme && species.forme.indexOf('Mega') === 0)) {
+				var baseSpecies = this.curTeam.dex.species.get(species.baseSpecies);
+				if (!baseSpecies.exists && species.id.endsWith('fantasy')) {
+					baseSpecies = this.curTeam.dex.species.get(toID(species.baseSpecies) + 'fantasy');
+				}
+				if (baseSpecies.exists) abilitySpecies = baseSpecies;
+			}
+			set.ability = abilitySpecies.abilities['0'];
 
 			set.moves = [];
 			set.evs = {};

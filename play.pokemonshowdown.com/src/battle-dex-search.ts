@@ -866,6 +866,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 
 		const item = dex.items.get(this.set.item || '');
 		let megaBaseSpeciesFromItem: string | null = null;
+		let megaSpeciesFromItem: string | null = null;
 		if (!species.isMega && item.megaStone && item.megaEvolves) {
 			const megaStones = Array.isArray(item.megaStone) ? item.megaStone : [item.megaStone];
 			const megaStoneIds = megaStones.map(s => toID(s as string));
@@ -876,6 +877,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 				idx = megaStoneIds.indexOf(toID(species.id + 'fantasy'));
 			}
 			if (idx >= 0) {
+				megaSpeciesFromItem = megaStones[idx] || megaStones[0] || null;
 				if (Array.isArray(item.megaEvolves)) {
 					megaBaseSpeciesFromItem = item.megaEvolves[idx] || item.megaEvolves[0] || null;
 				} else {
@@ -884,12 +886,23 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 			}
 		}
 
-		if (species.isMega || megaBaseSpeciesFromItem) {
-			const megaAbilityName = dex.abilities.get(species.abilities['0']).name;
+		const isMegaForme = species.isMega || species.forme.startsWith('Mega');
+		if (isMegaForme || megaBaseSpeciesFromItem) {
+			let megaSpecies = species;
+			if (!isMegaForme && megaSpeciesFromItem) {
+				let megaSpeciesId = toID(megaSpeciesFromItem);
+				if (species.id.endsWith('fantasy') && !megaSpeciesId.endsWith('fantasy')) {
+					const fantasyMegaSpeciesId = toID(megaSpeciesId + 'fantasy');
+					if (dex.species.get(fantasyMegaSpeciesId).exists) megaSpeciesId = fantasyMegaSpeciesId;
+				}
+				const fromItemSpecies = dex.species.get(megaSpeciesId);
+				if (fromItemSpecies.exists) megaSpecies = fromItemSpecies;
+			}
+			const megaAbilityName = dex.abilities.get(megaSpecies.abilities['0']).name;
 			abilitySet.unshift(['html', `Will be <strong>${megaAbilityName}</strong> after Mega Evolving.`]);
-			let baseSpeciesId = toID(species.isMega ? species.baseSpecies : megaBaseSpeciesFromItem!);
+			let baseSpeciesId = toID(isMegaForme ? species.baseSpecies : megaBaseSpeciesFromItem!);
 			if (species.id.endsWith('fantasy')) {
-				const rawBaseId = toID(species.isMega ? species.baseSpecies : megaBaseSpeciesFromItem!);
+				const rawBaseId = toID(isMegaForme ? species.baseSpecies : megaBaseSpeciesFromItem!);
 				const fantasyBaseId = rawBaseId.endsWith('fantasy') ? rawBaseId : toID(rawBaseId + 'fantasy');
 				if (dex.species.get(fantasyBaseId).exists) {
 					baseSpeciesId = fantasyBaseId;
