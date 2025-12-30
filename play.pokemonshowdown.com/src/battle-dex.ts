@@ -512,7 +512,8 @@ export const Dex = new class implements ModdedDex {
 			} else if (window.BattlePokedex && !(id in BattlePokedex) && window.BattleBaseSpeciesChart && !(
 				(formid.startsWith("sawsbuck") && formid.includes("fantasy")) ||
 				(formid.startsWith("floette") && formid.includes("fantasy")) ||
-				(formid.startsWith("floette") && formid.includes("mega")) // <-- 新增的 floette "mega" 排除规则
+				(formid.startsWith("floette") && formid.includes("mega")) ||// <-- 新增的 floette "mega" 排除规则
+				(formid.startsWith("tatsugiri") && formid.includes("mega"))
 			)) {
 				for (const baseSpeciesId of BattleBaseSpeciesChart) {
 					if (formid.startsWith(baseSpeciesId)) {
@@ -656,6 +657,78 @@ export const Dex = new class implements ModdedDex {
 			if (id === 'lucariomegaz') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'lucario';
+			}
+			if (id === 'heatranmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'heatran';
+			}
+			if (id === 'darkraimega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'darkrai';
+			}
+			if (id === 'golurkmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'golurk';
+			}
+			if (id === 'golurkmegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'golurk';
+			}
+			if (id === 'meowsticmmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'meowstic';
+			}
+			if (id === 'meowsticfmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'meowstic-f';
+			}
+			if (id === 'crabominablemega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'crabominable';
+			}
+			if (id === 'golisopodmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'golisopod';
+			}
+			if (id === 'golisopodmegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'golisopod';
+			}
+			if (id === 'magearnamega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'magearna';
+			}
+			if (id === 'magearnaoriginalmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'magearna-original';
+			}
+			if (id === 'zeraoramega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'zeraora';
+			}
+			if (id === 'scovillainmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'scovillain';
+			}
+			if (id === 'glimmoramega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'glimmora';
+			}
+			if (id === 'tatsugiricurlymega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'tatsugiri';
+			}
+			if (id === 'tatsugiridroopymega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'tatsugiri-droopy';
+			}
+			if (id === 'tatsugiristretchymega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'tatsugiri-stretchy';
+			}
+			if (id === 'baxcaliburmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'baxcalibur';
 			}
 			//自制mega
 			if (id === 'flygonmegafantasy') {
@@ -2116,6 +2189,22 @@ const ModModifier: {
 				'staraptormega',
 				'garchompmegaz','garchompmegazfantasy',
 				'lucariomegaz',
+				'heatranmega',
+				'darkraimega',
+				'golurkmega', 'golurkmegafantasy',
+				'meowsticmmega',
+				'meowsticfmega',
+				'crabominablemega',
+				'golisopodmega', 'golisopodmegafantasy',
+				'magearnamega',
+				'magearnaoriginalmega',
+				'zeraoramega',
+				'scovillainmega',
+				'glimmoramega',
+				'tatsugiricurlymega',
+				'tatsugiridroopymega',
+				'tatsugiristretchymega',
+				'baxcaliburmega',
 				//自制的mega（沙漠蜻蜓等等）
 				'flygonmegafantasy',
 				'garbodormegafantasy',
