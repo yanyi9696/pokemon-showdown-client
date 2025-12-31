@@ -1696,7 +1696,7 @@ export const BattleMoveAnims: AnimTable = {
 			}, 'swing');
 		},
 	},
-	qingshengluye: {
+	qingshenglvye: {
 		anim(scene, [attacker, defender]) {
 			scene.backgroundEffect('#000000', 750, 1, 50);
 			if (attacker.sp.url) {
