@@ -2858,7 +2858,7 @@ export class PokemonSprite extends Sprite {
 		}
 		if (pokemon.volatiles.fantasystats) {
 			const stats = pokemon.volatiles.fantasystats[1];
-			status += '<span class="neutral">' + stats + '</span> ';
+			if (stats && stats !== '0/0/0/0/0/0') status += '<span class="neutral">' + stats + '</span> ';
 		}
 		for (const stat in pokemon.boosts) {
 			if (pokemon.boosts[stat]) {
