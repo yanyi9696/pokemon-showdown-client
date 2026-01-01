@@ -763,6 +763,10 @@ export const Dex = new class implements ModdedDex {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'urshifurapidstrike-gmax';
 			}
+			if (id === 'orbeetlemegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'orbeetle-gmax';
+			}
 			// ===== 我们添加的强制贴图修正代码 结束 =====
 
 			let species: Species;

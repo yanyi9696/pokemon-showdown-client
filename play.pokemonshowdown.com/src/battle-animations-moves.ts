@@ -23,52 +23,96 @@ export const BattleMoveAnims: AnimTable = {
 	},
 	huazhiwu: {
 		anim(scene, [attacker]) {
-			// 1. 背景闪烁效果：参考蝶舞，这里我将颜色改为了更符合花朵的粉红色 (#FFC0CB)
-			// 你也可以根据喜好改回原来的黑色 '#000000'
-			scene.backgroundEffect('#FFC0CB', 800, 0.3);
+			// 1. 使用花瓣舞的粉色背景特效 (#FF99FF)
+			scene.backgroundEffect('#FF99FF', 1400, 0.5);
 
-			// 2. 将冲向对手的动作移除，改为使用者原地晃动（类似蝶舞的施法动作）
-			BattleOtherAnims.shake.anim(scene, [attacker]);
+			// 2. 使用者原地“跳舞”的动作（提取自花瓣舞的前段小幅度左右晃动）
+			attacker.anim({ x: attacker.x - 10, time: 100 });
+			attacker.anim({ x: attacker.x + 10, time: 200 });
+			attacker.anim({ x: attacker.x, time: 100 });
+			
+			// 增加一个原地旋律感的摆动 (swing)
+			attacker.anim({ z: attacker.z, time: 400 }, 'swing');
 
-			// 3. 视觉特效（fireball）：将坐标从 defender 改为 attacker，使特效在使用者身上绽放
-			// 特效 1
-			scene.showEffect('fireball', {
-				x: attacker.x + 40,
+			// 3. 绽放特效：花瓣从使用者身上向四周散开
+			// 花瓣 1：向左上方飘散
+			scene.showEffect('petal', {
+				x: attacker.x,
 				y: attacker.y,
 				z: attacker.z,
 				scale: 0,
-				opacity: 0.6,
-				time: 350,
+				opacity: 1,
+				time: 0,
 			}, {
-				scale: 7,
+				x: attacker.x - 45,
+				y: attacker.y - 45,
+				scale: 2,
 				opacity: 0,
+				time: 300,
 			}, 'decel');
 
-			// 特效 2
-			scene.showEffect('fireball', {
-				x: attacker.x - 40,
-				y: attacker.y - 20,
+			// 花瓣 2：向右上方飘散
+			scene.showEffect('petal', {
+				x: attacker.x,
+				y: attacker.y,
 				z: attacker.z,
 				scale: 0,
-				opacity: 0.6,
-				time: 500,
+				opacity: 1,
+				time: 150,
 			}, {
-				scale: 7,
+				x: attacker.x + 50,
+				y: attacker.y - 30,
+				scale: 2,
 				opacity: 0,
+				time: 450,
 			}, 'decel');
 
-			// 特效 3
-			scene.showEffect('fireball', {
-				x: attacker.x + 10,
+			// 花瓣 3：向上方飘散
+			scene.showEffect('petal', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0,
+				opacity: 1,
+				time: 250,
+			}, {
+				x: attacker.x + 25,
+				y: attacker.y - 60,
+				scale: 2,
+				opacity: 0,
+				time: 550,
+			}, 'decel');
+
+			// 花瓣 4：向左方飘散
+			scene.showEffect('petal', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0,
+				opacity: 1,
+				time: 300,
+			}, {
+				x: attacker.x - 40,
+				y: attacker.y - 40,
+				scale: 2,
+				opacity: 0,
+				time: 600,
+			}, 'decel');
+
+			// 4. 额外强化感：添加一个向上的光点或雾气效果，模仿强化技能的视觉反馈
+			scene.showEffect('mistball', {
+				x: attacker.x,
 				y: attacker.y + 20,
 				z: attacker.z,
-				scale: 0,
-				opacity: 0.6,
-				time: 650,
+				scale: 0.2,
+				opacity: 0.8,
+				time: 400,
 			}, {
-				scale: 7,
+				y: attacker.y - 60,
+				scale: 1,
 				opacity: 0,
-			}, 'decel');
+				time: 1000,
+			}, 'accel');
 		},
 	},
 	renzhenouda: {
