@@ -1151,21 +1151,31 @@ export class BattleTooltips {
 					if (ability === 'orichalcumpulse') {
 						stats.atk = Math.floor(stats.atk * 1.3333);
 					}
+					// ==================== 修改后的花之礼逻辑 (START) ====================
+					
+					// 1. 检查自身是否拥有花之礼 (因为你增强了特性，使持有者也受益)
+					if (ability === 'flowergift') {
+						stats.atk = Math.floor(stats.atk * 1.5);
+						stats.spa = Math.floor(stats.spa * 1.5);
+						stats.spd = Math.floor(stats.spd * 1.5);
+					}
+
+					// 2. 检查队友是否提供花之礼加成
 					let allyActive = clientPokemon?.side.active;
 					if (allyActive) {
 						for (const ally of allyActive) {
-							if (!ally || ally.fainted) continue;
+							if (!ally || ally.fainted || ally === clientPokemon) continue;
 							let allyAbility = this.getAllyAbility(ally);
-							// ==================== 修改点 (START) ====================
-							// 移除了 `&& (ally.getSpecies().baseSpecies === 'Cherrim' || this.battle.gen <= 4)` 的检查
-							// 现在只要队友有花之礼特性，就会在晴天下提供加成
+							
+							// 只要队友有花之礼，就提供加成
 							if (allyAbility === 'Flower Gift') {
 								stats.atk = Math.floor(stats.atk * 1.5);
+								stats.spa = Math.floor(stats.spa * 1.5); // 修复了之前的 stats.spa 赋值
 								stats.spd = Math.floor(stats.spd * 1.5);
 							}
-							// ==================== 修改点 (END) ======================
 						}
 					}
+					// ==================== 修改后的花之礼逻辑 (END) ======================
 				}
 				if (weather === 'raindance' || weather === 'primordialsea') {
 					if (ability === 'swiftswim') {

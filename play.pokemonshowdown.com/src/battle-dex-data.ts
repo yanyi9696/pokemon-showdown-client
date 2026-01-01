@@ -194,7 +194,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	burmytrash: 1032 + 42,
 	wormadamsandy: 1032 + 43,
 	wormadamtrash: 1032 + 44,
-	cherrimsunshine: 1032 + 45,
+	cherrimsunshine: 1032 + 45, cherrimsunshinefantasy: 1032 + 45, // Added fantasy mapping
 	shelloseast: 1032 + 46,
 	gastrodoneast: 1032 + 47,
 	rotomfan: 1032 + 48,
