@@ -3656,6 +3656,8 @@
 				'Sandaconda-Mega-Fantasy': 'G-Mega Wishing Star',
 				'Toxtricity-Mega-Fantasy': 'G-Mega Wishing Star',
 				'Toxtricity-Low-Key-Mega-Fantasy': 'G-Mega Wishing Star',
+				'Orbeetle-Mega-Fantasy': 'G-Mega Wishing Star',
+				'Drednaw-Mega-Fantasy': 'G-Mega Wishing Star',
 				// megafantasy
 				'Altaria-Mega-Fantasy': 'Altarianite',
 				'Metagross-Mega-Fantasy': 'Metagrossite',

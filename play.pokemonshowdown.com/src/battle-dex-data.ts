@@ -526,7 +526,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	melmetalgmax: 1320 + 61,
 	corviknightgmax: 1320 + 62, corviknightmegafantasy: 1320 + 62, // Added fantasy mapping
 	orbeetlegmax: 1320 + 63, orbeetlemegafantasy: 1320 + 63, // Added fantasy mapping
-	drednawgmax: 1320 + 64,
+	drednawgmax: 1320 + 64, drednawmegafantasy: 1320 + 64, // Added fantasy mapping
 	coalossalgmax: 1320 + 65,
 	flapplegmax: 1320 + 66,
 	appletungmax: 1320 + 67,
