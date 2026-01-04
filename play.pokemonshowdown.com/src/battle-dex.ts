@@ -2223,7 +2223,7 @@ const ModModifier: {
 				'urshifumegafantasy',
 				'urshifurapidstrikemegafantasy',
 				'orbeetlemegafantasy',
-				'drednawmegafantasy'
+				'drednawmegafantasy',
 			];
 
 			// 4. 收集符合当前分级条件的宝可梦
