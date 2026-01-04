@@ -119,7 +119,8 @@ class TeamTextbox extends preact.Component<{ team: Team }> {
 						this.activeType = 'item';
 					}
 				}
-				this.search.setType(this.activeType, 'gen8ou' as ID, this.sets[setIndex]);
+				const format = (this.props.team.format || Dex.currentGen) as ID;
+				this.search.setType(this.activeType, format, this.sets[setIndex]);
 				this.search.find('');
 				window.search = this.search;
 			}
@@ -137,12 +138,13 @@ class TeamTextbox extends preact.Component<{ team: Team }> {
 		}
 		this.forceUpdate();
 	};
-    save() {
-    	const sets = PSTeambuilder.importTeam(this.textbox.value, 'gen8ou' as ID); // 添加第二个参数
-    	this.props.team.packedTeam = PSTeambuilder.packTeam(sets);
-    	this.props.team.iconCache = null;
-    	PS.teams.save();
-    }
+	save() {
+		const format = (this.props.team.format || Dex.currentGen) as ID;
+		const sets = PSTeambuilder.importTeam(this.textbox.value, format);
+		this.props.team.packedTeam = PSTeambuilder.packTeam(sets);
+		this.props.team.iconCache = null;
+		PS.teams.save();
+	}
 	override componentDidMount() {
 		this.textbox = this.base!.getElementsByClassName('teamtextbox')[0] as HTMLTextAreaElement;
 		this.heightTester = this.base!.getElementsByClassName('heighttester')[0] as HTMLTextAreaElement;

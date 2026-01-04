@@ -922,6 +922,18 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 			}
 			species = dex.species.get(baseSpeciesId);
 		}
+
+		if (species.id === 'greninjabondfantasy' || species.id === 'greninjaashfantasy') {
+			const ashSpecies = dex.species.get('greninjaashfantasy');
+			if (ashSpecies.exists) {
+				const ashAbilityName = dex.abilities.get(ashSpecies.abilities['0']).name;
+				abilitySet.unshift(['html', `Will be <strong>${ashAbilityName}</strong> after Battle Bond.`]);
+			}
+			if (species.id === 'greninjaashfantasy') {
+				const bondSpecies = dex.species.get('greninjabondfantasy');
+				if (bondSpecies.exists) species = bondSpecies;
+			}
+		}
 		const speciesAbilities = { ...species.abilities };
 		abilitySet.push(['ability', toID(speciesAbilities['0'])]);
 		if (speciesAbilities['1']) {
