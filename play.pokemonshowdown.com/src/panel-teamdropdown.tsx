@@ -445,9 +445,25 @@ export class PSTeambuilder {
 		} else if (line.startsWith("Trait: ")) {
 			line = line.slice(7);
 			set.ability = line;
+			const speciesId = toID(set.species);
+			if (
+				(speciesId === "greninjaashfantasy" ||
+					speciesId === "greninjabondfantasy") &&
+				toID(set.ability) === "moldbreaker"
+			) {
+				set.ability = "Chao Yue Qian Ban Bian Shen";
+			}
 		} else if (line.startsWith("Ability: ")) {
 			line = line.slice(9);
 			set.ability = line;
+			const speciesId = toID(set.species);
+			if (
+				(speciesId === "greninjaashfantasy" ||
+					speciesId === "greninjabondfantasy") &&
+				toID(set.ability) === "moldbreaker"
+			) {
+				set.ability = "Chao Yue Qian Ban Bian Shen";
+			}
 		} else if (line === "Shiny: Yes") {
 			set.shiny = true;
 		} else if (line.startsWith("Level: ")) {
