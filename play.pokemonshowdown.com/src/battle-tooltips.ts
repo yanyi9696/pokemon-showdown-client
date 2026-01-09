@@ -2631,7 +2631,7 @@ export class BattleTooltips {
 			ability: '', baseAbility: '', possibilities: [],
 		};
 		if (clientPokemon) {
-			if (clientPokemon.ability && clientPokemon.ability !== 'noability' && clientPokemon.ability !== '0') {
+			if (clientPokemon.ability) {
 				abilityData.ability = clientPokemon.ability || clientPokemon.baseAbility;
 				if (clientPokemon.baseAbility) {
 					abilityData.baseAbility = clientPokemon.baseAbility;
@@ -2642,20 +2642,12 @@ export class BattleTooltips {
 				const species = clientPokemon.getSpecies(serverPokemon || undefined); // unequivalent
 				if (species.exists && species.abilities) {
 					abilityData.possibilities = Object.values(species.abilities);
-					if (species.isMega || species.name.includes('-Mega')) {
-						if (abilityData.possibilities.length === 1) {
-							abilityData.ability = abilityData.possibilities[0];
-						}
-					}
 				}
 			}
 		}
 		if (serverPokemon) {
-			const serverAbility = serverPokemon.ability || serverPokemon.baseAbility;
-			if (!abilityData.ability && serverAbility && serverAbility !== 'noability' && serverAbility !== '0') {
-				abilityData.ability = serverAbility;
-			}
-			if (!abilityData.baseAbility && serverPokemon.baseAbility && serverPokemon.baseAbility !== 'noability' && serverPokemon.baseAbility !== '0') {
+			if (!abilityData.ability) abilityData.ability = serverPokemon.ability || serverPokemon.baseAbility;
+			if (!abilityData.baseAbility && serverPokemon.baseAbility) {
 				abilityData.baseAbility = serverPokemon.baseAbility;
 			}
 		}
