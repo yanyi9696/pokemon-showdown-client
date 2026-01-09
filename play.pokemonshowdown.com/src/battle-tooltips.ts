@@ -280,100 +280,100 @@ export class BattleTooltips {
 
 		let buf: string;
 		switch (type) {
-		case 'move':
-		case 'zmove':
-		case 'maxmove': { // move|MOVE|ACTIVEPOKEMON|[GMAXMOVE]
-			let move = this.battle.dex.moves.get(args[1]);
-			let teamIndex = parseInt(args[2], 10);
-			let pokemon = this.battle.nearSide.active[
-				teamIndex + this.battle.pokemonControlled * Math.floor(this.battle.mySide.n / 2)
-			];
-			let gmaxMove = args[3] ? this.battle.dex.moves.get(args[3]) : undefined;
-			if (!pokemon) return false;
-			let serverPokemon = this.battle.myPokemon![teamIndex];
-			buf = this.showMoveTooltip(move, type, pokemon, serverPokemon, gmaxMove);
-			break;
-		}
+			case 'move':
+			case 'zmove':
+			case 'maxmove': { // move|MOVE|ACTIVEPOKEMON|[GMAXMOVE]
+				let move = this.battle.dex.moves.get(args[1]);
+				let teamIndex = parseInt(args[2], 10);
+				let pokemon = this.battle.nearSide.active[
+					teamIndex + this.battle.pokemonControlled * Math.floor(this.battle.mySide.n / 2)
+				];
+				let gmaxMove = args[3] ? this.battle.dex.moves.get(args[3]) : undefined;
+				if (!pokemon) return false;
+				let serverPokemon = this.battle.myPokemon![teamIndex];
+				buf = this.showMoveTooltip(move, type, pokemon, serverPokemon, gmaxMove);
+				break;
+			}
 
-		case 'pokemon': { // pokemon|SIDE|POKEMON
-			// mouse over sidebar pokemon
-			// pokemon definitely exists, serverPokemon always ignored
-			let sideIndex = parseInt(args[1], 10);
-			let side = this.battle.sides[sideIndex];
-			let pokemon = side.pokemon[parseInt(args[2], 10)];
-			if (args[3] === 'illusion') {
-				buf = '';
-				const species = pokemon.getBaseSpecies().baseSpecies;
-				let index = 1;
-				for (const otherPokemon of side.pokemon) {
-					if (otherPokemon.getBaseSpecies().baseSpecies === species) {
-						buf += this.showPokemonTooltip(otherPokemon, null, false, index);
-						index++;
+			case 'pokemon': { // pokemon|SIDE|POKEMON
+				// mouse over sidebar pokemon
+				// pokemon definitely exists, serverPokemon always ignored
+				let sideIndex = parseInt(args[1], 10);
+				let side = this.battle.sides[sideIndex];
+				let pokemon = side.pokemon[parseInt(args[2], 10)];
+				if (args[3] === 'illusion') {
+					buf = '';
+					const species = pokemon.getBaseSpecies().baseSpecies;
+					let index = 1;
+					for (const otherPokemon of side.pokemon) {
+						if (otherPokemon.getBaseSpecies().baseSpecies === species) {
+							buf += this.showPokemonTooltip(otherPokemon, null, false, index);
+							index++;
+						}
 					}
+				} else {
+					buf = this.showPokemonTooltip(pokemon);
 				}
-			} else {
-				buf = this.showPokemonTooltip(pokemon);
+				break;
 			}
-			break;
-		}
-		case 'activepokemon': { // activepokemon|SIDE|ACTIVE
-			// mouse over active pokemon
-			// pokemon definitely exists, serverPokemon maybe
-			let sideIndex = parseInt(args[1], 10);
-			let side = this.battle.sides[+this.battle.viewpointSwitched ^ sideIndex];
-			let activeIndex = parseInt(args[2], 10);
-			let pokemonIndex = activeIndex;
-			if (activeIndex >= 1 && this.battle.sides.length > 2) {
-				pokemonIndex -= 1;
-				side = this.battle.sides[side.n + 2];
+			case 'activepokemon': { // activepokemon|SIDE|ACTIVE
+				// mouse over active pokemon
+				// pokemon definitely exists, serverPokemon maybe
+				let sideIndex = parseInt(args[1], 10);
+				let side = this.battle.sides[+this.battle.viewpointSwitched ^ sideIndex];
+				let activeIndex = parseInt(args[2], 10);
+				let pokemonIndex = activeIndex;
+				if (activeIndex >= 1 && this.battle.sides.length > 2) {
+					pokemonIndex -= 1;
+					side = this.battle.sides[side.n + 2];
+				}
+				let pokemon = side.active[activeIndex];
+				let serverPokemon = null;
+				if (side === this.battle.mySide && this.battle.myPokemon) {
+					serverPokemon = this.battle.myPokemon[pokemonIndex];
+				}
+				if (side === this.battle.mySide.ally && this.battle.myAllyPokemon) {
+					serverPokemon = this.battle.myAllyPokemon[pokemonIndex];
+				}
+				if (!pokemon) return false;
+				buf = this.showPokemonTooltip(pokemon, serverPokemon, true);
+				break;
 			}
-			let pokemon = side.active[activeIndex];
-			let serverPokemon = null;
-			if (side === this.battle.mySide && this.battle.myPokemon) {
-				serverPokemon = this.battle.myPokemon[pokemonIndex];
+			case 'switchpokemon': { // switchpokemon|POKEMON
+				// mouse over switchable pokemon
+				// serverPokemon definitely exists, sidePokemon maybe
+				// let side = this.battle.mySide;
+				let activeIndex = parseInt(args[1], 10);
+				let pokemon = null;
+				/* if (activeIndex < side.active.length && activeIndex < this.battle.pokemonControlled) {
+					pokemon = side.active[activeIndex];
+					if (pokemon && pokemon.side === side.ally) pokemon = null;
+				} */
+				let serverPokemon = this.battle.myPokemon![activeIndex];
+				buf = this.showPokemonTooltip(pokemon, serverPokemon);
+				break;
 			}
-			if (side === this.battle.mySide.ally && this.battle.myAllyPokemon) {
-				serverPokemon = this.battle.myAllyPokemon[pokemonIndex];
+			case 'allypokemon': { // allypokemon|POKEMON
+				// mouse over ally's pokemon in multi battles
+				// serverPokemon definitely exists, sidePokemon maybe
+				// let side = this.battle.mySide.ally;
+				let activeIndex = parseInt(args[1], 10);
+				let pokemon = null;
+				/* if (activeIndex < side.pokemon.length) {
+					pokemon = side.pokemon[activeIndex] || side.ally ? side.ally.pokemon[activeIndex] : null;
+				} */
+				let serverPokemon = this.battle.myAllyPokemon ? this.battle.myAllyPokemon[activeIndex] : null;
+				buf = this.showPokemonTooltip(pokemon, serverPokemon);
+				break;
 			}
-			if (!pokemon) return false;
-			buf = this.showPokemonTooltip(pokemon, serverPokemon, true);
-			break;
-		}
-		case 'switchpokemon': { // switchpokemon|POKEMON
-			// mouse over switchable pokemon
-			// serverPokemon definitely exists, sidePokemon maybe
-			// let side = this.battle.mySide;
-			let activeIndex = parseInt(args[1], 10);
-			let pokemon = null;
-			/* if (activeIndex < side.active.length && activeIndex < this.battle.pokemonControlled) {
-				pokemon = side.active[activeIndex];
-				if (pokemon && pokemon.side === side.ally) pokemon = null;
-			} */
-			let serverPokemon = this.battle.myPokemon![activeIndex];
-			buf = this.showPokemonTooltip(pokemon, serverPokemon);
-			break;
-		}
-		case 'allypokemon': { // allypokemon|POKEMON
-			// mouse over ally's pokemon in multi battles
-			// serverPokemon definitely exists, sidePokemon maybe
-			// let side = this.battle.mySide.ally;
-			let activeIndex = parseInt(args[1], 10);
-			let pokemon = null;
-			/* if (activeIndex < side.pokemon.length) {
-				pokemon = side.pokemon[activeIndex] || side.ally ? side.ally.pokemon[activeIndex] : null;
-			} */
-			let serverPokemon = this.battle.myAllyPokemon ? this.battle.myAllyPokemon[activeIndex] : null;
-			buf = this.showPokemonTooltip(pokemon, serverPokemon);
-			break;
-		}
-		case 'field': {
-			buf = this.showFieldTooltip();
-			break;
-		}
-		default:
-			// "throws" an error without crashing
-			Promise.resolve(new Error(`unrecognized type`));
-			buf = `<p class="message-error" style="white-space: pre-wrap">${new Error(`unrecognized type`).stack!}</p>`;
+			case 'field': {
+				buf = this.showFieldTooltip();
+				break;
+			}
+			default:
+				// "throws" an error without crashing
+				Promise.resolve(new Error(`unrecognized type`));
+				buf = `<p class="message-error" style="white-space: pre-wrap">${new Error(`unrecognized type`).stack!}</p>`;
 		}
 
 		this.placeTooltip(buf, elem, ownHeight, type);
@@ -412,7 +412,7 @@ export class BattleTooltips {
 				try {
 					const selection = window.getSelection()!;
 					if (selection.type === 'Range') return;
-				} catch {}
+				} catch { }
 				BattleTooltips.hideTooltip();
 			});
 		} else {
@@ -578,21 +578,21 @@ export class BattleTooltips {
 				}
 				if (move.id === 'weatherball') {
 					switch (this.battle.weather) {
-					case 'sunnyday':
-					case 'desolateland':
-						zMove = this.battle.dex.moves.get(BattleTooltips.zMoveTable['Fire']);
-						break;
-					case 'raindance':
-					case 'primordialsea':
-						zMove = this.battle.dex.moves.get(BattleTooltips.zMoveTable['Water']);
-						break;
-					case 'sandstorm':
-						zMove = this.battle.dex.moves.get(BattleTooltips.zMoveTable['Rock']);
-						break;
-					case 'hail':
-					case 'snowscape':
-						zMove = this.battle.dex.moves.get(BattleTooltips.zMoveTable['Ice']);
-						break;
+						case 'sunnyday':
+						case 'desolateland':
+							zMove = this.battle.dex.moves.get(BattleTooltips.zMoveTable['Fire']);
+							break;
+						case 'raindance':
+						case 'primordialsea':
+							zMove = this.battle.dex.moves.get(BattleTooltips.zMoveTable['Water']);
+							break;
+						case 'sandstorm':
+							zMove = this.battle.dex.moves.get(BattleTooltips.zMoveTable['Rock']);
+							break;
+						case 'hail':
+						case 'snowscape':
+							zMove = this.battle.dex.moves.get(BattleTooltips.zMoveTable['Ice']);
+							break;
 					}
 				}
 				move = new Move(zMove.id, zMove.name, {
@@ -1042,7 +1042,7 @@ export class BattleTooltips {
 			} else if (this.battle.gen < 2 && pokemon.status === 'brn') {
 				stats.atk = Math.floor(stats.atk * 0.5);
 			}
-		// 1. 处理冻伤导致的特攻减半显示
+			// 1. 处理冻伤导致的特攻减半显示
 			if (pokemon.status === 'fst' && toID(serverPokemon.item) !== 'fantasylifeorb') {
 				stats.spa = Math.floor(stats.spa * 0.5);
 			}
@@ -1152,7 +1152,7 @@ export class BattleTooltips {
 						stats.atk = Math.floor(stats.atk * 1.3333);
 					}
 					// ==================== 修改后的花之礼逻辑 (START) ====================
-					
+
 					// 1. 检查自身是否拥有花之礼 (因为你增强了特性，使持有者也受益)
 					if (ability === 'flowergift') {
 						stats.atk = Math.floor(stats.atk * 1.5);
@@ -1166,7 +1166,7 @@ export class BattleTooltips {
 						for (const ally of allyActive) {
 							if (!ally || ally.fainted || ally === clientPokemon) continue;
 							let allyAbility = this.getAllyAbility(ally);
-							
+
 							// 只要队友有花之礼，就提供加成
 							if (allyAbility === 'Flower Gift') {
 								stats.atk = Math.floor(stats.atk * 1.5);
@@ -1409,14 +1409,14 @@ export class BattleTooltips {
 			// ==================== 修改点 (START) ====================
 			// 在施加麻痹的速度惩罚前，检查是否携带“幻之生命宝珠”
 			if (item !== 'fantasylifeorb') {
-			// ==================== 修改点 (END) ======================
+				// ==================== 修改点 (END) ======================
 				if (this.battle.gen > 6) {
 					stats.spe = Math.floor(stats.spe * 0.5);
 				} else {
 					stats.spe = Math.floor(stats.spe * 0.25);
 				}
-			// ==================== 修改点 (START) ====================
-			// 为我们上面添加的 if 语句闭合括号
+				// ==================== 修改点 (START) ====================
+				// 为我们上面添加的 if 语句闭合括号
 			}
 			// ==================== 修改点 (END) ======================
 		}
@@ -1574,23 +1574,23 @@ export class BattleTooltips {
 		// Weather and pseudo-weather type changes.
 		if (move.id === 'weatherball' && value.weatherModify(0)) {
 			switch (this.battle.weather) {
-			case 'sunnyday':
-			case 'desolateland':
-				if (item.id === 'utilityumbrella') break;
-				moveType = 'Fire';
-				break;
-			case 'raindance':
-			case 'primordialsea':
-				if (item.id === 'utilityumbrella') break;
-				moveType = 'Water';
-				break;
-			case 'sandstorm':
-				moveType = 'Rock';
-				break;
-			case 'hail':
-			case 'snowscape':
-				moveType = 'Ice';
-				break;
+				case 'sunnyday':
+				case 'desolateland':
+					if (item.id === 'utilityumbrella') break;
+					moveType = 'Fire';
+					break;
+				case 'raindance':
+				case 'primordialsea':
+					if (item.id === 'utilityumbrella') break;
+					moveType = 'Water';
+					break;
+				case 'sandstorm':
+					moveType = 'Rock';
+					break;
+				case 'hail':
+				case 'snowscape':
+					moveType = 'Ice';
+					break;
 			}
 		}
 		if (move.id === 'terrainpulse' && pokemon.isGrounded(serverPokemon)) {
@@ -1623,7 +1623,7 @@ export class BattleTooltips {
 		if (move.id === 'aurawheel' && pokemon.getSpeciesForme() === 'Morpeko-Hangry') {
 			moveType = 'Dark';
 		}
-		
+
 		// Aura Wheel as Toxtricity-Low-Key-Fantasy changes the type to Ice
 		if (move.id === 'overdrive' && pokemon.getSpeciesForme() === 'Toxtricity-Low-Key-Fantasy') {
 			moveType = 'Ice';
@@ -1635,48 +1635,48 @@ export class BattleTooltips {
 		// Raging Bull's type depends on the Tauros forme
 		if (move.id === 'ragingbull') {
 			switch (pokemon.getSpeciesForme()) {
-			case 'Tauros-Paldea-Combat':
-				moveType = 'Fighting';
-				break;
-			case 'Tauros-Paldea-Blaze':
-				moveType = 'Fire';
-				break;
-			case 'Tauros-Paldea-Aqua':
-				moveType = 'Water';
-				break;
+				case 'Tauros-Paldea-Combat':
+					moveType = 'Fighting';
+					break;
+				case 'Tauros-Paldea-Blaze':
+					moveType = 'Fire';
+					break;
+				case 'Tauros-Paldea-Aqua':
+					moveType = 'Water';
+					break;
 			}
 		}
 
-			// Lu Jiao 的属性切换
+		// Lu Jiao 的属性切换
 		if (move.id === 'lujiao') {
 			switch (pokemon.getSpeciesForme()) {
-			case 'Sawsbuck-Fantasy':
-				moveType = 'Fairy';
-				break;
-			case 'Sawsbuck-Summer-Fantasy':
-				moveType = 'Grass';
-				break;
-			case 'Sawsbuck-Autumn-Fantasy':
-				moveType = 'Ground';
-				break;
-			case 'Sawsbuck-Winter-Fantasy':
-				moveType = 'Ice';
-				break;
+				case 'Sawsbuck-Fantasy':
+					moveType = 'Fairy';
+					break;
+				case 'Sawsbuck-Summer-Fantasy':
+					moveType = 'Grass';
+					break;
+				case 'Sawsbuck-Autumn-Fantasy':
+					moveType = 'Ground';
+					break;
+				case 'Sawsbuck-Winter-Fantasy':
+					moveType = 'Ice';
+					break;
 			}
 		}
-		
+
 		// Ivy Cudgel's type depends on the Ogerpon forme
 		if (move.id === 'ivycudgel') {
 			switch (pokemon.getSpeciesForme()) {
-			case 'Ogerpon-Wellspring': case 'Ogerpon-Wellspring-Tera':
-				moveType = 'Water';
-				break;
-			case 'Ogerpon-Hearthflame': case 'Ogerpon-Hearthflame-Tera':
-				moveType = 'Fire';
-				break;
-			case 'Ogerpon-Cornerstone': case 'Ogerpon-Cornerstone-Tera':
-				moveType = 'Rock';
-				break;
+				case 'Ogerpon-Wellspring': case 'Ogerpon-Wellspring-Tera':
+					moveType = 'Water';
+					break;
+				case 'Ogerpon-Hearthflame': case 'Ogerpon-Hearthflame-Tera':
+					moveType = 'Fire';
+					break;
+				case 'Ogerpon-Cornerstone': case 'Ogerpon-Cornerstone-Tera':
+					moveType = 'Rock';
+					break;
 			}
 		}
 
@@ -1715,7 +1715,7 @@ export class BattleTooltips {
 			if (isSound && value.abilityModify(0, 'Liquid Voice')) {
 				moveType = 'Water';
 			}
-			 if (isSound && value.abilityModify(0, 'Tian Lai Zhi Yin')) {
+			if (isSound && value.abilityModify(0, 'Tian Lai Zhi Yin')) {
 				moveType = '???';
 			}
 		}
@@ -1853,7 +1853,7 @@ export class BattleTooltips {
 
 		if (value.tryItem('Fantasy Power Lens')) {
 			if (typeof move.accuracy === 'number') {
-				
+
 				// 检查技能是否满足条件：非状态类技能且命中率小于100%
 				const isHustleAffected = value.tryAbility('Hustle') && move.category === 'Physical';
 
@@ -2083,7 +2083,7 @@ export class BattleTooltips {
 			value.set(20, 'Battle Bond');
 		}
 		if (
-			move.id === 'watershuriken' && pokemon.getSpeciesForme() === 'Greninja-Ash-Fantasy' 
+			move.id === 'watershuriken' && pokemon.getSpeciesForme() === 'Greninja-Ash-Fantasy'
 		) {
 			value.set(20, 'Battle Bond');
 		}
@@ -2267,7 +2267,7 @@ export class BattleTooltips {
 		if (move.recoil || move.hasCrashDamage) {
 			value.abilityModify(1.2, 'Reckless');
 		}
-		
+
 		if (moveType === 'Bug') {
 			value.abilityModify(1.5, "Feng Chao");
 		}
@@ -2366,10 +2366,10 @@ export class BattleTooltips {
 			// ==================== 修改点 (START) ====================
 			// 在施加烧伤的威力惩罚前，检查是否携带“幻之生命宝珠”
 			if (toID(serverPokemon.item) !== 'fantasylifeorb') {
-			// ==================== 修改点 (END) ======================
+				// ==================== 修改点 (END) ======================
 				if (!value.tryAbility("Guts")) value.modify(0.5, 'Burn');
-			// ==================== 修改点 (START) ====================
-			// 为我们上面添加的 if 语句闭合括号
+				// ==================== 修改点 (START) ====================
+				// 为我们上面添加的 if 语句闭合括号
 			}
 			// ==================== 修改点 (END) ======================
 		}
@@ -2539,8 +2539,8 @@ export class BattleTooltips {
 		// Fantasy Power Lens
 		if (value && value.tryItem('Fantasy Power Lens')) { // 检查 value 是否有效，并且宝可梦携带了“幻想能量镜”
 			// 检查技能是否为非变化类技能且拥有一个数字类型的命中率
-			if (move.category !== 'Status' && typeof move.accuracy === 'number') { 
-				
+			if (move.category !== 'Status' && typeof move.accuracy === 'number') {
+
 				// 检查宝可梦是否拥有“活力”特性，并且当前技能是物理技能
 				const isHustleAffected = value.tryAbility('Hustle') && move.category === 'Physical';
 
@@ -2549,9 +2549,9 @@ export class BattleTooltips {
 				// 2. 或者，技能的基础命中率等于100，但它是一个会受到“活力”特性影响的物理技能
 				if (move.accuracy < 100 || (move.accuracy === 100 && isHustleAffected)) {
 					value.itemModify(1.2); // 将威力乘以1.2倍
-					return value; 
-				} 
-			} 
+					return value;
+				}
+			}
 		}
 
 		// Type-enhancing items
@@ -2653,6 +2653,16 @@ export class BattleTooltips {
 		}
 		return abilityData;
 	}
+	getInferredMegaAbility(clientPokemon: Pokemon | null, serverPokemon: ServerPokemon | null | undefined) {
+		const speciesForme = clientPokemon?.getSpeciesForme(serverPokemon || undefined) || serverPokemon?.speciesForme || '';
+		if (!speciesForme) return '';
+		const species = this.battle.dex.species.get(speciesForme);
+		if (!species.exists || !species.isMega) return '';
+		const abilities = Object.values(species.abilities || {});
+		if (!abilities.length) return '';
+		if (abilities[0] === 'No Ability') return '';
+		return abilities[0];
+	}
 	getPokemonAbilityText(
 		clientPokemon: Pokemon | null,
 		serverPokemon: ServerPokemon | null | undefined,
@@ -2666,11 +2676,24 @@ export class BattleTooltips {
 			const ability = abilityData.baseAbility || abilityData.ability;
 			if (ability) text = '<small>Ability:</small> ' + this.battle.dex.abilities.get(ability).name;
 		} else {
-			if (abilityData.ability) {
-				const abilityName = this.battle.dex.abilities.get(abilityData.ability).name;
+			let ability = abilityData.ability;
+			let abilityName = ability ? this.battle.dex.abilities.get(ability).name : '';
+			if (!ability || abilityName === 'No Ability') {
+				const isSuppressed = !!clientPokemon?.volatiles['gastroacid'] || this.battle.ngasActive();
+				if (!isSuppressed) {
+					const inferredMegaAbility = this.getInferredMegaAbility(clientPokemon, serverPokemon);
+					if (inferredMegaAbility) {
+						ability = inferredMegaAbility;
+						abilityName = this.battle.dex.abilities.get(ability).name;
+					}
+				}
+			}
+			if (ability && abilityName && abilityName !== 'No Ability') {
 				text = '<small>Ability:</small> ' + abilityName;
 				const baseAbilityName = this.battle.dex.abilities.get(abilityData.baseAbility).name;
-				if (baseAbilityName && baseAbilityName !== abilityName) text += ' (base: ' + baseAbilityName + ')';
+				if (baseAbilityName && baseAbilityName !== 'No Ability' && baseAbilityName !== abilityName) {
+					text += ' (base: ' + baseAbilityName + ')';
+				}
 			}
 		}
 		const tier = this.battle.tier;
