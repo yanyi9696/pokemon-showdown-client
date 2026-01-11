@@ -1564,7 +1564,7 @@ for (const mod of modNames)
 		if ([
 			'fantasyitem', 'fantasypowerlens', 'fantasyringtarget', 'fantasylifeorb',
 			'fantasysachet', 'fantasyscopelens', 'fantasysyrupyapple', 'fantasyprotector',
-			'fantasyicestone'
+			'fantasyicestone','fantasylaxincense'
 		].includes(id)) {
 			modSpecificItems.push(id);
 			continue;

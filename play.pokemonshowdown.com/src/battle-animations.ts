@@ -1825,6 +1825,7 @@ export class PokemonSprite extends Sprite {
 		perish3: ['Perish in 3', 'bad'],
 		airballoon: ['Balloon', 'good'],
 		fantasyringtarget: ['Fantasy Ring Target', 'good'],
+		fantasylaxincense: ['Fantasy Lax Incense', 'good'],
 		leechseed: ['Leech Seed', 'bad'],
 		encore: ['Encore', 'bad'],
 		mustrecharge: ['Must recharge', 'bad'],
