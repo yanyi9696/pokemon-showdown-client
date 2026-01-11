@@ -2401,7 +2401,7 @@ export class Battle {
 				case 'fantasylaxincense':
 					poke.prevItemEffect = 'popped';
 					poke.removeVolatile('fantasylaxincense' as ID);
-					this.scene.resultAnim(poke, 'Fantasy Lax Incense', 'neutral');
+					this.scene.resultAnim(poke, 'Fantasy Lax Incense popped', 'neutral');
 					break;
 				case 'focussash':
 					poke.prevItemEffect = 'consumed';
