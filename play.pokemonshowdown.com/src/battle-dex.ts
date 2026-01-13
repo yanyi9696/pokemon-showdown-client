@@ -771,6 +771,10 @@ export const Dex = new class implements ModdedDex {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'drednaw-gmax';
 			}
+			if (id === 'melmetalmegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'melmetal-gmax';
+			}
 			// ===== 我们添加的强制贴图修正代码 结束 =====
 
 			let species: Species;
@@ -2224,6 +2228,7 @@ const ModModifier: {
 				'urshifurapidstrikemegafantasy',
 				'orbeetlemegafantasy',
 				'drednawmegafantasy',
+				'melmetalmegafantasy',
 			];
 
 			// 4. 收集符合当前分级条件的宝可梦
