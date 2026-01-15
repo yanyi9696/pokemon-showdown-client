@@ -1,1 +1,1 @@
-../../config/testclient-key.js
+const POKEMON_SHOWDOWN_TESTCLIENT_KEY = "12345";
