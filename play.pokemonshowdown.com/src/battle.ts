@@ -2274,6 +2274,8 @@ export class Battle {
 			if (item.id === 'airballoon') poke.addVolatile('airballoon' as ID);
 			poke.removeVolatile('fantasyringtarget' as ID);
 			if (item.id === 'fantasyringtarget') poke.addVolatile('fantasyringtarget' as ID);
+			poke.removeVolatile('fantasylaxincense' as ID);
+			if (item.id === 'fantasylaxincense') poke.addVolatile('fantasylaxincense' as ID);
 
 			if (effect.id) {
 				switch (effect.id) {
@@ -2331,6 +2333,9 @@ export class Battle {
 				case 'fantasyringtarget':
 					this.scene.resultAnim(poke, 'Fantasy Ring Target', 'good');
 					break;
+				case 'fantasylaxincense':
+					this.scene.resultAnim(poke, 'Fantasy Lax Incense', 'good');
+					break;
 				}
 			}
 			this.log(args, kwArgs);
@@ -2348,6 +2353,7 @@ export class Battle {
 			}
 			poke.removeVolatile('airballoon' as ID);
 			poke.removeVolatile('fantasyringtarget' as ID);
+			poke.removeVolatile('fantasylaxincense' as ID);
 			poke.addVolatile('itemremoved' as ID);
 			if (kwArgs.eat) {
 				poke.prevItemEffect = 'eaten';
@@ -2391,6 +2397,11 @@ export class Battle {
 					poke.prevItemEffect = 'popped';
 					poke.removeVolatile('fantasyringtarget' as ID);
 					this.scene.resultAnim(poke, 'Fantasy Ring Target popped', 'neutral');
+					break;
+				case 'fantasylaxincense':
+					poke.prevItemEffect = 'popped';
+					poke.removeVolatile('fantasylaxincense' as ID);
+					this.scene.resultAnim(poke, 'Fantasy Lax Incense popped', 'neutral');
 					break;
 				case 'focussash':
 					poke.prevItemEffect = 'consumed';

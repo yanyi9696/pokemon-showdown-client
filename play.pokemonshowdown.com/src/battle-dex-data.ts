@@ -485,7 +485,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	tyranitarmega: 1320 + 20,
 	sceptilemega: 1320 + 21,
 	blazikenmega: 1320 + 22,
-	swampertmega: 1320 + 23,
+	swampertmega: 1320 + 23, swampertmegafantasy: 1320 + 23,// Added fantasy mapping
 	gardevoirmega: 1320 + 24,
 	sableyemega: 1320 + 25,
 	mawilemega: 1320 + 26,
@@ -523,7 +523,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	eeveegmax: 1320 + 58,
 	snorlaxgmax: 1320 + 59,
 	garbodorgmax: 1320 + 60, garbodormegafantasy: 1320 + 60, // Added fantasy mapping
-	melmetalgmax: 1320 + 61,
+	melmetalgmax: 1320 + 61, melmetalmegafantasy: 1320 + 61, // Added fantasy mapping
 	corviknightgmax: 1320 + 62, corviknightmegafantasy: 1320 + 62, // Added fantasy mapping
 	orbeetlegmax: 1320 + 63, orbeetlemegafantasy: 1320 + 63, // Added fantasy mapping
 	drednawgmax: 1320 + 64, drednawmegafantasy: 1320 + 64, // Added fantasy mapping
