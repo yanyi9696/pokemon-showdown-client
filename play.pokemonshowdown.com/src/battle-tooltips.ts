@@ -2273,7 +2273,7 @@ export class BattleTooltips {
 		}
 
 		if (moveType === 'Bug') {
-			value.abilityModify(1.5, "Zui Jia Ni Tai");
+			value.abilityModify(1.5, "Wei Chong Ni Tai");
 		}
 
 
