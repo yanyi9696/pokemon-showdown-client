@@ -4883,14 +4883,14 @@
 			var customMegaStones = {
 				// mega石对应
 				// G-mega超巨进化的mega
-				"Garbodor-Mega-Fantasy": "G-Mega Wishing Star",
-				"Corviknight-Mega-Fantasy": "G-Mega Wishing Star",
-				"Sandaconda-Mega-Fantasy": "G-Mega Wishing Star",
-				"Toxtricity-Mega-Fantasy": "G-Mega Wishing Star",
-				"Toxtricity-Low-Key-Mega-Fantasy": "G-Mega Wishing Star",
-				"Orbeetle-Mega-Fantasy": "G-Mega Wishing Star",
-				"Drednaw-Mega-Fantasy": "G-Mega Wishing Star",
-				"Melmetal-Mega-Fantasy": "G-Mega Wishing Star",
+				"Garbodor-G-Mega-Fantasy": "G-Mega Wishing Star",
+				"Corviknight-G-Mega-Fantasy": "G-Mega Wishing Star",
+				"Sandaconda-G-Mega-Fantasy": "G-Mega Wishing Star",
+				"Toxtricity-G-Mega-Fantasy": "G-Mega Wishing Star",
+				"Toxtricity-Low-Key-G-Mega-Fantasy": "G-Mega Wishing Star",
+				"Orbeetle-G-Mega-Fantasy": "G-Mega Wishing Star",
+				"Drednaw-G-Mega-Fantasy": "G-Mega Wishing Star",
+				"Melmetal-G-Mega-Fantasy": "G-Mega Wishing Star",
 				// megafantasy
 				"Altaria-Mega-Fantasy": "Altarianite",
 				"Metagross-Mega-Fantasy": "Metagrossite",

@@ -459,7 +459,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	ogerponwellspringtera: 1032 + 241,
 	ogerponhearthflametera: 1032 + 242,
 	ogerponcornerstonetera: 1032 + 243,
-	toxtricitylowkeygmax: 1320 + 69, toxtricitylowkeymegafantasy: 1320 + 69,// Added fantasy mapping
+	toxtricitylowkeygmax: 1320 + 69, toxtricitylowkeygmegafantasy: 1320 + 69,// Added fantasy mapping
 
 	// Mega/G-Max
 	venusaurmega: 1320 + 0,
@@ -522,16 +522,16 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	laprasgmax: 1320 + 57,
 	eeveegmax: 1320 + 58,
 	snorlaxgmax: 1320 + 59,
-	garbodorgmax: 1320 + 60, garbodormegafantasy: 1320 + 60, // Added fantasy mapping
-	melmetalgmax: 1320 + 61, melmetalmegafantasy: 1320 + 61, // Added fantasy mapping
-	corviknightgmax: 1320 + 62, corviknightmegafantasy: 1320 + 62, // Added fantasy mapping
-	orbeetlegmax: 1320 + 63, orbeetlemegafantasy: 1320 + 63, // Added fantasy mapping
-	drednawgmax: 1320 + 64, drednawmegafantasy: 1320 + 64, // Added fantasy mapping
+	garbodorgmax: 1320 + 60, garbodorgmegafantasy: 1320 + 60, // Added fantasy mapping
+	melmetalgmax: 1320 + 61, melmetalgmegafantasy: 1320 + 61, // Added fantasy mapping
+	corviknightgmax: 1320 + 62, corviknightgmegafantasy: 1320 + 62, // Added fantasy mapping
+	orbeetlegmax: 1320 + 63, orbeetlegmegafantasy: 1320 + 63, // Added fantasy mapping
+	drednawgmax: 1320 + 64, drednawgmegafantasy: 1320 + 64, // Added fantasy mapping
 	coalossalgmax: 1320 + 65,
 	flapplegmax: 1320 + 66,
 	appletungmax: 1320 + 67,
-	sandacondagmax: 1320 + 68, sandacondamegafantasy: 1320 + 68, // Added fantasy mapping
-	toxtricitygmax: 1320 + 69, toxtricitymegafantasy: 1320 + 69, // Added fantasy mapping
+	sandacondagmax: 1320 + 68, sandacondagmegafantasy: 1320 + 68, // Added fantasy mapping
+	toxtricitygmax: 1320 + 69, toxtricitygmegafantasy: 1320 + 69, // Added fantasy mapping
 	centiskorchgmax: 1320 + 70,
 	hatterenegmax: 1320 + 71,
 	grimmsnarlgmax: 1320 + 72,
@@ -544,8 +544,8 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	rillaboomgmax: 1320 + 79,
 	cinderacegmax: 1320 + 80,
 	inteleongmax: 1320 + 81,
-	urshifugmax: 1320 + 82, urshifumegafantasy: 1320 + 82, // Added fantasy mapping
-	urshifurapidstrikegmax: 1320 + 83, urshifurapidstrikemegafantasy: 1320 + 83, // Added fantasy mapping
+	urshifugmax: 1320 + 82, urshifugmegafantasy: 1320 + 82, // Added fantasy mapping
+	urshifurapidstrikegmax: 1320 + 83, urshifurapidstrikegmegafantasy: 1320 + 83, // Added fantasy mapping
 	clefablemega: 1320 + 84,
 	victreebelmega: 1320 + 85, victreebelmegafantasy: 1320 + 85, // Added fantasy mapping
 	starmiemega: 1320 + 86,

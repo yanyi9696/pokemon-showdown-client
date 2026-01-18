@@ -735,43 +735,43 @@ export const Dex = new class implements ModdedDex {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'flygon';
 			}
-			if (id === 'garbodormegafantasy') {
+			if (id === 'garbodorgmegafantasy') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'garbodor-gmax';
 			}
-			if (id === 'corviknightmegafantasy') {
+			if (id === 'corviknightgmegafantasy') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'corviknight-gmax';
 			}
-			if (id === 'sandacondamegafantasy') {
+			if (id === 'sandacondagmegafantasy') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'sandaconda-gmax';
 			}
-			if (id === 'toxtricitymegafantasy') {
+			if (id === 'toxtricitygmegafantasy') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'toxtricity-gmax';
 			}
-			if (id === 'toxtricitylowkeymegafantasy') {
+			if (id === 'toxtricitylowkeygmegafantasy') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'toxtricity-gmax';
 			}
-			if (id === 'urshifumegafantasy') {
+			if (id === 'urshifugmegafantasy') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'urshifu-gmax';
 			}
-			if (id === 'urshifurapidstrikemegafantasy') {
+			if (id === 'urshifurapidstrikegmegafantasy') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'urshifurapidstrike-gmax';
 			}
-			if (id === 'orbeetlemegafantasy') {
+			if (id === 'orbeetlegmegafantasy') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'orbeetle-gmax';
 			}
-			if (id === 'drednawmegafantasy') {
+			if (id === 'drednawgmegafantasy') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'drednaw-gmax';
 			}
-			if (id === 'melmetalmegafantasy') {
+			if (id === 'melmetalgmegafantasy') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'melmetal-gmax';
 			}
@@ -916,8 +916,8 @@ export const Dex = new class implements ModdedDex {
 		// --- Determine the sprite ID to use for the filename ---
 		let baseSpriteId = species.spriteid || species.id; // Start with current species' sprite ID or ID
 
-		// Special handling for Urshifu-Rapid-Strike-Mega-Fantasy to use Gmax sprites
-		if (species.id === 'urshifurapidstrikemegafantasy') {
+		// Special handling for Urshifu-Rapid-Strike-G-Mega-Fantasy to use Gmax sprites
+		if (species.id === 'urshifurapidstrikegmegafantasy') {
 			const target = Dex.species.get('urshifurapidstrikegmax');
 			if (target.exists) {
 				baseSpriteId = target.spriteid || target.id;
@@ -1193,7 +1193,7 @@ export const Dex = new class implements ModdedDex {
 		// ID for base sprite/data lookup (strip fantasy)
 		let lookupId = finalId;
 
-		if (finalId === 'urshifurapidstrikemegafantasy') {
+		if (finalId === 'urshifurapidstrikegmegafantasy') {
 			lookupId = 'urshifurapidstrikegmax' as ID;
 		}
 
@@ -1236,7 +1236,7 @@ export const Dex = new class implements ModdedDex {
 		// Ensure spriteid is defined and remove '-fantasy' suffix for filename
 		if (!spriteid) spriteid = id;
 
-		if (id === 'urshifurapidstrikemegafantasy') {
+		if (id === 'urshifurapidstrikegmegafantasy') {
 			const target = Dex.species.get('urshifurapidstrikegmax');
 			if (target.exists) {
 				spriteid = target.spriteid || target.id;
@@ -2219,16 +2219,16 @@ const ModModifier: {
 				'baxcaliburmega',
 				//自制的mega（沙漠蜻蜓等等）
 				'flygonmegafantasy',
-				'garbodormegafantasy',
-				'corviknightmegafantasy',
-				'sandacondamegafantasy',
-				'toxtricitymegafantasy',
-				'toxtricitylowkeymegafantasy',
-				'urshifumegafantasy',
-				'urshifurapidstrikemegafantasy',
-				'orbeetlemegafantasy',
-				'drednawmegafantasy',
-				'melmetalmegafantasy',
+				'garbodorgmegafantasy',
+				'corviknightgmegafantasy',
+				'sandacondagmegafantasy',
+				'toxtricitygmegafantasy',
+				'toxtricitylowkeygmegafantasy',
+				'urshifugmegafantasy',
+				'urshifurapidstrikegmegafantasy',
+				'orbeetlegmegafantasy',
+				'drednawgmegafantasy',
+				'melmetalgmegafantasy',
 			];
 
 			// 4. 收集符合当前分级条件的宝可梦
