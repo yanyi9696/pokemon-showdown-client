@@ -1928,6 +1928,7 @@ export class PokemonSprite extends Sprite {
 		tundu: ['吞毒', 'good'],
 		qianghuawuxiao: ['强化无效', 'bad'],
 		shiyingli: ['噬影力', 'good'],
+		dancer: ['舞者', 'good'],
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;

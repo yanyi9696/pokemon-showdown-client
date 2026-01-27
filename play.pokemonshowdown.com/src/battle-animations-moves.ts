@@ -13,6 +13,205 @@ import { type AnimTable, BattleOtherAnims } from './battle-animations';
 
 export const BattleMoveAnims: AnimTable = {
 	//FC自制技能对动画效果的自定义修改
+	meiguizhiwu: { // Work on this later
+		anim(scene, [attacker, defender]) {
+			scene.backgroundEffect('#FF99FF', 1400, 0.5);
+			attacker.anim({ x: attacker.x - 10, time: 100 });
+			attacker.anim({ x: attacker.x + 10, time: 200 });
+			attacker.anim({ x: attacker.x, time: 100 });
+			attacker.anim({
+				x: defender.x,
+				y: defender.y + 50,
+				z: defender.behind(-150),
+				time: 200,
+			}, 'ballistic2');
+			attacker.anim({
+				x: defender.x,
+				y: defender.y,
+				z: defender.behind(-100),
+				time: 100,
+			}, 'accel');
+
+			attacker.anim({ z: attacker.z, time: 400 }, 'swing');
+			scene.showEffect('petal', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0,
+				opacity: 1,
+				time: 0,
+			}, {
+				x: attacker.x - 45,
+				y: attacker.y - 45,
+				scale: 2,
+				opacity: 0,
+				time: 300,
+			}, 'decel');
+			scene.showEffect('petal', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0,
+				opacity: 1,
+				time: 150,
+			}, {
+				x: attacker.x + 50,
+				y: attacker.y - 30,
+				scale: 2,
+				opacity: 0,
+				time: 450,
+			}, 'decel');
+			scene.showEffect('petal', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0,
+				opacity: 1,
+				time: 250,
+			}, {
+				x: attacker.x + 25,
+				y: attacker.y - 60,
+				scale: 2,
+				opacity: 0,
+				time: 550,
+			}, 'decel');
+			scene.showEffect('petal', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0,
+				opacity: 1,
+				time: 300,
+			}, {
+				x: attacker.x - 40,
+				y: attacker.y - 40,
+				scale: 2,
+				opacity: 0,
+				time: 600,
+			}, 'decel');
+
+			scene.showEffect('mistball', {
+				x: attacker.x,
+				y: attacker.y,
+				z: defender.behind(-100),
+				scale: 0.6,
+				opacity: 1,
+				time: 700,
+			}, {
+				x: defender.x + 30,
+				y: defender.y + 30,
+				z: defender.z,
+				scale: 0.8,
+				opacity: 0.6,
+				time: 900,
+			}, 'ballistic', 'explode');
+			scene.showEffect('petal', {
+				x: attacker.x,
+				y: attacker.y,
+				z: defender.behind(-100),
+				scale: 0.7,
+				opacity: 1,
+				time: 775,
+			}, {
+				x: defender.x + 20,
+				y: defender.y - 30,
+				z: defender.z,
+				scale: 0.9,
+				opacity: 0.6,
+				time: 975,
+			}, 'ballistic2Under', 'explode');
+			scene.showEffect('mistball', {
+				x: attacker.x,
+				y: attacker.y,
+				z: defender.behind(-100),
+				scale: 0.5,
+				opacity: 0.6,
+				time: 850,
+			}, {
+				x: defender.x - 30,
+				y: defender.y,
+				z: defender.z,
+				scale: 0.8,
+				opacity: 0.3,
+				time: 1050,
+			}, 'ballistic2', 'explode');
+			scene.showEffect('petal', {
+				x: attacker.x,
+				y: attacker.y,
+				z: defender.behind(-100),
+				scale: 0.6,
+				opacity: 1,
+				time: 925,
+			}, {
+				x: defender.x - 10,
+				y: defender.y + 10,
+				z: defender.z,
+				scale: 0.9,
+				opacity: 0.6,
+				time: 1125,
+			}, 'ballistic', 'explode');
+			scene.showEffect('petal', {
+				x: attacker.x,
+				y: attacker.y,
+				z: defender.behind(-100),
+				scale: 0.8,
+				opacity: 1,
+				time: 1000,
+			}, {
+				x: defender.x + 10,
+				y: defender.y - 10,
+				z: defender.z,
+				scale: 1,
+				opacity: 0.6,
+				time: 1200,
+			}, 'linear', 'explode');
+			scene.showEffect('petal', {
+				x: attacker.x,
+				y: attacker.y,
+				z: defender.behind(-100),
+				scale: 0.8,
+				opacity: 0.6,
+				time: 1075,
+			}, {
+				x: defender.x - 20,
+				y: defender.y,
+				z: defender.z,
+				scale: 0.9,
+				opacity: 0.3,
+				time: 1175,
+			}, 'ballistic2', 'explode');
+
+			defender.delay(825);
+			defender.anim({
+				z: defender.behind(5),
+				time: 75,
+			}, 'swing');
+			defender.anim({
+				time: 75,
+			}, 'swing');
+			defender.anim({
+				z: defender.behind(5),
+				time: 75,
+			}, 'swing');
+			defender.anim({
+				time: 75,
+			}, 'swing');
+			defender.anim({
+				z: defender.behind(5),
+				time: 75,
+			}, 'swing');
+			defender.anim({
+				time: 75,
+			}, 'swing');
+			defender.anim({
+				z: defender.behind(5),
+				time: 75,
+			}, 'swing');
+			defender.anim({
+				time: 150,
+			}, 'swing');
+		},
+	},
 	longzhige: {
 		anim(scene, [attacker]) {
 			BattleOtherAnims.sound.anim(scene, [attacker]);
