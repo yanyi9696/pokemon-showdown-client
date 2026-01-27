@@ -13,6 +13,43 @@ import { type AnimTable, BattleOtherAnims } from './battle-animations';
 
 export const BattleMoveAnims: AnimTable = {
 	//FC自制技能对动画效果的自定义修改
+	mistyexplosion: {
+		anim(scene, [attacker]) {
+			scene.backgroundEffect('#FF99FF', 700, 0.5);
+			scene.showEffect('fireball', {
+				x: attacker.x + 40,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0,
+				opacity: 0.6,
+			}, {
+				scale: 6,
+				opacity: 0,
+			}, 'decel');
+			scene.showEffect('fireball', {
+				x: attacker.x - 40,
+				y: attacker.y - 20,
+				z: attacker.z,
+				scale: 0,
+				opacity: 0.6,
+				time: 150,
+			}, {
+				scale: 6,
+				opacity: 0,
+			}, 'decel');
+			scene.showEffect('fireball', {
+				x: attacker.x + 10,
+				y: attacker.y + 20,
+				z: attacker.z,
+				scale: 0,
+				opacity: 0.6,
+				time: 300,
+			}, {
+				scale: 6,
+				opacity: 0,
+			}, 'decel');
+		},
+	},
 	meiguizhiwu: { // Work on this later
 		anim(scene, [attacker, defender]) {
 			scene.backgroundEffect('#FF99FF', 1400, 0.5);
@@ -29040,48 +29077,6 @@ export const BattleMoveAnims: AnimTable = {
 				opacity: 0.3,
 				time: 575,
 			}, 'linear', 'explode');
-		},
-	},
-	mistyexplosion: {
-		anim(scene, [attacker]) {
-			scene.backgroundEffect('#FF99FF', 700, 0.5);
-			scene.showEffect('fireball', {
-				x: attacker.x + 40,
-				y: attacker.y,
-				z: attacker.z,
-				scale: 0,
-				opacity: 0.6,
-			}, {
-				scale: 6,
-				opacity: 0,
-			}, 'decel');
-			scene.showEffect('fireball', {
-				x: attacker.x - 40,
-				y: attacker.y - 20,
-				z: attacker.z,
-				scale: 0,
-				opacity: 0.6,
-				time: 150,
-			}, {
-				scale: 6,
-				opacity: 0,
-			}, 'decel');
-			scene.showEffect('fireball', {
-				x: attacker.x + 10,
-				y: attacker.y + 20,
-				z: attacker.z,
-				scale: 0,
-				opacity: 0.6,
-				time: 300,
-			}, {
-				scale: 6,
-				opacity: 0,
-			}, 'decel');
-			attacker.delay(450).anim({
-				scale: 4,
-				time: 400,
-				opacity: 0,
-			}, 'linear');
 		},
 	},
 	payday: {
