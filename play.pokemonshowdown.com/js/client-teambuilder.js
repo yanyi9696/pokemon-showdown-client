@@ -4907,6 +4907,7 @@
 				"Salamence-Mega-Fantasy": "Salamencite",
 				"Slowbro-Mega-Fantasy": "Slowbronite",
 				"Steelix-Mega-Fantasy": "Steelixite",
+				"Swampert-Mega-Fantasy": "Swampertite",
 				// ZA的新宝可梦
 				"Victreebel-Mega": "Victreebelite",
 				"Victreebel-Mega-Fantasy": "Victreebelite",
