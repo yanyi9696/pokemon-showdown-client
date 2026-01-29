@@ -2172,6 +2172,18 @@ export class PokemonSprite extends Sprite {
 
 		if (this.$el) this.scene.$sprites[+this.isFrontSprite].append(this.$el);
 		this.recalculatePos(pokemon.slot);
+		// =========== 注入：为幻想大岩蛇添加蓝色滤镜 ===========
+		// 检查是否为 Fantasy 大岩蛇。注意：pokemon.speciesForme 或 pokemon.baseSpecies 可能取决于你的 mod 设置
+		if (pokemon.speciesForme === 'Onix-Fantasy' || pokemon.baseSpecies === 'Onix-Fantasy') {
+			this.$el.css({
+				'filter': 'hue-rotate(180deg) saturate(1.5) brightness(1.1) drop-shadow(0 0 5px rgba(0,191,255,0.5))',
+				'-webkit-filter': 'hue-rotate(180deg) saturate(1.5) brightness(1.1) drop-shadow(0 0 5px rgba(0,191,255,0.5))'
+			});
+		} else {
+			// 确保非幻想大岩蛇不会意外继承滤镜（例如变身解除后）
+			this.$el.css('filter', '');
+		}
+		// ====================================================
 		this.resetStatbar(pokemon);
 		this.$el.css(this.scene.pos({
 			display: 'block',
