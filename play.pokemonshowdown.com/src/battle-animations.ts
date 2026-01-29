@@ -2173,17 +2173,17 @@ export class PokemonSprite extends Sprite {
 		if (this.$el) this.scene.$sprites[+this.isFrontSprite].append(this.$el);
 		this.recalculatePos(pokemon.slot);
 		// =========== 注入：为幻想大岩蛇添加蓝色滤镜 ===========
-		// 使用 getBaseSpecies().baseSpecies 来安全地获取基础种族名称
+		// 这里的 getBaseSpecies() 修复了之前报错的问题
 		if (pokemon.speciesForme === 'Onix-Fantasy' || pokemon.getBaseSpecies().baseSpecies === 'Onix-Fantasy') {
 			this.$el.css({
-				'filter': 'hue-rotate(180deg) saturate(1.5) brightness(1.1) drop-shadow(0 0 5px rgba(0,191,255,0.5))',
-				'-webkit-filter': 'hue-rotate(180deg) saturate(1.5) brightness(1.1) drop-shadow(0 0 5px rgba(0,191,255,0.5))'
+				// sepia(1) 使灰色变黄，hue-rotate(190deg) 将黄转蓝，saturate(5) 加深蓝色，brightness(1.1) 保持亮度
+				'filter': 'sepia(1) hue-rotate(190deg) saturate(5) brightness(1.1) drop-shadow(0 0 5px rgba(0,191,255,0.8))',
+				'-webkit-filter': 'sepia(1) hue-rotate(190deg) saturate(5) brightness(1.1) drop-shadow(0 0 5px rgba(0,191,255,0.8))'
 			});
 		} else {
-			// 确保非幻想大岩蛇不会意外继承滤镜（例如变身解除后）
 			this.$el.css('filter', '');
 		}
-		// ====================================================
+		// =========================================================
 		this.resetStatbar(pokemon);
 		this.$el.css(this.scene.pos({
 			display: 'block',
