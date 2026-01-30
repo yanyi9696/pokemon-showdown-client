@@ -1152,27 +1152,34 @@ export class BattleTooltips {
 						stats.atk = Math.floor(stats.atk * 1.3333);
 					}
 					// ==================== 修改后的花之礼逻辑 (START) ====================
-
-					// 1. 检查自身是否拥有花之礼 (因为你增强了特性，使持有者也受益)
-					if (ability === 'flowergift') {
-						stats.atk = Math.floor(stats.atk * 1.5);
-						stats.spa = Math.floor(stats.spa * 1.5);
-						stats.spd = Math.floor(stats.spd * 1.5);
+					// 1. 判断己方场上是否有“花之礼”特性的宝可梦在发挥作用
+					let hasFlowerGift = (ability === 'flowergift');
+					if (!hasFlowerGift) {
+						let allyActive = clientPokemon?.side.active;
+						if (allyActive) {
+							for (const ally of allyActive) {
+								if (ally && !ally.fainted && ally !== clientPokemon && this.getAllyAbility(ally) === 'Flower Gift') {
+									hasFlowerGift = true;
+									break;
+								}
+							}
+						}
 					}
 
-					// 2. 检查队友是否提供花之礼加成
-					let allyActive = clientPokemon?.side.active;
-					if (allyActive) {
-						for (const ally of allyActive) {
-							if (!ally || ally.fainted || ally === clientPokemon) continue;
-							let allyAbility = this.getAllyAbility(ally);
-
-							// 只要队友有花之礼，就提供加成
-							if (allyAbility === 'Flower Gift') {
-								stats.atk = Math.floor(stats.atk * 1.5);
-								stats.spa = Math.floor(stats.spa * 1.5); // 修复了之前的 stats.spa 赋值
-								stats.spd = Math.floor(stats.spd * 1.5);
-							}
+					// 2. 如果存在花之礼，且天气为晴天/大日照，执行数值比较加成
+					if (hasFlowerGift && (weather === 'sunnyday' || weather === 'desolateland')) {
+						// 攻击 vs 特攻 (提升较高的一项)
+						if (stats.atk >= stats.spa) {
+							stats.atk = Math.floor(stats.atk * 1.5);
+						} else {
+							stats.spa = Math.floor(stats.spa * 1.5);
+						}
+						
+						// 防御 vs 特防 (提升较低的一项)
+						if (stats.def <= stats.spd) {
+							stats.def = Math.floor(stats.def * 1.5);
+						} else {
+							stats.spd = Math.floor(stats.spd * 1.5);
 						}
 					}
 					// ==================== 修改后的花之礼逻辑 (END) ======================
