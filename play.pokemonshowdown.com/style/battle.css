@@ -861,13 +861,3 @@ License: GPLv2
 	font-weight: bold; /* 字体加粗 */
 	margin-right: 2px; /* 右边距 */
 }
-/* 如果 fantasystats 内容为空，则隐藏该容器 */
-.fantasystats:empty {
-    display: none !important;
-}
-
-/* 针对原版属性（非幻想）隐藏特定的 Fantasy 标签 */
-[data-type="Normal"], [data-type="Psychic"] {
-    /* 确保原版属性不会带上幻想背景 */
-    background-image: none !important;
-}
