@@ -1032,6 +1032,12 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 				if ((this.species === 'greninjabondfantasy' || this.species === 'greninjaashfantasy') && itemId === 'greninjaashz') {
 					isStrictlySpeciesSpecific = true;
 				}
+				// --- 新增逻辑开始 ---
+				// 为奈克洛兹玛的两种形态添加究极奈克洛兹玛Z的顶置支持
+				if ((this.species === 'necrozmaduskmane' || this.species === 'necrozmadawnwings') && itemId === 'ultranecroziumz') {
+					isStrictlySpeciesSpecific = true;
+				}
+				// --- 新增逻辑结束 ---
 			}
 			if (isStrictlySpeciesSpecific) {
 				if (!specificItemIds[itemId]) {
