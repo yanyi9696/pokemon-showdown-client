@@ -559,57 +559,68 @@ export const BattleMoveAnims: AnimTable = {
 	},
 	qibaoliuxing: {
 		anim(scene, [attacker, defender]) {
+			// 1. 背景微调：在原有的空间背景基础上，叠加一个半透明白色背景，使其看起来更亮
 			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/bg-space.jpg')`, 1100, 0.8);
-			scene.showEffect('flareball', {
-				x: defender.leftof(-200),
-				y: defender.y + 175,
-				z: defender.z,
-				scale: 0.1,
-				opacity: 0,
-			}, {
-				x: defender.x + 50,
-				y: defender.y,
-				scale: 1.5,
-				opacity: 0.8,
-			}, 'accel', 'explode');
-			scene.showEffect('flareball', {
-				x: defender.leftof(-200),
-				y: defender.y + 20 + 175,
-				z: defender.z,
-				scale: 0.1,
-				opacity: 0,
-				time: 150,
-			}, {
-				x: defender.x - 30,
-				y: defender.y - 5,
-				scale: 1.5,
-				opacity: 0.8,
-			}, 'accel', 'explode');
-			scene.showEffect('flareball', {
-				x: defender.leftof(-200),
-				y: defender.y - 20 + 175,
-				z: defender.z,
-				scale: 0.1,
-				opacity: 0,
-				time: 300,
-			}, {
-				x: defender.x + 30,
-				y: defender.y - 10,
-				scale: 1.5,
-				opacity: 0.8,
-			}, 'accel', 'explode');
-			scene.showEffect('rock3', {
-				x: defender.leftof(-200),
-				y: defender.y + 175,
-				z: defender.z,
-				scale: 0.1,
-				opacity: 0,
-			}, {
-				x: defender.x + 30,
-				y: defender.y,
-				scale: 1.5,
-				opacity: 0.4,
-			}, 'accel', 'explode');
+			scene.backgroundEffect('#FFFFFF', 1100, 0.2); // 额外叠加 20% 的白色，让场景变白一点
+
+			// 定义流星落下的时间点，方便同步风效
+			const timings = [0, 150, 300];
+
+			timings.forEach((timeOffset, i) => {
+				// 计算落下的起始偏移，与流星保持一致
+				let startX = defender.leftof(-200);
+				let startY = defender.y + 175 + (i === 1 ? 20 : (i === 2 ? -20 : 0));
+				
+				// 目标点（流星命中位置微调）
+				let targetX = defender.x + (i === 0 ? 50 : (i === 1 ? -30 : 30));
+				let targetY = defender.y + (i === 0 ? 0 : (i === 1 ? -5 : -10));
+
+				// --- 新增：白色的风效 (类似 aeroblast 的 wisp) ---
+				scene.showEffect('wisp', {
+					x: startX,
+					y: startY,
+					z: defender.z,
+					scale: 0.5,
+					opacity: 0,
+					time: timeOffset,
+				}, {
+					x: targetX,
+					y: targetY,
+					scale: 4,      // 变大产生扩散感
+					opacity: 0.6,  // 白色气流
+					time: timeOffset + 300,
+				}, 'accel', 'fade');
+
+				// --- 原有的流星火球效果 ---
+				scene.showEffect('flareball', {
+					x: startX,
+					y: startY,
+					z: defender.z,
+					scale: 0.1,
+					opacity: 0,
+					time: timeOffset,
+				}, {
+					x: targetX,
+					y: targetY,
+					scale: 1.5,
+					opacity: 0.8,
+				}, 'accel', 'explode');
+
+				// --- 原有的流星岩石效果 ---
+				scene.showEffect('rock3', {
+					x: startX,
+					y: startY,
+					z: defender.z,
+					scale: 0.1,
+					opacity: 0,
+					time: timeOffset,
+				}, {
+					x: targetX - (i === 0 ? 20 : (i === 1 ? -10 : 10)), // 稍微偏离中心点
+					y: targetY,
+					scale: 1.5,
+					opacity: 0.4,
+				}, 'accel', 'explode');
+			});
 			scene.showEffect('rock3', {
 				x: defender.leftof(-200),
 				y: defender.y + 20 + 175,
