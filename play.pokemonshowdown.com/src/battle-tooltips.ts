@@ -2013,7 +2013,7 @@ export class BattleTooltips {
 			else basePower = 20;
 			value.set(basePower);
 		}
-		if (['hex', 'infernalparade'].includes(move.id) && target?.status) {
+		if (['hex', 'infernalparade', 'bittermalice'].includes(move.id) && target?.status) {
 			value.modify(2, move.name + ' + status');
 		}
 		if (move.id === 'lastrespects') {
