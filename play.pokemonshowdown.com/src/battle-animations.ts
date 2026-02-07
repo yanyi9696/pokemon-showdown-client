@@ -1929,6 +1929,7 @@ export class PokemonSprite extends Sprite {
 		qianghuawuxiao: ['强化无效', 'bad'],
 		shiyingli: ['噬影力', 'good'],
 		dancer: ['舞者', 'good'],
+		ultraenergyboost: ['究极能量', 'good'],
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;
