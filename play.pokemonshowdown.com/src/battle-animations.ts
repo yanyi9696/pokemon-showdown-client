@@ -1837,7 +1837,6 @@ export class PokemonSprite extends Sprite {
 		perish2: ['Perish in 2', 'bad'],
 		perish3: ['Perish in 3', 'bad'],
 		airballoon: ['Balloon', 'good'],
-		fantasyringtarget: ['Fantasy Ring Target', 'good'],
 		leechseed: ['Leech Seed', 'bad'],
 		encore: ['Encore', 'bad'],
 		mustrecharge: ['Must recharge', 'bad'],
@@ -1928,6 +1927,7 @@ export class PokemonSprite extends Sprite {
 		qianghuawuxiao: ['强化无效', 'bad'],
 		shiyingli: ['噬影力', 'good'],
 		dancer: ['舞者', 'good'],
+		fantasyringtarget: ['幻之标靶', 'good'],
 		fantasylaxincense: ['幻之悠闲薰香', 'good'],
 		fantasyultraenergyboost: ['幻之究极能量', 'good'],
 	};
