@@ -4908,6 +4908,8 @@
 				"Slowbro-Mega-Fantasy": "Slowbronite",
 				"Steelix-Mega-Fantasy": "Steelixite",
 				"Swampert-Mega-Fantasy": "Swampertite",
+				"Mewtwo-Mega-X-Fantasy": "Mewtwonite X",
+				"Mewtwo-Mega-Y-Fantasy": "Mewtwonite Y",
 				// ZA的新宝可梦
 				"Victreebel-Mega": "Victreebelite",
 				"Victreebel-Mega-Fantasy": "Victreebelite",
