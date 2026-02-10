@@ -1138,6 +1138,12 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			];
 			if (suJunMoves.includes(id)) return true;
 		}
+		if (abilityid === 'sharpness') {
+			const suJunMoves = [
+				'leafblade', 'aerialace'
+			];
+			if (suJunMoves.includes(id)) return true;
+		}
 
 		// --- 新增逻辑结束 ---
 
