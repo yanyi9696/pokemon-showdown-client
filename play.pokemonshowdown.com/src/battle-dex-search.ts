@@ -1398,6 +1398,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 	private moveIsFantasy(id: ID, species: Dex.Species, moves: string[], set: Dex.PokemonSet | null) {
 		switch (id) {
 		case 'landswrath':
+		case 'landswrath':
 		case 'bittermalice':
 		case 'mistyexplosion':
 		case 'meiguizhiwu':
