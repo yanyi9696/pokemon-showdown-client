@@ -787,32 +787,41 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		return results;
 	}
 	// 在 BattlePokemonSearch 类中修改 getBaseResults 方法
-	getBaseResults(): SearchRow[] {
+		getBaseResults(): SearchRow[] {
 		// 获取当前分级的 Tier 集合
 		const tierSet = this.dex.getTierSet();
 
 		// 如果是 gen9fantasy mod，我们需要确保 AG 宝可梦被包含在合法列表中
 		if (this.dex.modid.includes('gen9fantasy' as ID)) {
-			// 检查当前 tierSet 中是否已经包含了自定义宝可梦
-			// 逻辑：将 AG 分级的官方宝可梦强制加入到合法显示区域
 			const results: SearchRow[] = [];
 			const seen = new Set<ID>();
 
-			// 1. 这里的 tierSet 通常已经包含了你定义的 Custom Pokemon
-			for (const row of tierSet) {
-				results.push(row);
-				if (row[0] === 'pokemon') seen.add(row[1]);
-			}
-
-			// 2. 检查并补全 AG 级别的官方宝kemon (如果它们被标记为不合法)
-			// 组队器是通过检测分级规则来过滤的，确保 AG 标签在 FC AG 中是合法的
+			// 1. 先扫描并添加 AG 头部和宝可梦（确保它们排在最前面，或者在 Custom 之后）
+			// 我们可以先检查是否有 AG 的宝可梦需要显示
+			const agPokemon: ID[] = [];
 			for (const id in BattlePokedex) {
 				const species = this.dex.species.get(id);
-				if (species.tier === 'AG' && !seen.has(id as ID)) {
-					// 如果是 AG 且还没在列表中，将其加入
-					results.push(['pokemon', id as ID]);
+				if (species.tier === 'AG') {
+					agPokemon.push(id as ID);
 				}
 			}
+
+			if (agPokemon.length > 0) {
+				results.push(['header', "AG"]); // 强制插入 AG Header
+				for (const id of agPokemon) {
+					results.push(['pokemon', id]);
+					seen.add(id);
+				}
+			}
+
+			// 2. 然后添加原本的 tierSet 内容，但要跳过已经在 AG 中显示过的宝可梦
+			for (const row of tierSet) {
+				if (row[0] === 'pokemon' && seen.has(row[1])) continue;
+				
+				// 如果原本的 tierSet 里也有 Header，正常添加
+				results.push(row);
+			}
+
 			return results;
 		}
 
