@@ -788,38 +788,66 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 	}
 	// 在 BattlePokemonSearch 类中修改 getBaseResults 方法
 		getBaseResults(): SearchRow[] {
-		// 获取当前分级的 Tier 集合
+		// 获取当前分级的原始列表（包含 Custom Pokemon 及其 Header）
 		const tierSet = this.dex.getTierSet();
 
-		// 如果是 gen9fantasy mod，我们需要确保 AG 宝可梦被包含在合法列表中
-		if (this.dex.modid.includes('gen9fantasy' as ID)) {
+		// 定义需要顶置 AG 宝可梦的特定分级 ID
+		const forceAGFormats: ID[] = ['gen9fantasy' as ID, 'gen9fantasychampionsdoubles' as ID];
+		
+		// 检查当前是否属于需要特殊处理的分级
+		const shouldInjectAG = forceAGFormats.some(f => this.dex.modid.includes(f));
+
+		if (shouldInjectAG) {
 			const results: SearchRow[] = [];
+			const agPokemonRows: SearchRow[] = [];
 			const seen = new Set<ID>();
 
-			// 1. 先扫描并添加 AG 头部和宝可梦（确保它们排在最前面，或者在 Custom 之后）
-			// 我们可以先检查是否有 AG 的宝可梦需要显示
-			const agPokemon: ID[] = [];
+			// 1. 提取所有 AG 分级的宝可梦行
 			for (const id in BattlePokedex) {
 				const species = this.dex.species.get(id);
 				if (species.tier === 'AG') {
-					agPokemon.push(id as ID);
+					agPokemonRows.push(['pokemon', id as ID]);
+					seen.add(id as ID);
 				}
 			}
 
-			if (agPokemon.length > 0) {
-				results.push(['header', "AG"]); // 强制插入 AG Header
-				for (const id of agPokemon) {
-					results.push(['pokemon', id]);
-					seen.add(id);
-				}
-			}
+			// 2. 遍历原始 tierSet，寻找插入点
+			// 我们希望在 "Gen9fantasy Custom Pokemon" 这一部分之后插入 AG
+			let customHeaderFound = false;
+			let injected = false;
 
-			// 2. 然后添加原本的 tierSet 内容，但要跳过已经在 AG 中显示过的宝可梦
-			for (const row of tierSet) {
-				if (row[0] === 'pokemon' && seen.has(row[1])) continue;
+			for (let i = 0; i < tierSet.length; i++) {
+				const row = tierSet[i];
 				
-				// 如果原本的 tierSet 里也有 Header，正常添加
+				// 跳过重复的 AG 宝可梦（防止它们出现在非法列表中）
+				if (row[0] === 'pokemon' && seen.has(row[1])) continue;
+
 				results.push(row);
+
+				// 策略：寻找下一个 Header。如果当前是一组 Custom Pokemon 结束后的新 Header
+				// 或者在列表处理过程中寻找特定的插入时机
+				if (row[0] === 'header' && row[1].includes('Custom Pokemon')) {
+					customHeaderFound = true;
+				}
+
+				// 如果找到了 Custom 头部，并且下一行又是 Header（说明 Custom 部分结束了）
+				// 或者已经处理完了所有初始行但还没插入
+				if (customHeaderFound && !injected) {
+					const nextRow = tierSet[i + 1];
+					if (!nextRow || nextRow[0] === 'header') {
+						if (agPokemonRows.length > 0) {
+							results.push(['header', "AG"]); 
+							results.push(...agPokemonRows);
+						}
+						injected = true;
+					}
+				}
+			}
+			
+			//兜底：如果完全没找到 Custom Header，就加在最后
+			if (!injected && agPokemonRows.length > 0) {
+				results.push(['header', "AG"]);
+				results.push(...agPokemonRows);
 			}
 
 			return results;
