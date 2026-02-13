@@ -798,7 +798,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 
 		// 定义需要顶置 AG 宝可梦的特定分级完整 ID
 		// 请确保这些 ID 与你 formats.ts 中定义的 ID 一致（通常是全小写且无空格）
-		const forceAGFormats = ['gen9fantasyag', 'gen9fantasychampionsdoubles'];
+		const forceAGFormats = ['gen9fcag', 'gen9fcchampionsdoubles'];
 		
 		// 只有当 formatid 精确匹配这两个分级时，才执行顶置逻辑
 		const shouldInjectAG = forceAGFormats.includes(formatid);
