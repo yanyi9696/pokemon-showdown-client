@@ -797,7 +797,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		const currentFormat = toID((this.dex as any).formatid || (this.dex as any).format?.id || "");
 		
 		// 定义需要顶置 AG 的分级 ID（toID 转换后的结果）
-		const forceAGFormats = ['gen9fcag', 'gen9fcchampionsdoubles'];
+		const forceAGFormats = ['[Gen 9] FC AG', '[Gen 9] FC Champions Doubles'];
 		
 		// 判定：只有精确匹配这两个 ID 时才注入
 		const shouldInjectAG = forceAGFormats.includes(currentFormat);
