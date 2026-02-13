@@ -788,26 +788,21 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 	}
 	// 在 BattlePokemonSearch 类中修改 getBaseResults 方法
 	getBaseResults(): SearchRow[] {
-		// 1. 获取当前分级的原始列表 (包含 Custom Pokemon)
+		// 获取当前分级的原始列表（包含 Custom Pokemon 及其 Header）
 		const tierSet = this.dex.getTierSet();
 
-		// 2. 获取当前具体分级的 ID
-		// 在 Showdown 搜索器中，直接访问 this.dex.formatid 最稳妥，
-		// 但为了兼容，我们同时检查 dex.modid 和可能存在的 format 对象
-		const currentFormat = toID((this.dex as any).formatid || (this.dex as any).format?.id || "");
+		// 定义需要顶置 AG 宝可梦的特定分级 ID
+		const forceAGFormats: ID[] = ['gen9fantasy' as ID, 'gen9fantasychampionsdoubles' as ID];
 		
-		// 定义需要顶置 AG 的分级 ID（toID 转换后的结果）
-		const forceAGFormats = ['[Gen 9] FC AG', '[Gen 9] FC Champions Doubles'];
-		
-		// 判定：只有精确匹配这两个 ID 时才注入
-		const shouldInjectAG = forceAGFormats.includes(currentFormat);
+		// 检查当前是否属于需要特殊处理的分级
+		const shouldInjectAG = forceAGFormats.some(f => this.dex.modid.includes(f));
 
 		if (shouldInjectAG) {
 			const results: SearchRow[] = [];
 			const agPokemonRows: SearchRow[] = [];
 			const seen = new Set<ID>();
 
-			// 提取所有真正的 AG 宝可梦
+			// 1. 提取所有 AG 分级的宝可梦行
 			for (const id in BattlePokedex) {
 				const species = this.dex.species.get(id);
 				if (species.tier === 'AG') {
@@ -816,23 +811,27 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				}
 			}
 
+			// 2. 遍历原始 tierSet，寻找插入点
+			// 我们希望在 "Gen9fantasy Custom Pokemon" 这一部分之后插入 AG
 			let customHeaderFound = false;
 			let injected = false;
 
 			for (let i = 0; i < tierSet.length; i++) {
 				const row = tierSet[i];
 				
-				// 防止 AG 宝可梦在后面重复出现
+				// 跳过重复的 AG 宝可梦（防止它们出现在非法列表中）
 				if (row[0] === 'pokemon' && seen.has(row[1])) continue;
 
 				results.push(row);
 
-				// 识别 Custom 头部
+				// 策略：寻找下一个 Header。如果当前是一组 Custom Pokemon 结束后的新 Header
+				// 或者在列表处理过程中寻找特定的插入时机
 				if (row[0] === 'header' && row[1].includes('Custom Pokemon')) {
 					customHeaderFound = true;
 				}
 
-				// 在 Custom 段落结束后插入 AG
+				// 如果找到了 Custom 头部，并且下一行又是 Header（说明 Custom 部分结束了）
+				// 或者已经处理完了所有初始行但还没插入
 				if (customHeaderFound && !injected) {
 					const nextRow = tierSet[i + 1];
 					if (!nextRow || nextRow[0] === 'header') {
@@ -845,7 +844,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				}
 			}
 			
-			// 兜底：如果完全没 Custom 头部也得插入
+			//兜底：如果完全没找到 Custom Header，就加在最后
 			if (!injected && agPokemonRows.length > 0) {
 				results.push(['header', "AG"]);
 				results.push(...agPokemonRows);
@@ -854,12 +853,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			return results;
 		}
 
-		// 3. 针对非 AG 分级（如 FC LC），我们需要过滤掉 tierSet 中可能被错误带入的 AG 头部
-		// 这一步是修复你截图中 FC LC 出现 AG 问题的关键
-		return tierSet.filter(row => {
-			if (row[0] === 'header' && row[1] === 'AG') return false;
-			return true;
-		});
+		return tierSet;
 	}
 	filter(row: SearchRow, filters: string[][]) {
 		if (!filters) return true;
