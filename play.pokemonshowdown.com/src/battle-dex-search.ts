@@ -578,6 +578,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 	 * This string specifically normalizes out generation number and the words
 	 * "Doubles" and "Let's Go" from the name.
 	 */
+	formatId = '' as ID;
 	formats = [''] as ID[];
 	/**
 	 * `species` is the second of two base filters. It constrains results to
@@ -788,27 +789,21 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 	}
 	// 在 BattlePokemonSearch 类中修改 getBaseResults 方法
 	getBaseResults(): SearchRow[] {
-		// 获取当前分级的原始列表
+		// 获取分级原始列表
 		const tierSet = this.dex.getTierSet();
 
-		// --- 修改逻辑开始 ---
-		// 1. 获取当前 Dex 的 modid。
-		// 先转换为 unknown 再转 string 是绕过 TS 强制转换检查的常用手段
-		const currentID = (this.dex.modid as unknown) as string;
+		// --- 核心修改：定义允许顶置 AG 的具体分级 ID 列表 ---
+		const forceAGFormats: ID[] = ['gen9fcag' as ID, 'gen9fcchampionsdoubles' as ID];
 		
-		// 2. 定义目标分级的 ID
-		const targetFormats: string[] = ['gen9fcag', 'Gen9fantasyag','[Gen 9] FC Champions Doubles'];
-		
-		// 3. 判定当前分级是否在目标列表中
-		const shouldInjectAG = targetFormats.includes(currentID);
-		// --- 修改逻辑结束 ---
+		// 只有当前分级 ID 在列表中时，才执行注入 AG 的逻辑
+		const shouldInjectAG = forceAGFormats.includes(this.formatId);
 
 		if (shouldInjectAG) {
 			const results: SearchRow[] = [];
 			const agPokemonRows: SearchRow[] = [];
 			const seen = new Set<ID>();
 
-			// 1. 提取所有 AG 分级的宝可梦
+			// 1. 提取所有 AG 宝可梦
 			for (const id in BattlePokedex) {
 				const species = this.dex.species.get(id);
 				if (species.tier === 'AG') {
@@ -817,20 +812,24 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				}
 			}
 
-			// 2. 注入逻辑
+			// 2. 遍历列表并寻找插入点（在 Custom Pokemon 之后）
 			let customHeaderFound = false;
 			let injected = false;
 
 			for (let i = 0; i < tierSet.length; i++) {
 				const row = tierSet[i];
+				
+				// 过滤掉原本就在列表中的 AG（防止在非法列表中重复出现）
 				if (row[0] === 'pokemon' && seen.has(row[1])) continue;
 
 				results.push(row);
 
+				// 标记是否找到了 Custom 头部
 				if (row[0] === 'header' && row[1].includes('Custom Pokemon')) {
 					customHeaderFound = true;
 				}
 
+				// 如果 Custom 部分结束（遇到下一个 Header 或列表结束），插入 AG 块
 				if (customHeaderFound && !injected) {
 					const nextRow = tierSet[i + 1];
 					if (!nextRow || nextRow[0] === 'header') {
@@ -842,18 +841,12 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 					}
 				}
 			}
-			
-			if (!injected && agPokemonRows.length > 0) {
-				results.push(['header', "AG"]);
-				results.push(...agPokemonRows);
-			}
-
 			return results;
 		}
 
+		// 如果不是目标分级，直接返回原始 TierSet（AG 宝可梦会正常显示在非法区域）
 		return tierSet;
 	}
-
 	filter(row: SearchRow, filters: string[][]) {
 		if (!filters) return true;
 		if (row[0] !== 'pokemon') return true;
