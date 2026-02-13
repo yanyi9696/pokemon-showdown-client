@@ -205,7 +205,12 @@ export class DexSearch {
 	}
 
 	getTier(species: Dex.Species) {
-		return this.typedSearch?.getTier(species) || '';
+		let tier = this.dex.species.get(species.name).tier;
+		// 如果在 FC 分级中，强制让 AG 宝可梦显示为合法分级标签
+		if (this.dex.modid.includes('gen9fantasy' as ID) && tier === 'AG') {
+			return 'AG';
+		}
+		return tier;
 	}
 
 	textSearch(query: string): SearchRow[] {
@@ -781,8 +786,37 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		}
 		return results;
 	}
+	// 在 BattlePokemonSearch 类中修改 getBaseResults 方法
 	getBaseResults(): SearchRow[] {
-		return this.dex.getTierSet();
+		// 获取当前分级的 Tier 集合
+		const tierSet = this.dex.getTierSet();
+
+		// 如果是 gen9fantasy mod，我们需要确保 AG 宝可梦被包含在合法列表中
+		if (this.dex.modid.includes('gen9fantasy' as ID)) {
+			// 检查当前 tierSet 中是否已经包含了自定义宝可梦
+			// 逻辑：将 AG 分级的官方宝可梦强制加入到合法显示区域
+			const results: SearchRow[] = [];
+			const seen = new Set<ID>();
+
+			// 1. 这里的 tierSet 通常已经包含了你定义的 Custom Pokemon
+			for (const row of tierSet) {
+				results.push(row);
+				if (row[0] === 'pokemon') seen.add(row[1]);
+			}
+
+			// 2. 检查并补全 AG 级别的官方宝kemon (如果它们被标记为不合法)
+			// 组队器是通过检测分级规则来过滤的，确保 AG 标签在 FC AG 中是合法的
+			for (const id in BattlePokedex) {
+				const species = this.dex.species.get(id);
+				if (species.tier === 'AG' && !seen.has(id as ID)) {
+					// 如果是 AG 且还没在列表中，将其加入
+					results.push(['pokemon', id as ID]);
+				}
+			}
+			return results;
+		}
+
+		return tierSet;
 	}
 	filter(row: SearchRow, filters: string[][]) {
 		if (!filters) return true;
