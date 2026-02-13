@@ -788,38 +788,40 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 	}
 	// 在 BattlePokemonSearch 类中修改 getBaseResults 方法
 		getBaseResults(): SearchRow[] {
-		// 获取当前分级的 Tier 集合
+		// 获取当前分级的 Tier 集合（包含 Custom Pokemon）
 		const tierSet = this.dex.getTierSet();
 
-		// 如果是 gen9fantasy mod，我们需要确保 AG 宝可梦被包含在合法列表中
-		if (this.dex.modid.includes('gen9fantasy' as ID)) {
+		// 修复报错：通过 this.formats 判断当前分级 ID
+		// this.formats 是一个 ID 数组，包含了当前分级的完整层级信息
+		const isAGFormat = this.formats.includes('gen9fcag' as ID) || 
+						this.formats.includes('gen9fcchampionsdoubles' as ID);
+
+		if (this.dex.modid.includes('gen9fantasy' as ID) && isAGFormat) {
 			const results: SearchRow[] = [];
 			const seen = new Set<ID>();
 
-			// 1. 先扫描并添加 AG 头部和宝可梦（确保它们排在最前面，或者在 Custom 之后）
-			// 我们可以先检查是否有 AG 的宝可梦需要显示
+			// 1. 首先添加原有的 tierSet（包括你的 Custom Pokemon 区域）
+			for (const row of tierSet) {
+				results.push(row);
+				if (row[0] === 'pokemon') seen.add(row[1]);
+			}
+
+			// 2. 扫描 AG 级别的官方宝可梦
 			const agPokemon: ID[] = [];
 			for (const id in BattlePokedex) {
 				const species = this.dex.species.get(id);
-				if (species.tier === 'AG') {
+				// 确保是 AG 且没有在之前的 Custom 列表中出现过
+				if (species.tier === 'AG' && !seen.has(id as ID)) {
 					agPokemon.push(id as ID);
 				}
 			}
 
+			// 3. 在 Custom Pokemon 区域下方添加 AG 头部和宝可梦
 			if (agPokemon.length > 0) {
-				results.push(['header', "AG"]); // 强制插入 AG Header
+				results.push(['header', "AG"]);
 				for (const id of agPokemon) {
 					results.push(['pokemon', id]);
-					seen.add(id);
 				}
-			}
-
-			// 2. 然后添加原本的 tierSet 内容，但要跳过已经在 AG 中显示过的宝可梦
-			for (const row of tierSet) {
-				if (row[0] === 'pokemon' && seen.has(row[1])) continue;
-				
-				// 如果原本的 tierSet 里也有 Header，正常添加
-				results.push(row);
 			}
 
 			return results;
