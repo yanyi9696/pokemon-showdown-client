@@ -788,16 +788,19 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 	}
 	// 在 BattlePokemonSearch 类中修改 getBaseResults 方法
 	getBaseResults(): SearchRow[] {
-		// 获取当前分级的原始列表（包含 Custom Pokemon 及其 Header）
+		// 获取当前分级的原始列表
 		const tierSet = this.dex.getTierSet();
 
 		// --- 修改逻辑开始 ---
-		// 使用父类已有的 formats 数组进行判断
-		// this.formats 在构造函数中会被初始化为当前 format 的 ID
-		const targetFormats: string[] = ['gen9fcag', '[Gen 9] FC Champions Doubles'];
+		// 1. 获取当前 Dex 的 modid。
+		// 先转换为 unknown 再转 string 是绕过 TS 强制转换检查的常用手段
+		const currentID = (this.dex.modid as unknown) as string;
 		
-		// 检查当前 format 数组中是否包含我们的目标分级
-		const shouldInjectAG = this.formats.some(f => targetFormats.includes(f));
+		// 2. 定义目标分级的 ID
+		const targetFormats: string[] = ['gen9fcag', 'Gen9fantasyag','[Gen 9] FC Champions Doubles'];
+		
+		// 3. 判定当前分级是否在目标列表中
+		const shouldInjectAG = targetFormats.includes(currentID);
 		// --- 修改逻辑结束 ---
 
 		if (shouldInjectAG) {
@@ -805,7 +808,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			const agPokemonRows: SearchRow[] = [];
 			const seen = new Set<ID>();
 
-			// 1. 提取所有 AG 分级的宝可梦行
+			// 1. 提取所有 AG 分级的宝可梦
 			for (const id in BattlePokedex) {
 				const species = this.dex.species.get(id);
 				if (species.tier === 'AG') {
@@ -814,14 +817,12 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				}
 			}
 
-			// 2. 遍历原始 tierSet，寻找插入点
+			// 2. 注入逻辑
 			let customHeaderFound = false;
 			let injected = false;
 
 			for (let i = 0; i < tierSet.length; i++) {
 				const row = tierSet[i];
-				
-				// 跳过重复的 AG 宝可梦
 				if (row[0] === 'pokemon' && seen.has(row[1])) continue;
 
 				results.push(row);
@@ -852,6 +853,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 
 		return tierSet;
 	}
+
 	filter(row: SearchRow, filters: string[][]) {
 		if (!filters) return true;
 		if (row[0] !== 'pokemon') return true;
