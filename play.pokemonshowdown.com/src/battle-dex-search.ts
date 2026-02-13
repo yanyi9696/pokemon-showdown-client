@@ -791,11 +791,14 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		// 获取当前分级的原始列表（包含 Custom Pokemon 及其 Header）
 		const tierSet = this.dex.getTierSet();
 
-		// 定义需要顶置 AG 宝可梦的特定分级 ID
-		const forceAGFormats: ID[] = ['gen9fantasy' as ID, 'gen9fantasychampionsdoubles' as ID];
+		// --- 修改逻辑开始 ---
+		// 使用父类已有的 formats 数组进行判断
+		// this.formats 在构造函数中会被初始化为当前 format 的 ID
+		const targetFormats: string[] = ['gen9fcag', '[Gen 9] FC Champions Doubles'];
 		
-		// 检查当前是否属于需要特殊处理的分级
-		const shouldInjectAG = forceAGFormats.some(f => this.dex.modid.includes(f));
+		// 检查当前 format 数组中是否包含我们的目标分级
+		const shouldInjectAG = this.formats.some(f => targetFormats.includes(f));
+		// --- 修改逻辑结束 ---
 
 		if (shouldInjectAG) {
 			const results: SearchRow[] = [];
@@ -812,26 +815,21 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			}
 
 			// 2. 遍历原始 tierSet，寻找插入点
-			// 我们希望在 "Gen9fantasy Custom Pokemon" 这一部分之后插入 AG
 			let customHeaderFound = false;
 			let injected = false;
 
 			for (let i = 0; i < tierSet.length; i++) {
 				const row = tierSet[i];
 				
-				// 跳过重复的 AG 宝可梦（防止它们出现在非法列表中）
+				// 跳过重复的 AG 宝可梦
 				if (row[0] === 'pokemon' && seen.has(row[1])) continue;
 
 				results.push(row);
 
-				// 策略：寻找下一个 Header。如果当前是一组 Custom Pokemon 结束后的新 Header
-				// 或者在列表处理过程中寻找特定的插入时机
 				if (row[0] === 'header' && row[1].includes('Custom Pokemon')) {
 					customHeaderFound = true;
 				}
 
-				// 如果找到了 Custom 头部，并且下一行又是 Header（说明 Custom 部分结束了）
-				// 或者已经处理完了所有初始行但还没插入
 				if (customHeaderFound && !injected) {
 					const nextRow = tierSet[i + 1];
 					if (!nextRow || nextRow[0] === 'header') {
@@ -844,7 +842,6 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				}
 			}
 			
-			//兜底：如果完全没找到 Custom Header，就加在最后
 			if (!injected && agPokemonRows.length > 0) {
 				results.push(['header', "AG"]);
 				results.push(...agPokemonRows);
