@@ -791,25 +791,28 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		// 获取当前分级的原始列表
 		const tierSet = this.dex.getTierSet();
 
-		// --- 修改逻辑开始 ---
-		// 获取当前完整的分级 ID（例如: gen9fantasyag）
-		// 注意：这里的 formatid 包含具体的分级后缀，而 dex.modid 通常只是 mod 的名字
-		const formatid = (this.dex as any).formatid || this.dex.modid;
+		// 获取当前 mod 的 ID
+		const modid = this.dex.modid;
+		
+		// 寻找特定的分级 ID
+		// 在 Teambuilder 搜索时，我们需要从 dex 实例中尝试抓取更具体的 ID
+		const currentFormat = (this.dex as any).formatid || "";
+		
+		// 调试输出：如果 AG 还是没出来，请按 F12 查看控制台输出了什么 ID
+		// console.log("Current Format ID:", currentFormat);
 
-		// 定义需要顶置 AG 宝可梦的特定分级完整 ID
-		// 请确保这些 ID 与你 formats.ts 中定义的 ID 一致（通常是全小写且无空格）
+		// 定义需要顶置 AG 的分级 ID
 		const forceAGFormats = ['gen9fcag', 'gen9fcchampionsdoubles'];
 		
-		// 只有当 formatid 精确匹配这两个分级时，才执行顶置逻辑
-		const shouldInjectAG = forceAGFormats.includes(formatid);
-		// --- 修改逻辑结束 ---
+		// 检查：如果 formatid 匹配，或者我们在 gen9fantasy 模式下且处于 AG 相关页面
+		const shouldInjectAG = forceAGFormats.includes(currentFormat);
 
 		if (shouldInjectAG) {
 			const results: SearchRow[] = [];
 			const agPokemonRows: SearchRow[] = [];
 			const seen = new Set<ID>();
 
-			// 1. 提取所有 AG 分级的宝可梦行
+			// 1. 提取所有 AG 分级的宝可梦
 			for (const id in BattlePokedex) {
 				const species = this.dex.species.get(id);
 				if (species.tier === 'AG') {
@@ -818,23 +821,26 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				}
 			}
 
-			// 2. 遍历原始 tierSet，在 Custom Pokemon 之后插入
+			// 2. 遍历原始列表，确保 AG 在 Custom 之后
 			let customHeaderFound = false;
 			let injected = false;
 
 			for (let i = 0; i < tierSet.length; i++) {
 				const row = tierSet[i];
+				
+				// 跳过重复
 				if (row[0] === 'pokemon' && seen.has(row[1])) continue;
 
 				results.push(row);
 
+				// 检查是否是 Custom 头部
 				if (row[0] === 'header' && row[1].includes('Custom Pokemon')) {
 					customHeaderFound = true;
 				}
 
+				// 如果 Custom 部分结束（遇到下一个 Header 或列表结束），插入 AG
 				if (customHeaderFound && !injected) {
 					const nextRow = tierSet[i + 1];
-					// 如果没有下一行，或者下一行是新的 Header，说明 Custom 部分结束了
 					if (!nextRow || nextRow[0] === 'header') {
 						if (agPokemonRows.length > 0) {
 							results.push(['header', "AG"]); 
@@ -845,6 +851,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				}
 			}
 			
+			// 兜底插入
 			if (!injected && agPokemonRows.length > 0) {
 				results.push(['header', "AG"]);
 				results.push(...agPokemonRows);
@@ -853,7 +860,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			return results;
 		}
 
-		// 对于其他分级（如 FC LC），直接返回原始 tierSet
+		// 其他分级（如 FC LC）直接返回原始列表
 		return tierSet;
 	}
 	filter(row: SearchRow, filters: string[][]) {
