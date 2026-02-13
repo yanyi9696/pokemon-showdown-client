@@ -788,48 +788,43 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 	}
 	// 在 BattlePokemonSearch 类中修改 getBaseResults 方法
 		getBaseResults(): SearchRow[] {
-		// 1. 获取基础 Tier 集合（这里包含你的 Custom Pokemon）
+		// 获取当前分级的 Tier 集合
 		const tierSet = this.dex.getTierSet();
 
-		// 2. 增强型分级判定：检查 formats 数组中是否包含相关的分级 ID
-		// 使用正则表达式匹配，兼容不同的 mod 前缀加载方式
-		const formatJoined = this.formats.join('|');
-		const isAGFormat = /fcag|fcchampionsdoubles/.test(formatJoined);
-
-		// 3. 逻辑执行：仅在指定的 FC 分级中添加 AG 顶置
-		if (this.dex.modid.includes('gen9fantasy' as ID) && isAGFormat) {
+		// 如果是 gen9fantasy mod，我们需要确保 AG 宝可梦被包含在合法列表中
+		if (this.dex.modid.includes('gen9fantasy' as ID)) {
 			const results: SearchRow[] = [];
 			const seen = new Set<ID>();
 
-			// 步骤 A: 首先添加 tierSet（包含 Gen9fantasy Custom Pokemon 区域）
-			for (const row of tierSet) {
-				results.push(row);
-				if (row[0] === 'pokemon') seen.add(row[1]);
-			}
-
-			// 步骤 B: 扫描所有分级为 AG 的官方宝可梦
+			// 1. 先扫描并添加 AG 头部和宝可梦（确保它们排在最前面，或者在 Custom 之后）
+			// 我们可以先检查是否有 AG 的宝可梦需要显示
 			const agPokemon: ID[] = [];
 			for (const id in BattlePokedex) {
 				const species = this.dex.species.get(id);
-				// 过滤出 Tier 为 AG 且没在上面 Custom 区域出现过的宝可梦
-				if (species.tier === 'AG' && !seen.has(id as ID)) {
+				if (species.tier === 'AG') {
 					agPokemon.push(id as ID);
 				}
 			}
 
-			// 步骤 C: 在 Custom 区域下方追加 AG 头部和宝可梦列表
 			if (agPokemon.length > 0) {
-				results.push(['header', "AG"]);
-				// 按照原版 AG 列表的默认顺序添加
+				results.push(['header', "AG"]); // 强制插入 AG Header
 				for (const id of agPokemon) {
 					results.push(['pokemon', id]);
+					seen.add(id);
 				}
+			}
+
+			// 2. 然后添加原本的 tierSet 内容，但要跳过已经在 AG 中显示过的宝可梦
+			for (const row of tierSet) {
+				if (row[0] === 'pokemon' && seen.has(row[1])) continue;
+				
+				// 如果原本的 tierSet 里也有 Header，正常添加
+				results.push(row);
 			}
 
 			return results;
 		}
 
-		// 如果不是 AG 相关分级，直接返回原始集合（这样 FC OU 就不会显示 AG 栏目）
 		return tierSet;
 	}
 	filter(row: SearchRow, filters: string[][]) {
