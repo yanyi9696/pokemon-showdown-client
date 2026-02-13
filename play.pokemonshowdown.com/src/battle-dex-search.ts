@@ -608,6 +608,9 @@ abstract class BattleTypedSearch<T extends SearchType> {
 
 	constructor(searchType: T, format = '' as ID, speciesOrSet: ID | Dex.PokemonSet = '' as ID) {
 		this.searchType = searchType;
+		
+		// --- 在这里记录传入的 format ID ---
+		this.formatId = format;
 
 		this.baseResults = null;
 		this.baseIllegalResults = null;
