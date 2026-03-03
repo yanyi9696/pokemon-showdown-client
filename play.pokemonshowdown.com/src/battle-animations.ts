@@ -1930,7 +1930,7 @@ export class PokemonSprite extends Sprite {
 		fantasyringtarget: ['幻之标靶', 'good'],
 		fantasylaxincense: ['幻之悠闲薰香', 'good'],
 		fantasyultraenergyboost: ['幻之究极能量', 'good'],
-		fanjishuanglin: ['反击霜鳞', 'neutral'],
+		fanjibingjia: ['反击冰甲', 'neutral'],
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;

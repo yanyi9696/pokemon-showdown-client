@@ -13,7 +13,7 @@ import { type AnimTable, BattleOtherAnims } from './battle-animations';
 
 export const BattleMoveAnims: AnimTable = {
 	//FC自制技能对动画效果的自定义修改
-	fanjishuanglin: {
+	fanjibingjia: {
 		anim(scene, [attacker, defender]) {
 			scene.showEffect('iceball', {
 				x: attacker.x,
