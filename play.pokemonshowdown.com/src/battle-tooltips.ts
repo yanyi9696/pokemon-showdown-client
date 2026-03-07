@@ -1727,7 +1727,7 @@ export class BattleTooltips {
 			}
 		}
 
-		if (move.id === 'photongeyser' || move.id === 'lightthatburnsthesky' ||
+		if (move.id === 'photongeyser' || move.id === 'lightthatburnsthesky' || move.id === 'psystrike' ||
 			(move.id === 'terablast' && pokemon.terastallized) ||
 			(move.id === 'terastarstorm' && pokemon.getSpeciesForme() === 'Terapagos-Stellar')) {
 			const stats = this.calculateModifiedStats(pokemon, serverPokemon, true);
