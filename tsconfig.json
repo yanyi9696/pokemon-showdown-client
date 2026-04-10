@@ -4,7 +4,6 @@
         "noEmit": true,
         "target": "esnext",
         "module": "None",
-        "ignoreDeprecations": "6.0",
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "verbatimModuleSyntax": true,
