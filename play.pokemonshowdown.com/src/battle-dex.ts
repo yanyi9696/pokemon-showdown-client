@@ -513,6 +513,7 @@ export const Dex = new class implements ModdedDex {
 				(formid.startsWith("sawsbuck") && formid.includes("fantasy")) ||
 				(formid.startsWith("floette") && formid.includes("fantasy")) ||
 				(formid.startsWith("floette") && formid.includes("mega")) ||// <-- 新增的 floette "mega" 排除规则
+				(formid.startsWith("zygarde") && formid.includes("mega")) ||
 				(formid.startsWith("tatsugiri") && formid.includes("mega"))
 			)) {
 				for (const baseSpeciesId of BattleBaseSpeciesChart) {
@@ -526,6 +527,10 @@ export const Dex = new class implements ModdedDex {
 			let data = window.BattlePokedex[id];
 
 			// ===== 我们添加的强制贴图修正代码 开始 =====
+			if (id === 'zygardemega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'zygarde-complete';
+			}
 			if (id === 'hawluchamega') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'hawlucha';
