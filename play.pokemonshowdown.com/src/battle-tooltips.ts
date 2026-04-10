@@ -577,6 +577,7 @@ export class BattleTooltips {
 					movePower = this.battle.dex.moves.get('hiddenpower').zMove!.basePower;
 				}
 				if (move.id === 'weatherball') {
+					value.abilityModify(2, "Mega Sol");
 					switch (this.battle.weather) {
 						case 'sunnyday':
 						case 'desolateland':
@@ -1563,6 +1564,9 @@ export class BattleTooltips {
 		value.reset();
 		if (move.id === 'revelationdance') {
 			moveType = pokemonTypes[0];
+		if (pokemonTypes[0] === '???' || pokemonTypes[0] === 'Bird' as any) {
+				moveType = pokemonTypes[1] || pokemonTypes[0];
+			}
 		}
 		// Moves that require an item to change their type.
 		let item = this.battle.dex.items.get(value.itemName);
@@ -1579,8 +1583,9 @@ export class BattleTooltips {
 			if (value.itemModify(0)) moveType = item.naturalGift.type;
 		}
 		// Weather and pseudo-weather type changes.
-		if (move.id === 'weatherball' && value.weatherModify(0)) {
-			switch (this.battle.weather) {
+		if (move.id === 'weatherball') {
+			if (value.weatherModify(0)) {
+				switch (this.battle.weather) {
 				case 'sunnyday':
 				case 'desolateland':
 					if (item.id === 'utilityumbrella') break;
@@ -1598,6 +1603,9 @@ export class BattleTooltips {
 				case 'snowscape':
 					moveType = 'Ice';
 					break;
+				}
+			} else if (value.abilityModify(0, 'Mega Sol')) {
+					moveType = 'Fire';
 			}
 		}
 		if (move.id === 'terrainpulse' && pokemon.isGrounded(serverPokemon)) {
@@ -1705,6 +1713,7 @@ export class BattleTooltips {
 			if (category !== 'Status' && !move.isZ && !move.id.startsWith('hiddenpower')) {
 				if (moveType === 'Normal') {
 					if (value.abilityModify(0, 'Aerilate')) moveType = 'Flying';
+					if (value.abilityModify(0, 'Dragonize')) moveType = 'Dragon';
 					if (value.abilityModify(0, 'Galvanize')) moveType = 'Electric';
 					if (value.abilityModify(0, 'Pixilate')) moveType = 'Fairy';
 					if (value.abilityModify(0, 'Refrigerate')) moveType = 'Ice';
@@ -1914,6 +1923,7 @@ export class BattleTooltips {
 		value.set(move.accuracy as number);
 
 		if (move.id === 'hurricane' || move.id === 'thunder') {
+			if (value.tryAbility('Mega Sol')) value.set(50, 'Mega Sol');
 			if (value.tryWeather('Sunny Day')) value.set(50, 'Sunny Day');
 			if (value.tryWeather('Desolate Land')) value.set(50, 'Desolate Land');
 		}
@@ -2262,7 +2272,8 @@ export class BattleTooltips {
 		) {
 			if (move.type === 'Normal') {
 				value.abilityModify(this.battle.gen > 6 ? 1.2 : 1.3, "Aerilate");
-				value.abilityModify(this.battle.gen > 6 ? 1.2 : 1.3, "Galvanize");
+				value.abilityModify(1.2, "Dragonize");
+				value.abilityModify(1.2, "Galvanize");
 				value.abilityModify(this.battle.gen > 6 ? 1.2 : 1.3, "Pixilate");
 				value.abilityModify(this.battle.gen > 6 ? 1.2 : 1.3, "Refrigerate");
 				value.abilityModify(this.battle.gen > 6 ? 1.2 : 1.3, "Du Wu Pi Fu");
