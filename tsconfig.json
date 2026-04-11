@@ -4,6 +4,10 @@
         "noEmit": true,
         "target": "esnext",
         "module": "None",
+        
+        // 新增：忽略 TypeScript 6.0 相关的配置弃用警告
+        "ignoreDeprecations": "6.0",
+        
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "verbatimModuleSyntax": true,

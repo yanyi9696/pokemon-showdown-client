@@ -2183,7 +2183,6 @@ const ModModifier: {
 				'excadrillmegafantasy',
 				'meganiummegafantasy',
 				'greninjamegafantasy',
-				'starmiemega',
 				'barbaraclemega',
 				'falinksmega',
 				'skarmorymegafantasy',
