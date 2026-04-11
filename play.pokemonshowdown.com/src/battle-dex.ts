@@ -2190,7 +2190,6 @@ const ModModifier: {
 				'eelektrossmega',
 				'floettemegafantasy',
 				'scolipedemega', 'scolipedemegafantasy',
-				'feraligatrmega',
 				'pyroarmega',
 				'malamarmega',
 				'raichumegax',
