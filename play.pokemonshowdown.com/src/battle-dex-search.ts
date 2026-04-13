@@ -966,13 +966,20 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 			const megaAbilityName = dex.abilities.get(megaSpecies.abilities['0']).name;
 			abilitySet.unshift(['html', `Will be <strong>${megaAbilityName}</strong> after Mega Evolving.`]);
 			let baseSpeciesId = toID(isMegaForme ? species.baseSpecies : megaBaseSpeciesFromItem!);
-			if (species.id.endsWith('fantasy')) {
-				const rawBaseId = toID(isMegaForme ? species.baseSpecies : megaBaseSpeciesFromItem!);
-				const fantasyBaseId = rawBaseId.endsWith('fantasy') ? rawBaseId : toID(rawBaseId + 'fantasy');
-				if (dex.species.get(fantasyBaseId).exists) {
-					baseSpeciesId = fantasyBaseId;
-				}
-			}
+            
+            // --- 修改开始：专门针对呆壳兽的自制 Mega 形态进行特判 ---
+            if (species.id === 'slowbromegafantasy') {
+                // 直接强制将底座指向伽勒尔形态
+                baseSpeciesId = toID('slowbrogalarfantasy');
+            } 
+            else if (species.id.endsWith('fantasy')) {
+                // 其他 fantasy 宝可梦继续走原来的默认逻辑
+                const rawBaseId = toID(isMegaForme ? species.baseSpecies : megaBaseSpeciesFromItem!);
+                const fantasyBaseId = rawBaseId.endsWith('fantasy') ? rawBaseId : toID(rawBaseId + 'fantasy');
+                if (dex.species.get(fantasyBaseId).exists) {
+                    baseSpeciesId = fantasyBaseId;
+                }
+            }
 			species = dex.species.get(baseSpeciesId);
 		}
 
