@@ -5019,6 +5019,11 @@
 				}
 				if (baseSpecies && baseSpecies.exists) abilitySpecies = baseSpecies;
 			}
+			// --- 修改开始：针对自制呆壳兽 Mega 的底座特性抓取进行特判 ---
+            if (species.id === "slowbromegafantasy") {
+                abilitySpecies = this.curTeam.dex.species.get("slowbrogalarfantasy");
+            }
+            // --- 修改结束 ---
 			set.ability = abilitySpecies.abilities["0"];
 			if (
 				species.id === "greninjaashfantasy" ||
