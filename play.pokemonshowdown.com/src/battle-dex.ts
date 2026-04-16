@@ -295,6 +295,7 @@ export const Dex = new class implements ModdedDex {
 		if (formatid.endsWith('rubl')) modids.push('rubl' as ID);
 		if (formatid.endsWith('ru')) modids.push('ru' as ID);
 		if (formatid.endsWith('lc')) modids.push('lc' as ID);
+		if (formatid.includes('fconly')) modids.push('fconly' as ID);
 
 		// regulars
 		if (formatid.includes('anythinggoes') || formatid.endsWith('ag')) modids.push('anythinggoes' as ID);
@@ -2222,6 +2223,48 @@ const ModModifier: {
 				'drednawgmegafantasy',
 				'melmetalgmegafantasy',
 			];
+
+			// FC Only: 仅显示可选的 Gen9fantasy 宝可梦，不拼接基础列表。
+			if (dex.modid.includes('fconly' as ID)) {
+				const allowedFCTiers = new Set(['Uber', '(Uber)', 'OU', 'UUBL', 'UU', 'RUBL', 'RU']);
+				const fcCollected: {id: ID, weight: number, name: string}[] = [];
+				const fcSeen = new Set<string>();
+
+				for (const id of pinnedPokemon) {
+					const species = dex.species.get(id as ID);
+					if (!species.exists) continue;
+					const tier = species.tier || '';
+					if (!allowedFCTiers.has(tier)) continue;
+					const weight = tierWeights[tier] || 0;
+					fcCollected.push({id: id as ID, weight, name: species.name});
+					fcSeen.add(id);
+				}
+
+				if (window.Gen9fantasydex) {
+					for (const id in window.Gen9fantasydex) {
+						if (fcSeen.has(id)) continue;
+						if (id in window.BattlePokedex) continue;
+						const species = dex.species.get(id as ID);
+						if (!species.exists) continue;
+						const tier = species.tier || '';
+						if (!allowedFCTiers.has(tier)) continue;
+						const weight = tierWeights[tier] || 0;
+						fcCollected.push({id: id as ID, weight, name: species.name});
+					}
+				}
+
+				fcCollected.sort((a, b) => {
+					if (b.weight !== a.weight) return b.weight - a.weight;
+					return a.name.localeCompare(b.name);
+				});
+
+				if (!fcCollected.length) return tierSet;
+				const fcTierSet: SearchRow[] = [['header', 'Gen9fantasy FC Only']];
+				for (const item of fcCollected) {
+					fcTierSet.push(['pokemon', item.id]);
+				}
+				return fcTierSet;
+			}
 
 			// 4. 收集符合当前分级条件的宝可梦
 			const collected: {id: ID, weight: number, name: string}[] = [];
