@@ -948,8 +948,10 @@ export class BattleScene implements BattleSceneStub {
 		return buf; // weather not found
 	}
 	sideConditionLeft(cond: Side['sideConditions'][string], isFoe: boolean, all?: boolean) {
-		if (!cond[2] && !cond[3] && !all) return '';
-		let buf = `<br />${isFoe && !all ? "Foe's " : ""}${Dex.moves.get(cond[0]).name}`;
+		const conditionName = Dex.moves.get(cond[0]).name;
+		const alwaysShowNoDuration = conditionName === 'Sea of Fire';
+		if (!cond[2] && !cond[3] && !all && !alwaysShowNoDuration) return '';
+		let buf = `<br />${isFoe && !all ? "Foe's " : ""}${conditionName}`;
 		if (this.battle.gen < 7 && this.battle.hardcoreMode) return buf;
 
 		if (!cond[2] && !cond[3]) return buf;
