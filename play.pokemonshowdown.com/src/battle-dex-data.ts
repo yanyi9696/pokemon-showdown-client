@@ -577,15 +577,15 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	chimechomega: 1320 + 112,
 	absolmegaz: 1320 + 113,
 	staraptormega: 1320 + 114,
-	garchompmegaz: 1320 + 115,
+	garchompmegaz: 1320 + 115, garchompmegazfantasy: 1320 + 115, // Added fantasy mapping
 	lucariomegaz: 1320 + 116,
 	heatranmega: 1320 + 117,
 	darkraimega: 1320 + 118,
-	golurkmega: 1320 + 119,
+	golurkmega: 1320 + 119, golurkmegafantasy: 1320 + 119, // Added fantasy mapping
 	meowsticmmega: 1320 + 120,
 	meowsticfmega: 1320 + 120,
 	crabominablemega: 1320 + 121,
-	golisopodmega: 1320 + 122,
+	golisopodmega: 1320 + 122, golisopodmegafantasy: 1320 + 122, // Added fantasy mapping
 	magearnamega: 1320 + 123,
 	magearnaoriginalmega: 1320 + 124,
 	zeraoramega: 1320 + 125,
