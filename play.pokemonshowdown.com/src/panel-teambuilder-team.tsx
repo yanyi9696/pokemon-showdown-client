@@ -175,7 +175,12 @@ class TeamTextbox extends preact.Component<{ team: Team }> {
 					const prevOffset = i === 0 ? 8 : this.setInfo[i - 1].bottomY;
 					const species = info.species;
 					const speciesId = toID(species); // 将 toID 结果存入变量
-					const iconStyle = Dex.getPokemonIcon(speciesId);
+					const num = Dex.getPokemonIconNum(speciesId, speciesId); // 传入两个参数
+					if (!num) return null;
+			
+					const top = Math.floor(num / 12) * 30;
+					const left = (num % 12) * 40;
+					const iconStyle = `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png) no-repeat scroll -${left}px -${top}px`;
 			
 					return <span
 						class="picon" style={`top:${prevOffset + 1}px;left:50px;position:absolute;${iconStyle}`}
