@@ -1202,6 +1202,9 @@ export const Dex = new class implements ModdedDex {
 		if (finalId === 'urshifurapidstrikegmegafantasy') {
 			lookupId = 'urshifurapidstrikegmax' as ID;
 		}
+		if (finalId === 'onixfantasy') {
+			return `background:transparent url(${Dex.resourcePrefix}sprites/custom/onix-fantasy-icon.png) no-repeat scroll 0 0`;
+		}
 
 		if (lookupId.endsWith('fantasy')) {
 			lookupId = lookupId.slice(0, -8) as ID;
@@ -1249,7 +1252,7 @@ export const Dex = new class implements ModdedDex {
 			}
 		}
 
-		if (spriteid.endsWith('-fantasy')) {
+		if (id !== 'onixfantasy' && spriteid.endsWith('-fantasy')) {
 			spriteid = spriteid.slice(0, -8);
 		}
 
