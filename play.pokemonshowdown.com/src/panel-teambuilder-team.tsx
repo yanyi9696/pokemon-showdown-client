@@ -180,8 +180,8 @@ class TeamTextbox extends preact.Component<{ team: Team }> {
 			
 					const top = Math.floor(num / 12) * 30;
 					const left = (num % 12) * 40;
-					const iconStyle = `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png) no-repeat scroll -${left}px -${top}px`;
-			
+					// 同样地，移除资源前缀，将 url 里的内容改为本地路径
+                    const iconStyle = `background:transparent url(./sprites/pokemonicons-sheet.png) no-repeat scroll -${left}px -${top}px`;
 					return <span
 						class="picon" style={`top:${prevOffset + 1}px;left:50px;position:absolute;${iconStyle}`}
 					></span>;
