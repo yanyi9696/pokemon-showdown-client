@@ -1319,6 +1319,17 @@ export const Dex = new class implements ModdedDex {
 		if (!pokemon) return '';
 		const data = this.getTeambuilderSpriteData(pokemon, gen);
 		const shiny = (data.shiny ? '-shiny' : '');
+
+		// 【新增代码：特判拦截 Onix-Fantasy】
+		// 使用 toID 统一转换名称，防止大小写或空格导致的匹配失败
+		const id = toID(pokemon.species);
+		if (id === 'onixfantasy') {
+			// 直接返回本地的图片路径。你可以根据实际存放的路径修改 './sprites/dex/onix-fantasy.png'
+			// data.x 和 data.y 决定了图片在 UI 框内的偏移位置，如果发现图偏了，可以直接在这里写死数值（例如 background-position: -5px 10px;）
+			return `background-image:url(./sprites/dex/onix-fantasy.png);background-position:${data.x}px ${data.y}px;background-repeat:no-repeat`;
+		}
+
+		// 原版逻辑：从官方服务器或默认路径拉取图片
 		return `background-image:url(${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png);background-position:${data.x}px ${data.y}px;background-repeat:no-repeat`;
 	}
 
