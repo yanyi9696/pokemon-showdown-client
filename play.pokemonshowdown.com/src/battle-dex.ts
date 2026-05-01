@@ -1214,7 +1214,7 @@ export const Dex = new class implements ModdedDex {
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
 		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
-		const iconSheetUrl = `/sprites/pokemonicons-sheet.png?v20`;
+		const iconSheetUrl = `${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v18`;
 		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}`;
 	}
 
