@@ -1347,7 +1347,12 @@ export const Dex = new class implements ModdedDex {
 
 		let top = Math.floor(num / 16) * 24;
 		let left = (num % 16) * 24;
-		return `background:transparent url(${Dex.resourcePrefix}sprites/itemicons-sheet.png?v1) no-repeat scroll -${left}px -${top}px`;
+        
+		// 【修改这里】移除 Dex.resourcePrefix，改为指向本地存放道具图的相对路径
+		// 注意：将 ?v1 改为 ?v2 (或更高的数字) 可以帮助强制清除浏览器缓存，确保加载的是你最新的图片
+		const itemSheetUrl = `./sprites/itemicons-sheet.png?v2`;
+        
+		return `background:transparent url(${itemSheetUrl}) no-repeat scroll -${left}px -${top}px`;
 	}
 
 	getTypeIcon(type: string | null, b?: boolean) { // b is just for utilichart.js
