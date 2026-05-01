@@ -4978,6 +4978,7 @@
 				// 自制的沙漠蜻蜓、智蛙 等等
 				"Flygon-Mega-Fantasy": "Flygonite",
 				"Greninja-Ash-Fantasy": "Greninja-Ash Z",
+				"Lugia-Shadow-Fantasy": "Shadow Bottle",
 				// 如果以后有更多自制 Mega，可以在这里继续添加，例如：
 				// 'Pikachu-Mega': 'Pikachunite'
 			};
