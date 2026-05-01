@@ -1191,12 +1191,11 @@ export const Dex = new class implements ModdedDex {
 	}
 
 	getPokemonIcon(pokemon: string | Pokemon | ServerPokemon | Dex.PokemonSet | null, facingLeft?: boolean) {
-		const iconSheetPrefix = (window as any).PSIconSheetPrefix || Dex.resourcePrefix;
 		// Handle pokeball cases first
-		if (pokemon === 'pokeball') return `background:transparent url(${iconSheetPrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -0px 4px`;
-		if (pokemon === 'pokeball-statused') return `background:transparent url(${iconSheetPrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -40px 4px`;
-		if (pokemon === 'pokeball-fainted') return `background:transparent url(${iconSheetPrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px;opacity:.4;filter:contrast(0)`;
-		if (pokemon === 'pokeball-none') return `background:transparent url(${iconSheetPrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px`;
+		if (pokemon === 'pokeball') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -0px 4px`;
+		if (pokemon === 'pokeball-statused') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -40px 4px`;
+		if (pokemon === 'pokeball-fainted') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px;opacity:.4;filter:contrast(0)`;
+		if (pokemon === 'pokeball-none') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px`;
 
 		let finalId: ID = '' as ID;
 		let gender: Dex.GenderName | '' = '';
