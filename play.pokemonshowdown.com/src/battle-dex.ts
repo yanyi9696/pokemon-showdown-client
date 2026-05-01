@@ -1320,13 +1320,20 @@ export const Dex = new class implements ModdedDex {
 		const data = this.getTeambuilderSpriteData(pokemon, gen);
 		const shiny = (data.shiny ? '-shiny' : '');
 
-		// 【新增代码：特判拦截 Onix-Fantasy】
-		// 使用 toID 统一转换名称，防止大小写或空格导致的匹配失败
+		// 【特判拦截 Onix-Fantasy】
 		const id = toID(pokemon.species);
 		if (id === 'onixfantasy') {
-			// 直接返回本地的图片路径。你可以根据实际存放的路径修改 './sprites/dex/onix-fantasy.png'
-			// data.x 和 data.y 决定了图片在 UI 框内的偏移位置，如果发现图偏了，可以直接在这里写死数值（例如 background-position: -5px 10px;）
-			return `background-image:url(./sprites/dex/onix-fantasy.png);background-position:${data.x}px ${data.y}px;background-repeat:no-repeat`;
+			// 1. 设置图片的缩放尺寸 (宽度 高度)。
+			// "80px auto" 表示宽度缩放为 80 像素，高度保持原有比例自动缩放。
+			const bgSize = "80px auto"; 
+			
+			// 2. 调整 X 和 Y 的位置偏移量。
+			// 这里我们弃用系统默认的 data.x 和 data.y，方便你单独对这张大图进行微调。
+			const offsetX = -10; // 水平方向：负数向左移，正数向右移
+			const offsetY = 5;   // 垂直方向：负数向上移，正数向下移
+			
+			// 将设定好的样式拼接成字符串并返回
+			return `background-image:url(./sprites/dex/onix-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 
 		// 原版逻辑：从官方服务器或默认路径拉取图片
