@@ -596,8 +596,9 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	tatsugiristretchymega: 1320 + 130,
 	baxcaliburmega: 1320 + 131,
 	//自制的mega沙漠蜻蜓等等
-	flygonmegafantasy: 330, // Added fantasy mapping
+	flygonmegafantasy: 1026, // Added fantasy mapping
     onixfantasy: 1452 + 106, // Added fantasy mapping
+	lugiashadowfantasy: 1452 + 107, // Added fantasy mapping
 
 	// CAP
 	syclant: 1560 + 0,

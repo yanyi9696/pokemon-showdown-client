@@ -1104,6 +1104,32 @@ export const Dex = new class implements ModdedDex {
 			spriteData.y += -11;
 		}
 
+		// ==========================================
+		// 【新增代码：自定义局内图片拦截】
+		// ==========================================
+		// 获取宝可梦的纯小写ID
+		const checkId = originalSpecies.id; 
+		
+		if (checkId === 'lugiashadowfantasy') {
+			// isFront 是布尔值，为 true 代表渲染正面，为 false 代表渲染背面
+			const facingDir = isFront ? 'gen5' : 'gen5-back';
+			// 强行将图片的 URL 指向你本地刚刚建好的文件夹
+			// 添加 ?v1 以清除浏览器缓存
+			spriteData.url = `./sprites/${facingDir}/lugia-shadow-fantasy.png?v1`;
+			
+			// 取消像素化模糊（如果你的原图很清晰且不是像素风，可以设置为 false）
+			spriteData.pixelated = true; 
+		}
+
+		// 以后如果有其他局内图片要替换，在这里加 else if 即可
+		/*
+		else if (checkId === 'onixfantasy') {
+			const facingDir = isFront ? 'gen5' : 'gen5-back';
+			spriteData.url = `./sprites/${facingDir}/onix-fantasy.png?v1`;
+		}
+		*/
+
+		// 原版代码：返回最终的数据对象
 		return spriteData;
 	}
 
@@ -1319,14 +1345,13 @@ export const Dex = new class implements ModdedDex {
 		if (!pokemon) return '';
 		const data = this.getTeambuilderSpriteData(pokemon, gen);
 		const shiny = (data.shiny ? '-shiny' : '');
-
-		// 【特判拦截 Onix-Fantasy】
 		const id = toID(pokemon.species);
+		
+		// 拦截：大岩蛇-幻想形态
 		if (id === 'onixfantasy') {
 			// 1. 设置图片的缩放尺寸 (宽度 高度)。
 			// "80px auto" 表示宽度缩放为 80 像素，高度保持原有比例自动缩放。
 			const bgSize = "80px auto"; 
-			
 			// 2. 调整 X 和 Y 的位置偏移量。
 			// 这里我们弃用系统默认的 data.x 和 data.y，方便你单独对这张大图进行微调。
 			const offsetX = 10; // 水平方向：负数向左移，正数向右移
@@ -1334,6 +1359,14 @@ export const Dex = new class implements ModdedDex {
 			
 			// 将设定好的样式拼接成字符串并返回
 			return `background-image:url(./sprites/dex/onix-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
+		}
+		// 【新增代码：拦截 暗影洛奇亚-幻想形态】
+		else if (id === 'lugiashadowfantasy') {
+			// 你可以针对洛奇亚的图片尺寸，独立调整这三个参数
+			const bgSize = "80px auto"; 
+			const offsetX = 10; // 左右微调
+			const offsetY = 5;  // 上下微调
+			return `background-image:url(./sprites/dex/lugia-shadow-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 
 		// 原版逻辑：从官方服务器或默认路径拉取图片
