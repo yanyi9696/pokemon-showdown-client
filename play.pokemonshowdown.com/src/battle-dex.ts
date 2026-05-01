@@ -1329,8 +1329,8 @@ export const Dex = new class implements ModdedDex {
 			
 			// 2. 调整 X 和 Y 的位置偏移量。
 			// 这里我们弃用系统默认的 data.x 和 data.y，方便你单独对这张大图进行微调。
-			const offsetX = -10; // 水平方向：负数向左移，正数向右移
-			const offsetY = 5;   // 垂直方向：负数向上移，正数向下移
+			const offsetX = 0; // 水平方向：负数向左移，正数向右移
+			const offsetY = 0;   // 垂直方向：负数向上移，正数向下移
 			
 			// 将设定好的样式拼接成字符串并返回
 			return `background-image:url(./sprites/dex/onix-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
