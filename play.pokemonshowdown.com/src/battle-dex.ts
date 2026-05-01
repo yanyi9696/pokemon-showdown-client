@@ -2283,7 +2283,7 @@ const ModModifier: {
 
 			// FC Only: 仅显示可选的 Gen9fantasy 宝可梦，不拼接基础列表。
 			if (dex.modid.includes('fconly' as ID)) {
-				const allowedFCTiers = new Set(['Uber', '(Uber)', 'OU', 'UUBL', 'UU', 'RUBL', 'RU']);
+				const allowedFCTiers = new Set(['Uber', '(Uber)', 'OU', 'UUBL', 'UU', 'RUBL', 'RU', 'LC']);
 				const fcCollected: {id: ID, weight: number, name: string}[] = [];
 				const fcSeen = new Set<string>();
 
