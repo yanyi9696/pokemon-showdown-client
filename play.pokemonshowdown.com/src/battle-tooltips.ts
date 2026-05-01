@@ -2234,6 +2234,11 @@ export class BattleTooltips {
 		if (['Rock', 'Ground', 'Steel'].includes(moveType) && this.battle.weather === 'sandstorm') {
 			if (value.tryAbility("Sand Force")) value.weatherModify(1.3, "Sandstorm", "Sand Force");
 		}
+		// ==== 在这里插入渊海洋流的 UI 威力修正 ====
+		if (moveType === 'Flying' && (this.battle.weather === 'raindance' || this.battle.weather === 'primordialsea')) {
+			if (value.tryAbility("Yuan Hai Yang Liu")) value.weatherModify(1.25, "Rain Dance", "Yuan Hai Yang Liu");
+		}
+		// ============================================
 		if (this.battle.weather === 'hail' || this.battle.weather === 'snowscape') {
 			if (value.tryAbility("Xue Zhi Li")) value.weatherModify(1.3, "Snowscape", "Xue Zhi Li");
 			if (value.tryAbility("Bao Xue Zhi Li")) value.weatherModify(1.3, "Snowscape", "Bao Xue Zhi Li");
@@ -2591,6 +2596,14 @@ export class BattleTooltips {
 		if (BattleTooltips.orbUsers[speciesName]?.includes(item.name) &&
 			BattleTooltips.orbTypes[item.name]?.includes(moveType)) {
 			value.itemModify(1.2);
+			return value;
+		}
+
+		// Shadow Bottle: Lugia-Fantasy holding this becomes Lugia-Shadow-Fantasy;
+		// its Ghost and Flying moves are boosted by 20%.
+		if (itemName === 'Shadow Bottle' && (moveType === 'Ghost' || moveType === 'Flying') &&
+			value.serverPokemon.speciesForme === 'Lugia-Shadow-Fantasy') {
+			value.itemModify(1.2, itemName);
 			return value;
 		}
 		if (speciesName === 'Ogerpon') {
