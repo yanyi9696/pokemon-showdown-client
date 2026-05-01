@@ -790,6 +790,7 @@ export const BattlePokemonIconIndexesLeft: { [id: string]: number } = {
 	necrozmaultra: 1452 + 103,
 	stakataka: 1452 + 104,
 	blacephalon: 1452 + 105,
+	onixfantasy: 1452 + 106, // Added fantasy mapping
 };
 
 export const BattleAvatarNumbers: { [k: string]: string } = {
