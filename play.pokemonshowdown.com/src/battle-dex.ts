@@ -1363,7 +1363,7 @@ export const Dex = new class implements ModdedDex {
 			// 你可以针对洛奇亚的图片尺寸，独立调整这三个参数
 			const bgSize = "100px auto"; 
 			const offsetX = 10; // 左右微调
-			const offsetY = 10;  // 上下微调
+			const offsetY = 5;  // 上下微调
 			return `background-image:url(./sprites/dex/lugia-shadow-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 
