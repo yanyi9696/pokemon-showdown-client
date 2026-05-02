@@ -1123,7 +1123,7 @@ export const Dex = new class implements ModdedDex {
 		if (checkId === 'lugiashadowfantasy') {
 			// isFront 是布尔值，为 true 代表渲染正面，为 false 代表渲染背面
 			const facingDir = isFront ? 'gen5' : 'gen5-back';
-			const filename = isFront ? 'lugia-shadow-fantasy.png' : 'lugia-shadow-fantasy2.png';
+			const filename = 'lugia-shadow-fantasy.png';
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			// 指向当前 client 静态资源根路径，避免 replay 子路径下解析成 /replay/sprites/...
 			// 添加 ?v1 以清除浏览器缓存
