@@ -257,6 +257,16 @@ export const Dex = new class implements ModdedDex {
 
 	pokeballs: string[] | null = null;
 
+	iconSheetPrefix = (() => {
+		const scripts = document.getElementsByTagName('script');
+		for (let i = scripts.length - 1; i >= 0; i--) {
+			const src = scripts[i].src;
+			const match = /^(.*\/)js\/battledata\.js(?:[?#].*)?$/.exec(src);
+			if (match) return match[1];
+		}
+		return '';
+	})();
+
 	resourcePrefix = (() => {
 		let prefix = '';
 		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
@@ -1113,9 +1123,11 @@ export const Dex = new class implements ModdedDex {
 		if (checkId === 'lugiashadowfantasy') {
 			// isFront 是布尔值，为 true 代表渲染正面，为 false 代表渲染背面
 			const facingDir = isFront ? 'gen5' : 'gen5-back';
-			// 强行将图片的 URL 指向你本地刚刚建好的文件夹
+			const filename = isFront ? 'lugia-shadow-fantasy.png' : 'lugia-shadow-fantasy2.png';
+			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			// 指向当前 client 静态资源根路径，避免 replay 子路径下解析成 /replay/sprites/...
 			// 添加 ?v1 以清除浏览器缓存
-			spriteData.url = `./sprites/${facingDir}/lugia-shadow-fantasy.png?v1`;
+			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
 
 			// 取消像素化模糊（如果你的原图很清晰且不是像素风，可以设置为 false）
 			spriteData.pixelated = true;
@@ -1191,11 +1203,12 @@ export const Dex = new class implements ModdedDex {
 	}
 
 	getPokemonIcon(pokemon: string | Pokemon | ServerPokemon | Dex.PokemonSet | null, facingLeft?: boolean) {
+		const iconSheetPrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 		// Handle pokeball cases first
-		if (pokemon === 'pokeball') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -0px 4px`;
-		if (pokemon === 'pokeball-statused') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -40px 4px`;
-		if (pokemon === 'pokeball-fainted') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px;opacity:.4;filter:contrast(0)`;
-		if (pokemon === 'pokeball-none') return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px`;
+		if (pokemon === 'pokeball') return `background:transparent url(${iconSheetPrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -0px 4px`;
+		if (pokemon === 'pokeball-statused') return `background:transparent url(${iconSheetPrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -40px 4px`;
+		if (pokemon === 'pokeball-fainted') return `background:transparent url(${iconSheetPrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px;opacity:.4;filter:contrast(0)`;
+		if (pokemon === 'pokeball-none') return `background:transparent url(${iconSheetPrefix}sprites/pokemonicons-pokeball-sheet.png) no-repeat scroll -80px 4px`;
 
 		let finalId: ID = '' as ID;
 		let gender: Dex.GenderName | '' = '';
@@ -1240,7 +1253,7 @@ export const Dex = new class implements ModdedDex {
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
 		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
-		const iconSheetUrl = `${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v18`;
+		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
 		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}`;
 	}
 
@@ -1356,15 +1369,17 @@ export const Dex = new class implements ModdedDex {
 			const offsetY = 5;   // 垂直方向：负数向上移，正数向下移
 
 			// 将设定好的样式拼接成字符串并返回
-			return `background-image:url(./sprites/dex/onix-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
+			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			return `background-image:url(${customSpritePrefix}sprites/dex/onix-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 		// 【新增代码：拦截 暗影洛奇亚-幻想形态】
 		else if (id === 'lugiashadowfantasy') {
 			// 你可以针对洛奇亚的图片尺寸，独立调整这三个参数
-			const bgSize = "100px auto"; 
+			const bgSize = "100px auto";
 			const offsetX = 10; // 左右微调
 			const offsetY = 5;  // 上下微调
-			return `background-image:url(./sprites/dex/lugia-shadow-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
+			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			return `background-image:url(${customSpritePrefix}sprites/dex/lugia-shadow-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 
 		// 原版逻辑：从官方服务器或默认路径拉取图片
