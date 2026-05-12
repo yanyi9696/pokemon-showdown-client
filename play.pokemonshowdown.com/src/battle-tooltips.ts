@@ -1665,6 +1665,7 @@ export class BattleTooltips {
 		// Lu Jiao 的属性切换
 		if (move.id === 'lujiao') {
 			switch (pokemon.getSpeciesForme()) {
+				case 'Xerneas-Fantasy':
 				case 'Sawsbuck-Fantasy':
 					moveType = 'Fairy';
 					break;
