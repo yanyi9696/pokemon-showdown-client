@@ -1263,17 +1263,7 @@
 		},
 		initialize: function (data) {
 			this.data = data;
-			if (!this.open) {
-				// todo: maybe make this configurable? not sure since it will cache what users toggle.
-				// avoiding that decision for now because it requires either an ugly hack
-				// or an overhaul of BattleFormats.
-				this.open = Storage.prefs('openformats') || {
-					"S/V Singles": true, "S/V Doubles": true, "Unofficial Metagames": true, "National Dex": true, "OM of the Month": true,
-					"Other Metagames": true, "Randomized Format Spotlight": true, "RoA Spotlight": true,
-					// For AFD
-					"Random Meta of the Decade": true
-				};
-			}
+			this.open = {"FC": true};
 			if (!this.starred) this.starred = Storage.prefs('starredformats') || {};
 			if (!this.search) this.search = "";
 			this.onselect = data.onselect;
@@ -1389,7 +1379,6 @@
 		updateOpen: function (ev) {
 			var section = $(ev.currentTarget).attr('section');
 			this.open[section] = !this.open[section];
-			Storage.prefs('openformats', this.open);
 		},
 		updateSearch: function (event) {
 			this.search = $(event.currentTarget).val();

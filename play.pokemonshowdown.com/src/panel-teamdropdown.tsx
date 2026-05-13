@@ -1013,6 +1013,7 @@ class FormatDropdownPanel extends PSRoomPanel {
 	gen = "";
 	format: string | null = null;
 	search = "";
+	openSections = new Set(["FC"]);
 	click = (e: MouseEvent) => {
 		let curTarget = e.target as HTMLElement | null;
 		let target;
@@ -1028,6 +1029,16 @@ class FormatDropdownPanel extends PSRoomPanel {
 	};
 	updateSearch = (ev: Event) => {
 		this.search = (ev.currentTarget as HTMLInputElement).value;
+		this.forceUpdate();
+	};
+	toggleSection = (ev: MouseEvent) => {
+		const section = (ev.currentTarget as HTMLElement).dataset.section;
+		if (!section) return;
+		if (this.openSections.has(section)) {
+			this.openSections.delete(section);
+		} else {
+			this.openSections.add(section);
+		}
 		this.forceUpdate();
 	};
 	override render() {
@@ -1094,7 +1105,7 @@ class FormatDropdownPanel extends PSRoomPanel {
 
 		let curSection = "";
 		let curColumnNum = 0;
-		let curColumn: (FormatData | { id: null; section: string })[] = [];
+		let curColumn: (FormatData | { id: null; section: string; collapsed: boolean })[] = [];
 		const columns = [curColumn];
 		const searchID = toID(this.search);
 		for (const format of formats) {
@@ -1111,9 +1122,14 @@ class FormatDropdownPanel extends PSRoomPanel {
 			if (format.section !== curSection) {
 				curSection = format.section;
 				if (curSection) {
-					curColumn.push({ id: null, section: curSection });
+					curColumn.push({
+						id: null,
+						section: curSection,
+						collapsed: !searchID && !this.openSections.has(curSection),
+					});
 				}
 			}
+			if (curSection && !searchID && !this.openSections.has(curSection)) continue;
 			curColumn.push(format);
 		}
 
@@ -1138,7 +1154,14 @@ class FormatDropdownPanel extends PSRoomPanel {
 									</li>
 								) : (
 									<li>
-										<h3>{format.section}</h3>
+										<h3
+											data-section={format.section}
+											onClick={this.toggleSection}
+											style="cursor: pointer"
+										>
+											<i class={`fa fa-caret-${format.collapsed ? "right" : "down"}`}></i>{" "}
+											{format.section}
+										</h3>
 									</li>
 								)
 							)}
