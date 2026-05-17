@@ -1933,7 +1933,6 @@ export class PokemonSprite extends Sprite {
 		fantasylaxincense: ['幻之悠闲薰香', 'good'],
 		fantasyultraenergyboost: ['幻之究极能量', 'good'],
 		fanjibingjia: ['反击冰甲', 'neutral'],
-		heianqinshi: ['黑暗侵蚀', 'neutral'],
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;
