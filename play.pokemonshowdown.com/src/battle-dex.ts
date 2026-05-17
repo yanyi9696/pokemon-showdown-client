@@ -1130,7 +1130,7 @@ export const Dex = new class implements ModdedDex {
 			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
 
 			// 取消像素化模糊（如果你的原图很清晰且不是像素风，可以设置为 false）
-			spriteData.pixelated = true;
+			spriteData.pixelated = false;
 		}
 
 		// 以后如果有其他局内图片要替换，在这里加 else if 即可
