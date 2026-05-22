@@ -28,28 +28,6 @@ export const BattleMoveAnims: AnimTable = {
 				opacity: 0,
 				time: 500,
 			}, 'linear');
-			scene.showEffect('fireball', {
-				x: defender.x + 40,
-				y: defender.y,
-				z: defender.z,
-				scale: 0,
-				opacity: 0.6,
-				time: 200,
-			}, {
-				scale: 7,
-				opacity: 0,
-			}, 'decel');
-			scene.showEffect('fireball', {
-				x: defender.x - 40,
-				y: defender.y - 20,
-				z: defender.z,
-				scale: 0,
-				opacity: 0.6,
-				time: 350,
-			}, {
-				scale: 7,
-				opacity: 0,
-			}, 'decel');
 			scene.showEffect('impact', {
 				x: defender.x,
 				y: defender.y,
