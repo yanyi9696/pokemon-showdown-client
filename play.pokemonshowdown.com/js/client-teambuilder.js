@@ -4954,6 +4954,7 @@
 				"Chimecho-Mega": "Chimechite",
 				"Crabominable-Mega": "Crabominite",
 				"Darkrai-Mega": "Darkranite",
+				"Darkrai-Mega-Fantasy": "Darkranite",
 				"Garchomp-Mega-Z": "Garchompite Z",
 				"Garchomp-Mega-Z-Fantasy": "Garchompite Z",
 				"Glimmora-Mega": "Glimmoranite",
