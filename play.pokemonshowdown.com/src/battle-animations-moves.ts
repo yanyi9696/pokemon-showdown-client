@@ -39,6 +39,18 @@ export const BattleMoveAnims: AnimTable = {
 				opacity: 0,
 				time: 800,
 			}, 'linear');
+			scene.showEffect('punch', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z + 5, 
+				scale: 0.5,
+				opacity: 1,
+				time: 280, 
+			}, {
+				scale: 2,
+				opacity: 0,
+				time: 600,
+			}, 'linear');
 			scene.showEffect(attacker.sp, {
 				x: attacker.x,
 				y: attacker.y,
@@ -80,8 +92,6 @@ export const BattleMoveAnims: AnimTable = {
 			defender.anim({
 				time: 300,
 			}, 'swing');
-			// also play the punch-type animation
-			BattleOtherAnims.punchattack.anim(scene, [attacker, defender]);
 		},
 	},
 	xingyihuanda: {
@@ -98,7 +108,7 @@ export const BattleMoveAnims: AnimTable = {
 				opacity: 0,
 				time: 700,
 			}, 'linear');
-			BattleOtherAnims.punchattack.anim(scene, [attacker, defender]);
+			BattleOtherAnims.contactattack.anim(scene, [attacker, defender]);
 		},
 	},
 	//归无之光
