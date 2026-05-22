@@ -682,6 +682,10 @@ export const Dex = new class implements ModdedDex {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'darkrai';
 			}
+			if (id === 'darkraimegafantasy') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'darkrai';
+			}
 			if (id === 'golurkmega') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'golurk';

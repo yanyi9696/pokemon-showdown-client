@@ -588,7 +588,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	garchompmegaz: 1320 + 115, garchompmegazfantasy: 1320 + 115, // Added fantasy mapping
 	lucariomegaz: 1320 + 116,
 	heatranmega: 1320 + 117,
-	darkraimega: 1320 + 118,
+	darkraimega: 1320 + 118, darkraimegafantasy: 1320 + 118, // Added fantasy mapping
 	golurkmega: 1320 + 119, golurkmegafantasy: 1320 + 119, // Added fantasy mapping
 	meowsticmmega: 1320 + 120,
 	meowsticfmega: 1320 + 120,
