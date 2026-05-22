@@ -14,77 +14,55 @@ import { type AnimTable, BattleOtherAnims } from './battle-animations';
 export const BattleMoveAnims: AnimTable = {
 	cunjinbengji: {
 		anim(scene, [attacker, defender]) {
-			scene.backgroundEffect('#000000', 700, 0.2);
+			scene.backgroundEffect('#000000', 700, 0.3);
+			BattleOtherAnims.punchattack.anim(scene, [attacker, defender]);
 			scene.showEffect('impact', {
 				x: defender.x,
 				y: defender.y,
 				z: defender.z,
 				scale: 0,
 				opacity: 0.4,
-				time: 300,
+				time: 150, 
 			}, {
 				scale: 4,
 				opacity: 0,
-				time: 600,
+				time: 500,
 			}, 'linear');
+			scene.showEffect('fireball', {
+				x: defender.x + 40,
+				y: defender.y,
+				z: defender.z,
+				scale: 0,
+				opacity: 0.6,
+				time: 200,
+			}, {
+				scale: 7,
+				opacity: 0,
+			}, 'decel');
+			scene.showEffect('fireball', {
+				x: defender.x - 40,
+				y: defender.y - 20,
+				z: defender.z,
+				scale: 0,
+				opacity: 0.6,
+				time: 350,
+			}, {
+				scale: 7,
+				opacity: 0,
+			}, 'decel');
 			scene.showEffect('impact', {
 				x: defender.x,
 				y: defender.y,
 				z: defender.z,
 				scale: 0,
 				opacity: 0.4,
-				time: 500,
+				time: 450,
 			}, {
 				scale: 4,
 				opacity: 0,
 				time: 800,
 			}, 'linear');
-			scene.showEffect('punch', {
-				x: defender.x,
-				y: defender.y,
-				z: defender.z + 5, 
-				scale: 0.5,
-				opacity: 1,
-				time: 280, 
-			}, {
-				scale: 2,
-				opacity: 0,
-				time: 600,
-			}, 'linear');
-			scene.showEffect(attacker.sp, {
-				x: attacker.x,
-				y: attacker.y,
-				z: attacker.z,
-				opacity: 0.3,
-				time: 50,
-			}, {
-				x: defender.x,
-				y: defender.y,
-				z: defender.behind(-5),
-				time: 350,
-			}, 'accel', 'fade');
-			scene.showEffect(attacker.sp, {
-				x: attacker.x,
-				y: attacker.y,
-				z: attacker.z,
-				opacity: 0.3,
-				time: 100,
-			}, {
-				x: defender.x,
-				y: defender.y,
-				z: defender.behind(-5),
-				time: 400,
-			}, 'accel', 'fade');
-			attacker.anim({
-				x: defender.x,
-				y: defender.y,
-				z: defender.behind(-5),
-				time: 300,
-			}, 'accel');
-			attacker.anim({
-				time: 500,
-			}, 'ballistic2Back');
-			defender.delay(280);
+			defender.delay(150); 
 			defender.anim({
 				z: defender.behind(20),
 				time: 100,
@@ -108,7 +86,7 @@ export const BattleMoveAnims: AnimTable = {
 				opacity: 0,
 				time: 700,
 			}, 'linear');
-			BattleOtherAnims.contactattack.anim(scene, [attacker, defender]);
+			BattleOtherAnims.punchattack.anim(scene, [attacker, defender]);
 		},
 	},
 	//归无之光
