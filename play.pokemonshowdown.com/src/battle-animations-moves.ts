@@ -12,6 +12,95 @@
 import { type AnimTable, BattleOtherAnims } from './battle-animations';
 
 export const BattleMoveAnims: AnimTable = {
+	cunjinbengji: {
+		anim(scene, [attacker, defender]) {
+			scene.backgroundEffect('#000000', 700, 0.2);
+			scene.showEffect('impact', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				scale: 0,
+				opacity: 0.4,
+				time: 300,
+			}, {
+				scale: 4,
+				opacity: 0,
+				time: 600,
+			}, 'linear');
+			scene.showEffect('impact', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				scale: 0,
+				opacity: 0.4,
+				time: 500,
+			}, {
+				scale: 4,
+				opacity: 0,
+				time: 800,
+			}, 'linear');
+			scene.showEffect(attacker.sp, {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				opacity: 0.3,
+				time: 50,
+			}, {
+				x: defender.x,
+				y: defender.y,
+				z: defender.behind(-5),
+				time: 350,
+			}, 'accel', 'fade');
+			scene.showEffect(attacker.sp, {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				opacity: 0.3,
+				time: 100,
+			}, {
+				x: defender.x,
+				y: defender.y,
+				z: defender.behind(-5),
+				time: 400,
+			}, 'accel', 'fade');
+			attacker.anim({
+				x: defender.x,
+				y: defender.y,
+				z: defender.behind(-5),
+				time: 300,
+			}, 'accel');
+			attacker.anim({
+				time: 500,
+			}, 'ballistic2Back');
+			defender.delay(280);
+			defender.anim({
+				z: defender.behind(20),
+				time: 100,
+			}, 'swing');
+			defender.anim({
+				time: 300,
+			}, 'swing');
+			// also play the punch-type animation
+			BattleOtherAnims.punchattack.anim(scene, [attacker, defender]);
+		},
+	},
+	xingyihuanda: {
+		anim(scene, [attacker, defender]) {
+			scene.showEffect('mistball', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				scale: 0,
+				opacity: 0.5,
+				time: 450,
+			}, {
+				scale: 2,
+				opacity: 0,
+				time: 700,
+			}, 'linear');
+			BattleOtherAnims.punchattack.anim(scene, [attacker, defender]);
+		},
+	},
 	//归无之光
 	nihillight: {
 		anim(scene, [attacker, ...defenders]) {

@@ -546,6 +546,14 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	inteleongmax: 1320 + 81,
 	urshifugmax: 1320 + 82, urshifugmegafantasy: 1320 + 82, // Added fantasy mapping
 	urshifurapidstrikegmax: 1320 + 83, urshifurapidstrikegmegafantasy: 1320 + 83, // Added fantasy mapping
+
+	urshifu: 1025 + 1,
+	urshifurapidstrike: 1025 + 2,
+	urshifufantasy: 1025 + 3,
+	urshifurapidstrikefantasy: 1025 + 4,
+	urshifu2fantasy: 1025 + 5,
+	urshifurapidstrike2fantasy: 1025 + 6,
+	
 	clefablemega: 1320 + 84,
 	victreebelmega: 1320 + 85, victreebelmegafantasy: 1320 + 85, // Added fantasy mapping
 	starmiemega: 1320 + 86,
@@ -596,7 +604,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	tatsugiristretchymega: 1320 + 130,
 	baxcaliburmega: 1320 + 131,
 	//自制的mega沙漠蜻蜓等等
-	flygonmegafantasy: 1026, // Added fantasy mapping
+	flygonmegafantasy: 1316, // Added fantasy mapping
     onixfantasy: 1452 + 106, // Added fantasy mapping
 	lugiashadowfantasy: 1452 + 107, // Added fantasy mapping
 
