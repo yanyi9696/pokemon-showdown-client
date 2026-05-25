@@ -1120,7 +1120,7 @@ export class BattleTooltips {
 		}
 
 		if (item === 'choiceband' && !clientPokemon?.volatiles['dynamax']) {
-			stats.atk = Math.floor(stats.atk * 1.5);
+			stats.atk = Math.floor(stats.atk * (ability === 'zengfuxitong' ? 2 : 1.5));
 		}
 		if (ability === 'purepower' || ability === 'hugepower') {
 			stats.atk *= 2;
@@ -1223,8 +1223,8 @@ export class BattleTooltips {
 			}
 		}
 		if (item === 'eviolite' && this.battle.dex.species.get(serverPokemon.speciesForme).nfe) {
-			stats.def = Math.floor(stats.def * 1.5);
-			stats.spd = Math.floor(stats.spd * 1.5);
+			stats.def = Math.floor(stats.def * (ability === 'zengfuxitong' ? 2 : 1.5));
+			stats.spd = Math.floor(stats.spd * (ability === 'zengfuxitong' ? 2 : 1.5));
 		}
 		if (ability === 'grasspelt' && this.battle.hasPseudoWeather('Grassy Terrain')) {
 			stats.def = Math.floor(stats.def * 1.5);
@@ -1238,7 +1238,7 @@ export class BattleTooltips {
 			}
 		}
 		if (item === 'choicespecs' && !clientPokemon?.volatiles['dynamax']) {
-			stats.spa = Math.floor(stats.spa * 1.5);
+			stats.spa = Math.floor(stats.spa * (ability === 'zengfuxitong' ? 2 : 1.5));
 		}
 		if (item === 'deepseatooth' && species === 'Clamperl') {
 			stats.spa *= 2;
@@ -1262,13 +1262,13 @@ export class BattleTooltips {
 			}
 		}
 		if (item === 'assaultvest') {
-			stats.spd = Math.floor(stats.spd * 1.5);
+			stats.spd = Math.floor(stats.spd * (ability === 'zengfuxitong' ? 2 : 1.5));
 		}
 		if (item === 'deepseascale' && species === 'Clamperl') {
 			stats.spd *= 2;
 		}
 		if (item === 'choicescarf' && !clientPokemon?.volatiles['dynamax']) {
-			speedModifiers.push(1.5);
+			speedModifiers.push(ability === 'zengfuxitong' ? 2 : 1.5);
 		}
 		if (item === 'ironball' || speedHalvingEVItems.includes(item)) {
 			speedModifiers.push(0.5);
@@ -1298,8 +1298,8 @@ export class BattleTooltips {
 		}
 		// ==================== 新增：自制道具的面板显示 (START) ====================
 		if (item === 'fantasyprotector') {
-			stats.def = Math.floor(stats.def * 1.2);
-			stats.spd = Math.floor(stats.spd * 1.2);
+			stats.def = Math.floor(stats.def * (ability === 'zengfuxitong' ? 1.4 : 1.2));
+			stats.spd = Math.floor(stats.spd * (ability === 'zengfuxitong' ? 1.4 : 1.2));
 			speedModifiers.push(0.5);
 		}
 		if (item === 'fantasysyrupyapple') {
@@ -2290,6 +2290,11 @@ export class BattleTooltips {
 		}
 		if (move.recoil || move.hasCrashDamage) {
 			value.abilityModify(1.2, 'Reckless');
+		}
+
+		// 增幅系统: 与自身不同属性的招式威力提高 1/3
+		if (!this.pokemonHasType(pokemon, moveType)) {
+			value.abilityModify(4/3, "Zeng Fu Xi Tong");
 		}
 
 		if (moveType === 'Bug') {

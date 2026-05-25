@@ -1551,6 +1551,9 @@ export const Dex = new class implements ModdedDex {
 		for (let id in window.BattleTypeChart) {
 			results.push(['type', id as ID]);
 		}
+		if (!window.BattleTypeChart?.hasOwnProperty('???')) {
+			results.push(['type', '???' as ID]);
+		}
 		return results;
 	}
 };
