@@ -419,23 +419,23 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	genesectburn: 1032 + 265,
 	genesectchill: 1032 + 266,
 
-	silvallybug: 1032 + 267,
-	silvallydark: 1032 + 268,
-	silvallydragon: 1032 + 269,
-	silvallyelectric: 1032 + 270,
-	silvallyfairy: 1032 + 271,
-	silvallyfighting: 1032 + 272,
-	silvallyfire: 1032 + 273,
-	silvallyflying: 1032 + 274,
-	silvallyghost: 1032 + 275,
-	silvallygrass: 1032 + 276,
-	silvallyground: 1032 + 277,
-	silvallyice: 1032 + 278,
-	silvallypoison: 1032 + 279,
-	silvallypsychic: 1032 + 280,
-	silvallyrock: 1032 + 281,
-	silvallysteel: 1032 + 282,
-	silvallywater: 1032 + 283,
+	silvallybug: 1032 + 267,silvallybugfantasy: 1032 + 267,// Added fantasy mapping
+	silvallydark: 1032 + 268, silvallydarkfantasy: 1032 + 268,// Added fantasy mapping
+	silvallydragon: 1032 + 269, silvallydragonfantasy: 1032 + 269,// Added fantasy mapping
+	silvallyelectric: 1032 + 270, silvallyelectricfantasy: 1032 + 270,// Added fantasy mapping
+	silvallyfairy: 1032 + 271, silvallyfairyfantasy: 1032 + 271,// Added fantasy mapping
+	silvallyfighting: 1032 + 272, silvallyfightingfantasy: 1032 + 272,// Added fantasy mapping
+	silvallyfire: 1032 + 273, silvallyfirefantasy: 1032 + 273,// Added fantasy mapping
+	silvallyflying: 1032 + 274, silvallyflyingfantasy: 1032 + 274,// Added fantasy mapping
+	silvallyghost: 1032 + 275, silvallyghostfantasy: 1032 + 275,// Added fantasy mapping
+	silvallygrass: 1032 + 276, silvallygrassfantasy: 1032 + 276,// Added fantasy mapping
+	silvallyground: 1032 + 277, silvallygroundfantasy: 1032 + 277,// Added fantasy mapping
+	silvallyice: 1032 + 278, silvallyicefantasy: 1032 + 278,// Added fantasy mapping
+	silvallypoison: 1032 + 279, silvallypoisonfantasy: 1032 + 279,// Added fantasy mapping
+	silvallypsychic: 1032 + 280, silvallypsychicfantasy: 1032 + 280,// Added fantasy mapping
+	silvallyrock: 1032 + 281, silvallyrockfantasy: 1032 + 281,// Added fantasy mapping
+	silvallysteel: 1032 + 282, silvallysteelfantasy: 1032 + 282,// Added fantasy mapping
+	silvallywater: 1032 + 283, silvallywaterfantasy: 1032 + 283,// Added fantasy mapping
 
 	// alt forms with duplicate icons
 	greninjabond: 658,
