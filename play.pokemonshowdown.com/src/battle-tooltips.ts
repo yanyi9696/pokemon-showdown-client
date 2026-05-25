@@ -1568,6 +1568,14 @@ export class BattleTooltips {
 				moveType = pokemonTypes[1] || pokemonTypes[0];
 			}
 		}
+		//多属性攻击·改
+		if (move.id === 'duoshuxinggongjigai') {
+			// 优先取第二属性，如果只有单属性则取第一属性
+			moveType = pokemonTypes.length > 1 ? pokemonTypes[1] : pokemonTypes[0];
+			if (moveType === 'Bird' as any) {
+				moveType = '???';
+			}
+		}
 		// Moves that require an item to change their type.
 		let item = this.battle.dex.items.get(value.itemName);
 		if (move.id === 'multiattack' && item.onMemory) {
