@@ -1743,6 +1743,11 @@ export class BattleTooltips {
 			const stats = this.calculateModifiedStats(pokemon, serverPokemon, true);
 			if (stats.atk > stats.spa) category = 'Physical';
 		}
+		// ==================== 新增：黑暗侵蚀 属性变更 ====================
+		if (category !== 'Status' && value.tryAbility('Hei An Qin Shi')) {
+			moveType = '???';
+		}
+		// =================================================================
 
 		// SSB
 		if (this.battle.tier.includes('Super Staff Bros')) {
