@@ -1196,6 +1196,26 @@ export class BattleTooltips {
 			stats.atk = Math.floor(stats.atk * 0.5);
 			stats.spa = Math.floor(stats.spa * 0.5);
 		}
+		// ==================== 新增：擂主 面板能力数值显现 ====================
+		if (ability === 'leizhu' && clientPokemon) {
+			let stacks = 0;
+			// 兼容C/S分离架构通过 '-start' 传递过来的挥发状态
+			for (let i = 1; i <= 20; i++) {
+				if (clientPokemon.volatiles[`leizhustack${i}`]) {
+					stacks = i;
+				}
+			}
+			// 兼容单机同构环境直接挂载的自定义属性
+			if (!stacks && (clientPokemon as any).leizhuStacks) {
+				stacks = (clientPokemon as any).leizhuStacks;
+			}
+			
+			if (stacks > 0) {
+				stats.atk = Math.floor(stats.atk * (10 + stacks) / 10);
+				stats.spa = Math.floor(stats.spa * (10 + stacks) / 10);
+			}
+		}
+		// ======================================================================
 		if (clientPokemon) {
 			if (clientPokemon.volatiles['slowstart']) {
 				stats.atk = Math.floor(stats.atk * 0.5);
