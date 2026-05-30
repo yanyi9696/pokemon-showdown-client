@@ -347,7 +347,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	zamazentacrowned: 1032 + 195,
 	slowpokegalar: 1032 + 196,
 	slowbrogalar: 1032 + 197, slowbrogalarfantasy: 1032 + 197, // Added fantasy mapping
-	zarudedada: 1032 + 198,
+	zarudedada: 1032 + 198, zarudedadafantasy: 1032 + 198, // Added fantasy mapping
 	pikachuworld: 1032 + 199,
 	articunogalar: 1032 + 200,
 	zapdosgalar: 1032 + 201,
