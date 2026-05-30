@@ -1470,6 +1470,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 	}
 	private moveIsFantasy(id: ID, species: Dex.Species, moves: string[], set: Dex.PokemonSet | null) {
 		switch (id) {
+		case 'linghunshayuan':
 		case 'duoshuxinggongjigai':
 		case 'zengfugongji':
 		case 'darkvoid':
