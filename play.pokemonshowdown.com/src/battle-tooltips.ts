@@ -2333,6 +2333,11 @@ export class BattleTooltips {
 			value.abilityModify(1.5, "Wei Chong Ni Tai");
 		}
 
+		// 排外族群: 连续招式威力提升 50%
+		if (move.multihit && pokemon.getSpeciesForme() !== 'Zarude-Dada-Fantasy') {
+			value.abilityModify(1.5, "Pai Wai Zu Qun");
+		}
+
 
 		if (move.category !== 'Status') {
 			let auraBoosted = '';

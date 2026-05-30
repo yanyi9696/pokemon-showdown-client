@@ -12,6 +12,56 @@
 import { type AnimTable, BattleOtherAnims } from './battle-animations';
 
 export const BattleMoveAnims: AnimTable = {
+	conglinzhanshu: {
+		anim(scene, [attacker, defender]) {
+			scene.showEffect('energyball', {
+				x: defender.x + 30,
+				y: defender.y - 30,
+				z: defender.z,
+				scale: 0,
+				opacity: 0.6,
+				time: 50,
+			}, {
+				scale: 3,
+				opacity: 0,
+			}, 'decel');
+			scene.showEffect('energyball', {
+				x: defender.x - 30,
+				y: defender.y - 40,
+				z: defender.z,
+				scale: 0,
+				opacity: 0.6,
+				time: 200,
+			}, {
+				scale: 3,
+				opacity: 0,
+			}, 'decel');
+			scene.showEffect('leaf1', {
+				x: defender.x + 30,
+				y: defender.y - 30,
+				z: defender.z,
+				scale: 0,
+				opacity: 0.6,
+				time: 50,
+			}, {
+				y: defender.y - 40,
+				scale: 3,
+				opacity: 0,
+			}, 'decel');
+			scene.showEffect('leaf2', {
+				x: defender.x - 30,
+				y: defender.y - 40,
+				z: defender.z,
+				scale: 0,
+				opacity: 0.6,
+				time: 200,
+			}, {
+				y: defender.y - 50,
+				scale: 3,
+				opacity: 0,
+			}, 'decel');
+		},
+	},
 	linghunshayuan: {
 		anim(scene, [attacker, ...defenders]) {
 			scene.backgroundEffect('#B47F1F', 1000, 0.3);
