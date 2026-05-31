@@ -477,7 +477,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	aerodactylmega: 1320 + 12, aerodactylmegafantasy: 1320 + 12,// Added fantasy mapping
 	mewtwomegax: 1320 + 13, mewtwomegaxfantasy: 1320 + 13,// Added fantasy mapping
 	mewtwomegay: 1320 + 14, mewtwomegayfantasy: 1320 + 14,// Added fantasy mapping
-	ampharosmega: 1320 + 15,
+	ampharosmega: 1320 + 15, ampharosmegafantasy: 1320 + 15,// Added fantasy mapping
 	steelixmega: 1320 + 16, steelixmegafantasy: 1320 + 16,// Added fantasy mapping
 	scizormega: 1320 + 17,
 	heracrossmega: 1320 + 18,
