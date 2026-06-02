@@ -2616,6 +2616,32 @@ export class BattleTooltips {
 			}
 		}
 
+		// ==================== 新增：幻之焦点镜的面板显示 (START) ====================
+		if (value && value.tryItem('Fantasy Scope Lens')) {
+			// 判定 1：招式原本就必定击中要害（如图鉴中自带 willCrit 的招式，例如冰息）
+			if ((move as any).willCrit) {
+				value.itemModify(2, 'Fantasy Scope Lens');
+				return value;
+			} else {
+				// 判定 2：非必定暴击的招式，手动在客户端计算其实际的击中要害率等级
+				let critRatio = move.critRatio || 1;
+				
+				if (value.pokemon) {
+					// 叠加客户端能读取到的常见增加击中要害率的 Buff 和特性
+					let ability = value.pokemon.ability || value.pokemon.baseAbility;
+					if (ability === 'Super Luck') critRatio += 1;
+					if (value.pokemon.volatiles && value.pokemon.volatiles['focusenergy']) critRatio += 2;
+				}
+
+				// 若最终击中要害率大于 1（即触发了大于 0% 的暴击率），面板威力提升 20%
+				if (critRatio > 1) {
+					value.itemModify(1.2, 'Fantasy Scope Lens');
+					return value;
+				}
+			}
+		}
+		// ==================== 新增：幻之焦点镜的面板显示 (END) ======================
+
 		// Type-enhancing items
 		if (BattleTooltips.itemTypes[item.name] === moveType) {
 			value.itemModify(this.battle.gen < 4 ? 1.1 : 1.2);
