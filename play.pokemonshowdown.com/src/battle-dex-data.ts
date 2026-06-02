@@ -1271,6 +1271,10 @@ export interface MoveFlags {
 	sound?: 1 | 0;
 	/** Activates the effects of the Wind Power and Wind Rider Abilities. */
 	wind?: 1 | 0;
+	shooting?: 1 | 0; 
+	// 拥有破竹特性的宝可梦在使用射击类招式时，无视防御方的能力变化与特性，直接给予伤害。
+	light?: 1 | 0; 
+	// 具有发光特性的宝可梦使用时，威力会乘以1.3。
 }
 
 export type MoveTarget = 'normal' | 'any' | 'adjacentAlly' | 'adjacentFoe' | 'adjacentAllyOrSelf' | // single-target

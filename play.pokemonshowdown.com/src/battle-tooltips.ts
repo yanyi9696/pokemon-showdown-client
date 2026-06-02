@@ -2253,6 +2253,11 @@ export class BattleTooltips {
 		if (move.flags['punch']) {
 			value.abilityModify(1.2, 'Iron Fist');
 		}
+		// === 在这里加上对发光（Illuminate）特性和光类（light）标签的判定 ===
+		if (move.flags['light']) {
+			value.abilityModify(1.3, "Illuminate");
+		}
+		// ========================================================
 		if (move.flags['pulse']) {
 			value.abilityModify(1.5, "Mega Launcher");
 		}
