@@ -456,7 +456,7 @@ export const BattleMoveAnims: AnimTable = {
                 x: defender.x + 30,
                 y: defender.y + 25,
                 z: defender.z,
-                scale: 0.3,
+                scale: 0.5,
                 opacity: 1,
                 time: 260,
             }, {
@@ -470,7 +470,7 @@ export const BattleMoveAnims: AnimTable = {
                 x: defender.x - 30,
                 y: defender.y - 20,
                 z: defender.z,
-                scale: 0.3,
+                scale: 0.5,
                 opacity: 1,
                 time: 260,
             }, {
@@ -484,7 +484,7 @@ export const BattleMoveAnims: AnimTable = {
                 x: defender.x + 15,
                 y: defender.y + 10,
                 z: defender.z,
-                scale: 0.3,
+                scale: 0.5,
                 opacity: 1,
                 time: 360,
             }, {
@@ -498,7 +498,7 @@ export const BattleMoveAnims: AnimTable = {
                 x: defender.x - 15,
                 y: defender.y - 30,
                 z: defender.z,
-                scale: 0.3,
+                scale: 0.5,
                 opacity: 1,
                 time: 360,
             }, {
@@ -513,11 +513,11 @@ export const BattleMoveAnims: AnimTable = {
                 x: defender.x,
                 y: defender.y,
                 z: defender.behind(5),
-                scale: 1,
+                scale: 1.5,
                 opacity: 0.3,
                 time: 260,
             }, {
-                scale: 1.25,
+                scale: 2,
                 opacity: 0,
                 time: 500,
             }, 'linear');
