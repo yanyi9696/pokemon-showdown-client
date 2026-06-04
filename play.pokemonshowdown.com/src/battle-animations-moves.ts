@@ -521,16 +521,6 @@ export const BattleMoveAnims: AnimTable = {
                 opacity: 0,
                 time: 500,
             }, 'linear');
-
-            // 5. 保留原招式的击退与硬直效果 (swing)，让拳击显得拳拳到肉
-            defender.delay(150); 
-            defender.anim({
-                z: defender.behind(20),
-                time: 100,
-            }, 'swing');
-            defender.anim({
-                time: 300,
-            }, 'swing');
         },
     },
 	xingyihuanda: {
