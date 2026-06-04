@@ -444,43 +444,95 @@ export const BattleMoveAnims: AnimTable = {
 		},
 	},
 	cunjinbengji: {
-		anim(scene, [attacker, defender]) {
-			scene.backgroundEffect('#000000', 700, 0.3);
-			BattleOtherAnims.punchattack.anim(scene, [attacker, defender]);
-			scene.showEffect('impact', {
-				x: defender.x,
-				y: defender.y,
-				z: defender.z,
-				scale: 0,
-				opacity: 0.4,
-				time: 150, 
-			}, {
-				scale: 4,
-				opacity: 0,
-				time: 500,
-			}, 'linear');
-			scene.showEffect('impact', {
-				x: defender.x,
-				y: defender.y,
-				z: defender.z,
-				scale: 0,
-				opacity: 0.4,
-				time: 450,
-			}, {
-				scale: 4,
-				opacity: 0,
-				time: 800,
-			}, 'linear');
-			defender.delay(150); 
-			defender.anim({
-				z: defender.behind(20),
-				time: 100,
-			}, 'swing');
-			defender.anim({
-				time: 300,
-			}, 'swing');
-		},
-	},
+        anim(scene, [attacker, defender]) {
+            // 1. 继承原版拳击的背景压暗效果，凸显重拳出击的张力
+            scene.backgroundEffect('#000000', 700, 0.3);
+            
+            // 2. 将 fastattack 替换为 punchattack，调用拳类招式专属的受击特效
+            BattleOtherAnims.punchattack.anim(scene, [attacker, defender]);
+            
+            // 3. 沿用 accelerock 的特效，表现重拳打碎岩石或产生强力拳风向四周震开的视觉效果
+            scene.showEffect('rock3', {
+                x: defender.x + 30,
+                y: defender.y + 25,
+                z: defender.z,
+                scale: 0.3,
+                opacity: 1,
+                time: 260,
+            }, {
+                x: defender.x + 50,
+                y: defender.y + 10,
+                opacity: 0,
+                time: 500,
+            }, 'accel');
+            
+            scene.showEffect('rock3', {
+                x: defender.x - 30,
+                y: defender.y - 20,
+                z: defender.z,
+                scale: 0.3,
+                opacity: 1,
+                time: 260,
+            }, {
+                x: defender.x - 50,
+                y: defender.y - 20,
+                opacity: 0,
+                time: 500,
+            }, 'accel');
+            
+            scene.showEffect('rock3', {
+                x: defender.x + 15,
+                y: defender.y + 10,
+                z: defender.z,
+                scale: 0.3,
+                opacity: 1,
+                time: 360,
+            }, {
+                x: defender.x + 35,
+                y: defender.y + 30,
+                opacity: 0,
+                time: 600,
+            }, 'accel');
+            
+            scene.showEffect('rock3', {
+                x: defender.x - 15,
+                y: defender.y - 30,
+                z: defender.z,
+                scale: 0.3,
+                opacity: 1,
+                time: 360,
+            }, {
+                x: defender.x - 35,
+                y: defender.y - 40,
+                opacity: 0,
+                time: 600,
+            }, 'accel');
+
+            // 4. 沿用 accelerock 的中心撞击冲击波
+            scene.showEffect('impact', {
+                x: defender.x,
+                y: defender.y,
+                z: defender.behind(5),
+                scale: 1,
+                opacity: 0.3,
+                time: 260,
+            }, {
+                scale: 1.25,
+                opacity: 0,
+                time: 500,
+            }, 'linear');
+
+            // 5. 保留原招式的击退与硬直效果 (swing)，让拳击显得拳拳到肉
+            defender.delay(150); 
+            defender.anim({
+                z: defender.behind(20),
+                time: 100,
+            }, 'swing');
+            defender.anim({
+                time: 300,
+            }, 'swing');
+        },
+    },
 	xingyihuanda: {
 		anim(scene, [attacker, defender]) {
 			scene.showEffect('mistball', {
@@ -491,7 +543,7 @@ export const BattleMoveAnims: AnimTable = {
 				opacity: 0.5,
 				time: 450,
 			}, {
-				scale: 2,
+				scale: 3,
 				opacity: 0,
 				time: 700,
 			}, 'linear');
