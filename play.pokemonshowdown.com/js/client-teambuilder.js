@@ -4005,7 +4005,7 @@
 				} else {
 					buf += '<select name="teratype" class="button">';
 					var types = Dex.types.all().filter(function (type) {
-						return type.name !== '???';
+						return type.id;
 					});
 					var teraType = set.teraType || (species.types[0] === '???' ? 'Normal' : species.types[0]);
 					for (var i = 0; i < types.length; i++) {
