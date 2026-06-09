@@ -12,6 +12,21 @@
 import { type AnimTable, BattleOtherAnims } from './battle-animations';
 
 export const BattleMoveAnims: AnimTable = {
+	wenliz: {
+		anim(scene, [attacker]) {
+			scene.showEffect(attacker.sp, {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 2,
+				opacity: 0.3,
+			}, {
+				scale: 1,
+				opacity: 0,
+				time: 600,
+			}, 'decel');
+		},
+	},
 	leiguanghongming: {
 		anim(scene, [attacker, defender]) {
 			let xstep = (defender.x - attacker.x) / 5;
