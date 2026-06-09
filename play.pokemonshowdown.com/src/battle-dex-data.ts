@@ -553,6 +553,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	urshifurapidstrikefantasy: 1025 + 4,
 	urshifu2fantasy: 1025 + 5,
 	urshifurapidstrike2fantasy: 1025 + 6,
+	porygonzfantasy: 474,
 	
 	clefablemega: 1320 + 84,
 	victreebelmega: 1320 + 85, victreebelmegafantasy: 1320 + 85, // Added fantasy mapping
