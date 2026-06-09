@@ -2278,7 +2278,7 @@ const ModModifier: {
 				'garchompmegaz','garchompmegazfantasy',
 				'lucariomegaz',
 				'heatranmega',
-				'darkraimega',
+				'darkraimega', 'darkraimegafantasy',
 				'golurkmegafantasy',
 				'golisopodmega', 'golisopodmegafantasy',
 				'magearnamega',
@@ -2559,7 +2559,8 @@ export const Teams = new class {
 			}
 			if (gen === 9) {
 				const species = Dex.species.get(curSet.species);
-				text += `Tera Type: ${species.forceTeraType || curSet.teraType || species.types[0]}  \n`;
+				const teraType = species.forceTeraType || curSet.teraType || (species.types[0] === '???' ? 'Normal' : species.types[0]);
+				text += `Tera Type: ${teraType}  \n`;
 			}
 			if (!hidestats) {
 				let first = true;

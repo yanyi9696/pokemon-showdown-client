@@ -1821,7 +1821,7 @@
 				if (renderTeraType) {
 					buf +=
 						'<span class="detailcell"><label>Tera Type</label>' +
-						(species.forceTeraType || set.teraType || species.types[0]) +
+						(species.forceTeraType || set.teraType || (species.types[0] === '???' ? 'Normal' : species.types[0])) +
 						"</span>";
 				}
 			}
@@ -2581,7 +2581,7 @@
 			// never preserve current set tera, even if smogon set used default
 			if (this.curSet.gen === 9) {
 				curSet.teraType =
-					species.forceTeraType || sampleSet.teraType || species.types[0];
+					species.forceTeraType || sampleSet.teraType || (species.types[0] === '???' ? 'Normal' : species.types[0]);
 			}
 
 			var text = Storage.exportTeam([curSet], this.curTeam.gen);
@@ -4004,8 +4004,10 @@
 					buf += species.forceTeraType;
 				} else {
 					buf += '<select name="teratype" class="button">';
-					var types = Dex.types.all();
-					var teraType = set.teraType || species.types[0];
+					var types = Dex.types.all().filter(function (type) {
+						return type.name !== '???';
+					});
+					var teraType = set.teraType || (species.types[0] === '???' ? 'Normal' : species.types[0]);
 					for (var i = 0; i < types.length; i++) {
 						buf +=
 							'<option value="' +
@@ -4109,7 +4111,8 @@
 
 			// Tera type
 			var teraType = this.$chart.find("select[name=teratype]").val();
-			if (Dex.types.isName(teraType) && teraType !== species.types[0]) {
+			var defaultTeraType = species.types[0] === '???' ? 'Normal' : species.types[0];
+			if (Dex.types.isName(teraType) && teraType !== defaultTeraType) {
 				set.teraType = teraType;
 			} else {
 				delete set.teraType;
@@ -4208,7 +4211,7 @@
 				if (renderTeraType)
 					buf +=
 						'<span class="detailcell"><label>Tera Type</label>' +
-						(species.forceTeraType || set.teraType || species.types[0]) +
+						(species.forceTeraType || set.teraType || (species.types[0] === '???' ? 'Normal' : species.types[0])) +
 						"</span>";
 			}
 			this.$("button[name=details]").html(buf);
@@ -4893,6 +4896,7 @@
 				"Melmetal-G-Mega-Fantasy": "G-Mega Wishing Star",
 				// megafantasy
 				"Altaria-Mega-Fantasy": "Altarianite",
+				"Ampharos-Mega-Fantasy": "Ampharosite",
 				"Metagross-Mega-Fantasy": "Metagrossite",
 				"Abomasnow-Mega-Fantasy": "Abomasite",
 				"Absol-Mega-Fantasy": "Absolite",
