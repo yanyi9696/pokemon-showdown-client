@@ -1710,29 +1710,17 @@ export class BattleTooltips {
 		}
 
 		// ==================== 新增：纹理Z 面板属性显现 ====================
-		if (pokemon.volatiles['wenliz']) {
-			const wenlizData = pokemon.volatiles['wenliz'];
-			// 确保它是数组才进行遍历
-			if (Array.isArray(wenlizData)) {
-				let targetType = '';
-				let targetMoveId = '';
+		// 客户端读取名为 'wenlizui' (Wen Li Z UI 的全小写无空格 ID) 的影子状态
+		if (pokemon.volatiles['wenlizui']) {
+			// 在这里，uiData 完美对应我们上面发来的数据: ['triattack', 'Water', '[silent]']
+			const uiData = pokemon.volatiles['wenlizui'];
+			
+			if (uiData.length >= 2) {
+				const targetMoveId = uiData[0]; // 第 0 位是招式 ID
+				const targetType = uiData[1];   // 第 1 位是属性
 				
-				// 宝可梦所有有效属性的集合
-				const validTypes = ['Normal', 'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'];
-				
-				// 【核心魔法】暴力遍历数组：不管 PS 客户端把参数藏在哪个索引里，全抓出来！
-				for (const item of wenlizData) {
-					if (typeof item === 'string') {
-						if (validTypes.includes(item)) {
-							targetType = item; // 抓到了属性名 (例如 'Water')
-						} else if (/^[a-z0-9]+$/.test(item) && item !== 'silent') {
-							targetMoveId = item; // 抓到了全小写的招式 ID (例如 'triattack')
-						}
-					}
-				}
-				
-				// 如果成功抓到了属性和招式ID，并且当前鼠标悬停的招式是对的，就覆盖属性
-				if (targetType && targetMoveId && move.id === targetMoveId) {
+				// 如果鼠标当前悬停的招式和记录的招式 ID 吻合，直接改面板属性！
+				if (move.id === targetMoveId) {
 					moveType = targetType as Dex.TypeName;
 				}
 			}
