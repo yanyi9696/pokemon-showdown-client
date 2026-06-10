@@ -1824,6 +1824,10 @@ export class BattleTooltips {
 				}
 			}
 		}
+		const wenliz = pokemon.volatiles['wenliz'];
+		if (wenliz && wenliz[1] === move.id && wenliz[2]) {
+			moveType = wenliz[2] as Dex.TypeName;
+		}
 		return [moveType, category];
 	}
 
