@@ -1710,18 +1710,14 @@ export class BattleTooltips {
 		}
 
 		// === 自制技能：纹理Z (Wen Li Z) 客户端面板显示同步 ===
-		if (pokemon.volatiles['wenliz']) {
-			// 在客户端，-start 事件传过来的参数会以数组的形式存储在 volatiles 中
-			const wenlizArgs = pokemon.volatiles['wenliz']; 
-			// 检查当前渲染的招式 ID 是否包含在这个数组中（即它是否是被改变的那个招式）
-			if (Array.isArray(wenlizArgs) && wenlizArgs.includes(move.id)) {
-				for (const arg of wenlizArgs) {
-					// 从数组参数中找出合法的属性名并直接替换渲染的属性
-					if (['Normal', 'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'].includes(arg)) {
-						moveType = arg as Dex.TypeName;
-						break;
-					}
-				}
+		const wenliz = pokemon.volatiles['wenliz'];
+		if (Array.isArray(wenliz) && wenliz[0] === 'wenliz' && wenliz[2] === move.id) {
+			const wenlizType = wenliz[1];
+			if (typeof wenlizType === 'string' && [
+				'Normal', 'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying',
+				'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy',
+			].includes(wenlizType)) {
+				moveType = wenlizType as Dex.TypeName;
 			}
 		}
 		// =====================================================================
