@@ -1712,14 +1712,13 @@ export class BattleTooltips {
 		// ==================== 新增：纹理Z 面板属性显现 ====================
 		if (pokemon.volatiles['wenliz']) {
 			// 在客户端，pokemon.volatiles['wenliz'] 是一个数组
-			// 它的结构对应我们在 moves.ts 发出的 -start 协议：
-			// ['Wen Li Z', randomType, targetMoveId, '[silent]']
+			// 实际接收到的 args 数组为: ['p1a: Porygon-Z', 'Wen Li Z', 'Water', 'triattack', '[silent]']
 			const wenlizData = pokemon.volatiles['wenliz'];
 			
-			// 确保我们接收到了足够的参数
-			if (wenlizData.length >= 3) {
-				const targetType = wenlizData[1] as Dex.TypeName;
-				const targetMoveId = wenlizData[2];
+			// 确保我们接收到了足够的参数 (长度至少为 4)
+			if (wenlizData.length >= 4) {
+				const targetType = wenlizData[2] as Dex.TypeName; // 索引 2 才是属性
+				const targetMoveId = wenlizData[3];               // 索引 3 才是招式 ID
 				
 				// 如果当前悬停的招式，正好是被记录的第一个招式，则覆盖其 UI 显示属性
 				if (move.id === targetMoveId) {
