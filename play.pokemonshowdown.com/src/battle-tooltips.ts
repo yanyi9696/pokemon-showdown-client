@@ -1708,25 +1708,7 @@ export class BattleTooltips {
 					break;
 			}
 		}
-
-		// ==================== 新增：纹理Z 面板属性显现 ====================
-		// 客户端读取名为 'wenlizui' (Wen Li Z UI 的全小写无空格 ID) 的影子状态
-		if (pokemon.volatiles['wenlizui']) {
-			// 在这里，uiData 完美对应我们上面发来的数据: ['triattack', 'Water', '[silent]']
-			const uiData = pokemon.volatiles['wenlizui'];
-			
-			if (uiData.length >= 2) {
-				const targetMoveId = uiData[0]; // 第 0 位是招式 ID
-				const targetType = uiData[1];   // 第 1 位是属性
-				
-				// 如果鼠标当前悬停的招式和记录的招式 ID 吻合，直接改面板属性！
-				if (move.id === targetMoveId) {
-					moveType = targetType as Dex.TypeName;
-				}
-			}
-		}
-		// ==================================================================
-
+		
 		// Ivy Cudgel's type depends on the Ogerpon forme
 		if (move.id === 'ivycudgel') {
 			switch (pokemon.getSpeciesForme()) {
