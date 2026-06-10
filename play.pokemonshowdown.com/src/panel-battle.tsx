@@ -198,19 +198,6 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 	static readonly id = 'battle';
 	static readonly routes = ['battle-*'];
 	static readonly Model = BattleRoom;
-	private getMoveButtonType(move: Dex.Move, pokemon?: Pokemon | null): Dex.TypeName {
-		const wenliz = pokemon?.volatiles['wenliz'];
-		if (Array.isArray(wenliz) && wenliz[0] === 'wenliz' && wenliz[2] === move.id) {
-			const wenlizType = wenliz[1];
-			if (typeof wenlizType === 'string' && [
-				'Normal', 'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying',
-				'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy',
-			].includes(wenlizType)) {
-				return wenlizType as Dex.TypeName;
-			}
-		}
-		return move.type;
-	}
 	send = (text: string) => {
 		this.props.room.send(text);
 	};
@@ -387,7 +374,6 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		const pokemonIndex = choices.index();
 		const active = choices.currentMoveRequest();
 		if (!active) return <div class="message-error">Invalid pokemon</div>;
-		const activePokemon = this.props.room.battle.nearSide.active[pokemonIndex];
 
 		if (choices.current.max || (active.maxMoves && !active.canDynamax)) {
 			if (!active.maxMoves) {
@@ -398,7 +384,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 				const maxMoveData = active.maxMoves![i];
 				const gmaxTooltip = maxMoveData.id.startsWith('gmax') ? `|${maxMoveData.id}` : ``;
 				const tooltip = `maxmove|${moveData.name}|${pokemonIndex}${gmaxTooltip}`;
-				return <MoveButton cmd={`/move ${i + 1} max`} type={this.getMoveButtonType(move, activePokemon)} tooltip={tooltip} moveData={moveData}>
+				return <MoveButton cmd={`/move ${i + 1} max`} type={move.type} tooltip={tooltip} moveData={moveData}>
 					{maxMoveData.name}
 				</MoveButton>;
 			});
@@ -415,7 +401,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 					return <button disabled>&nbsp;</button>;
 				}
 				const tooltip = `zmove|${moveData.name}|${pokemonIndex}`;
-				return <MoveButton cmd={`/move ${i + 1} zmove`} type={this.getMoveButtonType(move, activePokemon)} tooltip={tooltip} moveData={{ pp: 1, maxpp: 1 }}>
+				return <MoveButton cmd={`/move ${i + 1} zmove`} type={move.type} tooltip={tooltip} moveData={{ pp: 1, maxpp: 1 }}>
 					{zMoveData.name}
 				</MoveButton>;
 			});
@@ -425,7 +411,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		return active.moves.map((moveData, i) => {
 			const move = dex.moves.get(moveData.name);
 			const tooltip = `move|${moveData.name}|${pokemonIndex}`;
-			return <MoveButton cmd={`/move ${i + 1}${special}`} type={this.getMoveButtonType(move, activePokemon)} tooltip={tooltip} moveData={moveData}>
+			return <MoveButton cmd={`/move ${i + 1}${special}`} type={move.type} tooltip={tooltip} moveData={moveData}>
 				{move.name}
 			</MoveButton>;
 		});

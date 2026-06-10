@@ -1708,19 +1708,6 @@ export class BattleTooltips {
 					break;
 			}
 		}
-
-		// === 自制技能：纹理Z (Wen Li Z) 客户端面板显示同步 ===
-		const wenliz = pokemon.volatiles['wenliz'];
-		if (Array.isArray(wenliz) && wenliz[0] === 'wenliz' && wenliz[2] === move.id) {
-			const wenlizType = wenliz[1];
-			if (typeof wenlizType === 'string' && [
-				'Normal', 'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying',
-				'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy',
-			].includes(wenlizType)) {
-				moveType = wenlizType as Dex.TypeName;
-			}
-		}
-		// =====================================================================
 		
 		// Ivy Cudgel's type depends on the Ogerpon forme
 		if (move.id === 'ivycudgel') {
