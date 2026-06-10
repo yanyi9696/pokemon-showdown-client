@@ -1923,6 +1923,7 @@ export class PokemonSprite extends Sprite {
 		// FC的自制效果
 		longzhige: ['龙之歌', 'bad'],
 		woju: ['蜗居', 'good'],
+		emengchanrao: ['噩梦缠绕', 'bad'],
 		xianxingzhiling: ['先行指令', 'good'],
 		yuannengshifang: ['源能释放', 'neutral'],
 		tundu: ['吞毒', 'good'],
@@ -1933,6 +1934,7 @@ export class PokemonSprite extends Sprite {
 		fantasylaxincense: ['幻之悠闲薰香', 'good'],
 		fantasyultraenergyboost: ['幻之究极能量', 'good'],
 		fanjibingjia: ['反击冰甲', 'neutral'],
+		wenliz: ['纹理Z', 'neutral']
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;
