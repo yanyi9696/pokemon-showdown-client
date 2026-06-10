@@ -1647,6 +1647,10 @@ export class BattleTooltips {
 				moveType = 'Psychic';
 			}
 		}
+		const wenliz = pokemon.volatiles['wenliz'] as { targetMove?: string; targetType?: Dex.TypeName } | undefined;
+		if (wenliz?.targetMove && wenliz.targetType && move.id === wenliz.targetMove) {
+			moveType = wenliz.targetType;
+		}
 		// 全新的修改方案：直接检查宝可梦是否拥有“雷霆行者”特性
 		// This is a more direct approach that ties the visual change to the ability itself.
 		if (moveType === 'Normal' && move.id !== 'struggle') {

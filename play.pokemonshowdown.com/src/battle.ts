@@ -2670,10 +2670,6 @@ export class Battle {
 				}
 				this.scene.updateStatbar(poke);
 				break;
-			case 'wenliz':
-				poke.addVolatile('wenliz' as ID, Dex.sanitizeName(args[3] || ''), Dex.sanitizeName(args[4] || ''));
-				this.scene.updateStatbar(poke);
-				break;
 			case 'typeadd':
 				const type = Dex.sanitizeName(args[3]);
 				poke.addVolatile('typeadd' as ID, type);
