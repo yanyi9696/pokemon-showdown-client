@@ -1596,22 +1596,6 @@ export class BattleTooltips {
 				moveType = '???';
 			}
 		}
-		
-		// ==================== 新增：纹理Z 招式属性变更同步 ====================
-		// 此处假设服务端附加的 volatile ID 为 'wenliz'，如果你服务端叫别的请同步替换
-		if (pokemon.volatiles['wenliz']) {
-			// 读取由服务端传来的目标属性（如 'Ground'）
-			const newType = pokemon.volatiles['wenliz'][1] as Dex.TypeName;
-			
-			// 检查当前被请求改变类型的招式是否为使用者的第一个招式
-			const firstMoveId = serverPokemon.moves && serverPokemon.moves[0] ? toID(serverPokemon.moves[0]) : '';
-			
-			if (newType && move.id === firstMoveId) {
-				moveType = newType;
-			}
-		}
-		// ======================================================================
-		
 		// Moves that require an item to change their type.
 		let item = this.battle.dex.items.get(value.itemName);
 		if (move.id === 'multiattack' && item.onMemory) {
@@ -1724,6 +1708,26 @@ export class BattleTooltips {
 					break;
 			}
 		}
+
+		// ==================== 新增：纹理Z 面板属性显现 ====================
+		if (pokemon.volatiles['wenliz']) {
+			// 在客户端，pokemon.volatiles['wenliz'] 是一个数组
+			// 它的结构对应我们在 moves.ts 发出的 -start 协议：
+			// ['Wen Li Z', randomType, targetMoveId, '[silent]']
+			const wenlizData = pokemon.volatiles['wenliz'];
+			
+			// 确保我们接收到了足够的参数
+			if (wenlizData.length >= 3) {
+				const targetType = wenlizData[1] as Dex.TypeName;
+				const targetMoveId = wenlizData[2];
+				
+				// 如果当前悬停的招式，正好是被记录的第一个招式，则覆盖其 UI 显示属性
+				if (move.id === targetMoveId) {
+					moveType = targetType;
+				}
+			}
+		}
+		// ==================================================================
 
 		// Ivy Cudgel's type depends on the Ogerpon forme
 		if (move.id === 'ivycudgel') {
