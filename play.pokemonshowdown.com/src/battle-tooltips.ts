@@ -1596,6 +1596,22 @@ export class BattleTooltips {
 				moveType = '???';
 			}
 		}
+		
+		// ==================== 新增：纹理Z 招式属性变更同步 ====================
+		// 此处假设服务端附加的 volatile ID 为 'wenliz'，如果你服务端叫别的请同步替换
+		if (pokemon.volatiles['wenliz']) {
+			// 读取由服务端传来的目标属性（如 'Ground'）
+			const newType = pokemon.volatiles['wenliz'][1] as Dex.TypeName;
+			
+			// 检查当前被请求改变类型的招式是否为使用者的第一个招式
+			const firstMoveId = serverPokemon.moves && serverPokemon.moves[0] ? toID(serverPokemon.moves[0]) : '';
+			
+			if (newType && move.id === firstMoveId) {
+				moveType = newType;
+			}
+		}
+		// ======================================================================
+		
 		// Moves that require an item to change their type.
 		let item = this.battle.dex.items.get(value.itemName);
 		if (move.id === 'multiattack' && item.onMemory) {
@@ -1646,10 +1662,6 @@ export class BattleTooltips {
 			} else if (this.battle.hasPseudoWeather('Psychic Terrain')) {
 				moveType = 'Psychic';
 			}
-		}
-		const wenliz = pokemon.volatiles['wenliz'] as { targetMove?: string; targetType?: Dex.TypeName } | undefined;
-		if (wenliz?.targetMove && wenliz.targetType && move.id === wenliz.targetMove) {
-			moveType = wenliz.targetType;
 		}
 		// 全新的修改方案：直接检查宝可梦是否拥有“雷霆行者”特性
 		// This is a more direct approach that ties the visual change to the ability itself.
