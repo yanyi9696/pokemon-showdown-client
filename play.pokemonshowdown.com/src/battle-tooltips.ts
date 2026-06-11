@@ -1724,6 +1724,20 @@ export class BattleTooltips {
 			}
 		}
 
+		// ==================== 新增：纹理Z (Wen Li Z) 动态属性UI ====================
+		// 判断该宝可梦是否拥有 wenliz 状态，以及当前划过的招式是否为一号位招式
+		if (pokemon && pokemon.volatiles['wenliz'] && serverPokemon && serverPokemon.moves[0]) {
+			const firstMoveId = toID(serverPokemon.moves[0]);
+			if (move.id === firstMoveId) {
+				// 获取服务端传过来的属性参数，索引 [1] 即为刚才传入的 randomType
+				const wenlizType = pokemon.volatiles['wenliz'][1]; 
+				if (wenlizType) {
+					moveType = wenlizType as Dex.TypeName;
+				}
+			}
+		}
+		// =========================================================================
+
 		// Other abilities that change the move type.
 		const noTypeOverride = [
 			'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
