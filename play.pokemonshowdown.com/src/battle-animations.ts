@@ -1934,7 +1934,24 @@ export class PokemonSprite extends Sprite {
 		fantasylaxincense: ['幻之悠闲薰香', 'good'],
 		fantasyultraenergyboost: ['幻之究极能量', 'good'],
 		fanjibingjia: ['反击冰甲', 'neutral'],
-		wenliz: ['纹理Z', 'neutral']
+		wenliznormal: ['纹理Z-一般', 'neutral'],
+		wenlizfire: ['纹理Z-火', 'neutral'],
+		wenlizwater: ['纹理Z-水', 'neutral'],
+		wenlizelectric: ['纹理Z-电', 'neutral'],
+		wenlizgrass: ['纹理Z-草', 'neutral'],
+		wenlizice: ['纹理Z-冰', 'neutral'],
+		wenlizfighting: ['纹理Z-格斗', 'neutral'],
+		wenlizpoison: ['纹理Z-毒', 'neutral'],
+		wenlizground: ['纹理Z-地面', 'neutral'],
+		wenlizflying: ['纹理Z-飞行', 'neutral'],
+		wenlizpsychic: ['纹理Z-超能力', 'neutral'],
+		wenlizbug: ['纹理Z-虫', 'neutral'],
+		wenlizrock: ['纹理Z-岩石', 'neutral'],
+		wenlizghost: ['纹理Z-幽灵', 'neutral'],
+		wenlizdragon: ['纹理Z-龙', 'neutral'],
+		wenlizdark: ['纹理Z-恶', 'neutral'],
+		wenlizsteel: ['纹理Z-钢', 'neutral'],
+		wenlizfairy: ['纹理Z-妖精', 'neutral']
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;

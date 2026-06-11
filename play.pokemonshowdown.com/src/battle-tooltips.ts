@@ -1724,20 +1724,6 @@ export class BattleTooltips {
 			}
 		}
 
-		// ==================== 终极修正：纹理Z (Wen Li Z) 动态属性UI ====================
-		// 判断该宝可梦是否拥有虚拟的 wenlizui 状态
-		if (pokemon && pokemon.volatiles['wenlizui'] && serverPokemon && serverPokemon.moves[0]) {
-			const firstMoveId = toID(serverPokemon.moves[0]);
-			if (move.id === firstMoveId) {
-				// 获取服务端传过来的属性参数，索引 [2] 对应 randomType
-				const wenlizType = pokemon.volatiles['wenlizui'][2]; 
-				if (wenlizType) {
-					moveType = wenlizType as Dex.TypeName;
-				}
-			}
-		}
-		// =========================================================================
-
 		// Other abilities that change the move type.
 		const noTypeOverride = [
 			'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
@@ -1788,6 +1774,22 @@ export class BattleTooltips {
 		// ==================== 新增：黑暗侵蚀 属性变更 ====================
 		if (category !== 'Status' && value.tryAbility('Hei An Qin Shi')) {
 			moveType = '???';
+		}
+		// =================================================================
+
+		// =================================================================
+		// == 纹理Z (Wen Li Z) 动态修改招式属性 UI显示同步 ==
+		// =================================================================
+		// 判断条件：serverPokemon必须存在，而且当前正在被渲染ToolTip的招式必须是该宝可梦的第1个招式
+		if (serverPokemon && serverPokemon.moves && serverPokemon.moves.length > 0 && serverPokemon.moves[0] === move.id) {
+			const wenlizTypes: Dex.TypeName[] = ['Normal', 'Fire', 'Water', 'Electric', 'Grass', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'];
+			for (const t of wenlizTypes) {
+				// 检测客户端状态列表中是否存在我们动态附加的属性标签
+				if (pokemon.volatiles['wenliz' + t.toLowerCase()]) {
+					moveType = t; // 如果存在，直接将面板属性强行覆盖为该属性
+					break;        // 匹配成功，跳出循环
+				}
+			}
 		}
 		// =================================================================
 
