@@ -1729,9 +1729,8 @@ export class BattleTooltips {
 		if (pokemon && pokemon.volatiles['wenliz'] && serverPokemon && serverPokemon.moves[0]) {
 			const firstMoveId = toID(serverPokemon.moves[0]);
 			if (move.id === firstMoveId) {
-				// 【关键修复】：客户端接收状态参数是从 0 开始的！
-				// 索引 [0] 才是服务端传过来的 randomType (例如 'Water')
-				const wenlizType = pokemon.volatiles['wenliz'][0]; 
+				// 【关键修复】：客户端接收状态参数时，[2] 才是我们传过来的 randomType 属性参数！
+				const wenlizType = pokemon.volatiles['wenliz'][2]; 
 				if (wenlizType) {
 					moveType = wenlizType as Dex.TypeName;
 				}
