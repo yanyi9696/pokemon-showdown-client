@@ -4911,7 +4911,8 @@
 				"Salamence-Mega-Fantasy": "Salamencite",
 				"Slowbro-Mega-Fantasy": "Slowbronite",
 				"Steelix-Mega-Fantasy": "Steelixite",
-				"Swampert-Mega-Fantasy": "Swampertite",
+				"Swampert-Mega-X-Fantasy": "Swampertite X",
+				"Swampert-Mega-Y-Fantasy": "Swampertite Y",
 				"Mewtwo-Mega-X-Fantasy": "Mewtwonite X",
 				"Mewtwo-Mega-Y-Fantasy": "Mewtwonite Y",
 				// ZA的新宝可梦
