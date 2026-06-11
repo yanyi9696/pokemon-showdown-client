@@ -1724,13 +1724,13 @@ export class BattleTooltips {
 			}
 		}
 
-		// ==================== 修正：纹理Z (Wen Li Z) 动态属性UI ====================
-		// 判断该宝可梦是否拥有 wenliz 状态，以及当前划过的招式是否为一号位招式
-		if (pokemon && pokemon.volatiles['wenliz'] && serverPokemon && serverPokemon.moves[0]) {
+		// ==================== 终极修正：纹理Z (Wen Li Z) 动态属性UI ====================
+		// 判断该宝可梦是否拥有虚拟的 wenlizui 状态
+		if (pokemon && pokemon.volatiles['wenlizui'] && serverPokemon && serverPokemon.moves[0]) {
 			const firstMoveId = toID(serverPokemon.moves[0]);
 			if (move.id === firstMoveId) {
-				// 【关键修复】：客户端接收状态参数时，[2] 才是我们传过来的 randomType 属性参数！
-				const wenlizType = pokemon.volatiles['wenliz'][2]; 
+				// 获取服务端传过来的属性参数，索引 [2] 对应 randomType
+				const wenlizType = pokemon.volatiles['wenlizui'][2]; 
 				if (wenlizType) {
 					moveType = wenlizType as Dex.TypeName;
 				}
