@@ -1125,25 +1125,39 @@ export const Dex = new class implements ModdedDex {
 		const checkId = originalSpecies.id;
 
 		if (checkId === 'lugiashadowfantasy') {
-			// isFront 是布尔值，为 true 代表渲染正面，为 false 代表渲染背面
 			const facingDir = isFront ? 'gen5' : 'gen5-back';
 			const filename = 'lugia-shadow-fantasy.png';
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
-			// 指向当前 client 静态资源根路径，避免 replay 子路径下解析成 /replay/sprites/...
-			// 添加 ?v1 以清除浏览器缓存
 			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
-
-			// 取消像素化模糊（如果你的原图很清晰且不是像素风，可以设置为 false）
 			spriteData.pixelated = false;
+
+			// 【新增】解除官方强制拉伸，手动设定宽高比例
+			if (isFront) {
+				spriteData.w = 96;  // 根据你原图的实际视觉比例调整，数字越大图越宽
+				spriteData.h = 96;  // 数字越大图越高
+				// spriteData.y = 0; // 可选：如果觉得图片悬空或者太靠下，可以通过 y 值微调高度
+			} else {
+				// 背面图通常看起来更扁，尝试把高度拉长或宽度缩窄
+				spriteData.w = 120; 
+				spriteData.h = 140; 
+				// spriteData.y = -10; 
+			}
 		}
-		// 【新增代码：拦截 沙漠蜻蜓-Mega-幻想形态】
 		else if (checkId === 'flygonmegafantasy') {
 			const facingDir = isFront ? 'gen5' : 'gen5-back';
-			const filename = 'flygon-mega-fantasy.png'; // 确保你的图片文件名与此一致
+			const filename = 'flygon-mega-fantasy.png';
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
-			
 			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
-			spriteData.pixelated = false; 
+			spriteData.pixelated = false;
+
+			// 【新增】解除官方强制拉伸，手动设定宽高比例
+			if (isFront) {
+				spriteData.w = 100;
+				spriteData.h = 100;
+			} else {
+				spriteData.w = 130;
+				spriteData.h = 130;
+			}
 		}
 
 		// 以后如果有其他局内图片要替换，在这里加 else if 即可
