@@ -1136,6 +1136,15 @@ export const Dex = new class implements ModdedDex {
 			// 取消像素化模糊（如果你的原图很清晰且不是像素风，可以设置为 false）
 			spriteData.pixelated = false;
 		}
+		// 【新增代码：拦截 沙漠蜻蜓-Mega-幻想形态】
+		else if (checkId === 'flygonmegafantasy') {
+			const facingDir = isFront ? 'gen5' : 'gen5-back';
+			const filename = 'flygon-mega-fantasy.png'; // 确保你的图片文件名与此一致
+			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			
+			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
+			spriteData.pixelated = false; 
+		}
 
 		// 以后如果有其他局内图片要替换，在这里加 else if 即可
 		/*
@@ -1384,6 +1393,14 @@ export const Dex = new class implements ModdedDex {
 			const offsetY = 5;  // 上下微调
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			return `background-image:url(${customSpritePrefix}sprites/dex/lugia-shadow-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
+		}
+		// 【新增代码：拦截 沙漠蜻蜓-Mega-幻想形态】
+		else if (id === 'flygonmegafantasy') {
+			const bgSize = "100px auto"; // 根据你画的沙漠蜻蜓图标比例进行调整
+			const offsetX = 10; // 左右微调
+			const offsetY = 5;  // 上下微调
+			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			return `background-image:url(${customSpritePrefix}sprites/dex/flygon-mega-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 
 		// 原版逻辑：从官方服务器或默认路径拉取图片
