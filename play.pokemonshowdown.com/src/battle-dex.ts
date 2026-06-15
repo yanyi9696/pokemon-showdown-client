@@ -1133,13 +1133,13 @@ export const Dex = new class implements ModdedDex {
 
 			// 【新增】解除官方强制拉伸，手动设定宽高比例
 			if (isFront) {
-				spriteData.w = 96;  // 根据你原图的实际视觉比例调整，数字越大图越宽
-				spriteData.h = 96;  // 数字越大图越高
+				spriteData.w = 110;  // 根据你原图的实际视觉比例调整，数字越大图越宽
+				spriteData.h = 110;  // 数字越大图越高
 				// spriteData.y = 0; // 可选：如果觉得图片悬空或者太靠下，可以通过 y 值微调高度
 			} else {
 				// 背面图通常看起来更扁，尝试把高度拉长或宽度缩窄
-				spriteData.w = 120; 
-				spriteData.h = 140; 
+				spriteData.w = 125; 
+				spriteData.h = 125; 
 				// spriteData.y = -10; 
 			}
 		}
@@ -1152,11 +1152,11 @@ export const Dex = new class implements ModdedDex {
 
 			// 【新增】解除官方强制拉伸，手动设定宽高比例
 			if (isFront) {
-				spriteData.w = 100;
-				spriteData.h = 100;
+				spriteData.w = 110;
+				spriteData.h = 110;
 			} else {
-				spriteData.w = 130;
-				spriteData.h = 130;
+				spriteData.w = 120;
+				spriteData.h = 120;
 			}
 		}
 
