@@ -1143,20 +1143,49 @@ export const Dex = new class implements ModdedDex {
 				// spriteData.y = -10; 
 			}
 		}
+		// 【修改代码：拦截 沙漠蜻蜓-Mega-幻想形态】
 		else if (checkId === 'flygonmegafantasy') {
-			const facingDir = isFront ? 'gen5' : 'gen5-back';
-			const filename = 'flygon-mega-fantasy.png';
+			// 先判断 pokemon 是否为对象，然后用 as any 绕过 TS 检查安全获取 shiny 属性
+			const isShiny = typeof pokemon === 'object' && (pokemon as any).shiny; 
+			
+			let facingDir = isFront ? 'gen5' : 'gen5-back';
+			if (isShiny) facingDir += '-shiny';
+
+			const filename = 'flygon-mega-fantasy.png'; 
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			
 			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
 			spriteData.pixelated = false;
 
-			// 【新增】解除官方强制拉伸，手动设定宽高比例
 			if (isFront) {
+				spriteData.w = 100;
+				spriteData.h = 100;
+			} else {
 				spriteData.w = 110;
 				spriteData.h = 110;
+			}
+		}
+
+		// 【修改代码：拦截 巨沼怪-Mega-X-幻想形态】
+		else if (checkId === 'swampertmegaxfantasy') {
+			// 同理，安全获取 shiny 属性
+			const isShiny = typeof pokemon === 'object' && (pokemon as any).shiny;
+			
+			let facingDir = isFront ? 'gen5' : 'gen5-back';
+			if (isShiny) facingDir += '-shiny';
+
+			const filename = 'swampert-mega-x-fantasy.png'; 
+			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			
+			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
+			spriteData.pixelated = false; 
+
+			if (isFront) {
+				spriteData.w = 100; 
+				spriteData.h = 100; 
 			} else {
-				spriteData.w = 120;
-				spriteData.h = 120;
+				spriteData.w = 110; 
+				spriteData.h = 110; 
 			}
 		}
 
@@ -1415,6 +1444,14 @@ export const Dex = new class implements ModdedDex {
 			const offsetY = 5;  // 上下微调
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			return `background-image:url(${customSpritePrefix}sprites/dex/flygon-mega-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
+		}
+		// 【新增代码：拦截 巨沼怪-Mega-X-幻想形态】
+		else if (id === 'swampertmegaxfantasy') {
+			const bgSize = "100px auto"; // 根据你画的巨沼怪图标比例进行调整
+			const offsetX = 10; // 左右微调
+			const offsetY = 5;  // 上下微调
+			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			return `background-image:url(${customSpritePrefix}sprites/dex/swampert-mega-x-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 
 		// 原版逻辑：从官方服务器或默认路径拉取图片

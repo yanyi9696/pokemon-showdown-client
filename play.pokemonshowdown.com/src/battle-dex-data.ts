@@ -485,7 +485,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	tyranitarmega: 1320 + 20,
 	sceptilemega: 1320 + 21,
 	blazikenmega: 1320 + 22,
-	swampertmega: 1320 + 23, swampertmegaxfantasy: 1320 + 23, swampertmegayfantasy: 1320 + 23,// Added fantasy mapping
+	swampertmega: 1320 + 23, swampertmegayfantasy: 1320 + 23,// Added fantasy mapping
 	gardevoirmega: 1320 + 24,
 	sableyemega: 1320 + 25,
 	mawilemega: 1320 + 26,
@@ -608,6 +608,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	flygonmegafantasy: 1316, // Added fantasy mapping
     onixfantasy: 1452 + 106, // Added fantasy mapping
 	lugiashadowfantasy: 1452 + 107, // Added fantasy mapping
+	swampertmegaxfantasy: 1317, // Added fantasy mapping
 
 	// CAP
 	syclant: 1560 + 0,
