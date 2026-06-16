@@ -1144,10 +1144,13 @@ export const Dex = new class implements ModdedDex {
 			}
 		}
 		// 【修改代码：拦截 沙漠蜻蜓-Mega-幻想形态】
-		// 增加对 Teambuilder 闪光字符串的拦截
-		else if (checkId === 'flygonmegafantasy' || checkId === 'flygonmegafantasyshiny') {
-			// 双管齐下：既检测 url，又检测 checkId 是否以 shiny 结尾
-			const isShiny = checkId.endsWith('shiny') || (spriteData.url && spriteData.url.includes('-shiny')); 
+		else if (checkId.includes('flygonmegafantasy')) {
+			// 终极闪光判定：涵盖对象属性、额外 options 配置、ID 后缀和原有 URL 特征
+			const isShiny = 
+				(typeof pokemon === 'object' && (pokemon as any).shiny) || 
+				(typeof options === 'object' && options && options.shiny) || 
+				checkId.includes('shiny') || 
+				(spriteData.url && spriteData.url.includes('-shiny')); 
 			
 			let facingDir = isFront ? 'gen5' : 'gen5-back';
 			if (isShiny) facingDir += '-shiny';
@@ -1155,7 +1158,8 @@ export const Dex = new class implements ModdedDex {
 			const filename = 'flygon-Mega-Fantasy.png'; 
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			
-			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
+			// 【关键】将版本号改为 v2，强制刷新队伍编辑器缓存！
+			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v2`;
 			spriteData.pixelated = false;
 
 			if (isFront) {
@@ -1168,10 +1172,13 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		// 【修改代码：拦截 巨沼怪-Mega-X-幻想形态】
-		// 增加对 Teambuilder 闪光字符串的拦截
-		else if (checkId === 'swampertmegaxfantasy' || checkId === 'swampertmegaxfantasyshiny') {
-			// 双管齐下
-			const isShiny = checkId.endsWith('shiny') || (spriteData.url && spriteData.url.includes('-shiny'));
+		else if (checkId.includes('swampertmegaxfantasy')) {
+			// 同理，加入 options 判定
+			const isShiny = 
+				(typeof pokemon === 'object' && (pokemon as any).shiny) || 
+				(typeof options === 'object' && options && options.shiny) || 
+				checkId.includes('shiny') || 
+				(spriteData.url && spriteData.url.includes('-shiny'));
 			
 			let facingDir = isFront ? 'gen5' : 'gen5-back';
 			if (isShiny) facingDir += '-shiny';
@@ -1179,7 +1186,8 @@ export const Dex = new class implements ModdedDex {
 			const filename = 'swampert-Mega-X-Fantasy.png'; 
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			
-			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
+			// 【关键】将版本号改为 v2
+			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v2`;
 			spriteData.pixelated = false; 
 
 			if (isFront) {
