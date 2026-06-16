@@ -1145,13 +1145,14 @@ export const Dex = new class implements ModdedDex {
 		}
 		// 【修改代码：拦截 沙漠蜻蜓-Mega-幻想形态】
 		else if (checkId === 'flygonmegafantasy') {
-			// 先判断 pokemon 是否为对象，然后用 as any 绕过 TS 检查安全获取 shiny 属性
-			const isShiny = typeof pokemon === 'object' && (pokemon as any).shiny; 
+			// 终极杀招：直接检测系统原本拼好的 url 里是否包含闪光标识
+			const isShiny = spriteData.url && spriteData.url.includes('-shiny'); 
 			
 			let facingDir = isFront ? 'gen5' : 'gen5-back';
 			if (isShiny) facingDir += '-shiny';
 
-			const filename = 'flygon-mega-fantasy.png'; 
+			// 【重要】文件名与你的实际命名严格保持大小写一致
+			const filename = 'flygon-Mega-Fantasy.png'; 
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			
 			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
@@ -1168,13 +1169,14 @@ export const Dex = new class implements ModdedDex {
 
 		// 【修改代码：拦截 巨沼怪-Mega-X-幻想形态】
 		else if (checkId === 'swampertmegaxfantasy') {
-			// 同理，安全获取 shiny 属性
-			const isShiny = typeof pokemon === 'object' && (pokemon as any).shiny;
+			// 同理，检测原有 url 的闪光标识
+			const isShiny = spriteData.url && spriteData.url.includes('-shiny');
 			
 			let facingDir = isFront ? 'gen5' : 'gen5-back';
 			if (isShiny) facingDir += '-shiny';
 
-			const filename = 'swampert-mega-x-fantasy.png'; 
+			// 【重要】严格保持大小写一致
+			const filename = 'swampert-Mega-X-Fantasy.png'; 
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			
 			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
