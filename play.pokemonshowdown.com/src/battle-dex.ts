@@ -1144,14 +1144,14 @@ export const Dex = new class implements ModdedDex {
 			}
 		}
 		// 【修改代码：拦截 沙漠蜻蜓-Mega-幻想形态】
-		else if (checkId === 'flygonmegafantasy') {
-			// 终极杀招：直接检测系统原本拼好的 url 里是否包含闪光标识
-			const isShiny = spriteData.url && spriteData.url.includes('-shiny'); 
+		// 增加对 Teambuilder 闪光字符串的拦截
+		else if (checkId === 'flygonmegafantasy' || checkId === 'flygonmegafantasyshiny') {
+			// 双管齐下：既检测 url，又检测 checkId 是否以 shiny 结尾
+			const isShiny = checkId.endsWith('shiny') || (spriteData.url && spriteData.url.includes('-shiny')); 
 			
 			let facingDir = isFront ? 'gen5' : 'gen5-back';
 			if (isShiny) facingDir += '-shiny';
 
-			// 【重要】文件名与你的实际命名严格保持大小写一致
 			const filename = 'flygon-Mega-Fantasy.png'; 
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			
@@ -1168,14 +1168,14 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		// 【修改代码：拦截 巨沼怪-Mega-X-幻想形态】
-		else if (checkId === 'swampertmegaxfantasy') {
-			// 同理，检测原有 url 的闪光标识
-			const isShiny = spriteData.url && spriteData.url.includes('-shiny');
+		// 增加对 Teambuilder 闪光字符串的拦截
+		else if (checkId === 'swampertmegaxfantasy' || checkId === 'swampertmegaxfantasyshiny') {
+			// 双管齐下
+			const isShiny = checkId.endsWith('shiny') || (spriteData.url && spriteData.url.includes('-shiny'));
 			
 			let facingDir = isFront ? 'gen5' : 'gen5-back';
 			if (isShiny) facingDir += '-shiny';
 
-			// 【重要】严格保持大小写一致
 			const filename = 'swampert-Mega-X-Fantasy.png'; 
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			
