@@ -2747,44 +2747,44 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
 							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
 							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6))
-							drop-shadow(0 0 2px rgba(0, 0, 0, 0.65));
+							drop-shadow(0 0 2px rgba(0, 0, 0, 0.35));
 				}
 				25% {
 					filter: drop-shadow(1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
 							drop-shadow(0 1.5px 1.5px rgba(255, 100, 100, 0.6)) 
 							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
 							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 245, 0.6))
-							drop-shadow(0 0 2px rgba(0, 0, 0, 0.65));
+							drop-shadow(0 0 2px rgba(0, 0, 0, 0.35));
 				}
 				50% {
 					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
 							drop-shadow(0 1.5px 1.5px rgba(130, 100, 255, 0.6)) 
 							drop-shadow(-1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
 							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 100, 0.6))
-							drop-shadow(0 0 2px rgba(0, 0, 0, 0.65));
+							drop-shadow(0 0 2px rgba(0, 0, 0, 0.35));
 				}
 				75% {
 					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
 							drop-shadow(0 1.5px 1.5px rgba(100, 255, 245, 0.6)) 
 							drop-shadow(-1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
 							drop-shadow(0 -1.5px 1.5px rgba(255, 100, 100, 0.6))
-							drop-shadow(0 0 2px rgba(0, 0, 0, 0.65));
+							drop-shadow(0 0 2px rgba(0, 0, 0, 0.35));
 				}
 				100% {
 					filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
 							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
 							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
 							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6))
-							drop-shadow(0 0 2px rgba(0, 0, 0, 0.65));
+							drop-shadow(0 0 2px rgba(0, 0, 0, 0.35));
 				}
 			}
 
-			/* 1. 容器本体：剥夺背景图，建立独立的渲染层 */
+			/* 1. 容器本体：剥夺背景图,建立独立的渲染层 */
 			span[style*="--is-fantasy"] {
 				position: relative;
 				display: inline-block;
 				overflow: visible;
-				/* 【核心黑科技】抹除内联背景图，防止带崩清晰度 */
+				/* 【核心黑科技】抹除内联背景图,防止带崩清晰度 */
 				background-image: none !important;
 				isolation: isolate;
 			}
@@ -2807,7 +2807,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				z-index: 1;
 			}
 
-			/* 3. 清晰顶层：盖在发光层上面，没有任何 filter，永远保持 100% 原始像素锐利 */
+			/* 3. 清晰顶层：盖在发光层上面,没有任何 filter,永远保持 100% 原始像素锐利 */
 			span[style*="--is-fantasy"]::after {
 				z-index: 2;
 			}
