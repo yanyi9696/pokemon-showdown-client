@@ -2728,41 +2728,43 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码:注入流动棱彩覆盖层 CSS 动画（完美点缀版）】
+// 【新增代码：注入碎钻闪烁与褶皱镭射 CSS 动画】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
 		const style = document.createElement('style');
 		style.id = 'fantasy-holo-style';
 		style.innerHTML = `
-			@keyframes holoGradient {
-				0% { background-position: 0% 50%; }
-				50% { background-position: 100% 50%; }
-				100% { background-position: 0% 50%; }
+			/* 定义两种不同步的呼吸闪烁频率，让光点交错闪亮，拒绝死板 */
+			@keyframes twinkle1 {
+				0%, 100% { opacity: 0.1; }
+				50% { opacity: 1; }
 			}
+			@keyframes twinkle2 {
+				0%, 100% { opacity: 1; }
+				50% { opacity: 0.1; }
+			}
+			
 			span[style*="--is-fantasy"] {
 				position: relative;
 				display: inline-block;
 			}
-			span[style*="--is-fantasy"]::after {
+			
+			/* 第一层：极淡的褶皱镭射底纹 + 粉色/绿色发光点 */
+			span[style*="--is-fantasy"]::before {
 				content: '';
 				position: absolute;
 				top: 0; left: 0; right: 0; bottom: 0;
+				background:
+					/* 模拟图上的极小彩色反光点 (1.5px/2px大小) */
+					radial-gradient(circle 1.5px at 25% 25%, rgba(255, 100, 150, 0.9) 0%, transparent 100%),
+					radial-gradient(circle 2px at 75% 80%, rgba(100, 255, 150, 0.9) 0%, transparent 100%),
+					/* 模拟图上褶皱镭射锡纸的底层质感 (透明度仅为极淡的0.15) */
+					conic-gradient(from 45deg at 40% 60%, rgba(255,150,200,0.15) 0deg, rgba(150,200,255,0.15) 120deg, rgba(255,255,150,0.15) 240deg, rgba(255,150,200,0.15) 360deg);
 				
-				/* 【修改点1:高透明度】透明度统一调到了 0.7,颜色采用更纯粹的红蓝黄 */
-				background: linear-gradient(120deg, 
-					rgba(255, 80, 120, 0.7), 
-					rgba(80, 200, 255, 0.7), 
-					rgba(255, 230, 80, 0.7), 
-					rgba(255, 80, 120, 0.7)
-				);
-				background-size: 200% 200%;
-				animation: holoGradient 3s linear infinite;
-				
-				/* 【修改点2:Overlay 叠加模式】
-				   核心魔法:Overlay 会完美保留底层宝可梦的黑色描边和纯白高光,
-				   只在中间色调上渲染那 0.7 的彩虹色。告别高曝光,也告别白雾！ */
-				mix-blend-mode: overlay;
+				/* 颜色减淡：让光点真正发光，且底纹极度自然融入，不发白 */
+				mix-blend-mode: color-dodge;
+				animation: twinkle1 2.5s ease-in-out infinite;
 				
 				-webkit-mask-image: var(--bg-url);
 				-webkit-mask-position: var(--bg-pos);
@@ -2770,8 +2772,31 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				mask-image: var(--bg-url);
 				mask-position: var(--bg-pos);
 				mask-repeat: no-repeat;
-				
 				pointer-events: none;
+				z-index: 1;
+			}
+			
+			/* 第二层：蓝色/黄色/紫色发光点 (与第一层时间错开) */
+			span[style*="--is-fantasy"]::after {
+				content: '';
+				position: absolute;
+				top: 0; left: 0; right: 0; bottom: 0;
+				background:
+					radial-gradient(circle 2px at 80% 30%, rgba(100, 200, 255, 0.9) 0%, transparent 100%),
+					radial-gradient(circle 1.5px at 30% 70%, rgba(255, 255, 100, 0.9) 0%, transparent 100%),
+					radial-gradient(circle 1px at 50% 15%, rgba(200, 100, 255, 0.9) 0%, transparent 100%);
+				
+				mix-blend-mode: color-dodge;
+				animation: twinkle2 2s ease-in-out infinite;
+				
+				-webkit-mask-image: var(--bg-url);
+				-webkit-mask-position: var(--bg-pos);
+				-webkit-mask-repeat: no-repeat;
+				mask-image: var(--bg-url);
+				mask-position: var(--bg-pos);
+				mask-repeat: no-repeat;
+				pointer-events: none;
+				z-index: 2;
 			}
 		`;
 		document.head.appendChild(style);
