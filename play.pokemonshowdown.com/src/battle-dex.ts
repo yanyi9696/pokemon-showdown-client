@@ -289,7 +289,7 @@ export const Dex = new class implements ModdedDex {
 
 		const genStrings = formatid.match(/gen\d/); // /gen(10|\d)/ after gen 10 releases
 		const gen = genStrings ? genStrings[0] : this.currentGen;
-		// --- 新增：识别特殊分级关键字 ---
+		// --- 新增:识别特殊分级关键字 ---
 		if (formatid.includes('champions')) modids.push('champions' as ID);
 		if (formatid.includes('freeforall')) modids.push('freeforall' as ID);
 		// ----------------------------
@@ -298,7 +298,7 @@ export const Dex = new class implements ModdedDex {
 		if (formatid.endsWith('uber')) modids.push('uber' as ID);
 		if (formatid.endsWith('ubersuu')) modids.push('ubersuu' as ID);
 		if (formatid.endsWith('uubl')) modids.push('uubl' as ID);
-		// 先排除 'ubersuu' 和 'uubl'，再判断 'uu'
+		// 先排除 'ubersuu' 和 'uubl',再判断 'uu'
 		if (formatid.endsWith('uu') && !formatid.endsWith('ubersuu') && !formatid.endsWith('uubl')) {
 			modids.push('uu' as ID);
 		}
@@ -539,264 +539,264 @@ export const Dex = new class implements ModdedDex {
 
 			// ===== 我们添加的强制贴图修正代码 开始 =====
 			if (id === 'zygardemega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'zygarde-complete';
 			}
 			if (id === 'hawluchamega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'hawlucha';
 			}
 			if (id === 'hawluchamegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'hawlucha';
 			}
 			if (id === 'chandeluremega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'chandelure';
 			}
 			if (id === 'chandeluremegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'chandelure';
 			}
 			if (id === 'delphoxmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'delphox';
 			}
 			if (id === 'delphoxmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'delphox';
 			}
 			if (id === 'dragalgemega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'dragalge';
 			}
 			if (id === 'dragalgemegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'dragalge';
 			}
 			if (id === 'excadrillmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'excadrill';
 			}
 			if (id === 'excadrillmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'excadrill';
 			}
 			if (id === 'falinksmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'falinks';
 			}
 			if (id === 'greninjamega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'greninja';
 			}
 			if (id === 'greninjamegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'greninja';
 			}
 			if (id === 'barbaraclemega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'barbaracle';
 			}
 			if (id === 'chesnaughtmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'chesnaught';
 			}
 			if (id === 'drampamega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'drampa';
 			}
 			if (id === 'falinksmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'falinks';
 			}
 			if (id === 'scraftymega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'scrafty';
 			}
 			if (id === 'eelektrossmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'eelektross';
 			}
 			if (id === 'floettemega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'floette';
 			}
 			if (id === 'floettemegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'floette';
 			}
 			if (id === 'scolipedemega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'scolipede';
 			}
 			if (id === 'scolipedemegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'scolipede';
 			}
 			if (id === 'pyroarmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'pyroar';
 			}
 			if (id === 'malamarmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'malamar';
 			}
 			if (id === 'raichumegax') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'raichu';
 			}
 			if (id === 'raichumegay') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'raichu';
 			}
 			if (id === 'chimechomega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'chimecho';
 			}
 			if (id === 'absolmegaz') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'absol';
 			}
 			if (id === 'absolmegazfantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'absol';
 			}
 			if (id === 'staraptormega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'staraptor';
 			}
 			if (id === 'garchompmegaz') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'garchomp';
 			}
 			if (id === 'garchompmegazfantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'garchomp';
 			}
 			if (id === 'lucariomegaz') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'lucario';
 			}
 			if (id === 'heatranmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'heatran';
 			}
 			if (id === 'darkraimega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'darkrai';
 			}
 			if (id === 'darkraimegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'darkrai';
 			}
 			if (id === 'golurkmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'golurk';
 			}
 			if (id === 'golurkmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'golurk';
 			}
 			if (id === 'meowsticmmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'meowstic';
 			}
 			if (id === 'meowsticfmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'meowstic-f';
 			}
 			if (id === 'crabominablemega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'crabominable';
 			}
 			if (id === 'golisopodmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'golisopod';
 			}
 			if (id === 'golisopodmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'golisopod';
 			}
 			if (id === 'magearnamega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'magearna';
 			}
 			if (id === 'magearnaoriginalmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'magearna-original';
 			}
 			if (id === 'zeraoramega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'zeraora';
 			}
 			if (id === 'scovillainmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'scovillain';
 			}
 			if (id === 'glimmoramega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'glimmora';
 			}
 			if (id === 'tatsugiricurlymega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'tatsugiri';
 			}
 			if (id === 'tatsugiridroopymega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'tatsugiri-droopy';
 			}
 			if (id === 'tatsugiristretchymega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'tatsugiri-stretchy';
 			}
 			if (id === 'baxcaliburmega') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'baxcalibur';
 			}
 			//自制mega
 			if (id === 'flygonmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'flygon';
 			}
 			if (id === 'garbodorgmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'garbodor-gmax';
 			}
 			if (id === 'corviknightgmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'corviknight-gmax';
 			}
 			if (id === 'sandacondagmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'sandaconda-gmax';
 			}
 			if (id === 'toxtricitygmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'toxtricity-gmax';
 			}
 			if (id === 'toxtricitylowkeygmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'toxtricity-gmax';
 			}
 			if (id === 'urshifugmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'urshifu-gmax';
 			}
 			if (id === 'urshifurapidstrikegmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'urshifurapidstrike-gmax';
 			}
 			if (id === 'orbeetlegmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'orbeetle-gmax';
 			}
 			if (id === 'drednawgmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'drednaw-gmax';
 			}
 			if (id === 'melmetalgmegafantasy') {
-				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				if (!data) data = {}; // 确保 data 对象存在,以防万一
 				data.spriteid = 'melmetal-gmax';
 			}
 			// ===== 我们添加的强制贴图修正代码 结束 =====
@@ -1123,7 +1123,7 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		// ==========================================
-		// 【新增代码：自定义局内图片拦截】
+		// 【新增代码:自定义局内图片拦截】
 		// ==========================================
 		// 获取宝可梦的纯小写ID
 		const checkId = originalSpecies.id;
@@ -1135,21 +1135,21 @@ export const Dex = new class implements ModdedDex {
 			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
 			spriteData.pixelated = false;
 
-			// 【新增】解除官方强制拉伸，手动设定宽高比例
+			// 【新增】解除官方强制拉伸,手动设定宽高比例
 			if (isFront) {
-				spriteData.w = 110;  // 根据你原图的实际视觉比例调整，数字越大图越宽
+				spriteData.w = 110;  // 根据你原图的实际视觉比例调整,数字越大图越宽
 				spriteData.h = 110;  // 数字越大图越高
-				// spriteData.y = 0; // 可选：如果觉得图片悬空或者太靠下，可以通过 y 值微调高度
+				// spriteData.y = 0; // 可选:如果觉得图片悬空或者太靠下,可以通过 y 值微调高度
 			} else {
-				// 背面图通常看起来更扁，尝试把高度拉长或宽度缩窄
+				// 背面图通常看起来更扁,尝试把高度拉长或宽度缩窄
 				spriteData.w = 125; 
 				spriteData.h = 125; 
 				// spriteData.y = -10; 
 			}
 		}
-		// 【修改代码：拦截 沙漠蜻蜓-Mega-幻想形态】
+		// 【修改代码:拦截 沙漠蜻蜓-Mega-幻想形态】
 		else if (checkId === 'flygonmegafantasy') {
-			// 终极杀招：直接检测系统原本拼好的 url 里是否包含闪光标识
+			// 终极杀招:直接检测系统原本拼好的 url 里是否包含闪光标识
 			const isShiny = spriteData.url && spriteData.url.includes('-shiny'); 
 			
 			let facingDir = isFront ? 'gen5' : 'gen5-back';
@@ -1171,9 +1171,9 @@ export const Dex = new class implements ModdedDex {
 			}
 		}
 
-		// 【修改代码：拦截 巨沼怪-Mega-X-幻想形态】
+		// 【修改代码:拦截 巨沼怪-Mega-X-幻想形态】
 		else if (checkId === 'swampertmegaxfantasy') {
-			// 同理，检测原有 url 的闪光标识
+			// 同理,检测原有 url 的闪光标识
 			const isShiny = spriteData.url && spriteData.url.includes('-shiny');
 			
 			let facingDir = isFront ? 'gen5' : 'gen5-back';
@@ -1195,7 +1195,7 @@ export const Dex = new class implements ModdedDex {
 			}
 		}
 
-		// 以后如果有其他局内图片要替换，在这里加 else if 即可
+		// 以后如果有其他局内图片要替换,在这里加 else if 即可
 		/*
 		else if (checkId === 'onixfantasy') {
 			const facingDir = isFront ? 'gen5' : 'gen5-back';
@@ -1203,7 +1203,7 @@ export const Dex = new class implements ModdedDex {
 		}
 		*/
 
-		// 原版代码：返回最终的数据对象
+		// 原版代码:返回最终的数据对象
 		return spriteData;
 	}
 
@@ -1317,11 +1317,11 @@ export const Dex = new class implements ModdedDex {
 		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
 
-		// 【全新逻辑】判断如果是 fantasy 宝可梦，注入 CSS 变量供底层读取
+		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量供底层读取
 		let fantasyStyles = '';
 		if (finalId.endsWith('fantasy')) {
 			// --is-fantasy 用于触发特效
-			// --bg-url 和 --bg-pos 用于同步图标坐标，让彩虹只出现在宝可梦轮廓内
+			// --bg-url 和 --bg-pos 用于同步图标坐标,让彩虹只出现在宝可梦轮廓内
 			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px;`;
 		}
 
@@ -1429,49 +1429,49 @@ export const Dex = new class implements ModdedDex {
 		const shiny = (data.shiny ? '-shiny' : '');
 		const id = toID(pokemon.species);
 
-		// 拦截：大岩蛇-幻想形态
+		// 拦截:大岩蛇-幻想形态
 		if (id === 'onixfantasy') {
 			// 1. 设置图片的缩放尺寸 (宽度 高度)。
-			// "80px auto" 表示宽度缩放为 80 像素，高度保持原有比例自动缩放。
+			// "80px auto" 表示宽度缩放为 80 像素,高度保持原有比例自动缩放。
 			const bgSize = "80px auto";
 			// 2. 调整 X 和 Y 的位置偏移量。
-			// 这里我们弃用系统默认的 data.x 和 data.y，方便你单独对这张大图进行微调。
-			const offsetX = 10; // 水平方向：负数向左移，正数向右移
-			const offsetY = 5;   // 垂直方向：负数向上移，正数向下移
+			// 这里我们弃用系统默认的 data.x 和 data.y,方便你单独对这张大图进行微调。
+			const offsetX = 10; // 水平方向:负数向左移,正数向右移
+			const offsetY = 5;   // 垂直方向:负数向上移,正数向下移
 
 			// 将设定好的样式拼接成字符串并返回
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			return `background-image:url(${customSpritePrefix}sprites/dex/onix-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
-		// 【新增代码：拦截 暗影洛奇亚-幻想形态】
+		// 【新增代码:拦截 暗影洛奇亚-幻想形态】
 		else if (id === 'lugiashadowfantasy') {
-			// 你可以针对洛奇亚的图片尺寸，独立调整这三个参数
+			// 你可以针对洛奇亚的图片尺寸,独立调整这三个参数
 			const bgSize = "100px auto";
 			const offsetX = 10; // 左右微调
 			const offsetY = 5;  // 上下微调
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			return `background-image:url(${customSpritePrefix}sprites/dex/lugia-shadow-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
-		// 【新增代码：拦截 沙漠蜻蜓-Mega-幻想形态】
+		// 【新增代码:拦截 沙漠蜻蜓-Mega-幻想形态】
 		else if (id === 'flygonmegafantasy') {
 			const bgSize = "100px auto"; // 根据你画的沙漠蜻蜓图标比例进行调整
 			const offsetX = 10; // 左右微调
 			const offsetY = 5;  // 上下微调
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
-			// 重点修改：在 dex 后面加上 ${shiny}
+			// 重点修改:在 dex 后面加上 ${shiny}
 			return `background-image:url(${customSpritePrefix}sprites/dex${shiny}/flygon-mega-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
-		// 【新增代码：拦截 巨沼怪-Mega-X-幻想形态】
+		// 【新增代码:拦截 巨沼怪-Mega-X-幻想形态】
 		else if (id === 'swampertmegaxfantasy') {
 			const bgSize = "100px auto"; // 根据你画的巨沼怪图标比例进行调整
 			const offsetX = 10; // 左右微调
 			const offsetY = 5;  // 上下微调
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
-			// 重点修改：在 dex 后面加上 ${shiny}
+			// 重点修改:在 dex 后面加上 ${shiny}
 			return `background-image:url(${customSpritePrefix}sprites/dex${shiny}/swampert-mega-x-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 
-		// 原版逻辑：从官方服务器或默认路径拉取图片
+		// 原版逻辑:从官方服务器或默认路径拉取图片
 		return `background-image:url(${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png);background-position:${data.x}px ${data.y}px;background-repeat:no-repeat`;
 	}
 
@@ -1483,8 +1483,8 @@ export const Dex = new class implements ModdedDex {
 		let top = Math.floor(num / 16) * 24;
 		let left = (num % 16) * 24;
 
-		// 【修改这里】移除 Dex.resourcePrefix，改为指向本地存放道具图的相对路径
-		// 注意：将 ?v1 改为 ?v2 (或更高的数字) 可以帮助强制清除浏览器缓存，确保加载的是你最新的图片
+		// 【修改这里】移除 Dex.resourcePrefix,改为指向本地存放道具图的相对路径
+		// 注意:将 ?v1 改为 ?v2 (或更高的数字) 可以帮助强制清除浏览器缓存,确保加载的是你最新的图片
 		const itemSheetUrl = `./sprites/itemicons-sheet.png?v2`;
 
 		return `background:transparent url(${itemSheetUrl}) no-repeat scroll -${left}px -${top}px`;
@@ -2296,12 +2296,12 @@ const ModModifier: {
 			}
 		},
 		ModifyTierSet: (tierSet: SearchRow[], dex: ModdedDex, extra?: any): SearchRow[] => {
-			// 1. 定义详细的分级权重 (数字越大，排序越靠前)
+			// 1. 定义详细的分级权重 (数字越大,排序越靠前)
 			const tierWeights: { [k: string]: number } = {
 				'AG': 100,
-				'Illegal': 100, // 根据要求，摆在最高挡位 (与 AG 齐平)
+				'Illegal': 100, // 根据要求,摆在最高挡位 (与 AG 齐平)
 				'Uber': 90,
-				'(Uber)': 80,   // 略低于 Uber，确保排序在 Uber 之后
+				'(Uber)': 80,   // 略低于 Uber,确保排序在 Uber 之后
 				'Ubers UU': 80, // 将 (Uber) 和 Ubers UU 设为相同的权重
 				'OU': 70,
 				'UUBL': 65,
@@ -2315,9 +2315,9 @@ const ModModifier: {
 			let currentMaxWeight = 100; // 默认 AG 环境显示全部
 			const modidStr = dex.modid.join('');
 			if (modidStr.includes('champions')) {
-			currentMaxWeight = 100; // 冠军组：显示包括 AG 的所有宝可梦
+			currentMaxWeight = 100; // 冠军组:显示包括 AG 的所有宝可梦
 			} else if (modidStr.includes('freeforall')) {
-			currentMaxWeight = 90;  // FFA：显示到 Uber 为止
+			currentMaxWeight = 90;  // FFA:显示到 Uber 为止
 			} else if (modidStr.includes('ubersuu')) { // 必须放在 uber 之前判断
 			currentMaxWeight = 80;
 			} else if (modidStr.includes('uber')) {
@@ -2336,7 +2336,7 @@ const ModModifier: {
 				currentMaxWeight = 10;
 			}
 
-			// 3. 你的手动维护列表 (保持原样，用于确保“必顶置”)
+			// 3. 你的手动维护列表 (保持原样,用于确保“必顶置”)
 			const pinnedPokemon = [
 				'victreebelmegafantasy',
 				'hawluchamegafantasy',
@@ -2378,7 +2378,7 @@ const ModModifier: {
 				'melmetalgmegafantasy',
 			];
 
-			// FC Only: 仅显示可选的 Gen9fantasy 宝可梦，不拼接基础列表。
+			// FC Only: 仅显示可选的 Gen9fantasy 宝可梦,不拼接基础列表。
 			if (dex.modid.includes('fconly' as ID)) {
 				const allowedFCTiers = new Set(['Uber', '(Uber)', 'OU', 'UUBL', 'UU', 'RUBL', 'RU', 'LC']);
 				const fcCollected: {id: ID, weight: number, name: string}[] = [];
@@ -2429,14 +2429,14 @@ const ModModifier: {
 				const tier = species.tier || 'Illegal';
 				const weight = tierWeights[tier] || 0;
 
-				// 过滤：只有权重 <= 当前环境上限的才加入
+				// 过滤:只有权重 <= 当前环境上限的才加入
 				if (weight <= currentMaxWeight) {
 					collected.push({ id: id as ID, weight, name: species.name });
 					seen.add(id);
 				}
 			}
 
-			// [可选] 自动扫描保底：处理 window.Gen9fantasydex 中未手动录入的项
+			// [可选] 自动扫描保底:处理 window.Gen9fantasydex 中未手动录入的项
 			if (window.Gen9fantasydex) {
 				for (const id in window.Gen9fantasydex) {
 					if (seen.has(id)) continue;
@@ -2451,9 +2451,9 @@ const ModModifier: {
 
 			// 5. 执行排序逻辑 (关键步骤)
 			collected.sort((a, b) => {
-				// 第一优先级：权重降序 (100 -> 90 -> 70 ...)
+				// 第一优先级:权重降序 (100 -> 90 -> 70 ...)
 				if (b.weight !== a.weight) return b.weight - a.weight;
-				// 第二优先级：同分级内按字母升序 (A -> Z)
+				// 第二优先级:同分级内按字母升序 (A -> Z)
 				return a.name.localeCompare(b.name);
 			});
 
@@ -2728,7 +2728,7 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入流动棱彩覆盖层 CSS 动画（完美点缀版）】
+// 【新增代码:注入流动棱彩覆盖层 CSS 动画（完美点缀版）】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
@@ -2749,19 +2749,19 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				position: absolute;
 				top: 0; left: 0; right: 0; bottom: 0;
 				
-				/* 【修改点1：高透明度】透明度统一调到了 0.35，颜色采用更纯粹的红蓝黄 */
+				/* 【修改点1:高透明度】透明度统一调到了 0.45,颜色采用更纯粹的红蓝黄 */
 				background: linear-gradient(120deg, 
-					rgba(255, 80, 120, 0.35), 
-					rgba(80, 200, 255, 0.35), 
-					rgba(255, 230, 80, 0.35), 
-					rgba(255, 80, 120, 0.35)
+					rgba(255, 80, 120, 0.45), 
+					rgba(80, 200, 255, 0.45), 
+					rgba(255, 230, 80, 0.45), 
+					rgba(255, 80, 120, 0.45)
 				);
 				background-size: 200% 200%;
 				animation: holoGradient 3s linear infinite;
 				
-				/* 【修改点2：Overlay 叠加模式】
-				   核心魔法：Overlay 会完美保留底层宝可梦的黑色描边和纯白高光，
-				   只在中间色调上渲染那 0.35 的彩虹色。告别高曝光，也告别白雾！ */
+				/* 【修改点2:Overlay 叠加模式】
+				   核心魔法:Overlay 会完美保留底层宝可梦的黑色描边和纯白高光,
+				   只在中间色调上渲染那 0.45 的彩虹色。告别高曝光,也告别白雾！ */
 				mix-blend-mode: overlay;
 				
 				-webkit-mask-image: var(--bg-url);
