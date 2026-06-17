@@ -2728,7 +2728,7 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入流动棱彩覆盖层 CSS 动画（高显色版）】
+// 【新增代码：注入流动棱彩覆盖层 CSS 动画（完美点缀版）】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
@@ -2749,19 +2749,20 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				position: absolute;
 				top: 0; left: 0; right: 0; bottom: 0;
 				
-				/* 【修改点1：加深颜色】将透明度从 0.4 提升到了 0.85，并且使用了更饱和的红、蓝、黄 */
+				/* 【修改点1：高透明度】透明度统一调到了 0.35，颜色采用更纯粹的红蓝黄 */
 				background: linear-gradient(120deg, 
-					rgba(255, 120, 170, 0.85), 
-					rgba(100, 220, 255, 0.85), 
-					rgba(255, 240, 100, 0.85), 
-					rgba(255, 120, 170, 0.85)
+					rgba(255, 80, 120, 0.35), 
+					rgba(80, 200, 255, 0.35), 
+					rgba(255, 230, 80, 0.35), 
+					rgba(255, 80, 120, 0.35)
 				);
 				background-size: 200% 200%;
 				animation: holoGradient 3s linear infinite;
 				
-				/* 【修改点2：混合模式（核心黑科技）】
-				   hard-light（强光模式）：能让彩虹色强力融入底层图案，保留黑边轮廓的同时让原图发出彩虹光，告别“白雾感”！ */
-				mix-blend-mode: hard-light;
+				/* 【修改点2：Overlay 叠加模式】
+				   核心魔法：Overlay 会完美保留底层宝可梦的黑色描边和纯白高光，
+				   只在中间色调上渲染那 0.35 的彩虹色。告别高曝光，也告别白雾！ */
+				mix-blend-mode: overlay;
 				
 				-webkit-mask-image: var(--bg-url);
 				-webkit-mask-position: var(--bg-pos);
