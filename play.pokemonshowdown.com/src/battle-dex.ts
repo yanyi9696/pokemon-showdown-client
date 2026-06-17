@@ -1317,14 +1317,16 @@ export const Dex = new class implements ModdedDex {
 		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
 
-		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量和调用发光动画
+		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量进行图层分离
 		let fantasyStyles = '';
 		if (finalId.endsWith('fantasy')) {
-			// 调用底部的轮转动画 rainbowGlowSpin，3秒一圈匀速循环
-			let glowStyle = fainted ? '' : `animation: rainbowGlowSpin 3s linear infinite;`;
+			// 将动画参数传给 CSS 变量，如果是濒死状态则关闭动画
+			let glowAnim = fainted ? 'none' : 'rainbowGlowSpin 3s linear infinite';
 			
-			// --is-fantasy 用于触发底部 CSS 中修复模糊的黑科技样式
-			fantasyStyles = `; --is-fantasy: 1; ${glowStyle}`;
+			// --is-fantasy 用于触发外发光图层
+			// --bg-url 和 --bg-pos 用于在背后生成一个“影子克隆”
+			// --glow-anim 传递发光指令
+			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; --glow-anim: ${glowAnim};`;
 		}
 
 		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}${fantasyStyles}`;
@@ -2731,68 +2733,73 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入 0.6 透明度流转彩虹轮廓 (防模糊纯净版)】
+// 【新增代码：注入 0.6 透明度流转彩虹轮廓 (完美图层分离版)】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
 		const style = document.createElement('style');
 		style.id = 'fantasy-holo-style';
 		style.innerHTML = `
-			/* ------------------------------------------
-			   动画：轮转的彩虹色外发光
-			   【模糊修复】：去掉了 1.5px 的小数，改为 1px 偏移和 2px 模糊，
-			   完美规避了浏览器在不同缩放率下的亚像素渲染模糊问题！
-			   ------------------------------------------ */
+			/* 恢复使用 1.5px 的参数，让光晕更加柔和自然 */
 			@keyframes rainbowGlowSpin {
 				0% {
-					filter: drop-shadow(1px 0 2px rgba(255, 100, 100, 0.6)) 
-							drop-shadow(0 1px 2px rgba(100, 255, 100, 0.6)) 
-							drop-shadow(-1px 0 2px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(0 -1px 2px rgba(130, 100, 255, 0.6));
+					filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6));
 				}
 				25% {
-					filter: drop-shadow(1px 0 2px rgba(130, 100, 255, 0.6)) 
-							drop-shadow(0 1px 2px rgba(255, 100, 100, 0.6)) 
-							drop-shadow(-1px 0 2px rgba(100, 255, 100, 0.6)) 
-							drop-shadow(0 -1px 2px rgba(100, 255, 245, 0.6));
+					filter: drop-shadow(1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(255, 100, 100, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 245, 0.6));
 				}
 				50% {
-					filter: drop-shadow(1px 0 2px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(0 1px 2px rgba(130, 100, 255, 0.6)) 
-							drop-shadow(-1px 0 2px rgba(255, 100, 100, 0.6)) 
-							drop-shadow(0 -1px 2px rgba(100, 255, 100, 0.6));
+					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(130, 100, 255, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 100, 0.6));
 				}
 				75% {
-					filter: drop-shadow(1px 0 2px rgba(100, 255, 100, 0.6)) 
-							drop-shadow(0 1px 2px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(-1px 0 2px rgba(130, 100, 255, 0.6)) 
-							drop-shadow(0 -1px 2px rgba(255, 100, 100, 0.6));
+					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(100, 255, 245, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(255, 100, 100, 0.6));
 				}
 				100% {
-					filter: drop-shadow(1px 0 2px rgba(255, 100, 100, 0.6)) 
-							drop-shadow(0 1px 2px rgba(100, 255, 100, 0.6)) 
-							drop-shadow(-1px 0 2px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(0 -1px 2px rgba(130, 100, 255, 0.6));
+					filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6));
 				}
 			}
 
+			/* 1. 图标本体：不再施加任何 filter 或强制渲染模式，恢复浏览器的天然平滑抗锯齿 */
 			span[style*="--is-fantasy"] {
 				position: relative;
 				display: inline-block;
 				overflow: visible;
+				/* 创建独立的层叠上下文，这是图层分离的核心 */
+				z-index: 1; 
+			}
+			
+			/* 2. 影子分身：隐藏在本体背后，专门用来发光 */
+			span[style*="--is-fantasy"]::before {
+				content: '';
+				position: absolute;
+				top: 0; left: 0; right: 0; bottom: 0;
 				
-				/* =======================================
-				   【修复模糊的核心黑科技】
-				   ======================================= */
-				/* 1. 强制开启独立图层和硬件加速，防止滤镜平滑处理影响底层像素 */
-				transform: translateZ(0);
-				backface-visibility: hidden;
-				-webkit-font-smoothing: antialiased;
+				/* 读取本体的图标位置，生成一个完全重合的克隆体 */
+				background-image: var(--bg-url);
+				background-position: var(--bg-pos);
+				background-repeat: no-repeat;
 				
-				/* 2. 强制使用像素化渲染模式，阻止浏览器在网页缩放时强行抗锯齿 */
-				image-rendering: -webkit-optimize-contrast !important;
-				image-rendering: crisp-edges !important;
-				image-rendering: pixelated !important;
+				/* 将滤镜动画施加在影子身上 */
+				animation: var(--glow-anim);
+				
+				/* 将影子塞到本体的背景后面 */
+				z-index: -1; 
+				pointer-events: none;
 			}
 		`;
 		document.head.appendChild(style);
