@@ -2728,37 +2728,41 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入流动棱彩覆盖层 CSS 动画】
+// 【新增代码：注入流动棱彩覆盖层 CSS 动画（高显色版）】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
 		const style = document.createElement('style');
 		style.id = 'fantasy-holo-style';
-		// 巧妙使用 CSS 属性选择器和遮罩 (mask) 技术
-		// 做到“只有薄薄一层覆盖在图标表面”，完美还原 TFT 棱彩效果
 		style.innerHTML = `
 			@keyframes holoGradient {
 				0% { background-position: 0% 50%; }
 				50% { background-position: 100% 50%; }
 				100% { background-position: 0% 50%; }
 			}
-			/* 选中含有 --is-fantasy 变量的小图标容器 */
 			span[style*="--is-fantasy"] {
 				position: relative;
 				display: inline-block;
 			}
-			/* 在图标上层生成一个伪元素，作为单独的流光覆盖层 */
 			span[style*="--is-fantasy"]::after {
 				content: '';
 				position: absolute;
 				top: 0; left: 0; right: 0; bottom: 0;
 				
-				/* 这就是你图上的浅粉、浅青、浅黄渐变，0.4 代表透明度，不会遮挡原图 */
-				background: linear-gradient(120deg, rgba(255, 180, 200, 0.4), rgba(180, 255, 255, 0.4), rgba(255, 255, 180, 0.4), rgba(255, 180, 200, 0.4));
+				/* 【修改点1：加深颜色】将透明度从 0.4 提升到了 0.85，并且使用了更饱和的红、蓝、黄 */
+				background: linear-gradient(120deg, 
+					rgba(255, 120, 170, 0.85), 
+					rgba(100, 220, 255, 0.85), 
+					rgba(255, 240, 100, 0.85), 
+					rgba(255, 120, 170, 0.85)
+				);
 				background-size: 200% 200%;
 				animation: holoGradient 3s linear infinite;
 				
-				/* 核心技术：使用与底层一模一样的图集作为遮罩，确保流光不会漏到正方形空白处 */
+				/* 【修改点2：混合模式（核心黑科技）】
+				   hard-light（强光模式）：能让彩虹色强力融入底层图案，保留黑边轮廓的同时让原图发出彩虹光，告别“白雾感”！ */
+				mix-blend-mode: hard-light;
+				
 				-webkit-mask-image: var(--bg-url);
 				-webkit-mask-position: var(--bg-pos);
 				-webkit-mask-repeat: no-repeat;
@@ -2766,7 +2770,6 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				mask-position: var(--bg-pos);
 				mask-repeat: no-repeat;
 				
-				/* 鼠标穿透，防止影响点击 */
 				pointer-events: none;
 			}
 		`;
