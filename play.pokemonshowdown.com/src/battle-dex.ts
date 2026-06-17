@@ -2749,19 +2749,19 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				position: absolute;
 				top: 0; left: 0; right: 0; bottom: 0;
 				
-				/* 【修改点1:高透明度】透明度统一调到了 0.45,颜色采用更纯粹的红蓝黄 */
+				/* 【修改点1:高透明度】透明度统一调到了 0.55,颜色采用更纯粹的红蓝黄 */
 				background: linear-gradient(120deg, 
-					rgba(255, 80, 120, 0.45), 
-					rgba(80, 200, 255, 0.45), 
-					rgba(255, 230, 80, 0.45), 
-					rgba(255, 80, 120, 0.45)
+					rgba(255, 80, 120, 0.55), 
+					rgba(80, 200, 255, 0.55), 
+					rgba(255, 230, 80, 0.55), 
+					rgba(255, 80, 120, 0.55)
 				);
 				background-size: 200% 200%;
 				animation: holoGradient 3s linear infinite;
 				
 				/* 【修改点2:Overlay 叠加模式】
 				   核心魔法:Overlay 会完美保留底层宝可梦的黑色描边和纯白高光,
-				   只在中间色调上渲染那 0.45 的彩虹色。告别高曝光,也告别白雾！ */
+				   只在中间色调上渲染那 0.55 的彩虹色。告别高曝光,也告别白雾！ */
 				mix-blend-mode: overlay;
 				
 				-webkit-mask-image: var(--bg-url);
