@@ -1316,17 +1316,9 @@ export const Dex = new class implements ModdedDex {
 		let left = (num % 12) * 40;
 		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
-
-		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量供底层读取
-		let fantasyStyles = '';
-		if (finalId.endsWith('fantasy')) {
-			// --is-fantasy 用于触发特效
-			// --bg-url 和 --bg-pos 用于同步图标坐标,让彩虹只出现在宝可梦轮廓内
-			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px;`;
-		}
-
-		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}${fantasyStyles}`;
+		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}`;
 	}
+
 
 	// sprite in teambuilder
 	getTeambuilderSpriteData(pokemon: any, gen = 0): TeambuilderSpriteData {
@@ -2726,89 +2718,4 @@ if (typeof require === 'function') {
 	// in Node
 	global.Dex = Dex;
 	global.toID = toID;
-}
-// ==========================================
-// 【新增代码：注入 50% 棱彩底纹 + 大光点交替闪烁 CSS 动画】
-// ==========================================
-if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-	if (!document.getElementById('fantasy-holo-style')) {
-		const style = document.createElement('style');
-		style.id = 'fantasy-holo-style';
-		style.innerHTML = `
-			/* 动画1：第一组光点呼吸 */
-			@keyframes starPulse1 {
-				0%, 100% { opacity: 0.5; }
-				50% { opacity: 1; }
-			}
-			/* 动画2：第二组光点呼吸（与动画1时间错开，形成交替闪烁） */
-			@keyframes starPulse2 {
-				0%, 100% { opacity: 1; }
-				50% { opacity: 0.1; }
-			}
-			
-			span[style*="--is-fantasy"] {
-				position: relative;
-				display: inline-block;
-			}
-			
-			/* ==============================
-			   第一层：50%底纹 + 第一组光点 (粉色/青色)
-			   ============================== */
-			span[style*="--is-fantasy"]::before {
-				content: '';
-				position: absolute;
-				top: 0; left: 0; right: 0; bottom: 0;
-				
-				background:
-					/* 放大且更亮的粉色星光 */
-					radial-gradient(circle 5px at 20% 30%, rgba(255, 50, 150, 1) 0%, transparent 70%),
-					/* 放大且更亮的青色星光 */
-					radial-gradient(circle 4px at 80% 70%, rgba(50, 255, 255, 1) 0%, transparent 70%),
-					/* 固定的 60% 透明度柔和全息底纹 */
-					linear-gradient(120deg, rgba(255, 100, 150, 0.6), rgba(100, 200, 255, 0.6), rgba(255, 230, 100, 0.6), rgba(255, 100, 150, 0.6));
-				
-				mix-blend-mode: overlay; /* 让底纹融入宝可梦 */
-				animation: starPulse1 3s ease-in-out infinite; /* 3秒循环 */
-				
-				-webkit-mask-image: var(--bg-url);
-				-webkit-mask-position: var(--bg-pos);
-				-webkit-mask-repeat: no-repeat;
-				mask-image: var(--bg-url);
-				mask-position: var(--bg-pos);
-				mask-repeat: no-repeat;
-				pointer-events: none;
-				z-index: 1;
-			}
-			
-			/* ==============================
-			   第二层：第二组光点 (金色/绿色/白色)
-			   ============================== */
-			span[style*="--is-fantasy"]::after {
-				content: '';
-				position: absolute;
-				top: 0; left: 0; right: 0; bottom: 0;
-				
-				background:
-					/* 放大且更亮的金色星光 */
-					radial-gradient(circle 5px at 75% 25%, rgba(255, 220, 0, 1) 0%, transparent 70%),
-					/* 放大且更亮的绿色星光 */
-					radial-gradient(circle 4.5px at 25% 75%, rgba(50, 255, 100, 1) 0%, transparent 70%),
-					/* 极亮的纯白色中心星光 */
-					radial-gradient(circle 3px at 50% 50%, rgba(255, 255, 255, 1) 0%, transparent 80%);
-				
-				mix-blend-mode: color-dodge; /* 减淡模式，让颜色像霓虹灯一样爆亮 */
-				animation: starPulse2 2.2s ease-in-out infinite; /* 2.2秒循环，与第一层错位 */
-				
-				-webkit-mask-image: var(--bg-url);
-				-webkit-mask-position: var(--bg-pos);
-				-webkit-mask-repeat: no-repeat;
-				mask-image: var(--bg-url);
-				mask-position: var(--bg-pos);
-				mask-repeat: no-repeat;
-				pointer-events: none;
-				z-index: 2;
-			}
-		`;
-		document.head.appendChild(style);
-	}
 }
