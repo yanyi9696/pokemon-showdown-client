@@ -1317,15 +1317,13 @@ export const Dex = new class implements ModdedDex {
 		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
 
-		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量进行图层分离
+		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量进行“真·图层分离”
 		let fantasyStyles = '';
 		if (finalId.endsWith('fantasy')) {
-			// 将动画参数传给 CSS 变量，如果是濒死状态则关闭动画
-			let glowAnim = fainted ? 'none' : 'rainbowGlowSpin 3s linear infinite';
+			// 采用 Deosectwo 风格的闪耀彩虹动画，2秒一圈极速轮转
+			let glowAnim = fainted ? 'none' : 'deosectwoRainbowGlow 2s linear infinite';
 			
-			// --is-fantasy 用于触发外发光图层
-			// --bg-url 和 --bg-pos 用于在背后生成一个“影子克隆”
-			// --glow-anim 传递发光指令
+			// 变量传递：--is-fantasy 触发图层分离，--bg-url/pos 传递底层坐标，--glow-anim 传递动画指令
 			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; --glow-anim: ${glowAnim};`;
 		}
 
@@ -2733,73 +2731,55 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入 0.6 透明度流转彩虹轮廓 (完美图层分离版)】
+// 【新增代码： RGB 彩虹流光 (完美防模糊双图层版)】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
 		const style = document.createElement('style');
 		style.id = 'fantasy-holo-style';
 		style.innerHTML = `
-			/* 恢复使用 1.5px 的参数，让光晕更加柔和自然 */
-			@keyframes rainbowGlowSpin {
-				0% {
-					filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
-							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
-							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6));
-				}
-				25% {
-					filter: drop-shadow(1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
-							drop-shadow(0 1.5px 1.5px rgba(255, 100, 100, 0.6)) 
-							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 245, 0.6));
-				}
-				50% {
-					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(0 1.5px 1.5px rgba(130, 100, 255, 0.6)) 
-							drop-shadow(-1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 100, 0.6));
-				}
-				75% {
-					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
-							drop-shadow(0 1.5px 1.5px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(-1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(255, 100, 100, 0.6));
-				}
-				100% {
-					filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
-							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
-							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6));
-				}
+			/* Deosectwo 专属的高强度 RGB 彩虹轮转
+			   通过组合内圈(玫红)和外圈(天蓝)两种 drop-shadow，
+			   配合 hue-rotate 色相无缝旋转，实现极其绚丽、五颜六色的多彩呼吸光！
+			   全部采用 0 偏移，消除浏览器亚像素抖动。
+			*/
+			@keyframes deosectwoRainbowGlow {
+				0%   { filter: drop-shadow(0 0 2px rgba(255, 0, 85, 0.9)) drop-shadow(0 0 5px rgba(0, 136, 255, 0.8)) hue-rotate(0deg); }
+				100% { filter: drop-shadow(0 0 2px rgba(255, 0, 85, 0.9)) drop-shadow(0 0 5px rgba(0, 136, 255, 0.8)) hue-rotate(360deg); }
 			}
 
-			/* 1. 图标本体：不再施加任何 filter 或强制渲染模式，恢复浏览器的天然平滑抗锯齿 */
+			/* 1. 容器本体：剥夺背景图，建立独立的渲染层 */
 			span[style*="--is-fantasy"] {
 				position: relative;
 				display: inline-block;
 				overflow: visible;
-				/* 创建独立的层叠上下文，这是图层分离的核心 */
-				z-index: 1; 
+				/* 【核心黑科技】强行抹除父级的内联背景图，防止父级滤镜带崩清晰度 */
+				background-image: none !important;
+				/* 隔离层级，保证发光层不会跑到网页其他元素的背后去 */
+				isolation: isolate;
 			}
 			
-			/* 2. 影子分身：隐藏在本体背后，专门用来发光 */
-			span[style*="--is-fantasy"]::before {
+			/* 共用设置：利用之前存入的 CSS 变量，在子层重新渲染图标分身 */
+			span[style*="--is-fantasy"]::before,
+			span[style*="--is-fantasy"]::after {
 				content: '';
 				position: absolute;
 				top: 0; left: 0; right: 0; bottom: 0;
-				
-				/* 读取本体的图标位置，生成一个完全重合的克隆体 */
 				background-image: var(--bg-url);
 				background-position: var(--bg-pos);
 				background-repeat: no-repeat;
-				
-				/* 将滤镜动画施加在影子身上 */
-				animation: var(--glow-anim);
-				
-				/* 将影子塞到本体的背景后面 */
-				z-index: -1; 
 				pointer-events: none;
+			}
+
+			/* 2. 发光底层：沉在底下疯狂发光，即便浏览器因为缩放比例把它算糊了，也只是一圈柔和的光晕 */
+			span[style*="--is-fantasy"]::before {
+				animation: var(--glow-anim);
+				z-index: 1;
+			}
+
+			/* 3. 清晰顶层：盖在发光层上面。因为它身上没有任何 filter，永远保持 100% 原始像素级锐利！ */
+			span[style*="--is-fantasy"]::after {
+				z-index: 2;
 			}
 		`;
 		document.head.appendChild(style);
