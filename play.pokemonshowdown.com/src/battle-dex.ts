@@ -1319,15 +1319,14 @@ export const Dex = new class implements ModdedDex {
 		let opacityStyle = fainted ? `;opacity:.3` : ``;
 		let animationStyle = ``;
 		
-		// 1. 濒死状态：变灰变暗（不再应用彩虹动画）
+		// 1. 濒死状态：变灰变暗
 		if (fainted) {
 			filterStyles.push('grayscale(100%)', 'brightness(.5)');
 		} 
-		// 2. 正常状态且是 fantasy 宝可梦：调用全局的彩虹流动动画
+		// 2. 正常状态且是 fantasy 宝可梦：调用全局的棱彩动画
+		// 把动画时间设为 4s 让颜色流动更加柔和优雅
 		else if (finalId.endsWith('fantasy')) {
-			// 3s 表示 3秒转一圈，linear 表示匀速，infinite 表示无限循环
-			// 你可以把 3s 改成 2s(更快) 或 5s(更慢)
-			animationStyle = `;animation: fantasyRainbow 3s linear infinite`;
+			animationStyle = `;animation: fantasyHolo 4s linear infinite`;
 		}
 		
 		let filterString = filterStyles.length > 0 ? `;filter:${filterStyles.join(' ')}` : ``;
@@ -2736,17 +2735,22 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入流动彩虹 CSS 动画】
+// 【新增代码：注入流动棱彩 CSS 动画】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-	if (!document.getElementById('fantasy-rainbow-style')) {
+	if (!document.getElementById('fantasy-holo-style')) {
 		const style = document.createElement('style');
-		style.id = 'fantasy-rainbow-style';
-		// 定义动画：0% 到 100% 色相旋转一整圈，饱和度稍微提亮一点点
+		style.id = 'fantasy-holo-style';
+		// 滤镜配方解析：
+		// opacity(0.75)：实现你需要的“高透明度”
+		// sepia(0.3)：轻微统一底色，让所有宝可梦看起来像同一种镭射材质
+		// brightness(1.5) + contrast(0.75)：大幅提亮并降低对比度，消除原本生硬的黑边，呈现出粉彩/闪卡质感
+		// saturate(3)：极大地提高饱和度，让柔和的颜色变得像彩虹般炫目
+		// hue-rotate：控制颜色的流动
 		style.innerHTML = `
-			@keyframes fantasyRainbow {
-				0% { filter: hue-rotate(0deg) saturate(150%); }
-				100% { filter: hue-rotate(360deg) saturate(150%); }
+			@keyframes fantasyHolo {
+				0%   { filter: opacity(0.75) sepia(0.3) brightness(1.5) contrast(0.75) saturate(3) hue-rotate(0deg); }
+				100% { filter: opacity(0.75) sepia(0.3) brightness(1.5) contrast(0.75) saturate(3) hue-rotate(360deg); }
 			}
 		`;
 		document.head.appendChild(style);
