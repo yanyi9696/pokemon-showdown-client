@@ -1316,19 +1316,16 @@ export const Dex = new class implements ModdedDex {
 		let left = (num % 12) * 40;
 		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
-		
-		// 【新增逻辑】如果是 Fantasy 宝可梦，生成马卡龙彩虹背景徽章
+
+		// 【全新逻辑】判断如果是 fantasy 宝可梦，注入 CSS 变量供底层读取
+		let fantasyStyles = '';
 		if (finalId.endsWith('fantasy')) {
-			// 淡淡的马卡龙/柔和彩虹渐变（透明度 0.4，非常轻柔，不会喧宾夺主）
-			const pastelGradient = `linear-gradient(120deg, rgba(255,182,193,0.4), rgba(255,255,180,0.4), rgba(180,255,200,0.4), rgba(180,220,255,0.4), rgba(230,180,255,0.4))`;
-			
-			// 多重背景：图层1是宝可梦本体，图层2是彩色渐变。
-			// 巧妙利用 CSS 变量（--px, --py）传递坐标，使得动画只需平滑移动背后的渐变。
-			// border-radius: 5px 让它看起来像个边缘柔和的小卡片/徽章。
-			return `background: url(${iconSheetUrl}) no-repeat scroll var(--px) var(--py), ${pastelGradient} 0% 0% / 300% 300%; --px: -${left}px; --py: -${top}px; animation: fantasyRainbowBg 5s ease infinite; border-radius: 5px;${faintedString}`;
+			// --is-fantasy 用于触发特效
+			// --bg-url 和 --bg-pos 用于同步图标坐标，让彩虹只出现在宝可梦轮廓内
+			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px;`;
 		}
 
-		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}`;
+		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}${fantasyStyles}`;
 	}
 
 	// sprite in teambuilder
@@ -2731,18 +2728,46 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入柔和彩虹背景 CSS 动画】
+// 【新增代码：注入流动棱彩覆盖层 CSS 动画】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-	if (!document.getElementById('fantasy-rainbow-bg-style')) {
+	if (!document.getElementById('fantasy-holo-style')) {
 		const style = document.createElement('style');
-		style.id = 'fantasy-rainbow-bg-style';
-		// 注意这里：我们通过 CSS 变量 var(--px) 和 var(--py) 来保持宝可梦位置不动，只移动后面的彩虹渐变 (0% -> 100%)
+		style.id = 'fantasy-holo-style';
+		// 巧妙使用 CSS 属性选择器和遮罩 (mask) 技术
+		// 做到“只有薄薄一层覆盖在图标表面”，完美还原 TFT 棱彩效果
 		style.innerHTML = `
-			@keyframes fantasyRainbowBg {
-				0%   { background-position: var(--px, 0px) var(--py, 0px), 0% 50%; }
-				50%  { background-position: var(--px, 0px) var(--py, 0px), 100% 50%; }
-				100% { background-position: var(--px, 0px) var(--py, 0px), 0% 50%; }
+			@keyframes holoGradient {
+				0% { background-position: 0% 50%; }
+				50% { background-position: 100% 50%; }
+				100% { background-position: 0% 50%; }
+			}
+			/* 选中含有 --is-fantasy 变量的小图标容器 */
+			span[style*="--is-fantasy"] {
+				position: relative;
+				display: inline-block;
+			}
+			/* 在图标上层生成一个伪元素，作为单独的流光覆盖层 */
+			span[style*="--is-fantasy"]::after {
+				content: '';
+				position: absolute;
+				top: 0; left: 0; right: 0; bottom: 0;
+				
+				/* 这就是你图上的浅粉、浅青、浅黄渐变，0.4 代表透明度，不会遮挡原图 */
+				background: linear-gradient(120deg, rgba(255, 180, 200, 0.4), rgba(180, 255, 255, 0.4), rgba(255, 255, 180, 0.4), rgba(255, 180, 200, 0.4));
+				background-size: 200% 200%;
+				animation: holoGradient 3s linear infinite;
+				
+				/* 核心技术：使用与底层一模一样的图集作为遮罩，确保流光不会漏到正方形空白处 */
+				-webkit-mask-image: var(--bg-url);
+				-webkit-mask-position: var(--bg-pos);
+				-webkit-mask-repeat: no-repeat;
+				mask-image: var(--bg-url);
+				mask-position: var(--bg-pos);
+				mask-repeat: no-repeat;
+				
+				/* 鼠标穿透，防止影响点击 */
+				pointer-events: none;
 			}
 		`;
 		document.head.appendChild(style);
