@@ -1315,26 +1315,25 @@ export const Dex = new class implements ModdedDex {
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
 		
-		// 【修改逻辑】整合濒死状态与 Fantasy 的滤镜
 		let filterStyles = [];
 		let opacityStyle = fainted ? `;opacity:.3` : ``;
+		let animationStyle = ``;
 		
-		// 1. 如果濒死，添加变灰变暗滤镜
+		// 1. 濒死状态：变灰变暗（不再应用彩虹动画）
 		if (fainted) {
 			filterStyles.push('grayscale(100%)', 'brightness(.5)');
+		} 
+		// 2. 正常状态且是 fantasy 宝可梦：调用全局的彩虹流动动画
+		else if (finalId.endsWith('fantasy')) {
+			// 3s 表示 3秒转一圈，linear 表示匀速，infinite 表示无限循环
+			// 你可以把 3s 改成 2s(更快) 或 5s(更慢)
+			animationStyle = `;animation: fantasyRainbow 3s linear infinite`;
 		}
 		
-		// 2. 判断是否为 fantasy 宝可梦并追加彩色滤镜
-		if (finalId.endsWith('fantasy')) {
-			// 这里使用色相旋转和饱和度提升来制造出彩色/异色的效果
-			filterStyles.push('hue-rotate(90deg)', 'saturate(200%)', 'drop-shadow(0px 0px 2px rgba(255, 105, 180, 0.8))');
-		}
-		
-		// 3. 拼接最终的 filter 字符串
 		let filterString = filterStyles.length > 0 ? `;filter:${filterStyles.join(' ')}` : ``;
 		
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
-		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${opacityStyle}${filterString}`;
+		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${opacityStyle}${filterString}${animationStyle}`;
 	}
 
 	// sprite in teambuilder
@@ -2735,4 +2734,21 @@ if (typeof require === 'function') {
 	// in Node
 	global.Dex = Dex;
 	global.toID = toID;
+}
+// ==========================================
+// 【新增代码：注入流动彩虹 CSS 动画】
+// ==========================================
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+	if (!document.getElementById('fantasy-rainbow-style')) {
+		const style = document.createElement('style');
+		style.id = 'fantasy-rainbow-style';
+		// 定义动画：0% 到 100% 色相旋转一整圈，饱和度稍微提亮一点点
+		style.innerHTML = `
+			@keyframes fantasyRainbow {
+				0% { filter: hue-rotate(0deg) saturate(150%); }
+				100% { filter: hue-rotate(360deg) saturate(150%); }
+			}
+		`;
+		document.head.appendChild(style);
+	}
 }
