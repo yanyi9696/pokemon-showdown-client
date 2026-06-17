@@ -1314,9 +1314,27 @@ export const Dex = new class implements ModdedDex {
 		// Generate CSS
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
-		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
+		
+		// 【修改逻辑】整合濒死状态与 Fantasy 的滤镜
+		let filterStyles = [];
+		let opacityStyle = fainted ? `;opacity:.3` : ``;
+		
+		// 1. 如果濒死，添加变灰变暗滤镜
+		if (fainted) {
+			filterStyles.push('grayscale(100%)', 'brightness(.5)');
+		}
+		
+		// 2. 判断是否为 fantasy 宝可梦并追加彩色滤镜
+		if (finalId.endsWith('fantasy')) {
+			// 这里使用色相旋转和饱和度提升来制造出彩色/异色的效果
+			filterStyles.push('hue-rotate(90deg)', 'saturate(200%)', 'drop-shadow(0px 0px 2px rgba(255, 105, 180, 0.8))');
+		}
+		
+		// 3. 拼接最终的 filter 字符串
+		let filterString = filterStyles.length > 0 ? `;filter:${filterStyles.join(' ')}` : ``;
+		
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
-		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}`;
+		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${opacityStyle}${filterString}`;
 	}
 
 	// sprite in teambuilder
