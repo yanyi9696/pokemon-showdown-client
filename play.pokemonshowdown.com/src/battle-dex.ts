@@ -1317,16 +1317,17 @@ export const Dex = new class implements ModdedDex {
 		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
 
-		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量和外发光动画
+		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量和外发光样式
 		let fantasyStyles = '';
 		if (finalId.endsWith('fantasy')) {
-			// 如果宝可梦存活，添加彩虹轮廓发光动画；如果濒死，则不发光以保持原有的变灰效果
-			let glowAnimation = fainted ? '' : `animation: rainbowDropShadow 4s linear infinite;`;
+			// 【修改点】：废弃动画，改为同时在上下左右叠加 4 种不同颜色、0.4 低透明度的投影。
+			// 这会在宝可梦轮廓周围形成一圈固定不动、非常柔和的彩虹光晕。
+			let glowStyle = fainted ? '' : `filter: drop-shadow(0 -1.5px 1.5px rgba(255,100,150,0.4)) drop-shadow(1.5px 0 1.5px rgba(100,255,150,0.4)) drop-shadow(0 1.5px 1.5px rgba(100,200,255,0.4)) drop-shadow(-1.5px 0 1.5px rgba(255,230,100,0.4));`;
 			
-			// --is-fantasy 用于触发扫光特效
+			// --is-fantasy 用于触发内部扫光特效
 			// --bg-url 和 --bg-pos 用于同步图标坐标
-			// 注意最后拼接了 glowAnimation
-			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; ${glowAnimation}`;
+			// 拼接我们刚刚调配好的静态彩虹光圈 glowStyle
+			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; ${glowStyle}`;
 		}
 
 		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}${fantasyStyles}`;
@@ -2732,7 +2733,7 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入 TFT 棱彩扫光 + 彩虹轮廓外发光 CSS 动画】
+// 【新增代码：注入 TFT 棱彩扫光 CSS 动画 (带静态淡彩虹轮廓)】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
@@ -2740,21 +2741,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 		style.id = 'fantasy-holo-style';
 		style.innerHTML = `
 			/* ------------------------------------------
-			   新增动画：彩虹色轮廓泛光
-			   使用双层 drop-shadow 叠加，让轮廓发光厚实且显眼！
-			   ------------------------------------------ */
-			@keyframes rainbowDropShadow {
-				0%   { filter: drop-shadow(0 0 1.5px #ff2a2a) drop-shadow(0 0 3px #ff2a2a); }
-				17%  { filter: drop-shadow(0 0 1.5px #ffea2a) drop-shadow(0 0 3px #ffea2a); }
-				33%  { filter: drop-shadow(0 0 1.5px #2aff2a) drop-shadow(0 0 3px #2aff2a); }
-				50%  { filter: drop-shadow(0 0 1.5px #2affff) drop-shadow(0 0 3px #2affff); }
-				67%  { filter: drop-shadow(0 0 1.5px #2a2aff) drop-shadow(0 0 3px #2a2aff); }
-				83%  { filter: drop-shadow(0 0 1.5px #ff2aff) drop-shadow(0 0 3px #ff2aff); }
-				100% { filter: drop-shadow(0 0 1.5px #ff2a2a) drop-shadow(0 0 3px #ff2a2a); }
-			}
-
-			/* ------------------------------------------
-			   原有的动画：慢速高频的 TFT 扫光
+			   动画：慢速高频的 TFT 扫光 (内层)
 			   ------------------------------------------ */
 			@keyframes foilSweep {
 				0% { background-position: 150% 50%; }
@@ -2765,7 +2752,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 			span[style*="--is-fantasy"] {
 				position: relative;
 				display: inline-block;
-				/* 关键：防止发光特效被容器的正方形边缘裁剪 */
+				/* 防止发光特效被容器的正方形边缘裁剪 */
 				overflow: visible;
 			}
 			
