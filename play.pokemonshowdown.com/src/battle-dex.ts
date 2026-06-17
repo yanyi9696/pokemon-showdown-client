@@ -1320,8 +1320,8 @@ export const Dex = new class implements ModdedDex {
 		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量进行“真·图层分离”
 		let fantasyStyles = '';
 		if (finalId.endsWith('fantasy')) {
-			// 采用 Deosectwo 风格的闪耀彩虹动画，2秒一圈极速轮转
-			let glowAnim = fainted ? 'none' : 'deosectwoRainbowGlow 2s linear infinite';
+			// 恢复使用你喜欢的四色彩虹轮转动画，3秒一圈
+			let glowAnim = fainted ? 'none' : 'rainbowGlowSpin 3s linear infinite';
 			
 			// 变量传递：--is-fantasy 触发图层分离，--bg-url/pos 传递底层坐标，--glow-anim 传递动画指令
 			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; --glow-anim: ${glowAnim};`;
@@ -2731,21 +2731,45 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码： RGB 彩虹流光 (完美防模糊双图层版)】
+// 【新增代码：0.6透明度流转彩虹光晕 (完美防模糊双图层版)】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
 		const style = document.createElement('style');
 		style.id = 'fantasy-holo-style';
 		style.innerHTML = `
-			/* Deosectwo 专属的高强度 RGB 彩虹轮转
-			   通过组合内圈(玫红)和外圈(天蓝)两种 drop-shadow，
-			   配合 hue-rotate 色相无缝旋转，实现极其绚丽、五颜六色的多彩呼吸光！
-			   全部采用 0 偏移，消除浏览器亚像素抖动。
-			*/
-			@keyframes deosectwoRainbowGlow {
-				0%   { filter: drop-shadow(0 0 2px rgba(255, 0, 85, 0.9)) drop-shadow(0 0 5px rgba(0, 136, 255, 0.8)) hue-rotate(0deg); }
-				100% { filter: drop-shadow(0 0 2px rgba(255, 0, 85, 0.9)) drop-shadow(0 0 5px rgba(0, 136, 255, 0.8)) hue-rotate(360deg); }
+			/* 恢复使用 0.6 透明度、1.5px 模糊的四色彩虹轮转 */
+			@keyframes rainbowGlowSpin {
+				0% {
+					filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6));
+				}
+				25% {
+					filter: drop-shadow(1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(255, 100, 100, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 245, 0.6));
+				}
+				50% {
+					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(130, 100, 255, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 100, 0.6));
+				}
+				75% {
+					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(100, 255, 245, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(255, 100, 100, 0.6));
+				}
+				100% {
+					filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6));
+				}
 			}
 
 			/* 1. 容器本体：剥夺背景图，建立独立的渲染层 */
@@ -2753,13 +2777,12 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				position: relative;
 				display: inline-block;
 				overflow: visible;
-				/* 【核心黑科技】强行抹除父级的内联背景图，防止父级滤镜带崩清晰度 */
+				/* 【核心黑科技】抹除内联背景图，防止带崩清晰度 */
 				background-image: none !important;
-				/* 隔离层级，保证发光层不会跑到网页其他元素的背后去 */
 				isolation: isolate;
 			}
 			
-			/* 共用设置：利用之前存入的 CSS 变量，在子层重新渲染图标分身 */
+			/* 共用设置：在子层重新渲染图标分身 */
 			span[style*="--is-fantasy"]::before,
 			span[style*="--is-fantasy"]::after {
 				content: '';
@@ -2771,13 +2794,13 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				pointer-events: none;
 			}
 
-			/* 2. 发光底层：沉在底下疯狂发光，即便浏览器因为缩放比例把它算糊了，也只是一圈柔和的光晕 */
+			/* 2. 发光底层：沉在底下发彩虹光晕 */
 			span[style*="--is-fantasy"]::before {
 				animation: var(--glow-anim);
 				z-index: 1;
 			}
 
-			/* 3. 清晰顶层：盖在发光层上面。因为它身上没有任何 filter，永远保持 100% 原始像素级锐利！ */
+			/* 3. 清晰顶层：盖在发光层上面，没有任何 filter，永远保持 100% 原始像素锐利 */
 			span[style*="--is-fantasy"]::after {
 				z-index: 2;
 			}
