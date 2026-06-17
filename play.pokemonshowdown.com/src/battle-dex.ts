@@ -1316,9 +1316,17 @@ export const Dex = new class implements ModdedDex {
 		let left = (num % 12) * 40;
 		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
-		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}`;
-	}
 
+		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量供底层读取
+		let fantasyStyles = '';
+		if (finalId.endsWith('fantasy')) {
+			// --is-fantasy 用于触发特效
+			// --bg-url 和 --bg-pos 用于同步图标坐标,让彩虹只出现在宝可梦轮廓内
+			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px;`;
+		}
+
+		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}${fantasyStyles}`;
+	}
 
 	// sprite in teambuilder
 	getTeambuilderSpriteData(pokemon: any, gen = 0): TeambuilderSpriteData {
@@ -2718,4 +2726,85 @@ if (typeof require === 'function') {
 	// in Node
 	global.Dex = Dex;
 	global.toID = toID;
+}
+// ==========================================
+// 【新增代码：注入 TFT 风格棱彩扫光 (Foil Sweep) CSS 动画】
+// ==========================================
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+	if (!document.getElementById('fantasy-holo-style')) {
+		const style = document.createElement('style');
+		style.id = 'fantasy-holo-style';
+		style.innerHTML = `
+			/* 核心扫光动画：让光带从左侧远远滑向右侧 */
+			/* 加入了 0-15% 和 85-100% 的停顿期，模拟光线偶然扫过的真实感，而不是死板的匀速转动 */
+			@keyframes foilSweep {
+				0%, 15% { background-position: 250% 50%; }
+				85%, 100% { background-position: -150% 50%; }
+			}
+			
+			span[style*="--is-fantasy"] {
+				position: relative;
+				display: inline-block;
+			}
+			
+			/* 第一层：平时常驻的极其微弱的金属底色，防止无光时太单调 */
+			span[style*="--is-fantasy"]::before {
+				content: '';
+				position: absolute;
+				top: 0; left: 0; right: 0; bottom: 0;
+				/* 一层极淡的彩虹涂层，透明度只有 0.15 */
+				background: linear-gradient(135deg, rgba(255,200,200,0.15), rgba(200,255,200,0.15), rgba(200,200,255,0.15));
+				mix-blend-mode: hard-light;
+				
+				-webkit-mask-image: var(--bg-url);
+				-webkit-mask-position: var(--bg-pos);
+				-webkit-mask-repeat: no-repeat;
+				mask-image: var(--bg-url);
+				mask-position: var(--bg-pos);
+				mask-repeat: no-repeat;
+				pointer-events: none;
+				z-index: 1;
+			}
+			
+			/* 第二层：如同视频中一样的“倾斜彩虹扫光带” */
+			span[style*="--is-fantasy"]::after {
+				content: '';
+				position: absolute;
+				top: 0; left: 0; right: 0; bottom: 0;
+				
+				/* 精心调配的倾斜光束：边缘是浅彩虹色，中心是纯白爆亮的高光 */
+				background: linear-gradient(
+					110deg,
+					transparent 0%,
+					transparent 30%,
+					rgba(255, 220, 100, 0.7) 42%,  /* 边缘金黄 */
+					rgba(100, 255, 150, 0.7) 46%,  /* 边缘翠绿 */
+					rgba(255, 255, 255, 1)   50%,  /* 中心纯白高光！ */
+					rgba(100, 200, 255, 0.7) 54%,  /* 边缘湛蓝 */
+					rgba(255, 150, 200, 0.7) 58%,  /* 边缘粉红 */
+					transparent 70%,
+					transparent 100%
+				);
+				
+				/* 必须将宽度拉大到 300%，这样光带才有足够的空间从画面外扫进来再扫出去 */
+				background-size: 300% 100%;
+				
+				/* 动画时间设为 3.5秒 循环，滑动过程使用 ease-in-out 让光带滑行更丝滑 */
+				animation: foilSweep 3.5s ease-in-out infinite;
+				
+				/* 颜色减淡模式：一旦白光扫过，宝可梦身上的颜色会瞬间呈现金属爆亮感 */
+				mix-blend-mode: color-dodge;
+				
+				-webkit-mask-image: var(--bg-url);
+				-webkit-mask-position: var(--bg-pos);
+				-webkit-mask-repeat: no-repeat;
+				mask-image: var(--bg-url);
+				mask-position: var(--bg-pos);
+				mask-repeat: no-repeat;
+				pointer-events: none;
+				z-index: 2;
+			}
+		`;
+		document.head.appendChild(style);
+	}
 }
