@@ -1320,9 +1320,12 @@ export const Dex = new class implements ModdedDex {
 		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量和外发光样式
 		let fantasyStyles = '';
 		if (finalId.endsWith('fantasy')) {
-			// 【修改点】：将透明度从 0.4 提高到了 0.8，模糊半径从 1.5px 扩大到 2px。
-			// 这样彩虹轮廓会更加清晰显眼，不再是灰蒙蒙的一片！
-			let glowStyle = fainted ? '' : `filter: drop-shadow(0 -1.5px 2px rgba(255,100,150,0.8)) drop-shadow(1.5px 0 2px rgba(100,255,150,0.8)) drop-shadow(0 1.5px 2px rgba(100,200,255,0.8)) drop-shadow(-1.5px 0 2px rgba(255,230,100,0.8));`;
+			// 1. (1.5px 0)  -> 向右侧投影，使用红色/粉红色
+			// 2. (0 1.5px)  -> 向下侧投影，使用橙色/黄色
+			// 3. (-1.5px 0) -> 向左侧投影，使用蓝色
+			// 4. (0 -1.5px) -> 向上侧投影，使用绿色
+			// 依然保持 0.8 的较高透明度，模糊半径为 1.8px。
+			let glowStyle = fainted ? '' : `filter: drop-shadow(1.5px 0 1.8px rgba(255,100,150,0.8)) drop-shadow(0 1.5px 1.8px rgba(255,200,100,0.8)) drop-shadow(-1.5px 0 1.8px rgba(100,200,255,0.8)) drop-shadow(0 -1.5px 1.8px rgba(100,255,150,0.8));`;
 			
 			// --is-fantasy 用于触发内部扫光特效
 			// --bg-url 和 --bg-pos 用于同步图标坐标
@@ -2792,8 +2795,8 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 					transparent 100%
 				);
 				
-				background-size: 200% 100%;
-				animation: foilSweep 2.5s ease-in-out infinite;
+				background-size: 250% 100%;
+				animation: foilSweep 3.5s ease-in-out infinite;
 				mix-blend-mode: color-dodge;
 				
 				-webkit-mask-image: var(--bg-url);
