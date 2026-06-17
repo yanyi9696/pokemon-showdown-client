@@ -2728,23 +2728,22 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入 50% 流光棱彩 + 鲜艳碎钻闪烁 CSS 动画】
+// 【新增代码：注入 50% 棱彩底纹 + 大光点交替闪烁 CSS 动画】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
 		const style = document.createElement('style');
 		style.id = 'fantasy-holo-style';
 		style.innerHTML = `
-			/* 动画 1：底层的棱彩缓缓流动 */
-			@keyframes holoFlow {
-				0% { background-position: 0% 50%; }
-				50% { background-position: 100% 50%; }
-				100% { background-position: 0% 50%; }
-			}
-			/* 动画 2：上层的彩色光点呼吸闪烁 */
-			@keyframes starTwinkle {
-				0%, 100% { opacity: 0.2; }
+			/* 动画1：第一组光点呼吸 */
+			@keyframes starPulse1 {
+				0%, 100% { opacity: 0.5; }
 				50% { opacity: 1; }
+			}
+			/* 动画2：第二组光点呼吸（与动画1时间错开，形成交替闪烁） */
+			@keyframes starPulse2 {
+				0%, 100% { opacity: 1; }
+				50% { opacity: 0.1; }
 			}
 			
 			span[style*="--is-fantasy"] {
@@ -2753,23 +2752,23 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 			}
 			
 			/* ==============================
-			   第一层：流动棱彩 (严格 50% 透明度) 
+			   第一层：50%底纹 + 第一组光点 (粉色/青色)
 			   ============================== */
 			span[style*="--is-fantasy"]::before {
 				content: '';
 				position: absolute;
 				top: 0; left: 0; right: 0; bottom: 0;
 				
-				/* 使用 0.5 的 alpha 通道，确保透明度刚好是 50%，既有色彩又不突兀 */
-				background: linear-gradient(120deg, 
-					rgba(255, 100, 150, 0.5), 
-					rgba(100, 200, 255, 0.5), 
-					rgba(255, 230, 100, 0.5), 
-					rgba(255, 100, 150, 0.5)
-				);
-				background-size: 200% 200%;
-				animation: holoFlow 4s linear infinite;
-				mix-blend-mode: overlay; /* 完美融合，不破坏宝可梦黑色轮廓 */
+				background:
+					/* 放大且更亮的粉色星光 */
+					radial-gradient(circle 5px at 20% 30%, rgba(255, 50, 150, 1) 0%, transparent 70%),
+					/* 放大且更亮的青色星光 */
+					radial-gradient(circle 4px at 80% 70%, rgba(50, 255, 255, 1) 0%, transparent 70%),
+					/* 固定的 60% 透明度柔和全息底纹 */
+					linear-gradient(120deg, rgba(255, 100, 150, 0.6), rgba(100, 200, 255, 0.6), rgba(255, 230, 100, 0.6), rgba(255, 100, 150, 0.6));
+				
+				mix-blend-mode: overlay; /* 让底纹融入宝可梦 */
+				animation: starPulse1 3s ease-in-out infinite; /* 3秒循环 */
 				
 				-webkit-mask-image: var(--bg-url);
 				-webkit-mask-position: var(--bg-pos);
@@ -2782,24 +2781,23 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 			}
 			
 			/* ==============================
-			   第二层：高亮明显的彩色碎光点 
+			   第二层：第二组光点 (金色/绿色/白色)
 			   ============================== */
 			span[style*="--is-fantasy"]::after {
 				content: '';
 				position: absolute;
 				top: 0; left: 0; right: 0; bottom: 0;
 				
-				/* 光点中心的透明度拉满 (1)，颜色使用高饱和纯色，让光点“显眼包”一点 */
 				background:
-					radial-gradient(circle 3px at 20% 30%, rgba(255, 40, 100, 1) 0%, transparent 80%),   /* 亮粉色 */
-					radial-gradient(circle 3.5px at 80% 70%, rgba(40, 150, 255, 1) 0%, transparent 80%),  /* 亮蓝色 */
-					radial-gradient(circle 2.5px at 30% 75%, rgba(255, 210, 20, 1) 0%, transparent 80%),  /* 亮金色 */
-					radial-gradient(circle 2.5px at 75% 25%, rgba(80, 255, 80, 1) 0%, transparent 80%),   /* 亮绿色 */
-					radial-gradient(circle 1.5px at 50% 50%, rgba(255, 255, 255, 1) 0%, transparent 100%); /* 中心白点 */
+					/* 放大且更亮的金色星光 */
+					radial-gradient(circle 5px at 75% 25%, rgba(255, 220, 0, 1) 0%, transparent 70%),
+					/* 放大且更亮的绿色星光 */
+					radial-gradient(circle 4.5px at 25% 75%, rgba(50, 255, 100, 1) 0%, transparent 70%),
+					/* 极亮的纯白色中心星光 */
+					radial-gradient(circle 3px at 50% 50%, rgba(255, 255, 255, 1) 0%, transparent 80%);
 				
-				/* 颜色减淡模式：让光点和底层颜色叠加时爆发出强烈的发光感 */
-				mix-blend-mode: color-dodge;
-				animation: starTwinkle 2s ease-in-out infinite;
+				mix-blend-mode: color-dodge; /* 减淡模式，让颜色像霓虹灯一样爆亮 */
+				animation: starPulse2 2.2s ease-in-out infinite; /* 2.2秒循环，与第一层错位 */
 				
 				-webkit-mask-image: var(--bg-url);
 				-webkit-mask-position: var(--bg-pos);
