@@ -2728,18 +2728,18 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入 TFT 风格棱彩扫光 (Foil Sweep) CSS 动画】
+// 【新增代码：注入 TFT 风格棱彩扫光 (Foil Sweep - 慢速高频优化版)】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
 		const style = document.createElement('style');
 		style.id = 'fantasy-holo-style';
 		style.innerHTML = `
-			/* 核心扫光动画：让光带从左侧远远滑向右侧 */
-			/* 加入了 0-15% 和 85-100% 的停顿期，模拟光线偶然扫过的真实感，而不是死板的匀速转动 */
+			/* 优化动画：起始和终点距离缩短，取消长停顿，仅在 85%-100% 期间进行极短暂的停顿 */
 			@keyframes foilSweep {
-				0%, 15% { background-position: 250% 50%; }
-				85%, 100% { background-position: -150% 50%; }
+				0% { background-position: 150% 50%; }
+				85% { background-position: -50% 50%; }
+				100% { background-position: -50% 50%; }
 			}
 			
 			span[style*="--is-fantasy"] {
@@ -2747,12 +2747,11 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				display: inline-block;
 			}
 			
-			/* 第一层：平时常驻的极其微弱的金属底色，防止无光时太单调 */
+			/* 第一层：金属底色保留 */
 			span[style*="--is-fantasy"]::before {
 				content: '';
 				position: absolute;
 				top: 0; left: 0; right: 0; bottom: 0;
-				/* 一层极淡的彩虹涂层，透明度只有 0.15 */
 				background: linear-gradient(135deg, rgba(255,200,200,0.15), rgba(200,255,200,0.15), rgba(200,200,255,0.15));
 				mix-blend-mode: hard-light;
 				
@@ -2766,33 +2765,32 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				z-index: 1;
 			}
 			
-			/* 第二层：如同视频中一样的“倾斜彩虹扫光带” */
+			/* 第二层：优化后的扫光带 */
 			span[style*="--is-fantasy"]::after {
 				content: '';
 				position: absolute;
 				top: 0; left: 0; right: 0; bottom: 0;
 				
-				/* 精心调配的倾斜光束：边缘是浅彩虹色，中心是纯白爆亮的高光 */
+				/* 将光束稍微收紧一点，以配合较短的移动距离，显得更精致 */
 				background: linear-gradient(
 					110deg,
 					transparent 0%,
-					transparent 30%,
-					rgba(255, 220, 100, 0.7) 42%,  /* 边缘金黄 */
-					rgba(100, 255, 150, 0.7) 46%,  /* 边缘翠绿 */
-					rgba(255, 255, 255, 1)   50%,  /* 中心纯白高光！ */
-					rgba(100, 200, 255, 0.7) 54%,  /* 边缘湛蓝 */
-					rgba(255, 150, 200, 0.7) 58%,  /* 边缘粉红 */
-					transparent 70%,
+					transparent 35%,
+					rgba(255, 220, 100, 0.7) 43%,
+					rgba(100, 255, 150, 0.7) 47%,
+					rgba(255, 255, 255, 1)   50%,
+					rgba(100, 200, 255, 0.7) 53%,
+					rgba(255, 150, 200, 0.7) 57%,
+					transparent 65%,
 					transparent 100%
 				);
 				
-				/* 必须将宽度拉大到 300%，这样光带才有足够的空间从画面外扫进来再扫出去 */
-				background-size: 300% 100%;
+				/* 【修改核心1】：宽度从 300% 缩小到 200%，大幅缩短滑行路程，让扫光变慢 */
+				background-size: 200% 100%;
 				
-				/* 动画时间设为 3.5秒 循环，滑动过程使用 ease-in-out 让光带滑行更丝滑 */
-				animation: foilSweep 3.5s ease-in-out infinite;
+				/* 【修改核心2】：总时长缩短到 2.5s，间隔频率大幅提升 */
+				animation: foilSweep 2.5s ease-in-out infinite;
 				
-				/* 颜色减淡模式：一旦白光扫过，宝可梦身上的颜色会瞬间呈现金属爆亮感 */
 				mix-blend-mode: color-dodge;
 				
 				-webkit-mask-image: var(--bg-url);
