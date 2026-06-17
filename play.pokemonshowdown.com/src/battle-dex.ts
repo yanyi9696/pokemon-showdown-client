@@ -1317,12 +1317,16 @@ export const Dex = new class implements ModdedDex {
 		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
 
-		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量供底层读取
+		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量和外发光动画
 		let fantasyStyles = '';
 		if (finalId.endsWith('fantasy')) {
-			// --is-fantasy 用于触发特效
-			// --bg-url 和 --bg-pos 用于同步图标坐标,让彩虹只出现在宝可梦轮廓内
-			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px;`;
+			// 如果宝可梦存活，添加彩虹轮廓发光动画；如果濒死，则不发光以保持原有的变灰效果
+			let glowAnimation = fainted ? '' : `animation: rainbowDropShadow 4s linear infinite;`;
+			
+			// --is-fantasy 用于触发扫光特效
+			// --bg-url 和 --bg-pos 用于同步图标坐标
+			// 注意最后拼接了 glowAnimation
+			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; ${glowAnimation}`;
 		}
 
 		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}${fantasyStyles}`;
@@ -2728,14 +2732,30 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入 TFT 风格棱彩扫光 (Foil Sweep - 慢速高频优化版)】
+// 【新增代码：注入 TFT 棱彩扫光 + 彩虹轮廓外发光 CSS 动画】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
 		const style = document.createElement('style');
 		style.id = 'fantasy-holo-style';
 		style.innerHTML = `
-			/* 优化动画：起始和终点距离缩短，取消长停顿，仅在 85%-100% 期间进行极短暂的停顿 */
+			/* ------------------------------------------
+			   新增动画：彩虹色轮廓泛光
+			   使用双层 drop-shadow 叠加，让轮廓发光厚实且显眼！
+			   ------------------------------------------ */
+			@keyframes rainbowDropShadow {
+				0%   { filter: drop-shadow(0 0 1.5px #ff2a2a) drop-shadow(0 0 3px #ff2a2a); }
+				17%  { filter: drop-shadow(0 0 1.5px #ffea2a) drop-shadow(0 0 3px #ffea2a); }
+				33%  { filter: drop-shadow(0 0 1.5px #2aff2a) drop-shadow(0 0 3px #2aff2a); }
+				50%  { filter: drop-shadow(0 0 1.5px #2affff) drop-shadow(0 0 3px #2affff); }
+				67%  { filter: drop-shadow(0 0 1.5px #2a2aff) drop-shadow(0 0 3px #2a2aff); }
+				83%  { filter: drop-shadow(0 0 1.5px #ff2aff) drop-shadow(0 0 3px #ff2aff); }
+				100% { filter: drop-shadow(0 0 1.5px #ff2a2a) drop-shadow(0 0 3px #ff2a2a); }
+			}
+
+			/* ------------------------------------------
+			   原有的动画：慢速高频的 TFT 扫光
+			   ------------------------------------------ */
 			@keyframes foilSweep {
 				0% { background-position: 150% 50%; }
 				85% { background-position: -50% 50%; }
@@ -2745,9 +2765,11 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 			span[style*="--is-fantasy"] {
 				position: relative;
 				display: inline-block;
+				/* 关键：防止发光特效被容器的正方形边缘裁剪 */
+				overflow: visible;
 			}
 			
-			/* 第一层：金属底色保留 */
+			/* 第一层：金属底色 */
 			span[style*="--is-fantasy"]::before {
 				content: '';
 				position: absolute;
@@ -2765,13 +2787,12 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				z-index: 1;
 			}
 			
-			/* 第二层：优化后的扫光带 */
+			/* 第二层：倾斜扫光带 */
 			span[style*="--is-fantasy"]::after {
 				content: '';
 				position: absolute;
 				top: 0; left: 0; right: 0; bottom: 0;
 				
-				/* 将光束稍微收紧一点，以配合较短的移动距离，显得更精致 */
 				background: linear-gradient(
 					110deg,
 					transparent 0%,
@@ -2785,12 +2806,8 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 					transparent 100%
 				);
 				
-				/* 【修改核心1】：宽度从 300% 缩小到 200%，大幅缩短滑行路程，让扫光变慢 */
 				background-size: 200% 100%;
-				
-				/* 【修改核心2】：总时长缩短到 2.5s，间隔频率大幅提升 */
 				animation: foilSweep 2.5s ease-in-out infinite;
-				
 				mix-blend-mode: color-dodge;
 				
 				-webkit-mask-image: var(--bg-url);
