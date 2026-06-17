@@ -1324,8 +1324,8 @@ export const Dex = new class implements ModdedDex {
 			// 2. (0 1.5px)  -> 向下侧投影，使用橙色/黄色
 			// 3. (-1.5px 0) -> 向左侧投影，使用蓝色
 			// 4. (0 -1.5px) -> 向上侧投影，使用绿色
-			// 依然保持 0.8 的较高透明度，模糊半径为 1.8px。
-			let glowStyle = fainted ? '' : `filter: drop-shadow(1.5px 0 1.8px rgba(255,100,150,0.8)) drop-shadow(0 1.5px 1.8px rgba(255,200,100,0.8)) drop-shadow(-1.5px 0 1.8px rgba(100,200,255,0.8)) drop-shadow(0 -1.5px 1.8px rgba(100,255,150,0.8));`;
+			// 依然保持 0.8 的较高透明度，模糊半径为 1.5px。
+			let glowStyle = fainted ? '' : `filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.9)) drop-shadow(0 1.5px 1.5px rgba(245, 255, 100, 0.9)) drop-shadow(-1.5px 0 1.5px rgba(100,200,255,0.9)) drop-shadow(0 -1.5px 1.5px rgba(110, 255, 100, 0.8));`;
 			
 			// --is-fantasy 用于触发内部扫光特效
 			// --bg-url 和 --bg-pos 用于同步图标坐标
