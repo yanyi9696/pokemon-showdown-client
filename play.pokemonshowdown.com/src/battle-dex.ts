@@ -2731,44 +2731,51 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：0.6透明度流转彩虹光晕 (完美防模糊双图层版)】
+// 【新增代码：0.6透明度流转彩虹光晕 (带黑边/防模糊双图层版)】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
 		const style = document.createElement('style');
 		style.id = 'fantasy-holo-style';
 		style.innerHTML = `
-			/* 恢复使用 0.6 透明度、1.5px 模糊的四色彩虹轮转 */
+			/* 在 4 个彩虹色后面，统一追加了第 5 个 drop-shadow(0 0 2px rgba(0, 0, 0, 0.65))。
+			   这层黑灰色阴影会给光晕“托底”，极大地增强 Light 模式下的色彩对比度！
+			*/
 			@keyframes rainbowGlowSpin {
 				0% {
 					filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
 							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
 							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6));
+							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6))
+							drop-shadow(0 0 2px rgba(0, 0, 0, 0.65));
 				}
 				25% {
 					filter: drop-shadow(1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
 							drop-shadow(0 1.5px 1.5px rgba(255, 100, 100, 0.6)) 
 							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 245, 0.6));
+							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 245, 0.6))
+							drop-shadow(0 0 2px rgba(0, 0, 0, 0.65));
 				}
 				50% {
 					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
 							drop-shadow(0 1.5px 1.5px rgba(130, 100, 255, 0.6)) 
 							drop-shadow(-1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 100, 0.6));
+							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 100, 0.6))
+							drop-shadow(0 0 2px rgba(0, 0, 0, 0.65));
 				}
 				75% {
 					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
 							drop-shadow(0 1.5px 1.5px rgba(100, 255, 245, 0.6)) 
 							drop-shadow(-1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(255, 100, 100, 0.6));
+							drop-shadow(0 -1.5px 1.5px rgba(255, 100, 100, 0.6))
+							drop-shadow(0 0 2px rgba(0, 0, 0, 0.65));
 				}
 				100% {
 					filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
 							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
 							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6));
+							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6))
+							drop-shadow(0 0 2px rgba(0, 0, 0, 0.65));
 				}
 			}
 
