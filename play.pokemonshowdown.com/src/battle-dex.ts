@@ -2728,20 +2728,23 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入碎钻闪烁与褶皱镭射 CSS 动画 (高亮版)】
+// 【新增代码：注入 50% 流光棱彩 + 鲜艳碎钻闪烁 CSS 动画】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
 		const style = document.createElement('style');
 		style.id = 'fantasy-holo-style';
 		style.innerHTML = `
-			@keyframes twinkle1 {
-				0%, 100% { opacity: 0.1; }
-				50% { opacity: 1; }
+			/* 动画 1：底层的棱彩缓缓流动 */
+			@keyframes holoFlow {
+				0% { background-position: 0% 50%; }
+				50% { background-position: 100% 50%; }
+				100% { background-position: 0% 50%; }
 			}
-			@keyframes twinkle2 {
-				0%, 100% { opacity: 1; }
-				50% { opacity: 0.1; }
+			/* 动画 2：上层的彩色光点呼吸闪烁 */
+			@keyframes starTwinkle {
+				0%, 100% { opacity: 0.2; }
+				50% { opacity: 1; }
 			}
 			
 			span[style*="--is-fantasy"] {
@@ -2749,21 +2752,24 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				display: inline-block;
 			}
 			
-			/* 第一层：底纹 + 高亮粉/绿发光点 */
+			/* ==============================
+			   第一层：流动棱彩 (严格 50% 透明度) 
+			   ============================== */
 			span[style*="--is-fantasy"]::before {
 				content: '';
 				position: absolute;
 				top: 0; left: 0; right: 0; bottom: 0;
-				background:
-					/* 调高透明度至 1,中心纯色,边缘渐变消失,让光点更实、更亮 */
-					radial-gradient(circle 2px at 25% 25%, rgba(255, 100, 150, 1) 0%, rgba(255, 100, 150, 0) 100%),
-					radial-gradient(circle 2.5px at 75% 80%, rgba(100, 255, 150, 1) 0%, rgba(100, 255, 150, 0) 100%),
-					/* 新增：额外的高亮小白点,模拟极强的反光 */
-					radial-gradient(circle 1px at 45% 45%, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%),
-					conic-gradient(from 45deg at 40% 60%, rgba(255,150,200,0.15) 0deg, rgba(150,200,255,0.15) 120deg, rgba(255,255,150,0.15) 240deg, rgba(255,150,200,0.15) 360deg);
 				
-				mix-blend-mode: color-dodge;
-				animation: twinkle1 2.5s ease-in-out infinite;
+				/* 使用 0.5 的 alpha 通道，确保透明度刚好是 50%，既有色彩又不突兀 */
+				background: linear-gradient(120deg, 
+					rgba(255, 100, 150, 0.5), 
+					rgba(100, 200, 255, 0.5), 
+					rgba(255, 230, 100, 0.5), 
+					rgba(255, 100, 150, 0.5)
+				);
+				background-size: 200% 200%;
+				animation: holoFlow 4s linear infinite;
+				mix-blend-mode: overlay; /* 完美融合，不破坏宝可梦黑色轮廓 */
 				
 				-webkit-mask-image: var(--bg-url);
 				-webkit-mask-position: var(--bg-pos);
@@ -2775,20 +2781,25 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				z-index: 1;
 			}
 			
-			/* 第二层：高亮蓝/黄/紫发光点 */
+			/* ==============================
+			   第二层：高亮明显的彩色碎光点 
+			   ============================== */
 			span[style*="--is-fantasy"]::after {
 				content: '';
 				position: absolute;
 				top: 0; left: 0; right: 0; bottom: 0;
-				background:
-					radial-gradient(circle 2.5px at 80% 30%, rgba(100, 200, 255, 1) 0%, rgba(100, 200, 255, 0) 100%),
-					radial-gradient(circle 2px at 30% 70%, rgba(255, 255, 100, 1) 0%, rgba(255, 255, 100, 0) 100%),
-					radial-gradient(circle 1.5px at 50% 15%, rgba(200, 100, 255, 1) 0%, rgba(200, 100, 255, 0) 100%),
-					/* 新增：额外的高亮小白点 */
-					radial-gradient(circle 1.2px at 60% 60%, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
 				
+				/* 光点中心的透明度拉满 (1)，颜色使用高饱和纯色，让光点“显眼包”一点 */
+				background:
+					radial-gradient(circle 3px at 20% 30%, rgba(255, 40, 100, 1) 0%, transparent 80%),   /* 亮粉色 */
+					radial-gradient(circle 3.5px at 80% 70%, rgba(40, 150, 255, 1) 0%, transparent 80%),  /* 亮蓝色 */
+					radial-gradient(circle 2.5px at 30% 75%, rgba(255, 210, 20, 1) 0%, transparent 80%),  /* 亮金色 */
+					radial-gradient(circle 2.5px at 75% 25%, rgba(80, 255, 80, 1) 0%, transparent 80%),   /* 亮绿色 */
+					radial-gradient(circle 1.5px at 50% 50%, rgba(255, 255, 255, 1) 0%, transparent 100%); /* 中心白点 */
+				
+				/* 颜色减淡模式：让光点和底层颜色叠加时爆发出强烈的发光感 */
 				mix-blend-mode: color-dodge;
-				animation: twinkle2 2s ease-in-out infinite;
+				animation: starTwinkle 2s ease-in-out infinite;
 				
 				-webkit-mask-image: var(--bg-url);
 				-webkit-mask-position: var(--bg-pos);
