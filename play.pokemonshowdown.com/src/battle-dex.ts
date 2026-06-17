@@ -1320,13 +1320,12 @@ export const Dex = new class implements ModdedDex {
 		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量和外发光样式
 		let fantasyStyles = '';
 		if (finalId.endsWith('fantasy')) {
-			// 【修改点】：废弃动画，改为同时在上下左右叠加 4 种不同颜色、0.4 低透明度的投影。
-			// 这会在宝可梦轮廓周围形成一圈固定不动、非常柔和的彩虹光晕。
-			let glowStyle = fainted ? '' : `filter: drop-shadow(0 -1.5px 1.5px rgba(255,100,150,0.4)) drop-shadow(1.5px 0 1.5px rgba(100,255,150,0.4)) drop-shadow(0 1.5px 1.5px rgba(100,200,255,0.4)) drop-shadow(-1.5px 0 1.5px rgba(255,230,100,0.4));`;
+			// 【修改点】：将透明度从 0.4 提高到了 0.8，模糊半径从 1.5px 扩大到 2px。
+			// 这样彩虹轮廓会更加清晰显眼，不再是灰蒙蒙的一片！
+			let glowStyle = fainted ? '' : `filter: drop-shadow(0 -1.5px 2px rgba(255,100,150,0.8)) drop-shadow(1.5px 0 2px rgba(100,255,150,0.8)) drop-shadow(0 1.5px 2px rgba(100,200,255,0.8)) drop-shadow(-1.5px 0 2px rgba(255,230,100,0.8));`;
 			
 			// --is-fantasy 用于触发内部扫光特效
 			// --bg-url 和 --bg-pos 用于同步图标坐标
-			// 拼接我们刚刚调配好的静态彩虹光圈 glowStyle
 			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; ${glowStyle}`;
 		}
 
