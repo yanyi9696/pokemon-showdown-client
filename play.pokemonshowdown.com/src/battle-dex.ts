@@ -582,6 +582,10 @@ export const Dex = new class implements ModdedDex {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'excadrill';
 			}
+			if (id === 'falinksmega') {
+				if (!data) data = {}; // 确保 data 对象存在，以防万一
+				data.spriteid = 'falinks';
+			}
 			if (id === 'greninjamega') {
 				if (!data) data = {}; // 确保 data 对象存在，以防万一
 				data.spriteid = 'greninja';
@@ -2330,23 +2334,14 @@ const ModModifier: {
 				'chandeluremegafantasy',
 				'froslassmegafantasy',
 				'delphoxmegafantasy',
-				'dragalgemega', 'dragalgemegafantasy',
+				'dragalgemegafantasy',
 				'excadrillmegafantasy',
 				'meganiummegafantasy',
 				'greninjamegafantasy',
-				'barbaraclemega',
-				'falinksmega',
 				'skarmorymegafantasy',
-				'scraftymega',
-				'eelektrossmega',
 				'floettemegafantasy',
-				'scolipedemega', 'scolipedemegafantasy',
-				'pyroarmega',
-				'malamarmega',
-				'raichumegax',
-				'raichumegay',
+				'scolipedemegafantasy',
 				'absolmegaz','absolmegazfantasy',
-				'staraptormega',
 				'garchompmegaz','garchompmegazfantasy',
 				'lucariomegaz',
 				'heatranmega',
