@@ -1320,16 +1320,12 @@ export const Dex = new class implements ModdedDex {
 		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量和外发光样式
 		let fantasyStyles = '';
 		if (finalId.endsWith('fantasy')) {
-			// 1. (1.5px 0)  -> 向右侧投影，使用红色/粉红色
-			// 2. (0 1.5px)  -> 向下侧投影，使用橙色/黄色
-			// 3. (-1.5px 0) -> 向左侧投影，使用蓝色
-			// 4. (0 -1.5px) -> 向上侧投影，使用绿色
-			// 依然保持 0.8 的较高透明度，模糊半径为 1.5px。
-			let glowStyle = fainted ? '' : `filter: drop-shadow(1.5px 0 1.5px rgba(255, 200, 100, 0.9)) drop-shadow(0 1.5px 1.5px rgba(227, 255, 100, 0.9)) drop-shadow(-1.5px 0 1.5px rgba(150, 255, 100, 0.9)) drop-shadow(0 -1.5px 1.5px rgba(100, 255, 252, 0.8));`;
+			// 3s 代表转一圈需要 3 秒，linear 保证匀速，infinite 保证无限循环
+			let glowStyle = fainted ? '' : `animation: rainbowGlowSpin 3s linear infinite;`;
 			
-			// --is-fantasy 用于触发内部扫光特效
-			// --bg-url 和 --bg-pos 用于同步图标坐标
-			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; ${glowStyle}`;
+			// --is-fantasy 用于触发 CSS 中的 overflow: visible 防止光晕被裁剪
+			// 删除了多余的内部扫光背景坐标同步
+			fantasyStyles = `; --is-fantasy: 1; ${glowStyle}`;
 		}
 
 		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}${fantasyStyles}`;
@@ -2735,7 +2731,7 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入 TFT 棱彩扫光 CSS 动画 (带静态淡彩虹轮廓)】
+// 【新增代码：注入 0.6 透明度流转彩虹轮廓 (无扫光纯净版)】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 	if (!document.getElementById('fantasy-holo-style')) {
@@ -2743,70 +2739,47 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 		style.id = 'fantasy-holo-style';
 		style.innerHTML = `
 			/* ------------------------------------------
-			   动画：慢速高频的 TFT 扫光 (内层)
+			   新增动画：轮转的彩虹色外发光
+			   通过在四个固定方向上交替变换颜色，形成完美的 0.6 透明度流光
 			   ------------------------------------------ */
-			@keyframes foilSweep {
-				0% { background-position: 150% 50%; }
-				85% { background-position: -50% 50%; }
-				100% { background-position: -50% 50%; }
+			@keyframes rainbowGlowSpin {
+				0% {
+					filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6));
+				}
+				25% {
+					filter: drop-shadow(1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(255, 100, 100, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 245, 0.6));
+				}
+				50% {
+					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(130, 100, 255, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 100, 0.6));
+				}
+				75% {
+					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(100, 255, 245, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(255, 100, 100, 0.6));
+				}
+				100% {
+					filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
+							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
+							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
+							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6));
+				}
 			}
-			
+
 			span[style*="--is-fantasy"] {
 				position: relative;
 				display: inline-block;
 				/* 防止发光特效被容器的正方形边缘裁剪 */
 				overflow: visible;
-			}
-			
-			/* 第一层：金属底色 */
-			span[style*="--is-fantasy"]::before {
-				content: '';
-				position: absolute;
-				top: 0; left: 0; right: 0; bottom: 0;
-				background: linear-gradient(135deg, rgba(255,200,200,0.15), rgba(200,255,200,0.15), rgba(200,200,255,0.15));
-				mix-blend-mode: hard-light;
-				
-				-webkit-mask-image: var(--bg-url);
-				-webkit-mask-position: var(--bg-pos);
-				-webkit-mask-repeat: no-repeat;
-				mask-image: var(--bg-url);
-				mask-position: var(--bg-pos);
-				mask-repeat: no-repeat;
-				pointer-events: none;
-				z-index: 1;
-			}
-			
-			/* 第二层：倾斜扫光带 */
-			span[style*="--is-fantasy"]::after {
-				content: '';
-				position: absolute;
-				top: 0; left: 0; right: 0; bottom: 0;
-				
-				background: linear-gradient(
-					110deg,
-					transparent 0%,
-					transparent 35%,
-					rgba(255, 220, 100, 0.7) 43%,
-					rgba(100, 255, 150, 0.7) 47%,
-					rgba(255, 255, 255, 1)   50%,
-					rgba(100, 200, 255, 0.7) 53%,
-					rgba(255, 150, 200, 0.7) 57%,
-					transparent 65%,
-					transparent 100%
-				);
-				
-				background-size: 250% 100%;
-				animation: foilSweep 5.5s ease-in-out infinite;
-				mix-blend-mode: color-dodge;
-				
-				-webkit-mask-image: var(--bg-url);
-				-webkit-mask-position: var(--bg-pos);
-				-webkit-mask-repeat: no-repeat;
-				mask-image: var(--bg-url);
-				mask-position: var(--bg-pos);
-				mask-repeat: no-repeat;
-				pointer-events: none;
-				z-index: 2;
 			}
 		`;
 		document.head.appendChild(style);
