@@ -2358,6 +2358,11 @@ export class BattleTooltips {
 		if (move.multihit && pokemon.getSpeciesForme() !== 'Zarude-Dada-Fantasy') {
 			value.abilityModify(1.5, "Pai Wai Zu Qun");
 		}
+		// ==================== 新增：Fire Mane 属性增伤 ====================
+		if (moveType === 'Fire') {
+			value.abilityModify(1.5, "Fire Mane");
+		}
+		// =================================================================
 
 
 		if (move.category !== 'Status') {
