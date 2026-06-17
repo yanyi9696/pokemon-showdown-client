@@ -1314,25 +1314,21 @@ export const Dex = new class implements ModdedDex {
 		// Generate CSS
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
-		
-		let filterStyles = [];
-		let opacityStyle = fainted ? `;opacity:.3` : ``;
-		let animationStyle = ``;
-		
-		// 1. 濒死状态：变灰变暗
-		if (fainted) {
-			filterStyles.push('grayscale(100%)', 'brightness(.5)');
-		} 
-		// 2. 正常状态且是 fantasy 宝可梦：调用全局的棱彩动画
-		// 把动画时间设为 4s 让颜色流动更加柔和优雅
-		else if (finalId.endsWith('fantasy')) {
-			animationStyle = `;animation: fantasyHolo 4s linear infinite`;
-		}
-		
-		let filterString = filterStyles.length > 0 ? `;filter:${filterStyles.join(' ')}` : ``;
-		
+		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
-		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${opacityStyle}${filterString}${animationStyle}`;
+		
+		// 【新增逻辑】如果是 Fantasy 宝可梦，生成马卡龙彩虹背景徽章
+		if (finalId.endsWith('fantasy')) {
+			// 淡淡的马卡龙/柔和彩虹渐变（透明度 0.4，非常轻柔，不会喧宾夺主）
+			const pastelGradient = `linear-gradient(120deg, rgba(255,182,193,0.4), rgba(255,255,180,0.4), rgba(180,255,200,0.4), rgba(180,220,255,0.4), rgba(230,180,255,0.4))`;
+			
+			// 多重背景：图层1是宝可梦本体，图层2是彩色渐变。
+			// 巧妙利用 CSS 变量（--px, --py）传递坐标，使得动画只需平滑移动背后的渐变。
+			// border-radius: 5px 让它看起来像个边缘柔和的小卡片/徽章。
+			return `background: url(${iconSheetUrl}) no-repeat scroll var(--px) var(--py), ${pastelGradient} 0% 0% / 300% 300%; --px: -${left}px; --py: -${top}px; animation: fantasyRainbowBg 5s ease infinite; border-radius: 5px;${faintedString}`;
+		}
+
+		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}`;
 	}
 
 	// sprite in teambuilder
@@ -2735,22 +2731,18 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：注入流动棱彩 CSS 动画】
+// 【新增代码：注入柔和彩虹背景 CSS 动画】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-	if (!document.getElementById('fantasy-holo-style')) {
+	if (!document.getElementById('fantasy-rainbow-bg-style')) {
 		const style = document.createElement('style');
-		style.id = 'fantasy-holo-style';
-		// 滤镜配方解析：
-		// opacity(0.75)：实现你需要的“高透明度”
-		// sepia(0.3)：轻微统一底色，让所有宝可梦看起来像同一种镭射材质
-		// brightness(1.5) + contrast(0.75)：大幅提亮并降低对比度，消除原本生硬的黑边，呈现出粉彩/闪卡质感
-		// saturate(3)：极大地提高饱和度，让柔和的颜色变得像彩虹般炫目
-		// hue-rotate：控制颜色的流动
+		style.id = 'fantasy-rainbow-bg-style';
+		// 注意这里：我们通过 CSS 变量 var(--px) 和 var(--py) 来保持宝可梦位置不动，只移动后面的彩虹渐变 (0% -> 100%)
 		style.innerHTML = `
-			@keyframes fantasyHolo {
-				0%   { filter: opacity(0.75) sepia(0.3) brightness(1.5) contrast(0.75) saturate(3) hue-rotate(0deg); }
-				100% { filter: opacity(0.75) sepia(0.3) brightness(1.5) contrast(0.75) saturate(3) hue-rotate(360deg); }
+			@keyframes fantasyRainbowBg {
+				0%   { background-position: var(--px, 0px) var(--py, 0px), 0% 50%; }
+				50%  { background-position: var(--px, 0px) var(--py, 0px), 100% 50%; }
+				100% { background-position: var(--px, 0px) var(--py, 0px), 0% 50%; }
 			}
 		`;
 		document.head.appendChild(style);
