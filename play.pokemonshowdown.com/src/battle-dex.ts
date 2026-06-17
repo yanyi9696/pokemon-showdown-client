@@ -1320,12 +1320,10 @@ export const Dex = new class implements ModdedDex {
 		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量和外发光样式
 		let fantasyStyles = '';
 		if (finalId.endsWith('fantasy')) {
-			// 1. (1.5px 0)  -> 向右侧投影，使用红色/粉红色
-			// 2. (0 1.5px)  -> 向下侧投影，使用橙色/黄色
-			// 3. (-1.5px 0) -> 向左侧投影，使用蓝色
-			// 4. (0 -1.5px) -> 向上侧投影，使用绿色
-			// 依然保持 0.8 的较高透明度，模糊半径为 1.5px。
-			let glowStyle = fainted ? '' : `filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.9)) drop-shadow(0 1.5px 1.5px rgba(245, 255, 100, 0.9)) drop-shadow(-1.5px 0 1.5px rgba(100,200,255,0.9)) drop-shadow(0 -1.5px 1.5px rgba(110, 255, 100, 0.8));`;
+			// 【修改点】：将四个方向的 drop-shadow 颜色统一改为“暗金色”
+			// 这里使用的是 rgba(184, 134, 11, 0.85) ，也就是经典的 DarkGoldenRod 暗金杆色。
+			// 如果你觉得不够暗，可以把 184, 134, 11 调成 150, 110, 15。
+			let glowStyle = fainted ? '' : `filter: drop-shadow(1.5px 0 1.5px rgba(184, 134, 11, 0.85)) drop-shadow(0 1.5px 1.5px rgba(184, 134, 11, 0.85)) drop-shadow(-1.5px 0 1.5px rgba(184, 134, 11, 0.85)) drop-shadow(0 -1.5px 1.5px rgba(184, 134, 11, 0.85));`;
 			
 			// --is-fantasy 用于触发内部扫光特效
 			// --bg-url 和 --bg-pos 用于同步图标坐标
@@ -2796,7 +2794,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				);
 				
 				background-size: 250% 100%;
-				animation: foilSweep 3.5s ease-in-out infinite;
+				animation: foilSweep 5.5s ease-in-out infinite;
 				mix-blend-mode: color-dodge;
 				
 				-webkit-mask-image: var(--bg-url);
