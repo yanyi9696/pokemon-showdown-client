@@ -2731,7 +2731,7 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：高性能版彩虹光晕 (完美还原原版平滑度)】
+// 【新增代码：高性能版彩虹光晕 (终极完美像素对齐版)】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     if (!document.getElementById('fantasy-holo-style')) {
@@ -2776,20 +2776,17 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
                 background-position: var(--bg-pos);
                 background-repeat: no-repeat;
                 pointer-events: none;
-                /* 【核心修改】：恢复浏览器默认的平滑渲染，消除锯齿感，完美融入原版图标 */
-                image-rendering: auto;
             }
 
             /* 2. 发光底层：沉在底下发彩虹光晕 */
             span[style*="--is-fantasy"]::before {
                 animation: var(--glow-anim);
                 z-index: 1;
-                /* 保留硬件加速，防止光晕动画导致服务器卡顿 */
-                will-change: filter;
-                transform: translateZ(0); 
+                /* 【核心修改】：彻底删除了 will-change 和 transform: translateZ(0)。
+                   取消显卡强制 3D 渲染,回归 2D 引擎,完美消除 100% 缩放时的亚像素模糊（Sub-pixel blur）！*/
             }
 
-            /* 3. 正常顶层：盖在发光层上面，不带任何滤镜，做回一个普普通通的小图标 */
+            /* 3. 正常顶层：盖在发光层上面,乖乖做一个普通的精灵图层 */
             span[style*="--is-fantasy"]::after {
                 z-index: 2;
             }
