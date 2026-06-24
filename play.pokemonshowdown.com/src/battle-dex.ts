@@ -1318,17 +1318,17 @@ export const Dex = new class implements ModdedDex {
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
 
 		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量进行“真·图层分离”
-        let fantasyStyles = '';
-        if (finalId.endsWith('fantasy')) {
-            // 恢复使用你喜欢的四色彩虹轮转动画，3秒一圈
-            let glowAnim = fainted ? 'none' : 'rainbowGlowSpin 3s linear infinite';
-            
-            // 变量传递：--is-fantasy 触发图层分离，--bg-url/pos 传递底层坐标，--glow-anim 传递动画指令
-            fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; --glow-anim: ${glowAnim};`;
-        }
+		let fantasyStyles = '';
+		if (finalId.endsWith('fantasy')) {
+			// 改为静态发光滤镜：合并了东南西北四个方向的彩虹色以及底层黑边，彻底解决性能卡顿问题
+			let staticGlow = fainted ? 'none' : 'drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6)) drop-shadow(0 0 2px rgba(0, 0, 0, 0.35))';
+			
+			// 变量传递：--is-fantasy 触发图层分离，--bg-url/pos 传递底层坐标，--glow-filter 传递静态滤镜
+			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; --glow-filter: ${staticGlow};`;
+		}
 
-        return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}${fantasyStyles}`;
-    }
+		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}${fantasyStyles}`;
+	}
 
 
 	// sprite in teambuilder
@@ -2731,73 +2731,46 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：0.6透明度流转彩虹光晕 (带黑边/防模糊双图层版) - 性能优化版】
+// 【新增代码：0.6透明度静态彩虹光晕 (带黑边/防模糊双图层版，优化性能)】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-    if (!document.getElementById('fantasy-holo-style')) {
-        const style = document.createElement('style');
-        style.id = 'fantasy-holo-style';
-        style.innerHTML = `
-            /* 【性能优化关键】：
-               固定 drop-shadow 坐标，只通过 hue-rotate 旋转色相。
-               浏览器不再重复计算阴影几何轮廓，仅作 GPU 像素染色处理，大幅根除卡顿。
-            */
-            @keyframes rainbowGlowSpin {
-                0% {
-                    filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
-                            drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
-                            drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
-                            drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6))
-                            drop-shadow(0 0 2px rgba(0, 0, 0, 0.65))
-                            hue-rotate(0deg);
-                }
-                100% {
-                    filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
-                            drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
-                            drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
-                            drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6))
-                            drop-shadow(0 0 2px rgba(0, 0, 0, 0.65))
-                            hue-rotate(360deg);
-                }
-            }
+	if (!document.getElementById('fantasy-holo-style')) {
+		const style = document.createElement('style');
+		style.id = 'fantasy-holo-style';
+		style.innerHTML = `
+			/* 1. 容器本体：剥夺背景图,建立独立的渲染层 */
+			span[style*="--is-fantasy"] {
+				position: relative;
+				display: inline-block;
+				overflow: visible;
+				/* 【核心黑科技】抹除内联背景图,防止带崩清晰度 */
+				background-image: none !important;
+				isolation: isolate;
+			}
+			
+			/* 共用设置：在子层重新渲染图标分身 */
+			span[style*="--is-fantasy"]::before,
+			span[style*="--is-fantasy"]::after {
+				content: '';
+				position: absolute;
+				top: 0; left: 0; right: 0; bottom: 0;
+				background-image: var(--bg-url);
+				background-position: var(--bg-pos);
+				background-repeat: no-repeat;
+				pointer-events: none;
+			}
 
-            /* 1. 容器本体：剥夺背景图,建立独立的渲染层 */
-            span[style*="--is-fantasy"] {
-                position: relative;
-                display: inline-block;
-                overflow: visible;
-                /* 【核心黑科技】抹除内联背景图,防止带崩清晰度 */
-                background-image: none !important;
-                isolation: isolate;
-            }
-            
-            /* 共用设置：在子层重新渲染图标分身 */
-            span[style*="--is-fantasy"]::before,
-            span[style*="--is-fantasy"]::after {
-                content: '';
-                position: absolute;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background-image: var(--bg-url);
-                background-position: var(--bg-pos);
-                background-repeat: no-repeat;
-                pointer-events: none;
-                /* 启用 3D 转换来强制开启 GPU 硬件加速 */
-                transform: translateZ(0); 
-            }
+			/* 2. 发光底层：沉在底下发静态彩虹光晕 (直接调用 JS 传来的 --glow-filter) */
+			span[style*="--is-fantasy"]::before {
+				filter: var(--glow-filter);
+				z-index: 1;
+			}
 
-            /* 2. 发光底层：沉在底下发彩虹光晕 */
-            span[style*="--is-fantasy"]::before {
-                animation: var(--glow-anim);
-                z-index: 1;
-                /* 预先告知浏览器滤镜将发生变化，进一步提升渲染效率 */
-                will-change: filter;
-            }
-
-            /* 3. 清晰顶层：盖在发光层上面,没有任何 filter,永远保持 100% 原始像素锐利 */
-            span[style*="--is-fantasy"]::after {
-                z-index: 2;
-            }
-        `;
-        document.head.appendChild(style);
-    }
+			/* 3. 清晰顶层：盖在发光层上面,没有任何 filter,永远保持 100% 原始像素锐利 */
+			span[style*="--is-fantasy"]::after {
+				z-index: 2;
+			}
+		`;
+		document.head.appendChild(style);
+	}
 }
