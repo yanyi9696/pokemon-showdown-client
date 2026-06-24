@@ -2731,7 +2731,7 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：高性能版彩虹光晕 (带黑边/防模糊双图层版)】
+// 【新增代码：高性能版彩虹光晕 (完美还原原版平滑度)】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     if (!document.getElementById('fantasy-holo-style')) {
@@ -2776,21 +2776,20 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
                 background-position: var(--bg-pos);
                 background-repeat: no-repeat;
                 pointer-events: none;
-                /* 【核心修复】：强制像素化渲染，禁止浏览器使用双线性插值导致图标糊掉 */
-                image-rendering: pixelated;
-                image-rendering: -moz-crisp-edges;
-                image-rendering: crisp-edges;
+                /* 【核心修改】：恢复浏览器默认的平滑渲染，消除锯齿感，完美融入原版图标 */
+                image-rendering: auto;
             }
 
             /* 2. 发光底层：沉在底下发彩虹光晕 */
             span[style*="--is-fantasy"]::before {
                 animation: var(--glow-anim);
                 z-index: 1;
+                /* 保留硬件加速，防止光晕动画导致服务器卡顿 */
                 will-change: filter;
                 transform: translateZ(0); 
             }
 
-            /* 3. 清晰顶层：盖在发光层上面,没有任何 filter,永远保持 100% 原始像素锐利 */
+            /* 3. 正常顶层：盖在发光层上面，不带任何滤镜，做回一个普普通通的小图标 */
             span[style*="--is-fantasy"]::after {
                 z-index: 2;
             }
