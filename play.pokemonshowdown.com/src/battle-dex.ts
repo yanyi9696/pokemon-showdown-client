@@ -1320,10 +1320,10 @@ export const Dex = new class implements ModdedDex {
 		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量进行“真·图层分离”
 		let fantasyStyles = '';
 		if (finalId.endsWith('fantasy')) {
-			// 恢复使用你喜欢的四色彩虹轮转动画，3秒一圈
+			// 恢复使用你喜欢的四色彩虹轮转动画,3秒一圈
 			let glowAnim = fainted ? 'none' : 'rainbowGlowSpin 3s linear infinite';
 			
-			// 变量传递：--is-fantasy 触发图层分离，--bg-url/pos 传递底层坐标，--glow-anim 传递动画指令
+			// 变量传递：--is-fantasy 触发图层分离,--bg-url/pos 传递底层坐标,--glow-anim 传递动画指令
 			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; --glow-anim: ${glowAnim};`;
 		}
 
@@ -2731,74 +2731,71 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：0.6透明度流转彩虹光晕 (带黑边/防模糊双图层版)】
+// 【新增代码终极版：贴合轮廓流转彩虹光晕 (防模糊双图层 + GPU 色相旋转优化)】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-	if (!document.getElementById('fantasy-holo-style')) {
-		const style = document.createElement('style');
-		style.id = 'fantasy-holo-style';
-		style.innerHTML = `
-			/* 性能优化版：只对 transform 进行旋转动画，GPU 满载加速 */
-			@keyframes rainbowGlowSpinOptimized {
-				0% { transform: rotate(0deg) translateZ(0); }
-				100% { transform: rotate(360deg) translateZ(0); }
-			}
+    if (!document.getElementById('fantasy-holo-style')) {
+        const style = document.createElement('style');
+        style.id = 'fantasy-holo-style';
+        style.innerHTML = `
+            /* 性能核心：固定阴影形状,只对色相 (hue) 进行 360 度旋转,GPU 开销极小 */
+            @keyframes rainbowGlowSpin {
+                0% {
+                    /* 固定生成两层较粗的红色发光,加上一层黑色托底。0度为红色 */
+                    filter: drop-shadow(0 0 1.5px #ff0000) 
+                            drop-shadow(0 0 3px #ff0000) 
+                            drop-shadow(0 0 1px rgba(0, 0, 0, 0.6)) 
+                            hue-rotate(0deg);
+                }
+                100% {
+                    /* 360度旋转后,红->黄->绿->蓝->紫->红 形成完美闭环彩虹 */
+                    filter: drop-shadow(0 0 1.5px #ff0000) 
+                            drop-shadow(0 0 3px #ff0000) 
+                            drop-shadow(0 0 1px rgba(0, 0, 0, 0.6)) 
+                            hue-rotate(360deg);
+                }
+            }
 
-			/* 1. 容器本体：剥夺背景图,建立独立的渲染层 */
-			span[style*="--is-fantasy"] {
-				position: relative;
-				display: inline-block;
-				overflow: visible;
-				background-image: none !important;
-				isolation: isolate;
-			}
-			
-			/* 共用设置：处理顶层分身 */
-			span[style*="--is-fantasy"]::after {
-				content: '';
-				position: absolute;
-				top: 0; left: 0; right: 0; bottom: 0;
-				background-image: var(--bg-url);
-				background-position: var(--bg-pos);
-				background-repeat: no-repeat;
-				pointer-events: none;
-				z-index: 2;
-			}
+            /* 1. 容器本体：剥夺背景图,建立独立的渲染层 */
+            span[style*="--is-fantasy"] {
+                position: relative;
+                display: inline-block;
+                overflow: visible;
+                background-image: none !important;
+                isolation: isolate;
+            }
+            
+            /* 共用设置：在子层重新渲染图标分身 */
+            span[style*="--is-fantasy"]::before,
+            span[style*="--is-fantasy"]::after {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background-image: var(--bg-url);
+                background-position: var(--bg-pos);
+                background-repeat: no-repeat;
+                pointer-events: none;
+            }
 
-			/* 2. 发光底层：使用 conic-gradient 画一个彩虹圆盘并旋转，避免使用 filter 动画 */
-			span[style*="--is-fantasy"]::before {
-				content: '';
-				position: absolute;
-				/* 将光晕稍微放大一点，超出图标范围 */
-				top: -4px; left: -4px; right: -4px; bottom: -4px;
-				
-				/* 画一个彩虹渐变的圆底，并在中心留白（如果不需要中心留白可去掉径向渐变） */
-				background: conic-gradient(
-					rgba(255, 100, 100, 0.7),
-					rgba(100, 255, 100, 0.7),
-					rgba(100, 255, 245, 0.7),
-					rgba(130, 100, 255, 0.7),
-					rgba(255, 100, 100, 0.7)
-				);
-				border-radius: 50%;
-				
-				/* 使用一个静态的轻微模糊让边缘柔和，加上你要求的底层黑边托底 */
-				filter: blur(3px) drop-shadow(0 0 2px rgba(0, 0, 0, 0.65));
-				
-				/* 关键性能优化：只做 transform 旋转 */
-				animation: rainbowGlowSpinOptimized 3s linear infinite;
-				z-index: 1;
-				
-				/* 强制开启 GPU 硬件加速 */
-				will-change: transform;
-			}
+            /* 2. 发光底层：沉在底下,仅它执行色相旋转动画 */
+            span[style*="--is-fantasy"]::before {
+                animation: var(--glow-anim);
+                z-index: 1;
+                /* 强制开启 GPU 硬件加速滤镜 */
+                will-change: filter;
+            }
 
-			/* 如果宝可梦处于濒死状态，停止旋转并置灰 */
-			span[style*="--glow-anim: none"]::before {
-				animation: none;
-				filter: grayscale(100%) opacity(0.3);
-			}
-		`;
-		document.head.appendChild(style);
-	}
+            /* 3. 清晰顶层：盖在发光层上面,没有任何 filter,永远保持 100% 原始像素锐利 */
+            span[style*="--is-fantasy"]::after {
+                z-index: 2;
+            }
+
+            /* 濒死状态置灰 */
+            span[style*="--glow-anim: none"]::before {
+                animation: none;
+                filter: grayscale(100%) opacity(0.3);
+            }
+        `;
+        document.head.appendChild(style);
+    }
 }
