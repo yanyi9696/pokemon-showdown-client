@@ -1318,17 +1318,17 @@ export const Dex = new class implements ModdedDex {
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
 
 		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量进行“真·图层分离”
-		let fantasyStyles = '';
-		if (finalId.endsWith('fantasy')) {
-			// 恢复使用你喜欢的四色彩虹轮转动画,3秒一圈
-			let glowAnim = fainted ? 'none' : 'rainbowGlowSpin 3s linear infinite';
-			
-			// 变量传递：--is-fantasy 触发图层分离,--bg-url/pos 传递底层坐标,--glow-anim 传递动画指令
-			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; --glow-anim: ${glowAnim};`;
-		}
+        let fantasyStyles = '';
+        if (finalId.endsWith('fantasy')) {
+            // 恢复使用你喜欢的四色彩虹轮转动画，3秒一圈
+            let glowAnim = fainted ? 'none' : 'rainbowGlowSpin 3s linear infinite';
+            
+            // 变量传递：--is-fantasy 触发图层分离，--bg-url/pos 传递底层坐标，--glow-anim 传递动画指令
+            fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; --glow-anim: ${glowAnim};`;
+        }
 
-		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}${fantasyStyles}`;
-	}
+        return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}${fantasyStyles}`;
+    }
 
 
 	// sprite in teambuilder
@@ -2731,28 +2731,32 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码：高性能版彩虹光晕 (终极完美像素对齐版)】
+// 【新增代码：0.6透明度流转彩虹光晕 (带黑边/防模糊双图层版) - 性能优化版】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     if (!document.getElementById('fantasy-holo-style')) {
         const style = document.createElement('style');
         style.id = 'fantasy-holo-style';
         style.innerHTML = `
+            /* 【性能优化关键】：
+               固定 drop-shadow 坐标，只通过 hue-rotate 旋转色相。
+               浏览器不再重复计算阴影几何轮廓，仅作 GPU 像素染色处理，大幅根除卡顿。
+            */
             @keyframes rainbowGlowSpin {
                 0% {
-                    filter: drop-shadow(1.5px 0 1px rgba(255, 100, 100, 0.6)) 
-                            drop-shadow(0 1.5px 1px rgba(100, 255, 100, 0.6)) 
-                            drop-shadow(-1.5px 0 1px rgba(100, 255, 245, 0.6)) 
-                            drop-shadow(0 -1.5px 1px rgba(130, 100, 255, 0.6))
-                            drop-shadow(0 0 2px rgba(0, 0, 0, 0.3))
+                    filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
+                            drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
+                            drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
+                            drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6))
+                            drop-shadow(0 0 2px rgba(0, 0, 0, 0.65))
                             hue-rotate(0deg);
                 }
                 100% {
-                    filter: drop-shadow(1.5px 0 1px rgba(255, 100, 100, 0.6)) 
-                            drop-shadow(0 1.5px 1px rgba(100, 255, 100, 0.6)) 
-                            drop-shadow(-1.5px 0 1px rgba(100, 255, 245, 0.6)) 
-                            drop-shadow(0 -1.5px 1px rgba(130, 100, 255, 0.6))
-                            drop-shadow(0 0 2px rgba(0, 0, 0, 0.3))
+                    filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
+                            drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
+                            drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
+                            drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6))
+                            drop-shadow(0 0 2px rgba(0, 0, 0, 0.65))
                             hue-rotate(360deg);
                 }
             }
@@ -2762,6 +2766,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
                 position: relative;
                 display: inline-block;
                 overflow: visible;
+                /* 【核心黑科技】抹除内联背景图,防止带崩清晰度 */
                 background-image: none !important;
                 isolation: isolate;
             }
@@ -2776,17 +2781,19 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
                 background-position: var(--bg-pos);
                 background-repeat: no-repeat;
                 pointer-events: none;
+                /* 启用 3D 转换来强制开启 GPU 硬件加速 */
+                transform: translateZ(0); 
             }
 
             /* 2. 发光底层：沉在底下发彩虹光晕 */
             span[style*="--is-fantasy"]::before {
                 animation: var(--glow-anim);
                 z-index: 1;
-                /* 【核心修改】：彻底删除了 will-change 和 transform: translateZ(0)。
-                   取消显卡强制 3D 渲染,回归 2D 引擎,完美消除 100% 缩放时的亚像素模糊（Sub-pixel blur）！*/
+                /* 预先告知浏览器滤镜将发生变化，进一步提升渲染效率 */
+                will-change: filter;
             }
 
-            /* 3. 正常顶层：盖在发光层上面,乖乖做一个普通的精灵图层 */
+            /* 3. 清晰顶层：盖在发光层上面,没有任何 filter,永远保持 100% 原始像素锐利 */
             span[style*="--is-fantasy"]::after {
                 z-index: 2;
             }
