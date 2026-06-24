@@ -2738,45 +2738,10 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 		const style = document.createElement('style');
 		style.id = 'fantasy-holo-style';
 		style.innerHTML = `
-			/* 在 4 个彩虹色后面，统一追加了第 5 个 drop-shadow(0 0 2px rgba(0, 0, 0, 0.65))。
-			   这层黑灰色阴影会给光晕“托底”，极大地增强 Light 模式下的色彩对比度！
-			*/
-			@keyframes rainbowGlowSpin {
-				0% {
-					filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
-							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
-							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6))
-							drop-shadow(0 0 2px rgba(0, 0, 0, 0.2));
-				}
-				25% {
-					filter: drop-shadow(1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
-							drop-shadow(0 1.5px 1.5px rgba(255, 100, 100, 0.6)) 
-							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 245, 0.6))
-							drop-shadow(0 0 2px rgba(0, 0, 0, 0.2));
-				}
-				50% {
-					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(0 1.5px 1.5px rgba(130, 100, 255, 0.6)) 
-							drop-shadow(-1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(100, 255, 100, 0.6))
-							drop-shadow(0 0 2px rgba(0, 0, 0, 0.2));
-				}
-				75% {
-					filter: drop-shadow(1.5px 0 1.5px rgba(100, 255, 100, 0.6)) 
-							drop-shadow(0 1.5px 1.5px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(-1.5px 0 1.5px rgba(130, 100, 255, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(255, 100, 100, 0.6))
-							drop-shadow(0 0 2px rgba(0, 0, 0, 0.2));
-				}
-				100% {
-					filter: drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) 
-							drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) 
-							drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) 
-							drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6))
-							drop-shadow(0 0 2px rgba(0, 0, 0, 0.2));
-				}
+			/* 性能优化版：只对 transform 进行旋转动画，GPU 满载加速 */
+			@keyframes rainbowGlowSpinOptimized {
+				0% { transform: rotate(0deg) translateZ(0); }
+				100% { transform: rotate(360deg) translateZ(0); }
 			}
 
 			/* 1. 容器本体：剥夺背景图,建立独立的渲染层 */
@@ -2784,13 +2749,11 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				position: relative;
 				display: inline-block;
 				overflow: visible;
-				/* 【核心黑科技】抹除内联背景图,防止带崩清晰度 */
 				background-image: none !important;
 				isolation: isolate;
 			}
 			
-			/* 共用设置：在子层重新渲染图标分身 */
-			span[style*="--is-fantasy"]::before,
+			/* 共用设置：处理顶层分身 */
 			span[style*="--is-fantasy"]::after {
 				content: '';
 				position: absolute;
@@ -2799,17 +2762,41 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				background-position: var(--bg-pos);
 				background-repeat: no-repeat;
 				pointer-events: none;
-			}
-
-			/* 2. 发光底层：沉在底下发彩虹光晕 */
-			span[style*="--is-fantasy"]::before {
-				animation: var(--glow-anim);
-				z-index: 1;
-			}
-
-			/* 3. 清晰顶层：盖在发光层上面,没有任何 filter,永远保持 100% 原始像素锐利 */
-			span[style*="--is-fantasy"]::after {
 				z-index: 2;
+			}
+
+			/* 2. 发光底层：使用 conic-gradient 画一个彩虹圆盘并旋转，避免使用 filter 动画 */
+			span[style*="--is-fantasy"]::before {
+				content: '';
+				position: absolute;
+				/* 将光晕稍微放大一点，超出图标范围 */
+				top: -4px; left: -4px; right: -4px; bottom: -4px;
+				
+				/* 画一个彩虹渐变的圆底，并在中心留白（如果不需要中心留白可去掉径向渐变） */
+				background: conic-gradient(
+					rgba(255, 100, 100, 0.7),
+					rgba(100, 255, 100, 0.7),
+					rgba(100, 255, 245, 0.7),
+					rgba(130, 100, 255, 0.7),
+					rgba(255, 100, 100, 0.7)
+				);
+				border-radius: 50%;
+				
+				/* 使用一个静态的轻微模糊让边缘柔和，加上你要求的底层黑边托底 */
+				filter: blur(3px) drop-shadow(0 0 2px rgba(0, 0, 0, 0.65));
+				
+				/* 关键性能优化：只做 transform 旋转 */
+				animation: rainbowGlowSpinOptimized 3s linear infinite;
+				z-index: 1;
+				
+				/* 强制开启 GPU 硬件加速 */
+				will-change: transform;
+			}
+
+			/* 如果宝可梦处于濒死状态，停止旋转并置灰 */
+			span[style*="--glow-anim: none"]::before {
+				animation: none;
+				filter: grayscale(100%) opacity(0.3);
 			}
 		`;
 		document.head.appendChild(style);
