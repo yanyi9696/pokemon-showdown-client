@@ -2738,9 +2738,6 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
         const style = document.createElement('style');
         style.id = 'fantasy-holo-style';
         style.innerHTML = `
-            /* 【性能优化版】：固定 5 重 drop-shadow,仅对整体使用 hue-rotate(色相旋转) 来进行流转动画。
-               相比原版每一帧都去重算坐标和颜色,这种方式可以直接开启 GPU 硬件加速,大幅度降低卡顿！
-            */
             @keyframes rainbowGlowSpin {
                 0% {
                     filter: drop-shadow(1.5px 0 1px rgba(255, 100, 100, 0.6)) 
@@ -2779,13 +2776,16 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
                 background-position: var(--bg-pos);
                 background-repeat: no-repeat;
                 pointer-events: none;
+                /* 【核心修复】：强制像素化渲染，禁止浏览器使用双线性插值导致图标糊掉 */
+                image-rendering: pixelated;
+                image-rendering: -moz-crisp-edges;
+                image-rendering: crisp-edges;
             }
 
             /* 2. 发光底层：沉在底下发彩虹光晕 */
             span[style*="--is-fantasy"]::before {
                 animation: var(--glow-anim);
                 z-index: 1;
-                /* 【核心】提示浏览器为滤镜开启硬件加速,防止多宝可梦同屏时的掉帧 */
                 will-change: filter;
                 transform: translateZ(0); 
             }
