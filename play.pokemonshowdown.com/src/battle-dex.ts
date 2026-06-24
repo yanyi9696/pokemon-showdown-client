@@ -2731,27 +2731,31 @@ if (typeof require === 'function') {
 	global.toID = toID;
 }
 // ==========================================
-// 【新增代码终极版：贴合轮廓流转彩虹光晕 (防模糊双图层 + GPU 色相旋转优化)】
+// 【新增代码：高性能版彩虹光晕 (带黑边/防模糊双图层版)】
 // ==========================================
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     if (!document.getElementById('fantasy-holo-style')) {
         const style = document.createElement('style');
         style.id = 'fantasy-holo-style';
         style.innerHTML = `
-            /* 性能核心：固定阴影形状,只对色相 (hue) 进行 360 度旋转,GPU 开销极小 */
+            /* 【性能优化版】：固定 5 重 drop-shadow,仅对整体使用 hue-rotate(色相旋转) 来进行流转动画。
+               相比原版每一帧都去重算坐标和颜色,这种方式可以直接开启 GPU 硬件加速,大幅度降低卡顿！
+            */
             @keyframes rainbowGlowSpin {
                 0% {
-                    /* 固定生成两层较粗的红色发光,加上一层黑色托底。0度为红色 */
-                    filter: drop-shadow(0 0 1.5px #ff0000) 
-                            drop-shadow(0 0 3px #ff0000) 
-                            drop-shadow(0 0 1px rgba(0, 0, 0, 0.6)) 
+                    filter: drop-shadow(1.5px 0 1px rgba(255, 100, 100, 0.6)) 
+                            drop-shadow(0 1.5px 1px rgba(100, 255, 100, 0.6)) 
+                            drop-shadow(-1.5px 0 1px rgba(100, 255, 245, 0.6)) 
+                            drop-shadow(0 -1.5px 1px rgba(130, 100, 255, 0.6))
+                            drop-shadow(0 0 2px rgba(0, 0, 0, 0.3))
                             hue-rotate(0deg);
                 }
                 100% {
-                    /* 360度旋转后,红->黄->绿->蓝->紫->红 形成完美闭环彩虹 */
-                    filter: drop-shadow(0 0 1.5px #ff0000) 
-                            drop-shadow(0 0 3px #ff0000) 
-                            drop-shadow(0 0 1px rgba(0, 0, 0, 0.6)) 
+                    filter: drop-shadow(1.5px 0 1px rgba(255, 100, 100, 0.6)) 
+                            drop-shadow(0 1.5px 1px rgba(100, 255, 100, 0.6)) 
+                            drop-shadow(-1.5px 0 1px rgba(100, 255, 245, 0.6)) 
+                            drop-shadow(0 -1.5px 1px rgba(130, 100, 255, 0.6))
+                            drop-shadow(0 0 2px rgba(0, 0, 0, 0.3))
                             hue-rotate(360deg);
                 }
             }
@@ -2777,23 +2781,18 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
                 pointer-events: none;
             }
 
-            /* 2. 发光底层：沉在底下,仅它执行色相旋转动画 */
+            /* 2. 发光底层：沉在底下发彩虹光晕 */
             span[style*="--is-fantasy"]::before {
                 animation: var(--glow-anim);
                 z-index: 1;
-                /* 强制开启 GPU 硬件加速滤镜 */
+                /* 【核心】提示浏览器为滤镜开启硬件加速,防止多宝可梦同屏时的掉帧 */
                 will-change: filter;
+                transform: translateZ(0); 
             }
 
             /* 3. 清晰顶层：盖在发光层上面,没有任何 filter,永远保持 100% 原始像素锐利 */
             span[style*="--is-fantasy"]::after {
                 z-index: 2;
-            }
-
-            /* 濒死状态置灰 */
-            span[style*="--glow-anim: none"]::before {
-                animation: none;
-                filter: grayscale(100%) opacity(0.3);
             }
         `;
         document.head.appendChild(style);
