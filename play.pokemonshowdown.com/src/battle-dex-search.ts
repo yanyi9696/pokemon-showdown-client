@@ -796,7 +796,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		const tierSet = this.dex.getTierSet();
 
 		// --- 核心修改：定义允许顶置 AG 的具体分级 ID 列表 ---
-		const forceAGFormats: ID[] = ['gen9fcag' as ID, 'gen9fcchampionsdoubles' as ID];
+		const forceAGFormats: ID[] = ['gen9fcag' as ID, 'gen9fcchampionsdoublesbdoublemega' as ID, 'gen9fcchampionsdoublesf' as ID];
 		
 		// 只有当前分级 ID 在列表中时，才执行注入 AG 的逻辑
 		const shouldInjectAG = forceAGFormats.includes(this.formatId);
