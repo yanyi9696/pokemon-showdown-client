@@ -1952,11 +1952,11 @@ export class PokemonSprite extends Sprite {
 		wenlizdark: ['纹理Z-恶', 'neutral'],
 		wenlizsteel: ['纹理Z-钢', 'neutral'],
 		wenlizfairy: ['纹理Z-妖精', 'neutral'],
-		leizhustats1: ['擂主: 1', 'good'],
-		leizhustats2: ['擂主: 2', 'good'],
-		leizhustats3: ['擂主: 3', 'good'],
-		leizhustats4: ['擂主: 4', 'good'],
-		leizhustats5: ['擂主: 5', 'good'],
+		leizhustack1: ['擂主: 1', 'good'],
+		leizhustack2: ['擂主: 2', 'good'],
+		leizhustack3: ['擂主: 3', 'good'],
+		leizhustack4: ['擂主: 4', 'good'],
+		leizhustack5: ['擂主: 5', 'good'],
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;
