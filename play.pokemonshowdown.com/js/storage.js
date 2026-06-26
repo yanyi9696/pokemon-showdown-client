@@ -1419,7 +1419,16 @@ Storage.exportTeam = function (team, gen, hidestats) {
 		}
 		if (gen === 9) {
 			var species = Dex.species.get(curSet.species);
-			text += 'Tera Type: ' + (species.forceTeraType || curSet.teraType || species.types[0]) + " \n";
+			var teraType = species.forceTeraType || curSet.teraType;
+			
+			// 拦截：如果太晶属性为空或者是 "???"，就抓取第一属性
+			if (!teraType || teraType === '???') {
+				teraType = (species.types && species.types.length > 0 && species.types[0] !== '???') 
+					? species.types[0] 
+					: 'Normal';
+			}
+			
+			text += 'Tera Type: ' + teraType + " \n";
 		}
 		if (!hidestats) {
 			var first = true;
