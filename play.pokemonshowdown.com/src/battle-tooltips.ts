@@ -1213,6 +1213,8 @@ export class BattleTooltips {
 			if (stacks > 0) {
 				stats.atk = Math.floor(stats.atk * (10 + stacks) / 10);
 				stats.spa = Math.floor(stats.spa * (10 + stacks) / 10);
+				stats.def = Math.floor(stats.def * (10 + stacks) / 10);
+				stats.spd = Math.floor(stats.spd * (10 + stacks) / 10);
 			}
 		}
 		// ======================================================================
