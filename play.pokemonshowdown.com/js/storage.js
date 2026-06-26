@@ -1421,11 +1421,25 @@ Storage.exportTeam = function (team, gen, hidestats) {
 			var species = Dex.species.get(curSet.species);
 			var teraType = species.forceTeraType || curSet.teraType;
 			
-			// 拦截：如果太晶属性为空或者是 "???"，就抓取第一属性
+			// 拦截：太晶属性为空或者是 "???"
 			if (!teraType || teraType === '???') {
-				teraType = (species.types && species.types.length > 0 && species.types[0] !== '???') 
-					? species.types[0] 
-					: 'Normal';
+				var firstType = '???';
+				var checkName = curSet.species;
+				
+				// 逐层剥离后缀，确保带有多个后缀的形态也能正确追溯到本体的第一属性
+				for (var step = 0; step < 3; step++) {
+					var tempSpecies = Dex.species.get(checkName);
+					if (tempSpecies && tempSpecies.types && tempSpecies.types.length > 0 && tempSpecies.types[0] !== '???') {
+						firstType = tempSpecies.types[0];
+						break; // 只要找到了有效的非 ??? 属性，立刻停止追溯
+					}
+					var dashIndex = checkName.lastIndexOf('-');
+					if (dashIndex === -1) break; // 如果名字里没有横杠了，停止剥离
+					checkName = checkName.substring(0, dashIndex); // 切掉最后一个 '-' 及其后面的字符串
+				}
+				
+				// 最终兜底：如果连原版本体都没找到有效属性，才赋值给一般系
+				teraType = (firstType === '???') ? 'Normal' : firstType;
 			}
 			
 			text += 'Tera Type: ' + teraType + " \n";
