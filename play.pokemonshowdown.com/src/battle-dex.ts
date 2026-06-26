@@ -2638,7 +2638,15 @@ export const Teams = new class {
 			}
 			if (gen === 9) {
 				const species = Dex.species.get(curSet.species);
-				const teraType = species.forceTeraType || curSet.teraType || (species.types[0] === '???' ? 'Normal' : species.types[0]);
+				let teraType = species.forceTeraType || curSet.teraType;
+				
+				// 拦截：如果太晶属性为空或者是 "???"，就抓取第一属性
+				if (!teraType || teraType === '???') {
+					teraType = (species.types && species.types.length > 0 && species.types[0] !== '???') 
+						? species.types[0] 
+						: 'Normal';
+				}
+				
 				text += `Tera Type: ${teraType}  \n`;
 			}
 			if (!hidestats) {
