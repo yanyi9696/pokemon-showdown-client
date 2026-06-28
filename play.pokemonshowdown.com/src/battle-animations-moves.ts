@@ -2960,76 +2960,134 @@ export const BattleMoveAnims: AnimTable = {
 	},
 	wuzhuotihuan: {
 		anim(scene, [attacker, defender]) {
+			// ==========================================
+			// 1. 攻击方动作 (提取自 伏特替换)
+			// ==========================================
+			// 微微后撤蓄力
+			attacker.anim({
+				z: attacker.behind(15),
+				time: 200,
+			}, 'decel');
+			// 猛然前倾施放毒雾
+			attacker.anim({
+				z: defender.behind(-170),
+				time: 100,
+			}, 'accel');
+			// 迅速后撤回原位 (暗示即将替换下场)
+			attacker.anim({
+				z: attacker.z,
+				time: 300,
+			}, 'swing');
+
+			// ==========================================
+			// 2. 施放毒液弹 (提取自 浊雾，时间轴延后100ms以匹配冲刺动作)
+			// ==========================================
 			scene.showEffect('poisonwisp', {
-				x: defender.x,
-				y: defender.y,
-				z: defender.z,
-				scale: 0,
-				opacity: 1,
-				time: 400,
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0.7,
+				opacity: 0.6,
+				time: 100, 
 			}, {
-				x: defender.leftof(-20),
-				y: defender.y,
-				z: defender.behind(50),
-				scale: 3,
-				opacity: 0,
-				time: 700,
-			}, 'linear');
-			scene.showEffect('poisonwisp', {
 				x: defender.x,
-				y: defender.y,
-				z: defender.z,
-				scale: 0,
-				opacity: 1,
-				time: 500,
-			}, {
-				x: defender.leftof(-20),
-				y: defender.y,
-				z: defender.behind(50),
-				scale: 3,
-				opacity: 0,
-				time: 800,
-			}, 'linear');
-			scene.showEffect('poisonwisp', {
-				x: defender.x,
-				y: defender.y,
-				z: defender.z,
+				y: defender.y + 10,
+				z: defender.behind(10),
 				scale: 1,
-				opacity: 1,
-				time: 400,
-			}, {
-				x: defender.leftof(-20),
-				y: defender.y,
-				z: defender.behind(50),
-				scale: 2,
-				opacity: 0,
-				time: 800,
-			}, 'linear');
-			attacker.anim({
-				x: defender.leftof(20),
-				y: defender.y,
-				z: defender.behind(-20),
-				time: 400,
-			}, 'ballistic2Under');
-			attacker.anim({
-				x: defender.x,
-				y: defender.y,
-				z: defender.z,
-				time: 50,
-			});
-			attacker.anim({
+				opacity: 0.3,
 				time: 500,
-			}, 'ballistic2');
-			defender.delay(425);
-			defender.anim({
-				x: defender.leftof(-20),
+			}, 'decel', 'explode');
+			scene.showEffect('poisonwisp', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0.7,
+				opacity: 1,
+				time: 200,
+			}, {
+				x: defender.x - 20,
+				y: defender.y + 5,
+				z: defender.behind(10),
+				scale: 1,
+				opacity: 0.3,
+				time: 600,
+			}, 'decel', 'explode');
+			scene.showEffect('poisonwisp', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0.7,
+				opacity: 1,
+				time: 300,
+			}, {
+				x: defender.x + 25,
 				y: defender.y,
-				z: defender.behind(20),
+				z: defender.behind(10),
+				scale: 1,
+				opacity: 0.3,
+				time: 700,
+			}, 'decel', 'explode');
+
+			// ==========================================
+			// 3. 防御方受击动作 (提取自 伏特替换)
+			// ==========================================
+			// 延时500ms，恰好在第一团毒雾命中时产生受击硬直
+			defender.delay(500);
+			defender.anim({
+				x: defender.leftof(5),
+				y: defender.y,
+				z: defender.behind(15),
 				time: 50,
 			}, 'swing');
 			defender.anim({
 				time: 300,
 			}, 'swing');
+
+			// ==========================================
+			// 4. 毒雾在防御方身上炸开并消散 (提取自 浊雾，时间轴延后100ms)
+			// ==========================================
+			scene.showEffect('poisonwisp', {
+				x: defender.x + 30,
+				y: defender.y,
+				z: defender.z,
+				scale: 1,
+				opacity: 1,
+				time: 500,
+			}, {
+				x: defender.x + 50,
+				y: defender.y + 30,
+				scale: 1.4,
+				opacity: 0.2,
+				time: 900,
+			}, 'decel', 'fade');
+			scene.showEffect('poisonwisp', {
+				x: defender.x - 30,
+				y: defender.y,
+				z: defender.z,
+				scale: 1,
+				opacity: 1,
+				time: 600,
+			}, {
+				x: defender.x - 50,
+				y: defender.y + 30,
+				scale: 1.4,
+				opacity: 0.2,
+				time: 1000,
+			}, 'decel', 'fade');
+			scene.showEffect('poisonwisp', {
+				x: defender.x + 15,
+				y: defender.y,
+				z: defender.z,
+				scale: 1,
+				opacity: 1,
+				time: 700,
+			}, {
+				x: defender.x + 25,
+				y: defender.y + 20,
+				scale: 1.4,
+				opacity: 0.2,
+				time: 1100,
+			}, 'decel', 'fade');
 		},
 	},
 	yuannengshifang: {
