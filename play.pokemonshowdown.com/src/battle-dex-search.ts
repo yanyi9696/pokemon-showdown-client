@@ -1470,9 +1470,10 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 	}
 	private moveIsFantasy(id: ID, species: Dex.Species, moves: string[], set: Dex.PokemonSet | null) {
 		switch (id) {
+		case 'zhenxi':
 		case 'wenliz':
 		case 'triattack':
-		case 'leiguanghongming':
+		case 'xuguanghonglei':
 		case 'conglinzhanshu':
 		case 'linghunshayuan':
 		case 'duoshuxinggongjigai':
@@ -1508,7 +1509,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		case 'mijianbairenchuan':
 		case 'dianshanxunji':
 		case 'zuishenluanda':
-		case 'biansuzhefan':
+		case 'wuzhuotihuan':
 		case 'chuanyun':
 		case 'baoyulihua':
 		case 'yanjian':

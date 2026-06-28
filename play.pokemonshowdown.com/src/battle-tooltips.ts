@@ -1669,9 +1669,13 @@ export class BattleTooltips {
 			moveType = 'Dark';
 		}
 
-		// Aura Wheel as Toxtricity-Low-Key-Fantasy changes the type to Ice
-		if (move.id === 'overdrive' && pokemon.getSpeciesForme() === 'Toxtricity-Low-Key-Fantasy') {
-			moveType = 'Ice';
+		// Overdrive 属性面板显示逻辑
+		if (move.id === 'overdrive') {
+			if (pokemon.getSpeciesForme() === 'Toxtricity-Low-Key-Fantasy') {
+				moveType = 'Ice';
+			} else if (pokemon.getSpeciesForme() === 'Toxtricity-G-Mega-Fantasy') {
+				moveType = 'Psychic';
+			}
 		}
 		if (move.id === 'chaopinyaogunpoyinbo' && pokemon.getSpeciesForme() === 'Toxtricity-Low-Key-Fantasy') {
 			moveType = 'Ice';

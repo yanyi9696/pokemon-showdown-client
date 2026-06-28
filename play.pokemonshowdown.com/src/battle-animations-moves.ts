@@ -12,6 +12,77 @@
 import { type AnimTable, BattleOtherAnims } from './battle-animations';
 
 export const BattleMoveAnims: AnimTable = {
+	zhenxi: {
+		anim(scene, [attacker, defender]) {
+			// 1. 保留突袭的基础动作：极速突进
+			BattleOtherAnims.fastattack.anim(scene, [attacker, defender]);
+			
+			// 2. 保留突袭命中时的基础冲击波特效
+			scene.showEffect('impact', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.behind(5),
+				scale: 0,
+				opacity: 0.3,
+				time: 260,
+			}, {
+				scale: 1.25,
+				opacity: 0,
+				time: 500,
+			}, 'linear');
+
+			// 3. 融合毒击的特效：命中瞬间（260ms）迸发第一团毒液
+			scene.showEffect('poisonwisp', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				scale: 0,
+				opacity: 1,
+				time: 260, 
+			}, {
+				x: defender.leftof(-20),
+				y: defender.y,
+				z: defender.behind(50),
+				scale: 3,
+				opacity: 0,
+				time: 560, // 持续时间缩短以匹配突袭的快节奏
+			}, 'linear');
+
+			// 4. 融合毒击的特效：稍微延迟（360ms）迸发第二团毒液，增加层次感
+			scene.showEffect('poisonwisp', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				scale: 0,
+				opacity: 1,
+				time: 360,
+			}, {
+				x: defender.leftof(-20),
+				y: defender.y,
+				z: defender.behind(50),
+				scale: 3,
+				opacity: 0,
+				time: 660,
+			}, 'linear');
+
+			// 5. 融合毒击的特效：伴随命中迸发的主体毒雾（稍微小一点，scale 1->2）
+			scene.showEffect('poisonwisp', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				scale: 1,
+				opacity: 1,
+				time: 260,
+			}, {
+				x: defender.leftof(-20),
+				y: defender.y,
+				z: defender.behind(50),
+				scale: 2,
+				opacity: 0,
+				time: 660,
+			}, 'linear');
+		},
+	},
 	wenliz: {
 		anim(scene, [attacker]) {
 			scene.showEffect(attacker.sp, {
@@ -27,7 +98,7 @@ export const BattleMoveAnims: AnimTable = {
 			}, 'decel');
 		},
 	},
-	leiguanghongming: {
+	xuguanghonglei: {
 		anim(scene, [attacker, defender]) {
 			let xstep = (defender.x - attacker.x) / 5;
 			let ystep = (defender.x - 200 - attacker.x) / 5;
@@ -2887,7 +2958,7 @@ export const BattleMoveAnims: AnimTable = {
 			}, 'linear', 'explode');
 		},
 	},
-	biansuzhefan: {
+	wuzhuotihuan: {
 		anim(scene, [attacker, defender]) {
 			scene.showEffect('poisonwisp', {
 				x: defender.x,
