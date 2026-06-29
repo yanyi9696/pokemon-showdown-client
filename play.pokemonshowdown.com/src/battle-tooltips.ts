@@ -2038,10 +2038,10 @@ export class BattleTooltips {
 				value.modify(2, "Acrobatics + no item");
 			}
 		}
-		// 1. 加上 as ID 解决 TypeScript 报错
-		let isFantasyTier = this.battle.dex.modid.includes('fantasy' as ID);
+		// 1. 在客户端 Tooltips 中，依靠 tier（分级名称）判断是最准确的
+		let isFantasyTier = this.battle.tier.includes('FC');
 
-		// 2. 如果是你的 Mod 且招式为捏碎 (crushgrip)，则将其从浮动威力列表中排除
+		// 2. 如果是 FC 分级且招式为捏碎 (crushgrip)，则将其从浮动威力列表中排除
 		let variableBPCap = (['crushgrip', 'wringout'].includes(move.id) && !(isFantasyTier && move.id === 'crushgrip')) 
 			? 120 
 			: move.id === 'hardpress' ? 100 : undefined;
