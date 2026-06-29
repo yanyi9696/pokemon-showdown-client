@@ -1678,7 +1678,8 @@ export class BattleTooltips {
 		if (move.id === 'overdrive') {
 			if (pokemon.getSpeciesForme() === 'Toxtricity-Low-Key-Fantasy') {
 				moveType = 'Ice';
-			} else if (pokemon.getSpeciesForme() === 'Toxtricity-G-Mega-Fantasy') {
+			} else if (pokemon.getSpeciesForme() === 'Toxtricity-G-Mega-Fantasy'|| 
+           			   pokemon.getSpeciesForme() === 'Toxtricity-Low-Key-Fantasy') {
 				moveType = 'Psychic';
 			}
 		}
