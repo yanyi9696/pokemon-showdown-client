@@ -12,6 +12,28 @@
 import { type AnimTable, BattleOtherAnims } from './battle-animations';
 
 export const BattleMoveAnims: AnimTable = {
+	huanshenbu: {
+		anim(scene, [attacker, defender]) {
+			// 1. 使用电光一闪的极速突进动画框架，取代原本较慢的接触攻击
+			BattleOtherAnims.fastattack.anim(scene, [attacker, defender]);
+			
+			// 2. 融入超能力系的朦胧打击特效 (mistball)
+			scene.showEffect('mistball', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				scale: 0,
+				opacity: 0.5,
+				// 将触发时间提前到 260ms，完美契合 fastattack 的命中瞬间
+				time: 260, 
+			}, {
+				scale: 2,
+				opacity: 0,
+				// 持续时间相应缩短，使得特效爆发更加干脆利落
+				time: 510, 
+			}, 'linear');
+		},
+	},
 	zhenxi: {
 		anim(scene, [attacker, defender]) {
 			// 1. 保留突袭的基础动作：极速突进
