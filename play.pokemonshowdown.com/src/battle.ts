@@ -735,7 +735,7 @@ export class Side {
 			break;
 		// ------------- 👇 新增这3行 👇 -------------
 		case 'weixingshidi':
-			this.sideConditions[condition] = ['微型湿地', 1, 4, 0];
+			this.sideConditions[condition] = ['Wei Xing Shi Di', 1, 4, 0];
 			break;
 		// ------------- 👆 新增这3行 👆 -------------
 		case 'waterpledge':
@@ -1448,8 +1448,8 @@ export class Battle {
 	}
 	swapSideConditions() {
 		const sideConditions = [
-			'mist', 'lightscreen', 'reflect', 'spikes', 'safeguard', 'tailwind', 'toxicspikes', 'stealthrock', 'waterpledge', 'firepledge', 'grasspledge', 'stickyweb', 'auroraveil', 'gmaxsteelsurge', 'gmaxcannonade', 'gmaxvinelash', 'gmaxwildfire','seaoffire',
-		];
+			'weixingshidi', 'mist', 'lightscreen', 'reflect', 'spikes', 'safeguard', 'tailwind', 'toxicspikes', 'stealthrock', 'waterpledge', 'firepledge', 'grasspledge', 'stickyweb', 'auroraveil', 'gmaxsteelsurge', 'gmaxcannonade', 'gmaxvinelash', 'gmaxwildfire','seaoffire',
+		]; // 👆开头加上 'weixingshidi',
 		if (this.gameType === 'freeforall') {
 			// TODO: Add FFA support
 			return;
@@ -3157,6 +3157,7 @@ export class Battle {
 			side.addSideCondition(effect, !!kwArgs.persistent);
 
 			switch (effect.id) {
+			case 'weixingshidi': // 微型湿地
 			case 'tailwind':
 			case 'auroraveil':
 			case 'reflect':
