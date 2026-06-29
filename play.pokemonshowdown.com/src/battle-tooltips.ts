@@ -2710,11 +2710,12 @@ export class BattleTooltips {
 		}
 
 		// Shadow Bottle: Lugia-Fantasy holding this becomes Lugia-Shadow-Fantasy;
-		// 变身黑暗形态后，所有招式的威力都会被提升 20%
-		if (itemName === 'Shadow Bottle' && value.serverPokemon.speciesForme === 'Lugia-Shadow-Fantasy') {
-			value.itemModify(1.2, itemName);
-			return value;
-		}
+        // 变身黑暗形态后，所有招式的威力都会被提升 20%
+        if (itemName === 'Shadow Bottle' && value.pokemon.getSpeciesForme() === 'Lugia-Shadow-Fantasy') {
+            value.itemModify(1.2, itemName);
+            return value;
+        }
+		
 		if (speciesName === 'Ogerpon') {
 			const speciesForme = value.pokemon.getSpeciesForme();
 			if (
