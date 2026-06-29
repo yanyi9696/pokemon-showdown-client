@@ -733,6 +733,11 @@ export class Side {
 		case 'grasspledge':
 			this.sideConditions[condition] = ['Swamp', 1, 4, 0];
 			break;
+		// ------------- 👇 新增这3行 👇 -------------
+		case 'weixingshidi':
+			this.sideConditions[condition] = ['微型湿地', 1, 4, 0];
+			break;
+		// ------------- 👆 新增这3行 👆 -------------
 		case 'waterpledge':
 			this.sideConditions[condition] = ['Rainbow', 1, 4, 0];
 			break;
