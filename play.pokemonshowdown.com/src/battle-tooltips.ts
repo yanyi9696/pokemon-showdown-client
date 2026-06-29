@@ -1426,6 +1426,11 @@ export class BattleTooltips {
 		if (sideConditions['grasspledge']) {
 			speedModifiers.push(0.25);
 		}
+		// ------------- 新增微型沼泽 -------------
+		if (sideConditions['weixingshidi']) {
+			speedModifiers.push(0.5);
+		}
+		// ------------- 新增微型沼泽 -------------
 
 		let chainedSpeedModifier = 1;
 		for (const modifier of speedModifiers) {
