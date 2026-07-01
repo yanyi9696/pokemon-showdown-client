@@ -7413,14 +7413,19 @@ var translations = {
 // 在 translations 字典之后添加以下执行代码：
 (function() {
     function translatePokemonName(name) {
-        // 1. 强制进行最完整的字符串匹配
+        // 1. 优先完整匹配
         if (translations[name]) return translations[name];
 
-        // 2. 只有在找不到完整匹配时，才走拆分逻辑
+        // 2. 特殊保护机制：如果名字里包含 "-G-Mega"，先把它整体处理掉，防止被 split("-") 误拆
+        // 这样 "-G-Mega" 就会变成一个整体，不会参与后续的逻辑
+        if (name.includes("-G-Mega")) {
+            name = name.replace("-G-Mega", translations["-G-Mega"]);
+        }
+
+        // 3. 对剩余部分执行正常的拆分逻辑
         let parts = name.split('-');
         let translatedParts = parts.map((part, index) => {
             if (index === 0) return translations[part] || part;
-            // 拼接 key 时，确保它是 "-G-Mega" 这样的格式
             let key = "-" + part;
             return translations[key] || key;
         });
@@ -7433,11 +7438,9 @@ var translations = {
             let trimmed = text.trim();
             if (!trimmed) return;
 
-            // 这里是匹配逻辑
             if (translations[trimmed]) {
                 node.nodeValue = text.replace(trimmed, translations[trimmed]);
             } else if (trimmed.includes('-')) {
-                // 如果包含连字符，尝试翻译
                 let newText = translatePokemonName(trimmed);
                 if (newText !== trimmed) {
                     node.nodeValue = text.replace(trimmed, newText);
@@ -7447,24 +7450,16 @@ var translations = {
             let tag = node.tagName.toUpperCase();
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
 
-            // 针对包含连字符的宝可梦名字容器进行处理
+            // 依然保留你在 pokemonnamecol 中对 <b> 标签的强行重写逻辑
             if (node.classList.contains('pokemonnamecol') || node.parentElement?.classList.contains('pokemonnamecol')) {
                 let fullText = node.textContent.trim();
-                
-                // 【核心调试】：如果你觉得没效果，请取消下面这行的注释
-                // console.log("Current Pokemon Name:", fullText); 
-                
                 if (fullText.includes('-')) {
-                    // 如果词典里有完整翻译，直接调用翻译并重写，跳过分段逻辑
-                    if (translations[fullText]) {
-                        node.innerHTML = translations[fullText];
-                        return;
-                    }
+                    let firstDashIndex = fullText.indexOf('-');
+                    let base = fullText.substring(0, firstDashIndex);
+                    let suffix = fullText.substring(firstDashIndex);
                     
-                    // 如果没有完整翻译，尝试看看能不能拆解翻译
-                    let translated = translatePokemonName(fullText);
-                    if (translated !== fullText) {
-                        node.innerHTML = translated;
+                    if (translatePokemonName(fullText) !== fullText) {
+                        node.innerHTML = base + translatePokemonName(suffix).replace(base, "");
                         return;
                     }
                 }
