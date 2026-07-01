@@ -4821,7 +4821,6 @@ var translations = {
     "Sawsbuck-Summer-Fantasy": "萌芽鹿-夏天-幻想",
     "Sawsbuck-Autumn-Fantasy": "萌芽鹿-秋天-幻想",
     "Sawsbuck-Winter-Fantasy": "萌芽鹿-冬天-幻想",
-    "-Blade-Fantasy": "坚盾剑怪-刀剑形态-幻想",
     "-Mega-Fantasy": "-超级进化-幻想",
     "-Hisui-Fantasy": "-洗翠-幻想",
     "-Rapid-Strike-Fantasy": "-乱击流-幻想",
