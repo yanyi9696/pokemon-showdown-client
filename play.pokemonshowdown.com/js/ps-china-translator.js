@@ -4806,6 +4806,14 @@ var translations = {
     //  Fantasy 后缀
 
     "-Fantasy": "-幻想",
+    "-G-Mega": "-超巨进化",
+
+
+
+    //  Fantasy 名称
+
+    "Lugia-Shadow": "黑暗洛奇亚",
+    "Lugia-Shadow-Fantasy": "黑暗洛奇亚-幻想",
 
 
 
@@ -7418,6 +7426,7 @@ var translations = {
         // 2. 特殊对待名单：保护这些词条不被 split('-') 拆碎
         // 我们在拆分前直接把这些“整体”替换掉，或者直接返回翻译
         if (name === "Lugia-Shadow") return "黑暗洛奇亚";
+        if (name === "Lugia-Shadow-Fantasy") return "黑暗洛奇亚-幻想";
         if (name.includes("-G-Mega")) {
             name = name.replace("-G-Mega", translations["-G-Mega"] || "-超巨进化");
         }
