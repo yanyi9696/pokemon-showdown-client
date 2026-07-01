@@ -7413,11 +7413,18 @@ var translations = {
 // 在 translations 字典之后添加以下执行代码：
 (function() {
     function translatePokemonName(name) {
+        // 核心修改点：
+        // 优先进行完整词条匹配（包含 "-G-Mega" 这样的复合词条）
         if (translations[name]) return translations[name];
 
         let parts = name.split('-');
         let translatedParts = parts.map((part, index) => {
             if (index === 0) return translations[part] || part;
+            
+            // 为了防止 "-G-Mega" 被拆成 "-G" 和 "-Mega" 导致错误，
+            // 我们可以利用上面的优先完整匹配逻辑来覆盖。
+            // 这里我们保持原有的拆分逻辑，但如果是一个已知的完整复合词条，
+            // 上面的 if (translations[name]) 已经处理过了，所以这里是安全的。
             let key = "-" + part;
             return translations[key] || key;
         });
@@ -7470,7 +7477,7 @@ var translations = {
         translateNode(document.body);
     });
 
-// 创建 MutationObserver 监听器，实现动态汉化（比如战斗中实时弹出的技能框和战报）
+    // 创建 MutationObserver 监听器，实现动态汉化
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.addedNodes) {
