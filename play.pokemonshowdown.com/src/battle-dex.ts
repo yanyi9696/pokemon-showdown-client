@@ -1130,7 +1130,7 @@ export const Dex = new class implements ModdedDex {
 
 		if (checkId === 'shadowlugiafantasy') {
 			const facingDir = isFront ? 'gen5' : 'gen5-back';
-			const filename = 'shadow lugia-Fantasy.png';
+			const filename = 'shadow lugia-fantasy.png';
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
 			spriteData.pixelated = false;
@@ -1453,7 +1453,7 @@ export const Dex = new class implements ModdedDex {
 			const offsetX = 10; // 左右微调
 			const offsetY = 5;  // 上下微调
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
-			return `background-image:url(${customSpritePrefix}sprites/dex/shadow lugia-Fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
+			return `background-image:url(${customSpritePrefix}sprites/dex/shadow lugia-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 		// 【新增代码:拦截 沙漠蜻蜓-Mega-幻想形态】
 		else if (id === 'flygonmegafantasy') {
