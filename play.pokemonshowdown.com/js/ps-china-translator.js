@@ -7406,35 +7406,52 @@ var translations = {
 };
 // 在 translations 字典之后添加以下执行代码：
 (function() {
-    // 遍历并替换文本节点的函数
+    function translatePokemonName(name) {
+        if (translations[name]) return translations[name];
+
+        let parts = name.split('-');
+        let translatedParts = parts.map((part, index) => {
+            if (index === 0) return translations[part] || part;
+            let key = "-" + part;
+            return translations[key] || key;
+        });
+        return translatedParts.join('');
+    }
+
     function translateNode(node) {
-        if (node.nodeType === 3) { // 文本节点
+        if (node.nodeType === 3) {
             let text = node.nodeValue;
             let trimmed = text.trim();
             if (!trimmed) return;
 
-            // 1. 优先尝试直接完整匹配（例如 "Mewtwo-Mega-Y-Fantasy"）
             if (translations[trimmed]) {
                 node.nodeValue = text.replace(trimmed, translations[trimmed]);
-                return;
-            }
-
-            // 2. 智能拆分匹配：仅在第一个 "-" 处拆分
-            // 结果示例: ["Mewtwo", "Mega-Y-Fantasy"]
-            let firstDashIndex = trimmed.indexOf('-');
-            if (firstDashIndex !== -1) {
-                let baseName = trimmed.substring(0, firstDashIndex);
-                let suffix = trimmed.substring(firstDashIndex); // 保留包含第一个"-"后的所有内容
-
-                // 如果本体名在字典里，且后缀也在字典里
-                if (translations[baseName] && translations[suffix]) {
-                    node.nodeValue = text.replace(trimmed, translations[baseName] + translations[suffix]);
+            } else if (trimmed.includes('-')) {
+                let newText = translatePokemonName(trimmed);
+                if (newText !== trimmed) {
+                    node.nodeValue = text.replace(trimmed, newText);
                 }
             }
-
-        } else if (node.nodeType === 1) { // 元素节点
+        } else if (node.nodeType === 1) {
             let tag = node.tagName.toUpperCase();
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
+
+            // 针对包含连字符的宝可梦名字进行特殊处理，以移除后续部分的高亮标签
+            if (node.classList.contains('pokemonnamecol') || node.parentElement?.classList.contains('pokemonnamecol')) {
+                let fullText = node.textContent.trim();
+                if (fullText.includes('-')) {
+                    let firstDashIndex = fullText.indexOf('-');
+                    let base = fullText.substring(0, firstDashIndex);
+                    let suffix = fullText.substring(firstDashIndex);
+                    
+                    // 只有在能翻译的情况下才进行强行处理
+                    if (translatePokemonName(fullText) !== fullText) {
+                        // 强制清空 HTML 并重写为纯文本，从而抹除所有 <b> 或 <strong> 标签
+                        node.innerHTML = base + translatePokemonName(suffix).replace(base, "");
+                        return; // 处理完毕，不再遍历子节点
+                    }
+                }
+            }
             
             for (let i = 0; i < node.childNodes.length; i++) {
                 translateNode(node.childNodes[i]);
@@ -7447,7 +7464,7 @@ var translations = {
         translateNode(document.body);
     });
 
-    // 创建 MutationObserver 监听器，实现动态汉化
+// 创建 MutationObserver 监听器，实现动态汉化（比如战斗中实时弹出的技能框和战报）
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.addedNodes) {
