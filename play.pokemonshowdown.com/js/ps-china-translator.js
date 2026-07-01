@@ -18,8 +18,7 @@
 // @downloadURL https://update.greasyfork.org/scripts/432623/PSChina%20Server%20Translation%20SV.user.js
 // @updateURL https://update.greasyfork.org/scripts/432623/PSChina%20Server%20Translation%20SV.meta.js
 // ==/UserScript==
-window.PSChinaTranslations = window.PSChinaTranslations || {};
-window.PSChinaTranslations = {
+var translations = {
     /// 系统
 
     "Connecting...": "连接中...",
@@ -7434,41 +7433,35 @@ window.PSChinaTranslations = {
     "The user uses the last move used by the target. Fails if the target has not made a move since the user switched in, or if the last move used was Mirror Move.": "使用当回合目标使用过的招式。目标本回合未行动时或目标最后使用的招式是鹦鹉学舌，招式使用失败。",
     "If the user is a Terapagos in Stellar Form, this move's type becomes Stellar, hits all opposing Pokemon, and becomes a physical attack if the user's Attack is greater than its Special Attack, including stat stage changes.": "如果使用者是星晶形态的太乐巴戈斯，此招式的属性会变为星晶属性，会攻击对方全体宝可梦，并且如果使用者的攻击数值（包括能力等级变化）大于其特攻数值时，此招式会变为物理招式。",
 };
-// 在 translations 词典之后添加以下执行代码
+// 在 translations 字典之后添加以下执行代码：
 (function() {
+    // 遍历并替换文本节点的函数
     function translateNode(node) {
-        try {
-            if (node.nodeType === 3) {
-                let text = node.nodeValue;
-                let trimmed = text.trim();
-                if (translations[trimmed]) {
-                    node.nodeValue = text.replace(trimmed, translations[trimmed]);
-                }
-            } else if (node.nodeType === 1) {
-                let tag = node.tagName.toUpperCase();
-                // 严禁触碰 IFRAME 等系统节点，防止跨域报错阻断游戏进程
-                if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'IFRAME') return;
-                for (let i = 0; i < node.childNodes.length; i++) {
-                    translateNode(node.childNodes[i]);
-                }
+        if (node.nodeType === 3) { // 如果是文本节点
+            let text = node.nodeValue;
+            let trimmed = text.trim();
+            // 如果词典中存在对应的翻译，则进行替换
+            if (translations[trimmed]) {
+                node.nodeValue = text.replace(trimmed, translations[trimmed]);
             }
-        } catch (e) {
-            // 静默处理错误，保证客户端不死机
+        } else if (node.nodeType === 1) { // 如果是元素节点
+            // 避开输入框、脚本和样式表，防止破坏原本的功能输入
+            let tag = node.tagName.toUpperCase();
+            if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
+            
+            // 递归遍历子节点
+            for (let i = 0; i < node.childNodes.length; i++) {
+                translateNode(node.childNodes[i]);
+            }
         }
     }
 
-    // 初始替换
-    if (typeof jQuery !== 'undefined') {
-        jQuery(document).ready(function() {
-            translateNode(document.body);
-        });
-    } else {
-        window.addEventListener('DOMContentLoaded', function() {
-            translateNode(document.body);
-        });
-    }
+    // 页面加载完成后进行一次全局初始替换
+    $(document).ready(function() {
+        translateNode(document.body);
+    });
 
-    // 动态监听后续加载的对战面板和战报
+    // 创建 MutationObserver 监听器，实现动态汉化（比如战斗中实时弹出的技能框和战报）
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.addedNodes) {
@@ -7479,5 +7472,6 @@ window.PSChinaTranslations = {
         });
     });
 
+    // 启动观察器，监听 body 下所有子节点的变动
     observer.observe(document.body, { childList: true, subtree: true });
 })();
