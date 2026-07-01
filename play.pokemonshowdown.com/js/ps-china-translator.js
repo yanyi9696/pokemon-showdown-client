@@ -4294,8 +4294,8 @@ var translations = {
     "-Paldea-Combat": "-帕底亚-帕底亚",
 
     //  Fantasy 名称
-    "Aegislash-Blade-Fantasy": "坚盾剑怪-刀剑形态-幻想",
-    "Metagross-Mega-Fantasy": "巨金怪-超级进化-幻想",
+    "Aegislash-Blade-F": "坚盾剑怪-刀剑形态-幻想",
+    "Metagross-Mega-Fa": "巨金怪-超级进化-幻想",
     "Garchomp-Mega-Fantasy": "烈咬陆鲨-超级进化-幻想",
     "Altaria-Mega-Fantasy": "七夕青鸟-超级进化-幻想",
     "Audino-Mega-Fantasy": "差不多娃娃-超级进化-幻想",
@@ -4827,14 +4827,6 @@ var translations = {
 
     "-Fantasy": "-幻想",
 
-    "-Mega-Fantasy": "-超级进化-幻想",
-    "-Blade-Fantasy": "-刀剑形态-幻想",
-    "-Hisui-Fantasy": "-洗翠-幻想",
-    "-Rapid-Strike-Fantasy": "-乱击流-幻想",
-    "-Galar-Fantasy": "-伽勒尔-幻想",
-    "-Summer-Fantasy": "-夏天-幻想",
-    "-Autumn-Fantasy": "-秋天-幻想",
-    "-Winter-Fantasy": "-冬天-幻想",
 
 
 
