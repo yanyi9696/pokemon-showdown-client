@@ -4572,6 +4572,30 @@ var translations = {
     "Copperajah-Gmax": "大王铜象-超极巨化",
     "Duraludon-Gmax": "铝钢龙-超极巨化",
 
+    //  Fantasy 名称
+    "Aegislash-Blade-Fantasy": "坚盾剑怪-刀剑形态-幻想",
+    "Metagross-Mega-Fantasy": "巨金怪-超级进化-幻想",
+    "Garchomp-Mega-Fantasy": "烈咬陆鲨-超级进化-幻想",
+    "Altaria-Mega-Fantasy": "七夕青鸟-超级进化-幻想",
+    "Audino-Mega-Fantasy": "差不多娃娃-超级进化-幻想",
+    "Absol-Mega-Fantasy": "阿勃梭鲁-超级进化-幻想",
+    "Aggron-Mega-Fantasy": "波士可多拉-超级进化-幻想",
+    "Abomasnow-Mega-Fantasy": "暴雪王-超级进化-幻想",
+    "Glalie-Mega-Fantasy": "冰鬼护-超级进化-幻想",
+
+    "Goodra-Hisui-Fantasy": "黏美龙-洗翠-幻想",
+    "Decidueye-Hisui-Fantasy": "狙射树枭-洗翠-幻想",
+
+    "Weezing-Galar-Fantasy": "双弹瓦斯-伽勒尔-幻想",
+
+    "Urshifu-Rapid-Strike-Fantasy": "武道熊师-乱击流-幻想",
+
+    "Sawsbuck-Fantasy": "萌芽鹿-春天-幻想",
+    "Sawsbuck-Summer-Fantasy": "萌芽鹿-夏天-幻想",
+    "Sawsbuck-Autumn-Fantasy": "萌芽鹿-秋天-幻想",
+    "Sawsbuck-Winter-Fantasy": "萌芽鹿-冬天-幻想",
+
+
     "-Question": "-？",
     "-Exclamation": "-！",
     "-Neutral": "-放松模式",
@@ -4801,35 +4825,14 @@ var translations = {
 
     "-Fantasy": "-幻想",
 
-
-    "Aegislash-Blade-Fantasy": "坚盾剑怪-刀剑形态-幻想",
-    "-Blade-Fantasy": "-刀剑形态-幻想",
-
-    "Metagross-Mega-Fantasy": "巨金怪-超级进化-幻想",
-    "Garchomp-Mega-Fantasy": "烈咬陆鲨-超级进化-幻想",
-    "Altaria-Mega-Fantasy": "七夕青鸟-超级进化-幻想",
-    "Audino-Mega-Fantasy": "差不多娃娃-超级进化-幻想",
-    "Absol-Mega-Fantasy": "阿勃梭鲁-超级进化-幻想",
-    "Aggron-Mega-Fantasy": "波士可多拉-超级进化-幻想",
-    "Abomasnow-Mega-Fantasy": "暴雪王-超级进化-幻想",
-    "Glalie-Mega-Fantasy": "冰鬼护-超级进化-幻想",
-    "Goodra-Hisui-Fantasy": "黏美龙-洗翠-幻想",
-    "Decidueye-Hisui-Fantasy": "狙射树枭-洗翠-幻想",
-    "Urshifu-Rapid-Strike-Fantasy": "武道熊师-乱击流-幻想",
-    "Weezing-Galar-Fantasy": "双弹瓦斯-伽勒尔-幻想",
-    "Sawsbuck-Fantasy": "萌芽鹿-春天-幻想",
-    "Sawsbuck-Summer-Fantasy": "萌芽鹿-夏天-幻想",
-    "Sawsbuck-Autumn-Fantasy": "萌芽鹿-秋天-幻想",
-    "Sawsbuck-Winter-Fantasy": "萌芽鹿-冬天-幻想",
     "-Mega-Fantasy": "-超级进化-幻想",
+    "-Blade-Fantasy": "-刀剑形态-幻想",
     "-Hisui-Fantasy": "-洗翠-幻想",
     "-Rapid-Strike-Fantasy": "-乱击流-幻想",
     "-Galar-Fantasy": "-伽勒尔-幻想",
     "-Summer-Fantasy": "-夏天-幻想",
     "-Autumn-Fantasy": "-秋天-幻想",
     "-Winter-Fantasy": "-冬天-幻想",
-
-
 
 
 
@@ -7441,21 +7444,9 @@ var translations = {
             let text = node.nodeValue;
             let trimmed = text.trim();
             // 如果词典中存在对应的翻译，则进行替换
-            let result = text;
-
-            // 先尝试完整匹配
             if (translations[trimmed]) {
-                result = text.replace(trimmed, translations[trimmed]);
-            } else {
-                // 再尝试所有子串替换
-                for (const [en, zh] of Object.entries(translations)) {
-                    if (result.includes(en)) {
-                        result = result.replaceAll(en, zh);
-                    }
-                }
+                node.nodeValue = text.replace(trimmed, translations[trimmed]);
             }
-
-            node.nodeValue = result;
         } else if (node.nodeType === 1) { // 如果是元素节点
             // 避开输入框、脚本和样式表，防止破坏原本的功能输入
             let tag = node.tagName.toUpperCase();
