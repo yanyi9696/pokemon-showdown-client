@@ -4583,7 +4583,6 @@ var translations = {
     "-Mega-X": "-超级进化-X",
     "-Mega-Y": "-超级进化-Y",
     "-Mega-Z": "-超级进化-Z",
-    "-G-Mega": "-超巨进化",
     "-Gmax": "-超极巨化",
     "-Eternamax": "-无极巨化",
     "-Alola": "-阿罗拉",
@@ -4807,6 +4806,13 @@ var translations = {
     //  Fantasy 后缀
 
     "-Fantasy": "-幻想",
+    "-G-Mega": "-超巨进化",
+
+
+
+    //  Fantasy 名称
+
+    "Lugia-Shadow": "黑暗洛奇亚",
 
 
 
@@ -7420,6 +7426,9 @@ var translations = {
         // 这样 "-G-Mega" 就会变成一个整体，不会参与后续的逻辑
         if (name.includes("-G-Mega")) {
             name = name.replace("-G-Mega", translations["-G-Mega"]);
+        }
+        if (name.includes("Lugia-Shadow")) {
+            name = name.replace("Lugia-Shadow", translations["Lugia-Shadow"]);
         }
 
         // 3. 对剩余部分执行正常的拆分逻辑
