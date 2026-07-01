@@ -6,6 +6,22 @@ function toId() {
 
 (function ($) {
 
+    // === 【新增】：原生文字拦截器，开始 ===
+    if (typeof Tools !== 'undefined' && Tools.escapeHTML) {
+        var originalEscapeHTML = Tools.escapeHTML;
+        Tools.escapeHTML = function (str) {
+            var text = String(str);
+            var trimmed = text.trim();
+            // 如果全局翻译字典存在，且有对应的翻译，则替换
+            if (window.PSChinaTranslations && window.PSChinaTranslations[trimmed]) {
+                text = text.replace(trimmed, window.PSChinaTranslations[trimmed]);
+            }
+            // 返回替换后的安全文本
+            return originalEscapeHTML(text);
+        };
+    }
+    // === 【新增】：原生文字拦截器，结束 ===
+
 	Config.sockjsprefix = '/showdown';
 	Config.root = '/';
 

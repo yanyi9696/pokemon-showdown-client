@@ -18,7 +18,8 @@
 // @downloadURL https://update.greasyfork.org/scripts/432623/PSChina%20Server%20Translation%20SV.user.js
 // @updateURL https://update.greasyfork.org/scripts/432623/PSChina%20Server%20Translation%20SV.meta.js
 // ==/UserScript==
-var translations = {
+window.PSChinaTranslations = window.PSChinaTranslations || {};
+window.PSChinaTranslations = {
     /// 系统
 
     "Connecting...": "连接中...",
@@ -12208,67 +12209,3 @@ function translateElement(element) {
         }
     }
 }
-
-(function() {
-    'use strict';
-    const observerCallback = function(mutationsList, observer) {
-        for (let mutation of mutationsList) {
-            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                mutation.addedNodes.forEach(node => {
-                    translateElement(node);
-                });
-            }
-        }
-    };
-
-    const observer = new MutationObserver(observerCallback);
-
-    const config = { childList: true, subtree: true };
-
-    const targetNode = document.querySelector('body');
-    if (targetNode) {
-        translateElement(targetNode);
-        observer.observe(targetNode, config);
-    }
-})();
-
-// 在 translations 字典之后添加以下修复后的执行代码：
-(function() {
-    function translateNode(node) {
-        try { // 加入 try-catch 拦截可能导致死机的报错
-            if (node.nodeType === 3) { 
-                let text = node.nodeValue;
-                let trimmed = text.trim();
-                if (translations[trimmed]) {
-                    node.nodeValue = text.replace(trimmed, translations[trimmed]);
-                }
-            } else if (node.nodeType === 1) { 
-                let tag = node.tagName.toUpperCase();
-                // 【核心修复】必须避开 IFRAME，防止触发跨域安全报错阻断连接！
-                if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'IFRAME') return;
-                
-                for (let i = 0; i < node.childNodes.length; i++) {
-                    translateNode(node.childNodes[i]);
-                }
-            }
-        } catch (e) {
-            // 静默忽略无法访问的跨域节点，保证后续连接代码正常运行
-        }
-    }
-
-    $(document).ready(function() {
-        translateNode(document.body);
-    });
-
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.addedNodes) {
-                mutation.addedNodes.forEach(function(node) {
-                    translateNode(node);
-                });
-            }
-        });
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-})();
