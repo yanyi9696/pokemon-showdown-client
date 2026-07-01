@@ -7438,7 +7438,9 @@ var translations = {
     "The user uses the last move used by the target. Fails if the target has not made a move since the user switched in, or if the last move used was Mirror Move.": "使用当回合目标使用过的招式。目标本回合未行动时或目标最后使用的招式是鹦鹉学舌，招式使用失败。",
     "If the user is a Terapagos in Stellar Form, this move's type becomes Stellar, hits all opposing Pokemon, and becomes a physical attack if the user's Attack is greater than its Special Attack, including stat stage changes.": "如果使用者是星晶形态的太乐巴戈斯，此招式的属性会变为星晶属性，会攻击对方全体宝可梦，并且如果使用者的攻击数值（包括能力等级变化）大于其特攻数值时，此招式会变为物理招式。",
 };
-// 遍历并替换文本节点的函数
+// 在 translations 字典之后添加以下执行代码：
+(function() {
+    // 遍历并替换文本节点的函数
     function translateNode(node) {
         if (node.nodeType === 3) { // 如果是文本节点
             let text = node.nodeValue;
@@ -7452,41 +7454,29 @@ var translations = {
             let tag = node.tagName.toUpperCase();
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
             
-            // ===== 【新增：修复搜索高亮导致文本被切碎的问题】 =====
-            let fullText = node.textContent.trim();
-            // 如果当前元素的完整文本正好在词典中，且它内部有多个子节点（说明包含了图标或被 <b> 标签切碎）
-            if (translations[fullText] && node.childNodes.length > 1) {
-                let iconNode = null;
-                // 1. 遍历寻找可能存在的迷你图标（防止替换文字时把宝可梦的小头像也删了）
-                for (let i = 0; i < node.childNodes.length; i++) {
-                    let child = node.childNodes[i];
-                    // 识别 PS 的图标标签（如 <psicon> 或带有 picon/icon 类名的 span）
-                    if (child.nodeType === 1 && 
-                       (child.tagName === 'PSICON' || (typeof child.className === 'string' && child.className.indexOf('icon') !== -1))) {
-                        iconNode = child.cloneNode(true); // 克隆一份保存下来
-                        break;
-                    }
-                }
-                
-                // 2. 暴力清空这个元素里的所有 HTML（抹杀碎片和高亮标签）
-                node.innerHTML = '';
-                
-                // 3. 把刚刚救下来的图标重新贴回去
-                if (iconNode) {
-                    node.appendChild(iconNode);
-                    node.appendChild(document.createTextNode(' ')); // 补个空格防止太挤
-                }
-                
-                // 4. 插入完整的中文翻译
-                node.appendChild(document.createTextNode(translations[fullText]));
-                
-                return; // 直接返回，不需要再往下递归遍历那些碎掉的节点了
-            }
-            // ===== 【修复结束】 =====
-
             // 递归遍历子节点
             for (let i = 0; i < node.childNodes.length; i++) {
                 translateNode(node.childNodes[i]);
             }
         }
     }
+
+    // 页面加载完成后进行一次全局初始替换
+    $(document).ready(function() {
+        translateNode(document.body);
+    });
+
+    // 创建 MutationObserver 监听器，实现动态汉化（比如战斗中实时弹出的技能框和战报）
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes) {
+                mutation.addedNodes.forEach(function(node) {
+                    translateNode(node);
+                });
+            }
+        });
+    });
+
+    // 启动观察器，监听 body 下所有子节点的变动
+    observer.observe(document.body, { childList: true, subtree: true });
+})();
