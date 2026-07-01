@@ -4801,19 +4801,19 @@ var translations = {
 
     "-Fantasy": "-幻想",
 
-    //  Fantasy 名字
 
-    "Aegislash-Blade": "坚盾剑怪-刀剑形态",
-    "Metagross-Mega": "巨金怪-超级进化",
-    "Garchomp-Mega": "烈咬陆鲨-超级进化",
-    "Altaria-Mega": "七夕青鸟-超级进化",
-    "Audino-Mega": "差不多娃娃-超级进化",
-    "Absol-Mega": "阿勃梭鲁-超级进化",
-    "Aggron-Mega": "波士可多拉-超级进化",
-    "Abomasnow-Mega": "暴雪王-超级进化",
-    "Glalie-Megay": "冰鬼护-超级进化",
+    "Aegislash-Blade-Fantasy": "坚盾剑怪-刀剑形态-幻想",
+    "-Blade-Fantasy": "-刀剑形态-幻想",
 
-    "Goodra-Hisuiy": "黏美龙-洗翠",
+    "Metagross-Mega-Fantasy": "巨金怪-超级进化-幻想",
+    "Garchomp-Mega-Fantasy": "烈咬陆鲨-超级进化-幻想",
+    "Altaria-Mega-Fantasy": "七夕青鸟-超级进化-幻想",
+    "Audino-Mega-Fantasy": "差不多娃娃-超级进化-幻想",
+    "Absol-Mega-Fantasy": "阿勃梭鲁-超级进化-幻想",
+    "Aggron-Mega-Fantasy": "波士可多拉-超级进化-幻想",
+    "Abomasnow-Mega-Fantasy": "暴雪王-超级进化-幻想",
+    "Glalie-Mega-Fantasy": "冰鬼护-超级进化-幻想",
+    "Goodra-Hisui-Fantasy": "黏美龙-洗翠-幻想",
     "Decidueye-Hisui-Fantasy": "狙射树枭-洗翠-幻想",
     "Urshifu-Rapid-Strike-Fantasy": "武道熊师-乱击流-幻想",
     "Weezing-Galar-Fantasy": "双弹瓦斯-伽勒尔-幻想",
