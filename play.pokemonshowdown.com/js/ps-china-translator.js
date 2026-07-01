@@ -7420,26 +7420,27 @@ var translations = {
 // 在 translations 字典之后添加以下执行代码：
 (function() {
     function translatePokemonName(name) {
-        // 1. 优先完整匹配 (包含你字典里已有的所有完整词条)
-        if (translations[name]) return translations[name];
+    // 1. 优先完整匹配（字典里如果有精确定义，直接返回）
+    if (translations[name]) return translations[name];
 
-        // 2. 特殊对待名单：保护这些词条不被 split('-') 拆碎
-        // 我们在拆分前直接把这些“整体”替换掉，或者直接返回翻译
-        if (name === "Lugia-Shadow") return "黑暗洛奇亚";
-        if (name === "Lugia-Shadow-Fantasy") return "黑暗洛奇亚-幻想";
-        if (name.includes("-G-Mega")) {
-            name = name.replace("-G-Mega", translations["-G-Mega"] || "-超巨进化");
-        }
+    // 2. 占位保护：将特殊的长名字替换为临时标签
+    // 使用这种方式可以完全避开后面的 split('-')
+    const protectionMap = {
+        "Lugia-Shadow-Fantasy": "黑暗洛奇亚-幻想",
+        "Lugia-Shadow": "黑暗洛奇亚"
+    };
 
-        // 3. 对剩余部分执行正常的拆分逻辑
-        let parts = name.split('-');
-        let translatedParts = parts.map((part, index) => {
-            if (index === 0) return translations[part] || part;
-            let key = "-" + part;
-            return translations[key] || key;
-        });
-        return translatedParts.join('');
-    }
+    if (protectionMap[name]) return protectionMap[name];
+
+    // 3. 对其他名字执行正常的拆分逻辑
+    let parts = name.split('-');
+    let translatedParts = parts.map((part, index) => {
+        if (index === 0) return translations[part] || part;
+        let key = "-" + part;
+        return translations[key] || key;
+    });
+    return translatedParts.join('');
+}
 
     function translateNode(node) {
         if (node.nodeType === 3) {
