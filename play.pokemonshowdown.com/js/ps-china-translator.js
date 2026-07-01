@@ -7406,63 +7406,60 @@ var translations = {
 };
 // 在 translations 字典之后添加以下执行代码：
 (function() {
-    // 遍历并替换文本节点的函数
+    // 核心翻译函数：将复杂的宝可梦名拆解处理
+    function translatePokemonName(name) {
+        // 如果词典里有直接的翻译，直接返回
+        if (translations[name]) return translations[name];
+
+        // 拆解逻辑：按 "-" 分割，但保留连字符，或者你可以手动拼回去
+        // 例如 "Mewtwo-Mega-Y-Fantasy" -> ["Mewtwo", "-Mega", "-Y", "-Fantasy"]
+        let parts = name.split('-');
+        let translatedParts = parts.map((part, index) => {
+            if (index === 0) return translations[part] || part; // 第一部分正常查字典
+            let key = "-" + part;
+            return translations[key] || key; // 后面的部分加上"-"查字典
+        });
+
+        return translatedParts.join('');
+    }
+
     function translateNode(node) {
-        if (node.nodeType === 3) { // 如果是文本节点
+        if (node.nodeType === 3) {
             let text = node.nodeValue;
             let trimmed = text.trim();
-            
-            // 如果为空白文本，直接跳过，节省性能
             if (!trimmed) return;
 
-            // 1. 标准的全词典匹配
+            // 优化：尝试翻译完整文本
             if (translations[trimmed]) {
                 node.nodeValue = text.replace(trimmed, translations[trimmed]);
-                return;
+            } else if (trimmed.includes('-')) {
+                // 如果包含连字符且完整匹配失败，尝试局部拆解替换
+                // 注意：这里只替换那些完全符合结构的片段，避免误伤
+                let newText = translatePokemonName(trimmed);
+                if (newText !== trimmed) {
+                    node.nodeValue = text.replace(trimmed, newText);
+                }
             }
-
-            // 2. 针对 "-Fantasy" 后缀的强制额外识别和替换
-            // 确保只替换那些确实包含 "-Fantasy" 的文本节点，
-            // 并且为了安全起见，只替换完全相等或以它结尾的情况，避免误伤
-            if (trimmed === "-Fantasy" || trimmed.endsWith("-Fantasy")) {
-                 node.nodeValue = text.replace("-Fantasy", "-幻想");
-                 return;
-            }
-
-            // （可选）如果经常因为高亮被切出独立的 "Fantasy" 导致没被汉化，可以加上这个：
-            if (trimmed === "Fantasy") {
-                 node.nodeValue = text.replace("Fantasy", "幻想");
-                 return;
-            }
-
-        } else if (node.nodeType === 1) { // 如果是元素节点
-            // 避开输入框、脚本和样式表，防止破坏原本的功能输入
+        } else if (node.nodeType === 1) {
             let tag = node.tagName.toUpperCase();
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
             
-            // 递归遍历子节点
             for (let i = 0; i < node.childNodes.length; i++) {
                 translateNode(node.childNodes[i]);
             }
         }
     }
 
-    // 页面加载完成后进行一次全局初始替换
-    $(document).ready(function() {
-        translateNode(document.body);
-    });
-
-    // 创建 MutationObserver 监听器，实现动态汉化（比如战斗中实时弹出的技能框和战报）
+    // 建议：由于 Showdown 列表是动态渲染的，使用防抖来优化性能
+    let debounceTimer;
     const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.addedNodes) {
-                mutation.addedNodes.forEach(function(node) {
-                    translateNode(node);
-                });
-            }
-        });
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => translateNode(node));
+            });
+        }, 100); // 100ms 延迟，避免搜索框输入时过于频繁地触发汉化导致卡顿
     });
 
-    // 启动观察器，监听 body 下所有子节点的变动
     observer.observe(document.body, { childList: true, subtree: true });
 })();
