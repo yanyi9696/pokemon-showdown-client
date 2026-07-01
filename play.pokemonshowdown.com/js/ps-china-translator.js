@@ -4293,28 +4293,6 @@ var translations = {
     "-Paldea-Blaze": "-帕底亚-火炽种",
     "-Paldea-Combat": "-帕底亚-帕底亚",
 
-    //  Fantasy 名称
-    "Aegislash-Blade-F": "坚盾剑怪-刀剑形态-幻想",
-    "Metagross-Mega-Fa": "巨金怪-超级进化-幻想",
-    "Garchomp-Mega-Fantasy": "烈咬陆鲨-超级进化-幻想",
-    "Altaria-Mega-Fantasy": "七夕青鸟-超级进化-幻想",
-    "Audino-Mega-Fantasy": "差不多娃娃-超级进化-幻想",
-    "Absol-Mega-Fantasy": "阿勃梭鲁-超级进化-幻想",
-    "Aggron-Mega-Fantasy": "波士可多拉-超级进化-幻想",
-    "Abomasnow-Mega-Fantasy": "暴雪王-超级进化-幻想",
-    "Glalie-Mega-Fantasy": "冰鬼护-超级进化-幻想",
-
-    "Goodra-Hisui-Fantasy": "黏美龙-洗翠-幻想",
-    "Decidueye-Hisui-Fantasy": "狙射树枭-洗翠-幻想",
-
-    "Weezing-Galar-Fantasy": "双弹瓦斯-伽勒尔-幻想",
-
-    "Urshifu-Rapid-Strike-Fantasy": "武道熊师-乱击流-幻想",
-
-    "Sawsbuck-Fantasy": "萌芽鹿-春天-幻想",
-    "Sawsbuck-Summer-Fantasy": "萌芽鹿-夏天-幻想",
-    "Sawsbuck-Autumn-Fantasy": "萌芽鹿-秋天-幻想",
-    "Sawsbuck-Winter-Fantasy": "萌芽鹿-冬天-幻想",
 
 
     "Charizard-Mega-X": "喷火龙-超级进化-X",
@@ -4605,6 +4583,7 @@ var translations = {
     "-Mega-X": "-超级进化-X",
     "-Mega-Y": "-超级进化-Y",
     "-Mega-Z": "-超级进化-Z",
+    "-G-Mega": "-超巨进化",
     "-Gmax": "-超极巨化",
     "-Eternamax": "-无极巨化",
     "-Alola": "-阿罗拉",
@@ -4822,10 +4801,6 @@ var translations = {
     "-Cornerstone-Tera": "-础石-太晶化",
     "-Hearthflame-Tera": "-火灶-太晶化",
     "-Teal-Tera": "-碧草-太晶化",
-
-    //  Fantasy 后缀
-
-    "-Fantasy": "-幻想",
 
 
 
@@ -7432,6 +7407,12 @@ var translations = {
 };
 // 在 translations 字典之后添加以下执行代码：
 (function() {
+    // 专门处理 Fantasy 后缀的正则替换函数
+    function replaceFantasy(text) {
+        // 使用正则匹配所有 -Fantasy，不区分它是被切断的还是完整的
+        // 这里会把 "-Fantasy" 替换为 "-幻想"
+        return text.replace(/-Fantasy/gi, "-幻想");
+    }
     // 遍历并替换文本节点的函数
     function translateNode(node) {
         if (node.nodeType === 3) { // 如果是文本节点
