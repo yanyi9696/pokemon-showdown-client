@@ -7441,9 +7441,21 @@ var translations = {
             let text = node.nodeValue;
             let trimmed = text.trim();
             // 如果词典中存在对应的翻译，则进行替换
+            let result = text;
+
+            // 先尝试完整匹配
             if (translations[trimmed]) {
-                node.nodeValue = text.replace(trimmed, translations[trimmed]);
+                result = text.replace(trimmed, translations[trimmed]);
+            } else {
+                // 再尝试所有子串替换
+                for (const [en, zh] of Object.entries(translations)) {
+                    if (result.includes(en)) {
+                        result = result.replaceAll(en, zh);
+                    }
+                }
             }
+
+            node.nodeValue = result;
         } else if (node.nodeType === 1) { // 如果是元素节点
             // 避开输入框、脚本和样式表，防止破坏原本的功能输入
             let tag = node.tagName.toUpperCase();
