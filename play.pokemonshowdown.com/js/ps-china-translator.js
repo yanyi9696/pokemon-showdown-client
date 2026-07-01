@@ -7446,46 +7446,8 @@ var translations = {
             let text = node.nodeValue;
             let trimmed = text.trim();
             // 如果词典中存在对应的翻译，则进行替换
-            // 新增：移植高亮效果的辅助函数
-            function highlightTranslation(originalHtml, translation) {
-                // 简单处理：如果原文包含加粗，我们把整个中文都加粗，
-                // 或者简单判断如果输入词在原文中被加粗了，就加粗对应的中文部分
-                if (originalHtml.indexOf('<b>') !== -1 || originalHtml.indexOf('<strong>') !== -1) {
-                    return '<b>' + translation + '</b>';
-                }
-                return translation;
-            }
-
-            // 在遍历元素节点时，替换那段“暴力替换”逻辑：
-            if (translations[fullText] && node.childNodes.length > 1) {
-                let iconNode = null;
-                for (let i = 0; i < node.childNodes.length; i++) {
-                    let child = node.childNodes[i];
-                    if (child.nodeType === 1 && (child.tagName === 'PSICON' || child.className.indexOf('icon') !== -1)) {
-                        iconNode = child.cloneNode(true);
-                        break;
-                    }
-                }
-
-                // 获取原有的 HTML 结构，用于判断哪些部分被加粗了
-                let originalHtml = node.innerHTML;
-                let translatedText = translations[fullText];
-                
-                // 移植高亮：如果原英文名在搜索时触发了高亮，则将整段中文汉化也套上高亮
-                let finalHtml = highlightTranslation(originalHtml, translatedText);
-
-                node.innerHTML = '';
-                if (iconNode) {
-                    node.appendChild(iconNode);
-                    node.appendChild(document.createTextNode(' '));
-                }
-                
-                // 使用 innerHTML 插入带标签的高亮中文
-                let span = document.createElement('span');
-                span.innerHTML = finalHtml;
-                node.appendChild(span);
-                
-                return;
+            if (translations[trimmed]) {
+                node.nodeValue = text.replace(trimmed, translations[trimmed]);
             }
         } else if (node.nodeType === 1) { // 如果是元素节点
             // 避开输入框、脚本和样式表，防止破坏原本的功能输入
