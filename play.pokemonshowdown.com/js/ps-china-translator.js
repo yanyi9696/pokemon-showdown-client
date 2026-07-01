@@ -7413,18 +7413,14 @@ var translations = {
 // 在 translations 字典之后添加以下执行代码：
 (function() {
     function translatePokemonName(name) {
-        // 核心修改点：
-        // 优先进行完整词条匹配（包含 "-G-Mega" 这样的复合词条）
+        // 1. 强制进行最完整的字符串匹配
         if (translations[name]) return translations[name];
 
+        // 2. 只有在找不到完整匹配时，才走拆分逻辑
         let parts = name.split('-');
         let translatedParts = parts.map((part, index) => {
             if (index === 0) return translations[part] || part;
-            
-            // 为了防止 "-G-Mega" 被拆成 "-G" 和 "-Mega" 导致错误，
-            // 我们可以利用上面的优先完整匹配逻辑来覆盖。
-            // 这里我们保持原有的拆分逻辑，但如果是一个已知的完整复合词条，
-            // 上面的 if (translations[name]) 已经处理过了，所以这里是安全的。
+            // 拼接 key 时，确保它是 "-G-Mega" 这样的格式
             let key = "-" + part;
             return translations[key] || key;
         });
@@ -7437,9 +7433,11 @@ var translations = {
             let trimmed = text.trim();
             if (!trimmed) return;
 
+            // 这里是匹配逻辑
             if (translations[trimmed]) {
                 node.nodeValue = text.replace(trimmed, translations[trimmed]);
             } else if (trimmed.includes('-')) {
+                // 如果包含连字符，尝试翻译
                 let newText = translatePokemonName(trimmed);
                 if (newText !== trimmed) {
                     node.nodeValue = text.replace(trimmed, newText);
@@ -7449,19 +7447,25 @@ var translations = {
             let tag = node.tagName.toUpperCase();
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
 
-            // 针对包含连字符的宝可梦名字进行特殊处理，以移除后续部分的高亮标签
+            // 针对包含连字符的宝可梦名字容器进行处理
             if (node.classList.contains('pokemonnamecol') || node.parentElement?.classList.contains('pokemonnamecol')) {
                 let fullText = node.textContent.trim();
+                
+                // 【核心调试】：如果你觉得没效果，请取消下面这行的注释
+                // console.log("Current Pokemon Name:", fullText); 
+                
                 if (fullText.includes('-')) {
-                    let firstDashIndex = fullText.indexOf('-');
-                    let base = fullText.substring(0, firstDashIndex);
-                    let suffix = fullText.substring(firstDashIndex);
+                    // 如果词典里有完整翻译，直接调用翻译并重写，跳过分段逻辑
+                    if (translations[fullText]) {
+                        node.innerHTML = translations[fullText];
+                        return;
+                    }
                     
-                    // 只有在能翻译的情况下才进行强行处理
-                    if (translatePokemonName(fullText) !== fullText) {
-                        // 强制清空 HTML 并重写为纯文本，从而抹除所有 <b> 或 <strong> 标签
-                        node.innerHTML = base + translatePokemonName(suffix).replace(base, "");
-                        return; // 处理完毕，不再遍历子节点
+                    // 如果没有完整翻译，尝试看看能不能拆解翻译
+                    let translated = translatePokemonName(fullText);
+                    if (translated !== fullText) {
+                        node.innerHTML = translated;
+                        return;
                     }
                 }
             }
@@ -7472,12 +7476,10 @@ var translations = {
         }
     }
 
-    // 页面加载完成后进行一次全局初始替换
     $(document).ready(function() {
         translateNode(document.body);
     });
 
-    // 创建 MutationObserver 监听器，实现动态汉化
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.addedNodes) {
@@ -7488,6 +7490,5 @@ var translations = {
         });
     });
 
-    // 启动观察器，监听 body 下所有子节点的变动
     observer.observe(document.body, { childList: true, subtree: true });
 })();
