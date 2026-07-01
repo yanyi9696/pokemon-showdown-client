@@ -12232,35 +12232,34 @@ function translateElement(element) {
     }
 })();
 
-// 在 translations 字典之后添加以下执行代码：
+// 在 translations 字典之后添加以下修复后的执行代码：
 (function() {
-    // 遍历并替换文本节点的函数
     function translateNode(node) {
-        if (node.nodeType === 3) { // 如果是文本节点
-            let text = node.nodeValue;
-            let trimmed = text.trim();
-            // 如果词典中存在对应的翻译，则进行替换
-            if (translations[trimmed]) {
-                node.nodeValue = text.replace(trimmed, translations[trimmed]);
+        try { // 加入 try-catch 拦截可能导致死机的报错
+            if (node.nodeType === 3) { 
+                let text = node.nodeValue;
+                let trimmed = text.trim();
+                if (translations[trimmed]) {
+                    node.nodeValue = text.replace(trimmed, translations[trimmed]);
+                }
+            } else if (node.nodeType === 1) { 
+                let tag = node.tagName.toUpperCase();
+                // 【核心修复】必须避开 IFRAME，防止触发跨域安全报错阻断连接！
+                if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'IFRAME') return;
+                
+                for (let i = 0; i < node.childNodes.length; i++) {
+                    translateNode(node.childNodes[i]);
+                }
             }
-        } else if (node.nodeType === 1) { // 如果是元素节点
-            // 避开输入框、脚本和样式表，防止破坏原本的功能输入
-            let tag = node.tagName.toUpperCase();
-            if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
-            
-            // 递归遍历子节点
-            for (let i = 0; i < node.childNodes.length; i++) {
-                translateNode(node.childNodes[i]);
-            }
+        } catch (e) {
+            // 静默忽略无法访问的跨域节点，保证后续连接代码正常运行
         }
     }
 
-    // 页面加载完成后进行一次全局初始替换
     $(document).ready(function() {
         translateNode(document.body);
     });
 
-    // 创建 MutationObserver 监听器，实现动态汉化（比如战斗中实时弹出的技能框和战报）
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.addedNodes) {
@@ -12271,6 +12270,5 @@ function translateElement(element) {
         });
     });
 
-    // 启动观察器，监听 body 下所有子节点的变动
     observer.observe(document.body, { childList: true, subtree: true });
 })();
