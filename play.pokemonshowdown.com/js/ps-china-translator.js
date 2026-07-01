@@ -4806,7 +4806,6 @@ var translations = {
     //  Fantasy 后缀
 
     "-Fantasy": "-幻想",
-    "-G-Mega": "-超巨进化",
 
 
 
@@ -7413,20 +7412,17 @@ var translations = {
 // 在 translations 字典之后添加以下执行代码：
 (function() {
     function translatePokemonName(name) {
-        // 1. 最优先：处理你指定的特殊翻译需求
-        if (name === "Lugia-Shadow") {
-            return "黑暗洛奇亚";
-        }
-
-        // 2. 依然保留对 "-G-Mega" 的保护
-        if (name.includes("-G-Mega")) {
-            name = name.replace("-G-Mega", translations["-G-Mega"]);
-        }
-
-        // 3. 完整匹配检查
+        // 1. 优先完整匹配 (包含你字典里已有的所有完整词条)
         if (translations[name]) return translations[name];
 
-        // 4. 通用拆分逻辑
+        // 2. 特殊对待名单：保护这些词条不被 split('-') 拆碎
+        // 我们在拆分前直接把这些“整体”替换掉，或者直接返回翻译
+        if (name === "Lugia-Shadow") return "黑暗洛奇亚";
+        if (name.includes("-G-Mega")) {
+            name = name.replace("-G-Mega", translations["-G-Mega"] || "-超巨进化");
+        }
+
+        // 3. 对剩余部分执行正常的拆分逻辑
         let parts = name.split('-');
         let translatedParts = parts.map((part, index) => {
             if (index === 0) return translations[part] || part;
