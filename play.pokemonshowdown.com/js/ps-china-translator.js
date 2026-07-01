@@ -4804,7 +4804,6 @@ var translations = {
 
 
 
-
     //  前代道具效果
 
 
@@ -7407,32 +7406,30 @@ var translations = {
 };
 // 在 translations 字典之后添加以下执行代码：
 (function() {
-    // 专门处理 Fantasy 后缀的正则替换函数
-    function replaceFantasy(text) {
-        // 使用正则匹配所有 -Fantasy，不区分它是被切断的还是完整的
-        // 这里会把 "-Fantasy" 替换为 "-幻想"
-        return text.replace(/-Fantasy/gi, "-幻想");
-    }
     // 遍历并替换文本节点的函数
-    function translateNode(node) {
-        if (node.nodeType === 3) { // 如果是文本节点
-            let text = node.nodeValue;
-            let trimmed = text.trim();
-            // 如果词典中存在对应的翻译，则进行替换
-            if (translations[trimmed]) {
-                node.nodeValue = text.replace(trimmed, translations[trimmed]);
-            }
-        } else if (node.nodeType === 1) { // 如果是元素节点
-            // 避开输入框、脚本和样式表，防止破坏原本的功能输入
-            let tag = node.tagName.toUpperCase();
-            if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
-            
-            // 递归遍历子节点
-            for (let i = 0; i < node.childNodes.length; i++) {
-                translateNode(node.childNodes[i]);
-            }
+   function translateNode(node) {
+    if (node.nodeType === 3) { // 文本节点
+        let text = node.nodeValue;
+        // 如果文本里包含 -Fantasy，则强制进行拆解汉化
+        // 注意：这里保留了 "-Fantasy" 到 "-幻想" 的映射
+        if (text.includes("-Fantasy")) {
+            node.nodeValue = text.replace(/-Fantasy/g, "-幻想");
+        }
+        
+        // 维持原有的字典匹配
+        let trimmed = node.nodeValue.trim();
+        if (translations[trimmed]) {
+            node.nodeValue = translations[trimmed];
+        }
+    } else if (node.nodeType === 1) { // 元素节点
+        let tag = node.tagName.toUpperCase();
+        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
+        
+        for (let i = 0; i < node.childNodes.length; i++) {
+            translateNode(node.childNodes[i]);
         }
     }
+}
 
     // 页面加载完成后进行一次全局初始替换
     $(document).ready(function() {
