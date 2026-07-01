@@ -4804,6 +4804,12 @@ var translations = {
 
 
 
+    //  Fantasy 后缀
+
+    "-Fantasy": "-幻想",
+
+
+
     //  前代道具效果
 
 
@@ -7406,21 +7412,46 @@ var translations = {
 };
 // 在 translations 字典之后添加以下执行代码：
 (function() {
-    // 遍历并替换文本节点的函数
+    // 取消了按 "-" 拆分的机制，只进行完整的词典匹配
+    function translatePokemonName(name) {
+        return translations[name] || name;
+    }
+
     function translateNode(node) {
-        if (node.nodeType === 3) { // 如果是文本节点
+        if (node.nodeType === 3) {
             let text = node.nodeValue;
             let trimmed = text.trim();
-            // 如果词典中存在对应的翻译，则进行替换
+            if (!trimmed) return;
+
             if (translations[trimmed]) {
                 node.nodeValue = text.replace(trimmed, translations[trimmed]);
+            } else if (trimmed.includes('-')) {
+                let newText = translatePokemonName(trimmed);
+                if (newText !== trimmed) {
+                    node.nodeValue = text.replace(trimmed, newText);
+                }
             }
-        } else if (node.nodeType === 1) { // 如果是元素节点
-            // 避开输入框、脚本和样式表，防止破坏原本的功能输入
+        } else if (node.nodeType === 1) {
             let tag = node.tagName.toUpperCase();
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
+
+            // 针对包含连字符的宝可梦名字进行特殊处理，以移除后续部分的高亮标签
+            if (node.classList.contains('pokemonnamecol') || node.parentElement?.classList.contains('pokemonnamecol')) {
+                let fullText = node.textContent.trim();
+                if (fullText.includes('-')) {
+                    let firstDashIndex = fullText.indexOf('-');
+                    let base = fullText.substring(0, firstDashIndex);
+                    let suffix = fullText.substring(firstDashIndex);
+                    
+                    // 只有在词典能完整翻译的情况下才进行强行处理
+                    if (translatePokemonName(fullText) !== fullText) {
+                        // 强制清空 HTML 并重写为纯文本，从而抹除所有 <b> 或 <strong> 标签
+                        node.innerHTML = base + translatePokemonName(suffix).replace(base, "");
+                        return; // 处理完毕，不再遍历子节点
+                    }
+                }
+            }
             
-            // 递归遍历子节点
             for (let i = 0; i < node.childNodes.length; i++) {
                 translateNode(node.childNodes[i]);
             }
