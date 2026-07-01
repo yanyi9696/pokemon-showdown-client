@@ -7420,27 +7420,23 @@ var translations = {
 // 在 translations 字典之后添加以下执行代码：
 (function() {
     function translatePokemonName(name) {
-        // 1. 优先完整匹配
-        if (translations[name]) return translations[name];
-
-        // 2. 强制修复：针对你指出的这些“被拆分导致错误”的宝可梦
-        // 在这里写死逻辑，不走任何字典查询，直接返回正确结果
+        // --- 【新增：绝对强制匹配区域】 ---
+        // 这里的名单将直接返回结果，跳过所有字典查找和后续拆分逻辑
         const forcedMap = {
             "Lugia-Shadow": "黑暗洛奇亚",
             "Lugia-Shadow-Fantasy": "黑暗洛奇亚-幻想",
-            // 如果以后还有别的强制匹配，在这里加一行即可
+            // 你可以继续在此添加任何不想被拆分的宝可梦名
         };
+        // 1. 优先完整匹配
+        if (translations[name]) return translations[name];
 
-        // 3. 特殊保护机制：如果名字里包含 "-G-Mega"，先把它整体处理掉，防止被 split("-") 误拆
+        // 2. 特殊保护机制：如果名字里包含 "-G-Mega"，先把它整体处理掉，防止被 split("-") 误拆
         // 这样 "-G-Mega" 就会变成一个整体，不会参与后续的逻辑
         if (name.includes("-G-Mega")) {
             name = name.replace("-G-Mega", translations["-G-Mega"]);
         }
-        if (name.includes("Lugia-Shadow")) {
-            name = name.replace("Lugia-Shadow", translations["Lugia-Shadow"]);
-        }
 
-        // 4. 对剩余部分执行正常的拆分逻辑
+        // 3. 对剩余部分执行正常的拆分逻辑
         let parts = name.split('-');
         let translatedParts = parts.map((part, index) => {
             if (index === 0) return translations[part] || part;
