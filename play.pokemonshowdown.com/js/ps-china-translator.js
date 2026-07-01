@@ -7420,22 +7420,27 @@ var translations = {
 // 在 translations 字典之后添加以下执行代码：
 (function() {
     function translatePokemonName(name) {
-        // 强制优先级：遇到这些词直接返回，严禁拆分
-        const blacklist = ["Lugia-Shadow", "Lugia-Shadow-Fantasy"];
-        
-        if (blacklist.includes(name)) return translations[name];
-        // 1. 优先完整匹配 (包含你字典里已有的所有完整词条)
+        // 1. 优先完整匹配
         if (translations[name]) return translations[name];
 
-        // 2. 特殊对待名单：保护这些词条不被 split('-') 拆碎
-        // 我们在拆分前直接把这些“整体”替换掉，或者直接返回翻译
-        if (name === "Lugia-Shadow") return "黑暗洛奇亚";
-        if (name === "Lugia-Shadow-Fantasy") return "黑暗洛奇亚-幻想";
+        // 2. 强制修复：针对你指出的这些“被拆分导致错误”的宝可梦
+        // 在这里写死逻辑，不走任何字典查询，直接返回正确结果
+        const forcedMap = {
+            "Lugia-Shadow": "黑暗洛奇亚",
+            "Lugia-Shadow-Fantasy": "黑暗洛奇亚-幻想",
+            // 如果以后还有别的强制匹配，在这里加一行即可
+        };
+
+        // 3. 特殊保护机制：如果名字里包含 "-G-Mega"，先把它整体处理掉，防止被 split("-") 误拆
+        // 这样 "-G-Mega" 就会变成一个整体，不会参与后续的逻辑
         if (name.includes("-G-Mega")) {
-            name = name.replace("-G-Mega", translations["-G-Mega"] || "-超巨进化");
+            name = name.replace("-G-Mega", translations["-G-Mega"]);
+        }
+        if (name.includes("Lugia-Shadow")) {
+            name = name.replace("Lugia-Shadow", translations["Lugia-Shadow"]);
         }
 
-        // 3. 对剩余部分执行正常的拆分逻辑
+        // 4. 对剩余部分执行正常的拆分逻辑
         let parts = name.split('-');
         let translatedParts = parts.map((part, index) => {
             if (index === 0) return translations[part] || part;
