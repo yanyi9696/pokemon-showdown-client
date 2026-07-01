@@ -607,7 +607,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	//自制的mega沙漠蜻蜓等等
 	flygonmegafantasy: 1316, // Added fantasy mapping
     onixfantasy: 1452 + 106, // Added fantasy mapping
-	lugiashadowfantasy: 1452 + 107, // Added fantasy mapping
+	shadowlugiafantasy: 1452 + 107, // Added fantasy mapping
 	swampertmegaxfantasy: 1317, // Added fantasy mapping
 
 	// CAP

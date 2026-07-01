@@ -4812,8 +4812,8 @@ var translations = {
 
     //  Fantasy 名称
 
-    "Lugia-Shadow": "黑暗洛奇亚",
-    "Lugia-Shadow-Fantasy": "黑暗洛奇亚-幻想",
+    "Shadow Lugia": "黑暗洛奇亚",
+    "Shadow Lugia-Fantasy": "黑暗洛奇亚-幻想",
 
 
 
@@ -7420,13 +7420,6 @@ var translations = {
 // 在 translations 字典之后添加以下执行代码：
 (function() {
     function translatePokemonName(name) {
-        // --- 【新增：绝对强制匹配区域】 ---
-        // 这里的名单将直接返回结果，跳过所有字典查找和后续拆分逻辑
-        const forcedMap = {
-            "Lugia-Shadow": "黑暗洛奇亚",
-            "Lugia-Shadow-Fantasy": "黑暗洛奇亚-幻想",
-            // 你可以继续在此添加任何不想被拆分的宝可梦名
-        };
         // 1. 优先完整匹配
         if (translations[name]) return translations[name];
 

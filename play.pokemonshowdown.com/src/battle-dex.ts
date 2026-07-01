@@ -1128,9 +1128,9 @@ export const Dex = new class implements ModdedDex {
 		// 获取宝可梦的纯小写ID
 		const checkId = originalSpecies.id;
 
-		if (checkId === 'lugiashadowfantasy') {
+		if (checkId === 'shadowlugiafantasy') {
 			const facingDir = isFront ? 'gen5' : 'gen5-back';
-			const filename = 'lugia-shadow-fantasy.png';
+			const filename = 'Shadow Lugia-Fantasy.png';
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
 			spriteData.pixelated = false;
@@ -1447,13 +1447,13 @@ export const Dex = new class implements ModdedDex {
 			return `background-image:url(${customSpritePrefix}sprites/dex/onix-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 		// 【新增代码:拦截 暗影洛奇亚-幻想形态】
-		else if (id === 'lugiashadowfantasy') {
+		else if (id === 'shadowlugiafantasy') {
 			// 你可以针对洛奇亚的图片尺寸,独立调整这三个参数
 			const bgSize = "100px auto";
 			const offsetX = 10; // 左右微调
 			const offsetY = 5;  // 上下微调
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
-			return `background-image:url(${customSpritePrefix}sprites/dex/lugia-shadow-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
+			return `background-image:url(${customSpritePrefix}sprites/dex/Shadow Lugia-Fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 		// 【新增代码:拦截 沙漠蜻蜓-Mega-幻想形态】
 		else if (id === 'flygonmegafantasy') {
