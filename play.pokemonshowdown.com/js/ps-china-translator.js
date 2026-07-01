@@ -7406,35 +7406,53 @@ var translations = {
 };
 // 在 translations 字典之后添加以下执行代码：
 (function() {
-    // 辅助函数：剥离第一个连字符后的高亮标签
-    function stripHighlightAfterHyphen(htmlString) {
-        // 找到第一个连字符的位置
-        const firstHyphenIndex = htmlString.indexOf('-');
-        if (firstHyphenIndex === -1) return htmlString;
+    function translatePokemonName(name) {
+        if (translations[name]) return translations[name];
 
-        const before = htmlString.substring(0, firstHyphenIndex);
-        let after = htmlString.substring(firstHyphenIndex);
-
-        // 使用正则表达式移除 after 部分所有的 <b>, </b>, <strong>, </strong> 标签
-        after = after.replace(/<\/?(b|strong)>/gi, '');
-
-        return before + after;
+        let parts = name.split('-');
+        let translatedParts = parts.map((part, index) => {
+            if (index === 0) return translations[part] || part;
+            let key = "-" + part;
+            return translations[key] || key;
+        });
+        return translatedParts.join('');
     }
 
-    // 在你的 translateNode 函数内调用：
     function translateNode(node) {
         if (node.nodeType === 3) {
-            // ... 原有的文字翻译逻辑 ...
+            let text = node.nodeValue;
+            let trimmed = text.trim();
+            if (!trimmed) return;
+
+            if (translations[trimmed]) {
+                node.nodeValue = text.replace(trimmed, translations[trimmed]);
+            } else if (trimmed.includes('-')) {
+                let newText = translatePokemonName(trimmed);
+                if (newText !== trimmed) {
+                    node.nodeValue = text.replace(trimmed, newText);
+                }
+            }
         } else if (node.nodeType === 1) {
             let tag = node.tagName.toUpperCase();
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
 
-            // 这里是关键：在渲染前处理 HTML
-            // 如果该节点是搜索结果列表中的宝可梦名字容器
-            if (node.classList.contains('pokemonnamecol') || node.classList.contains('result')) {
-                node.innerHTML = stripHighlightAfterHyphen(node.innerHTML);
+            // 针对包含连字符的宝可梦名字进行特殊处理，以移除后续部分的高亮标签
+            if (node.classList.contains('pokemonnamecol') || node.parentElement?.classList.contains('pokemonnamecol')) {
+                let fullText = node.textContent.trim();
+                if (fullText.includes('-')) {
+                    let firstDashIndex = fullText.indexOf('-');
+                    let base = fullText.substring(0, firstDashIndex);
+                    let suffix = fullText.substring(firstDashIndex);
+                    
+                    // 只有在能翻译的情况下才进行强行处理
+                    if (translatePokemonName(fullText) !== fullText) {
+                        // 强制清空 HTML 并重写为纯文本，从而抹除所有 <b> 或 <strong> 标签
+                        node.innerHTML = base + translatePokemonName(suffix).replace(base, "");
+                        return; // 处理完毕，不再遍历子节点
+                    }
+                }
             }
-
+            
             for (let i = 0; i < node.childNodes.length; i++) {
                 translateNode(node.childNodes[i]);
             }
@@ -7446,7 +7464,7 @@ var translations = {
         translateNode(document.body);
     });
 
-    // 创建 MutationObserver 监听器，实现动态汉化（比如战斗中实时弹出的技能框和战报）
+// 创建 MutationObserver 监听器，实现动态汉化（比如战斗中实时弹出的技能框和战报）
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.addedNodes) {
