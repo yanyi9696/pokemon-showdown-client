@@ -4803,6 +4803,7 @@ var translations = {
 
 
     "Aegislash-Blade-Fantasy": "坚盾剑怪-刀剑形态-幻想",
+    "-Blade-Fantasy": "-刀剑形态-幻想",
 
     "Metagross-Mega-Fantasy": "巨金怪-超级进化-幻想",
     "Garchomp-Mega-Fantasy": "烈咬陆鲨-超级进化-幻想",
@@ -7434,14 +7435,6 @@ var translations = {
 };
 // 在 translations 字典之后添加以下执行代码：
 (function() {
-    // 预构建子串替换列表：收集所有含连字符的翻译键，按长度降序排列
-    // 这样 "Aegislash-Blade-Fantasy" 会在 "-Blade-Fantasy" 之前匹配
-    var compoundKeys = Object.keys(translations).filter(function(k) {
-        return k.includes('-');
-    }).sort(function(a, b) {
-        return b.length - a.length;
-    });
-
     // 遍历并替换文本节点的函数
     function translateNode(node) {
         if (node.nodeType === 3) { // 如果是文本节点
@@ -7450,16 +7443,6 @@ var translations = {
             // 如果词典中存在对应的翻译，则进行替换
             if (translations[trimmed]) {
                 node.nodeValue = text.replace(trimmed, translations[trimmed]);
-            } else if (text.includes('-')) {
-                // 精确匹配失败后，对含连字符的文本做子串替换
-                // 按长度降序匹配，确保长键优先（如 "-Blade-Fantasy" 优先于 "-Blade"）
-                for (var i = 0; i < compoundKeys.length; i++) {
-                    var key = compoundKeys[i];
-                    if (text.includes(key)) {
-                        text = text.split(key).join(translations[key]);
-                    }
-                }
-                node.nodeValue = text;
             }
         } else if (node.nodeType === 1) { // 如果是元素节点
             // 避开输入框、脚本和样式表，防止破坏原本的功能输入
