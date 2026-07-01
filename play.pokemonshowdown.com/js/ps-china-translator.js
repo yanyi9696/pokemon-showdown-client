@@ -7407,29 +7407,45 @@ var translations = {
 // 在 translations 字典之后添加以下执行代码：
 (function() {
     // 遍历并替换文本节点的函数
-   function translateNode(node) {
-    if (node.nodeType === 3) { // 文本节点
-        let text = node.nodeValue;
-        // 如果文本里包含 -Fantasy，则强制进行拆解汉化
-        // 注意：这里保留了 "-Fantasy" 到 "-幻想" 的映射
-        if (text.includes("-Fantasy")) {
-            node.nodeValue = text.replace(/-Fantasy/g, "-幻想");
-        }
-        
-        // 维持原有的字典匹配
-        let trimmed = node.nodeValue.trim();
-        if (translations[trimmed]) {
-            node.nodeValue = translations[trimmed];
-        }
-    } else if (node.nodeType === 1) { // 元素节点
-        let tag = node.tagName.toUpperCase();
-        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
-        
-        for (let i = 0; i < node.childNodes.length; i++) {
-            translateNode(node.childNodes[i]);
+    function translateNode(node) {
+        if (node.nodeType === 3) { // 如果是文本节点
+            let text = node.nodeValue;
+            let trimmed = text.trim();
+            
+            // 如果为空白文本，直接跳过，节省性能
+            if (!trimmed) return;
+
+            // 1. 标准的全词典匹配
+            if (translations[trimmed]) {
+                node.nodeValue = text.replace(trimmed, translations[trimmed]);
+                return;
+            }
+
+            // 2. 针对 "-Fantasy" 后缀的强制额外识别和替换
+            // 确保只替换那些确实包含 "-Fantasy" 的文本节点，
+            // 并且为了安全起见，只替换完全相等或以它结尾的情况，避免误伤
+            if (trimmed === "-Fantasy" || trimmed.endsWith("-Fantasy")) {
+                 node.nodeValue = text.replace("-Fantasy", "-幻想");
+                 return;
+            }
+
+            // （可选）如果经常因为高亮被切出独立的 "Fantasy" 导致没被汉化，可以加上这个：
+            if (trimmed === "Fantasy") {
+                 node.nodeValue = text.replace("Fantasy", "幻想");
+                 return;
+            }
+
+        } else if (node.nodeType === 1) { // 如果是元素节点
+            // 避开输入框、脚本和样式表，防止破坏原本的功能输入
+            let tag = node.tagName.toUpperCase();
+            if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
+            
+            // 递归遍历子节点
+            for (let i = 0; i < node.childNodes.length; i++) {
+                translateNode(node.childNodes[i]);
+            }
         }
     }
-}
 
     // 页面加载完成后进行一次全局初始替换
     $(document).ready(function() {
