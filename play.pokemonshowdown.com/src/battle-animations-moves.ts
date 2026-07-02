@@ -14,26 +14,18 @@ import { type AnimTable, BattleOtherAnims } from './battle-animations';
 export const BattleMoveAnims: AnimTable = {
 	biansuzfan: {
 		anim(scene, [attacker, defender]) {
-			// 1. 执行 spinout 的特效部分 (自身齿轮/冰球效果)
+			// --- 第一部分：spinout 的自身特效 (攻击前) ---
 			for (let i = 0; i < 5; i++) {
 				scene.showEffect('gear', {
-					x: attacker.x,
-					y: attacker.y,
-					z: attacker.z,
-					scale: 0,
-					opacity: 1,
-					time: 0,
+					x: attacker.x, y: attacker.y, z: attacker.z,
+					scale: 0, opacity: 1, time: 0,
 				}, {
-					x: attacker.x + (50 / i),
+					x: attacker.x + (50 / (i + 1)), // 防止除以0
 					y: attacker.y + (i * 5),
-					scale: 1,
-					opacity: 0,
-					time: 300,
+					scale: 1, opacity: 0, time: 300,
 				}, 'ballistic');
 			}
 
-			// 这里仅保留你提到的 "自身特效"，如果需要冰球特效，请保留下方代码
-			// 若只需齿轮，可注释掉下面关于 iceball 的 scene.showEffect 部分
 			const iceEffects = [
 				{ t: 0, x: -25, y: -25, time: 300 },
 				{ t: 150, x: 30, y: -20, time: 450 },
@@ -51,9 +43,32 @@ export const BattleMoveAnims: AnimTable = {
 				}, 'ballistic');
 			});
 
-			// 2. 执行 uturn 的位移和动作逻辑
-			// 使用 BattleOtherAnims.spinattack 覆盖原有的 uturn 攻击表现
-			BattleOtherAnims.spinattack.anim(scene, [attacker, defender]);
+			// --- 第二部分：uturn 的位移和折返逻辑 (手动展开) ---
+			// 确保攻击者在特效展示一段时间后再开始突进
+			attacker.delay(300); 
+
+			// 执行冲向目标
+			attacker.anim({
+				x: defender.x,
+				y: defender.y,
+				z: defender.behind(-5),
+				time: 300,
+			}, 'accel');
+
+			// 执行折返 (回撤)
+			attacker.anim({
+				time: 500,
+			}, 'ballistic2Back');
+
+			// 防御方受击
+			defender.delay(580);
+			defender.anim({
+				z: defender.behind(20),
+				time: 100,
+			}, 'swing');
+			defender.anim({
+				time: 300,
+			}, 'swing');
 		},
 	},
 	huanshenbu: {
@@ -3026,7 +3041,7 @@ export const BattleMoveAnims: AnimTable = {
 	},
 	wasitihuan: {
 		anim(scene, [attacker, defender]) {
-			// 1. 发射毒弹 (替代 electroball)
+			// 1. 发射毒弹
 			scene.showEffect('poisonwisp', {
 				x: attacker.x,
 				y: attacker.y,
@@ -3040,8 +3055,7 @@ export const BattleMoveAnims: AnimTable = {
 				time: 500,
 			}, 'linear', 'explode');
 
-			// 2. 毒气散开特效 (源自 haze，修改为以 defender 为中心)
-			// 调整了循环逻辑以适应散开效果
+			// 2. 毒气散开特效 (延迟至击中后的 500ms 处开始)
 			let xf = [1, -1, 1, -1];
 			let yf = [1, -1, -1, 1];
 			
@@ -3052,17 +3066,18 @@ export const BattleMoveAnims: AnimTable = {
 					z: defender.z,
 					scale: 0.5,
 					opacity: 1,
+					time: 500, // 核心修改：在这里设置延迟，匹配击中时刻
 				}, {
 					x: defender.x + 80 * xf[i],
 					y: defender.y,
 					z: defender.z + 50 * yf[i],
-					scale: 2, // 稍微调大扩散规模
+					scale: 2,
 					opacity: 0,
-					time: 800,
+					time: 1300, // 将散开的总时长设为 800ms，从 500ms 开始
 				}, 'decel', 'fade');
 			}
 
-			// 3. 攻击方动作 (保持与 voltswitch 一致)
+			// 3. 攻击方动作
 			attacker.anim({
 				z: attacker.behind(15),
 				time: 200,
@@ -3076,7 +3091,7 @@ export const BattleMoveAnims: AnimTable = {
 				time: 300,
 			}, 'swing');
 
-			// 4. 防御方受击动作 (保持与 voltswitch 一致)
+			// 4. 防御方受击动作
 			defender.delay(500);
 			defender.anim({
 				x: defender.leftof(5),
