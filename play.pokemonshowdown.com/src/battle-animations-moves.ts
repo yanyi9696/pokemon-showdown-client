@@ -32,8 +32,8 @@ export const BattleMoveAnims: AnimTable = {
 				}, 'ballistic');
 			}
 
-			// 2. 保持原有的折返特效轨迹 (waterwisp)
-			scene.showEffect('waterwisp', {
+			// 2. 保持原有的折返特效轨迹 (iceball)
+			scene.showEffect('iceball', {
 				x: defender.x,
 				y: defender.y + 80,
 				z: defender.behind(-15),
@@ -51,18 +51,33 @@ export const BattleMoveAnims: AnimTable = {
 			// 3. 攻击命中后：冰球喷发特效 (在 defender 位置)
 			// 增加延迟确保其出现在命中时刻
 			scene.showEffect('iceball', {
-				x: defender.x,
-				y: defender.y,
-				z: defender.z,
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
 				scale: 0,
 				opacity: 1,
 				time: 600,
 			}, {
-				scale: 5,
+				x: attacker.x + 5,
+				y: attacker.y - 40,
+				scale: 2,
 				opacity: 0,
 				time: 900,
 			}, 'linear');
-
+			scene.showEffect('iceball', {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				scale: 0,
+				opacity: 1,
+				time: 600,
+			}, {
+				x: attacker.x - 20,
+				y: attacker.y - 20,
+				scale: 2,
+				opacity: 0,
+				time: 900,
+			}, 'linear');
 			scene.showEffect('iceball', {
 				x: defender.x,
 				y: defender.y,
@@ -71,7 +86,7 @@ export const BattleMoveAnims: AnimTable = {
 				opacity: 1,
 				time: 700,
 			}, {
-				scale: 8,
+				scale: 5,
 				opacity: 0,
 				time: 1000,
 			}, 'linear');
