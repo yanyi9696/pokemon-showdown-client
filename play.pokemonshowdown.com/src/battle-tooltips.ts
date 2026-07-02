@@ -2047,10 +2047,12 @@ export class BattleTooltips {
 		// 1. 在客户端 Tooltips 中，依靠 tier（分级名称）判断是最准确的
 		let isFantasyTier = this.battle.tier.includes('FC');
 
-		// 2. 如果是 FC 分级且招式为捏碎 (crushgrip)，则将其从浮动威力列表中排除
-		let variableBPCap = (['crushgrip', 'wringout'].includes(move.id) && !(isFantasyTier && move.id === 'crushgrip')) 
-			? 120 
-			: move.id === 'hardpress' ? 100 : undefined;
+		// 2. 独立判断每种浮动威力招式，FC分级下的捏碎(crushgrip)返回 undefined 从而排除浮动
+		let variableBPCap = 
+			(move.id === 'hardpress') ? 100 :
+			(move.id === 'wringout') ? 120 :
+			(move.id === 'crushgrip' && !isFantasyTier) ? 120 :
+			undefined;
 
 		if (variableBPCap && target) {
 			value.set(
