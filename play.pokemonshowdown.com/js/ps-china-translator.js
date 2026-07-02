@@ -7604,6 +7604,36 @@ var translations = {
 };
 // 在 translations 字典之后添加以下执行代码：
 (function() {
+    // 1. 读取本地存储中的语言设置，如果没有设置，则默认开启汉化 ('zh')
+    const currentLang = localStorage.getItem('ps_china_lang') || 'zh';
+
+    // 2. 监听全局点击事件（必须放在最前面，确保在英文模式下也能监听到点击并切回中文）
+    document.addEventListener('click', function(e) {
+        let btn = e.target.closest('button');
+        if (!btn) return;
+
+        let btnText = btn.textContent.trim();
+
+        if (btnText === 'English') {
+            if (currentLang !== 'en') {
+                localStorage.setItem('ps_china_lang', 'en');
+                location.reload(); // 刷新页面恢复原生英文
+            }
+        } else if (btnText === '简体中文') {
+            if (currentLang !== 'zh') {
+                localStorage.setItem('ps_china_lang', 'zh');
+                location.reload(); // 刷新页面激活汉化
+            }
+        }
+    });
+
+    // 3. 如果当前语言不是中文，直接退出，不执行后续的任何汉化逻辑
+    if (currentLang !== 'zh') return;
+
+
+    // ==========================================
+    // 以下为你原有的汉化核心逻辑，保持完全不变
+    // ==========================================
     function translatePokemonName(name) {
         // 1. 优先完整匹配
         if (translations[name]) return translations[name];
