@@ -12,20 +12,21 @@
 import { type AnimTable, BattleOtherAnims } from './battle-animations';
 
 export const BattleMoveAnims: AnimTable = {
-	biansuzfan: {
+	biansuzhefan: {
 		anim(scene, [attacker, defender]) {
-			// --- 第一部分：spinout 的自身特效 (攻击前) ---
+			// 1. 保留原本的打击特效逻辑 (复用 spinout 的部分)
+			// 齿轮特效
 			for (let i = 0; i < 5; i++) {
 				scene.showEffect('gear', {
 					x: attacker.x, y: attacker.y, z: attacker.z,
 					scale: 0, opacity: 1, time: 0,
 				}, {
-					x: attacker.x + (50 / (i + 1)), // 防止除以0
-					y: attacker.y + (i * 5),
+					x: attacker.x + (50 / i), y: attacker.y + (i * 5),
 					scale: 1, opacity: 0, time: 300,
 				}, 'ballistic');
 			}
 
+			// 冰球冲击特效
 			const iceEffects = [
 				{ t: 0, x: -25, y: -25, time: 300 },
 				{ t: 150, x: 30, y: -20, time: 450 },
@@ -33,21 +34,18 @@ export const BattleMoveAnims: AnimTable = {
 				{ t: 300, x: -20, y: -20, time: 600 }
 			];
 
-			iceEffects.forEach(fx => {
+			iceEffects.forEach(eff => {
 				scene.showEffect('iceball', {
 					x: attacker.x, y: attacker.y, z: attacker.z,
-					scale: 0, opacity: 1, time: fx.t,
+					scale: 0, opacity: 1, time: eff.t,
 				}, {
-					x: attacker.x + fx.x, y: attacker.y + fx.y,
-					scale: 2, opacity: 0, time: fx.time,
+					x: attacker.x + eff.x, y: attacker.y + eff.y,
+					scale: 2, opacity: 0, time: eff.time,
 				}, 'ballistic');
 			});
 
-			// --- 第二部分：uturn 的位移和折返逻辑 (手动展开) ---
-			// 确保攻击者在特效展示一段时间后再开始突进
-			attacker.delay(300); 
-
-			// 执行冲向目标
+			// 2. 攻击位移与打击感
+			attacker.delay(300);
 			attacker.anim({
 				x: defender.x,
 				y: defender.y,
@@ -55,20 +53,16 @@ export const BattleMoveAnims: AnimTable = {
 				time: 300,
 			}, 'accel');
 
-			// 执行折返 (回撤)
+			// 3. 折返逻辑 (关键点)
+			// 在攻击结束后(300ms + 500ms)，触发回到原位的动作
 			attacker.anim({
 				time: 500,
-			}, 'ballistic2Back');
+			}, 'ballistic2Back'); // 假设 ballistic2Back 是标准的返回动作
 
-			// 防御方受击
+			// defender 受击反馈
 			defender.delay(580);
-			defender.anim({
-				z: defender.behind(20),
-				time: 100,
-			}, 'swing');
-			defender.anim({
-				time: 300,
-			}, 'swing');
+			defender.anim({ z: defender.behind(20), time: 100 }, 'swing');
+			defender.anim({ time: 300 }, 'swing');
 		},
 	},
 	huanshenbu: {
