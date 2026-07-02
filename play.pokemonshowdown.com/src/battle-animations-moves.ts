@@ -14,7 +14,7 @@ import { type AnimTable, BattleOtherAnims } from './battle-animations';
 export const BattleMoveAnims: AnimTable = {
 	biansuzfan: {
 		anim(scene, [attacker, defender]) {
-			// 1. 在攻击者处生成齿轮喷射特效 (使用 spinout 的循环逻辑)
+			// 1. 执行 spinout 的特效部分 (自身齿轮/冰球效果)
 			for (let i = 0; i < 5; i++) {
 				scene.showEffect('gear', {
 					x: attacker.x,
@@ -24,7 +24,7 @@ export const BattleMoveAnims: AnimTable = {
 					opacity: 1,
 					time: 0,
 				}, {
-					x: attacker.x + (50 / (i + 1)), // 防止除以0
+					x: attacker.x + (50 / i),
 					y: attacker.y + (i * 5),
 					scale: 1,
 					opacity: 0,
@@ -32,43 +32,28 @@ export const BattleMoveAnims: AnimTable = {
 				}, 'ballistic');
 			}
 
-			// 2. 攻击者冲向目标并产生打击感
-			attacker.delay(300);
-			attacker.anim({
-				x: defender.x,
-				y: defender.y,
-				z: defender.behind(-5),
-				time: 300,
-			}, 'accel');
+			// 这里仅保留你提到的 "自身特效"，如果需要冰球特效，请保留下方代码
+			// 若只需齿轮，可注释掉下面关于 iceball 的 scene.showEffect 部分
+			const iceEffects = [
+				{ t: 0, x: -25, y: -25, time: 300 },
+				{ t: 150, x: 30, y: -20, time: 450 },
+				{ t: 250, x: 5, y: -40, time: 550 },
+				{ t: 300, x: -20, y: -20, time: 600 }
+			];
 
-			// 3. 在目标位置生成钢系打击特效 (将 iceball 替换为 gear 或 steel 效果)
-			scene.showEffect('gear', {
-				x: defender.x,
-				y: defender.y,
-				z: defender.z,
-				scale: 2,
-				opacity: 1,
-				time: 350,
-			}, {
-				scale: 8,
-				opacity: 0,
-				time: 600,
-			}, 'linear');
+			iceEffects.forEach(fx => {
+				scene.showEffect('iceball', {
+					x: attacker.x, y: attacker.y, z: attacker.z,
+					scale: 0, opacity: 1, time: fx.t,
+				}, {
+					x: attacker.x + fx.x, y: attacker.y + fx.y,
+					scale: 2, opacity: 0, time: fx.time,
+				}, 'ballistic');
+			});
 
-			// 4. 受击者抖动动画
-			defender.delay(350);
-			defender.anim({
-				z: defender.behind(20),
-				time: 100,
-			}, 'swing');
-			defender.anim({
-				time: 300,
-			}, 'swing');
-
-			// 5. 折返逻辑：攻击者退回到初始位置
-			attacker.anim({
-				time: 500,
-			}, 'ballistic2Back');
+			// 2. 执行 uturn 的位移和动作逻辑
+			// 使用 BattleOtherAnims.spinattack 覆盖原有的 uturn 攻击表现
+			BattleOtherAnims.spinattack.anim(scene, [attacker, defender]);
 		},
 	},
 	huanshenbu: {
@@ -3041,78 +3026,57 @@ export const BattleMoveAnims: AnimTable = {
 	},
 	wasitihuan: {
 		anim(scene, [attacker, defender]) {
-			// ==========================================
-			// 1. 攻击方动作 (提取自 伏特替换)
-			// ==========================================
-			// 微微后撤蓄力
+			// 1. 发射毒弹 (替代 electroball)
+			scene.showEffect('poisonwisp', {
+				x: attacker.x,
+				y: attacker.y,
+				z: defender.behind(-130),
+				opacity: 0.8,
+				time: 275,
+			}, {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				time: 500,
+			}, 'linear', 'explode');
+
+			// 2. 毒气散开特效 (源自 haze，修改为以 defender 为中心)
+			// 调整了循环逻辑以适应散开效果
+			let xf = [1, -1, 1, -1];
+			let yf = [1, -1, -1, 1];
+			
+			for (let i = 0; i < 4; i++) {
+				scene.showEffect('poisonwisp', {
+					x: defender.x,
+					y: defender.y,
+					z: defender.z,
+					scale: 0.5,
+					opacity: 1,
+				}, {
+					x: defender.x + 80 * xf[i],
+					y: defender.y,
+					z: defender.z + 50 * yf[i],
+					scale: 2, // 稍微调大扩散规模
+					opacity: 0,
+					time: 800,
+				}, 'decel', 'fade');
+			}
+
+			// 3. 攻击方动作 (保持与 voltswitch 一致)
 			attacker.anim({
 				z: attacker.behind(15),
 				time: 200,
 			}, 'decel');
-			// 猛然前倾施放毒雾
 			attacker.anim({
 				z: defender.behind(-170),
 				time: 100,
 			}, 'accel');
-			// 迅速后撤回原位 (暗示即将替换下场)
 			attacker.anim({
 				z: attacker.z,
 				time: 300,
 			}, 'swing');
 
-			// ==========================================
-			// 2. 施放毒液弹 (提取自 浊雾，时间轴延后100ms以匹配冲刺动作)
-			// ==========================================
-			scene.showEffect('poisonwisp', {
-				x: attacker.x,
-				y: attacker.y,
-				z: attacker.z,
-				scale: 0.7,
-				opacity: 0.6,
-				time: 100, 
-			}, {
-				x: defender.x,
-				y: defender.y + 10,
-				z: defender.behind(10),
-				scale: 1,
-				opacity: 0.3,
-				time: 500,
-			}, 'decel', 'explode');
-			scene.showEffect('poisonwisp', {
-				x: attacker.x,
-				y: attacker.y,
-				z: attacker.z,
-				scale: 0.7,
-				opacity: 1,
-				time: 200,
-			}, {
-				x: defender.x - 20,
-				y: defender.y + 5,
-				z: defender.behind(10),
-				scale: 1,
-				opacity: 0.3,
-				time: 600,
-			}, 'decel', 'explode');
-			scene.showEffect('poisonwisp', {
-				x: attacker.x,
-				y: attacker.y,
-				z: attacker.z,
-				scale: 0.7,
-				opacity: 1,
-				time: 300,
-			}, {
-				x: defender.x + 25,
-				y: defender.y,
-				z: defender.behind(10),
-				scale: 1,
-				opacity: 0.3,
-				time: 700,
-			}, 'decel', 'explode');
-
-			// ==========================================
-			// 3. 防御方受击动作 (提取自 伏特替换)
-			// ==========================================
-			// 延时500ms，恰好在第一团毒雾命中时产生受击硬直
+			// 4. 防御方受击动作 (保持与 voltswitch 一致)
 			defender.delay(500);
 			defender.anim({
 				x: defender.leftof(5),
@@ -3123,52 +3087,6 @@ export const BattleMoveAnims: AnimTable = {
 			defender.anim({
 				time: 300,
 			}, 'swing');
-
-			// ==========================================
-			// 4. 毒雾在防御方身上炸开并消散 (提取自 浊雾，时间轴延后100ms)
-			// ==========================================
-			scene.showEffect('poisonwisp', {
-				x: defender.x + 30,
-				y: defender.y,
-				z: defender.z,
-				scale: 1,
-				opacity: 1,
-				time: 500,
-			}, {
-				x: defender.x + 50,
-				y: defender.y + 30,
-				scale: 1.4,
-				opacity: 0.2,
-				time: 900,
-			}, 'decel', 'fade');
-			scene.showEffect('poisonwisp', {
-				x: defender.x - 30,
-				y: defender.y,
-				z: defender.z,
-				scale: 1,
-				opacity: 1,
-				time: 600,
-			}, {
-				x: defender.x - 50,
-				y: defender.y + 30,
-				scale: 1.4,
-				opacity: 0.2,
-				time: 1000,
-			}, 'decel', 'fade');
-			scene.showEffect('poisonwisp', {
-				x: defender.x + 15,
-				y: defender.y,
-				z: defender.z,
-				scale: 1,
-				opacity: 1,
-				time: 700,
-			}, {
-				x: defender.x + 25,
-				y: defender.y + 20,
-				scale: 1.4,
-				opacity: 0.2,
-				time: 1100,
-			}, 'decel', 'fade');
 		},
 	},
 	yuannengshifang: {

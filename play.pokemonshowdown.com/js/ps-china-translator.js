@@ -2249,6 +2249,7 @@ var translations = {
     "Dian Shan Xun Ji": "电闪迅击",
     "Zui Shen Luan Da": "醉神乱打",
     "Wa Si Ti Huan": "瓦斯替换",
+    "Bian Su Zhe Fan": "变速折返",
     "Chuan Yun": "穿云",
     "Bao Yu Li Hua": "暴雨梨花",
     "Yan Jian": "岩箭",
