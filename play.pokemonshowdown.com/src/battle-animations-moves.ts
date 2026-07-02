@@ -14,7 +14,8 @@ import { type AnimTable, BattleOtherAnims } from './battle-animations';
 export const BattleMoveAnims: AnimTable = {
 	biansuzhefan: {
 		anim(scene, [attacker, defender]) {
-			// 1. 特效部分保持不变
+			// 1. 保留原本的打击特效逻辑 (复用 spinout 的部分)
+			// 齿轮特效
 			for (let i = 0; i < 5; i++) {
 				scene.showEffect('gear', {
 					x: attacker.x, y: attacker.y, z: attacker.z,
@@ -25,7 +26,7 @@ export const BattleMoveAnims: AnimTable = {
 				}, 'ballistic');
 			}
 
-			// 冰球冲击逻辑
+			// 冰球冲击特效
 			const iceEffects = [
 				{ t: 0, x: -25, y: -25, time: 300 },
 				{ t: 150, x: 30, y: -20, time: 450 },
@@ -42,19 +43,7 @@ export const BattleMoveAnims: AnimTable = {
 					scale: 2, opacity: 0, time: eff.time,
 				}, 'ballistic');
 			});
-
-			// 2. 移除原本的 attacker.anim(x, y...) 冲刺逻辑
-			// 直接让 defender 表现受击
-			defender.delay(580);
-			defender.anim({ z: defender.behind(20), time: 100 }, 'swing');
-			defender.anim({ time: 300 }, 'swing');
-
-			// 3. 强制让 attacker 执行折返动画
-			// 如果你的系统支持直接调用弹回，这样写：
-			attacker.delay(600);
-			attacker.anim({
-				time: 500,
-			}, 'ballistic2Back'); 
+			BattleOtherAnims.spinattack.anim(scene, [attacker, defender]);
 		},
 	},
 	huanshenbu: {
