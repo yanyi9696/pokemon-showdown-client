@@ -58,7 +58,7 @@ export const BattleMoveAnims: AnimTable = {
 				opacity: 1,
 				time: 700,
 			}, {
-				scale: 2,
+				scale: 4,
 				opacity: 0,
 				time: 1000,
 			}, 'linear');
