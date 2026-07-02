@@ -25,24 +25,6 @@ export const BattleMoveAnims: AnimTable = {
 					scale: 1, opacity: 0, time: 300,
 				}, 'ballistic');
 			}
-
-			// 冰球冲击特效
-			const iceEffects = [
-				{ t: 0, x: -25, y: -25, time: 300 },
-				{ t: 150, x: 30, y: -20, time: 450 },
-				{ t: 250, x: 5, y: -40, time: 550 },
-				{ t: 300, x: -20, y: -20, time: 600 }
-			];
-
-			iceEffects.forEach(eff => {
-				scene.showEffect('iceball', {
-					x: attacker.x, y: attacker.y, z: attacker.z,
-					scale: 0, opacity: 1, time: eff.t,
-				}, {
-					x: attacker.x + eff.x, y: attacker.y + eff.y,
-					scale: 2, opacity: 0, time: eff.time,
-				}, 'ballistic');
-			});
 			BattleOtherAnims.spinattack.anim(scene, [attacker, defender]);
 		},
 	},
