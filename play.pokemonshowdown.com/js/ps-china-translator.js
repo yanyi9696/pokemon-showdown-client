@@ -4829,6 +4829,9 @@ var translations = {
 
     "-Fantasy": "-幻想",
     "-G-Mega": "-超巨进化",
+    "-Rapid-Strike-Fantasy": "-乱击流-幻想",
+    "-Rapid-Strike-G-Mega-Fantasy": "-瞬击流-幻想",
+    "-Rapid-Strike-2-Fantasy": "-环击流-幻想",
 
 
 
@@ -7604,47 +7607,21 @@ var translations = {
 };
 // 在 translations 字典之后添加以下执行代码：
 (function() {
-    // 1. 读取本地存储中的语言设置，如果没有设置，则默认开启汉化 ('zh')
-    const currentLang = localStorage.getItem('ps_china_lang') || 'zh';
-
-    // 2. 监听全局点击事件
-    // 【关键修改】：这里传入了第三个参数 true，开启事件捕获。
-    // 这样能确保我们的点击监听优先于 PS 客户端原本的拦截代码执行。
-    document.addEventListener('click', function(e) {
-        let btn = e.target.closest('button');
-        if (!btn) return;
-
-        let btnText = btn.textContent.trim();
-        let btnValue = btn.value; // 获取按钮的 value 属性，PS 的原生语言按钮带有此属性
-
-        // 判断是否点击了英文按钮 (同时匹配文字或 value 属性)
-        if (btnText === 'English' || btnValue === 'en') {
-            if (currentLang !== 'en') {
-                localStorage.setItem('ps_china_lang', 'en');
-                location.reload(); // 刷新页面恢复原生英文
-            }
-        } 
-        // 判断是否点击了中文按钮 (同时匹配文字或 value 属性)
-        else if (btnText === '简体中文' || btnValue === 'zh-Hans') {
-            if (currentLang !== 'zh') {
-                localStorage.setItem('ps_china_lang', 'zh');
-                location.reload(); // 刷新页面激活汉化
-            }
-        }
-    }, true); // <-- 注意这个 true 非常重要！
-
-    // 3. 如果当前语言不是中文，直接退出，不执行后续的任何汉化逻辑
-    if (currentLang !== 'zh') return;
-
-
-    // ==========================================
-    // 以下为你原有的汉化核心逻辑，保持完全不变
-    // ==========================================
     function translatePokemonName(name) {
         // 1. 优先完整匹配
         if (translations[name]) return translations[name];
 
-        // 2. 特殊保护机制
+        // 2. 特殊保护机制：如果名字里包含 "-G-Mega"，先把它整体处理掉，防止被 split("-") 误拆
+        // 这样 "-G-Mega" 就会变成一个整体，不会参与后续的逻辑
+        if (name.includes("-Rapid-Strike-Fantasy")) {
+            name = name.replace("-Rapid-Strike-Fantasy", translations["-Rapid-Strike-Fantasy"]);
+        }
+        if (name.includes("-Rapid-Strike-G-Mega-Fantasy")) {
+            name = name.replace("-Rapid-Strike-G-Mega-Fantasy", translations["-Rapid-Strike-G-Mega-Fantasy"]);
+        }
+        if (name.includes("-Rapid-Strike-2-Fantasy")) {
+            name = name.replace("-Rapid-Strike-2-Fantasy", translations["-Rapid-Strike-2-Fantasy"]);
+        }
         if (name.includes("-G-Mega")) {
             name = name.replace("-G-Mega", translations["-G-Mega"]);
         }
@@ -7677,6 +7654,7 @@ var translations = {
             let tag = node.tagName.toUpperCase();
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
 
+            // 依然保留你在 pokemonnamecol 中对 <b> 标签的强行重写逻辑
             if (node.classList.contains('pokemonnamecol') || node.parentElement?.classList.contains('pokemonnamecol')) {
                 let fullText = node.textContent.trim();
                 if (fullText.includes('-')) {
