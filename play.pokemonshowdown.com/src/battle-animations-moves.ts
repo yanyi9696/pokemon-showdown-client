@@ -14,17 +14,63 @@ import { type AnimTable, BattleOtherAnims } from './battle-animations';
 export const BattleMoveAnims: AnimTable = {
 	biansuzhefan: {
 		anim(scene, [attacker, defender]) {
-			// 1. 保留原本的打击特效逻辑 (复用 spinout 的部分)
-			// 齿轮特效
+			// 1. 攻击前：齿轮预热效果（仿照原 spinout）
 			for (let i = 0; i < 5; i++) {
 				scene.showEffect('gear', {
-					x: attacker.x, y: attacker.y, z: attacker.z,
-					scale: 0, opacity: 1, time: 0,
+					x: attacker.x,
+					y: attacker.y,
+					z: attacker.z,
+					scale: 0,
+					opacity: 1,
+					time: 0,
 				}, {
-					x: attacker.x + (50 / i), y: attacker.y + (i * 5),
-					scale: 1, opacity: 0, time: 300,
+					x: attacker.x + (50 / (i + 1)),
+					y: attacker.y + (i * 5),
+					scale: 1,
+					opacity: 0,
+					time: 300,
 				}, 'ballistic');
 			}
+
+			// 2. 攻击动作：冲向目标并折返
+			// 延迟执行，给齿轮一点预热时间
+			attacker.delay(300);
+			attacker.anim({
+				x: defender.x,
+				y: defender.y,
+				z: defender.behind(-5),
+				time: 300,
+			}, 'accel');
+			
+			// 3. 击中后：冰球喷发效果（在目标位置触发）
+			// 使用 delay 确保在攻击触碰目标后触发
+			const impactTime = 600; 
+			
+			const iceEffects = [
+				{ start: { x: defender.x - 25, y: defender.y - 25 }, end: { x: defender.x - 50, y: defender.y - 50 }, delay: 0 },
+				{ start: { x: defender.x + 30, y: defender.y - 20 }, end: { x: defender.x + 60, y: defender.y - 40 }, delay: 150 },
+				{ start: { x: defender.x + 5, y: defender.y - 40 }, end: { x: defender.x + 10, y: defender.y - 80 }, delay: 250 },
+				{ start: { x: defender.x - 20, y: defender.y - 20 }, end: { x: defender.x - 40, y: defender.y - 40 }, delay: 300 }
+			];
+
+			iceEffects.forEach(fx => {
+				scene.showEffect('iceball', {
+					x: fx.start.x,
+					y: fx.start.y,
+					z: defender.z,
+					scale: 0,
+					opacity: 1,
+					time: impactTime + fx.delay,
+				}, {
+					x: fx.end.x,
+					y: fx.end.y,
+					scale: 2,
+					opacity: 0,
+					time: impactTime + fx.delay + 300,
+				}, 'ballistic');
+			});
+
+			// 4. 折返动作：攻击者回到原位
 			BattleOtherAnims.spinattack.anim(scene, [attacker, defender]);
 		},
 	},
