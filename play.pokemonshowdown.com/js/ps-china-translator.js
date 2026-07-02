@@ -7611,8 +7611,20 @@ var translations = {
         // 1. 优先完整匹配
         if (translations[name]) return translations[name];
 
-        // 2. 特殊保护机制：如果名字里包含 "-G-Mega"，先把它整体处理掉，防止被 split("-") 误拆
-        // 这样 "-G-Mega" 就会变成一个整体，不会参与后续的逻辑
+        // 2. 特殊保护机制：如果名字里包含 "-X-X"，先把它整体处理掉，防止被 split("-") 误拆
+        // 这样 "-X-X" 就会变成一个整体，不会参与后续的逻辑
+        if (name.includes("Wo-Chien")) {
+            name = name.replace("Wo-Chien", translations["Wo-Chien"]);
+        }
+        if (name.includes("Chien-Pao")) {
+            name = name.replace("Chien-Pao", translations["Chien-Pao"]);
+        }
+        if (name.includes("Chi-Yu")) {
+            name = name.replace("Chi-Yu", translations["Chi-Yu"]);
+        }
+        if (name.includes("Ting-Lu")) {
+            name = name.replace("Ting-Lu", translations["Ting-Lu"]);
+        }
         if (name.includes("-Rapid-Strike-Fantasy")) {
             name = name.replace("-Rapid-Strike-Fantasy", translations["-Rapid-Strike-Fantasy"]);
         }
@@ -7624,6 +7636,9 @@ var translations = {
         }
         if (name.includes("-G-Mega")) {
             name = name.replace("-G-Mega", translations["-G-Mega"]);
+        }
+        if (name.includes("-Low-Key")) {
+            name = name.replace("-Low-Key", translations["-Low-Key"]);
         }
 
         // 3. 对剩余部分执行正常的拆分逻辑
