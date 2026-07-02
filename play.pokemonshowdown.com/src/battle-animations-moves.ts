@@ -14,7 +14,7 @@ import { type AnimTable, BattleOtherAnims } from './battle-animations';
 export const BattleMoveAnims: AnimTable = {
 	biansuzhefan: {
 		anim(scene, [attacker, defender]) {
-			// 1. 攻击前：齿轮预热效果（仿照原 spinout）
+			// 1. 攻击前：齿轮特效 (在 attacker 位置)
 			for (let i = 0; i < 5; i++) {
 				scene.showEffect('gear', {
 					x: attacker.x,
@@ -24,7 +24,7 @@ export const BattleMoveAnims: AnimTable = {
 					opacity: 1,
 					time: 0,
 				}, {
-					x: attacker.x + (50 / (i + 1)),
+					x: attacker.x + (50 / (i + 1)), // 防止除以0
 					y: attacker.y + (i * 5),
 					scale: 1,
 					opacity: 0,
@@ -32,45 +32,51 @@ export const BattleMoveAnims: AnimTable = {
 				}, 'ballistic');
 			}
 
-			// 2. 攻击动作：冲向目标并折返
-			// 延迟执行，给齿轮一点预热时间
-			attacker.delay(300);
-			attacker.anim({
+			// 2. 保持原有的折返特效轨迹 (waterwisp)
+			scene.showEffect('waterwisp', {
+				x: defender.x,
+				y: defender.y + 80,
+				z: defender.behind(-15),
+				scale: 1.5,
+				opacity: 0.8,
+				time: 400,
+			}, {
+				y: defender.y,
+				z: defender.z,
+				scale: 0.5,
+				opacity: 1,
+				time: 500,
+			}, 'linear', 'explode');
+
+			// 3. 攻击命中后：冰球喷发特效 (在 defender 位置)
+			// 增加延迟确保其出现在命中时刻
+			scene.showEffect('iceball', {
 				x: defender.x,
 				y: defender.y,
-				z: defender.behind(-5),
-				time: 300,
-			}, 'accel');
-			
-			// 3. 击中后：冰球喷发效果（在目标位置触发）
-			// 使用 delay 确保在攻击触碰目标后触发
-			const impactTime = 600; 
-			
-			const iceEffects = [
-				{ start: { x: defender.x - 25, y: defender.y - 25 }, end: { x: defender.x - 50, y: defender.y - 50 }, delay: 0 },
-				{ start: { x: defender.x + 30, y: defender.y - 20 }, end: { x: defender.x + 60, y: defender.y - 40 }, delay: 150 },
-				{ start: { x: defender.x + 5, y: defender.y - 40 }, end: { x: defender.x + 10, y: defender.y - 80 }, delay: 250 },
-				{ start: { x: defender.x - 20, y: defender.y - 20 }, end: { x: defender.x - 40, y: defender.y - 40 }, delay: 300 }
-			];
+				z: defender.z,
+				scale: 0,
+				opacity: 1,
+				time: 600,
+			}, {
+				scale: 5,
+				opacity: 0,
+				time: 900,
+			}, 'linear');
 
-			iceEffects.forEach(fx => {
-				scene.showEffect('iceball', {
-					x: fx.start.x,
-					y: fx.start.y,
-					z: defender.z,
-					scale: 0,
-					opacity: 1,
-					time: impactTime + fx.delay,
-				}, {
-					x: fx.end.x,
-					y: fx.end.y,
-					scale: 2,
-					opacity: 0,
-					time: impactTime + fx.delay + 300,
-				}, 'ballistic');
-			});
+			scene.showEffect('iceball', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				scale: 0,
+				opacity: 1,
+				time: 700,
+			}, {
+				scale: 8,
+				opacity: 0,
+				time: 1000,
+			}, 'linear');
 
-			// 4. 折返动作：攻击者回到原位
+			// 4. 执行位移逻辑 (复用原始折返的运动轨迹)
 			BattleOtherAnims.spinattack.anim(scene, [attacker, defender]);
 		},
 	},
