@@ -12,6 +12,65 @@
 import { type AnimTable, BattleOtherAnims } from './battle-animations';
 
 export const BattleMoveAnims: AnimTable = {
+	biansuzfan: {
+		anim(scene, [attacker, defender]) {
+			// 1. 在攻击者处生成齿轮喷射特效 (使用 spinout 的循环逻辑)
+			for (let i = 0; i < 5; i++) {
+				scene.showEffect('gear', {
+					x: attacker.x,
+					y: attacker.y,
+					z: attacker.z,
+					scale: 0,
+					opacity: 1,
+					time: 0,
+				}, {
+					x: attacker.x + (50 / (i + 1)), // 防止除以0
+					y: attacker.y + (i * 5),
+					scale: 1,
+					opacity: 0,
+					time: 300,
+				}, 'ballistic');
+			}
+
+			// 2. 攻击者冲向目标并产生打击感
+			attacker.delay(300);
+			attacker.anim({
+				x: defender.x,
+				y: defender.y,
+				z: defender.behind(-5),
+				time: 300,
+			}, 'accel');
+
+			// 3. 在目标位置生成钢系打击特效 (将 iceball 替换为 gear 或 steel 效果)
+			scene.showEffect('gear', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				scale: 2,
+				opacity: 1,
+				time: 350,
+			}, {
+				scale: 8,
+				opacity: 0,
+				time: 600,
+			}, 'linear');
+
+			// 4. 受击者抖动动画
+			defender.delay(350);
+			defender.anim({
+				z: defender.behind(20),
+				time: 100,
+			}, 'swing');
+			defender.anim({
+				time: 300,
+			}, 'swing');
+
+			// 5. 折返逻辑：攻击者退回到初始位置
+			attacker.anim({
+				time: 500,
+			}, 'ballistic2Back');
+		},
+	},
 	huanshenbu: {
 		anim(scene, [attacker, defender]) {
 			// 1. 使用电光一闪的极速突进动画框架，取代原本较慢的接触攻击
@@ -2980,7 +3039,7 @@ export const BattleMoveAnims: AnimTable = {
 			}, 'linear', 'explode');
 		},
 	},
-	wuzhuotihuan: {
+	wasitihuan: {
 		anim(scene, [attacker, defender]) {
 			// ==========================================
 			// 1. 攻击方动作 (提取自 伏特替换)
