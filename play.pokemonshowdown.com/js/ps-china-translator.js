@@ -7607,6 +7607,39 @@ var translations = {
 };
 // 在 translations 字典之后添加以下执行代码：
 (function() {
+    // 1. 读取本地存储中的语言设置，如果没有设置，则默认开启汉化 ('zh')
+    const currentLang = localStorage.getItem('ps_china_lang') || 'zh';
+
+    // 2. 监听全局 change 事件（专门捕获下拉框的改变）
+    document.addEventListener('change', function(e) {
+        let target = e.target;
+        
+        // 确保触发事件的是 name="language" 的那个 <select> 下拉菜单
+        if (target && target.tagName.toUpperCase() === 'SELECT' && target.name === 'language') {
+            let selectedValue = target.value; // PS 的原生 value，比如 'english' 或 'simplifiedchinese'
+
+            if (selectedValue === 'english') {
+                if (currentLang !== 'en') {
+                    localStorage.setItem('ps_china_lang', 'en');
+                    // 稍微延迟 200 毫秒刷新，给 PS 客户端一点时间把原生设置存好
+                    setTimeout(() => location.reload(), 200); 
+                }
+            } else if (selectedValue === 'simplifiedchinese') {
+                if (currentLang !== 'zh') {
+                    localStorage.setItem('ps_china_lang', 'zh');
+                    setTimeout(() => location.reload(), 200); 
+                }
+            }
+        }
+    }, true); // true 开启事件捕获
+
+    // 3. 如果当前语言不是中文，直接退出，不执行后续的任何汉化逻辑
+    if (currentLang !== 'zh') return;
+
+
+    // ==========================================
+    // 以下为你原有的汉化核心逻辑，保持完全不变
+    // ==========================================
     function translatePokemonName(name) {
         // 1. 优先完整匹配
         if (translations[name]) return translations[name];
