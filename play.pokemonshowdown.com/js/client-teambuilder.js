@@ -3911,10 +3911,6 @@
 						(!set.shiny ? " checked" : "") +
 						" /> No</label>";
 					buf += "</div></div>";
-					buf += '<div class="formrow"><label class="formlabel">Sprite:</label><div>' +
-						'<label class="checkbox inline"><input type="radio" name="sprite" value="bw"' + (!Storage.prefs('homesprites') ? ' checked' : '') + ' /> XY</label> ' +
-						'<label class="checkbox inline"><input type="radio" name="sprite" value="home"' + (Storage.prefs('homesprites') ? ' checked' : '') + ' /> Home</label>' +
-					'</div></div>';
 				}
 
 				if (renderDynamax) {
@@ -4068,12 +4064,6 @@
 				set.shiny = true;
 			} else {
 				delete set.shiny;
-			}
-
-			// sprite (Home sprites)
-			var sprite = this.$chart.find('input[name=sprite]:checked').val();
-			if (sprite) {
-				Storage.prefs('homesprites', sprite === 'home');
 			}
 
 			// dynamax level
@@ -5393,14 +5383,8 @@
 			if (Dex.prefs("nopastgens")) dir = "dex";
 			if ((Dex.prefs("bwgfx") && dir === "dex") || species.gen >= 8)
 				dir = "gen5";
-				
-			// 【新增】如果开启了 Home 立绘，强制去 home 文件夹拉取形态列表贴图
-			if (Dex.prefs("homesprites")) dir = "home"; 
-			
 			spriteDir += dir;
-			
-			// 【修改】由于 home 立绘也很大，需要和 dex 共享 120px 的尺寸设定
-			if (dir === "dex" || dir === "home") { 
+			if (dir === "dex") {
 				spriteSize = 120;
 				spriteDim = "width: 120px; height: 120px;";
 			}
