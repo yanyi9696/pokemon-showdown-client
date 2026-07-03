@@ -6405,7 +6405,7 @@ var translations = {
     "On switch-in, this Pokemon lowers the evasiveness of opponents 1 stage. Once per battle.": "首次出场时，令对手的闪避率下降1级",
     "On switch-in, this Pokemon restores 1/4 of its ally's maximum HP, rounded down.": "出场时款待同伴，使其回复1/4最大HP",
     "Fire damage against this Pokemon is dealt with 1/2 offensive stat; 1/2 burn damage.": "火属性招式和灼伤对您造成的伤害变为原本的一半",
-    "Fighting, Normal moves hit Ghost. Accuracy can't be lowered, ignores evasiveness.": "使出一般属性和格斗属性的招式时可以击中幽灵属性的宝可梦",
+    "Fighting, Normal moves hit Ghost. Accuracy can't be lowered, ignores evasiveness.": "使出一般属性和格斗属性的招式时可以击中幽灵属性的宝可梦,命中率不会被降低",
     "If this Pokemon is a Terapagos, it transforms into its Terastal Form on entry.": "出场时会吸收周围的能量，变为太晶形态",
     "Terapagos: If full HP, attacks taken have 0.5x effectiveness unless naturally immune.": "HP全满时，如果受到的攻击招式的属性相性倍率为1或以上，将变为效果不好",
     "Terapagos: Terastallizing ends the effects of weather and terrain. Once per battle.": "令场上所有的天气型状态和场地型状态消失。每场对战仅能发动1次",

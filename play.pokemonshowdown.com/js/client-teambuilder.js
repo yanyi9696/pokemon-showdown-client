@@ -5379,12 +5379,20 @@
 			var spriteDim = "width: 96px; height: 96px;";
 
 			var gen = Math.max(this.room.curTeam.gen, species.gen);
-			var dir = gen > 5 ? "dex" : "gen" + gen;
-			if (Dex.prefs("nopastgens")) dir = "dex";
-			if ((Dex.prefs("bwgfx") && dir === "dex") || species.gen >= 8)
+			// 默认将第六世代及以上的 3D 立绘路径指向 home
+			var dir = gen > 5 ? "home" : "gen" + gen;
+			if (Dex.prefs("nopastgens")) dir = "home";
+
+			// 为自定义宝可梦加入像素立绘的降级逻辑
+			if (species.id.includes('fantasy') || species.id.includes('shadowlugia')) {
 				dir = "gen5";
+			} else if ((Dex.prefs("bwgfx") && dir === "home") || species.gen >= 8) {
+				dir = "gen5";
+			}
+			
 			spriteDir += dir;
-			if (dir === "dex") {
+			// 兼容 home 尺寸
+			if (dir === "home" || dir === "dex") {
 				spriteSize = 120;
 				spriteDim = "width: 120px; height: 120px;";
 			}

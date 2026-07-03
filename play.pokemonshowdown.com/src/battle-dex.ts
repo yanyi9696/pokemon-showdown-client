@@ -1393,25 +1393,10 @@ export const Dex = new class implements ModdedDex {
 		if (speciesForChecks.gen >= 8 && speciesForChecks.isNonstandard !== 'CAP') xydexExists = false;
 
 		if ((!gen || gen >= 6) && xydexExists) {
-			spriteData.spriteDir = 'sprites/dex'; // Keep XY dir
-			// Apply specific offsets based on the *cleaned* spriteid
-			if (speciesForChecks.gen >= 7) {
-				spriteData.x = -6;
-				spriteData.y = -7;
-			} else if (spriteid.startsWith('arceus')) {
-				spriteData.x = -2;
-				spriteData.y = 7;
-			} else if (spriteid === 'garchomp') {
-				spriteData.x = -2;
-				spriteData.y = 2;
-			} else if (spriteid === 'garchompmega') {
-				spriteData.x = -2;
-				spriteData.y = 0;
-			} else {
-				// Default XY offsets
-				spriteData.x = -2;
-				spriteData.y = -3;
-			}
+			spriteData.spriteDir = 'sprites/dex'; // 官方现已将 sprites/dex 用于 Home 3D 立绘
+			// Home 立绘是标准的 120x120，不再需要旧版的硬编码坐标偏移，统一归零
+			spriteData.x = 0;
+			spriteData.y = 0;
 			return spriteData;
 		}
 
@@ -1475,7 +1460,14 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		// 原版逻辑:从官方服务器或默认路径拉取图片
-		return `background-image:url(${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png);background-position:${data.x}px ${data.y}px;background-repeat:no-repeat`;
+		let style = `background-image:url(${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png);background-position:${data.x}px ${data.y}px;background-repeat:no-repeat`;
+		
+		// 针对 Home 3D 立绘，强制设定 background-size 为 120px 匹配官方样式
+		if (data.spriteDir === 'sprites/dex') {
+			style += `;background-size:120px`;
+		}
+		
+		return style;
 	}
 
 	getItemIcon(item: any) {
