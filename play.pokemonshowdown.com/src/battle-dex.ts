@@ -984,10 +984,10 @@ export const Dex = new class implements ModdedDex {
 		let facing;
 		if (isFront) {
 			spriteData.isFrontSprite = true;
-			dir = '';
+			dir = Dex.prefs('homesprites') ? 'home' : '';
 			facing = 'front';
 		} else {
-			dir = '-back';
+			dir = Dex.prefs('homesprites') ? 'home' : '-back';
 			facing = 'back';
 		}
 
@@ -1005,8 +1005,9 @@ export const Dex = new class implements ModdedDex {
 		let graphicsGen = mechanicsGen;
 		if (Dex.prefs('nopastgens')) graphicsGen = 6;
 		if (Dex.prefs('bwgfx') && graphicsGen >= 6) graphicsGen = 5;
+		if (Dex.prefs('homesprites')) graphicsGen = 9;
 		spriteData.gen = Math.max(graphicsGen, Math.min(speciesForGenCheck.gen, 5));
-		const baseDir = ['', 'gen1', 'gen2', 'gen3', 'gen4', 'gen5', '', '', '', ''][spriteData.gen];
+		const baseDir = ['', 'gen1', 'gen2', 'gen3', 'gen4', 'gen5', '', '', '', 'home'][spriteData.gen];
 
 		let animationData = null;
 		let miscData = null;
@@ -1076,7 +1077,7 @@ export const Dex = new class implements ModdedDex {
 		if (animationData[facing + 'f'] && options.gender === 'F') facing += 'f';
 		let allowAnim = !Dex.prefs('noanim') && !Dex.prefs('nogif');
 		if (allowAnim && spriteData.gen >= 6) spriteData.pixelated = false;
-		if (allowAnim && animationData[facing] && spriteData.gen >= 5) {
+		if (allowAnim && animationData[facing] && spriteData.gen >= 5 && spriteData.gen !== 9) {
 			if (facing.endsWith('f')) name += '-f';
 			dir = baseDir + 'ani' + dir;
 
@@ -1382,6 +1383,13 @@ export const Dex = new class implements ModdedDex {
 		// Determine display generation based on preferences and species data
 		if (Dex.prefs('nopastgens')) gen = 6;
 		if (Dex.prefs('bwgfx') && gen > 5) gen = 5;
+
+		if (Dex.prefs('homesprites')) {
+			spriteData.spriteDir = 'sprites/home';
+			spriteData.x = -6;
+			spriteData.y = -7;
+			return spriteData;
+		}
 
 		// Use the determined species (mod or base) for gen checks
 		let speciesForChecks = species;
