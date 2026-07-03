@@ -1393,8 +1393,8 @@ export const Dex = new class implements ModdedDex {
 		if (speciesForChecks.gen >= 8 && speciesForChecks.isNonstandard !== 'CAP') xydexExists = false;
 
 		if ((!gen || gen >= 6) && xydexExists) {
-			spriteData.spriteDir = 'sprites/dex'; // 官方现已将 sprites/dex 用于 Home 3D 立绘
-			// Home 立绘是标准的 120x120，不再需要旧版的硬编码坐标偏移，统一归零
+			spriteData.spriteDir = 'sprites/dex';
+			// Home 3D 立绘是完全居中的 120x120 尺寸，移除所有旧版偏移！
 			spriteData.x = 0;
 			spriteData.y = 0;
 			return spriteData;
