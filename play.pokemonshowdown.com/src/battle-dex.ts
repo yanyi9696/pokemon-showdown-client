@@ -1482,7 +1482,7 @@ export const Dex = new class implements ModdedDex {
             const bgSize = "background-size: 95px 95px; ";
             
             // 1. 设置绝大部分宝可梦默认的 Y 轴居中位置
-            let finalY = "10%"; 
+            let finalY = "30%"; 
             
             // 2. 提取出干净的宝可梦 ID（去掉 -fantasy 后缀，方便字典统一判定）
             let baseId = data.spriteid;
@@ -1493,7 +1493,9 @@ export const Dex = new class implements ModdedDex {
             // 3. 【特判字典】：在这里把所有“太靠上”的宝可梦揪出来单独调教
             // 填入宝可梦的纯小写 ID，赋给它们一个更小的值（越小越往上抬）
             const customOffsets: { [id: string]: string } = {
-                'corviknight': '40%', 
+				'metagross': '5%',    // 巨金怪 往上提
+                'excadrill': '5%',    // 龙头地鼠 往上提
+                'corviknight': '40%',  // 钢铠鸦 往下压
             };
 
             // 如果这只宝可梦在特判字典里，就用字典里的定制高度
