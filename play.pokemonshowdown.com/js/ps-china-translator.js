@@ -7609,9 +7609,6 @@ var translations = {
 // 在 translations 字典之后添加以下执行代码：
 
 // ==========================================================
-var QQ = $.noConflict();
-
-
 var regex_item_was = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(was ([A-z0-9,'.() ’:-]+?)\)$/);
 var regex_toCommander = new RegExp(/^The opposing (.+?) was swallowed by the opposing (.+?) and became the opposing (.+?)'s commander!$/);
 var regex_Commander = new RegExp(/^(.+?) was swallowed by (.+?) and became (.+?)'s commander!$/);
