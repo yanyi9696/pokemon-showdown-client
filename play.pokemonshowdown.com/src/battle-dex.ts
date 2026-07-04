@@ -1482,7 +1482,7 @@ export const Dex = new class implements ModdedDex {
             const bgSize = "background-size: 95px 95px; ";
             
             // 1. 设置绝大部分宝可梦默认的 Y 轴居中位置
-            let finalY = "20%"; 
+            let finalY = "10%"; 
             
             // 2. 提取出干净的宝可梦 ID（去掉 -fantasy 后缀，方便字典统一判定）
             let baseId = data.spriteid;
