@@ -12145,20 +12145,18 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
         return translatedParts.join('');
     }
 
-    // 整合后的 DOM 节点替换逻辑
     function translateNode(node) {
         if (node.nodeType === 3) {
-            // 注意：这里统一改用 value 变量，以完美兼容旧文件复制过来的代码
             let value = node.nodeValue;
             let trimmed = value.trim();
             if (!trimmed) return;
 
-            // 优先级别 1：基础词典全文本精确匹配 (效率最高)
+            // 优先级别 1：基础词典全文本精确匹配
             if (translations[trimmed]) {
                 node.nodeValue = value.replace(trimmed, translations[trimmed]);
                 return;
-            } 
-            
+            }
+
             // 优先级别 2：处理宝可梦名字（带有短横线但不包含空格的短词）
             if (trimmed.includes('-') && !trimmed.includes(' ')) {
                 let newText = translatePokemonName(trimmed);
@@ -12169,9 +12167,6 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
             }
 
             // ==========================================================
-            function translateNode(node) {
-            if (node.tagName == 'SCRIPT') return;
-            var value = node.nodeValue;
             if (value.startsWith("If this move is successful, it deals damage or heals the target. 102/256 chance for")) node.nodeValue = "随机选择如下效果：102/256几率以40威力攻击对手；76/256几率以80威力攻击对手；26/256几率以120威力攻击对手；52/256几率回复对手1/4的最大HP(向下取整)。在第二世代使用礼物招式时，伤害计算公式中的等级、攻击、防御变量的值会发生改变。攻击的值会变为5（岩石属性或钢属性）或10（其他属性）。等级与防御的值由宝可梦的属性决定，其中等级会变为防御方宝可梦第二属性的内部编号，防御会变为攻击方宝可梦第二属性的内部编号（如果攻击方或防御方宝可梦只有一种属性，按照该宝可梦的第一属性计算）。各属性的内部编号如下：0=一般，1=格斗，2=飞行，3=毒，4=地面，5=岩石，7=虫，8=幽灵，9=钢，20=火，21=水，22=草，23=电，24=超能力，25=冰，26=龙，27=恶。";
             if (value.startsWith("The user spends two turns locked into this move and then, on the second turn after using this move, the user attacks the last Pokemon that hit")) node.nodeValue = "进入忍耐状态，2回合内无法使用其它招式、使用道具或交换宝可梦。第三回合以处于忍耐状态期间，上一次使用攻击招式对使用者造成伤害的对手所在场地的宝可梦为目标，对目标造成处于忍耐状态期间受到攻击招式的总伤害×2的伤害。该招式无法对没有效果的属性的宝可梦造成伤害，但忽略其它属性相克和属性一致加成且必定命中。";
             if (value.startsWith("The user and its ally's Abilities change to match the target's Ability. Does not")) node.nodeValue = "将自身和同伴的特性转变为目标的特性。以下情况时，招式使用失败：使用者或同伴与目标特性相同；目标特性为神奇守护、复制、接球手、化学之力、阴晴不定、花之礼、多属性、变身者、幻觉、达摩模式、战斗切换、群聚变形、牵绊变身、画皮、鱼群、界限盾壳、AR系统、饱了又饿、一口导弹、结冻头、人马一体、绝对睡眠、化学变化气体、全能变身、发号施令、古代活性和夸克充能； 或者使用者或同伴的特性为多属性、达摩模式、战斗切换、群聚变形、牵绊变身、画皮、鱼群、界限盾壳、AR系统、一口导弹、结冻头、人马一体、绝对睡眠、全能变身、发号施令、古代活性和夸克充能。";
@@ -12427,25 +12422,18 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
                     return;
                 }
             }
-            if (value.lastIndexOf('!') == 0 || (value.lastIndexOf(')!') == 0)){
-                value = value.replace('!', "！");
-                node.nodeValue = value;
-            }
-            if (value.indexOf('•') == 0) {
-                value = value.replace('•', "").replace('Metronome', "挥指").replace('Refresh', "焕然一新").replace('Disable', "定身法").replace("Hidden Power 精神强念", "觉醒力量-超能力").replace("强念 Noise", "噪音").replace("强念 Fangs", "之牙").replace("强念 Terrain", "场地").replace('Psychic', "精神强念");
-                value = t(value);
-                node.nodeValue = "• " + value + " ";
-            } else {
-                node.nodeValue = t(node.nodeValue.replace("é", "e"));
-
-            }
-        }
-
             // ==========================================================
 
 
-            // 优先级别 3：前面都没拦截下来，最后交由动态正则去匹配对战播报
-            let regexTranslated = t(value);
+            // 优先级别 4：动态正则匹配与特殊字符处理
+            let regexTranslated = value;
+            if (value.indexOf('•') === 0) {
+                let cleanValue = value.replace('•', "").replace('Metronome', "挥指").replace('Refresh', "焕然一新").replace('Disable', "定身法").replace("Hidden Power 精神强念", "觉醒力量-超能力").replace("强念 Noise", "噪音").replace("强念 Fangs", "之牙").replace("强念 Terrain", "场地").replace('Psychic', "精神强念");
+                regexTranslated = "• " + t(cleanValue) + " ";
+            } else {
+                regexTranslated = t(value.replace("é", "e"));
+            }
+
             if (regexTranslated !== value) {
                 node.nodeValue = regexTranslated;
             }
@@ -12454,7 +12442,7 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
             let tag = node.tagName.toUpperCase();
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
 
-            // 依然保留您在 pokemonnamecol 中对 <b> 标签的强行重写逻辑
+            // 保留的 pokemonnamecol 强行重写逻辑
             if (node.classList.contains('pokemonnamecol') || node.parentElement?.classList.contains('pokemonnamecol')) {
                 let fullText = node.textContent.trim();
                 if (fullText.includes('-')) {
