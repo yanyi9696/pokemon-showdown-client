@@ -1368,7 +1368,7 @@ export const Dex = new class implements ModdedDex {
 
 		const spriteData: TeambuilderSpriteData = {
 			spriteid, // Use cleaned spriteid for filename
-			spriteDir: 'sprites/dex',
+			spriteDir: 'sprites/home', // 【修改1：将默认路径改为 home】
 			x: -2,
 			y: -3,
 		};
@@ -1393,7 +1393,7 @@ export const Dex = new class implements ModdedDex {
 		if (speciesForChecks.gen >= 8 && speciesForChecks.isNonstandard !== 'CAP') xydexExists = false;
 
 		if ((!gen || gen >= 6) && xydexExists) {
-			spriteData.spriteDir = 'sprites/dex'; // Keep XY dir
+			spriteData.spriteDir = 'sprites/home'; // 【修改2：强制高世代也使用 home 路径】
 			// Apply specific offsets based on the *cleaned* spriteid
 			if (speciesForChecks.gen >= 7) {
 				spriteData.x = -6;
@@ -1474,8 +1474,24 @@ export const Dex = new class implements ModdedDex {
 			return `background-image:url(${customSpritePrefix}sprites/dex${shiny}/swampert-mega-x-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 
-		// 原版逻辑:从官方服务器或默认路径拉取图片
-		return `background-image:url(${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png);background-position:${data.x}px ${data.y}px;background-repeat:no-repeat`;
+		// 精准修复：如果是官方的 home 立绘，直接强行去官方云端服务器拉取，本地不需要有这个文件夹！
+		let finalUrl = "";
+		let bgSize = "";
+		let finalX = data.x;
+		let finalY = data.y;
+		
+		if (data.spriteDir === 'sprites/home') {
+			// 强行锁定官方 CDN 地址
+			finalUrl = `https://play.pokemonshowdown.com/sprites/home${shiny}/${data.spriteid}.png`;
+			bgSize = "background-size: 100px auto; ";
+			finalX = -5;
+			finalY = -10;
+		} else {
+			// 属于你本地魔改的非 home 贴图，依然读取你本地或私服配置的路径
+			finalUrl = `${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`;
+		}
+
+		return `background-image:url(${finalUrl});${bgSize}background-position:${finalX}px ${finalY}px;background-repeat:no-repeat`;
 	}
 
 	getItemIcon(item: any) {

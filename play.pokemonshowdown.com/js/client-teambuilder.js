@@ -5366,28 +5366,36 @@
 		},
 	}));
 	var AltFormPopup = (this.AltFormPopup = Popup.extend({
-		type: "semimodal",
-		initialize: function (data) {
-			this.room = data.room;
-			this.curSet = data.curSet;
-			this.chartIndex = data.index;
-			var species = this.room.curTeam.dex.species.get(this.curSet.species);
-			var baseid = toID(species.baseSpecies);
-			var forms = [baseid].concat(species.cosmeticFormes.map(toID));
-			var spriteDir = Dex.resourcePrefix + "sprites/";
-			var spriteSize = 96;
-			var spriteDim = "width: 96px; height: 96px;";
+        type: "semimodal",
+        initialize: function (data) {
+            this.room = data.room;
+            this.curSet = data.curSet;
+            this.chartIndex = data.index;
+            var species = this.room.curTeam.dex.species.get(this.curSet.species);
+            var baseid = toID(species.baseSpecies);
+            var forms = [baseid].concat(species.cosmeticFormes.map(toID));
+            var spriteDir = Dex.resourcePrefix + "sprites/";
+            var spriteSize = 96;
+            var spriteDim = "width: 96px; height: 96px;";
 
-			var gen = Math.max(this.room.curTeam.gen, species.gen);
-			var dir = gen > 5 ? "dex" : "gen" + gen;
-			if (Dex.prefs("nopastgens")) dir = "dex";
-			if ((Dex.prefs("bwgfx") && dir === "dex") || species.gen >= 8)
-				dir = "gen5";
-			spriteDir += dir;
-			if (dir === "dex") {
-				spriteSize = 120;
-				spriteDim = "width: 120px; height: 120px;";
-			}
+            var gen = Math.max(this.room.curTeam.gen, species.gen);
+            
+            var dir = gen > 5 ? "home" : "gen" + gen; 
+            if (Dex.prefs("nopastgens")) dir = "home"; 
+            if (Dex.prefs("bwgfx") && dir === "home") 
+                dir = "gen5";
+                
+            // --- 核心修复：分流图片服务器 ---
+            if (dir === "home") {
+                // 如果是 home 目录，直接将路径重写为官方线上的图片源，本地不需要有此文件夹
+                spriteDir = "https://play.pokemonshowdown.com/sprites/home"; 
+                spriteSize = 120;
+                spriteDim = "width: 120px; height: 120px; background-size: contain; background-position: center;"; 
+            } else {
+                // 其他旧世代像素图或魔改图，依然走私服原本的本地路径
+                spriteDir += dir;
+            }
+            // --- 修改结束 ---
 
 			var buf = "";
 			buf +=
