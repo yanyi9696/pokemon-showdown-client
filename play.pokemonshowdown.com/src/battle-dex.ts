@@ -1481,11 +1481,11 @@ export const Dex = new class implements ModdedDex {
 			const finalUrl = `https://play.pokemonshowdown.com/sprites/home${shiny}/${data.spriteid}.png`;
 			
 			// 【终极微调参数】
-			// 1. 将大小限制在 75px * 75px 正方形内，确保不超出整行的高度边界
-			const bgSize = "background-size: 75px 75px; ";
+			// 1. 将大小限制在 100px * 100px 正方形内，确保不超出整行的高度边界
+			const bgSize = "background-size: 100px 100px; ";
 			
-			// 2. X轴固定距离左边 12px（避开最左侧的边框），Y轴直接写 center 让浏览器完美上下居中
-			return `background-image:url(${finalUrl});${bgSize}background-position: 12px center;background-repeat:no-repeat`;
+			// 2. X轴固定距离左边 12px（避开最左侧的边框），Y轴直接写 center 让浏览器完美上下居中(左右调12px 上下调2px)
+			return `background-image:url(${finalUrl});${bgSize}background-position: 12px 2px;background-repeat:no-repeat`;
 		} else {
 			// 属于你本地魔改的非 home 贴图，依然读取你本地或私服配置的路径
 			const finalUrl = `${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`;
