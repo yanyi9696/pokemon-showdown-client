@@ -7607,6 +7607,1119 @@ var translations = {
     "If the user is a Terapagos in Stellar Form, this move's type becomes Stellar, hits all opposing Pokemon, and becomes a physical attack if the user's Attack is greater than its Special Attack, including stat stage changes.": "如果使用者是星晶形态的太乐巴戈斯，此招式的属性会变为星晶属性，会攻击对方全体宝可梦，并且如果使用者的攻击数值（包括能力等级变化）大于其特攻数值时，此招式会变为物理招式。",
 };
 // 在 translations 字典之后添加以下执行代码：
+
+// ==========================================================
+var QQ = $.noConflict();
+
+
+var regex_item_was = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(was ([A-z0-9,'.() ’:-]+?)\)$/);
+var regex_toCommander = new RegExp(/^The opposing (.+?) was swallowed by the opposing (.+?) and became the opposing (.+?)'s commander!$/);
+var regex_Commander = new RegExp(/^(.+?) was swallowed by (.+?) and became (.+?)'s commander!$/);
+var regex_tomagic_bounce = new RegExp(/^The opposing (.+?) bounced the ([A-z0-9,'.() ’:-]+?) back!$/);
+var regex_magic_bounce = new RegExp(/^(.+?) bounced the ([A-z0-9,'.() ’:-]+?) back!$/);
+var regex_start_battle = new RegExp(/^Battle started between (.+?) and (.+?)!$/);
+var regex_touturn = new RegExp(/^The opposing (.+?) went back to (.+?)!$/);
+var regex_uturn = new RegExp(/^(.+?) went back to (.+?)!$/);
+var regex_togems = new RegExp(/^The ([A-z0-9,'.() ’:-]+?) strengthened the opposing (.+?)'s power!$/);
+var regex_gems = new RegExp(/^The ([A-z0-9,'.() ’:-]+?) strengthened (.+?)'s power!$/);
+var regex_toeat2 = new RegExp(/^\(The opposing (.+?) used its ([A-z0-9,'.() ’:-]+?)!\)$/);
+var regex_eat2 = new RegExp(/^\((.+?) used its ([A-z0-9,'.() ’:-]+?)!\)$/);
+var regex_toeat = new RegExp(/^\(The opposing (.+?) ate its ([A-z0-9,'.() ’:-]+?)!\)$/);
+var regex_eat = new RegExp(/^\((.+?) ate its ([A-z0-9,'.() ’:-]+?)!\)$/);
+var regex_sent_out_first2 = new RegExp(/^([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?) will be sent out first.$/);
+var regex_sent_out_first = new RegExp(/^([A-z0-9é,'.()* ’:-]+?) will be sent out first.$/);
+var regex_sent_out2 = new RegExp(/^(.+?) sent out (.+?) \(/);
+var regex_sent_out = new RegExp(/^(.+?) sent out $/);
+var regex_withdrew = new RegExp(/^(.+?) withdrew (.+?)!$/);
+var regex_tolost_health = new RegExp(/^\(The opposing (.+?) lost (.+?)% of its health!\)$/);
+var regex_lost_health = new RegExp(/^\((.+?) lost (.+?)% of its health!\)$/);
+var regex_tolost_health2 = new RegExp(/^\(The opposing (.+?) lost $/);
+var regex_lost_health2 = new RegExp(/^\((.+?) lost $/);
+var regex_tomega = new RegExp(/^The opposing (.+?) has Mega Evolved into Mega ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_mega = new RegExp(/^(.+?) has Mega Evolved into Mega ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_come_back = new RegExp(/^(.+?), come back!$/);
+var regex_tomax_guard = new RegExp(/^\(Max Guard started on the opposing (.+?)!\)$/);
+var regex_max_guard = new RegExp(/^\(Max Guard started on (.+?)!\)$/);
+var regex_key_stone = new RegExp(/^(The opposing )*(.+?)'s (.+?) is reacting to the Key Stone!/)
+var regex_move_no_effect = new RegExp(/^\((The opposing )*([A-z -']+[A-z]) blocked the effect!\)$/);
+var regex_topointed_stones = new RegExp(/^Pointed stones dug into the opposing (.+?)!$/);
+var regex_pointed_stones = new RegExp(/^Pointed stones dug into (.+?)!$/);
+var regex_toafter_taunt = new RegExp(/^The opposing (.+?) can't use ([A-z- ]+?) after the taunt!$/);
+var regex_after_taunt = new RegExp(/^(.+?) can't use ([A-z- ]+?) after the taunt!$/);
+var regex_chn = new RegExp(/^\u4E00-\u9FA5+$/);
+var regex_go = new RegExp(/^Go! (.+?) \($/);
+var regex_tog6_mega = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) is reacting to (.+?)'s Mega Bracelet!$/);
+var regex_g6_mega = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) is reacting to (.+?)'s Mega Bracelet!$/);
+var regex_tocannot_use2 = new RegExp(/^The opposing (.+?) can't use its sealed ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_cannot_use2 = new RegExp(/^(.+?) can't use its sealed ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_seconds_left2 = new RegExp(/^(.+?) has ([0-9]+?) seconds left this turn.$/);
+var regex_seconds_left = new RegExp(/^(.+?) has ([0-9]+?) seconds left.$/);
+var regex_timer_on = new RegExp(/^Battle timer is ON: inactive players will automatically lose when time's up. \(requested by (.+?)\)$/);
+var regex_reset_timer = new RegExp(/^The timer can't be re-enabled so soon after disabling it \(([0-9]+?) seconds remaining\)./)
+var regex_team = new RegExp(/^(.+?)'s team:$/);
+var regex_tofuture_sight = new RegExp(/^The opposing (.+?) foresaw an attack!$/);
+var regex_future_sight = new RegExp(/^(.+?) foresaw an attack!$/);
+var regex_toFutureSight_DoomDesire_attack = new RegExp(/^The opposing (.+?) took the (Future Sight|Doom Desire) attack!$/);
+var regex_FutureSight_DoomDesire_attack = new RegExp(/^(.+?) took the (Future Sight|Doom Desire) attack!$/);
+var regex_totype_change = new RegExp(/^The opposing (.+?)'s type changed to ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_type_change = new RegExp(/^(.+?)'s type changed to ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_hit_times = new RegExp(/^The Pokemon was hit ([0-9]+?) times!$/);
+var regex_battle = new RegExp(/^(.+?) wants to battle!$/);
+var regex_cancelled = new RegExp(/^(.+?) cancelled the challenge.$/);
+var regex_waitingavailable = new RegExp(/^Waiting for battles to become available(.+?)$/);
+var regex_challengex = new RegExp(/^Challenge (.+?)?$/);
+var regex_wftcy = new RegExp(/^Waiting for (.+?) to challenge you.$/);
+var regex_waiting = new RegExp(/^Waiting for (.+?)$/);
+var regex_accepted = new RegExp(/^(.+?) accepted the challenge, starting «$/);
+var regex_forfeited = new RegExp(/^(.+?) forfeited.$/);
+var regex_copyofuntitled2 = new RegExp(/^Copy of Copy of (Untitled|Box) (.+?)$/);
+var regex_copyofuntitled = new RegExp(/^Copy of (Untitled|Box) (.+?)$/);
+var regex_copyof = new RegExp(/^Copy of (.+?)$/);
+var regex_untitled = new RegExp(/^(Untitled|Box) (.+?)$/);
+var regex_newteam = new RegExp(/^ New (.+?) Team$/);
+var regex_users2 = new RegExp(/^\(([0-9]+?) users\)$/);
+var regex_users = new RegExp(/^([0-9]+?) users$/);
+var regex_theopposingfainted = new RegExp(/^The opposing (.+?) fainted!$/);
+var regex_fainted = new RegExp(/^(.+?) fainted!$/);
+var regex_wish = new RegExp(/^(.+?)'s wish came true!$/);
+var regex_doestaffecttd = new RegExp(/^It doesn't affect the opposing (.+?)...$/);
+var regex_doestaffect = new RegExp(/^It doesn't affect (.+?)...$/);
+var regex_younoteams = new RegExp(/^You have no (.+?) teams$/);
+var regex_youdontha = new RegExp(/^you don't have any (.+?) teams$/);
+var regex_theinverted = new RegExp(/^The opposing (.+?)'s stat changes were inverted!$/);
+var regex_inverted = new RegExp(/^(.+?)'s stat changes were inverted!$/);
+var regex_rejectchallenge = new RegExp(/^(.+?) rejected the challenge.$/);
+var regex_thesustookto = new RegExp(/^The substitute took damage for the opposing (.+?)!$/);
+var regex_thesustook = new RegExp(/^The substitute took damage for (.+?)!$/);
+var regex_totohbawi = new RegExp(/^The opposing (.+?) has been afflicted with an infestation by the opposing (.+?)!$/);
+var regex_tohbawi2 = new RegExp(/^The opposing (.+?) has been afflicted with an infestation by (.+?)!$/);
+var regex_tohbawi = new RegExp(/^(.+?) has been afflicted with an infestation by the opposing (.+?)!$/);
+var regex_hbawi = new RegExp(/^(.+?) has been afflicted with an infestation by (.+?)!$/);
+var regex_iseoto = new RegExp(/^It's super effective on the opposing (.+?)!$/);
+var regex_iseo = new RegExp(/^It's super effective on (.+?)!$/);
+var regex_isnveoto = new RegExp(/^It's not very effective on the opposing (.+?).$/);
+var regex_isnveo = new RegExp(/^It's not very effective on (.+?).$/);
+var regex_achoto = new RegExp(/^A critical hit on the opposing (.+?)!$/);
+var regex_acho = new RegExp(/^A critical hit on (.+?)!$/);
+var regex_willswitchin = new RegExp(/^([A-z0-9,'.()% ’:-]+?) will switch in, replacing ([A-z0-9,'.()% ’:-]+?).$/);
+var regex_uteamsvf = new RegExp(/^Your team is valid for (.+?).$/);
+var regex_Metronome = new RegExp(/^Waggling a finger let it use ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_iatbabi = new RegExp(/^(.+?) is about to be attacked by its ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_toiatbabi = new RegExp(/^The opposing (.+?) is about to be attacked by its ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_toctop2 = new RegExp(/^The opposing (.+?) corroded the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_toctop = new RegExp(/^The opposing (.+?) corroded (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_ctop = new RegExp(/^(.+?) corroded the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_ctop2 = new RegExp(/^(.+?) corroded (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_biftato = new RegExp(/^But it failed to affect the opposing (.+?)!$/);
+var regex_bifta = new RegExp(/^But it failed to affect (.+?)!$/);
+var regex_toshpif = new RegExp(/^The opposing (.+?)'s HP is full!$/);
+var regex_shpif = new RegExp(/^(.+?)'s HP is full!$/);
+var regex_tobiuiz = new RegExp(/^The opposing (.+?) boosted its ([A-z0-9,'.() ’:-]+?) (drastically | )using its Z-Power!$/);
+var regex_biuiz = new RegExp(/^(.+?) boosted its ([A-z0-9,'.() ’:-]+?) (drastically | )using its Z-Power!$/);
+var regex_thwctfto = new RegExp(/^The healing wish came true for the opposing (.+?)!$/);
+var regex_thwctf = new RegExp(/^The healing wish came true for (.+?)!$/);
+var regex_sfwhrtorm = new RegExp(/^(.+?)'s fervent wish has reached the opposing ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_sfwhrrm = new RegExp(/^(.+?)'s fervent wish has reached ([A-z0-9,'.() ’:-]+?)!$/);
+
+var regex_protosynthesisto = new RegExp(/^The harsh sunlight activated the opposing (.+?)'s Protosynthesis!$/);
+var regex_protosynthesis = new RegExp(/^The harsh sunlight activated (.+?)'s Protosynthesis!$/);
+var regex_protosynthesisoffto = new RegExp(/^The effects of the opposing (.+?)'s Protosynthesis wore off!$/);
+var regex_protosynthesisoff = new RegExp(/^The effects of (.+?)'s Protosynthesis wore off!$/);
+var regex_quarkdrive = new RegExp(/^The Electric Terrain activated (.+?)'s Quark Drive!$/);
+var regex_toquarkdrive = new RegExp(/^The Electric Terrain activated the opposing (.+?)'s Quark Drive!$/);
+var regex_quarkdriveoff = new RegExp(/^The effects of (.+?)'s Quark Drive wore off!$/);
+var regex_toquarkdriveoff = new RegExp(/^The effects of the opposing (.+?)'s Quark Drive wore off!$/);
+var regex_toelectric_seed = new RegExp(/^The Electric Seed (sharply raised|raised|lowered) the opposing (.+?)'s Defense!$/);
+var regex_electric_seed = new RegExp(/^The Electric Seed (sharply raised|raised|lowered) (.+?)'s Defense!$/);
+var regex_tograssy_seed = new RegExp(/^The Grassy Seed (sharply raised|raised|lowered) the opposing (.+?)'s Defense!$/);
+var regex_grassy_seed = new RegExp(/^The Grassy Seed (sharply raised|raised|lowered) (.+?)'s Defense!$/);
+var regex_topsychic_seed = new RegExp(/^The Psychic Seed (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Def!$/);
+var regex_psychic_seed = new RegExp(/^The Psychic Seed (sharply raised|raised|lowered) (.+?)'s Sp. Def!$/);
+var regex_tomisty_seed = new RegExp(/^The Misty Seed (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Def!$/);
+var regex_misty_seed = new RegExp(/^The Misty Seed (sharply raised|raised|lowered) (.+?)'s Sp. Def!$/);
+var regex_tobroke = new RegExp(/^It broke through the opposing (.+?)'s protection!$/);
+var regex_broke = new RegExp(/^It broke through (.+?)'s protection!$/);
+var regex_totoredcard = new RegExp(/^The opposing (.+?) held up its Red Card against the opposing (.+?)!$/);
+var regex_toredcard2 = new RegExp(/^The opposing (.+?) held up its Red Card against (.+?)!$/);
+var regex_toredcard = new RegExp(/^(.+?) held up its Red Card against the opposing (.+?)!$/);
+var regex_redcard = new RegExp(/^(.+?) held up its Red Card against (.+?)!$/);
+var regex_towindpower = new RegExp(/^Being hit by Tailwind charged the opposing (.+?) with power!$/);
+var regex_windpower = new RegExp(/^Being hit by Tailwind charged (.+?) with power!$/);
+var regex_torevivalblessing = new RegExp(/^The opposing (.+?) was revived and is ready to fight again!$/);
+var regex_revivalblessing = new RegExp(/^(.+?) was revived and is ready to fight again!$/);
+var regex_toclearamulet = new RegExp(/^The effects of the opposing (.+?)'s Clear Amulet prevent its stats from being lowered!$/);
+var regex_clearamulet = new RegExp(/^The effects of (.+?)'s Clear Amulet prevent its stats from being lowered!$/);
+var regex_toskullbash = new RegExp(/^The opposing (.+?) tucked in its head!$/);
+var regex_skullbash = new RegExp(/^(.+?) tucked in its head!$/);
+var regex_totofrisk = new RegExp(/^The opposing (.+?) frisked the opposing (.+?) and found its (.+?)!$/);
+var regex_tofrisk2 = new RegExp(/^The opposing (.+?) frisked (.+?) and found its (.+?)!$/);
+var regex_tofrisk = new RegExp(/^(.+?) frisked the opposing (.+?) and found its (.+?)!$/);
+var regex_frisk = new RegExp(/^(.+?) frisked (.+?) and found its (.+?)!$/);
+var regex_totopsychup = new RegExp(/^The opposing (.+?) copied the opposing (.+?)'s stat changes!$/);
+var regex_topsychup2 = new RegExp(/^The opposing (.+?) copied (.+?)'s stat changes!$/);
+var regex_topsychup = new RegExp(/^(.+?) copied the opposing (.+?)'s stat changes!$/);
+var regex_psychup = new RegExp(/^(.+?) copied (.+?)'s stat changes!$/);
+var regex_toencore = new RegExp(/^The opposing (.+?)'s encore ended!$/);
+var regex_encore = new RegExp(/^(.+?)'s encore ended!$/);
+var regex_totocurse = new RegExp(/^The opposing (.+?) cut its own HP and put a curse on the opposing (.+?)!$/);
+var regex_tocurse2 = new RegExp(/^The opposing (.+?) cut its own HP and put a curse on (.+?)!$/);
+var regex_tocurse = new RegExp(/^(.+?) cut its own HP and put a curse on the opposing (.+?)!$/);
+var regex_curse = new RegExp(/^(.+?) cut its own HP and put a curse on (.+?)!$/);
+var regex_toweakdamageberry = new RegExp(/^The ([A-z0-9,'.() ’:-]+?) weakened the damage to the opposing (.+?)!$/);
+var regex_weakdamageberry = new RegExp(/^The ([A-z0-9,'.() ’:-]+?) weakened the damage to (.+?)!$/);
+var regex_celebrate = new RegExp(/^Congratulations, (.+?)!$/);
+var regex_tohpberry = new RegExp(/^The opposing (.+?) restored HP using its ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_hpberry = new RegExp(/^(.+?) restored HP using its ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_toaquaring = new RegExp(/^A veil of water restored the opposing (.+?)'s HP!$/);
+var regex_aquaring = new RegExp(/^A veil of water restored (.+?)'s HP!$/);
+var regex_tosalacberry = new RegExp(/^The Salac Berry (sharply raised|raised|lowered) the opposing (.+?)'s Speed!$/);
+var regex_salacberry = new RegExp(/^The Salac Berry (sharply raised|raised|lowered) (.+?)'s Speed!$/);
+var regex_toliechiberry = new RegExp(/^The Liechi Berry (sharply raised|raised|lowered) the opposing (.+?)'s Attack!$/);
+var regex_liechiberry = new RegExp(/^The Liechi Berry (sharply raised|raised|lowered) (.+?)'s Attack!$/);
+var regex_topetayaberry = new RegExp(/^The Petaya Berry (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Atk!$/);
+var regex_petayaberry = new RegExp(/^The Petaya Berry (sharply raised|raised|lowered) (.+?)'s Sp. Atk!$/);
+var regex_toapicotberry = new RegExp(/^The Apicot Berry (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Def!$/);
+var regex_apicotberry = new RegExp(/^The Apicot Berry (sharply raised|raised|lowered) (.+?)'s Sp. Def!$/);
+var regex_toganlonberry = new RegExp(/^The Ganlon Berry (sharply raised|raised|lowered) the opposing (.+?)'s Defense!$/);
+var regex_ganlonberry = new RegExp(/^The Ganlon Berry (sharply raised|raised|lowered) (.+?)'s Defense!$/);
+var regex_tomarangaberry = new RegExp(/^The Maranga Berry (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Def!$/);
+var regex_marangaberry = new RegExp(/^The Maranga Berry (sharply raised|raised|lowered) (.+?)'s Sp. Def!$/);
+var regex_toLuminous_Moss = new RegExp(/^The Luminous Moss (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Def!$/);
+var regex_Luminous_Moss = new RegExp(/^The Luminous Moss (sharply raised|raised|lowered) (.+?)'s Sp. Def!$/);
+var regex_toKee_Berry = new RegExp(/^The Kee Berry (sharply raised|raised|lowered) the opposing (.+?)'s Defense!$/);
+var regex_Kee_Berry = new RegExp(/^The Kee Berry (sharply raised|raised|lowered) (.+?)'s Defense!$/);
+var regex_toSnowball = new RegExp(/^The Snowball (sharply raised|raised|lowered) the opposing (.+?)'s Attack!$/);
+var regex_Snowball = new RegExp(/^The Snowball (sharply raised|raised|lowered) (.+?)'s Attack!$/);
+var regex_toAbsorb_Bulb = new RegExp(/^The Absorb Bulb (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Atk!$/);
+var regex_Absorb_Bulb = new RegExp(/^The Absorb Bulb (sharply raised|raised|lowered) (.+?)'s Sp. Atk!$/);
+var regex_toCell_Bettery = new RegExp(/^The Cell Battery (sharply raised|raised|lowered) the opposing (.+?)'s Attack!$/);
+var regex_Cell_Bettery = new RegExp(/^The Cell Battery (sharply raised|raised|lowered) (.+?)'s Attack!$/);
+var regex_toAdrenaline_Orb = new RegExp(/^The Adrenaline Orb (sharply raised|raised|lowered) the opposing (.+?)'s Speed!$/);
+var regex_Adrenaline_Orb = new RegExp(/^The Adrenaline Orb (sharply raised|raised|lowered) (.+?)'s Speed!$/);
+var regex_tothroatspray = new RegExp(/^The Throat Spray (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Atk!$/);
+var regex_throatspray = new RegExp(/^The Throat Spray (sharply raised|raised|lowered) (.+?)'s Sp. Atk!$/);
+var regex_tosafety_goggles = new RegExp(/^The opposing (.+?) is not affected by ([A-z0-9,'.() ’:-]+?) thanks to its Safety Goggles!$/);
+var regex_safety_goggles = new RegExp(/^(.+?) is not affected by ([A-z0-9,'.() ’:-]+?) thanks to its Safety Goggles!$/);
+var regex_tostruggle = new RegExp(/^The opposing (.+?) has no moves left!$/);
+var regex_struggle = new RegExp(/^(.+?) has no moves left!$/);
+var regex_totohelpinghand = new RegExp(/^The opposing (.+?) is ready to help the opposing (.+?)!$/);
+var regex_tohelpinghand2 = new RegExp(/^The opposing (.+?) is ready to help (.+?)!$/);
+var regex_tohelpinghand = new RegExp(/^(.+?) is ready to help the opposing (.+?)!$/);
+var regex_helpinghand = new RegExp(/^(.+?) is ready to help (.+?)!$/);
+var regex_toclearsmog = new RegExp(/^The opposing (.+?)'s stat changes were removed!$/);
+var regex_clearsmog = new RegExp(/^(.+?)'s stat changes were removed!$/);
+var regex_toharvest = new RegExp(/^The opposing (.+?) harvested one ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_harvest = new RegExp(/^(.+?) harvested one ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_toallyswitch = new RegExp(/^The opposing (.+?) and the opposing (.+?) switched places!$/);
+var regex_allyswitch = new RegExp(/^(.+?) and (.+?) switched places!$/);
+var regex_toattract = new RegExp(/^The opposing (.+?) is in love with (.+?)!$/);
+var regex_attract = new RegExp(/^(.+?) is in love with the opposing (.+?)!$/);
+var regex_torecycle = new RegExp(/^The opposing (.+?) found one ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_recycle = new RegExp(/^(.+?) found one ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_tofling = new RegExp(/^The opposing (.+?) flung its ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_fling = new RegExp(/^(.+?) flung its ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_toobtained = new RegExp(/^The opposing (.+?) obtained one ([A-z0-9,'.() ’:-]+?).$/);
+var regex_obtained = new RegExp(/^(.+?) obtained one ([A-z0-9,'.() ’:-]+?).$/);
+var regex_totolockon = new RegExp(/^The opposing (.+?) took aim at the opposing (.+?)!$/);
+var regex_tolockon2 = new RegExp(/^The opposing (.+?) took aim at (.+?)!$/);
+var regex_tolockon = new RegExp(/^(.+?) took aim at the opposing (.+?)!$/);
+var regex_lockon = new RegExp(/^(.+?) took aim at (.+?)!$/);
+var regex_topoison = new RegExp(/^The opposing (.+?) was hurt by poison!$/);
+var regex_poison = new RegExp(/^(.+?) was hurt by poison!$/);
+var regex_toelectromorphosis = new RegExp(/^Being hit by ([A-z0-9,'.() ’:-]+?) charged the opposing (.+?) with power!$/);
+var regex_electromorphosis = new RegExp(/^Being hit by ([A-z0-9,'.() ’:-]+?) charged (.+?) with power!$/);
+var regex_torequestpending = new RegExp(/^You have (.+?) pending friend requests.$/);
+var regex_requestpending = new RegExp(/^You have (.+?) friend request pending.$/);
+var regex_blockchallenges = new RegExp(/^The user '(.+?)' is not accepting challenges right now.$/);
+var regex_friendrequest = new RegExp(/^You have already sent a friend request to '(.+?)'.$/);
+var regex_friendrequest2 = new RegExp(/^You sent a friend request to (.+?)!$/);
+var regex_friendrequest3 = new RegExp(/^You sent a friend request to '(.+?)'.$/);
+var regex_acceptfriendrequest = new RegExp(/^You accepted a friend request from "(.+?)".$/);
+var regex_denyfriendrequest = new RegExp(/^You denied a friend request from '(.+?)'.$/);
+var regex_removed = new RegExp(/^Removed friend '(.+?)'.$/);
+var regex_removed2 = new RegExp(/^You do not have (.+?) friended.$/);
+var regex_removed3 = new RegExp(/^You removed your friend request to '(.+?)'$/);
+var regex_donothavefriendrequest = new RegExp(/^You do not have a friend request pending from '(.+?)'.$/);
+var regex_donothavefriendrequest2 = new RegExp(/^You have no request pending from (.+?).$/);
+var regex_accuracy = new RegExp(/^Accuracy: (.+?)$/);
+var regex_basepower_double2 = new RegExp(/^Base power vs ([A-z0-9,'.() ’:-]+?): (\d{1,3}) to (\d{1,3})$/);
+var regex_basepower_double = new RegExp(/^Base power vs ([A-z0-9,'.() ’:-]+?): (.+?)$/);
+var regex_basepower2 = new RegExp(/^Base power: (\d{1,3}) to (\d{1,3})$/);
+var regex_basepower = new RegExp(/^Base power: (.+?)$/);
+var regex_disconnected = new RegExp(/^(.+?) disconnected and has (.+?) seconds to reconnect!$/);
+var regex_disconnected2 = new RegExp(/^(.+?) disconnected and has a minute to reconnect!$/);
+var regex_disconnected3 = new RegExp(/^(.+?) disconnected!$/);
+var regex_reconnected = new RegExp(/^(.+?) reconnected and has (.+?) seconds left.$/);
+var regex_usemove3 = new RegExp(/^([A-z0-9é,'.()% ’:-]+?) will use ([A-z0-9,'.() ’:-]+?) at your ([A-z0-9é,'.()% ’:-]+?).$/);
+var regex_usemove2 = new RegExp(/^([A-z0-9é,'.()% ’:-]+?) will use ([A-z0-9,'.() ’:-]+?) at ([A-z0-9é,'.()% ’:-]+?).$/);
+var regex_usemove = new RegExp(/^([A-z0-9é,'.()% ’:-]+?) will use ([A-z0-9,'.() ’:-]+?).$/);
+var regex_reconnecte = new RegExp(/^(.+?) has (.+?) seconds to reconnect!$/);
+var regex_toskyattack = new RegExp(/^The opposing (.+?) became cloaked in a harsh light!$/);
+var regex_skyattack = new RegExp(/^(.+?) became cloaked in a harsh light!$/);
+var regex_todisable = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) is disabled!$/);
+var regex_disable = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) is disabled!$/);
+var regex_todisable2 = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) was disabled!$/);
+var regex_disable2 = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) was disabled!$/);
+var regex_last10team = new RegExp(/^(.+?)'s last 10 teams$/);
+var regex_uploadedon = new RegExp(/^Uploaded on: (.+?)$/);
+var regex_format = new RegExp(/^Format: (.+?)$/);
+var regex_views = new RegExp(/^Views: (.+?)$/);
+var regex_teampassword = new RegExp(/^Team set to private. Password: (.+?)$/);
+var regex_toskydrop = new RegExp(/^The opposing (.+?) took (.+?) into the sky!$/);
+var regex_skydrop = new RegExp(/^(.+?) took the opposing (.+?) into the sky!$/);
+var regex_inactivity = new RegExp(/^(.+?) lost due to inactivity.$/);
+var regex_deleted = new RegExp(/^(.+?) deleted.$/);
+var regex_nextdamage = new RegExp(/^ Next damage: ([0-9% .]+?)$/);
+var regex_item_was_held_up = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); Red Card was held up\)$/);
+var regex_item_was_popped = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); Air Balloon was popped\)$/);
+var regex_item_was_eaten = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); ([A-z0-9,'.() ’:-]+?) was eaten\)$/);
+var regex_item_was_consumed = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); ([A-z0-9,'.() ’:-]+?) was consumed\)$/);
+var regex_item_was_flung = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); ([A-z0-9,'.() ’:-]+?) was flung\)$/);
+var regex_item_was_stolen = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); ([A-z0-9,'.() ’:-]+?) was stolen\)$/);
+var regex_item_was_knockedoff = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); ([A-z0-9,'.() ’:-]+?) was knocked off\)$/);
+var regex_item_was_was = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); was ([A-z0-9,'.() ’:-]+?)\)$/);
+var regex_item_held_up = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(Red Card was held up\)$/);
+var regex_item_popped = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(Air Balloon was popped\)$/);
+var regex_item_eaten = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(([A-z0-9,'.() ’:-]+?) was eaten\)$/);
+var regex_item_consumed = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(([A-z0-9,'.() ’:-]+?) was consumed\)$/);
+var regex_item_knockedoff = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(([A-z0-9,'.() ’:-]+?) was knocked off\)$/);
+var regex_item_stolen = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(stolen\)$/);
+var regex_item_found = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(found\)$/);
+var regex_item_harvested = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(harvested\)$/);
+var regex_item_tricked = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(tricked\)$/);
+var regex_item_disturbed = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(disturbed\)$/);
+var regex_item_frisked = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(frisked\)$/);
+var regex_item_flung = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(([A-z0-9,'.() ’:-]+?) was flung\)$/);
+var regex_item_stolen2 = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(([A-z0-9,'.() ’:-]+?) was stolen\)$/);
+var regex_item_incinerated = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(([A-z0-9,'.() ’:-]+?) was incinerated\)$/);
+var regex_base = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(base: ([A-z0-9,'.() ’:-]+?)\)$/);
+var regex_toonly = new RegExp(/^But the opposing (.+?) can't use the move!$/);
+var regex_only = new RegExp(/^But (.+?) can't use the move!$/);
+var regex_use3 = new RegExp(/^([A-z0-9,'.() ’:-]+?) will (Terastalliz|Mega Evolv)e, then use ([A-z0-9,'.() ’:-]+?) at your ([A-z0-9,'.() ’:-]+?).$/);
+var regex_use2 = new RegExp(/^([A-z0-9,'.() ’:-]+?) will (Terastallize|Dynamax|Mega Evolve), then use ([A-z0-9,'.() ’:-]+?) at ([A-z0-9,'.() ’:-]+?).$/);
+var regex_use = new RegExp(/^([A-z0-9,'.() ’:-]+?) will (Terastallize|Dynamax|Mega Evolve), then use ([A-z0-9,'.() ’:-]+?).$/);
+var regex_tonatural_cure = new RegExp(/^\(The opposing (.+?) is cured by its Natural Cure!\)$/);
+var regex_natural_cure = new RegExp(/^\((.+?) is cured by its Natural Cure!\)$/);
+var regex_toacquired = new RegExp(/^The opposing (.+?) acquired ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_acquired = new RegExp(/^(.+?) acquired ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_namestarting = new RegExp(/^This battle is required to be public due to a player having a name starting with '(.+?)'.$/);
+var regex_toComplete_Forme = new RegExp(/^The opposing (.+?) transformed into its Complete Forme!$/);
+var regex_Complete_Forme = new RegExp(/^(.+?) transformed into its Complete Forme!$/);
+var regex_totransformed_into = new RegExp(/^The opposing (.+?) transformed into (.+?)!$/);
+var regex_transformed_into = new RegExp(/^(.+?) transformed into (.+?)!$/);
+var regex_wouldtake = new RegExp(/^Would take if ability removed: ([0-9% .]+?)$/);
+var regex_totofollwed = new RegExp(/^The opposing (.+?) followed the opposing (.+?)'s instructions!$/);
+var regex_tofollwed2 = new RegExp(/^The opposing (.+?) followed (.+?)'s instructions!$/);
+var regex_tofollwed = new RegExp(/^(.+?) followed the opposing (.+?)'s instructions!$/);
+var regex_follwed = new RegExp(/^(.+?) followed (.+?)'s instructions!$/);
+var regex_suspect = new RegExp(/^(.+?) is currently suspecting ([A-z0-9,'.() ’:-]+?)! For information on how to participate check out the $/);
+var regex_changed = new RegExp(/^\(Changed forme: ([A-z0-9,'.() ’:-]+?)\)$/);
+var regex_turnsasleep = new RegExp(/^ Turns asleep: (.+?)$/);
+var regex_switchto = new RegExp(/^Switch ([A-z0-9,'.() ’:-]+?) to$/);
+var regex_online = new RegExp(/^Online (.+?)$/);
+var regex_offline = new RegExp(/^Offline (.+?)$/);
+var regex_toterastallized = new RegExp(/^The opposing (.+?) has Terastallized into the ([A-z ’:-]+?)\-type!$/);
+var regex_terastallized = new RegExp(/^(.+?) has Terastallized into the ([A-z0-9,'.() ’:-]+?)\-type!$/);
+var regex_topressure = new RegExp(/^The opposing (.+?) is exerting its pressure!$/);
+var regex_pressure = new RegExp(/^(.+?) is exerting its pressure!$/);
+var regex_toseeded = new RegExp(/^The opposing (.+?) was seeded!$/);
+var regex_seeded = new RegExp(/^(.+?) was seeded!$/);
+var regex_topoisoned = new RegExp(/^The opposing (.+?) was (poisoned|badly poisoned)!$/);
+var regex_poisoned = new RegExp(/^(.+?) was (poisoned|badly poisoned)!$/);
+var regex_toslept = new RegExp(/^The opposing (.+?) slept and became healthy!$/);
+var regex_slept = new RegExp(/^(.+?) slept and became healthy!$/);
+var regex_toasleep = new RegExp(/^The opposing (.+?) is fast asleep.$/);
+var regex_asleep = new RegExp(/^(.+?) is fast asleep.$/);
+var regex_towoke_up = new RegExp(/^The opposing (.+?) woke up!$/);
+var regex_woke_up = new RegExp(/^(.+?) woke up!$/);
+var regex_toz_power = new RegExp(/^The opposing (.+?) surrounded itself with its Z-Power!$/);
+var regex_z_power = new RegExp(/^(.+?) surrounded itself with its Z-Power!$/);
+var regex_toz_move = new RegExp(/^The opposing (.+?) unleashes its full-force Z-Move!$/);
+var regex_z_move = new RegExp(/^(.+?) unleashes its full-force Z-Move!$/);
+var regex_toleech_seed = new RegExp(/^The opposing (.+?)'s health is sapped by Leech Seed!$/);
+var regex_leech_seed = new RegExp(/^(.+?)'s health is sapped by Leech Seed!$/);
+var regex_toradiating_aura = new RegExp(/^The opposing (.+?) is radiating a (dark|fairy) aura!$/);
+var regex_radiating_aura = new RegExp(/^(.+?) is radiating a (dark|fairy) aura!$/);
+var regex_toradiating_aura2 = new RegExp(/^The opposing (.+?) is radiating a (bursting|blazing) aura!$/);
+var regex_radiating_aura2 = new RegExp(/^(.+?) is radiating a (bursting|blazing) aura!$/);
+var regex_toprotected = new RegExp(/^The opposing (.+?) protected itself!$/);
+var regex_protected = new RegExp(/^(.+?) protected itself!$/);
+var regex_totaunt = new RegExp(/^The opposing (.+?) fell for the taunt!$/);
+var regex_taunt = new RegExp(/^(.+?) fell for the taunt!$/);
+var regex_topumped = new RegExp(/^The opposing (.+?) is getting pumped!$/);
+var regex_pumped = new RegExp(/^(.+?) is getting pumped!$/);
+var regex_toavoided = new RegExp(/^The opposing (.+?) avoided the attack!$/);
+var regex_avoided = new RegExp(/^(.+?) avoided the attack!$/);
+var regex_togrew_drowsy = new RegExp(/^The opposing (.+?) grew drowsy!$/);
+var regex_grew_drowsy = new RegExp(/^(.+?) grew drowsy!$/);
+var regex_tofell_straight_down = new RegExp(/^The opposing (.+?) fell straight down!$/);
+var regex_fell_straight_down = new RegExp(/^(.+?) fell straight down!$/);
+var regex_tomust_encore = new RegExp(/^The opposing (.+?) must do an encore!$/);
+var regex_must_encore = new RegExp(/^(.+?) must do an encore!$/);
+var regex_toencore_ended = new RegExp(/^The opposing (.+?)'s encore ended!$/);
+var regex_encore_ended = new RegExp(/^(.+?)'s encore ended!$/);
+var regex_toshook_off_taunt = new RegExp(/^The opposing (.+?) shook off the taunt!$/);
+var regex_shook_off_taunt = new RegExp(/^(.+?) shook off the taunt!$/);
+var regex_tovortex_fieryvortex = new RegExp(/^The opposing (.+?) became trapped in the (vortex|fiery vortex)!$/);
+var regex_vortex_fieryvortex = new RegExp(/^(.+?) became trapped in the (vortex|fiery vortex)!$/);
+var regex_toburned_frozen = new RegExp(/^The opposing (.+?) was (burned|frozen solid)!$/);
+var regex_burned_frozen = new RegExp(/^(.+?) was (burned|frozen solid)!$/);
+var regex_tospikes = new RegExp(/^The opposing (.+?) was hurt by the spikes!$/);
+var regex_spikes = new RegExp(/^(.+?) was hurt by the spikes!$/);
+var regex_towas_cured_of = new RegExp(/^The opposing (.+?) was cured of (Freeze|Burn|Sleep|paralysis|its poisoning)!$/);
+var regex_was_cured_of = new RegExp(/^(.+?) was cured of (Freeze|Burn|Sleep|paralysis|its poisoning)!$/);
+var regex_toput_in_substitute = new RegExp(/^The opposing (.+?) put in a substitute!$/);
+var regex_put_in_substitute = new RegExp(/^(.+?) put in a substitute!$/);
+var regex_tohp_restored = new RegExp(/^The opposing (.+?) had its HP restored.$/);
+var regex_hp_restored = new RegExp(/^(.+?) had its HP restored.$/);
+var regex_tohp_restored2 = new RegExp(/^The opposing (.+?)'s HP was restored.$/);
+var regex_hp_restored2 = new RegExp(/^(.+?)'s HP was restored.$/);
+var regex_tohp_restored3 = new RegExp(/^The opposing (.+?)'s HP was restored by the Z-Power!$/);
+var regex_hp_restored3 = new RegExp(/^(.+?)'s HP was restored by the Z-Power!$/);
+var regex_totransformed = new RegExp(/^The opposing (.+?) transformed!$/);
+var regex_transformed = new RegExp(/^(.+?) transformed!$/);
+var regex_toconfused2 = new RegExp(/^The opposing (.+?) is confused!$/);
+var regex_confused2 = new RegExp(/^(.+?) is confused!$/);
+var regex_toconfused = new RegExp(/^The opposing (.+?) became confused!$/);
+var regex_confused = new RegExp(/^(.+?) became confused!$/);
+var regex_tofell_asleep = new RegExp(/^The opposing (.+?) fell asleep!$/);
+var regex_fell_asleep = new RegExp(/^(.+?) fell asleep!$/);
+var regex_tocanno_longer_escape = new RegExp(/^The opposing (.+?) can no longer escape!$/);
+var regex_canno_longer_escape = new RegExp(/^(.+?) can no longer escape!$/);
+var regex_tomist_safeguard = new RegExp(/^The opposing (.+?) is protected by (the mist|Safeguard)!$/);
+var regex_mist_safeguard = new RegExp(/^(.+?) is protected by (the mist|Safeguard)!$/);
+var regex_toprotosynthesis_quarkdrive = new RegExp(/^The opposing (.+?) used its Booster Energy to activate (Protosynthesis|its Quark Drive)!$/);
+var regex_protosynthesis_quarkdrive = new RegExp(/^(.+?) used its Booster Energy to activate (Protosynthesis|its Quark Drive)!$/);
+var regex_toair_light = new RegExp(/^The opposing (.+?) became cloaked in (freezing air|a freezing light)!$/);
+var regex_air_light = new RegExp(/^(.+?) became cloaked in (freezing air|a freezing light)!$/);
+var regex_todryskin_solarpower = new RegExp(/^The opposing (.+?) was hurt by its (Dry Skin|Solar Power).$/);
+var regex_dryskin_solarpower = new RegExp(/^(.+?) was hurt by its (Dry Skin|Solar Power).$/);
+var regex_todrowsing = new RegExp(/^The opposing (.+?) is drowsing!$/);
+var regex_drowsing = new RegExp(/^(.+?) is drowsing!$/);
+var regex_tobreaks_mold = new RegExp(/^The opposing (.+?) breaks the mold!$/);
+var regex_breaks_mold = new RegExp(/^(.+?) breaks the mold!$/);
+var regex_toendured_hit = new RegExp(/^The opposing (.+?) is endured the hit!$/);
+var regex_endured_hit = new RegExp(/^(.+?) is endured the hit!$/);
+var regex_toendured_hit2 = new RegExp(/^The opposing (.+?) endured the hit!$/);
+var regex_endured_hit2 = new RegExp(/^(.+?) endured the hit!$/);
+var regex_toburned_itself = new RegExp(/^The opposing (.+?) burned itself out!$/);
+var regex_burned_itself = new RegExp(/^(.+?) burned itself out!$/);
+var regex_toair_balloon = new RegExp(/^The opposing (.+?) floats in the air with its Air Balloon!$/);
+var regex_air_balloon = new RegExp(/^(.+?) floats in the air with its Air Balloon!$/);
+var regex_toalready_confused = new RegExp(/^The opposing (.+?) is already confused!$/);
+var regex_already_confused = new RegExp(/^(.+?) is already confused!$/);
+var regex_toswirling_magma = new RegExp(/^The opposing (.+?) became trapped by swirling magma!$/);
+var regex_swirling_magma = new RegExp(/^(.+?) became trapped by swirling magma!$/);
+var regex_toquicksand = new RegExp(/^The opposing (.+?) became trapped by the quicksand!$/);
+var regex_quicksand = new RegExp(/^(.+?) became trapped by the quicksand!$/);
+var regex_toconfused_fatigue = new RegExp(/^The opposing (.+?) became confused due to fatigue!$/);
+var regex_confused_fatigue = new RegExp(/^(.+?) became confused due to fatigue!$/);
+var regex_tobecame_confused = new RegExp(/^The opposing (.+?) became confused!$/);
+var regex_became_confused = new RegExp(/^(.+?) became confused!$/);
+var regex_toprevented_healing = new RegExp(/^The opposing (.+?) was prevented from healing!$/);
+var regex_prevented_healing = new RegExp(/^(.+?) was prevented from healing!$/);
+var regex_toquick_draw = new RegExp(/^Quick Draw made the opposing (.+?) move faster!$/);
+var regex_quick_draw = new RegExp(/^Quick Draw made (.+?) move faster!$/);
+var regex_tosalt_cured = new RegExp(/^The opposing (.+?) is being salt cured!$/);
+var regex_salt_cured = new RegExp(/^(.+?) is being salt cured!$/);
+var regex_tobeing_withdrawn = new RegExp(/^\(The opposing (.+?) is being withdrawn...\)$/);
+var regex_being_withdrawn = new RegExp(/^\((.+?) is being withdrawn...\)$/);
+var regex_toeject_pack = new RegExp(/^The opposing (.+?) is switched out by the Eject Pack!$/);
+var regex_eject_pack = new RegExp(/^(.+?) is switched out by the Eject Pack!$/);
+var regex_toeject_button = new RegExp(/^The opposing (.+?) is switched out with the Eject Button!$/);
+var regex_eject_button = new RegExp(/^(.+?) is switched out with the Eject Button!$/);
+var regex_topower_herb = new RegExp(/^The opposing (.+?) became fully charged due to its Power Herb!$/);
+var regex_power_herb = new RegExp(/^(.+?) became fully charged due to its Power Herb!$/);
+var regex_towhite_herb = new RegExp(/^The opposing (.+?) returned its status to normal using its White Herb!$/);
+var regex_white_herb = new RegExp(/^(.+?) returned its status to normal using its White Herb!$/);
+var regex_tofocussash_focusband = new RegExp(/^The opposing (.+?) hung on using its Focus (Sash|Band)!$/);
+var regex_focussash_focusband = new RegExp(/^(.+?) hung on using its Focus (Sash|Band)!$/);
+var regex_toair_balloon_popped = new RegExp(/^The opposing (.+?)'s Air Balloon popped!$/);
+var regex_air_balloon_popped = new RegExp(/^(.+?)'s Air Balloon popped!$/);
+var regex_toshell_gleam = new RegExp(/^The opposing (.+?) made its shell gleam! It's distorting type matchups!$/);
+var regex_shell_gleam = new RegExp(/^(.+?) made its shell gleam! It's distorting type matchups!$/);
+var regex_toquick_claw = new RegExp(/^The opposing (.+?) can act faster than normal, thanks to its Quick Claw!$/);
+var regex_quick_claw = new RegExp(/^(.+?) can act faster than normal, thanks to its Quick Claw!$/);
+var regex_tosupreme_overlord = new RegExp(/^The opposing (.+?) gained strength from the fallen!$/);
+var regex_supreme_overlord = new RegExp(/^(.+?) gained strength from the fallen!$/);
+var regex_toabsorbed_light = new RegExp(/^The opposing (.+?) absorbed light!$/);
+var regex_absorbed_light = new RegExp(/^(.+?) absorbed light!$/);
+var regex_toalready_burned = new RegExp(/^The opposing (.+?) is already burned!$/);
+var regex_already_burned = new RegExp(/^(.+?) is already burned!$/);
+var regex_tosticky_candy_syrup = new RegExp(/^The opposing (.+?) got covered in sticky candy syrup!$/);
+var regex_sticky_candy_syrup = new RegExp(/^(.+?) got covered in sticky candy syrup!$/);
+var regex_togoing_all = new RegExp(/^The opposing (.+?) is going all out for this attack!$/);
+var regex_going_all = new RegExp(/^(.+?) is going all out for this attack!$/);
+var regex_tocreate_decoy = new RegExp(/^The opposing (.+?) shed its tail to create a decoy!$/);
+var regex_create_decoy = new RegExp(/^(.+?) shed its tail to create a decoy!$/);
+var regex_tocut_hp2 = new RegExp(/^\(The opposing (.+?) cut its own HP to power up its move!\)$/);
+var regex_cut_hp2 = new RegExp(/^\((.+?) cut its own HP to power up its move!\)$/);
+var regex_tocut_hp = new RegExp(/^The opposing (.+?) cut its own HP to power up its move!$/);
+var regex_cut_hp = new RegExp(/^(.+?) cut its own HP to power up its move!$/);
+var regex_toloses_flying = new RegExp(/^\(The opposing (.+?) loses Flying type this turn.\)$/);
+var regex_loses_flying = new RegExp(/^\((.+?) loses Flying type this turn.\)$/);
+var regex_toreceived_encore = new RegExp(/^The opposing (.+?) received an encore!$/);
+var regex_received_encore = new RegExp(/^(.+?) received an encore!$/);
+var regex_totoxic_orb = new RegExp(/^The opposing (.+?) was badly poisoned by the Toxic Orb!$/);
+var regex_toxic_orb = new RegExp(/^(.+?) was badly poisoned by the Toxic Orb!$/);
+var regex_tosticky_web = new RegExp(/^The opposing (.+?) was caught in a sticky web!$/);
+var regex_sticky_web = new RegExp(/^(.+?) was caught in a sticky web!$/);
+var regex_tonot_lowered2 = new RegExp(/^The opposing (.+?)'s stats were not lowered!$/);
+var regex_not_lowered2 = new RegExp(/^(.+?)'s stats were not lowered!$/);
+var regex_tocant_use_item = new RegExp(/^The opposing (.+?) can't use items anymore!$/);
+var regex_cant_use_item = new RegExp(/^(.+?) can't use items anymore!$/);
+var regex_toheal_block_off = new RegExp(/^The opposing (.+?)'s Heal Block wore off!$/);
+var regex_heal_block_off = new RegExp(/^(.+?)'s Heal Block wore off!$/);
+var regex_torestored_littlehp_using = new RegExp(/^The opposing (.+?) restored a little HP using its (Leftovers|Shell Bell|Black Sludge)!$/);
+var regex_restored_littlehp_using = new RegExp(/^(.+?) restored a little HP using its (Leftovers|Shell Bell|Black Sludge)!$/);
+var regex_toparalyzed_cant_move = new RegExp(/^The opposing (.+?) is paralyzed! It can't move!$/);
+var regex_paralyzed_cant_move = new RegExp(/^(.+?) is paralyzed! It can't move!$/);
+var regex_toparalyzed_maybe_unable_move = new RegExp(/^The opposing (.+?) is paralyzed! It may be unable to move!$/);
+var regex_paralyzed_maybe_unable_move = new RegExp(/^(.+?) is paralyzed! It may be unable to move!$/);
+var regex_tosealed_moves = new RegExp(/^The opposing (.+?) sealed any moves its target shares with it!$/);
+var regex_sealed_moves = new RegExp(/^(.+?) sealed any moves its target shares with it!$/);
+var regex_tochose_doom = new RegExp(/^The opposing (.+?) chose Doom Desire as its destiny!$/);
+var regex_chose_doom = new RegExp(/^(.+?) chose Doom Desire as its destiny!$/);
+var regex_toelectromagnetism = new RegExp(/^The opposing (.+?) levitated with electromagnetism!$/);
+var regex_electromagnetism = new RegExp(/^(.+?) levitated with electromagnetism!$/);
+var regex_tostockpiled_off = new RegExp(/^The opposing (.+?)'s stockpiled effect wore off!$/);
+var regex_stockpiled_off = new RegExp(/^(.+?)'s stockpiled effect wore off!$/);
+var regex_toillusion_off = new RegExp(/^The opposing (.+?)'s illusion wore off!$/);
+var regex_illusion_off = new RegExp(/^(.+?)'s illusion wore off!$/);
+var regex_tosnapped_confusion = new RegExp(/^The opposing (.+?) snapped it out of its confusion!$/);
+var regex_snapped_confusion = new RegExp(/^(.+?) snapped it out of its confusion!$/);
+var regex_tosnapped_confusion2 = new RegExp(/^The opposing (.+?) snapped out of its confusion!$/);
+var regex_snapped_confusion2 = new RegExp(/^(.+?) snapped out of its confusion!$/);
+var regex_tosnapped_confusion3 = new RegExp(/^The opposing (.+?) snapped out of confusion!$/);
+var regex_snapped_confusion3 = new RegExp(/^(.+?) snapped out of confusion!$/);
+var regex_tofuturistic_engine = new RegExp(/^The opposing (.+?) turned the ground into Electric Terrain, energizing its futuristic engine!$/);
+var regex_futuristic_engine = new RegExp(/^(.+?) turned the ground into Electric Terrain, energizing its futuristic engine!$/);
+var regex_tofuturistic_engine2 = new RegExp(/^The opposing (.+?) used the Electric Terrain to energize its futuristic engine!$/);
+var regex_futuristic_engine2 = new RegExp(/^(.+?) used the Electric Terrain to energize its futuristic engine!$/);
+var regex_toancient_pulse = new RegExp(/^The opposing (.+?) turned the sunlight harsh, sending its ancient pulse into a frenzy!$/);
+var regex_ancient_pulse = new RegExp(/^(.+?) turned the sunlight harsh, sending its ancient pulse into a frenzy!$/);
+var regex_toancient_pulse2 = new RegExp(/^The opposing (.+?) basked in the sunlight, sending its ancient pulse into a frenzy!$/);
+var regex_ancient_pulse2 = new RegExp(/^(.+?) basked in the sunlight, sending its ancient pulse into a frenzy!$/);
+var regex_toflinched = new RegExp(/^The opposing (.+?) flinched and couldn't move!$/);
+var regex_flinched = new RegExp(/^(.+?) flinched and couldn't move!$/);
+var regex_tolost_somehp = new RegExp(/^The opposing (.+?) lost some of its HP!$/);
+var regex_lost_somehp = new RegExp(/^(.+?) lost some of its HP!$/);
+var regex_todamaged_recoil = new RegExp(/^The opposing (.+?) is damaged by the recoil!$/);
+var regex_damaged_recoil = new RegExp(/^(.+?) is damaged by the recoil!$/);
+var regex_tobuffeted_sandstorm_hail = new RegExp(/^The opposing (.+?) is buffeted by the (sandstorm|hail)!$/);
+var regex_buffeted_sandstorm_hail = new RegExp(/^(.+?) is buffeted by the (sandstorm|hail)!$/);
+var regex_totormented = new RegExp(/^The opposing (.+?) is tormented!$/);
+var regex_tormented = new RegExp(/^(.+?) is tormented!$/);
+var regex_toafflicted_by_curse = new RegExp(/^The opposing (.+?) is afflicted by the curse!$/);
+var regex_afflicted_by_curse = new RegExp(/^(.+?) is afflicted by the curse!$/);
+var regex_tolocked_in_nightmare = new RegExp(/^The opposing (.+?) is locked in a nightmare!$/);
+var regex_locked_in_nightmare = new RegExp(/^(.+?) is locked in a nightmare!$/);
+var regex_todemaged_by_recoil = new RegExp(/^The opposing (.+?) was damaged by the recoil!$/);
+var regex_demaged_by_recoil = new RegExp(/^(.+?) was damaged by the recoil!$/);
+var regex_tomystical_moonlight = new RegExp(/^The opposing (.+?) became cloaked in mystical moonlight!$/);
+var regex_mystical_moonlight = new RegExp(/^(.+?) became cloaked in mystical moonlight!$/);
+var regex_towas_hurt2 = new RegExp(/^\(The opposing (.+?) was hurt!\)$/);
+var regex_was_hurt2 = new RegExp(/^\((.+?) was hurt!\)$/);
+var regex_towas_hurt = new RegExp(/^The opposing (.+?) was hurt!$/);
+var regex_was_hurt = new RegExp(/^(.+?) was hurt!$/);
+var regex_tofrozen_solid = new RegExp(/^The opposing (.+?) is frozen solid!$/);
+var regex_frozen_solid = new RegExp(/^(.+?) is frozen solid!$/);
+var regex_totwisted_dimensions = new RegExp(/^The opposing (.+?) twisted the dimensions!$/);
+var regex_twisted_dimensions = new RegExp(/^(.+?) twisted the dimensions!$/);
+var regex_toability_suppressed = new RegExp(/^The opposing (.+?)'s Ability was suppressed!$/);
+var regex_ability_suppressed = new RegExp(/^(.+?)'s Ability was suppressed!$/);
+var regex_tousedupall_electricity = new RegExp(/^The opposing (.+?) used up all of its electricity!$/);
+var regex_usedupall_electricity = new RegExp(/^(.+?) used up all of its electricity!$/);
+var regex_tono_retreat = new RegExp(/^The opposing (.+?) can no longer escape because it used No Retreat!$/);
+var regex_no_retreat = new RegExp(/^(.+?) can no longer escape because it used No Retreat!$/);
+var regex_dragged_out = new RegExp(/^(.+?) was dragged out!$/);
+var regex_toenergy_drained = new RegExp(/^The opposing (.+?) had its energy drained!$/);
+var regex_energy_drained = new RegExp(/^(.+?) had its energy drained!$/);
+var regex_toabsorbs_attack = new RegExp(/^The opposing (.+?) absorbs the attack!$/);
+var regex_absorbs_attack = new RegExp(/^(.+?) absorbs the attack!$/);
+var regex_totook_attack = new RegExp(/^The opposing (.+?) took the attack!$/);
+var regex_took_attack = new RegExp(/^(.+?) took the attack!$/);
+var regex_tie = new RegExp(/^Tie between (.+?) and (.+?)!$/);
+var regex_tounder_ground = new RegExp(/^The opposing (.+?) burrowed its way under the ground!$/);
+var regex_under_ground = new RegExp(/^(.+?) burrowed its way under the ground!$/);
+var regex_toflew_high = new RegExp(/^The opposing (.+?) flew up high!$/);
+var regex_flew_high = new RegExp(/^(.+?) flew up high!$/);
+var regex_tohurled_air = new RegExp(/^The opposing (.+?) was hurled into the air!$/);
+var regex_hurled_air = new RegExp(/^(.+?) was hurled into the air!$/);
+var regex_towhippedup_whirlwind = new RegExp(/^The opposing (.+?) whipped up a whirlwind!$/);
+var regex_whippedup_whirlwind = new RegExp(/^(.+?) whipped up a whirlwind!$/);
+var regex_tohid_underwater = new RegExp(/^The opposing (.+?) hid underwater!$/);
+var regex_hid_underwater = new RegExp(/^(.+?) hid underwater!$/);
+var regex_tosprang_up = new RegExp(/^The opposing (.+?) sprang up!$/);
+var regex_sprang_up = new RegExp(/^(.+?) sprang up!$/);
+var regex_toitem_cannot_removed = new RegExp(/^The opposing (.+?)'s item cannot be removed!$/);
+var regex_item_cannot_removed = new RegExp(/^(.+?)'s item cannot be removed!$/);
+var regex_tomove_nolonger_disabled = new RegExp(/^The opposing (.+?)'s move is no longer disabled!$/);
+var regex_move_nolonger_disabled = new RegExp(/^(.+?)'s move is no longer disabled!$/);
+var regex_toloafing_around = new RegExp(/^The opposing (.+?) is loafing around!$/);
+var regex_loafing_around = new RegExp(/^(.+?) is loafing around!$/);
+var regex_tomust_recharge = new RegExp(/^The opposing (.+?) must recharge!$/);
+var regex_must_recharge = new RegExp(/^(.+?) must recharge!$/);
+var regex_toheals_status = new RegExp(/^The opposing (.+?) heals its status!$/);
+var regex_heals_status = new RegExp(/^(.+?) heals its status!$/);
+var regex_tohealed_burn = new RegExp(/^The opposing (.+?) healed its burn!$/);
+var regex_healed_burn = new RegExp(/^(.+?) healed its burn!$/);
+var regex_toburn_was_healed = new RegExp(/^The opposing (.+?)'s burn was healed!$/);
+var regex_burn_was_healed = new RegExp(/^(.+?)'s burn was healed!$/);
+var regex_tocured_its_poison = new RegExp(/^The opposing (.+?) cured its poison!$/);
+var regex_cured_its_poison = new RegExp(/^(.+?) cured its poison!$/);
+var regex_tocured_its_paralysis = new RegExp(/^The opposing (.+?) cured its paralysis!$/);
+var regex_cured_its_paralysis = new RegExp(/^(.+?) cured its paralysis!$/);
+var regex_tostatus_cleared = new RegExp(/^The opposing (.+?)'s status cleared!$/);
+var regex_status_cleared = new RegExp(/^(.+?)'s status cleared!$/);
+var regex_totake_attacker_down = new RegExp(/^The opposing (.+?) is hoping to take its attacker down with it!$/);
+var regex_take_attacker_down = new RegExp(/^(.+?) is hoping to take its attacker down with it!$/);
+var regex_totook_attacker_down = new RegExp(/^The opposing (.+?) took its attacker down with it!$/);
+var regex_took_attacker_down = new RegExp(/^(.+?) took its attacker down with it!$/);
+var regex_toplanted_its_roots = new RegExp(/^The opposing (.+?) planted its roots!$/);
+var regex_planted_its_roots = new RegExp(/^(.+?) planted its roots!$/);
+var regex_toanchored_itself_roots = new RegExp(/^The opposing (.+?) anchored itself with its roots!$/);
+var regex_anchored_itself_roots = new RegExp(/^(.+?) anchored itself with its roots!$/);
+var regex_tosurrounded_veil_water = new RegExp(/^The opposing (.+?) surrounded itself with a veil of water!$/);
+var regex_surrounded_veil_water = new RegExp(/^(.+?) surrounded itself with a veil of water!$/);
+var regex_towas_subjected_torment = new RegExp(/^The opposing (.+?) was subjected to torment!$/);
+var regex_was_subjected_torment = new RegExp(/^(.+?) was subjected to torment!$/);
+var regex_tosupersweet_aroma = new RegExp(/^A supersweet aroma is wafting from the syrup covering the opposing (.+?)!$/);
+var regex_supersweet_aroma = new RegExp(/^A supersweet aroma is wafting from the syrup covering (.+?)!$/);
+var regex_toreversed_other_auras = new RegExp(/^The opposing (.+?) reversed all other Pokemon's auras!$/);
+var regex_reversed_other_auras = new RegExp(/^(.+?) reversed all other Pokemon's auras!$/);
+var regex_togot_over_infatuation = new RegExp(/^The opposing (.+?) got over its infatuation!$/);
+var regex_got_over_infatuation = new RegExp(/^(.+?) got over its infatuation!$/);
+var regex_tounderwent_heroic_transformation = new RegExp(/^The opposing (.+?) underwent a heroic transformation!$/);
+var regex_underwent_heroic_transformation = new RegExp(/^(.+?) underwent a heroic transformation!$/);
+var regex_toimmobilized_by_love = new RegExp(/^The opposing (.+?) is immobilized by love!$/);
+var regex_immobilized_by_love = new RegExp(/^(.+?) is immobilized by love!$/);
+var regex_toshuddered = new RegExp(/^The opposing (.+?) shuddered!$/);
+var regex_shuddered = new RegExp(/^(.+?) shuddered!$/);
+var regex_tomove_was_postponed = new RegExp(/^The opposing (.+?)'s move was postponed!$/);
+var regex_move_was_postponed = new RegExp(/^(.+?)'s move was postponed!$/);
+var regex_totightening_its_focus = new RegExp(/^The opposing (.+?) is tightening its focus!$/);
+var regex_tightening_its_focus = new RegExp(/^(.+?) is tightening its focus!$/);
+var regex_toset_shell_trap = new RegExp(/^The opposing (.+?) set a shell trap!$/);
+var regex_set_shell_trap = new RegExp(/^(.+?) set a shell trap!$/);
+var regex_toshrouded_itself_magiccoat = new RegExp(/^The opposing (.+?) shrouded itself with Magic Coat!$/);
+var regex_shrouded_itself_magiccoat = new RegExp(/^(.+?) shrouded itself with Magic Coat!$/);
+var regex_also_timer_to_on = new RegExp(/^(.+?) also wants the timer to be on.$/);
+var regex_torestorehp_using_zpower = new RegExp(/^The opposing (.+?) will restore its replacement's HP using its Z-Power!$/);
+var regex_restorehp_using_zpower = new RegExp(/^(.+?) will restore its replacement's HP using its Z-Power!$/);
+var regex_tocuthp_maximized_attack = new RegExp(/^The opposing (.+?) cut its own HP and maximized its Attack!$/);
+var regex_cuthp_maximized_attack = new RegExp(/^(.+?) cut its own HP and maximized its Attack!$/);
+var regex_torestored_its_hp = new RegExp(/^The opposing (.+?) restored its HP.$/);
+var regex_restored_its_hp = new RegExp(/^(.+?) restored its HP.$/);
+var regex_torestorehp_using_zpower2 = new RegExp(/^The opposing (.+?) restored its HP using its Z-Power!$/);
+var regex_restorehp_using_zpower2 = new RegExp(/^(.+?) restored its HP using its Z-Power!$/);
+var regex_toreturned_stats_zpower = new RegExp(/^The opposing (.+?) returned its decreased stats to normal using its Z-Power!$/);
+var regex_returned_stats_zpower = new RegExp(/^(.+?) returned its decreased stats to normal using its Z-Power!$/);
+var regex_tostarted_heatingup_beak = new RegExp(/^The opposing (.+?) started heating up its beak!$/);
+var regex_started_heatingup_beak = new RegExp(/^(.+?) started heating up its beak!$/);
+var regex_toswitched_items_target = new RegExp(/^The opposing (.+?) switched items with its target!$/);
+var regex_switched_items_target = new RegExp(/^(.+?) switched items with its target!$/);
+var regex_tomoves_have_electrified = new RegExp(/^The opposing (.+?)'s moves have been electrified!$/);
+var regex_moves_have_electrified = new RegExp(/^(.+?)'s moves have been electrified!$/);
+var regex_totarget_bear_grudge = new RegExp(/^The opposing (.+?) wants its target to bear a grudge!$/);
+var regex_target_bear_grudge = new RegExp(/^(.+?) wants its target to bear a grudge!$/);
+var regex_tolearned = new RegExp(/^The opposing (.+?) learned ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_learned = new RegExp(/^(.+?) learned ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_tokept_going_crashed = new RegExp(/^The opposing (.+?) kept going and crashed!$/);
+var regex_kept_going_crashed = new RegExp(/^(.+?) kept going and crashed!$/);
+var regex_tothawed_out = new RegExp(/^The opposing (.+?) thawed out!$/);
+var regex_thawed_out = new RegExp(/^(.+?) thawed out!$/);
+var regex_tothroat_chop = new RegExp(/^The effects of Throat Chop prevent the opposing (.+?) from using certain moves!$/);
+var regex_throat_chop = new RegExp(/^The effects of Throat Chop prevent (.+?) from using certain moves!$/);
+var regex_toprotected_aromaticveil = new RegExp(/^The opposing (.+?) is protected by an aromatic veil!$/);
+var regex_protected_aromaticveil = new RegExp(/^(.+?) is protected by an aromatic veil!$/);
+var regex_tosurrounded_sweetness = new RegExp(/^The opposing (.+?) surrounded itself with a veil of sweetness!$/);
+var regex_surrounded_sweetness = new RegExp(/^(.+?) surrounded itself with a veil of sweetness!$/);
+var regex_tocant_asleep_sweetness = new RegExp(/^The opposing (.+?) can't fall asleep due to a veil of sweetness!$/);
+var regex_cant_asleep_sweetness = new RegExp(/^(.+?) can't fall asleep due to a veil of sweetness!$/);
+var regex_tolost_focus = new RegExp(/^The opposing (.+?) lost its focus and couldn't move!$/);
+var regex_lost_focus = new RegExp(/^(.+?) lost its focus and couldn't move!$/);
+var regex_toattack_missed2 = new RegExp(/^The opposing (.+?)'s attack missed!$/);
+var regex_attack_missed2 = new RegExp(/^(.+?)'s attack missed!$/);
+var regex_tocenter_attention_zpower = new RegExp(/^The opposing (.+?) became the center of attention using its Z-Power!$/);
+var regex_center_attention_zpower = new RegExp(/^(.+?) became the center of attention using its Z-Power!$/);
+var regex_tobond_trainer = new RegExp(/^The opposing (.+?) became fully charged due to its bond with its Trainer!$/);
+var regex_bond_trainer = new RegExp(/^(.+?) became fully charged due to its bond with its Trainer!$/);
+var regex_toprimal_reversion = new RegExp(/^The opposing (.+?)'s Primal Reversion! It reverted to its primal state!$/);
+var regex_primal_reversion = new RegExp(/^(.+?)'s Primal Reversion! It reverted to its primal state!$/);
+var regex_toabsorbing_power = new RegExp(/^The opposing (.+?) is absorbing power!$/);
+var regex_absorbing_power = new RegExp(/^(.+?) is absorbing power!$/);
+var regex_totaunt_off = new RegExp(/^The opposing (.+?)'s taunt wore off!$/);
+var regex_taunt_off = new RegExp(/^(.+?)'s taunt wore off!$/);
+var regex_tocustap_berry = new RegExp(/^The opposing (.+?) can act faster than normal, thanks to its Custap Berry!$/);
+var regex_custap_berry = new RegExp(/^(.+?) can act faster than normal, thanks to its Custap Berry!$/);
+var regex_totwo_abilities = new RegExp(/^The opposing (.+?) has two Abilities!$/);
+var regex_two_abilities = new RegExp(/^(.+?) has two Abilities!$/);
+var regex_toprotected_Terrain = new RegExp(/^The opposing (.+?) is protected by the (Electric|Misty|Psychic) Terrain!$/);
+var regex_protected_Terrain = new RegExp(/^(.+?) is protected by the (Electric|Misty|Psychic) Terrain!$/);
+var regex_tomirrorherb2 = new RegExp(/^The Mirror Herb drastically (raised|lowered) the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_mirrorherb2 = new RegExp(/^The Mirror Herb drastically (raised|lowered) (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_tomirrorherb = new RegExp(/^The Mirror Herb (sharply raised|raised) the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_mirrorherb = new RegExp(/^The Mirror Herb (sharply raised|raised) (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_tomirrorherb_Contrary = new RegExp(/^The Mirror Herb (harshly lowered|lowered) the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_mirrorherb_Contrary = new RegExp(/^The Mirror Herb (harshly lowered|lowered) (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_toStarf_Berry = new RegExp(/^The Starf Berry (sharply raised|drastically raised|harshly lowered) the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_Starf_Berry = new RegExp(/^The Starf Berry (sharply raised|drastically raised|harshly lowered) (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_toWeakness_Policy = new RegExp(/^The Weakness Policy (sharply raised|drastically raised|harshly lowered) the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_Weakness_Policy = new RegExp(/^The Weakness Policy (sharply raised|drastically raised|harshly lowered) (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_toRoom_Service = new RegExp(/^The Room Service lowered the opposing (.+?)'s Speed!$/);
+var regex_Room_Service = new RegExp(/^The Room Service lowered (.+?)'s Speed!$/);
+var regex_toabsorbed_electricity = new RegExp(/^The opposing (.+?) absorbed electricity!$/);
+var regex_absorbed_electricity = new RegExp(/^(.+?) absorbed electricity!$/);
+var regex_tospace_power = new RegExp(/^The opposing (.+?) is overflowing with space power!$/);
+var regex_space_power = new RegExp(/^(.+?) is overflowing with space power!$/);
+var regex_togravity = new RegExp(/^The opposing (.+?) couldn't stay airborne because of gravity!$/);
+var regex_gravity = new RegExp(/^(.+?) couldn't stay airborne because of gravity!$/);
+var regex_toWhite_Herb = new RegExp(/^The opposing (.+?) returned its stats to normal using its White Herb!$/);
+var regex_White_Herb = new RegExp(/^(.+?) returned its stats to normal using its White Herb!$/);
+var regex_todisguise_busted = new RegExp(/^The opposing (.+?)'s disguise was busted!$/);
+var regex_disguise_busted = new RegExp(/^(.+?)'s disguise was busted!$/);
+var regex_toswapped_abilities = new RegExp(/^The opposing (.+?) swapped Abilities with its target!$/);
+var regex_swapped_abilities = new RegExp(/^(.+?) swapped Abilities with its target!$/);
+var regex_tocharging_power = new RegExp(/^The opposing (.+?) began charging power!$/);
+var regex_charging_power = new RegExp(/^(.+?) began charging power!$/);
+var regex_tofell_love = new RegExp(/^The opposing (.+?) fell in love!$/);
+var regex_fell_love = new RegExp(/^(.+?) fell in love!$/);
+var regex_toasleep_paralyzed = new RegExp(/^The opposing (.+?) is already (asleep|paralyzed)!$/);
+var regex_asleep_paralyzed = new RegExp(/^(.+?) is already (asleep|paralyzed)!$/);
+var regex_toidentified = new RegExp(/^The opposing (.+?) was identified!$/);
+var regex_identified = new RegExp(/^(.+?) was identified!$/);
+var regex_toswitched_Attack_Defense = new RegExp(/^The opposing (.+?) switched its Attack and Defense!$/);
+var regex_switched_Attack_Defense = new RegExp(/^(.+?) switched its Attack and Defense!$/);
+var regex_toanchors_itself = new RegExp(/^The opposing (.+?) anchors itself!$/);
+var regex_anchors_itself = new RegExp(/^(.+?) anchors itself!$/);
+var regex_toanchored_suction_cups = new RegExp(/^The opposing (.+?) is anchored in place with its suction cups!$/);
+var regex_anchored_suction_cups = new RegExp(/^(.+?) is anchored in place with its suction cups!$/);
+var regex_tostopped_shielding_itself = new RegExp(/^\(the opposing (.+?) stopped shielding itself.\)$/);
+var regex_stopped_shielding_itself = new RegExp(/^\((.+?) stopped shielding itself.\)$/);
+var regex_toshielded_itself = new RegExp(/^\(the opposing (.+?) shielded itself.\)$/);
+var regex_shielded_itself = new RegExp(/^\((.+?) shielded itself.\)$/);
+var regex_tocriticalhit_zpower = new RegExp(/^The opposing (.+?) boosted its critical-hit ratio using its Z-Power!$/);
+var regex_criticalhit_zpower = new RegExp(/^(.+?) boosted its critical-hit ratio using its Z-Power!$/);
+var regex_tomaking_uproar = new RegExp(/^The opposing (.+?) is making an uproar!$/);
+var regex_making_uproar = new RegExp(/^(.+?) is making an uproar!$/);
+var regex_tocaused_uproar = new RegExp(/^The opposing (.+?) caused an uproar!$/);
+var regex_caused_uproar = new RegExp(/^(.+?) caused an uproar!$/);
+var regex_tomove_no_disabled = new RegExp(/^The opposing (.+?)'s move is no longer disabled!$/);
+var regex_move_no_disabled = new RegExp(/^(.+?)'s move is no longer disabled!$/);
+var regex_tocan_use_item = new RegExp(/^The opposing (.+?) can use items again!$/);
+var regex_can_use_item = new RegExp(/^(.+?) can use items again!$/);
+var regex_totorment_wore_off = new RegExp(/^The opposing (.+?)'s torment wore off!$/);
+var regex_torment_wore_off = new RegExp(/^(.+?)'s torment wore off!$/);
+var regex_toshared_power_target = new RegExp(/^The opposing (.+?) shared its power with the target!$/);
+var regex_shared_power_target = new RegExp(/^(.+?) shared its power with the target!$/);
+var regex_toshared_guard_target = new RegExp(/^The opposing (.+?) shared its guard with the target!$/);
+var regex_shared_guard_target = new RegExp(/^(.+?) shared its guard with the target!$/);
+var regex_toswitched_speed_target = new RegExp(/^The opposing (.+?) switched Speed with its target!$/);
+var regex_switched_speed_target = new RegExp(/^(.+?) switched Speed with its target!$/);
+var regex_toBright_light = new RegExp(/^Bright light is about to burst out of the opposing (.+?)!$/);
+var regex_Bright_light = new RegExp(/^Bright light is about to burst out of (.+?)!$/);
+var regex_toalready_poisoned = new RegExp(/^The opposing (.+?) is already poisoned.$/);
+var regex_already_poisoned = new RegExp(/^(.+?) is already poisoned.$/);
+var regex_toalready_paralyzed = new RegExp(/^The opposing (.+?) is already paralyzed.$/);
+var regex_already_paralyzed = new RegExp(/^(.+?) is already paralyzed.$/);
+var regex_toalready_frozen = new RegExp(/^The opposing (.+?) is already frozen solid!$/);
+var regex_already_frozen = new RegExp(/^(.+?) is already frozen solid!$/);
+var regex_tosketched = new RegExp(/^The opposing (.+?) sketched ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_sketched = new RegExp(/^(.+?) sketched ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_toshell_trap = new RegExp(/^The opposing (.+?)'s shell trap didn't work!$/);
+var regex_shell_trap = new RegExp(/^(.+?)'s shell trap didn't work!$/);
+var regex_toDynamax = new RegExp(/^\(The opposing (.+?)'s Dynamax!\)$/);
+var regex_Dynamax = new RegExp(/^\((.+?)'s Dynamax!\)$/);
+var regex_no_battle_on_right_now = new RegExp(/^No (.+?) battles are going on right now.$/);
+var regex_tosubstitute_faded = new RegExp(/^The opposing (.+?)'s substitute faded!$/);
+var regex_substitute_faded = new RegExp(/^(.+?)'s substitute faded!$/);
+var regex_not_found = new RegExp(/^The user '(.+?)' was not found.$/);
+var regex_Challenging = new RegExp(/^Challenging (.+?)...$/);
+var regex_is_offline = new RegExp(/^User (.+?) is offline. If you still want to PM them, send the message again, or use \/offlinemsg.$/);
+var regex_tolonger_tormented = new RegExp(/^The opposing (.+?) is no longer tormented!$/);
+var regex_longer_tormented = new RegExp(/^(.+?) is no longer tormented!$/);
+var regex_tocured_infatuation = new RegExp(/^The opposing (.+?) cured its infatuation using its Mental Herb!$/);
+var regex_cured_infatuation = new RegExp(/^(.+?) cured its infatuation using its Mental Herb!$/);
+var regex_torocky_helmet = new RegExp(/^The opposing (.+?) was hurt by the Rocky Helmet!$/);
+var regex_rocky_helmet = new RegExp(/^(.+?) was hurt by the Rocky Helmet!$/);
+var regex_toCourt_Change = new RegExp(/^The opposing (.+?) swapped the battle effects affecting each side of the field!$/);
+var regex_Court_Change = new RegExp(/^(.+?) swapped the battle effects affecting each side of the field!$/);
+var regex_toalready_substitute = new RegExp(/^The opposing (.+?) already has a substitute!$/);
+var regex_already_substitute = new RegExp(/^(.+?) already has a substitute!$/);
+var regex_tovanished_instantly = new RegExp(/^The opposing (.+?) vanished instantly!$/);
+var regex_vanished_instantly = new RegExp(/^(.+?) vanished instantly!$/);
+var regex_toheavy_lifted = new RegExp(/^The opposing (.+?) is too heavy to be lifted!$/);
+var regex_heavy_lifted = new RegExp(/^(.+?) is too heavy to be lifted!$/);
+var regex_touproar_kept = new RegExp(/^But the uproar kept the opposing (.+?) awake!$/);
+var regex_uproar_kept = new RegExp(/^But the uproar kept (.+?) awake!$/);
+var regex_tobraced_itself = new RegExp(/^The opposing (.+?) braced itself!$/);
+var regex_braced_itself = new RegExp(/^(.+?) braced itself!$/);
+var regex_toswitched_stat_target = new RegExp(/^The opposing (.+?) switched stat changes with its target!$/);
+var regex_switched_stat_target = new RegExp(/^(.+?) switched stat changes with its target!$/);
+var regex_toswitched_def_spd = new RegExp(/^The opposing (.+?) switched all changes to its Defense and Sp. Def with its target!$/);
+var regex_switched_def_spd = new RegExp(/^(.+?) switched all changes to its Defense and Sp. Def with its target!$/);
+var regex_toswitched_atk_spa = new RegExp(/^The opposing (.+?) switched all changes to its Attack and Sp. Atk with its target!$/);
+var regex_switched_atk_spa = new RegExp(/^(.+?) switched all changes to its Attack and Sp. Atk with its target!$/);
+var regex_torevealed = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) was revealed!$/);
+var regex_revealed = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) was revealed!$/);
+var regex_toGMax_Wildfire = new RegExp(/^The opposing (.+?) is burning up within G-Max Wildfire’s flames!$/);
+var regex_GMax_Wildfire = new RegExp(/^(.+?) is burning up within G-Max Wildfire’s flames!$/);
+var regex_no_energy = new RegExp(/^(.+?) has no energy left to battle!$/);
+var regex_already_in_battle = new RegExp(/^(.+?) is already in battle!$/);
+var regex_towaiting_move = new RegExp(/^The opposing (.+?) is waiting for (.+?)'s move...$/);
+var regex_waiting_move = new RegExp(/^(.+?) is waiting for (.+?)'s move...$/);
+var regex_tosea_fire = new RegExp(/^The opposing (.+?) was hurt by the sea of fire!$/);
+var regex_sea_fire = new RegExp(/^(.+?) was hurt by the sea of fire!$/);
+var regex_toTelepathy = new RegExp(/^The opposing (.+?) can't be hit by attacks from its ally Pokemon!$/);
+var regex_Telepathy = new RegExp(/^(.+?) can't be hit by attacks from its ally Pokemon!$/);
+var regex_toKey_Stone = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) is reacting to the Key Stone!$/);
+var regex_Key_Stone = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) is reacting to the Key Stone!$/);
+var regex_tobecame_AshGreninja = new RegExp(/^The opposing (.+?) became Ash-Greninja!$/);
+var regex_became_AshGreninja = new RegExp(/^(.+?) became Ash-Greninja!$/);
+var regex_crazy_house = new RegExp(/^(.+?) was captured by (.+?)!$/);
+var regex_tomelted = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) melted the ice!$/);
+var regex_melted = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) melted the ice!$/);
+var regex_toelectromagnetism_woreoff = new RegExp(/^The opposing (.+?)'s electromagnetism wore off!$/);
+var regex_electromagnetism_woreoff = new RegExp(/^(.+?)'s electromagnetism wore off!$/);
+var regex_tocant_use_gravity = new RegExp(/^The opposing (.+?) can't use ([A-z0-9,'.() ’:-]+?) because of gravity!$/);
+var regex_cant_use_gravity = new RegExp(/^The opposing (.+?) can't use ([A-z0-9,'.() ’:-]+?) because of gravity!$/);
+var regex_tomaxed_Attack = new RegExp(/^The opposing (.+?) maxed its Attack!$/);
+var regex_maxed_Attack = new RegExp(/^(.+?) maxed its Attack!$/);
+var regex_tocenter_attention = new RegExp(/^The opposing (.+?) became the center of attention!$/);
+var regex_center_attention = new RegExp(/^(.+?) became the center of attention!$/);
+var regex_toHospitality = new RegExp(/^The opposing (.+?) drank down all the matcha that the opposing (.+?) made!$/);
+var regex_Hospitality = new RegExp(/^(.+?) drank down all the matcha that (.+?) made!$/);
+var regex_toRowap_Berry_Jaboca_Berry = new RegExp(/^The opposing (.+?) was hurt by (.+?)'s (Rowap|Jaboca) Berry!$/);
+var regex_Rowap_Berry_Jaboca_Berry = new RegExp(/^(.+?) was hurt by the opposing (.+?)'s (Rowap|Jaboca) Berry!$/);
+var regex_tostoring_energy = new RegExp(/^The opposing (.+?) is storing energy!$/);
+var regex_storing_energy = new RegExp(/^(.+?) is storing energy!$/);
+var regex_tounleashed_energy = new RegExp(/^The opposing (.+?) unleashed its energy!$/);
+var regex_unleashed_energy = new RegExp(/^(.+?) unleashed its energy!$/);
+var regex_tobecame_nimble = new RegExp(/^The opposing (.+?) became nimble!$/);
+var regex_became_nimble = new RegExp(/^(.+?) became nimble!$/);
+var regex_rejected_Open_Team_Sheet = new RegExp(/^(.+?) rejected open team sheets.$/);
+var regex_agreed_Open_Team_Sheet = new RegExp(/^(.+?) has agreed to open team sheets.$/);
+var regex_tosqueezed_wrapped = new RegExp(/^The opposing (.+?) was (squeezed|wrapped) by (.+?)!$/);
+var regex_squeezed_wrapped = new RegExp(/^(.+?) was (squeezed|wrapped) by the opposing (.+?)!$/);
+var regex_tounaffected = new RegExp(/^The opposing (.+?) is unaffected!$/);
+var regex_unaffected = new RegExp(/^(.+?) is unaffected!$/);
+var regex_toabsorbed_nutrients_roots = new RegExp(/^The opposing (.+?) absorbed nutrients with its roots!$/);
+var regex_absorbed_nutrients_roots = new RegExp(/^(.+?) absorbed nutrients with its roots!$/);
+var regex_tonot_lowered = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) was not lowered!$/);
+var regex_not_lowered = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) was not lowered!$/);
+var regex_totype_added = new RegExp(/^([A-z0-9,'.() ’:-]+?) type was added to the opposing (.+?)!$/);
+var regex_type_added = new RegExp(/^([A-z0-9,'.() ’:-]+?) type was added to (.+?)!$/);
+var regex_tocant_get_going = new RegExp(/^The opposing (.+?) can't get it going!$/);
+var regex_cant_get_going = new RegExp(/^(.+?) can't get it going!$/);
+var regex_tofinally_get_going = new RegExp(/^The opposing (.+?) finally got its act together!$/);
+var regex_finally_get_going = new RegExp(/^(.+?) finally got its act together!$/);
+var regex_towas_burned_up = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) was burned up!$/);
+var regex_was_burned_up = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) was burned up!$/);
+var regex_tosurrounded_veil_petals = new RegExp(/^The opposing (.+?) surrounded itself with a veil of petals!$/);
+var regex_surrounded_veil_petals = new RegExp(/^(.+?) surrounded itself with a veil of petals!$/);
+var regex_toAbility_became_Mummy = new RegExp(/^The opposing (.+?)'s Ability became Mummy!$/);
+var regex_Ability_became_Mummy = new RegExp(/^(.+?)'s Ability became Mummy!$/);
+var regex_toreturned_normal = new RegExp(/^\(The opposing (.+?) returned to normal!\)$/);
+var regex_returned_normal = new RegExp(/^\((.+?) returned to normal!\)$/);
+var regex_tolingering_aroma = new RegExp(/^A lingering aroma clings to the opposing (.+?)!$/);
+var regex_lingering_aroma = new RegExp(/^A lingering aroma clings to (.+?)!$/);
+var regex_totoReflect_Type = new RegExp(/^The opposing (.+?)'s type became the same as the opposing (.+?)'s type!$/);
+var regex_toReflect_Type2 = new RegExp(/^The opposing (.+?)'s type became the same as (.+?)'s type!$/);
+var regex_toReflect_Type = new RegExp(/^(.+?)'s type became the same as the opposing (.+?)'s type!$/);
+var regex_Reflect_Type = new RegExp(/^(.+?)'s type became the same as (.+?)'s type!$/);
+var regex_totaken_over = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) was taken over!$/);
+var regex_taken_over = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) was taken over!$/);
+var regex_toweaker_to_fire = new RegExp(/^The opposing (.+?) became weaker to fire!$/);
+var regex_weaker_to_fire = new RegExp(/^(.+?) became weaker to fire!$/);
+var regex_tocalmed_down = new RegExp(/^The opposing (.+?) calmed down.$/);
+var regex_calmed_down = new RegExp(/^(.+?) calmed down.$/);
+var regex_toFlash_Fire = new RegExp(/^The power of the opposing (.+?)'s Fire-type moves rose!$/);
+var regex_Flash_Fire = new RegExp(/^The power of (.+?)'s Fire-type moves rose!$/);
+var regex_towaiting_target_move = new RegExp(/^The opposing (.+?) is waiting for a target to make a move!$/);
+var regex_waiting_target_move = new RegExp(/^(.+?) is waiting for a target to make a move!$/);
+var regex_tosnatched_move = new RegExp(/^The opposing (.+?) snatched (.+?)'s move!$/);
+var regex_snatched_move = new RegExp(/^(.+?) snatched the opposing (.+?)'s move!$/);
+var regex_toMat_Block = new RegExp(/^The opposing (.+?) intends to flip up a mat and block incoming attacks!$/);
+var regex_Mat_Block = new RegExp(/^(.+?) intends to flip up a mat and block incoming attacks!$/);
+var regex_kicked_up_mat = new RegExp(/^([A-z0-9,'.() ’:-]+?) was blocked by the kicked-up mat!$/);
+var regex_no_wants_timer_on = new RegExp(/^(.+?) no longer wants the timer on, but the timer is staying on because (.+?) still does.$/);
+var regex_toGMax_Vine_Lash = new RegExp(/^The opposing (.+?) is hurt by G-Max Vine Lash’s ferocious beating!$/);
+var regex_GMax_Vine_Lash = new RegExp(/^(.+?) is hurt by G-Max Vine Lash’s ferocious beating!$/);
+var regex_toGMax_Cannonade = new RegExp(/^The opposing (.+?) is hurt by G-Max Cannonade’s vortex!$/);
+var regex_GMax_Cannonade = new RegExp(/^(.+?) is hurt by G-Max Cannonade’s vortex!$/);
+var regex_tosharp_steel = new RegExp(/^The sharp steel bit into the opposing (.+?)!$/);
+var regex_sharp_steel = new RegExp(/^The sharp steel bit into (.+?)!$/);
+var regex_already_selected = new RegExp(/^(.+?) is already selected!$/);
+var regex_toOctolock = new RegExp(/^The opposing (.+?) can no longer escape because of Octolock!$/);
+var regex_Octolock = new RegExp(/^(.+?) can no longer escape because of Octolock!$/);
+var regex_areintheback5 = new RegExp(/^([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?) are in the back.$/);
+var regex_areintheback4 = new RegExp(/^([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?) are in the back.$/);
+var regex_areintheback3 = new RegExp(/^([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?) are in the back.$/);
+var regex_areintheback2 = new RegExp(/^([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?) are in the back.$/);
+var regex_areintheback = new RegExp(/^([A-z0-9é,'.()* ’:-]+?) are in the back.$/);
+var regex_toPluck_BugBite = new RegExp(/^The opposing (.+?) stole and ate its target's ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_Pluck_BugBite = new RegExp(/^(.+?) stole and ate its target's ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_toliquid_ooze = new RegExp(/^The opposing (.+?) sucked up the liquid ooze!$/);
+var regex_liquid_ooze = new RegExp(/^(.+?) sucked up the liquid ooze!$/);
+var regex_tocovered_powder = new RegExp(/^The opposing (.+?) is covered in powder!$/);
+var regex_covered_powder = new RegExp(/^(.+?) is covered in powder!$/);
+var regex_tospecial_attacks = new RegExp(/^The opposing (.+?)'s protected against special attacks!$/);
+var regex_special_attacks = new RegExp(/^(.+?)'s protected against special attacks!$/);
+var regex_togained_armor = new RegExp(/^The opposing (.+?) gained armor!$/);
+var regex_gained_armor = new RegExp(/^(.+?) gained armor!$/);
+var regex_toformed_school = new RegExp(/^The opposing (.+?) formed a school!$/);
+var regex_formed_school = new RegExp(/^(.+?) formed a school!$/);
+var regex_tostopped_schooling = new RegExp(/^The opposing (.+?) stopped schooling!$/);
+var regex_stopped_schooling = new RegExp(/^(.+?) stopped schooling!$/);
+var regex_tobursting_flame = new RegExp(/^The bursting flame hit the opposing (.+?)!$/);
+var regex_bursting_flame = new RegExp(/^The bursting flame hit (.+?)!$/);
+var regex_send_offline_confirm = new RegExp(/^User (.+?) is offline. If you still want to PM them, send the message again to confirm.$/);
+var regex_tofell_for_feint = new RegExp(/^The opposing (.+?) fell for the feint!$/);
+var regex_fell_for_feint = new RegExp(/^(.+?) fell for the feint!$/);
+var regex_tobroke_protection = new RegExp(/^It broke through the opposing (.+?)'s protection!$/);
+var regex_broke_protection = new RegExp(/^It broke through (.+?)'s protection!$/);
+var regex_toalready_preparing = new RegExp(/^The opposing (.+?) is already preparing its next move!$/);
+var regex_already_preparing = new RegExp(/^(.+?) is already preparing its next move!$/);
+var regex_tobeing_withdrawn2 = new RegExp(/^The opposing (.+?) is being withdrawn!$/);
+var regex_being_withdrawn2 = new RegExp(/^(.+?) is being withdrawn!$/);
+var regex_toclamped_down = new RegExp(/^The opposing (.+?) clamped down on (.+?)!$/);
+var regex_clamped_down = new RegExp(/^(.+?) clamped down on the opposing (.+?)!$/);
+var regex_totook_kind_offer = new RegExp(/^The opposing (.+?) took the kind offer!$/);
+var regex_took_kind_offer = new RegExp(/^(.+?) took the kind offer!$/);
+var regex_tohaving_nightmare = new RegExp(/^The opposing (.+?) began having a nightmare!$/);
+var regex_having_nightmare = new RegExp(/^(.+?) began having a nightmare!$/);
+var regex_reconnected2 = new RegExp(/^(.+?) reconnected.$/);
+var regex_tobecause_gravity = new RegExp(/^The opposing (.+?) can't use ([A-z0-9,'.() ’:-]+?) because of gravity!$/);
+var regex_because_gravity = new RegExp(/^(.+?) can't use ([A-z0-9,'.() ’:-]+?) because of gravity!$/);
+var regex_Invite_sent_to = new RegExp(/^Invite sent to (.+?)!$/);
+var regex_toGMax_Volcalith = new RegExp(/^The opposing (.+?) is hurt by the rocks thrown out by G-Max Volcalith!$/);
+var regex_GMax_Volcalith = new RegExp(/^(.+?) is hurt by the rocks thrown out by G-Max Volcalith!$/);
+var regex_toprotect_hurt = new RegExp(/^The opposing (.+?) couldn't fully protect itself and got hurt!$/);
+var regex_protect_hurt = new RegExp(/^(.+?) couldn't fully protect itself and got hurt!$/);
+var regex_cant_Dynamax = new RegExp(/^\[Invalid choice\] Can't move: (.+?) can't Dynamax now.$/);
+var regex_toPower_Shift = new RegExp(/^The opposing (.+?) swapped its offensive stats with its defensive stats!$/);
+var regex_Power_Shift = new RegExp(/^(.+?) swapped its offensive stats with its defensive stats!$/);
+var regex_toanchored_roots = new RegExp(/^The opposing (.+?) is anchored in place with its roots!$/);
+var regex_anchored_roots = new RegExp(/^(.+?) is anchored in place with its roots!$/);
+var regex_toUltra_Burst = new RegExp(/^The opposing (.+?) regained its true power through Ultra Burst!$/);
+var regex_Ultra_Burst = new RegExp(/^(.+?) regained its true power through Ultra Burst!$/);
+var regex_from4 = new RegExp(/\(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\)$/);
+var regex_from3 = new RegExp(/\(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\)$/);
+var regex_from2 = new RegExp(/\(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\)$/);
+var regex_from = new RegExp(/\(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\)$/);
+var regex_toProtective_Pads = new RegExp(/^The opposing (.+?) protected itself with its Protective Pads!$/);
+var regex_Protective_Pads = new RegExp(/^(.+?) protected itself with its Protective Pads!$/);
+var regex_toAbility_Shield = new RegExp(/^The opposing (.+?)'s Ability is protected by the effects of its Ability Shield!$/);
+var regex_Ability_Shield = new RegExp(/^(.+?)'s Ability is protected by the effects of its Ability Shield!$/);
+var regex_togrudge = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) lost all of its PP due to the grudge!$/);
+var regex_grudge = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) lost all of its PP due to the grudge!$/);
+var regex_toalready_has_burn = new RegExp(/^The opposing (.+?) already has a burn.$/);
+var regex_already_has_burn = new RegExp(/^(.+?) already has a burn.$/);
+var regex_already_searching = new RegExp(/^Couldn't search: You are already searching for a (.+?) battle.$/);
+var regex_todoesnt_become_confused = new RegExp(/^The opposing (.+?) doesn't become confused!$/);
+var regex_doesnt_become_confused = new RegExp(/^(.+?) doesn't become confused!$/);
+var regex_already_challenge = new RegExp(/^There's already a challenge (.+?) between you and (.+?)!$/);
+var regex_tobecause_Heal_Block = new RegExp(/^The opposing (.+?) can't use ([A-z0-9,'.() ’:-]+?) because of Heal Block!$/);
+var regex_because_Heal_Block = new RegExp(/^(.+?) can't use ([A-z0-9,'.() ’:-]+?) because of Heal Block!$/);
+var regex_offering_tie = new RegExp(/^(.+?) is offering a tie.$/);
+var regex_rejected_accepted_tie = new RegExp(/^(.+?) (rejected|accepted) the tie.$/);
+var regex_toStickyBarb_burn_BlackSludge = new RegExp(/^The opposing (.+?) was hurt by its (Sticky Barb|burn|Black Sludge)!$/);
+var regex_StickyBarb_burn_BlackSludge = new RegExp(/^(.+?) was hurt by its (Sticky Barb|burn|Black Sludge)!$/);
+var regex_toCrafty_Quick_Wide_Shield = new RegExp(/^(Crafty|Quick|Wide) Guard protected the opposing (.+?)!$/);
+var regex_Crafty_Quick_Wide_Shield = new RegExp(/^(Crafty|Quick|Wide) Guard protected (.+?)!$/);
+var regex_toTreasures_of_ruin = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'() ’:-]+?) weakened the ([A-z0-9,'.() ’:-]+?) of all surrounding Pokemon!$/);
+var regex_Treasures_of_ruin = new RegExp(/^(.+?)'s ([A-z0-9,'() ’:-]+?) weakened the ([A-z0-9,'.() ’:-]+?) of all surrounding Pokemon!$/);
+var regex_Specific_to = new RegExp(/^Specific to (.+?)$/);
+var regex_toprotective_mist = new RegExp(/^The opposing (.+?) surrounds itself with a protective mist!$/);
+var regex_protective_mist = new RegExp(/^(.+?) surrounds itself with a protective mist!$/);
+var regex_torose = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) (rose drastically|rose sharply|rose)!$/);
+var regex_rose = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) (rose drastically|rose sharply|rose)!$/);
+var regex_tofell = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) (fell severely|fell harshly|fell)!$/);
+var regex_fell = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) (fell severely|fell harshly|fell)!$/);
+var regex_toperishsong = new RegExp(/^The opposing (.+?)'s perish count fell to (3|2|1|0).$/);
+var regex_perishsong = new RegExp(/^(.+?)'s perish count fell to (3|2|1|0).$/);
+var regex_toDestiny_Knot = new RegExp(/^The opposing (.+?) fell in love because of the Destiny Knot!$/);
+var regex_Destiny_Knot = new RegExp(/^(.+?) fell in love because of the Destiny Knot!$/);
+var regex_toBerserk_Gene = new RegExp(/^The Berserk Gene sharply raised the opposing (.+?)'s Attack!$/);
+var regex_Berserk_Gene = new RegExp(/^The Berserk Gene sharply raised (.+?)'s Attack!$/);
+var regex_Guessed_spread = new RegExp(/^([A-UW-Za-z ]+?):\s(\d{1,3})\s([A-z]{2,3})\s\/\s(\d{1,3})\s([A-z]{2,3})\s\/\s(\d{1,3})\s([A-z]{2,3})(.+?)$/);
+var regex_Guessed_spread2 = new RegExp(/^(\d{1,3})\s([A-z]{2,3})\s\/\s(\d{1,3})\s([A-z]{2,3})(.+?)$/);
+var regex_Teaches = new RegExp(/^Teaches certain Pokemon the move ([A-z0-9' ’:-]+?). One use.$/);
+var regex_allows_ZMove = new RegExp(/^If holder has (a|an) ([A-z]+?) move, this item allows it to use (a|an) ([A-z]+?) Z-Move.$/);
+var regex_Multi_Attack = new RegExp(/^^Holder's Multi-Attack is ([A-z]+?) type.$/);
+var regex_Judgment = new RegExp(/^Holder's ([A-z]+?)-type attacks have 1.2x power. Judgment is ([A-z]+?) type.$/);
+var regex_attacks_have = new RegExp(/^Holder's ([A-z]+?)-type attacks have 1.(1|2)x power.$/);
+var regex_Gem = new RegExp(/^Holder's first successful ([A-z]+?)-type attack will have 1.(3|5)x power. Single use.$/);
+var regex_taken_supereffective = new RegExp(/^Halves damage taken from a supereffective ([A-z]+?)-type attack. Single use.$/);
+var regex_Can_revived = new RegExp(/^Can be revived into ([A-z0-9,'() ’:-]+?).$/);
+var regex_Evolves = new RegExp(/^Evolves ([A-z0-9,'.() ’:-]+?) into ([A-z0-9,'.() ’:-]+?) when (us|trad)ed.$/);
+var regex_confuses_Nature = new RegExp(/^Restores ([A-z0-9/.%]+?) max HP at ([A-z0-9/.%]+?) max HP or less; confuses if -([A-z]+?) Nature. Single use.$/);
+var regex_Mega_Evolve_item = new RegExp(/^If held by (a|an) ([A-z0-9']+?), this item allows it to Mega Evolve in battle.$/);
+var regex_Spe_to = new RegExp(/^ (\d{1,3}) to (\d{1,3}) $/);
+var regex_battles_ballte = new RegExp(/^([0-9+]+)([A-z0-9'() ’:-]+?) (battles|battle)$/);
+var regex_Turn = new RegExp(/^Turn (\d{1,3})$/);
+var regex_Transformed_into2 = new RegExp(/^\(Transformed into ([A-z0-9,'.() ’:-]+?)\)$/);
+var regex_knocked_off = new RegExp(/^([A-z,'.0-9 ’:-]+?) \(knocked off\)$/);
+var regex_hid_replay = new RegExp(/^(.+?) hid the replay of this battle.$/);
+var regex_weather_suppressed = new RegExp(/\((Snow|Hail|Desolate Land|Sunny Day|Primordial Sea|Rain Dance|Sandstorm) suppressed by ([A-z ’:-]+?)\)$/);
+var regex_Nature_Power = new RegExp(/^Nature Power turned into ([A-z0-9,'.() ’:-]+?)\)!$/);
+var regex_Use_different_nature = new RegExp(/Use a different nature to save (\d{1,3}) EVs:/);
+var regex_made_hidden = new RegExp(/^(.+?) made this room hidden.$/);
+var regex_made_public = new RegExp(/^(.+?) made this room public.$/);
+var regex_tofell_sky = new RegExp(/^The opposing (.+?) fell from the sky due to the gravity!$/);
+var regex_fell_sky = new RegExp(/^(.+?) fell from the sky due to the gravity!$/);
+var regex_lol = new RegExp(/^you don't have any(.+?)teams lol$/);
+var regex_toconcentrated = new RegExp(/^The opposing (.+?) concentrated intensely!$/);
+var regex_concentrated = new RegExp(/^(.+?) concentrated intensely!$/);
+var regex_toshook_head = new RegExp(/^The opposing (.+?) shook its head. It seems like it can't use this move...$/);
+var regex_shook_head = new RegExp(/^(.+?) shook its head. It seems like it can't use this move...$/);
+
+//  \s
+
+
+var regex_Mega_Evolution = new RegExp(/^\sMega\sEvolution$/);
+var regex_Fallen = new RegExp(/^Fallen:\s(\d{1})$/);
+var regex_modifiers = new RegExp(/^([0-9.×]+?)\s([A-z]+?)$/);
+var regex_modifiers2 = new RegExp(/^already\s(4|0.33|0.25)×\s([A-z]+?)$/);
+var regex_PQ = new RegExp(/^(Protosynthesis|Quark\sDrive):\s([A-z]+?)$/);
+var regex_NR = new RegExp(/^No\sRetreat$/);
+var regex_LR = new RegExp(/^Leech\sSeed$/);
+var regex_SC = new RegExp(/^Salt\sCure$/);
+var regex_SC2 = new RegExp(/^Stats\scopied$/);
+var regex_DB = new RegExp(/^Destiny\sBond$/);
+var regex_SD = new RegExp(/^Smack\sDown$/);
+var regex_MS = new RegExp(/^Magma\sStorm$/);
+var regex_FS = new RegExp(/^Fire\sSpin$/);
+var regex_ST = new RegExp(/^Sand\sTomb$/);
+var regex_ST2 = new RegExp(/^Snap\sTrap$/);
+var regex_TC = new RegExp(/^Thunder\sCage$/);
+var regex_TC2 = new RegExp(/^Throat\sChop$/);
+var regex_ME = new RegExp(/^Miracle\sEye$/);
+var regex_OS = new RegExp(/^Odor\sSleuth$/);
+var regex_HB = new RegExp(/^Heal\sBlock$/);
+var regex_HBE = new RegExp(/^Heal Block\sended$/);
+var regex_PS = new RegExp(/^Perish\sin\s(3|2)$/);
+var regex_PNT = new RegExp(/^Perish\snext\sturn$/);
+var regex_PN = new RegExp(/^Perish\snow$/);
+var regex_TS = new RegExp(/^Tar\sShot$/);
+var regex_TS2 = new RegExp(/^Trap\sset$/);
+var regex_TS3 = new RegExp(/^Torment\sended$/);
+var regex_MR = new RegExp(/^Must\srecharge$/);
+var regex_MR2 = new RegExp(/^Magnet\sRise$/);
+var regex_RP = new RegExp(/^Rage\sPowder$/);
+var regex_FM = new RegExp(/^Follow\sMe$/);
+var regex_CHB = new RegExp(/^Critical\sHit\sBoost$/);
+var regex_LF = new RegExp(/^Laser\sFocus$/);
+var regex_HH = new RegExp(/^Helping\sHand$/);
+var regex_PT = new RegExp(/^Power\sTrick$/);
+var regex_WG = new RegExp(/^Wide\sGuard$/);
+var regex_QG = new RegExp(/^Quick\sGuard$/);
+var regex_MB = new RegExp(/^Mat\sBlock$/);
+var regex_MC = new RegExp(/^Magic\sCoat$/);
+var regex_GR = new RegExp(/^Glaive\sRush$/);
+var regex_BB = new RegExp(/^Beak\sBlast$/);
+var regex_AR = new RegExp(/^Aqua\sRing$/);
+var regex_SS = new RegExp(/^Slow\sStart$/);
+var regex_BO = new RegExp(/^Blue\sOrb$/);
+var regex_RO = new RegExp(/^Red\sOrb$/);
+var regex_AS = new RegExp(/^Attract\sended$/);
+var regex_DS = new RegExp(/^Disable\sended$/);
+var regex_ES = new RegExp(/^Encore\sended$/);
+var regex_TE = new RegExp(/^Taunt\sended$/);
+var regex_CE = new RegExp(/^Confusion\sended$/);
+var regex_IKO = new RegExp(/^Item\sknocked\soff$/);
+var regex_FF = new RegExp(/^Flash\sFire$/);
+var regex_IF = new RegExp(/^Imprisoning\sfoe$/);
+var regex_AP = new RegExp(/^Already\spoisoned$/);
+var regex_AP2 = new RegExp(/^Already\sparalyzed$/);
+var regex_AB = new RegExp(/^Already\sburned$/);
+var regex_LS = new RegExp(/^Loafing\saround$/);
+var regex_SDB = new RegExp(/^Stat\sdrop\sblocked$/);
+var regex_BL = new RegExp(/^Boost\slost$/);
+var regex_MG = new RegExp(/^Max\sGuard$/);
+var regex_Guessed_spread3 = new RegExp(/^Guessed\sspread:\s\(Please\schoose\s4\smoves\sto\sget\sa\sguessed\sspread\) \($/);
+
+
+
+
+//  debug
+
+var regex_totoknock = new RegExp(/^The opposing (.+?) knocked off the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_toknock2 = new RegExp(/^The opposing (.+?) knocked off (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_toknock = new RegExp(/^(.+?) knocked off the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_knock = new RegExp(/^(.+?) knocked off (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_knock2 = new RegExp(/^knocked off (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_totothief = new RegExp(/^The opposing (.+?) stole the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_tothief2 = new RegExp(/^The opposing (.+?) stole (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_tothief = new RegExp(/^(.+?) stole the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_thief = new RegExp(/^(.+?) stole (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_tototrace = new RegExp(/^The opposing (.+?) traced the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_totrace2 = new RegExp(/^The opposing (.+?) traced (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_totrace = new RegExp(/^(.+?) traced the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_trace = new RegExp(/^(.+?) traced (.+?)\'s ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_totoroleplay = new RegExp(/^The opposing (.+?) copied the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) Ability!$/);
+var regex_toroleplay2 = new RegExp(/^The opposing (.+?) copied (.+?)'s ([A-z0-9,'.() ’:-]+?) Ability!$/);
+var regex_toroleplay = new RegExp(/^(.+?) copied the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) Ability!$/);
+var regex_roleplay = new RegExp(/^(.+?) copied (.+?)'s ([A-z0-9,'.() ’:-]+?) Ability!$/);
+var regex_tocannot_use = new RegExp(/^The opposing (.+?) cannot use ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_cannot_use = new RegExp(/^(.+?) cannot use ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_tostockpiled = new RegExp(/^The opposing (.+?) stockpiled (.+?)!$/);
+var regex_stockpiled = new RegExp(/^(.+?) stockpiled (.+?)!$/);
+var regex_toihb = new RegExp(/^The opposing (.+?) is hurt by ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_ihb = new RegExp(/^(.+?) is hurt by ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_tofreed = new RegExp(/^The opposing (.+?) was freed from (.+?)!$/);
+var regex_freed = new RegExp(/^(.+?) was freed from (.+?)!$/);
+var regex_tocant_use = new RegExp(/^The opposing (.+?) can't use ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_cant_use = new RegExp(/^(.+?) can't use ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_totrapped = new RegExp(/^The opposing (.+?) trapped (.+?)!$/);
+var regex_trapped = new RegExp(/^(.+?) trapped the opposing (.+?)!$/);
+var regex_joined = new RegExp(/^(.+?) joined$/);
+var regex_left = new RegExp(/^(.+?) left$/);
+var regex_toeerie_spell = new RegExp(/^It reduced the PP of the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) by (.+?)!$/);
+var regex_eerie_spell = new RegExp(/^It reduced the PP of (.+?)'s ([A-z0-9,'.() ’:-]+?) by (.+?)!$/);
+var regex_Unavailable_choice_cant_move = new RegExp(/^[Unavailable choice] Can't move: (.+?)'s ([A-z0-9,'.() ’:-]+?) is disabled$/);
+var regex_toleppaberry = new RegExp(/^The opposing (.+?) restored PP to its move ([A-z0-9,'.() ’:-]+?) using its Leppa Berry!$/);
+var regex_leppaberry = new RegExp(/^(.+?) restored PP to its move ([A-z0-9,'.() ’:-]+?) using its Leppa Berry!$/);
+var regex_tostat_changes = new RegExp(/^The opposing (.+?)'s stat changes!$/);
+var regex_stat_changes = new RegExp(/^(.+?)'s stat changes!$/);
+var regex_tosymbiosis = new RegExp(/^The opposing (.+?) shared its ([A-z0-9,'.() ’:-]+?) with the opposing (.+?)!$/);
+var regex_symbiosis = new RegExp(/^(.+?) shared its ([A-z0-9,'.() ’:-]+?) with (.+?)!$/);
+var regex_tohigh_low = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) won't go any (high|low)er!$/);
+var regex_high_low = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) won't go any (high|low)er!$/);
+var regex_towas_heightened = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) was heightened!$/);
+var regex_was_heightened = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) was heightened!$/);
+var regex_Move_here = new RegExp(/^ Move here$/);
+var regex_to_used = new RegExp(/^The opposing (.+?) used $/);
+var regex_used = new RegExp(/^(.+?) used $/);
+var regex_to123 = new RegExp(/^\[The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)\]$/);
+var regex_123 = new RegExp(/^\[(.+?)'s ([A-z0-9,'.() ’:-]+?)\]$/);
+var regex_1234 = new RegExp(/^\(([A-z0-9,'.() ’:-]+?)\)$/);
+var regex_12345 = new RegExp(/^([A-z0-9,'.() ’:-]+?) \($/);
+var regex_9 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
+var regex_8 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
+var regex_7 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
+var regex_6 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
+var regex_5 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
+var regex_4 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
+var regex_3 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
+var regex_2 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
+var regex_1 = new RegExp(/^ ([A-z0-9é'() ’:-]+?) \/ $/);
+var regex_333 = new RegExp(/^ ([A-z0-9*'., -]+?), ([A-z0-9*'., -]+?), ([A-z0-9*'., -]+?)$/);
+var regex_222 = new RegExp(/^ ([A-z0-9*'., -]+?), ([A-z0-9*'., -]+?)$/);
+var regex_111 = new RegExp(/^(不开启|超能力|节拍器|刷新|攻击)$/);
+var regex_11 = new RegExp(/^！(.+?)$/);
+
+var regex_rating = new RegExp(/(.+)'s rating: (.+)/);
+var regex_forwin = new RegExp(/\((.+) for winning\)/);
+var regex_forlos = new RegExp(/\((.+) for losing\)/);
+var regex_tourwsoumbaq = new RegExp(/Please respond to the tournament within (.+) seconds or you may be automatically disqualified./);
+
+var regex_statussetto = new RegExp(/Your status has been set to: (.+)./);
+var regex_tcdnetsamswt = new RegExp(/The command "(.+)" does not exist. To send a message starting with "(.+)", type "(.+)"./);
+var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message again to confirm. If you are using (.+), use (.+) instead./);
+// ==========================================================
+
 (function() {
     // 1. 读取本地存储中的语言设置，如果没有设置，则默认开启汉化 ('zh')
     const currentLang = localStorage.getItem('ps_china_lang') || 'zh';
@@ -7622,7 +8735,6 @@ var translations = {
             if (selectedValue === 'english') {
                 if (currentLang !== 'en') {
                     localStorage.setItem('ps_china_lang', 'en');
-                    // 稍微延迟 200 毫秒刷新，给 PS 客户端一点时间把原生设置存好
                     setTimeout(() => location.reload(), 200); 
                 }
             } else if (selectedValue === 'simplifiedchinese') {
@@ -7632,1162 +8744,3396 @@ var translations = {
                 }
             }
         }
-    }, true); // true 开启事件捕获
+    }, true); 
 
     // 3. 如果当前语言不是中文，直接退出，不执行后续的任何汉化逻辑
     if (currentLang !== 'zh') return;
 
 
     // ==========================================
-    // 4. 正则表达式变量定义（你可以把其他的 regex_xxx 都贴在这里）
+    // 以下为整合后的汉化核心逻辑
     // ==========================================
-    var QQ = $.noConflict();
+    
+    // 为正则替换 t() 准备的查词典函数 (继承自旧文件)
+    function trans_from_dict(a) {
+        var b = translations[a];
+        if (b) return b;
+        return a;
+    }
+
+    // ==========================================================
+        var t = function (originalStr) {
+        var tmp = originalStr.trim();
+        if (translations[tmp])
+            return translations[tmp];
+        if (originalStr.match(regex_chn))
+            return originalStr;
+        if (originalStr.match(regex_team)) {
+            return RegExp.$1 + "的队伍：";
+        }
+        if (originalStr.match(regex_item_was)) {
+            return  translations[RegExp.$1] + " (之前是" + translations[RegExp.$2] + ")";
+        }
+        if (originalStr.match(regex_toCommander)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "作为对对手的" + trans_from_dict(RegExp.$2) + "发号施令的要员而被对手的" + trans_from_dict(RegExp.$3) + "吞下去了！";
+        }
+        if (originalStr.match(regex_Commander)) {
+            return  trans_from_dict(RegExp.$1) + "作为对" + trans_from_dict(RegExp.$2) + "发号施令的要员而被" + trans_from_dict(RegExp.$3) + "吞下去了！";
+        }
+        if(originalStr.match(regex_timer_on)){
+            return "战斗计时器已开启：玩家若不行动则在时间耗尽后输掉比赛。(由" + RegExp.$1 + "开启)";
+        }
+        if (originalStr.match(regex_reconnected)) {
+            return RegExp.$1 + "重新连接了，还剩" + RegExp.$2 + "秒。";
+        }
+        if (originalStr.match(regex_seconds_left2)) {
+            return RegExp.$1 + "本回合还剩" + RegExp.$2 + "秒。";
+        }
+        if (originalStr.match(regex_seconds_left)) {
+            return RegExp.$1 + "还剩" + RegExp.$2 + "秒。";
+        }
+        if (originalStr.match(regex_reset_timer)) {
+            return "还剩" + RegExp.$1 + "秒可以重新开启计时器。";
+        }
+        if (originalStr.match(regex_tostruggle)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "没有可用来施展的招式！";
+        }
+        if (originalStr.match(regex_struggle)) {
+            return  trans_from_dict(RegExp.$1) + "没有可用来施展的招式！";
+        }
+        if (originalStr.match(regex_sent_out_first2)) {
+            return  "将首先派出" + translations[RegExp.$1] + "和" + translations[RegExp.$2] + "。";
+        }
+        if (originalStr.match(regex_sent_out_first)) {
+            return  "将首先派出" + translations[RegExp.$1] + "。";
+        }
+        if (originalStr.match(regex_sent_out2)) {
+            return  RegExp.$1 + "派出了" + trans_from_dict(RegExp.$2) + "(";
+        }
+        if (originalStr.match(regex_sent_out)) {
+            return  RegExp.$1 + "派出了";
+        }
+        if (originalStr.match(regex_withdrew)) {
+            return  RegExp.$1 + "换下了" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_tolost_health)) {
+            return  "(对手的" + trans_from_dict(RegExp.$1) + "失去了 " + RegExp.$2 + "% 的生命值！)";
+        }
+        if (originalStr.match(regex_lost_health)) {
+            return  "(" + trans_from_dict(RegExp.$1) + "失去了 " + RegExp.$2 + "% 的生命值！)";
+        }
+        if (originalStr.match(regex_tolost_health2)) {
+            return  "(对手的" + trans_from_dict(RegExp.$1) + "失去了 ";
+        }
+        if (originalStr.match(regex_lost_health2)) {
+            return   "(" + trans_from_dict(RegExp.$1) + "失去了 ";
+        }
+        if (originalStr.match(regex_come_back)) {
+            return trans_from_dict(RegExp.$1) + "，回来！";
+        }
+        if (originalStr.match(regex_go)) {
+            return "去吧！" + trans_from_dict(RegExp.$1) + "(";
+        }
+        if (originalStr.match(regex_forfeited)) {
+            return RegExp.$1 + "投降了。";
+        }
+        if (originalStr.match(regex_tomega)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "超级进化成了超级" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_mega)) {
+            return trans_from_dict(RegExp.$1) + "超级进化成了超级" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_tog6_mega)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "响应了" + RegExp.$3 + "的Mega手环！";
+        }
+        if (originalStr.match(regex_g6_mega)) {
+            return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "响应了" + RegExp.$3 + "的Mega手环！";
+        }
+        if (originalStr.match(regex_toafter_taunt)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "受到了挑衅，无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
+        }
+        if (originalStr.match(regex_after_taunt)) {
+            return trans_from_dict(RegExp.$1) + "受到了挑衅，无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
+        }
+        if (originalStr.match(regex_tocannot_use2)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
+        }
+        if (originalStr.match(regex_cannot_use2)) {
+            return trans_from_dict(RegExp.$1) + "无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
+        }
+        if (originalStr.match(regex_toeat2)) {
+            return "(对手的" + trans_from_dict(RegExp.$1) + "使用了" + translations[RegExp.$2] + "！)";
+        }
+        if (originalStr.match(regex_eat2)) {
+            return "(" + trans_from_dict(RegExp.$1) + "使用了" + translations[RegExp.$2] + "！)";
+        }
+        if (originalStr.match(regex_toeat)) {
+            return "(对手的" + trans_from_dict(RegExp.$1) + "吃掉了" + translations[RegExp.$2] + "！)";
+        }
+        if (originalStr.match(regex_eat)) {
+            return "(" + trans_from_dict(RegExp.$1) + "吃掉了" + translations[RegExp.$2] + "！)";
+        }
+        if (originalStr.match(regex_move_no_effect)) {
+            return "(这对" + trans_from_dict(RegExp.$1) + trans_from_dict(RegExp.$2) + "没有效果)";
+        }
+        if (originalStr.match(regex_tomax_guard)) {
+            return  "(对手的" + trans_from_dict(RegExp.$1) + "展开了极巨防壁！)";
+        }
+        if (originalStr.match(regex_max_guard)) {
+            return  "(" + trans_from_dict(RegExp.$1) + "展开了极巨防壁！)";
+        }
+        if (originalStr.match(regex_topointed_stones)) {
+            return "尖锐的岩石扎进了对手的" + trans_from_dict(RegExp.$1) + "的体内！";
+        }
+        if (originalStr.match(regex_pointed_stones)) {
+            return "尖锐的岩石扎进了" + trans_from_dict(RegExp.$1) + "的体内！";
+        }
+        if (originalStr.match(regex_tofuture_sight)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "预知了未来的攻击！";
+        }
+        if (originalStr.match(regex_future_sight)) {
+            return trans_from_dict(RegExp.$1) + "预知了未来的攻击！";
+        }
+        if (originalStr.match(regex_toFutureSight_DoomDesire_attack)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "Future Sight" ? "预知未来" : "破灭之愿") + "的攻击！";
+        }
+        if (originalStr.match(regex_FutureSight_DoomDesire_attack)) {
+            return trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "Future Sight" ? "预知未来" : "破灭之愿") + "的攻击！";
+        }
+        if (originalStr.match(regex_totype_change)) {
+            return "对手的" +  trans_from_dict(RegExp.$1) + "变成了" + translations[RegExp.$2] + "属性！";
+        }
+        if (originalStr.match(regex_type_change)) {
+            return  trans_from_dict(RegExp.$1) + "变成了" + translations[RegExp.$2] + "属性！";
+        }
+        if (originalStr.match(regex_hit_times)) {
+            return "击中了" + RegExp.$1 + "次！";
+        }
+        if (originalStr.match(regex_start_battle)) {
+            return RegExp.$1 + " 与 " + RegExp.$2 + " 的对战开始了！";
+        }
+        if (originalStr.match(regex_touturn)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "回到了" + RegExp.$2 + "的身边！";
+        }
+        if (originalStr.match(regex_uturn)) {
+            return   trans_from_dict(RegExp.$1) + "回到了" + RegExp.$2 + "的身边！";
+        }
+        if (originalStr.match(regex_tomagic_bounce)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "把" + translations[RegExp.$2].replace("不开启", "定身法") + "反射了回去！";
+        }
+        if (originalStr.match(regex_magic_bounce)) {
+            return  trans_from_dict(RegExp.$1) + "把" + translations[RegExp.$2].replace("不开启", "定身法") + "反射了回去！";
+        }
+        if (originalStr.match(regex_togems)) {
+            return translations[RegExp.$1] + "提升了对手的" + trans_from_dict(RegExp.$2) + "的威力！";
+        }
+        if (originalStr.match(regex_gems)) {
+            return translations[RegExp.$1] + "提升了" + trans_from_dict(RegExp.$2) + "的威力！";
+        }
+        if (originalStr.match(regex_battle)) {
+            return RegExp.$1 + "想要战斗！";
+        }
+        if (originalStr.match(regex_cancelled)) {
+            return RegExp.$1 + "取消了战斗。";
+        }
+        if (originalStr.match(regex_wftcy)) {
+            return  "等待" + RegExp.$1 + "挑战您";
+        }
+        if (originalStr.match(regex_waitingavailable)) {
+            return "等待战斗开始" + RegExp.$1;
+        }
+        if (originalStr.match(regex_waiting)) {
+            return "等待" + RegExp.$1;
+        }
+        if (originalStr.match(regex_accepted)) {
+            return RegExp.$1 + "接受了挑战，对战开始 «";
+        }
+        if (originalStr.match(regex_copyofuntitled2)) {
+            return  trans_from_dict(RegExp.$1 == "Untitled" ? "无标题 " : "箱子 ") + RegExp.$2 + " - 副本 - 副本";
+        }
+        if (originalStr.match(regex_copyofuntitled)) {
+            return  trans_from_dict(RegExp.$1 == "Untitled" ? "无标题 " : "箱子 ") + RegExp.$2 + " - 副本";
+        }
+        if (originalStr.match(regex_copyof)) {
+            return RegExp.$1 + " - 副本";
+        }
+        if (originalStr.match(regex_untitled)) {
+            return  trans_from_dict(RegExp.$1 == "Untitled" ? "无标题 " : "箱子 ") + RegExp.$2;
+        }
+        if (originalStr.match(regex_newteam)) {
+            return "新的" + RegExp.$1 + "队伍";
+        }
+        if (originalStr.match(regex_users2)) {
+            return  "(" +RegExp.$1 + "位用户)";
+        }
+        if (originalStr.match(regex_users)) {
+            return  RegExp.$1 + "位用户";
+        }
+        if (originalStr.match(regex_theopposingfainted)) {
+            return "对手的" +  trans_from_dict(RegExp.$1) + "倒下了！";
+        }
+        if (originalStr.match(regex_fainted)) {
+            return trans_from_dict(RegExp.$1) + "倒下了！";
+        }
+        if (originalStr.match(regex_torestored_littlehp_using)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "用" + trans_from_dict(RegExp.$2 == "Leftovers" ? "吃剩的东西" : RegExp.$2 == "Shell Bell"  ? "贝壳之铃" : "黑色污泥")  + "回复了少许HP。";
+        }
+        if (originalStr.match(regex_restored_littlehp_using)) {
+            return  trans_from_dict(RegExp.$1) + "用" + trans_from_dict(RegExp.$2 == "Leftovers" ? "吃剩的东西" : RegExp.$2 == "Shell Bell"  ? "贝壳之铃" : "黑色污泥") + "回复了少许HP。";
+        }
+        if (originalStr.match(regex_wish)) {
+            return trans_from_dict(RegExp.$1) + "的祈愿实现了！";
+        }
+        if (originalStr.match(regex_doestaffecttd)) {
+            return "对于对手的" + trans_from_dict(RegExp.$1) + "，好像没有效果......";
+        }
+        if (originalStr.match(regex_doestaffect)) {
+            return "对于" + trans_from_dict(RegExp.$1) + "，好像没有效果......";
+        }
+        if (originalStr.match(regex_younoteams)) {
+            return "您没有" + RegExp.$1 + "队伍";
+        }
+        if (originalStr.match(regex_youdontha)) {
+            return "您没有任何" + RegExp.$1 + "队伍";
+        }
+        if (originalStr.match(regex_theinverted)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "的能力变化颠倒过来了！";
+        }
+        if (originalStr.match(regex_inverted)) {
+            return  trans_from_dict(RegExp.$1) + "的能力变化颠倒过来了！";
+        }
+        if (originalStr.match(regex_rejectchallenge)) {
+            return  RegExp.$1 + "拒绝了挑战。";
+        }
+        if (originalStr.match(regex_thesustookto)) {
+            return  "替身代替对手的" + trans_from_dict(RegExp.$1) + "承受了攻击！";
+        }
+        if (originalStr.match(regex_thesustook)) {
+            return  "替身代替" + trans_from_dict(RegExp.$1) + "承受了攻击！";
+        }
+        if (originalStr.match(regex_totohbawi)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "受到了来自对手的" + trans_from_dict(RegExp.$2) + "的死缠烂打！";
+        }
+        if (originalStr.match(regex_tohbawi2)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "受到了来自" + trans_from_dict(RegExp.$2) + "的死缠烂打！";
+        }
+        if (originalStr.match(regex_tohbawi)) {
+            return  trans_from_dict(RegExp.$1) + "受到了来自对手的" + trans_from_dict(RegExp.$2) + "的死缠烂打！";
+        }
+        if (originalStr.match(regex_hbawi)) {
+            return  trans_from_dict(RegExp.$1) + "受到了来自" + trans_from_dict(RegExp.$2) + "的死缠烂打！";
+        }
+        if (originalStr.match(regex_iseoto)) {
+            return  "这对对手的" + trans_from_dict(RegExp.$1) + "效果绝佳！";
+        }
+        if (originalStr.match(regex_iseo)) {
+            return  "这对" + trans_from_dict(RegExp.$1) + "效果绝佳！";
+        }
+        if (originalStr.match(regex_isnveoto)) {
+            return  "这对对手的" + trans_from_dict(RegExp.$1) + "效果不好。";
+        }
+        if (originalStr.match(regex_isnveo)) {
+            return  "这对" + trans_from_dict(RegExp.$1) + "效果不好。";
+        }
+        if (originalStr.match(regex_achoto)) {
+            return  "击中了对手的" + trans_from_dict(RegExp.$1) + "的要害！";
+        }
+        if (originalStr.match(regex_acho)) {
+            return  "击中了" + trans_from_dict(RegExp.$1) + "的要害！";
+        }
+        if (originalStr.match(regex_willswitchin)) {
+            return   translations[RegExp.$1] + "将替换" + translations[RegExp.$2] + "上场。";
+        }
+        if (originalStr.match(regex_challengex)) {
+            return  "挑战" + RegExp.$1;
+        }
+        if (originalStr.match(regex_uteamsvf)) {
+            return  "您的队伍在" + RegExp.$1 + "分级中合法。";
+        }
+        if (originalStr.match(regex_Metronome)) {
+            return  "挥动手指后，使出了" + translations[RegExp.$1].replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
+        }
+        if (originalStr.match(regex_toiatbabi)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) +"被" + translations[RegExp.$2] + "袭击了！";
+        }
+        if (originalStr.match(regex_iatbabi)) {
+            return  trans_from_dict(RegExp.$1) +"被" + translations[RegExp.$2] + "袭击了！";
+        }
+        if (originalStr.match(regex_toctop2)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) +"腐蚀了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_toctop)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) +"腐蚀了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_ctop)) {
+            return  trans_from_dict(RegExp.$1) +"腐蚀了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_ctop2)) {
+            return  trans_from_dict(RegExp.$1) +"腐蚀了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_biftato)) {
+            return  "但是，对对手的" + trans_from_dict(RegExp.$1) + "没有起到效果！！";
+        }
+        if (originalStr.match(regex_bifta)) {
+            return  "但是，对" + trans_from_dict(RegExp.$1) + "没有起到效果！！";
+        }
+        if (originalStr.match(regex_toshpif)) {
+            return  "但是，对手的" + trans_from_dict(RegExp.$1) + "的体力是全满的！";
+        }
+        if (originalStr.match(regex_shpif)) {
+            return  "但是，" + trans_from_dict(RegExp.$1) + "的体力是全满的！";
+        }
+        if (originalStr.match(regex_tobiuiz)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "利用Z力量强化了自身的" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_biuiz)) {
+            return  trans_from_dict(RegExp.$1) + "利用Z力量强化了自身的" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_thwctfto)) {
+            return  "治愈愿望在对手的" + trans_from_dict(RegExp.$1) + "身上实现了！";
+        }
+        if (originalStr.match(regex_thwctf)) {
+            return  "治愈愿望在" + trans_from_dict(RegExp.$1) + "身上实现了！";
+        }
+        if (originalStr.match(regex_sfwhrtorm)) {
+            return  RegExp.$1 + "衷心的祈愿传递到了对手的" + translations[RegExp.$2].replace("烈空坐-超级进化", "烈空坐") + "那里！";
+        }
+        if (originalStr.match(regex_sfwhrrm)) {
+            return  RegExp.$1 + "衷心的祈愿传递到了" + translations[RegExp.$2].replace("烈空坐-超级进化", "烈空坐") + "那里！";
+        }
+        if (originalStr.match(regex_protosynthesisto)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "通过大晴天发动了古代活性！";
+        }
+        if (originalStr.match(regex_protosynthesis)) {
+            return  trans_from_dict(RegExp.$1) + "通过大晴天发动了古代活性！";
+        }
+        if (originalStr.match(regex_protosynthesisoffto)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的古代活性的效果消失了！";
+        }
+        if (originalStr.match(regex_protosynthesisoff)) {
+            return  trans_from_dict(RegExp.$1) + "的古代活性的效果消失了！";
+        }
+        if (originalStr.match(regex_toquarkdrive)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "通过电气场地发动了夸克充能！";
+        }
+        if (originalStr.match(regex_quarkdrive)) {
+            return  trans_from_dict(RegExp.$1) + "通过电气场地发动了夸克充能！";
+        }
+        if (originalStr.match(regex_toquarkdriveoff)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的夸克充能的效果消失了！";
+        }
+        if (originalStr.match(regex_quarkdriveoff)) {
+            return  trans_from_dict(RegExp.$1) + "的夸克充能的效果消失了！";
+        }
+        if (originalStr.match(regex_toelectric_seed)) {
+            return  "对手的" + trans_from_dict(RegExp.$2) + "用电气种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
+        }
+        if (originalStr.match(regex_electric_seed)) {
+            return  trans_from_dict(RegExp.$2) + "用电气种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
+        }
+        if (originalStr.match(regex_tograssy_seed)) {
+            return  "对手的" + trans_from_dict(RegExp.$2) + "用青草种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
+        }
+        if (originalStr.match(regex_grassy_seed)) {
+            return  trans_from_dict(RegExp.$2) + "用青草种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
+        }
+        if (originalStr.match(regex_topsychic_seed)) {
+            return  "对手的" + trans_from_dict(RegExp.$2) + "用精神种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
+        }
+        if (originalStr.match(regex_psychic_seed)) {
+            return  trans_from_dict(RegExp.$2) + "用精神种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
+        }
+        if (originalStr.match(regex_tomisty_seed)) {
+            return  "对手的" + trans_from_dict(RegExp.$2) + "用薄雾种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
+        }
+        if (originalStr.match(regex_misty_seed)) {
+            return  trans_from_dict(RegExp.$2) + "用薄雾种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
+        }
+        if (originalStr.match(regex_tobroke)) {
+            return  "突破了对手的" + trans_from_dict(RegExp.$1) + "的守护！";
+        }
+        if (originalStr.match(regex_broke)) {
+            return  "突破了" + trans_from_dict(RegExp.$1) + "的守护！";
+        }
+        if (originalStr.match(regex_totoredcard)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "猛地向对手的" + trans_from_dict(RegExp.$2) + "出示了红牌！";
+        }
+        if (originalStr.match(regex_toredcard2)) {
+            return  trans_from_dict(RegExp.$1) + "猛地向" + trans_from_dict(RegExp.$2) + "出示了红牌！";
+        }
+        if (originalStr.match(regex_toredcard)) {
+            return  trans_from_dict(RegExp.$1) + "猛地向对手的" + trans_from_dict(RegExp.$2) + "出示了红牌！";
+        }
+        if (originalStr.match(regex_redcard)) {
+            return  trans_from_dict(RegExp.$1) + "猛地向" + trans_from_dict(RegExp.$2) + "出示了红牌！";
+        }
+        if (originalStr.match(regex_towindpower)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "受到顺风而充电了！";
+        }
+        if (originalStr.match(regex_windpower)) {
+            return  trans_from_dict(RegExp.$1) + "受到顺风而充电了！";
+        }
+        if (originalStr.match(regex_torevivalblessing)) {
+            return  "对手的" +  trans_from_dict(RegExp.$1) + "复活并能继续战斗了！";
+        }
+        if (originalStr.match(regex_revivalblessing)) {
+            return  trans_from_dict(RegExp.$1) + "复活并能继续战斗了！";
+        }
+        if (originalStr.match(regex_toclearamulet)) {
+            return  "因为清净坠饰的效果，无法降低对手的" + trans_from_dict(RegExp.$1) + "的能力！";
+        }
+        if (originalStr.match(regex_clearamulet)) {
+            return  "因为清净坠饰的效果，无法降低" + trans_from_dict(RegExp.$1) + "的能力！";
+        }
+        if (originalStr.match(regex_toskullbash)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "把头缩进去了！";
+        }
+        if (originalStr.match(regex_skullbash)) {
+            return   trans_from_dict(RegExp.$1) + "把头缩进去了！";
+        }
+        if (originalStr.match(regex_totofrisk)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "察觉到了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_tofrisk2)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "察觉到了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_tofrisk)) {
+            return   trans_from_dict(RegExp.$1) + "察觉到了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_frisk)) {
+            return   trans_from_dict(RegExp.$1) + "察觉到了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_totopsychup)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "复制了对手的" + trans_from_dict(RegExp.$2) + "的能力变化！";
+        }
+        if (originalStr.match(regex_topsychup2)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "复制了" + trans_from_dict(RegExp.$2) + "的能力变化！";
+        }
+        if (originalStr.match(regex_topsychup)) {
+            return   trans_from_dict(RegExp.$1) + "复制了对手的" + trans_from_dict(RegExp.$2) + "的能力变化！";
+        }
+        if (originalStr.match(regex_psychup)) {
+            return   trans_from_dict(RegExp.$1) + "复制了" + trans_from_dict(RegExp.$2) + "的能力变化！";
+        }
+        if (originalStr.match(regex_toencore)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的再来一次状态解除了！";
+        }
+        if (originalStr.match(regex_encore)) {
+            return   trans_from_dict(RegExp.$1) + "的再来一次状态解除了！";
+        }
+        if (originalStr.match(regex_totocurse)) {
+            return  "对手的" +  trans_from_dict(RegExp.$1) + "削减了自己的HP，并诅咒了对手的" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_tocurse2)) {
+            return  "对手的" +  trans_from_dict(RegExp.$1) + "削减了自己的HP，并诅咒了" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_tocurse)) {
+            return  trans_from_dict(RegExp.$1) + "削减了自己的HP，并诅咒了对手的" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_curse)) {
+            return  trans_from_dict(RegExp.$1) + "削减了自己的HP，并诅咒了" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_toweakdamageberry)) {
+            return   translations[RegExp.$1] + "减轻了对对手的" + trans_from_dict(RegExp.$2) + "造成的伤害！";
+        }
+        if (originalStr.match(regex_weakdamageberry)) {
+            return   translations[RegExp.$1] + "减轻了对" + trans_from_dict(RegExp.$2) + "造成的伤害！";
+        }
+        if (originalStr.match(regex_celebrate)) {
+            return  "恭喜恭喜！" + RegExp.$1 + "！";
+        }
+        if (originalStr.match(regex_tohpberry)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "用" + translations[RegExp.$2] + "回复了体力！";
+        }
+        if (originalStr.match(regex_hpberry)) {
+            return  trans_from_dict(RegExp.$1) + "用" + translations[RegExp.$2] + "回复了体力！";
+        }
+        if (originalStr.match(regex_toaquaring)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "通过水环回复了体力！";
+        }
+        if (originalStr.match(regex_aquaring)) {
+            return   trans_from_dict(RegExp.$1) + "通过水环回复了体力！";
+        }
+        if (originalStr.match(regex_tosalacberry)) {
+            return   "对手的"  + trans_from_dict(RegExp.$2) + "用沙鳞果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了速度！";
+        }
+        if (originalStr.match(regex_salacberry)) {
+            return   trans_from_dict(RegExp.$2) + "用沙鳞果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了速度！";
+        }
+        if (originalStr.match(regex_toliechiberry)) {
+            return   "对手的"  + trans_from_dict(RegExp.$2) + "用枝荔果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了攻击！";
+        }
+        if (originalStr.match(regex_liechiberry)) {
+            return   trans_from_dict(RegExp.$2) + "用枝荔果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了攻击！";
+        }
+        if (originalStr.match(regex_topetayaberry)) {
+            return   "对手的"  + trans_from_dict(RegExp.$2) + "用龙火果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特攻！";
+        }
+        if (originalStr.match(regex_petayaberry)) {
+            return   trans_from_dict(RegExp.$2) + "用龙火果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特攻！";
+        }
+        if (originalStr.match(regex_toapicotberry)) {
+            return   "对手的"  + trans_from_dict(RegExp.$2) + "用杏仔果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
+        }
+        if (originalStr.match(regex_apicotberry)) {
+            return   trans_from_dict(RegExp.$2) + "用杏仔果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
+        }
+        if (originalStr.match(regex_toganlonberry)) {
+            return   "对手的"  + trans_from_dict(RegExp.$2) + "用龙睛果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
+        }
+        if (originalStr.match(regex_ganlonberry)) {
+            return   trans_from_dict(RegExp.$2) + "用龙睛果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
+        }
+        if (originalStr.match(regex_tomarangaberry)) {
+            return   "对手的"  + trans_from_dict(RegExp.$2) + "用香罗果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
+        }
+        if (originalStr.match(regex_marangaberry)) {
+            return   trans_from_dict(RegExp.$2) + "用香罗果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
+        }
+        if (originalStr.match(regex_toLuminous_Moss)) {
+            return   "对手的"  + trans_from_dict(RegExp.$2) + "用光苔" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
+        }
+        if (originalStr.match(regex_Luminous_Moss)) {
+            return   trans_from_dict(RegExp.$2) + "用光苔" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
+        }
+        if (originalStr.match(regex_toKee_Berry)) {
+            return   "对手的"  + trans_from_dict(RegExp.$2) + "用亚开果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
+        }
+        if (originalStr.match(regex_Kee_Berry)) {
+            return   trans_from_dict(RegExp.$2) + "用亚开果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
+        }
+        if (originalStr.match(regex_toSnowball)) {
+            return   "对手的"  + trans_from_dict(RegExp.$2) + "用雪球" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了攻击！";
+        }
+        if (originalStr.match(regex_Snowball)) {
+            return   trans_from_dict(RegExp.$2) + "用雪球" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了攻击！";
+        }
+        if (originalStr.match(regex_toAbsorb_Bulb)) {
+            return   "对手的"  + trans_from_dict(RegExp.$2) + "用球根" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特攻！";
+        }
+        if (originalStr.match(regex_Absorb_Bulb)) {
+            return   trans_from_dict(RegExp.$2) + "用球根" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特攻！";
+        }
+        if (originalStr.match(regex_toCell_Bettery)) {
+            return   "对手的"  + trans_from_dict(RegExp.$2) + "用充电电池" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了攻击！";
+        }
+        if (originalStr.match(regex_Cell_Bettery)) {
+            return   trans_from_dict(RegExp.$2) + "用充电电池" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了攻击！";
+        }
+        if (originalStr.match(regex_toAdrenaline_Orb)) {
+            return   "对手的"  + trans_from_dict(RegExp.$2) + "用胆怯球" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了速度！";
+        }
+        if (originalStr.match(regex_Adrenaline_Orb)) {
+            return   trans_from_dict(RegExp.$2) + "用胆怯球" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了速度！";
+        }
+        if (originalStr.match(regex_tothroatspray)) {
+            return   "对手的" + trans_from_dict(RegExp.$2) + "用爽喉喷雾" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "特攻！";
+        }
+        if (originalStr.match(regex_throatspray)) {
+            return   trans_from_dict(RegExp.$2) + "用爽喉喷雾" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "特攻！";
+        }
+        if (originalStr.match(regex_toclearsmog)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的能力变化消失了！";
+        }
+        if (originalStr.match(regex_tosafety_goggles)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "因防尘护目镜而不会受到" + translations[RegExp.$2] + "的攻击！";
+        }
+        if (originalStr.match(regex_safety_goggles)) {
+            return   trans_from_dict(RegExp.$1) + "因防尘护目镜而不会受到" + translations[RegExp.$2] + "的攻击！";
+        }
+        if (originalStr.match(regex_totohelpinghand)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "摆出了帮助对手的" + trans_from_dict(RegExp.$2) + "的架势！";
+        }
+        if (originalStr.match(regex_tohelpinghand2)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "摆出了帮助" + trans_from_dict(RegExp.$2) + "的架势！";
+        }
+        if (originalStr.match(regex_tohelpinghand)) {
+            return   trans_from_dict(RegExp.$1) + "摆出了帮助对手的" + trans_from_dict(RegExp.$2) + "的架势！";
+        }
+        if (originalStr.match(regex_helpinghand)) {
+            return   trans_from_dict(RegExp.$1) + "摆出了帮助" + trans_from_dict(RegExp.$2) + "的架势！";
+        }
+        if (originalStr.match(regex_clearsmog)) {
+            return   trans_from_dict(RegExp.$1) + "的能力变化消失了！";
+        }
+        if (originalStr.match(regex_toharvest)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "收获了" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_harvest)) {
+            return   trans_from_dict(RegExp.$1) + "收获了" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_toallyswitch)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "和对手的" + trans_from_dict(RegExp.$2) + "交换了场地！";
+        }
+        if (originalStr.match(regex_allyswitch)) {
+            return   trans_from_dict(RegExp.$1) + "和" + trans_from_dict(RegExp.$2) + "交换了场地！";
+        }
+        if (originalStr.match(regex_attract)) {
+            return   "对手的" + trans_from_dict(RegExp.$2) + "让" + trans_from_dict(RegExp.$1) + "着迷了！";
+        }
+        if (originalStr.match(regex_toattract)) {
+            return   trans_from_dict(RegExp.$2) + "让对手的" + trans_from_dict(RegExp.$1) + "着迷了！";
+        }
+        if (originalStr.match(regex_torecycle)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "捡来了" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_recycle)) {
+            return   trans_from_dict(RegExp.$1) + "捡来了" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_tofling)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "投掷了" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_fling)) {
+            return   trans_from_dict(RegExp.$1) + "投掷了" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_toobtained)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "获得了" + translations[RegExp.$2] + "。";
+        }
+        if (originalStr.match(regex_obtained)) {
+            return  trans_from_dict(RegExp.$1) + "获得了" + translations[RegExp.$2] + "。";
+        }
+        if (originalStr.match(regex_totolockon)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "锁定了对手的" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_tolockon2)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "锁定了" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_tolockon)) {
+            return  trans_from_dict(RegExp.$1) + "锁定了对手的" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_lockon)) {
+            return  trans_from_dict(RegExp.$1) + "锁定了" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_topoison)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "受到了毒的伤害！";
+        }
+        if (originalStr.match(regex_poison)) {
+            return  trans_from_dict(RegExp.$1) + "受到了毒的伤害！";
+        }
+        if (originalStr.match(regex_toelectromorphosis)) {
+            return  "对手的" + trans_from_dict(RegExp.$2) + "受到" + translations[RegExp.$1] + "而充电了！";
+        }
+        if (originalStr.match(regex_electromorphosis)) {
+            return  trans_from_dict(RegExp.$2) + "受到" + translations[RegExp.$1] + "而充电了！";
+        }
+        if (originalStr.match(regex_torequestpending)) {
+            return  "您有" + RegExp.$1 + "个好友请求待处理。";
+        }
+        if (originalStr.match(regex_requestpending)) {
+            return  "您有" + RegExp.$1 + "个已发送的好友请求。";
+        }
+        if (originalStr.match(regex_blockchallenges)) {
+            return  "此用户'" + RegExp.$1 + "'现在不接受挑战。";
+        }
+        if (originalStr.match(regex_removed)) {
+            return  "好友" + RegExp.$1 + "已移除。";
+        }
+        if (originalStr.match(regex_removed2)) {
+            return  "您现在不是" + RegExp.$1 + "的好友了。";
+        }
+        if (originalStr.match(regex_removed3)) {
+            return  "您取消了向" + RegExp.$1 + "发送的好友请求。";
+        }
+        if (originalStr.match(regex_friendrequest)) {
+            return  "您已经向" + RegExp.$1 + "发送了好友请求。";
+        }
+        if (originalStr.match(regex_friendrequest2)) {
+            return  "您向" + RegExp.$1 + "发送了好友请求！";
+        }
+        if (originalStr.match(regex_friendrequest3)) {
+            return  "您向" + RegExp.$1 + "发送了好友请求。";
+        }
+        if (originalStr.match(regex_acceptfriendrequest)) {
+            return  "您接受了" + RegExp.$1 + "的好友请求。";
+        }
+        if (originalStr.match(regex_denyfriendrequest)) {
+            return  "您拒绝了" + RegExp.$1 + "的好友请求。";
+        }
+        if (originalStr.match(regex_donothavefriendrequest)) {
+            return  "您没有来自" + RegExp.$1 + "的好友请求。";
+        }
+        if (originalStr.match(regex_donothavefriendrequest2)) {
+            return  "您没有来自" + RegExp.$1 + "的请求。";
+        }
+        if (originalStr.match(regex_accuracy)) {
+            return  "命中: " + RegExp.$1;
+        }
+        if (originalStr.match(regex_basepower_double2)) {
+            return   "对"+ translations[RegExp.$1] + "的威力: " + RegExp.$2 + " 至 " + RegExp.$3;
+        }
+        if (originalStr.match(regex_basepower_double)) {
+            return  "对" + translations[RegExp.$1] + "的威力: " + RegExp.$2;
+        }
+        if (originalStr.match(regex_basepower2)) {
+            return  "威力: " + RegExp.$1 + " 至 " + RegExp.$2;
+        }
+        if (originalStr.match(regex_basepower)) {
+            return  "威力: " + RegExp.$1;
+        }
+        if (originalStr.match(regex_disconnected)) {
+            return  RegExp.$1 + "断开了连接，有" + RegExp.$2 + "秒的时间重新连接！";
+        }
+        if (originalStr.match(regex_disconnected2)) {
+            return  RegExp.$1 + "断开了连接，有一分钟的时间重新连接！";
+        }
+        if (originalStr.match(regex_disconnected3)) {
+            return  RegExp.$1 + "断开了连接！";
+        }
+        if (originalStr.match(regex_usemove3)) {
+            return  translations[RegExp.$1] + "将对您的" + translations[RegExp.$3] + "使用" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
+        }
+        if (originalStr.match(regex_usemove2)) {
+            return  translations[RegExp.$1] + "将对" + translations[RegExp.$3] + "使用" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
+        }
+        if (originalStr.match(regex_usemove)) {
+            return  translations[RegExp.$1] + "将使用" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
+        }
+        if (originalStr.match(regex_reconnecte)) {
+            return  RegExp.$1 + "还有" + RegExp.$2 + "秒的时间重新连接！";
+        }
+        if (originalStr.match(regex_toskyattack)) {
+            return   "强光包围了对手的" + trans_from_dict(RegExp.$1) + "！";
+        }
+        if (originalStr.match(regex_skyattack)) {
+            return   "强光包围了" + trans_from_dict(RegExp.$1) + "！";
+        }
+        if (originalStr.match(regex_todisable)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "因定身法而无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
+        }
+        if (originalStr.match(regex_disable)) {
+            return   trans_from_dict(RegExp.$1) + "因定身法而无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
+        }
+        if (originalStr.match(regex_todisable2)) {
+            return   "封住了对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
+        }
+        if (originalStr.match(regex_disable2)) {
+            return   "封住了" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
+        }
+        if (originalStr.match(regex_last10team)) {
+            return  RegExp.$1 + "的最近10个队伍";
+        }
+        if (originalStr.match(regex_uploadedon)) {
+            return  "上传时间: " + RegExp.$1;
+        }
+        if (originalStr.match(regex_format)) {
+            return  "分级: " + RegExp.$1;
+        }
+        if (originalStr.match(regex_views)) {
+            return  "查看数: " + RegExp.$1;
+        }
+        if (originalStr.match(regex_teampassword)) {
+            return  "队伍已设置为私人。密码: " + RegExp.$1;
+        }
+        if (originalStr.match(regex_toskydrop)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "把" + trans_from_dict(RegExp.$2) + "带上了天空！";
+        }
+        if (originalStr.match(regex_skydrop)) {
+            return   trans_from_dict(RegExp.$1) + "把对手的" + trans_from_dict(RegExp.$2) + "带上了天空！";
+        }
+        if (originalStr.match(regex_inactivity)) {
+            return  RegExp.$1 + "因超时而输掉了比赛。";
+        }
+        if (originalStr.match(regex_deleted)) {
+            return  RegExp.$1 + "已删除。";
+        }
+        if (originalStr.match(regex_nextdamage)) {
+            return  " 下次伤害：" + RegExp.$1;
+        }
+        if (originalStr.match(regex_item_was_held_up)) {
+            return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; 红牌出示过了)";
+        }
+        if (originalStr.match(regex_item_was_popped)) {
+            return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; 气球破裂了)";
+        }
+        if (originalStr.match(regex_item_was_eaten)) {
+            return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; " + translations[RegExp.$3]  + "被吃掉了)";
+        }
+        if (originalStr.match(regex_item_was_consumed)) {
+            return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; " + translations[RegExp.$3]  + "消失了)";
+        }
+        if (originalStr.match(regex_item_was_stolen)) {
+            return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; " + translations[RegExp.$3]  + "被偷走了)";
+        }
+        if (originalStr.match(regex_item_was_flung)) {
+            return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; " + translations[RegExp.$3]  + "被投掷了)";
+        }
+        if (originalStr.match(regex_item_was_knockedoff)) {
+            return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; " + translations[RegExp.$3]  + "被拍落了)";
+        }
+        if (originalStr.match(regex_item_was_was)) {
+            return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; 之前是" + translations[RegExp.$3]  + ")";
+        }
+        if (originalStr.match(regex_item_held_up)) {
+            return   translations[RegExp.$1] + " (红牌出示过了)";
+        }
+        if (originalStr.match(regex_item_popped)) {
+            return   translations[RegExp.$1] + " (气球破裂了)";
+        }
+        if (originalStr.match(regex_item_eaten)) {
+            return   translations[RegExp.$1] + " (" + translations[RegExp.$2] + "被吃掉了)";
+        }
+        if (originalStr.match(regex_item_consumed)) {
+            return    translations[RegExp.$1] + " (" + translations[RegExp.$2] + "消失了)";
+        }
+        if (originalStr.match(regex_item_knockedoff)) {
+            return   translations[RegExp.$1] + " (" + translations[RegExp.$2] + "被拍落了)";
+        }
+        if (originalStr.match(regex_item_flung)) {
+            return   translations[RegExp.$1] + " (" + translations[RegExp.$2] + "被投掷了)";
+        }
+        if (originalStr.match(regex_item_stolen2)) {
+            return   translations[RegExp.$1] + " (" + translations[RegExp.$2] + "被偷走了)";
+        }
+        if (originalStr.match(regex_item_incinerated)) {
+            return   translations[RegExp.$1] + " (" + translations[RegExp.$2] + "被烧掉了)";
+        }
+        if (originalStr.match(regex_item_stolen)) {
+            return   translations[RegExp.$1] + " (窃取)";
+        }
+        if (originalStr.match(regex_item_found)) {
+            return   translations[RegExp.$1] + " (回收)";
+        }
+        if (originalStr.match(regex_item_harvested)) {
+            return   translations[RegExp.$1] + " (收获)";
+        }
+        if (originalStr.match(regex_item_tricked)) {
+            return   translations[RegExp.$1] + " (戏法)";
+        }
+        if (originalStr.match(regex_item_disturbed)) {
+            return   translations[RegExp.$1] + " (灵骚)";
+        }
+        if (originalStr.match(regex_item_frisked)) {
+            return   translations[RegExp.$1] + " (察觉)";
+        }
+        if (originalStr.match(regex_base)) {
+            return   translations[RegExp.$1] + " (原本的特性: " + translations[RegExp.$2] + ")";
+        }
+        if (originalStr.match(regex_toonly)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "无法使出这个招式！";
+        }
+        if (originalStr.match(regex_only)) {
+            return   trans_from_dict(RegExp.$1) + "无法使出这个招式！";
+        }
+        if (originalStr.match(regex_use3)) {
+            return   translations[RegExp.$1] + "将" + trans_from_dict(RegExp.$2 == "Terastalliz" ? "太晶" : "超级进") + "化，然后对您的" +  translations[RegExp.$4] + "使用" + translations[RegExp.$3].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
+        }
+        if (originalStr.match(regex_use2)) {
+            return   translations[RegExp.$1] + "将" + trans_from_dict(RegExp.$2 == "Terastallize" ? "太晶" : RegExp.$2 == "Dynamax"  ? "极巨" : "超级进") + "化，然后对" + translations[RegExp.$4] + "使用" + translations[RegExp.$3].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
+        }
+        if (originalStr.match(regex_use)) {
+            return   translations[RegExp.$1] + "将" + trans_from_dict(RegExp.$2 == "Terastallize" ? "太晶" : RegExp.$2 == "Dynamax"  ? "极巨" : "超级进")  + "化，然后使用" + translations[RegExp.$3].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
+        }
+        if (originalStr.match(regex_tonatural_cure)) {
+            return   "(对手的" + trans_from_dict(RegExp.$1) + "通过自然回复治愈了异常状态！)";
+        }
+        if (originalStr.match(regex_natural_cure)) {
+            return   "(" + trans_from_dict(RegExp.$1) + "通过自然回复治愈了异常状态！)";
+        }
+        if (originalStr.match(regex_toacquired)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的特性变成" + translations[RegExp.$2] + "了！";
+        }
+        if (originalStr.match(regex_acquired)) {
+            return   trans_from_dict(RegExp.$1) + "的特性变成" + translations[RegExp.$2] + "了！";
+        }
+        if (originalStr.match(regex_namestarting)) {
+            return  "由于有玩家的名字以'" + RegExp.$1 + "'开头，这场战斗必须公开。";
+        }
+        if (originalStr.match(regex_toComplete_Forme)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "变成了完全体形态！";
+        }
+        if (originalStr.match(regex_Complete_Forme)) {
+            return  trans_from_dict(RegExp.$1) + "变成了完全体形态！";
+        }
+        if (originalStr.match(regex_totransformed_into)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "变成了" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_transformed_into)) {
+            return  trans_from_dict(RegExp.$1) + "变成了" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_wouldtake)) {
+            return  "如果失去特性，将受到 " + RegExp.$1 + " 伤害";
+        }
+        if (originalStr.match(regex_totofollwed)) {
+            return  "根据对手的" + trans_from_dict(RegExp.$2) + "的指示，对手的" + trans_from_dict(RegExp.$1) + "使出了招式！";
+        }
+        if (originalStr.match(regex_tofollwed2)) {
+            return  "根据对手的" + trans_from_dict(RegExp.$2) + "的指示，" + trans_from_dict(RegExp.$1) + "使出了招式！";
+        }
+        if (originalStr.match(regex_tofollwed)) {
+            return  "根据" + trans_from_dict(RegExp.$2) + "的指示，对手的" + trans_from_dict(RegExp.$1) + "使出了招式！";
+        }
+        if (originalStr.match(regex_follwed)) {
+            return  "根据" + trans_from_dict(RegExp.$2) + "的指示，" + trans_from_dict(RegExp.$1) + "使出了招式！";
+        }
+        if (originalStr.match(regex_suspect)) {
+            if (translations[RegExp.$2])
+                return  RegExp.$1 + "正在进行" + translations[RegExp.$2] + "的可疑测试！有关如何参与测试的信息，请查看 ";
+            else
+                return  RegExp.$1 + "正在进行" + RegExp.$2 + "的可疑测试！有关如何参与测试的信息，请查看 ";
+        }
+        if (originalStr.match(regex_changed)) {
+            return  "(形态改变: " + translations[RegExp.$1] + ")";
+        }
+        if (originalStr.match(regex_turnsasleep)) {
+            return  "  睡眠回合数: " + RegExp.$1;
+        }
+        if (originalStr.match(regex_switchto)) {
+            return  translations[RegExp.$1] + " 将交换:";
+        }
+        if (originalStr.match(regex_online)) {
+            return   " 在线 " + RegExp.$1;
+        }
+        if (originalStr.match(regex_offline)) {
+            return   " 离线 " + RegExp.$1;
+        }
+        if (originalStr.match(regex_toterastallized)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "太晶化变成了" + translations[RegExp.$2] + "属性！";
+        }
+        if (originalStr.match(regex_terastallized)) {
+            return   trans_from_dict(RegExp.$1) + "太晶化变成了" + translations[RegExp.$2] + "属性！";
+        }
+        if (originalStr.match(regex_topressure)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "释放着压迫感！";
+        }
+        if (originalStr.match(regex_pressure)) {
+            return   trans_from_dict(RegExp.$1) + "释放着压迫感！";
+        }
+        if (originalStr.match(regex_toseeded)) {
+            return   "将种子种殖在了对手的" + trans_from_dict(RegExp.$1) + "身上！";
+        }
+        if (originalStr.match(regex_seeded)) {
+            return   "将种子种殖在了" + trans_from_dict(RegExp.$1) + "身上！";
+        }
+        if (originalStr.match(regex_topoisoned)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + trans_from_dict(RegExp.$2 == "poisoned" ? "中毒了" : "中剧毒了") + "！";
+        }
+        if (originalStr.match(regex_poisoned)) {
+            return  trans_from_dict(RegExp.$1) + trans_from_dict(RegExp.$2 == "poisoned" ? "中毒了" : "中剧毒了") + "！";
+        }
+        if (originalStr.match(regex_toslept)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "睡着了，并且变得精力充沛！";
+        }
+        if (originalStr.match(regex_slept)) {
+            return  trans_from_dict(RegExp.$1) + "睡着了，并且变得精力充沛！";
+        }
+        if (originalStr.match(regex_toasleep)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "正在呼呼大睡。";
+        }
+        if (originalStr.match(regex_asleep)) {
+            return  trans_from_dict(RegExp.$1) + "正在呼呼大睡。";
+        }
+        if (originalStr.match(regex_towoke_up)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "醒过来了！";
+        }
+        if (originalStr.match(regex_woke_up)) {
+            return  trans_from_dict(RegExp.$1) + "醒过来了！";
+        }
+        if (originalStr.match(regex_toz_power)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "让Z力量笼罩了全身！";
+        }
+        if (originalStr.match(regex_z_power)) {
+            return  trans_from_dict(RegExp.$1) + "让Z力量笼罩了全身！";
+        }
+        if (originalStr.match(regex_toz_move)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "开始释放全力的Z招式！";
+        }
+        if (originalStr.match(regex_z_move)) {
+            return  trans_from_dict(RegExp.$1) + "开始释放全力的Z招式！";
+        }
+        if (originalStr.match(regex_toleech_seed)) {
+            return  "寄生植物夺取了对手的" + trans_from_dict(RegExp.$1) + "的体力！";
+        }
+        if (originalStr.match(regex_leech_seed)) {
+            return  "寄生植物夺取了" + trans_from_dict(RegExp.$1) + "的体力！";
+        }
+        if (originalStr.match(regex_toradiating_aura)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "释放着" + trans_from_dict(RegExp.$2 == "dark" ? "暗黑" : "妖精") + "气场！";
+        }
+        if (originalStr.match(regex_radiating_aura)) {
+            return  trans_from_dict(RegExp.$1) + "释放着" + trans_from_dict(RegExp.$2 == "dark" ? "暗黑" : "妖精") + "气场！";
+        }
+        if (originalStr.match(regex_toradiating_aura2)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "释放着" + trans_from_dict(RegExp.$2 == "bursting" ? "溅射" : "炽热") + "气场！";
+        }
+        if (originalStr.match(regex_radiating_aura2)) {
+            return  trans_from_dict(RegExp.$1) + "释放着" + trans_from_dict(RegExp.$2 == "bursting" ? "溅射" : "炽热") + "气场！";
+        }
+        if (originalStr.match(regex_toprotected)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "守护住了自己！";
+        }
+        if (originalStr.match(regex_protected)) {
+            return  trans_from_dict(RegExp.$1) + "守护住了自己！";
+        }
+        if (originalStr.match(regex_totaunt)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "中了挑衅！";
+        }
+        if (originalStr.match(regex_taunt)) {
+            return  trans_from_dict(RegExp.$1) + "中了挑衅！";
+        }
+        if (originalStr.match(regex_topumped)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "现在干劲十足！";
+        }
+        if (originalStr.match(regex_pumped)) {
+            return  trans_from_dict(RegExp.$1) + "现在干劲十足！";
+        }
+        if (originalStr.match(regex_toavoided)) {
+            return  "没有击中对手的" + trans_from_dict(RegExp.$1) + "！";
+        }
+        if (originalStr.match(regex_avoided)) {
+            return  "没有击中" + trans_from_dict(RegExp.$1) + "！";
+        }
+        if (originalStr.match(regex_togrew_drowsy)) {
+            return  "让对手的" + trans_from_dict(RegExp.$1) + "产生睡意了！";
+        }
+        if (originalStr.match(regex_grew_drowsy)) {
+            return  "让" + trans_from_dict(RegExp.$1) + "产生睡意了！";
+        }
+        if (originalStr.match(regex_tofell_straight_down)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "被击落，掉到了地面！";
+        }
+        if (originalStr.match(regex_fell_straight_down)) {
+            return  trans_from_dict(RegExp.$1) + "被击落，掉到了地面！";
+        }
+        if (originalStr.match(regex_tomust_encore)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "接受了再来一次！";
+        }
+        if (originalStr.match(regex_must_encore)) {
+            return  trans_from_dict(RegExp.$1) + "接受了再来一次！";
+        }
+        if (originalStr.match(regex_toencore_ended)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的再来一次状态解除了！";
+        }
+        if (originalStr.match(regex_encore_ended)) {
+            return  trans_from_dict(RegExp.$1) + "的再来一次状态解除了！";
+        }
+        if (originalStr.match(regex_toshook_off_taunt)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "从挑衅状态中解除了！";
+        }
+        if (originalStr.match(regex_shook_off_taunt)) {
+            return  trans_from_dict(RegExp.$1) + "从挑衅状态中解除了！";
+        }
+        if (originalStr.match(regex_tovortex_fieryvortex)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "被困在了" + trans_from_dict(RegExp.$2 == "vortex" ? "漩涡" : "火焰漩涡") + "之中！";
+        }
+        if (originalStr.match(regex_vortex_fieryvortex)) {
+            return  trans_from_dict(RegExp.$1) + "被困在了" + trans_from_dict(RegExp.$2 == "vortex" ? "漩涡" : "火焰漩涡") + "之中！";
+        }
+        if (originalStr.match(regex_toburned_frozen)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + trans_from_dict(RegExp.$2 == "burned" ? "灼伤" : "冻住") + "了！";
+        }
+        if (originalStr.match(regex_burned_frozen)) {
+            return  trans_from_dict(RegExp.$1) + trans_from_dict(RegExp.$2 == "burned" ? "灼伤" : "冻住") + "了！";
+        }
+        if (originalStr.match(regex_tospikes)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "受到了撒菱的伤害！";
+        }
+        if (originalStr.match(regex_spikes)) {
+            return  trans_from_dict(RegExp.$1) + "受到了撒菱的伤害！";
+        }
+        if (originalStr.match(regex_towas_cured_of)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "治愈了" + trans_from_dict(RegExp.$2 == "Freeze" ? "冰冻" : RegExp.$2 == "Burn"  ? "灼伤" : RegExp.$2 == "Sleep"  ? "睡眠" : RegExp.$2 == "paralysis"  ? "麻痹" : "中毒") + "！";
+        }
+        if (originalStr.match(regex_was_cured_of)) {
+            return  trans_from_dict(RegExp.$1) + "治愈了" + trans_from_dict(RegExp.$2 == "Freeze" ? "冰冻" : RegExp.$2 == "Burn"  ? "灼伤" : RegExp.$2 == "Sleep"  ? "睡眠" : RegExp.$2 == "paralysis"  ? "麻痹" : "中毒") + "！";
+        }
+        if (originalStr.match(regex_toput_in_substitute)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的替身出现了！";
+        }
+        if (originalStr.match(regex_put_in_substitute)) {
+            return   trans_from_dict(RegExp.$1) + "的替身出现了！";
+        }
+        if (originalStr.match(regex_tohp_restored)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的体力回复了。";
+        }
+        if (originalStr.match(regex_hp_restored)) {
+            return   trans_from_dict(RegExp.$1) + "的体力回复了。";
+        }
+        if (originalStr.match(regex_tohp_restored2)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "的体力回复了！";
+        }
+        if (originalStr.match(regex_hp_restored2)) {
+            return trans_from_dict(RegExp.$1) + "的体力回复了！";
+        }
+        if (originalStr.match(regex_tohp_restored3)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "通过Z力量回复了体力！";
+        }
+        if (originalStr.match(regex_hp_restored3)) {
+            return  trans_from_dict(RegExp.$1) + "通过Z力量回复了体力！";
+        }
+        if (originalStr.match(regex_totransformed)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的样子发生了变化！";
+        }
+        if (originalStr.match(regex_transformed)) {
+            return   trans_from_dict(RegExp.$1) + "的样子发生了变化！";
+        }
+        if (originalStr.match(regex_toconfused2)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "正在混乱中！";
+        }
+        if (originalStr.match(regex_confused2)) {
+            return   trans_from_dict(RegExp.$1) + "正在混乱中！";
+        }
+        if (originalStr.match(regex_toconfused)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "混乱了！";
+        }
+        if (originalStr.match(regex_confused)) {
+            return   trans_from_dict(RegExp.$1) + "混乱了！";
+        }
+        if (originalStr.match(regex_tofell_asleep)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "睡着了！";
+        }
+        if (originalStr.match(regex_fell_asleep)) {
+            return   trans_from_dict(RegExp.$1) + "睡着了！";
+        }
+        if (originalStr.match(regex_tocanno_longer_escape)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "无法逃走了！";
+        }
+        if (originalStr.match(regex_canno_longer_escape)) {
+            return   trans_from_dict(RegExp.$1) + "无法逃走了！";
+        }
+        if (originalStr.match(regex_tomist_safeguard)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "the mist" ? "白雾" : "神秘守护") + "的保护！";
+        }
+        if (originalStr.match(regex_mist_safeguard)) {
+            return   trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "the mist" ? "白雾" : "神秘守护") + "的保护！";
+        }
+        if (originalStr.match(regex_toprotosynthesis_quarkdrive)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "通过驱劲能量发动了" + trans_from_dict(RegExp.$2 == "Protosynthesis" ? "古代活性" : "夸克充能") + "！";
+        }
+        if (originalStr.match(regex_protosynthesis_quarkdrive)) {
+            return   trans_from_dict(RegExp.$1) + "通过驱劲能量发动了" + trans_from_dict(RegExp.$2 == "Protosynthesis" ? "古代活性" : "夸克充能") + "！";
+        }
+        if (originalStr.match(regex_toair_light)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "被" + trans_from_dict(RegExp.$2 == "freezing air" ? "冷冻的空气" : "冷光") + "包围了！";
+        }
+        if (originalStr.match(regex_air_light)) {
+            return   trans_from_dict(RegExp.$1) + "被" + trans_from_dict(RegExp.$2 == "freezing air" ? "冷冻的空气" : "冷光") + "包围了！";
+        }
+        if (originalStr.match(regex_todryskin_solarpower)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "因" + trans_from_dict(RegExp.$2 == "Dry Skin" ? "干燥皮肤" : "太阳能量") + "而受到了伤害。";
+        }
+        if (originalStr.match(regex_dryskin_solarpower)) {
+            return   trans_from_dict(RegExp.$1) + "因" + trans_from_dict(RegExp.$2 == "Dry Skin" ? "干燥皮肤" : "太阳能量") + "而受到了伤害。";
+        }
+        if (originalStr.match(regex_todrowsing)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "处于半梦半醒状态！";
+        }
+        if (originalStr.match(regex_drowsing)) {
+            return   trans_from_dict(RegExp.$1) + "处于半梦半醒状态！";
+        }
+        if (originalStr.match(regex_tobreaks_mold)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "打破了常规！";
+        }
+        if (originalStr.match(regex_breaks_mold)) {
+            return   trans_from_dict(RegExp.$1) + "打破了常规！";
+        }
+        if (originalStr.match(regex_toendured_hit)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "挺住了攻击！";
+        }
+        if (originalStr.match(regex_endured_hit)) {
+            return   trans_from_dict(RegExp.$1) + "挺住了攻击！";
+        }
+        if (originalStr.match(regex_toendured_hit2)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "挺住了攻击！";
+        }
+        if (originalStr.match(regex_endured_hit2)) {
+            return   trans_from_dict(RegExp.$1) + "挺住了攻击！";
+        }
+        if (originalStr.match(regex_toburned_itself)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "燃尽了自身！";
+        }
+        if (originalStr.match(regex_burned_itself)) {
+            return   trans_from_dict(RegExp.$1) + "燃尽了自身！";
+        }
+        if (originalStr.match(regex_toair_balloon)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "靠着气球浮在了空中！";
+        }
+        if (originalStr.match(regex_air_balloon)) {
+            return   trans_from_dict(RegExp.$1) + "靠着气球浮在了空中！";
+        }
+        if (originalStr.match(regex_toalready_confused)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "已经混乱了！";
+        }
+        if (originalStr.match(regex_already_confused)) {
+            return   trans_from_dict(RegExp.$1) + "已经混乱了！";
+        }
+        if (originalStr.match(regex_toswirling_magma)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "被困在了熔岩风暴之中！";
+        }
+        if (originalStr.match(regex_swirling_magma)) {
+            return   trans_from_dict(RegExp.$1) + "被困在了熔岩风暴之中！";
+        }
+        if (originalStr.match(regex_toquicksand)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "陷入了流沙地狱！";
+        }
+        if (originalStr.match(regex_quicksand)) {
+            return   trans_from_dict(RegExp.$1) + "陷入了流沙地狱！";
+        }
+        if (originalStr.match(regex_toconfused_fatigue)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "因精疲力尽而混乱了！";
+        }
+        if (originalStr.match(regex_confused_fatigue)) {
+            return   trans_from_dict(RegExp.$1) + "因精疲力尽而混乱了！";
+        }
+        if (originalStr.match(regex_tobecame_confused)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "混乱了！";
+        }
+        if (originalStr.match(regex_became_confused)) {
+            return   trans_from_dict(RegExp.$1) + "混乱了！";
+        }
+        if (originalStr.match(regex_toprevented_healing)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的回复行为被封住了！";
+        }
+        if (originalStr.match(regex_prevented_healing)) {
+            return   trans_from_dict(RegExp.$1) + "的回复行为被封住了！";
+        }
+        if (originalStr.match(regex_toquick_draw)) {
+            return   "速击使对手的" + trans_from_dict(RegExp.$1) + "行动变快了！";
+        }
+        if (originalStr.match(regex_quick_draw)) {
+            return   "速击使" + trans_from_dict(RegExp.$1) + "行动变快了！";
+        }
+        if (originalStr.match(regex_tosalt_cured)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "陷入了盐腌状态！";
+        }
+        if (originalStr.match(regex_salt_cured)) {
+            return   trans_from_dict(RegExp.$1) + "陷入了盐腌状态！";
+        }
+        if (originalStr.match(regex_tobeing_withdrawn)) {
+            return   "(对手的" + trans_from_dict(RegExp.$1) + "正在撤退......)";
+        }
+        if (originalStr.match(regex_being_withdrawn)) {
+            return   "(" + trans_from_dict(RegExp.$1) + "正在撤退......)";
+        }
+        if (originalStr.match(regex_toeject_pack)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "要用避难背包回去了！";
+        }
+        if (originalStr.match(regex_eject_pack)) {
+            return   trans_from_dict(RegExp.$1) + "要用避难背包回去了！";
+        }
+        if (originalStr.match(regex_toeject_button)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "要用逃脱按键回去了！";
+        }
+        if (originalStr.match(regex_eject_button)) {
+            return   trans_from_dict(RegExp.$1) + "要用逃脱按键回去了！";
+        }
+        if (originalStr.match(regex_topower_herb)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "用了强力香草后，充满了力量！";
+        }
+        if (originalStr.match(regex_power_herb)) {
+            return   trans_from_dict(RegExp.$1) + "用了强力香草后，充满了力量！";
+        }
+        if (originalStr.match(regex_towhite_herb)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "用白色香草复原了能力！";
+        }
+        if (originalStr.match(regex_white_herb)) {
+            return   trans_from_dict(RegExp.$1) + "用白色香草复原了能力！";
+        }
+        if (originalStr.match(regex_tofocussash_focusband)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "用气势" + trans_from_dict(RegExp.$2 == "Sash" ? "披" : "头") + "带撑住了！";
+        }
+        if (originalStr.match(regex_focussash_focusband)) {
+            return   trans_from_dict(RegExp.$1) + "用气势" + trans_from_dict(RegExp.$2 == "Sash" ? "披" : "头") + "带撑住了！";
+        }
+        if (originalStr.match(regex_toair_balloon_popped)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的气球破了！";
+        }
+        if (originalStr.match(regex_air_balloon_popped)) {
+            return   trans_from_dict(RegExp.$1) + "的气球破了！";
+        }
+        if (originalStr.match(regex_toshell_gleam)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "让甲壳发出光辉，使属性相克关系发生扭曲！！";
+        }
+        if (originalStr.match(regex_shell_gleam)) {
+            return   trans_from_dict(RegExp.$1) + "让甲壳发出光辉，使属性相克关系发生扭曲！！";
+        }
+        if (originalStr.match(regex_toquick_claw)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "用了先制之爪后，行动变快了！";
+        }
+        if (originalStr.match(regex_quick_claw)) {
+            return   trans_from_dict(RegExp.$1) + "用了先制之爪后，行动变快了！";
+        }
+        if (originalStr.match(regex_tosupreme_overlord)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "从被打倒的同伴身上得到力量了！";
+        }
+        if (originalStr.match(regex_supreme_overlord)) {
+            return   trans_from_dict(RegExp.$1) + "从被打倒的同伴身上得到力量了！";
+        }
+        if (originalStr.match(regex_toabsorbed_light)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "吸收了光！";
+        }
+        if (originalStr.match(regex_absorbed_light)) {
+            return   trans_from_dict(RegExp.$1) + "吸收了光！";
+        }
+        if (originalStr.match(regex_toalready_burned)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "已经被灼伤了！";
+        }
+        if (originalStr.match(regex_already_burned)) {
+            return   trans_from_dict(RegExp.$1) + "已经被灼伤了！";
+        }
+        if (originalStr.match(regex_tosticky_candy_syrup)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "陷入了满身糖状态！";
+        }
+        if (originalStr.match(regex_sticky_candy_syrup)) {
+            return   trans_from_dict(RegExp.$1) + "陷入了满身糖状态！";
+        }
+        if (originalStr.match(regex_togoing_all)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "拿出全力了！";
+        }
+        if (originalStr.match(regex_going_all)) {
+            return   trans_from_dict(RegExp.$1) + "拿出全力了！";
+        }
+        if (originalStr.match(regex_tocreate_decoy)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "断掉尾巴并将其作为替身了！";
+        }
+        if (originalStr.match(regex_create_decoy)) {
+            return   trans_from_dict(RegExp.$1) + "断掉尾巴并将其作为替身了！";
+        }
+        if (originalStr.match(regex_tocut_hp2)) {
+            return   "(对手的" + trans_from_dict(RegExp.$1) + "削减生命强化了招式！)";
+        }
+        if (originalStr.match(regex_cut_hp2)) {
+            return   "(" + trans_from_dict(RegExp.$1) + "削减生命强化了招式！)";
+        }
+        if (originalStr.match(regex_tocut_hp)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "削减生命强化了招式！";
+        }
+        if (originalStr.match(regex_cut_hp)) {
+            return   trans_from_dict(RegExp.$1) + "削减生命强化了招式！";
+        }
+        if (originalStr.match(regex_toloses_flying)) {
+            return   "(对手的" + trans_from_dict(RegExp.$1) + "本回合失去了飞行属性。)";
+        }
+        if (originalStr.match(regex_loses_flying)) {
+            return   "(" + trans_from_dict(RegExp.$1) + "本回合失去了飞行属性。)";
+        }
+        if (originalStr.match(regex_toreceived_encore)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "接受了再来一次！";
+        }
+        if (originalStr.match(regex_received_encore)) {
+            return   trans_from_dict(RegExp.$1) + "接受了再来一次！";
+        }
+        if (originalStr.match(regex_totoxic_orb)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "因剧毒宝珠而中剧毒了！";
+        }
+        if (originalStr.match(regex_toxic_orb)) {
+            return   trans_from_dict(RegExp.$1) + "因剧毒宝珠而中剧毒了！";
+        }
+        if (originalStr.match(regex_tosticky_web)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "被黏黏网粘住了！";
+        }
+        if (originalStr.match(regex_sticky_web)) {
+            return   trans_from_dict(RegExp.$1) + "被黏黏网粘住了！";
+        }
+        if (originalStr.match(regex_tonot_lowered2)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的能力不会降低！";
+        }
+        if (originalStr.match(regex_not_lowered2)) {
+            return   trans_from_dict(RegExp.$1) + "的能力不会降低！";
+        }
+        if (originalStr.match(regex_tocant_use_item)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "无法使用道具了！";
+        }
+        if (originalStr.match(regex_cant_use_item)) {
+            return   trans_from_dict(RegExp.$1) + "无法使用道具了！";
+        }
+        if (originalStr.match(regex_toheal_block_off)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的回复封印解除了！";
+        }
+        if (originalStr.match(regex_heal_block_off)) {
+            return   trans_from_dict(RegExp.$1) + "的回复封印解除了！";
+        }
+        if (originalStr.match(regex_toparalyzed_cant_move)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "因身体麻痹而无法行动！";
+        }
+        if (originalStr.match(regex_paralyzed_cant_move)) {
+            return   trans_from_dict(RegExp.$1) + "因身体麻痹而无法行动！";
+        }
+        if (originalStr.match(regex_toparalyzed_maybe_unable_move)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "麻痹了，很难使出招式！";
+        }
+        if (originalStr.match(regex_paralyzed_maybe_unable_move)) {
+            return   trans_from_dict(RegExp.$1) + "麻痹了，很难使出招式！";
+        }
+        if (originalStr.match(regex_tosealed_moves)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "封印了对手的招式！";
+        }
+        if (originalStr.match(regex_sealed_moves)) {
+            return   trans_from_dict(RegExp.$1) + "封印了对手的招式！";
+        }
+        if (originalStr.match(regex_tochose_doom)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "将破灭之愿托付给了未来！";
+        }
+        if (originalStr.match(regex_chose_doom)) {
+            return   trans_from_dict(RegExp.$1) + "将破灭之愿托付给了未来！";
+        }
+        if (originalStr.match(regex_toelectromagnetism)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "因电磁力浮了起来！";
+        }
+        if (originalStr.match(regex_electromagnetism)) {
+            return   trans_from_dict(RegExp.$1) + "因电磁力浮了起来！";
+        }
+        if (originalStr.match(regex_tostockpiled_off)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的蓄力效果消失了！";
+        }
+        if (originalStr.match(regex_stockpiled_off)) {
+            return   trans_from_dict(RegExp.$1) + "的蓄力效果消失了！";
+        }
+        if (originalStr.match(regex_toillusion_off)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "造成的幻觉被解除了！";
+        }
+        if (originalStr.match(regex_illusion_off)) {
+            return   trans_from_dict(RegExp.$1) + "造成的幻觉被解除了！";
+        }
+        if (originalStr.match(regex_tosnapped_confusion)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的混乱解除了！";
+        }
+        if (originalStr.match(regex_snapped_confusion)) {
+            return   trans_from_dict(RegExp.$1) + "的混乱解除了！";
+        }
+        if (originalStr.match(regex_tosnapped_confusion2)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的混乱解除了！";
+        }
+        if (originalStr.match(regex_snapped_confusion2)) {
+            return   trans_from_dict(RegExp.$1) + "的混乱解除了！";
+        }
+        if (originalStr.match(regex_tosnapped_confusion3)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的混乱解除了！";
+        }
+        if (originalStr.match(regex_snapped_confusion3)) {
+            return   trans_from_dict(RegExp.$1) + "的混乱解除了！";
+        }
+        if (originalStr.match(regex_tofuturistic_engine)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "布下电气场地使未来的机关跃动起来！！";
+        }
+        if (originalStr.match(regex_futuristic_engine)) {
+            return   trans_from_dict(RegExp.$1) + "布下电气场地使未来的机关跃动起来！！";
+        }
+        if (originalStr.match(regex_tofuturistic_engine2)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "用电气场地使未来的机关跃动起来！！";
+        }
+        if (originalStr.match(regex_futuristic_engine2)) {
+            return   trans_from_dict(RegExp.$1) + "用电气场地使未来的机关跃动起来！！";
+        }
+        if (originalStr.match(regex_toancient_pulse)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "令日照变强，激起了古代的脉动！";
+        }
+        if (originalStr.match(regex_ancient_pulse)) {
+            return   trans_from_dict(RegExp.$1) + "令日照变强，激起了古代的脉动！";
+        }
+        if (originalStr.match(regex_toancient_pulse2)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "受到日照而激起了古代的脉动！";
+        }
+        if (originalStr.match(regex_ancient_pulse2)) {
+            return   trans_from_dict(RegExp.$1) + "受到日照而激起了古代的脉动！";
+        }
+        if (originalStr.match(regex_toflinched)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "畏缩了，无法使出招式！";
+        }
+        if (originalStr.match(regex_flinched)) {
+            return   trans_from_dict(RegExp.$1) + "畏缩了，无法使出招式！";
+        }
+        if (originalStr.match(regex_tolost_somehp)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的生命被少量削减了！";
+        }
+        if (originalStr.match(regex_lost_somehp)) {
+            return   trans_from_dict(RegExp.$1) + "的生命被少量削减了！";
+        }
+        if (originalStr.match(regex_todamaged_recoil)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "受到了反作用力的伤害！";
+        }
+        if (originalStr.match(regex_damaged_recoil)) {
+            return   trans_from_dict(RegExp.$1) + "受到了反作用力的伤害！";
+        }
+        if (originalStr.match(regex_tobuffeted_sandstorm_hail)) {
+            return    trans_from_dict(RegExp.$2 == "sandstorm" ? "沙暴" : "冰雹") + "袭击了对手的" + trans_from_dict(RegExp.$1) + "！";
+        }
+        if (originalStr.match(regex_buffeted_sandstorm_hail)) {
+            return    trans_from_dict(RegExp.$2 == "sandstorm" ? "沙暴" : "冰雹") + "袭击了" + trans_from_dict(RegExp.$1) + "！";
+        }
+        if (originalStr.match(regex_totormented)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "正被恶梦缠身！";
+        }
+        if (originalStr.match(regex_tormented)) {
+            return   trans_from_dict(RegExp.$1) + "正被恶梦缠身！";
+        }
+        if (originalStr.match(regex_toafflicted_by_curse)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "正受到诅咒！";
+        }
+        if (originalStr.match(regex_afflicted_by_curse)) {
+            return   trans_from_dict(RegExp.$1) + "正受到诅咒！";
+        }
+        if (originalStr.match(regex_tolocked_in_nightmare)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "被困在了恶梦之中！";
+        }
+        if (originalStr.match(regex_locked_in_nightmare)) {
+            return   trans_from_dict(RegExp.$1) + "被困在了恶梦之中！";
+        }
+        if (originalStr.match(regex_todemaged_by_recoil)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "受到了反作用力造成的伤害！";
+        }
+        if (originalStr.match(regex_demaged_by_recoil)) {
+            return   trans_from_dict(RegExp.$1) + "受到了反作用力造成的伤害！";
+        }
+        if (originalStr.match(regex_tomystical_moonlight)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "被神秘的月光包围了！";
+        }
+        if (originalStr.match(regex_mystical_moonlight)) {
+            return   trans_from_dict(RegExp.$1) + "被神秘的月光包围了！";
+        }
+        if (originalStr.match(regex_towas_hurt2)) {
+            return   "(对手的" + trans_from_dict(RegExp.$1) + "受伤了！)";
+        }
+        if (originalStr.match(regex_was_hurt2)) {
+            return   "(" + trans_from_dict(RegExp.$1) + "受伤了！)";
+        }
+        if (originalStr.match(regex_towas_hurt)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "受伤了！";
+        }
+        if (originalStr.match(regex_was_hurt)) {
+            return   trans_from_dict(RegExp.$1) + "受伤了！";
+        }
+        if (originalStr.match(regex_tofrozen_solid)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "因冻住了而无法行动！";
+        }
+        if (originalStr.match(regex_frozen_solid)) {
+            return   trans_from_dict(RegExp.$1) + "因冻住了而无法行动！";
+        }
+        if (originalStr.match(regex_totwisted_dimensions)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "扭曲了时空！";
+        }
+        if (originalStr.match(regex_twisted_dimensions)) {
+            return   trans_from_dict(RegExp.$1) + "扭曲了时空！";
+        }
+        if (originalStr.match(regex_toability_suppressed)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的特性变得无效了！";
+        }
+        if (originalStr.match(regex_ability_suppressed)) {
+            return   trans_from_dict(RegExp.$1) + "的特性变得无效了！";
+        }
+        if (originalStr.match(regex_tousedupall_electricity)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "用尽电力了！";
+        }
+        if (originalStr.match(regex_usedupall_electricity)) {
+            return   trans_from_dict(RegExp.$1) + "用尽电力了！";
+        }
+        if (originalStr.match(regex_tono_retreat)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "受到背水一战的效果影响，无法逃走了！";
+        }
+        if (originalStr.match(regex_no_retreat)) {
+            return   trans_from_dict(RegExp.$1) + "受到背水一战的效果影响，无法逃走了！";
+        }
+        if (originalStr.match(regex_dragged_out)) {
+            return    trans_from_dict(RegExp.$1) + "被拖进了战斗！";
+        }
+        if (originalStr.match(regex_toenergy_drained)) {
+            return   "从对手的" + trans_from_dict(RegExp.$1) + "那里吸取了体力！";
+        }
+        if (originalStr.match(regex_energy_drained)) {
+            return   trans_from_dict(RegExp.$1) + "被吸取了体力！";
+        }
+        if (originalStr.match(regex_toabsorbs_attack)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "吸引了攻击！";
+        }
+        if (originalStr.match(regex_absorbs_attack)) {
+            return   trans_from_dict(RegExp.$1) + "吸引了攻击！";
+        }
+        if (originalStr.match(regex_totook_attack)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "吸引了攻击！";
+        }
+        if (originalStr.match(regex_took_attack)) {
+            return   trans_from_dict(RegExp.$1) + "吸引了攻击！";
+        }
+        if (originalStr.match(regex_tie)) {
+            return   trans_from_dict(RegExp.$1) + "和" + trans_from_dict(RegExp.$2) + "平局了！";
+        }
+        if (originalStr.match(regex_tounder_ground)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "钻入了洞里！";
+        }
+        if (originalStr.match(regex_under_ground)) {
+            return   trans_from_dict(RegExp.$1) + "钻入了洞里！";
+        }
+        if (originalStr.match(regex_toflew_high)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "飞向了高空！";
+        }
+        if (originalStr.match(regex_flew_high)) {
+            return   trans_from_dict(RegExp.$1) + "飞向了高空！";
+        }
+        if (originalStr.match(regex_tohurled_air)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "被投向了空中！";
+        }
+        if (originalStr.match(regex_hurled_air)) {
+            return   trans_from_dict(RegExp.$1) + "被投向了空中！";
+        }
+        if (originalStr.match(regex_towhippedup_whirlwind)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "掀起一阵旋风！";
+        }
+        if (originalStr.match(regex_whippedup_whirlwind)) {
+            return   trans_from_dict(RegExp.$1) + "掀起一阵旋风！";
+        }
+        if (originalStr.match(regex_tohid_underwater)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "潜入了水中！";
+        }
+        if (originalStr.match(regex_hid_underwater)) {
+            return   trans_from_dict(RegExp.$1) + "潜入了水中！";
+        }
+        if (originalStr.match(regex_tosprang_up)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "高高地跳了起来！";
+        }
+        if (originalStr.match(regex_sprang_up)) {
+            return   trans_from_dict(RegExp.$1) + "高高地跳了起来！";
+        }
+        if (originalStr.match(regex_toitem_cannot_removed)) {
+            return   "无法拿开对手的" + trans_from_dict(RegExp.$1) + "的道具！";
+        }
+        if (originalStr.match(regex_item_cannot_removed)) {
+            return   "无法拿开" + trans_from_dict(RegExp.$1) + "的道具！";
+        }
+        if (originalStr.match(regex_tomove_nolonger_disabled)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的招式不再被禁用！";
+        }
+        if (originalStr.match(regex_move_nolonger_disabled)) {
+            return   trans_from_dict(RegExp.$1) + "的招式不再被禁用！";
+        }
+        if (originalStr.match(regex_toloafing_around)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "正在偷懒！";
+        }
+        if (originalStr.match(regex_loafing_around)) {
+            return   trans_from_dict(RegExp.$1) + "正在偷懒！";
+        }
+        if (originalStr.match(regex_tomust_recharge)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "因攻击的反作用力而无法动弹！";
+        }
+        if (originalStr.match(regex_must_recharge)) {
+            return   trans_from_dict(RegExp.$1) + "因攻击的反作用力而无法动弹！";
+        }
+        if (originalStr.match(regex_toheals_status)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "治愈了异常状态！";
+        }
+        if (originalStr.match(regex_heals_status)) {
+            return   trans_from_dict(RegExp.$1) + "治愈了异常状态！";
+        }
+        if (originalStr.match(regex_tohealed_burn)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "治愈了灼伤状态！";
+        }
+        if (originalStr.match(regex_healed_burn)) {
+            return   trans_from_dict(RegExp.$1) + "治愈了灼伤状态！";
+        }
+        if (originalStr.match(regex_toburn_was_healed)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的灼伤被治愈了！";
+        }
+        if (originalStr.match(regex_burn_was_healed)) {
+            return   trans_from_dict(RegExp.$1) + "的灼伤被治愈了！";
+        }
+        if (originalStr.match(regex_tocured_its_poison)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "治愈了中毒状态！";
+        }
+        if (originalStr.match(regex_cured_its_poison)) {
+            return   trans_from_dict(RegExp.$1) + "治愈了中毒状态！";
+        }
+        if (originalStr.match(regex_tocured_its_paralysis)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "治愈了麻痹状态！";
+        }
+        if (originalStr.match(regex_cured_its_paralysis)) {
+            return   trans_from_dict(RegExp.$1) + "治愈了麻痹状态！";
+        }
+        if (originalStr.match(regex_tostatus_cleared)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的异常状态被清除了！";
+        }
+        if (originalStr.match(regex_status_cleared)) {
+            return    trans_from_dict(RegExp.$1) + "的异常状态被清除了！";
+        }
+        if (originalStr.match(regex_totake_attacker_down)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "想和对手同归于尽！";
+        }
+        if (originalStr.match(regex_take_attacker_down)) {
+            return   trans_from_dict(RegExp.$1) + "想和对手同归于尽！";
+        }
+        if (originalStr.match(regex_totook_attacker_down)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "和对手同归于尽了！";
+        }
+        if (originalStr.match(regex_took_attacker_down)) {
+            return   trans_from_dict(RegExp.$1) + "和对手同归于尽了！";
+        }
+        if (originalStr.match(regex_toplanted_its_roots)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "扎下了根！";
+        }
+        if (originalStr.match(regex_planted_its_roots)) {
+            return   trans_from_dict(RegExp.$1) + "扎下了根！";
+        }
+        if (originalStr.match(regex_toanchored_itself_roots)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "扎下了根！";
+        }
+        if (originalStr.match(regex_anchored_itself_roots)) {
+            return   trans_from_dict(RegExp.$1) + "扎下了根！";
+        }
+        if (originalStr.match(regex_tosurrounded_veil_water)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "套上了水环！";
+        }
+        if (originalStr.match(regex_surrounded_veil_water)) {
+            return   trans_from_dict(RegExp.$1) + "套上了水环！";
+        }
+        if (originalStr.match(regex_towas_subjected_torment)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "遭到了无理取闹！";
+        }
+        if (originalStr.match(regex_was_subjected_torment)) {
+            return   trans_from_dict(RegExp.$1) + "遭到了无理取闹！";
+        }
+        if (originalStr.match(regex_tosupersweet_aroma)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的蜜散发出了甜甜香气！";
+        }
+        if (originalStr.match(regex_supersweet_aroma)) {
+            return   trans_from_dict(RegExp.$1) + "的蜜散发出了甜甜香气！";
+        }
+        if (originalStr.match(regex_toreversed_other_auras)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "压制了所有气场！";
+        }
+        if (originalStr.match(regex_reversed_other_auras)) {
+            return   trans_from_dict(RegExp.$1) + "压制了所有气场！";
+        }
+        if (originalStr.match(regex_togot_over_infatuation)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "不再迷恋对方了！";
+        }
+        if (originalStr.match(regex_got_over_infatuation)) {
+            return   trans_from_dict(RegExp.$1) + "不再迷恋对方了！";
+        }
+        if (originalStr.match(regex_tounderwent_heroic_transformation)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "变身后归来了！";
+        }
+        if (originalStr.match(regex_underwent_heroic_transformation)) {
+            return   trans_from_dict(RegExp.$1) + "变身后归来了！";
+        }
+        if (originalStr.match(regex_toimmobilized_by_love)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "陷入了爱河！";
+        }
+        if (originalStr.match(regex_immobilized_by_love)) {
+            return   trans_from_dict(RegExp.$1) + "陷入了爱河！";
+        }
+        if (originalStr.match(regex_toshuddered)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "发抖了！";
+        }
+        if (originalStr.match(regex_shuddered)) {
+            return   trans_from_dict(RegExp.$1) + "发抖了！";
+        }
+        if (originalStr.match(regex_tomove_was_postponed)) {
+            return   "延后了对手的" + trans_from_dict(RegExp.$1) + "的顺序！";
+        }
+        if (originalStr.match(regex_move_was_postponed)) {
+            return   "延后了" + trans_from_dict(RegExp.$1) + "的顺序！";
+        }
+        if (originalStr.match(regex_totightening_its_focus)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "聚精会神了起来！";
+        }
+        if (originalStr.match(regex_tightening_its_focus)) {
+            return   trans_from_dict(RegExp.$1) + "聚精会神了起来！";
+        }
+        if (originalStr.match(regex_toset_shell_trap)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "布置了一个甲壳陷阱！";
+        }
+        if (originalStr.match(regex_set_shell_trap)) {
+            return   trans_from_dict(RegExp.$1) + "布置了一个甲壳陷阱！";
+        }
+        if (originalStr.match(regex_toshrouded_itself_magiccoat)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "给自己裹上了一层魔术外衣！";
+        }
+        if (originalStr.match(regex_shrouded_itself_magiccoat)) {
+            return   trans_from_dict(RegExp.$1) + "给自己裹上了一层魔术外衣！";
+        }
+        if (originalStr.match(regex_also_timer_to_on)) {
+            return   RegExp.$1 + "也想要开启计时器。";
+        }
+        if (originalStr.match(regex_torestorehp_using_zpower)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "用Z力量恢复了生命值！";
+        }
+        if (originalStr.match(regex_restorehp_using_zpower)) {
+            return   trans_from_dict(RegExp.$1) + "用Z力量恢复了生命值！";
+        }
+        if (originalStr.match(regex_tocuthp_maximized_attack)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "削减体力并释放了全部力量！";
+        }
+        if (originalStr.match(regex_cuthp_maximized_attack)) {
+            return   trans_from_dict(RegExp.$1) + "削减体力并释放了全部力量！";
+        }
+        if (originalStr.match(regex_torestored_its_hp)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "回复了HP。";
+        }
+        if (originalStr.match(regex_restored_its_hp)) {
+            return   trans_from_dict(RegExp.$1) + "回复了HP。";
+        }
+        if (originalStr.match(regex_torestorehp_using_zpower2)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "通过Z招式回复了HP！";
+        }
+        if (originalStr.match(regex_restorehp_using_zpower2)) {
+            return   trans_from_dict(RegExp.$1) + "通过Z招式回复了HP！";
+        }
+        if (originalStr.match(regex_toreturned_stats_zpower)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "通过Z招式将被降低的能力复原了！";
+        }
+        if (originalStr.match(regex_returned_stats_zpower)) {
+            return   trans_from_dict(RegExp.$1) + "通过Z招式将被降低的能力复原了！";
+        }
+        if (originalStr.match(regex_tostarted_heatingup_beak)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "开始给鸟嘴加热了！";
+        }
+        if (originalStr.match(regex_started_heatingup_beak)) {
+            return   trans_from_dict(RegExp.$1) + "开始给鸟嘴加热了！";
+        }
+        if (originalStr.match(regex_toswitched_items_target)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "互换了各自的道具！";
+        }
+        if (originalStr.match(regex_switched_items_target)) {
+            return   trans_from_dict(RegExp.$1) + "互换了各自的道具！";
+        }
+        if (originalStr.match(regex_tomoves_have_electrified)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的招式带电了！";
+        }
+        if (originalStr.match(regex_moves_have_electrified)) {
+            return   trans_from_dict(RegExp.$1) + "的招式带电了！";
+        }
+        if (originalStr.match(regex_totarget_bear_grudge)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "想向对手施放怨念！";
+        }
+        if (originalStr.match(regex_target_bear_grudge)) {
+            return   trans_from_dict(RegExp.$1) + "想向对手施放怨念！";
+        }
+        if (originalStr.match(regex_tolearned)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "学会了" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_learned)) {
+            return   trans_from_dict(RegExp.$1) + "学会了" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_tokept_going_crashed)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "因势头过猛而撞到了地面！";
+        }
+        if (originalStr.match(regex_kept_going_crashed)) {
+            return   trans_from_dict(RegExp.$1) + "因势头过猛而撞到了地面！";
+        }
+        if (originalStr.match(regex_tothawed_out)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的冰冻被融化了！";
+        }
+        if (originalStr.match(regex_thawed_out)) {
+            return   trans_from_dict(RegExp.$1) + "的冰冻被融化了！";
+        }
+        if (originalStr.match(regex_tothroat_chop)) {
+            return   "对手的地狱突刺的效果阻止了" + trans_from_dict(RegExp.$1) + "使用的声音类招式！";
+        }
+        if (originalStr.match(regex_throat_chop)) {
+            return   "地狱突刺的效果阻止了对手的" + trans_from_dict(RegExp.$1) + "使用的声音类招式！";
+        }
+        if (originalStr.match(regex_toprotected_aromaticveil)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "被芳香幕保护了！";
+        }
+        if (originalStr.match(regex_protected_aromaticveil)) {
+            return   trans_from_dict(RegExp.$1) + "被芳香幕保护了！";
+        }
+        if (originalStr.match(regex_tosurrounded_sweetness)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "被甜幕包围了！";
+        }
+        if (originalStr.match(regex_surrounded_sweetness)) {
+            return   trans_from_dict(RegExp.$1) + "被甜幕包围了！";
+        }
+        if (originalStr.match(regex_tocant_asleep_sweetness)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "因为甜幕无法入睡！";
+        }
+        if (originalStr.match(regex_cant_asleep_sweetness)) {
+            return   trans_from_dict(RegExp.$1) + "因为甜幕无法入睡！";
+        }
+        if (originalStr.match(regex_tolost_focus)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "聚气时受到干扰，无法使出招式！";
+        }
+        if (originalStr.match(regex_lost_focus)) {
+            return   trans_from_dict(RegExp.$1) + "聚气时受到干扰，无法使出招式！";
+        }
+        if (originalStr.match(regex_toattack_missed2)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的攻击没有命中！";
+        }
+        if (originalStr.match(regex_attack_missed2)) {
+            return   trans_from_dict(RegExp.$1) + "的攻击没有命中！";
+        }
+        if (originalStr.match(regex_tocenter_attention_zpower)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "使用Z力量变得万众瞩目了！";
+        }
+        if (originalStr.match(regex_center_attention_zpower)) {
+            return   trans_from_dict(RegExp.$1) + "使用Z力量变得万众瞩目了！";
+        }
+        if (originalStr.match(regex_tobond_trainer)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "浑身充满了牵绊之力！";
+        }
+        if (originalStr.match(regex_bond_trainer)) {
+            return   trans_from_dict(RegExp.$1) + "浑身充满了牵绊之力！";
+        }
+        if (originalStr.match(regex_toprimal_reversion)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的原始回归！恢复了原始的样子！";
+        }
+        if (originalStr.match(regex_primal_reversion)) {
+            return   trans_from_dict(RegExp.$1) + "的原始回归！恢复了原始的样子！";
+        }
+        if (originalStr.match(regex_toabsorbing_power)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "正在积蓄力量！";
+        }
+        if (originalStr.match(regex_absorbing_power)) {
+            return   trans_from_dict(RegExp.$1) + "正在积蓄力量！";
+        }
+        if (originalStr.match(regex_totaunt_off)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的挑衅效果解除了！";
+        }
+        if (originalStr.match(regex_taunt_off)) {
+            return   trans_from_dict(RegExp.$1) + "的挑衅效果解除了！";
+        }
+        if (originalStr.match(regex_tocustap_berry)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "用了释陀果后，行动变快了！";
+        }
+        if (originalStr.match(regex_custap_berry)) {
+            return   trans_from_dict(RegExp.$1) + "用了释陀果后，行动变快了！";
+        }
+        if (originalStr.match(regex_totwo_abilities)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "同时拥有了两种特性！";
+        }
+        if (originalStr.match(regex_two_abilities)) {
+            return   trans_from_dict(RegExp.$1) + "同时拥有了两种特性！";
+        }
+        if (originalStr.match(regex_toprotected_Terrain)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "Electric" ? "电气" : RegExp.$2 == "Misty"  ? "薄雾" : "精神") + "场地的保护！";
+        }
+        if (originalStr.match(regex_protected_Terrain)) {
+            return   trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "Electric" ? "电气" : RegExp.$2 == "Misty"  ? "薄雾" : "精神") + "场地的保护！";
+        }
+        if (originalStr.match(regex_tomirrorherb2)) {
+            return  "对手的" + trans_from_dict(RegExp.$2) +"用模仿香草巨幅" + trans_from_dict(RegExp.$1 == "raised" ? "提升" : "降低") + "了" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_mirrorherb2)) {
+            return  trans_from_dict(RegExp.$2) +"用模仿香草巨幅" + trans_from_dict(RegExp.$1 == "raised" ? "提升" : "降低") + "了" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_tomirrorherb)) {
+            return  "对手的" + trans_from_dict(RegExp.$2) + "用模仿香草" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : "提升") + "了" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_mirrorherb)) {
+            return  trans_from_dict(RegExp.$2) + "用模仿香草" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : "提升") + "了" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_tomirrorherb_Contrary)) {
+            return  "对手的" + trans_from_dict(RegExp.$2) + "用模仿香草" + trans_from_dict(RegExp.$1 == "harshly lowered" ? "大幅降低" : "降低") + "了"  + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_mirrorherb_Contrary)) {
+            return  trans_from_dict(RegExp.$2) + "用模仿香草" + trans_from_dict(RegExp.$1 == "harshly lowered" ? "大幅降低" : "降低") + "了"  + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_toStarf_Berry)) {
+            return   "对手的" + trans_from_dict(RegExp.$2) + "用星桃果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "drastically raised"  ? "巨幅提升" : "大幅降低") + "了" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_Starf_Berry)) {
+            return   trans_from_dict(RegExp.$2) + "用星桃果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "drastically raised"  ? "巨幅提升" : "大幅降低") + "了" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_toWeakness_Policy)) {
+            return   "对手的" + trans_from_dict(RegExp.$2) + "用弱点保险" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "drastically raised"  ? "巨幅提升" : "大幅降低") + "了" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_Weakness_Policy)) {
+            return   trans_from_dict(RegExp.$2) + "用弱点保险" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "drastically raised"  ? "巨幅提升" : "大幅降低") + "了" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_toRoom_Service)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "用客房服务降低了速度！";
+        }
+        if (originalStr.match(regex_Room_Service)) {
+            return   trans_from_dict(RegExp.$1) + "用客房服务降低了速度！";
+        }
+        if (originalStr.match(regex_toabsorbed_electricity)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "吸收了电力！";
+        }
+        if (originalStr.match(regex_absorbed_electricity)) {
+            return   trans_from_dict(RegExp.$1) + "吸收了电力！";
+        }
+        if (originalStr.match(regex_tospace_power)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "身上溢出了宇宙之力！";
+        }
+        if (originalStr.match(regex_space_power)) {
+            return   trans_from_dict(RegExp.$1) + "身上溢出了宇宙之力！";
+        }
+        if (originalStr.match(regex_togravity)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "因受到重力影响而无法待在空中！";
+        }
+        if (originalStr.match(regex_gravity)) {
+            return   trans_from_dict(RegExp.$1) + "因受到重力影响而无法待在空中！";
+        }
+        if (originalStr.match(regex_toWhite_Herb)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "用白色香草复原了能力！";
+        }
+        if (originalStr.match(regex_White_Herb)) {
+            return   trans_from_dict(RegExp.$1) + "用白色香草复原了能力！";
+        }
+        if (originalStr.match(regex_todisguise_busted)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的画皮脱落了！";
+        }
+        if (originalStr.match(regex_disguise_busted)) {
+            return   trans_from_dict(RegExp.$1) + "的画皮脱落了！";
+        }
+        if (originalStr.match(regex_toswapped_abilities)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "互换了各自的特性！";
+        }
+        if (originalStr.match(regex_swapped_abilities)) {
+            return   trans_from_dict(RegExp.$1) + "互换了各自的特性！";
+        }
+        if (originalStr.match(regex_tocharging_power)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "开始充电了！";
+        }
+        if (originalStr.match(regex_charging_power)) {
+            return   trans_from_dict(RegExp.$1) + "开始充电了！";
+        }
+        if (originalStr.match(regex_tofell_love)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "着迷了！";
+        }
+        if (originalStr.match(regex_fell_love)) {
+            return   trans_from_dict(RegExp.$1) + "着迷了！";
+        }
+        if (originalStr.match(regex_toasleep_paralyzed)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "已经"+ trans_from_dict(RegExp.$2 == "asleep" ? "睡着" : "麻痹") + "了！";
+        }
+        if (originalStr.match(regex_asleep_paralyzed)) {
+            return   trans_from_dict(RegExp.$1) + "已经"+ trans_from_dict(RegExp.$2 == "asleep" ? "睡着" : "麻痹") + "了！";
+        }
+        if (originalStr.match(regex_toidentified)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "被识破了！";
+        }
+        if (originalStr.match(regex_identified)) {
+            return   trans_from_dict(RegExp.$1) + "被识破了！";
+        }
+        if (originalStr.match(regex_toswitched_Attack_Defense)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "交换了攻击和防御！";
+        }
+        if (originalStr.match(regex_switched_Attack_Defense)) {
+            return   trans_from_dict(RegExp.$1) + "交换了攻击和防御！";
+        }
+        if (originalStr.match(regex_toanchors_itself)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "用吸盘粘在了地面上！";
+        }
+        if (originalStr.match(regex_anchors_itself)) {
+            return   trans_from_dict(RegExp.$1) + "用吸盘粘在了地面上！";
+        }
+        if (originalStr.match(regex_toanchored_suction_cups)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "用吸盘粘在了地面上！";
+        }
+        if (originalStr.match(regex_anchored_suction_cups)) {
+            return   trans_from_dict(RegExp.$1) + "用吸盘粘在了地面上！";
+        }
+        if (originalStr.match(regex_tostopped_shielding_itself)) {
+            return   "(对手的" + trans_from_dict(RegExp.$1) + "停止了自我保护。)";
+        }
+        if (originalStr.match(regex_stopped_shielding_itself)) {
+            return   "(" + trans_from_dict(RegExp.$1) + "停止了自我保护。)";
+        }
+        if (originalStr.match(regex_toshielded_itself)) {
+            return   "(对手的" + trans_from_dict(RegExp.$1) + "的自我保护。)";
+        }
+        if (originalStr.match(regex_shielded_itself)) {
+            return   "(" + trans_from_dict(RegExp.$1) + "的自我保护。)";
+        }
+        if (originalStr.match(regex_tocriticalhit_zpower)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "通过使用Z力量使击中要害率提升了！";
+        }
+        if (originalStr.match(regex_criticalhit_zpower)) {
+            return   trans_from_dict(RegExp.$1) + "通过使用Z力量使击中要害率提升了！";
+        }
+        if (originalStr.match(regex_tomaking_uproar)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "吵闹个不停！";
+        }
+        if (originalStr.match(regex_making_uproar)) {
+            return   trans_from_dict(RegExp.$1) + "吵闹个不停！";
+        }
+        if (originalStr.match(regex_tocaused_uproar)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "吵闹了起来！";
+        }
+        if (originalStr.match(regex_caused_uproar)) {
+            return   trans_from_dict(RegExp.$1) + "吵闹了起来！";
+        }
+        if (originalStr.match(regex_tomove_no_disabled)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的招式不再被封印了！";
+        }
+        if (originalStr.match(regex_move_no_disabled)) {
+            return   trans_from_dict(RegExp.$1) + "的招式不再被封印了！";
+        }
+        if (originalStr.match(regex_tocan_use_item)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "可以再次使用道具了！";
+        }
+        if (originalStr.match(regex_can_use_item)) {
+            return   trans_from_dict(RegExp.$1) + "可以再次使用道具了！";
+        }
+        if (originalStr.match(regex_totorment_wore_off)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "不再受对方无理取闹的影响了！";
+        }
+        if (originalStr.match(regex_torment_wore_off)) {
+            return   trans_from_dict(RegExp.$1) + "不再受对方无理取闹的影响了！";
+        }
+        if (originalStr.match(regex_toshared_power_target)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "把力量分享给了目标！";
+        }
+        if (originalStr.match(regex_shared_power_target)) {
+            return   trans_from_dict(RegExp.$1) + "把力量分享给了目标！";
+        }
+        if (originalStr.match(regex_toshared_guard_target)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "把防御分享给了目标！";
+        }
+        if (originalStr.match(regex_shared_guard_target)) {
+            return   trans_from_dict(RegExp.$1) + "把防御分享给了目标！";
+        }
+        if (originalStr.match(regex_toswitched_speed_target)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "与目标交换了速度！";
+        }
+        if (originalStr.match(regex_switched_speed_target)) {
+            return   trans_from_dict(RegExp.$1) + "与目标交换了速度！";
+        }
+        if (originalStr.match(regex_toBright_light)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的身上开始溢出耀眼的光芒！";
+        }
+        if (originalStr.match(regex_Bright_light)) {
+            return   trans_from_dict(RegExp.$1) + "的身上开始溢出耀眼的光芒！";
+        }
+        if (originalStr.match(regex_toalready_poisoned)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "已经中毒了。";
+        }
+        if (originalStr.match(regex_already_poisoned)) {
+            return  trans_from_dict(RegExp.$1) + "已经中毒了。";
+        }
+        if (originalStr.match(regex_toalready_paralyzed)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "已经被麻痹了。";
+        }
+        if (originalStr.match(regex_already_paralyzed)) {
+            return  trans_from_dict(RegExp.$1) + "已经被麻痹了。";
+        }
+        if (originalStr.match(regex_toalready_frozen)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "已经被冻住了！";
+        }
+        if (originalStr.match(regex_already_frozen)) {
+            return  trans_from_dict(RegExp.$1) + "已经被冻住了！";
+        }
+        if (originalStr.match(regex_tosketched)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "学会了" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_sketched)) {
+            return  trans_from_dict(RegExp.$1) + "学会了" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_toshell_trap)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的陷阱甲壳没有生效！";
+        }
+        if (originalStr.match(regex_shell_trap)) {
+            return  trans_from_dict(RegExp.$1) + "的陷阱甲壳没有生效！";
+        }
+        if (originalStr.match(regex_toDynamax)) {
+            return  "(对手的" + trans_from_dict(RegExp.$1) + "的极巨化！)";
+        }
+        if (originalStr.match(regex_Dynamax)) {
+            return  "(" + trans_from_dict(RegExp.$1) + "的极巨化！)";
+        }
+        if (originalStr.match(regex_no_battle_on_right_now)) {
+            return  "现在没有正在进行的" + RegExp.$1 + "。";
+        }
+        if (originalStr.match(regex_tosubstitute_faded)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的替身消失了......";
+        }
+        if (originalStr.match(regex_substitute_faded)) {
+            return  trans_from_dict(RegExp.$1) + "的替身消失了......";
+        }
+        if (originalStr.match(regex_not_found)) {
+            return  "没有找到用户'" + RegExp.$1 + "'。";
+        }
+        if (originalStr.match(regex_Challenging)) {
+            return  "正在向" + RegExp.$1 + "发起挑战...";
+        }
+        if (originalStr.match(regex_is_offline)) {
+            return  "用户" + RegExp.$1 + "处于离线状态。如果您仍然想对TA进行私聊，请再次发送消息，或使用指令/offlinemsg。";
+        }
+        if (originalStr.match(regex_tolonger_tormented)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "不再无理取闹了！";
+        }
+        if (originalStr.match(regex_longer_tormented)) {
+            return  trans_from_dict(RegExp.$1) + "不再无理取闹了！";
+        }
+        if (originalStr.match(regex_tocured_infatuation)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "用心灵香草治愈了着迷！";
+        }
+        if (originalStr.match(regex_cured_infatuation)) {
+            return  trans_from_dict(RegExp.$1) + "用心灵香草治愈了着迷！";
+        }
+        if (originalStr.match(regex_torocky_helmet)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "因凸凸头盔受到了伤害！";
+        }
+        if (originalStr.match(regex_rocky_helmet)) {
+            return  trans_from_dict(RegExp.$1) + "因凸凸头盔受到了伤害！";
+        }
+        if (originalStr.match(regex_toCourt_Change)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "交换了双方的场地效果！";
+        }
+        if (originalStr.match(regex_Court_Change)) {
+            return  trans_from_dict(RegExp.$1) + "交换了双方的场地效果！";
+        }
+        if (originalStr.match(regex_toalready_substitute)) {
+            return  "但是，对手的" + trans_from_dict(RegExp.$1) + "的替身已经出现了。";
+        }
+        if (originalStr.match(regex_already_substitute)) {
+            return  "但是，" + trans_from_dict(RegExp.$1) + "的替身已经出现了。";
+        }
+        if (originalStr.match(regex_tovanished_instantly)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的身影瞬间消失了！";
+        }
+        if (originalStr.match(regex_vanished_instantly)) {
+            return  trans_from_dict(RegExp.$1) + "的身影瞬间消失了！";
+        }
+        if (originalStr.match(regex_toheavy_lifted)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "太重了，无法被提起！";
+        }
+        if (originalStr.match(regex_heavy_lifted)) {
+            return  trans_from_dict(RegExp.$1) + "太重了，无法被提起！";
+        }
+        if (originalStr.match(regex_touproar_kept)) {
+            return  "但是吵闹让对手的" + trans_from_dict(RegExp.$1) + "醒过来了！";
+        }
+        if (originalStr.match(regex_uproar_kept)) {
+            return  "但是吵闹让" + trans_from_dict(RegExp.$1) + "醒过来了！";
+        }
+        if (originalStr.match(regex_tobraced_itself)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "摆出了挺住攻击的架势！";
+        }
+        if (originalStr.match(regex_braced_itself)) {
+            return  trans_from_dict(RegExp.$1) + "摆出了挺住攻击的架势！";
+        }
+        if (originalStr.match(regex_toswitched_stat_target)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "和目标互换了能力变化！";
+        }
+        if (originalStr.match(regex_switched_stat_target)) {
+            return  trans_from_dict(RegExp.$1) + "和目标互换了能力变化！";
+        }
+        if (originalStr.match(regex_toswitched_def_spd)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "和目标互换了防御和特防的能力变化！";
+        }
+        if (originalStr.match(regex_switched_def_spd)) {
+            return  trans_from_dict(RegExp.$1) + "和目标互换了防御和特防的能力变化！";
+        }
+        if (originalStr.match(regex_toswitched_atk_spa)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "和目标互换了攻击和特攻的能力变化！";
+        }
+        if (originalStr.match(regex_switched_atk_spa)) {
+            return  trans_from_dict(RegExp.$1) + "和目标互换了攻击和特攻的能力变化！";
+        }
+        if (originalStr.match(regex_torevealed)) {
+            return  "读取了对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_revealed)) {
+            return  "读取了" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_toGMax_Wildfire)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "被超极巨地狱灭焰的火焰包围，酷热难耐！";
+        }
+        if (originalStr.match(regex_GMax_Wildfire)) {
+            return  trans_from_dict(RegExp.$1) + "被超极巨地狱灭焰的火焰包围，酷热难耐！";
+        }
+        if (originalStr.match(regex_no_energy)) {
+            return  trans_from_dict(RegExp.$1) + "没有力气战斗了！";
+        }
+        if (originalStr.match(regex_already_in_battle)) {
+            return  trans_from_dict(RegExp.$1) + "已经在战斗了！";
+        }
+        if (originalStr.match(regex_towaiting_move)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "正在等待" + trans_from_dict(RegExp.$2) + "...";
+        }
+        if (originalStr.match(regex_waiting_move)) {
+            return  trans_from_dict(RegExp.$1) + "正在等待" + trans_from_dict(RegExp.$2) + "...";
+        }
+        if (originalStr.match(regex_tosea_fire)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "受到了火海的伤害！";
+        }
+        if (originalStr.match(regex_sea_fire)) {
+            return  trans_from_dict(RegExp.$1) + "受到了火海的伤害！";
+        }
+        if (originalStr.match(regex_toTelepathy)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "没有受到伙伴的攻击！";
+        }
+        if (originalStr.match(regex_Telepathy)) {
+            return  trans_from_dict(RegExp.$1) + "没有受到伙伴的攻击！";
+        }
+        if (originalStr.match(regex_toKey_Stone)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "对钥石起了反应！";
+        }
+        if (originalStr.match(regex_Key_Stone)) {
+            return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "对钥石起了反应！";
+        }
+        if (originalStr.match(regex_tobecame_AshGreninja)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "变身成了小智版甲贺忍蛙！";
+        }
+        if (originalStr.match(regex_became_AshGreninja)) {
+            return  trans_from_dict(RegExp.$1) + "变身成了小智版甲贺忍蛙！";
+        }
+        if (originalStr.match(regex_crazy_house)) {
+            return  RegExp.$2 + "夺取了" + trans_from_dict(RegExp.$1) + "！";
+        }
+        if (originalStr.match(regex_tomelted)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "解除了冰冻状态！";
+        }
+        if (originalStr.match(regex_melted)) {
+            return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "解除了冰冻状态！";
+        }
+        if (originalStr.match(regex_toelectromagnetism_woreoff)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的电磁力消失了！";
+        }
+        if (originalStr.match(regex_electromagnetism_woreoff)) {
+            return  trans_from_dict(RegExp.$1) + "的电磁力消失了！";
+        }
+        if (originalStr.match(regex_tocant_use_gravity)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "因重力而无法使出" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_cant_use_gravity)) {
+            return  trans_from_dict(RegExp.$1) + "因重力而无法使出" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_tomaxed_Attack)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的攻击被提高到了最大！";
+        }
+        if (originalStr.match(regex_maxed_Attack)) {
+            return  trans_from_dict(RegExp.$1) + "的攻击被提高到了最大！";
+        }
+        if (originalStr.match(regex_tocenter_attention)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "变得万众瞩目了！";
+        }
+        if (originalStr.match(regex_center_attention)) {
+            return  trans_from_dict(RegExp.$1) + "变得万众瞩目了！";
+        }
+        if (originalStr.match(regex_toHospitality)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "喝光了对手的" + trans_from_dict(RegExp.$2) + "泡的茶！";
+        }
+        if (originalStr.match(regex_Hospitality)) {
+            return  trans_from_dict(RegExp.$1) + "喝光了" + trans_from_dict(RegExp.$2) + "泡的茶！";
+        }
+        if (originalStr.match(regex_toRowap_Berry_Jaboca_Berry)) {
+            return    "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2) + "的" + trans_from_dict(RegExp.$3 == "Rowap" ? "雾莲" : "嘉珍") + "果的伤害！";
+        }
+        if (originalStr.match(regex_Rowap_Berry_Jaboca_Berry)) {
+            return    trans_from_dict(RegExp.$1) + "受到了对手的" + trans_from_dict(RegExp.$2) + "的" + trans_from_dict(RegExp.$3 == "Rowap" ? "雾莲" : "嘉珍") + "果的伤害！";
+        }
+        if (originalStr.match(regex_tostoring_energy)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "正在积蓄力量！";
+        }
+        if (originalStr.match(regex_storing_energy)) {
+            return  trans_from_dict(RegExp.$1) + "正在积蓄力量！";
+        }
+        if (originalStr.match(regex_tounleashed_energy)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "释放了自身的能量！";
+        }
+        if (originalStr.match(regex_unleashed_energy)) {
+            return  trans_from_dict(RegExp.$1) + "释放了自身的能量！";
+        }
+        if (originalStr.match(regex_tobecame_nimble)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "变得身轻如燕了！";
+        }
+        if (originalStr.match(regex_became_nimble)) {
+            return  trans_from_dict(RegExp.$1) + "变得身轻如燕了！";
+        }
+        if (originalStr.match(regex_rejected_Open_Team_Sheet)) {
+            return  RegExp.$1 + "拒绝公开队伍配置。";
+        }
+        if (originalStr.match(regex_agreed_Open_Team_Sheet)) {
+            return  RegExp.$1 + "同意公开队伍配置。";
+        }
+        if (originalStr.match(regex_tosqueezed_wrapped)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "被" + trans_from_dict(RegExp.$3) + "紧紧" + trans_from_dict(RegExp.$2 == "squeezed" ? "绑住" : "束缚") + "了！";
+        }
+        if (originalStr.match(regex_squeezed_wrapped)) {
+            return  trans_from_dict(RegExp.$1) + "被对手的" + trans_from_dict(RegExp.$3) + "紧紧" + trans_from_dict(RegExp.$2 == "squeezed" ? "绑住" : "束缚") + "了！";
+        }
+        if (originalStr.match(regex_tounaffected)) {
+            return  "对于对手的" + trans_from_dict(RegExp.$1) + "，完全没有效果！";
+        }
+        if (originalStr.match(regex_unaffected)) {
+            return  "对于" + trans_from_dict(RegExp.$1) + "，完全没有效果！";
+        }
+        if (originalStr.match(regex_toabsorbed_nutrients_roots)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "从根上吸取了养分！";
+        }
+        if (originalStr.match(regex_absorbed_nutrients_roots)) {
+            return  trans_from_dict(RegExp.$1) + "从根上吸取了养分！";
+        }
+        if (originalStr.match(regex_tonot_lowered)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的"+ translations[RegExp.$2] + "不会降低！";
+        }
+        if (originalStr.match(regex_not_lowered)) {
+            return   trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "不会降低！";
+        }
+        if (originalStr.match(regex_totype_added)) {
+            return  "对手的" + trans_from_dict(RegExp.$2) + "增加了" + translations[RegExp.$1] + "属性！";
+        }
+        if (originalStr.match(regex_type_added)) {
+            return  trans_from_dict(RegExp.$2) + "增加了" + translations[RegExp.$1] + "属性！";
+        }
+        if (originalStr.match(regex_tocant_get_going)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "无法拿出平时的水准！";
+        }
+        if (originalStr.match(regex_cant_get_going)) {
+            return  trans_from_dict(RegExp.$1) + "无法拿出平时的水准！";
+        }
+        if (originalStr.match(regex_tofinally_get_going)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "恢复了平时的水准！";
+        }
+        if (originalStr.match(regex_finally_get_going)) {
+            return  trans_from_dict(RegExp.$1) + "恢复了平时的水准！";
+        }
+        if (originalStr.match(regex_towas_burned_up)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "被烧尽了！";
+        }
+        if (originalStr.match(regex_was_burned_up)) {
+            return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "被烧尽了！";
+        }
+        if (originalStr.match(regex_tosurrounded_veil_petals)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "用花幕包裹了自己！";
+        }
+        if (originalStr.match(regex_surrounded_veil_petals)) {
+            return  trans_from_dict(RegExp.$1) + "用花幕包裹了自己！";
+        }
+        if (originalStr.match(regex_toAbility_became_Mummy)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的特性变成了木乃伊！";
+        }
+        if (originalStr.match(regex_Ability_became_Mummy)) {
+            return  trans_from_dict(RegExp.$1) + "的特性变成了木乃伊！";
+        }
+        if (originalStr.match(regex_toreturned_normal)) {
+            return  "(对手的" + trans_from_dict(RegExp.$1) + "复原了！)";
+        }
+        if (originalStr.match(regex_returned_normal)) {
+            return  "(" + trans_from_dict(RegExp.$1) + "复原了！)";
+        }
+        if (originalStr.match(regex_tolingering_aroma)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "沾上了味道且挥之不去！";
+        }
+        if (originalStr.match(regex_lingering_aroma)) {
+            return  trans_from_dict(RegExp.$1) + "沾上了味道且挥之不去！";
+        }
+        if (originalStr.match(regex_totoReflect_Type)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的属性变得和对手的对手的" + trans_from_dict(RegExp.$2) + "一样了！";
+        }
+        if (originalStr.match(regex_toReflect_Type2)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的属性变得和" + trans_from_dict(RegExp.$2) + "一样了！";
+        }
+        if (originalStr.match(regex_toReflect_Type)) {
+            return  trans_from_dict(RegExp.$1) + "的属性变得和对手的" + trans_from_dict(RegExp.$2) + "一样了！";
+        }
+        if (originalStr.match(regex_Reflect_Type)) {
+            return  trans_from_dict(RegExp.$1) + "的属性变得和" + trans_from_dict(RegExp.$2) + "一样了！";
+        }
+        if (originalStr.match(regex_totaken_over)) {
+            return  "继承了对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_taken_over)) {
+            return  "继承了" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_toweaker_to_fire)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "变得怕火了！";
+        }
+        if (originalStr.match(regex_weaker_to_fire)) {
+            return  trans_from_dict(RegExp.$1) + "变得怕火了！";
+        }
+        if (originalStr.match(regex_tocalmed_down)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "平静了下来。";
+        }
+        if (originalStr.match(regex_calmed_down)) {
+            return  trans_from_dict(RegExp.$1) + "平静了下来。";
+        }
+        if (originalStr.match(regex_toFlash_Fire)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的火焰威力提高了！";
+        }
+        if (originalStr.match(regex_Flash_Fire)) {
+            return  trans_from_dict(RegExp.$1) + "的火焰威力提高了！";
+        }
+        if (originalStr.match(regex_towaiting_target_move)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "正在等待一个招式进行抢夺！";
+        }
+        if (originalStr.match(regex_waiting_target_move)) {
+            return   trans_from_dict(RegExp.$1) + "正在等待一个招式进行抢夺！";
+        }
+        if (originalStr.match(regex_tosnatched_move)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "抢夺了" + trans_from_dict(RegExp.$2) + "的招式！";
+        }
+        if (originalStr.match(regex_snatched_move)) {
+            return  trans_from_dict(RegExp.$1) + "抢夺了对手的" + trans_from_dict(RegExp.$2) + "的招式！";
+        }
+        if (originalStr.match(regex_toMat_Block)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "举起了一块榻榻米挡下了即将到来的攻击！";
+        }
+        if (originalStr.match(regex_Mat_Block)) {
+            return  trans_from_dict(RegExp.$1) + "举起了一块榻榻米挡下了即将到来的攻击！";
+        }
+        if (originalStr.match(regex_kicked_up_mat)) {
+            return  "掀起的榻榻米挡住了" + translations[RegExp.$1] + "！";
+        }
+        if (originalStr.match(regex_no_wants_timer_on)) {
+            return  RegExp.$1 + "不再想要开启计时器，但计时器仍然启动着因为" + RegExp.$2 + "仍在启用。";
+        }
+        if (originalStr.match(regex_toGMax_Vine_Lash)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "被超极巨灰飞鞭灭强烈猛击！";
+        }
+        if (originalStr.match(regex_GMax_Vine_Lash)) {
+            return  trans_from_dict(RegExp.$1) + "被超极巨灰飞鞭灭强烈猛击！";
+        }
+        if (originalStr.match(regex_toGMax_Cannonade)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "被超极巨水炮轰灭的漩涡伤害了！";
+        }
+        if (originalStr.match(regex_GMax_Cannonade)) {
+            return  trans_from_dict(RegExp.$1) + "被超极巨水炮轰灭的漩涡伤害了！";
+        }
+        if (originalStr.match(regex_tosharp_steel)) {
+            return  "尖锐的钢刺扎进了对手的" + trans_from_dict(RegExp.$1) + "的体内！";
+        }
+        if (originalStr.match(regex_sharp_steel)) {
+            return  "尖锐的钢刺扎进了" + trans_from_dict(RegExp.$1) + "的体内！";
+        }
+        if (originalStr.match(regex_already_selected)) {
+            return  "已经选择了" + trans_from_dict(RegExp.$1) + "！";
+        }
+        if (originalStr.match(regex_toOctolock)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "受到蛸固的效果影响，变得无法逃走了！";
+        }
+        if (originalStr.match(regex_Octolock)) {
+            return  trans_from_dict(RegExp.$1) + "受到蛸固的效果影响，变得无法逃走了！";
+        }
+        if (originalStr.match(regex_areintheback5)) {
+            return  trans_from_dict(RegExp.$1) + ", " + trans_from_dict(RegExp.$2) + ", " + trans_from_dict(RegExp.$3) + ", " + trans_from_dict(RegExp.$4) + "和" + trans_from_dict(RegExp.$5) + "紧跟其后。";
+        }
+        if (originalStr.match(regex_areintheback4)) {
+            return  trans_from_dict(RegExp.$1) + ", " + trans_from_dict(RegExp.$2) + ", " + trans_from_dict(RegExp.$3) + "和" + trans_from_dict(RegExp.$4) + "紧跟其后。";
+        }
+        if (originalStr.match(regex_areintheback3)) {
+            return  trans_from_dict(RegExp.$1) + ", " + trans_from_dict(RegExp.$2) + "和" + trans_from_dict(RegExp.$3) + "紧跟其后。";
+        }
+        if (originalStr.match(regex_areintheback2)) {
+            return  trans_from_dict(RegExp.$1) + "和" + trans_from_dict(RegExp.$2) + "紧跟其后。";
+        }
+        if (originalStr.match(regex_areintheback)) {
+            return  trans_from_dict(RegExp.$1) + "紧跟其后。";
+        }
+        if (originalStr.match(regex_toPluck_BugBite)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "偷走并吃掉了目标的" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_Pluck_BugBite)) {
+            return  trans_from_dict(RegExp.$1) + "偷走并吃掉了目标的" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_toliquid_ooze)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "吸到了污泥浆！";
+        }
+        if (originalStr.match(regex_liquid_ooze)) {
+            return  trans_from_dict(RegExp.$1) + "吸到了污泥浆！";
+        }
+        if (originalStr.match(regex_tocovered_powder)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "被粉尘包裹着！";
+        }
+        if (originalStr.match(regex_covered_powder)) {
+            return  trans_from_dict(RegExp.$1) + "被粉尘包裹着！";
+        }
+        if (originalStr.match(regex_tospecial_attacks)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "获得了对特殊攻击的防护！";
+        }
+        if (originalStr.match(regex_special_attacks)) {
+            return  trans_from_dict(RegExp.$1) + "获得了对特殊攻击的防护！";
+        }
+        if (originalStr.match(regex_togained_armor)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "获得了对于物理攻击的防护！";
+        }
+        if (originalStr.match(regex_gained_armor)) {
+            return  trans_from_dict(RegExp.$1) + "获得了对于物理攻击的防护！";
+        }
+        if (originalStr.match(regex_toformed_school)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "一群群地聚集起来了！";
+        }
+        if (originalStr.match(regex_formed_school)) {
+            return  trans_from_dict(RegExp.$1) + "一群群地聚集起来了！";
+        }
+        if (originalStr.match(regex_tostopped_schooling)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "一群群地四散而去了！";
+        }
+        if (originalStr.match(regex_stopped_schooling)) {
+            return  trans_from_dict(RegExp.$1) + "一群群地四散而去了！";
+        }
+        if (originalStr.match(regex_tobursting_flame)) {
+            return  "溅射的火焰击中了对手的" + trans_from_dict(RegExp.$1) + "！";
+        }
+        if (originalStr.match(regex_bursting_flame)) {
+            return  "溅射的火焰击中了" + trans_from_dict(RegExp.$1) + "！";
+        }
+        if (originalStr.match(regex_send_offline_confirm)) {
+            return  "用户" + RegExp.$1 + "已离线。如果您仍然想对TA发送信息，请再次发送消息进行确认。";
+        }
+        if (originalStr.match(regex_tofell_for_feint)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "中了佯攻！";
+        }
+        if (originalStr.match(regex_fell_for_feint)) {
+            return  trans_from_dict(RegExp.$1) + "中了佯攻！";
+        }
+        if (originalStr.match(regex_tobroke_protection)) {
+            return  "突破了对手的" + trans_from_dict(RegExp.$1) + "的守护！";
+        }
+        if (originalStr.match(regex_broke_protection)) {
+            return  "突破了" + trans_from_dict(RegExp.$1) + "的守护！";
+        }
+        if (originalStr.match(regex_toalready_preparing)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "已经准备好了下轮行动！";
+        }
+        if (originalStr.match(regex_already_preparing)) {
+            return  trans_from_dict(RegExp.$1) + "已经准备好了下轮行动！";
+        }
+        if (originalStr.match(regex_tobeing_withdrawn2)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "准备回来！";
+        }
+        if (originalStr.match(regex_being_withdrawn2)) {
+            return  trans_from_dict(RegExp.$1) + "准备回来！";
+        }
+        if (originalStr.match(regex_toclamped_down)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "夹住了" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_clamped_down)) {
+            return  trans_from_dict(RegExp.$1) + "夹住了对手的" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_totook_kind_offer)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "接受了好意！";
+        }
+        if (originalStr.match(regex_took_kind_offer)) {
+            return  trans_from_dict(RegExp.$1) + "接受了好意！";
+        }
+        if (originalStr.match(regex_tohaving_nightmare)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "开始做恶梦了！";
+        }
+        if (originalStr.match(regex_having_nightmare)) {
+            return   trans_from_dict(RegExp.$1) + "开始做恶梦了！";
+        }
+        if (originalStr.match(regex_reconnected2)) {
+            return   RegExp.$1 + "重新连接了。";
+        }
+        if (originalStr.match(regex_tobecause_gravity)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "因重力而无法使出" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_because_gravity)) {
+            return  trans_from_dict(RegExp.$1) + "因重力而无法使出" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_Invite_sent_to)) {
+            return  "邀请了 " + RegExp.$1 + "！";
+        }
+        if (originalStr.match(regex_toGMax_Volcalith)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "被困在超极巨炎石喷发的岩石之中，疼痛难忍！";
+        }
+        if (originalStr.match(regex_GMax_Volcalith)) {
+            return  trans_from_dict(RegExp.$1) + "被困在超极巨炎石喷发的岩石之中，疼痛难忍！";
+        }
+        if (originalStr.match(regex_toprotect_hurt)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "没能防住攻击，受到了伤害！";
+        }
+        if (originalStr.match(regex_protect_hurt)) {
+            return  trans_from_dict(RegExp.$1) + "没能防住攻击，受到了伤害！";
+        }
+        if (originalStr.match(regex_cant_Dynamax)) {
+            return  "[无效的选择]不能使用：" + trans_from_dict(RegExp.$1) + "现在不能极巨化。";
+        }
+        if (originalStr.match(regex_toPower_Shift)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "互换了自身的攻击和防御！";
+        }
+        if (originalStr.match(regex_Power_Shift)) {
+            return  trans_from_dict(RegExp.$1) + "互换了自身的攻击和防御！";
+        }
+        if (originalStr.match(regex_toanchored_roots)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "用扎下的根固定住了！";
+        }
+        if (originalStr.match(regex_anchored_roots)) {
+            return  trans_from_dict(RegExp.$1) + "用扎下的根固定住了！";
+        }
+        if (originalStr.match(regex_toUltra_Burst)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "通过究极爆发现出了新的样子！";
+        }
+        if (originalStr.match(regex_Ultra_Burst)) {
+            return  trans_from_dict(RegExp.$1) + "通过究极爆发现出了新的样子！";
+        }
+        if (originalStr.match(regex_from4)) {
+            if (translations[RegExp.$8]) {
+                originalStr = originalStr.replace(regex_from4, "");
+                originalStr +=  "(因" + translations[RegExp.$2] + "而×" + RegExp.$1 + ") " + "(因" + translations[RegExp.$4] + "而×" + RegExp.$3 + ") " + "(因" + translations[RegExp.$6] + "而×" + RegExp.$5 + ") "+ "(因" + translations[RegExp.$8] + "而×" + RegExp.$7 + ")";
+            }
+            return originalStr.replace("因求雨而×", "因下雨而×").replace("因始源之海而×", "因大雨而×").replace("因终结之地而×", "因大日照而×");
+        }
+        if (originalStr.match(regex_from3)) {
+            if (translations[RegExp.$6]) {
+                originalStr = originalStr.replace(regex_from3, "");
+                originalStr +=  "(因" + translations[RegExp.$2] + "而×" + RegExp.$1 + ") " + "(因" + translations[RegExp.$4] + "而×" + RegExp.$3 + ") " + "(因" + translations[RegExp.$6] + "而×" + RegExp.$5 + ")";
+            }
+            return originalStr.replace("因求雨而×", "因下雨而×").replace("因始源之海而×", "因大雨而×").replace("因终结之地而×", "因大日照而×");
+        }
+        if (originalStr.match(regex_from2)) {
+            if (translations[RegExp.$4]) {
+                originalStr = originalStr.replace(regex_from2, "");
+                originalStr +=  "(因" + translations[RegExp.$2] + "而×" + RegExp.$1 + ") " + "(因" + translations[RegExp.$4] + "而×" + RegExp.$3 + ")";
+            }
+            return originalStr.replace("因求雨而×", "因下雨而×").replace("因始源之海而×", "因大雨而×").replace("因终结之地而×", "因大日照而×");
+        }
+        if (originalStr.match(regex_from)) {
+            if (translations[RegExp.$2]) {
+                originalStr = originalStr.replace(regex_from, "");
+                originalStr +=  "(因" + translations[RegExp.$2].replace("求雨", "下雨").replace("始源之海", "大雨").replace("终结之地", "大日照") + "而×" + RegExp.$1 + ")";
+            }
+            return originalStr;
+        }
+        if (originalStr.match(regex_toProtective_Pads)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "因部位护具而保护了自身！";
+        }
+        if (originalStr.match(regex_Protective_Pads)) {
+            return  trans_from_dict(RegExp.$1) + "因部位护具而保护了自身！";
+        }
+        if (originalStr.match(regex_toAbility_Shield)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的特性正受到特性护具效果的保护！";
+        }
+        if (originalStr.match(regex_Ability_Shield)) {
+            return  trans_from_dict(RegExp.$1) + "的特性正受到特性护具效果的保护！";
+        }
+        if (originalStr.match(regex_togrudge)) {
+            return  "因为怨念，对手的" + trans_from_dict(RegExp.$1) + "失去了其招式" + translations[RegExp.$2] + "的所有PP！";
+        }
+        if (originalStr.match(regex_grudge)) {
+            return   "因为怨念，" + trans_from_dict(RegExp.$1) + "失去了其招式" + translations[RegExp.$2] + "的所有PP！";
+        }
+        if (originalStr.match(regex_toalready_has_burn)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "已经灼伤了。";
+        }
+        if (originalStr.match(regex_already_has_burn)) {
+            return  trans_from_dict(RegExp.$1) + "已经灼伤了。";
+        }
+        if (originalStr.match(regex_already_searching)) {
+            return  "无法搜索：您已经在搜索一场" + RegExp.$1 + "对战了。";
+        }
+        if (originalStr.match(regex_todoesnt_become_confused)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "并没有混乱！";
+        }
+        if (originalStr.match(regex_doesnt_become_confused)) {
+            return  trans_from_dict(RegExp.$1) + "并没有混乱！";
+        }
+        if (originalStr.match(regex_already_challenge)) {
+            return  "您和" + RegExp.$2 + "之间已经有了一场" + RegExp.$1 + "挑战了！";
+        }
+        if (originalStr.match(regex_tobecause_Heal_Block)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "因回复封锁而无法使出" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_because_Heal_Block)) {
+            return  trans_from_dict(RegExp.$1) + "因回复封锁而无法使出" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_offering_tie)) {
+            return  RegExp.$1 + "请求平局。";
+        }
+        if (originalStr.match(regex_rejected_accepted_tie)) {
+            return  RegExp.$1 + trans_from_dict(RegExp.$2 == "rejected" ? "拒绝" : "同意") + "了平局。";
+        }
+        if (originalStr.match(regex_toStickyBarb_burn_BlackSludge)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "Sticky Barb" ? "附着针" : RegExp.$2 == "burn"  ? "灼伤" : "黑色污泥") + "的伤害！";
+        }
+        if (originalStr.match(regex_StickyBarb_burn_BlackSludge)) {
+            return  trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "Sticky Barb" ? "附着针" : RegExp.$2 == "burn"  ? "灼伤" : "黑色污泥") + "的伤害！";
+        }
+        if (originalStr.match(regex_toCrafty_Quick_Wide_Shield)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$1 == "Crafty" ? "戏法" : RegExp.$1 == "Quick"  ? "快速" : "广域")  + "防守的保护！";
+        }
+        if (originalStr.match(regex_Crafty_Quick_Wide_Shield)) {
+            return  trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$1 == "Crafty" ? "戏法" : RegExp.$1 == "Quick"  ? "快速" : "广域")  + "防守的保护！";
+        }
+        if (originalStr.match(regex_toTreasures_of_ruin)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "令周围的宝可梦的" + translations[RegExp.$3] + "减弱了！";
+        }
+        if (originalStr.match(regex_Treasures_of_ruin)) {
+            return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "令周围的宝可梦的" + translations[RegExp.$3] + "减弱了！";
+        }
+        if (originalStr.match(regex_Specific_to)) {
+            return  translations[RegExp.$1] + "的专属道具";
+        }
+        if (originalStr.match(regex_toprotective_mist)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "受到了薄雾场地的保护！";
+        }
+        if (originalStr.match(regex_protective_mist)) {
+            return  trans_from_dict(RegExp.$1) + "受到了薄雾场地的保护！";
+        }
+        if (originalStr.match(regex_torose)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + trans_from_dict(RegExp.$3 == "rose drastically" ? "巨幅提高" : RegExp.$3 == "rose sharply"  ? "大幅提高" : "提高")  + "了！";
+        }
+        if (originalStr.match(regex_rose)) {
+            return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + trans_from_dict(RegExp.$3 == "rose drastically" ? "巨幅提高" : RegExp.$3 == "rose sharply"  ? "大幅提高" : "提高")  + "了！";
+        }
+        if (originalStr.match(regex_tofell)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + trans_from_dict(RegExp.$3 == "fell severely" ? "巨幅降低" : RegExp.$3 == "fell harshly"  ? "大幅降低" : "降低") + "了！";
+        }
+        if (originalStr.match(regex_fell)) {
+            return   trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + trans_from_dict(RegExp.$3 == "fell severely" ? "巨幅降低" : RegExp.$3 == "fell harshly"  ? "大幅降低" : "降低") + "了！";
+        }
+        if (originalStr.match(regex_toperishsong)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的灭亡计时变成" + RegExp.$2 + "了！";
+        }
+        if (originalStr.match(regex_perishsong)) {
+            return  trans_from_dict(RegExp.$1) + "的灭亡计时变成" + RegExp.$2 + "了！";
+        }
+        if (originalStr.match(regex_toDestiny_Knot)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "因红线而着迷了！";
+        }
+        if (originalStr.match(regex_Destiny_Knot)) {
+            return  trans_from_dict(RegExp.$1) + "因红线而着迷了！";
+        }
+        if (originalStr.match(regex_toBerserk_Gene)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "用破坏基因大幅提高了攻击！";
+        }
+        if (originalStr.match(regex_Berserk_Gene)) {
+            return  trans_from_dict(RegExp.$1) + "用破坏基因大幅提高了攻击！";
+        }
+        if (originalStr.match(regex_Guessed_spread)) {
+            originalStr = originalStr.replace("");
+            originalStr = translations[RegExp.$1] + ": " + RegExp.$2 + " " + translations[RegExp.$3] + " / " + RegExp.$4 + " " + translations[RegExp.$5] + " / " + RegExp.$6 + " " + translations[RegExp.$7] + RegExp.$8;
+            return originalStr.replace("Atk", "攻击").replace("Def", "防御").replace("SpA", "特攻").replace("SpD", "特防").replace("Spe", "速度").replace("+Atk", "+攻击").replace("+Def", "+防御").replace("+SpA", "+特攻").replace("+SpD", "+特防").replace("+Spe", "+速度").replace("-Atk", "-攻击").replace("-Def", "-防御").replace("-SpA", "-特攻").replace("-SpD", "-特防").replace("-Spe", "-速度");
+        }
+        if (originalStr.match(regex_Guessed_spread2)) {
+            originalStr = originalStr.replace("");
+            originalStr = RegExp.$1 + " " + translations[RegExp.$2] + " / " + RegExp.$3 + " " + translations[RegExp.$4] + RegExp.$5;
+            return originalStr.replace("Atk", "攻击").replace("Def", "防御").replace("SpA", "特攻").replace("SpD", "特防").replace("Spe", "速度").replace("+Atk", "+攻击").replace("+Def", "+防御").replace("+SpA", "+特攻").replace("+SpD", "+特防").replace("+Spe", "+速度").replace("-Atk", "-攻击").replace("-Def", "-防御").replace("-SpA", "-特攻").replace("-SpD", "-特防").replace("-Spe", "-速度");
+        }
+        if (originalStr.match(regex_Teaches)) {
+            return  "教会某些宝可梦" + translations[RegExp.$1] + "。一次性使用";
+        }
+        if (originalStr.match(regex_allows_ZMove)) {
+            return  trans_from_dict(RegExp.$1 == "a" ? "拥有" : "拥有") + translations[RegExp.$2] + "属性招式的携带者可以使" + trans_from_dict(RegExp.$3 == "a" ? "用" : "用") + translations[RegExp.$4] + "属性Z招式";
+        }
+        if (originalStr.match(regex_Multi_Attack)) {
+            return  "携带后多属性攻击变为" + translations[RegExp.$1] + "属性";
+        }
+        if (originalStr.match(regex_Judgment)) {
+            return  "携带后" + translations[RegExp.$1] + "招式威力提升20%，制裁光砾变为" + translations[RegExp.$2] + "属性";
+        }
+        if (originalStr.match(regex_attacks_have)) {
+            return  "携带后" + translations[RegExp.$1] + "属性招式威力提升" + RegExp.$2 + "0%";
+        }
+        if (originalStr.match(regex_Gem)) {
+            return  "使用" + translations[RegExp.$1] + "属性招式时提升本次攻击" + RegExp.$2 + "0%的威力。使用后消失";
+        }
+        if (originalStr.match(regex_taken_supereffective)) {
+            return  "受到效果绝佳的" + translations[RegExp.$1] + "属性招式时伤害减半。使用后消失";
+        }
+        if (originalStr.match(regex_Can_revived)) {
+            return  "可以用来复活" + translations[RegExp.$1];
+        }
+        if (originalStr.match(regex_Evolves)) {
+            if (translations[RegExp.$1])
+                return  translations[RegExp.$1] + trans_from_dict(RegExp.$3 == "us" ? "使用" : "携带并通信交换") + "后，进化为" + translations[RegExp.$2];
+            else
+                return  RegExp.$1 + trans_from_dict(RegExp.$3 == "us" ? "使用" : "携带并通信交换") + "后，进化为" + RegExp.$2;
+        }
+        if (originalStr.match(regex_confuses_Nature)) {
+            return  "HP低于" + RegExp.$2 + "最大HP时，恢复最大HP的" + RegExp.$1 + "，减" + translations[RegExp.$3] + "性格会混乱。使用后消失";
+        }
+        if (originalStr.match(regex_Mega_Evolve_item)){
+            if (translations[RegExp.$2])
+                return  "让" + translations[RegExp.$2] + "携带后，在战斗时可以进行超级进化";
+            else
+                return "让" + RegExp.$2 + "携带后，在战斗时可以进行超级进化"
+        }
+        if (originalStr.match(regex_Spe_to)) {
+            return   ": " + RegExp.$1 + " 至 " + RegExp.$2;
+        }
+        if (originalStr.match(regex_battles_ballte)) {
+            return  RegExp.$1 + "场 " + RegExp.$2 + trans_from_dict(RegExp.$3 == "battles" ? "对战" : "对战");
+        }
+        if (originalStr.match(regex_Turn)) {
+            return  "回合 " + RegExp.$1;
+        }
+        if (originalStr.match(regex_Transformed_into2)) {
+            return "(变成了" + trans_from_dict(RegExp.$1) + ")";
+        }
+        if (originalStr.match(regex_knocked_off)) {
+            return  translations[RegExp.$1] + " (拍落)";
+        }
+        if (originalStr.match(regex_hid_replay)) {
+            return  RegExp.$1 + "隐藏了这场战斗的回放。";
+        }
+        if (originalStr.match(regex_weather_suppressed)) {
+            if (translations[RegExp.$2])
+                return  "(" + translations[RegExp.$2] + "使" + trans_from_dict(RegExp.$1 == "Snow" ? "下雪" : RegExp.$1 == "Hail"  ? "冰雹" : RegExp.$1 == "Desolate Land"  ? "大日照" : RegExp.$1 == "Sunny Day"  ? "大晴天" : RegExp.$1 == "Primordial Sea" ? "始源之海": RegExp.$1 == "Rain Dance" ? "下雨" : "沙暴") + "的影响无效了)";
+        }
+        if (originalStr.match(regex_Nature_Power)) {
+            return "自然之力变成了" + translations[RegExp.$1] + "！";
+        }
+        if (originalStr.match(regex_Use_different_nature)) {
+            return "使用这种性格可以多出" + RegExp.$1 + "点基础点数:";
+        }
+        if (originalStr.match(regex_made_hidden)) {
+            return  RegExp.$1 + "将房间隐藏了。";
+        }
+        if (originalStr.match(regex_made_public)) {
+            return  RegExp.$1 + "将房间公开了。";
+        }
+        if (originalStr.match(regex_tofell_sky)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "因重力而掉到了地面！";
+        }
+        if (originalStr.match(regex_fell_sky)) {
+            return  trans_from_dict(RegExp.$1) + "因重力而掉到了地面！";
+        }
+        if (originalStr.match(regex_lol)) {
+            return  "您还没有" + RegExp.$1.replace(" ", "") + "队伍";
+        }
+        if (originalStr.match(regex_toconcentrated)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "磨砺了精神！";
+        }
+        if (originalStr.match(regex_concentrated)) {
+            return  trans_from_dict(RegExp.$1) + "磨砺了精神！";
+        }
+        if (originalStr.match(regex_toshook_head)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "摇了摇头，好像无法使出这个招式......";
+        }
+        if (originalStr.match(regex_shook_head)) {
+            return  trans_from_dict(RegExp.$1) + "摇了摇头，好像无法使出这个招式......";
+        }
 
 
-    var regex_item_was = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(was ([A-z0-9,'.() ’:-]+?)\)$/);
-    var regex_toCommander = new RegExp(/^The opposing (.+?) was swallowed by the opposing (.+?) and became the opposing (.+?)'s commander!$/);
-    var regex_Commander = new RegExp(/^(.+?) was swallowed by (.+?) and became (.+?)'s commander!$/);
-    var regex_tomagic_bounce = new RegExp(/^The opposing (.+?) bounced the ([A-z0-9,'.() ’:-]+?) back!$/);
-    var regex_magic_bounce = new RegExp(/^(.+?) bounced the ([A-z0-9,'.() ’:-]+?) back!$/);
-    var regex_start_battle = new RegExp(/^Battle started between (.+?) and (.+?)!$/);
-    var regex_touturn = new RegExp(/^The opposing (.+?) went back to (.+?)!$/);
-    var regex_uturn = new RegExp(/^(.+?) went back to (.+?)!$/);
-    var regex_togems = new RegExp(/^The ([A-z0-9,'.() ’:-]+?) strengthened the opposing (.+?)'s power!$/);
-    var regex_gems = new RegExp(/^The ([A-z0-9,'.() ’:-]+?) strengthened (.+?)'s power!$/);
-    var regex_toeat2 = new RegExp(/^\(The opposing (.+?) used its ([A-z0-9,'.() ’:-]+?)!\)$/);
-    var regex_eat2 = new RegExp(/^\((.+?) used its ([A-z0-9,'.() ’:-]+?)!\)$/);
-    var regex_toeat = new RegExp(/^\(The opposing (.+?) ate its ([A-z0-9,'.() ’:-]+?)!\)$/);
-    var regex_eat = new RegExp(/^\((.+?) ate its ([A-z0-9,'.() ’:-]+?)!\)$/);
-    var regex_sent_out_first2 = new RegExp(/^([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?) will be sent out first.$/);
-    var regex_sent_out_first = new RegExp(/^([A-z0-9é,'.()* ’:-]+?) will be sent out first.$/);
-    var regex_sent_out2 = new RegExp(/^(.+?) sent out (.+?) \(/);
-    var regex_sent_out = new RegExp(/^(.+?) sent out $/);
-    var regex_withdrew = new RegExp(/^(.+?) withdrew (.+?)!$/);
-    var regex_tolost_health = new RegExp(/^\(The opposing (.+?) lost (.+?)% of its health!\)$/);
-    var regex_lost_health = new RegExp(/^\((.+?) lost (.+?)% of its health!\)$/);
-    var regex_tolost_health2 = new RegExp(/^\(The opposing (.+?) lost $/);
-    var regex_lost_health2 = new RegExp(/^\((.+?) lost $/);
-    var regex_tomega = new RegExp(/^The opposing (.+?) has Mega Evolved into Mega ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_mega = new RegExp(/^(.+?) has Mega Evolved into Mega ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_come_back = new RegExp(/^(.+?), come back!$/);
-    var regex_tomax_guard = new RegExp(/^\(Max Guard started on the opposing (.+?)!\)$/);
-    var regex_max_guard = new RegExp(/^\(Max Guard started on (.+?)!\)$/);
-    var regex_key_stone = new RegExp(/^(The opposing )*(.+?)'s (.+?) is reacting to the Key Stone!/)
-    var regex_move_no_effect = new RegExp(/^\((The opposing )*([A-z -']+[A-z]) blocked the effect!\)$/);
-    var regex_topointed_stones = new RegExp(/^Pointed stones dug into the opposing (.+?)!$/);
-    var regex_pointed_stones = new RegExp(/^Pointed stones dug into (.+?)!$/);
-    var regex_toafter_taunt = new RegExp(/^The opposing (.+?) can't use ([A-z- ]+?) after the taunt!$/);
-    var regex_after_taunt = new RegExp(/^(.+?) can't use ([A-z- ]+?) after the taunt!$/);
-    var regex_chn = new RegExp(/^\u4E00-\u9FA5+$/);
-    var regex_go = new RegExp(/^Go! (.+?) \($/);
-    var regex_tog6_mega = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) is reacting to (.+?)'s Mega Bracelet!$/);
-    var regex_g6_mega = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) is reacting to (.+?)'s Mega Bracelet!$/);
-    var regex_tocannot_use2 = new RegExp(/^The opposing (.+?) can't use its sealed ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_cannot_use2 = new RegExp(/^(.+?) can't use its sealed ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_seconds_left2 = new RegExp(/^(.+?) has ([0-9]+?) seconds left this turn.$/);
-    var regex_seconds_left = new RegExp(/^(.+?) has ([0-9]+?) seconds left.$/);
-    var regex_timer_on = new RegExp(/^Battle timer is ON: inactive players will automatically lose when time's up. \(requested by (.+?)\)$/);
-    var regex_reset_timer = new RegExp(/^The timer can't be re-enabled so soon after disabling it \(([0-9]+?) seconds remaining\)./)
-    var regex_team = new RegExp(/^(.+?)'s team:$/);
-    var regex_tofuture_sight = new RegExp(/^The opposing (.+?) foresaw an attack!$/);
-    var regex_future_sight = new RegExp(/^(.+?) foresaw an attack!$/);
-    var regex_toFutureSight_DoomDesire_attack = new RegExp(/^The opposing (.+?) took the (Future Sight|Doom Desire) attack!$/);
-    var regex_FutureSight_DoomDesire_attack = new RegExp(/^(.+?) took the (Future Sight|Doom Desire) attack!$/);
-    var regex_totype_change = new RegExp(/^The opposing (.+?)'s type changed to ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_type_change = new RegExp(/^(.+?)'s type changed to ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_hit_times = new RegExp(/^The Pokemon was hit ([0-9]+?) times!$/);
-    var regex_battle = new RegExp(/^(.+?) wants to battle!$/);
-    var regex_cancelled = new RegExp(/^(.+?) cancelled the challenge.$/);
-    var regex_waitingavailable = new RegExp(/^Waiting for battles to become available(.+?)$/);
-    var regex_challengex = new RegExp(/^Challenge (.+?)?$/);
-    var regex_wftcy = new RegExp(/^Waiting for (.+?) to challenge you.$/);
-    var regex_waiting = new RegExp(/^Waiting for (.+?)$/);
-    var regex_accepted = new RegExp(/^(.+?) accepted the challenge, starting «$/);
-    var regex_forfeited = new RegExp(/^(.+?) forfeited.$/);
-    var regex_copyofuntitled2 = new RegExp(/^Copy of Copy of (Untitled|Box) (.+?)$/);
-    var regex_copyofuntitled = new RegExp(/^Copy of (Untitled|Box) (.+?)$/);
-    var regex_copyof = new RegExp(/^Copy of (.+?)$/);
-    var regex_untitled = new RegExp(/^(Untitled|Box) (.+?)$/);
-    var regex_newteam = new RegExp(/^ New (.+?) Team$/);
-    var regex_users2 = new RegExp(/^\(([0-9]+?) users\)$/);
-    var regex_users = new RegExp(/^([0-9]+?) users$/);
-    var regex_theopposingfainted = new RegExp(/^The opposing (.+?) fainted!$/);
-    var regex_fainted = new RegExp(/^(.+?) fainted!$/);
-    var regex_wish = new RegExp(/^(.+?)'s wish came true!$/);
-    var regex_doestaffecttd = new RegExp(/^It doesn't affect the opposing (.+?)...$/);
-    var regex_doestaffect = new RegExp(/^It doesn't affect (.+?)...$/);
-    var regex_younoteams = new RegExp(/^You have no (.+?) teams$/);
-    var regex_youdontha = new RegExp(/^you don't have any (.+?) teams$/);
-    var regex_theinverted = new RegExp(/^The opposing (.+?)'s stat changes were inverted!$/);
-    var regex_inverted = new RegExp(/^(.+?)'s stat changes were inverted!$/);
-    var regex_rejectchallenge = new RegExp(/^(.+?) rejected the challenge.$/);
-    var regex_thesustookto = new RegExp(/^The substitute took damage for the opposing (.+?)!$/);
-    var regex_thesustook = new RegExp(/^The substitute took damage for (.+?)!$/);
-    var regex_totohbawi = new RegExp(/^The opposing (.+?) has been afflicted with an infestation by the opposing (.+?)!$/);
-    var regex_tohbawi2 = new RegExp(/^The opposing (.+?) has been afflicted with an infestation by (.+?)!$/);
-    var regex_tohbawi = new RegExp(/^(.+?) has been afflicted with an infestation by the opposing (.+?)!$/);
-    var regex_hbawi = new RegExp(/^(.+?) has been afflicted with an infestation by (.+?)!$/);
-    var regex_iseoto = new RegExp(/^It's super effective on the opposing (.+?)!$/);
-    var regex_iseo = new RegExp(/^It's super effective on (.+?)!$/);
-    var regex_isnveoto = new RegExp(/^It's not very effective on the opposing (.+?).$/);
-    var regex_isnveo = new RegExp(/^It's not very effective on (.+?).$/);
-    var regex_achoto = new RegExp(/^A critical hit on the opposing (.+?)!$/);
-    var regex_acho = new RegExp(/^A critical hit on (.+?)!$/);
-    var regex_willswitchin = new RegExp(/^([A-z0-9,'.()% ’:-]+?) will switch in, replacing ([A-z0-9,'.()% ’:-]+?).$/);
-    var regex_uteamsvf = new RegExp(/^Your team is valid for (.+?).$/);
-    var regex_Metronome = new RegExp(/^Waggling a finger let it use ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_iatbabi = new RegExp(/^(.+?) is about to be attacked by its ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_toiatbabi = new RegExp(/^The opposing (.+?) is about to be attacked by its ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_toctop2 = new RegExp(/^The opposing (.+?) corroded the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_toctop = new RegExp(/^The opposing (.+?) corroded (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_ctop = new RegExp(/^(.+?) corroded the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_ctop2 = new RegExp(/^(.+?) corroded (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_biftato = new RegExp(/^But it failed to affect the opposing (.+?)!$/);
-    var regex_bifta = new RegExp(/^But it failed to affect (.+?)!$/);
-    var regex_toshpif = new RegExp(/^The opposing (.+?)'s HP is full!$/);
-    var regex_shpif = new RegExp(/^(.+?)'s HP is full!$/);
-    var regex_tobiuiz = new RegExp(/^The opposing (.+?) boosted its ([A-z0-9,'.() ’:-]+?) (drastically | )using its Z-Power!$/);
-    var regex_biuiz = new RegExp(/^(.+?) boosted its ([A-z0-9,'.() ’:-]+?) (drastically | )using its Z-Power!$/);
-    var regex_thwctfto = new RegExp(/^The healing wish came true for the opposing (.+?)!$/);
-    var regex_thwctf = new RegExp(/^The healing wish came true for (.+?)!$/);
-    var regex_sfwhrtorm = new RegExp(/^(.+?)'s fervent wish has reached the opposing ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_sfwhrrm = new RegExp(/^(.+?)'s fervent wish has reached ([A-z0-9,'.() ’:-]+?)!$/);
+        //  \s
 
-    var regex_protosynthesisto = new RegExp(/^The harsh sunlight activated the opposing (.+?)'s Protosynthesis!$/);
-    var regex_protosynthesis = new RegExp(/^The harsh sunlight activated (.+?)'s Protosynthesis!$/);
-    var regex_protosynthesisoffto = new RegExp(/^The effects of the opposing (.+?)'s Protosynthesis wore off!$/);
-    var regex_protosynthesisoff = new RegExp(/^The effects of (.+?)'s Protosynthesis wore off!$/);
-    var regex_quarkdrive = new RegExp(/^The Electric Terrain activated (.+?)'s Quark Drive!$/);
-    var regex_toquarkdrive = new RegExp(/^The Electric Terrain activated the opposing (.+?)'s Quark Drive!$/);
-    var regex_quarkdriveoff = new RegExp(/^The effects of (.+?)'s Quark Drive wore off!$/);
-    var regex_toquarkdriveoff = new RegExp(/^The effects of the opposing (.+?)'s Quark Drive wore off!$/);
-    var regex_toelectric_seed = new RegExp(/^The Electric Seed (sharply raised|raised|lowered) the opposing (.+?)'s Defense!$/);
-    var regex_electric_seed = new RegExp(/^The Electric Seed (sharply raised|raised|lowered) (.+?)'s Defense!$/);
-    var regex_tograssy_seed = new RegExp(/^The Grassy Seed (sharply raised|raised|lowered) the opposing (.+?)'s Defense!$/);
-    var regex_grassy_seed = new RegExp(/^The Grassy Seed (sharply raised|raised|lowered) (.+?)'s Defense!$/);
-    var regex_topsychic_seed = new RegExp(/^The Psychic Seed (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Def!$/);
-    var regex_psychic_seed = new RegExp(/^The Psychic Seed (sharply raised|raised|lowered) (.+?)'s Sp. Def!$/);
-    var regex_tomisty_seed = new RegExp(/^The Misty Seed (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Def!$/);
-    var regex_misty_seed = new RegExp(/^The Misty Seed (sharply raised|raised|lowered) (.+?)'s Sp. Def!$/);
-    var regex_tobroke = new RegExp(/^It broke through the opposing (.+?)'s protection!$/);
-    var regex_broke = new RegExp(/^It broke through (.+?)'s protection!$/);
-    var regex_totoredcard = new RegExp(/^The opposing (.+?) held up its Red Card against the opposing (.+?)!$/);
-    var regex_toredcard2 = new RegExp(/^The opposing (.+?) held up its Red Card against (.+?)!$/);
-    var regex_toredcard = new RegExp(/^(.+?) held up its Red Card against the opposing (.+?)!$/);
-    var regex_redcard = new RegExp(/^(.+?) held up its Red Card against (.+?)!$/);
-    var regex_towindpower = new RegExp(/^Being hit by Tailwind charged the opposing (.+?) with power!$/);
-    var regex_windpower = new RegExp(/^Being hit by Tailwind charged (.+?) with power!$/);
-    var regex_torevivalblessing = new RegExp(/^The opposing (.+?) was revived and is ready to fight again!$/);
-    var regex_revivalblessing = new RegExp(/^(.+?) was revived and is ready to fight again!$/);
-    var regex_toclearamulet = new RegExp(/^The effects of the opposing (.+?)'s Clear Amulet prevent its stats from being lowered!$/);
-    var regex_clearamulet = new RegExp(/^The effects of (.+?)'s Clear Amulet prevent its stats from being lowered!$/);
-    var regex_toskullbash = new RegExp(/^The opposing (.+?) tucked in its head!$/);
-    var regex_skullbash = new RegExp(/^(.+?) tucked in its head!$/);
-    var regex_totofrisk = new RegExp(/^The opposing (.+?) frisked the opposing (.+?) and found its (.+?)!$/);
-    var regex_tofrisk2 = new RegExp(/^The opposing (.+?) frisked (.+?) and found its (.+?)!$/);
-    var regex_tofrisk = new RegExp(/^(.+?) frisked the opposing (.+?) and found its (.+?)!$/);
-    var regex_frisk = new RegExp(/^(.+?) frisked (.+?) and found its (.+?)!$/);
-    var regex_totopsychup = new RegExp(/^The opposing (.+?) copied the opposing (.+?)'s stat changes!$/);
-    var regex_topsychup2 = new RegExp(/^The opposing (.+?) copied (.+?)'s stat changes!$/);
-    var regex_topsychup = new RegExp(/^(.+?) copied the opposing (.+?)'s stat changes!$/);
-    var regex_psychup = new RegExp(/^(.+?) copied (.+?)'s stat changes!$/);
-    var regex_toencore = new RegExp(/^The opposing (.+?)'s encore ended!$/);
-    var regex_encore = new RegExp(/^(.+?)'s encore ended!$/);
-    var regex_totocurse = new RegExp(/^The opposing (.+?) cut its own HP and put a curse on the opposing (.+?)!$/);
-    var regex_tocurse2 = new RegExp(/^The opposing (.+?) cut its own HP and put a curse on (.+?)!$/);
-    var regex_tocurse = new RegExp(/^(.+?) cut its own HP and put a curse on the opposing (.+?)!$/);
-    var regex_curse = new RegExp(/^(.+?) cut its own HP and put a curse on (.+?)!$/);
-    var regex_toweakdamageberry = new RegExp(/^The ([A-z0-9,'.() ’:-]+?) weakened the damage to the opposing (.+?)!$/);
-    var regex_weakdamageberry = new RegExp(/^The ([A-z0-9,'.() ’:-]+?) weakened the damage to (.+?)!$/);
-    var regex_celebrate = new RegExp(/^Congratulations, (.+?)!$/);
-    var regex_tohpberry = new RegExp(/^The opposing (.+?) restored HP using its ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_hpberry = new RegExp(/^(.+?) restored HP using its ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_toaquaring = new RegExp(/^A veil of water restored the opposing (.+?)'s HP!$/);
-    var regex_aquaring = new RegExp(/^A veil of water restored (.+?)'s HP!$/);
-    var regex_tosalacberry = new RegExp(/^The Salac Berry (sharply raised|raised|lowered) the opposing (.+?)'s Speed!$/);
-    var regex_salacberry = new RegExp(/^The Salac Berry (sharply raised|raised|lowered) (.+?)'s Speed!$/);
-    var regex_toliechiberry = new RegExp(/^The Liechi Berry (sharply raised|raised|lowered) the opposing (.+?)'s Attack!$/);
-    var regex_liechiberry = new RegExp(/^The Liechi Berry (sharply raised|raised|lowered) (.+?)'s Attack!$/);
-    var regex_topetayaberry = new RegExp(/^The Petaya Berry (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Atk!$/);
-    var regex_petayaberry = new RegExp(/^The Petaya Berry (sharply raised|raised|lowered) (.+?)'s Sp. Atk!$/);
-    var regex_toapicotberry = new RegExp(/^The Apicot Berry (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Def!$/);
-    var regex_apicotberry = new RegExp(/^The Apicot Berry (sharply raised|raised|lowered) (.+?)'s Sp. Def!$/);
-    var regex_toganlonberry = new RegExp(/^The Ganlon Berry (sharply raised|raised|lowered) the opposing (.+?)'s Defense!$/);
-    var regex_ganlonberry = new RegExp(/^The Ganlon Berry (sharply raised|raised|lowered) (.+?)'s Defense!$/);
-    var regex_tomarangaberry = new RegExp(/^The Maranga Berry (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Def!$/);
-    var regex_marangaberry = new RegExp(/^The Maranga Berry (sharply raised|raised|lowered) (.+?)'s Sp. Def!$/);
-    var regex_toLuminous_Moss = new RegExp(/^The Luminous Moss (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Def!$/);
-    var regex_Luminous_Moss = new RegExp(/^The Luminous Moss (sharply raised|raised|lowered) (.+?)'s Sp. Def!$/);
-    var regex_toKee_Berry = new RegExp(/^The Kee Berry (sharply raised|raised|lowered) the opposing (.+?)'s Defense!$/);
-    var regex_Kee_Berry = new RegExp(/^The Kee Berry (sharply raised|raised|lowered) (.+?)'s Defense!$/);
-    var regex_toSnowball = new RegExp(/^The Snowball (sharply raised|raised|lowered) the opposing (.+?)'s Attack!$/);
-    var regex_Snowball = new RegExp(/^The Snowball (sharply raised|raised|lowered) (.+?)'s Attack!$/);
-    var regex_toAbsorb_Bulb = new RegExp(/^The Absorb Bulb (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Atk!$/);
-    var regex_Absorb_Bulb = new RegExp(/^The Absorb Bulb (sharply raised|raised|lowered) (.+?)'s Sp. Atk!$/);
-    var regex_toCell_Bettery = new RegExp(/^The Cell Battery (sharply raised|raised|lowered) the opposing (.+?)'s Attack!$/);
-    var regex_Cell_Bettery = new RegExp(/^The Cell Battery (sharply raised|raised|lowered) (.+?)'s Attack!$/);
-    var regex_toAdrenaline_Orb = new RegExp(/^The Adrenaline Orb (sharply raised|raised|lowered) the opposing (.+?)'s Speed!$/);
-    var regex_Adrenaline_Orb = new RegExp(/^The Adrenaline Orb (sharply raised|raised|lowered) (.+?)'s Speed!$/);
-    var regex_tothroatspray = new RegExp(/^The Throat Spray (sharply raised|raised|lowered) the opposing (.+?)'s Sp. Atk!$/);
-    var regex_throatspray = new RegExp(/^The Throat Spray (sharply raised|raised|lowered) (.+?)'s Sp. Atk!$/);
-    var regex_tosafety_goggles = new RegExp(/^The opposing (.+?) is not affected by ([A-z0-9,'.() ’:-]+?) thanks to its Safety Goggles!$/);
-    var regex_safety_goggles = new RegExp(/^(.+?) is not affected by ([A-z0-9,'.() ’:-]+?) thanks to its Safety Goggles!$/);
-    var regex_tostruggle = new RegExp(/^The opposing (.+?) has no moves left!$/);
-    var regex_struggle = new RegExp(/^(.+?) has no moves left!$/);
-    var regex_totohelpinghand = new RegExp(/^The opposing (.+?) is ready to help the opposing (.+?)!$/);
-    var regex_tohelpinghand2 = new RegExp(/^The opposing (.+?) is ready to help (.+?)!$/);
-    var regex_tohelpinghand = new RegExp(/^(.+?) is ready to help the opposing (.+?)!$/);
-    var regex_helpinghand = new RegExp(/^(.+?) is ready to help (.+?)!$/);
-    var regex_toclearsmog = new RegExp(/^The opposing (.+?)'s stat changes were removed!$/);
-    var regex_clearsmog = new RegExp(/^(.+?)'s stat changes were removed!$/);
-    var regex_toharvest = new RegExp(/^The opposing (.+?) harvested one ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_harvest = new RegExp(/^(.+?) harvested one ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_toallyswitch = new RegExp(/^The opposing (.+?) and the opposing (.+?) switched places!$/);
-    var regex_allyswitch = new RegExp(/^(.+?) and (.+?) switched places!$/);
-    var regex_toattract = new RegExp(/^The opposing (.+?) is in love with (.+?)!$/);
-    var regex_attract = new RegExp(/^(.+?) is in love with the opposing (.+?)!$/);
-    var regex_torecycle = new RegExp(/^The opposing (.+?) found one ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_recycle = new RegExp(/^(.+?) found one ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_tofling = new RegExp(/^The opposing (.+?) flung its ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_fling = new RegExp(/^(.+?) flung its ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_toobtained = new RegExp(/^The opposing (.+?) obtained one ([A-z0-9,'.() ’:-]+?).$/);
-    var regex_obtained = new RegExp(/^(.+?) obtained one ([A-z0-9,'.() ’:-]+?).$/);
-    var regex_totolockon = new RegExp(/^The opposing (.+?) took aim at the opposing (.+?)!$/);
-    var regex_tolockon2 = new RegExp(/^The opposing (.+?) took aim at (.+?)!$/);
-    var regex_tolockon = new RegExp(/^(.+?) took aim at the opposing (.+?)!$/);
-    var regex_lockon = new RegExp(/^(.+?) took aim at (.+?)!$/);
-    var regex_topoison = new RegExp(/^The opposing (.+?) was hurt by poison!$/);
-    var regex_poison = new RegExp(/^(.+?) was hurt by poison!$/);
-    var regex_toelectromorphosis = new RegExp(/^Being hit by ([A-z0-9,'.() ’:-]+?) charged the opposing (.+?) with power!$/);
-    var regex_electromorphosis = new RegExp(/^Being hit by ([A-z0-9,'.() ’:-]+?) charged (.+?) with power!$/);
-    var regex_torequestpending = new RegExp(/^You have (.+?) pending friend requests.$/);
-    var regex_requestpending = new RegExp(/^You have (.+?) friend request pending.$/);
-    var regex_blockchallenges = new RegExp(/^The user '(.+?)' is not accepting challenges right now.$/);
-    var regex_friendrequest = new RegExp(/^You have already sent a friend request to '(.+?)'.$/);
-    var regex_friendrequest2 = new RegExp(/^You sent a friend request to (.+?)!$/);
-    var regex_friendrequest3 = new RegExp(/^You sent a friend request to '(.+?)'.$/);
-    var regex_acceptfriendrequest = new RegExp(/^You accepted a friend request from "(.+?)".$/);
-    var regex_denyfriendrequest = new RegExp(/^You denied a friend request from '(.+?)'.$/);
-    var regex_removed = new RegExp(/^Removed friend '(.+?)'.$/);
-    var regex_removed2 = new RegExp(/^You do not have (.+?) friended.$/);
-    var regex_removed3 = new RegExp(/^You removed your friend request to '(.+?)'$/);
-    var regex_donothavefriendrequest = new RegExp(/^You do not have a friend request pending from '(.+?)'.$/);
-    var regex_donothavefriendrequest2 = new RegExp(/^You have no request pending from (.+?).$/);
-    var regex_accuracy = new RegExp(/^Accuracy: (.+?)$/);
-    var regex_basepower_double2 = new RegExp(/^Base power vs ([A-z0-9,'.() ’:-]+?): (\d{1,3}) to (\d{1,3})$/);
-    var regex_basepower_double = new RegExp(/^Base power vs ([A-z0-9,'.() ’:-]+?): (.+?)$/);
-    var regex_basepower2 = new RegExp(/^Base power: (\d{1,3}) to (\d{1,3})$/);
-    var regex_basepower = new RegExp(/^Base power: (.+?)$/);
-    var regex_disconnected = new RegExp(/^(.+?) disconnected and has (.+?) seconds to reconnect!$/);
-    var regex_disconnected2 = new RegExp(/^(.+?) disconnected and has a minute to reconnect!$/);
-    var regex_disconnected3 = new RegExp(/^(.+?) disconnected!$/);
-    var regex_reconnected = new RegExp(/^(.+?) reconnected and has (.+?) seconds left.$/);
-    var regex_usemove3 = new RegExp(/^([A-z0-9é,'.()% ’:-]+?) will use ([A-z0-9,'.() ’:-]+?) at your ([A-z0-9é,'.()% ’:-]+?).$/);
-    var regex_usemove2 = new RegExp(/^([A-z0-9é,'.()% ’:-]+?) will use ([A-z0-9,'.() ’:-]+?) at ([A-z0-9é,'.()% ’:-]+?).$/);
-    var regex_usemove = new RegExp(/^([A-z0-9é,'.()% ’:-]+?) will use ([A-z0-9,'.() ’:-]+?).$/);
-    var regex_reconnecte = new RegExp(/^(.+?) has (.+?) seconds to reconnect!$/);
-    var regex_toskyattack = new RegExp(/^The opposing (.+?) became cloaked in a harsh light!$/);
-    var regex_skyattack = new RegExp(/^(.+?) became cloaked in a harsh light!$/);
-    var regex_todisable = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) is disabled!$/);
-    var regex_disable = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) is disabled!$/);
-    var regex_todisable2 = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) was disabled!$/);
-    var regex_disable2 = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) was disabled!$/);
-    var regex_last10team = new RegExp(/^(.+?)'s last 10 teams$/);
-    var regex_uploadedon = new RegExp(/^Uploaded on: (.+?)$/);
-    var regex_format = new RegExp(/^Format: (.+?)$/);
-    var regex_views = new RegExp(/^Views: (.+?)$/);
-    var regex_teampassword = new RegExp(/^Team set to private. Password: (.+?)$/);
-    var regex_toskydrop = new RegExp(/^The opposing (.+?) took (.+?) into the sky!$/);
-    var regex_skydrop = new RegExp(/^(.+?) took the opposing (.+?) into the sky!$/);
-    var regex_inactivity = new RegExp(/^(.+?) lost due to inactivity.$/);
-    var regex_deleted = new RegExp(/^(.+?) deleted.$/);
-    var regex_nextdamage = new RegExp(/^ Next damage: ([0-9% .]+?)$/);
-    var regex_item_was_held_up = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); Red Card was held up\)$/);
-    var regex_item_was_popped = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); Air Balloon was popped\)$/);
-    var regex_item_was_eaten = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); ([A-z0-9,'.() ’:-]+?) was eaten\)$/);
-    var regex_item_was_consumed = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); ([A-z0-9,'.() ’:-]+?) was consumed\)$/);
-    var regex_item_was_flung = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); ([A-z0-9,'.() ’:-]+?) was flung\)$/);
-    var regex_item_was_stolen = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); ([A-z0-9,'.() ’:-]+?) was stolen\)$/);
-    var regex_item_was_knockedoff = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); ([A-z0-9,'.() ’:-]+?) was knocked off\)$/);
-    var regex_item_was_was = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \((stolen|tricked|disturbed|frisked|found|harvested); was ([A-z0-9,'.() ’:-]+?)\)$/);
-    var regex_item_held_up = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(Red Card was held up\)$/);
-    var regex_item_popped = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(Air Balloon was popped\)$/);
-    var regex_item_eaten = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(([A-z0-9,'.() ’:-]+?) was eaten\)$/);
-    var regex_item_consumed = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(([A-z0-9,'.() ’:-]+?) was consumed\)$/);
-    var regex_item_knockedoff = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(([A-z0-9,'.() ’:-]+?) was knocked off\)$/);
-    var regex_item_stolen = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(stolen\)$/);
-    var regex_item_found = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(found\)$/);
-    var regex_item_harvested = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(harvested\)$/);
-    var regex_item_tricked = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(tricked\)$/);
-    var regex_item_disturbed = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(disturbed\)$/);
-    var regex_item_frisked = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(frisked\)$/);
-    var regex_item_flung = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(([A-z0-9,'.() ’:-]+?) was flung\)$/);
-    var regex_item_stolen2 = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(([A-z0-9,'.() ’:-]+?) was stolen\)$/);
-    var regex_item_incinerated = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(([A-z0-9,'.() ’:-]+?) was incinerated\)$/);
-    var regex_base = new RegExp(/^ ([A-z0-9,'.() ’:-]+?) \(base: ([A-z0-9,'.() ’:-]+?)\)$/);
-    var regex_toonly = new RegExp(/^But the opposing (.+?) can't use the move!$/);
-    var regex_only = new RegExp(/^But (.+?) can't use the move!$/);
-    var regex_use3 = new RegExp(/^([A-z0-9,'.() ’:-]+?) will (Terastalliz|Mega Evolv)e, then use ([A-z0-9,'.() ’:-]+?) at your ([A-z0-9,'.() ’:-]+?).$/);
-    var regex_use2 = new RegExp(/^([A-z0-9,'.() ’:-]+?) will (Terastallize|Dynamax|Mega Evolve), then use ([A-z0-9,'.() ’:-]+?) at ([A-z0-9,'.() ’:-]+?).$/);
-    var regex_use = new RegExp(/^([A-z0-9,'.() ’:-]+?) will (Terastallize|Dynamax|Mega Evolve), then use ([A-z0-9,'.() ’:-]+?).$/);
-    var regex_tonatural_cure = new RegExp(/^\(The opposing (.+?) is cured by its Natural Cure!\)$/);
-    var regex_natural_cure = new RegExp(/^\((.+?) is cured by its Natural Cure!\)$/);
-    var regex_toacquired = new RegExp(/^The opposing (.+?) acquired ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_acquired = new RegExp(/^(.+?) acquired ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_namestarting = new RegExp(/^This battle is required to be public due to a player having a name starting with '(.+?)'.$/);
-    var regex_toComplete_Forme = new RegExp(/^The opposing (.+?) transformed into its Complete Forme!$/);
-    var regex_Complete_Forme = new RegExp(/^(.+?) transformed into its Complete Forme!$/);
-    var regex_totransformed_into = new RegExp(/^The opposing (.+?) transformed into (.+?)!$/);
-    var regex_transformed_into = new RegExp(/^(.+?) transformed into (.+?)!$/);
-    var regex_wouldtake = new RegExp(/^Would take if ability removed: ([0-9% .]+?)$/);
-    var regex_totofollwed = new RegExp(/^The opposing (.+?) followed the opposing (.+?)'s instructions!$/);
-    var regex_tofollwed2 = new RegExp(/^The opposing (.+?) followed (.+?)'s instructions!$/);
-    var regex_tofollwed = new RegExp(/^(.+?) followed the opposing (.+?)'s instructions!$/);
-    var regex_follwed = new RegExp(/^(.+?) followed (.+?)'s instructions!$/);
-    var regex_suspect = new RegExp(/^(.+?) is currently suspecting ([A-z0-9,'.() ’:-]+?)! For information on how to participate check out the $/);
-    var regex_changed = new RegExp(/^\(Changed forme: ([A-z0-9,'.() ’:-]+?)\)$/);
-    var regex_turnsasleep = new RegExp(/^ Turns asleep: (.+?)$/);
-    var regex_switchto = new RegExp(/^Switch ([A-z0-9,'.() ’:-]+?) to$/);
-    var regex_online = new RegExp(/^Online (.+?)$/);
-    var regex_offline = new RegExp(/^Offline (.+?)$/);
-    var regex_toterastallized = new RegExp(/^The opposing (.+?) has Terastallized into the ([A-z ’:-]+?)\-type!$/);
-    var regex_terastallized = new RegExp(/^(.+?) has Terastallized into the ([A-z0-9,'.() ’:-]+?)\-type!$/);
-    var regex_topressure = new RegExp(/^The opposing (.+?) is exerting its pressure!$/);
-    var regex_pressure = new RegExp(/^(.+?) is exerting its pressure!$/);
-    var regex_toseeded = new RegExp(/^The opposing (.+?) was seeded!$/);
-    var regex_seeded = new RegExp(/^(.+?) was seeded!$/);
-    var regex_topoisoned = new RegExp(/^The opposing (.+?) was (poisoned|badly poisoned)!$/);
-    var regex_poisoned = new RegExp(/^(.+?) was (poisoned|badly poisoned)!$/);
-    var regex_toslept = new RegExp(/^The opposing (.+?) slept and became healthy!$/);
-    var regex_slept = new RegExp(/^(.+?) slept and became healthy!$/);
-    var regex_toasleep = new RegExp(/^The opposing (.+?) is fast asleep.$/);
-    var regex_asleep = new RegExp(/^(.+?) is fast asleep.$/);
-    var regex_towoke_up = new RegExp(/^The opposing (.+?) woke up!$/);
-    var regex_woke_up = new RegExp(/^(.+?) woke up!$/);
-    var regex_toz_power = new RegExp(/^The opposing (.+?) surrounded itself with its Z-Power!$/);
-    var regex_z_power = new RegExp(/^(.+?) surrounded itself with its Z-Power!$/);
-    var regex_toz_move = new RegExp(/^The opposing (.+?) unleashes its full-force Z-Move!$/);
-    var regex_z_move = new RegExp(/^(.+?) unleashes its full-force Z-Move!$/);
-    var regex_toleech_seed = new RegExp(/^The opposing (.+?)'s health is sapped by Leech Seed!$/);
-    var regex_leech_seed = new RegExp(/^(.+?)'s health is sapped by Leech Seed!$/);
-    var regex_toradiating_aura = new RegExp(/^The opposing (.+?) is radiating a (dark|fairy) aura!$/);
-    var regex_radiating_aura = new RegExp(/^(.+?) is radiating a (dark|fairy) aura!$/);
-    var regex_toradiating_aura2 = new RegExp(/^The opposing (.+?) is radiating a (bursting|blazing) aura!$/);
-    var regex_radiating_aura2 = new RegExp(/^(.+?) is radiating a (bursting|blazing) aura!$/);
-    var regex_toprotected = new RegExp(/^The opposing (.+?) protected itself!$/);
-    var regex_protected = new RegExp(/^(.+?) protected itself!$/);
-    var regex_totaunt = new RegExp(/^The opposing (.+?) fell for the taunt!$/);
-    var regex_taunt = new RegExp(/^(.+?) fell for the taunt!$/);
-    var regex_topumped = new RegExp(/^The opposing (.+?) is getting pumped!$/);
-    var regex_pumped = new RegExp(/^(.+?) is getting pumped!$/);
-    var regex_toavoided = new RegExp(/^The opposing (.+?) avoided the attack!$/);
-    var regex_avoided = new RegExp(/^(.+?) avoided the attack!$/);
-    var regex_togrew_drowsy = new RegExp(/^The opposing (.+?) grew drowsy!$/);
-    var regex_grew_drowsy = new RegExp(/^(.+?) grew drowsy!$/);
-    var regex_tofell_straight_down = new RegExp(/^The opposing (.+?) fell straight down!$/);
-    var regex_fell_straight_down = new RegExp(/^(.+?) fell straight down!$/);
-    var regex_tomust_encore = new RegExp(/^The opposing (.+?) must do an encore!$/);
-    var regex_must_encore = new RegExp(/^(.+?) must do an encore!$/);
-    var regex_toencore_ended = new RegExp(/^The opposing (.+?)'s encore ended!$/);
-    var regex_encore_ended = new RegExp(/^(.+?)'s encore ended!$/);
-    var regex_toshook_off_taunt = new RegExp(/^The opposing (.+?) shook off the taunt!$/);
-    var regex_shook_off_taunt = new RegExp(/^(.+?) shook off the taunt!$/);
-    var regex_tovortex_fieryvortex = new RegExp(/^The opposing (.+?) became trapped in the (vortex|fiery vortex)!$/);
-    var regex_vortex_fieryvortex = new RegExp(/^(.+?) became trapped in the (vortex|fiery vortex)!$/);
-    var regex_toburned_frozen = new RegExp(/^The opposing (.+?) was (burned|frozen solid)!$/);
-    var regex_burned_frozen = new RegExp(/^(.+?) was (burned|frozen solid)!$/);
-    var regex_tospikes = new RegExp(/^The opposing (.+?) was hurt by the spikes!$/);
-    var regex_spikes = new RegExp(/^(.+?) was hurt by the spikes!$/);
-    var regex_towas_cured_of = new RegExp(/^The opposing (.+?) was cured of (Freeze|Burn|Sleep|paralysis|its poisoning)!$/);
-    var regex_was_cured_of = new RegExp(/^(.+?) was cured of (Freeze|Burn|Sleep|paralysis|its poisoning)!$/);
-    var regex_toput_in_substitute = new RegExp(/^The opposing (.+?) put in a substitute!$/);
-    var regex_put_in_substitute = new RegExp(/^(.+?) put in a substitute!$/);
-    var regex_tohp_restored = new RegExp(/^The opposing (.+?) had its HP restored.$/);
-    var regex_hp_restored = new RegExp(/^(.+?) had its HP restored.$/);
-    var regex_tohp_restored2 = new RegExp(/^The opposing (.+?)'s HP was restored.$/);
-    var regex_hp_restored2 = new RegExp(/^(.+?)'s HP was restored.$/);
-    var regex_tohp_restored3 = new RegExp(/^The opposing (.+?)'s HP was restored by the Z-Power!$/);
-    var regex_hp_restored3 = new RegExp(/^(.+?)'s HP was restored by the Z-Power!$/);
-    var regex_totransformed = new RegExp(/^The opposing (.+?) transformed!$/);
-    var regex_transformed = new RegExp(/^(.+?) transformed!$/);
-    var regex_toconfused2 = new RegExp(/^The opposing (.+?) is confused!$/);
-    var regex_confused2 = new RegExp(/^(.+?) is confused!$/);
-    var regex_toconfused = new RegExp(/^The opposing (.+?) became confused!$/);
-    var regex_confused = new RegExp(/^(.+?) became confused!$/);
-    var regex_tofell_asleep = new RegExp(/^The opposing (.+?) fell asleep!$/);
-    var regex_fell_asleep = new RegExp(/^(.+?) fell asleep!$/);
-    var regex_tocanno_longer_escape = new RegExp(/^The opposing (.+?) can no longer escape!$/);
-    var regex_canno_longer_escape = new RegExp(/^(.+?) can no longer escape!$/);
-    var regex_tomist_safeguard = new RegExp(/^The opposing (.+?) is protected by (the mist|Safeguard)!$/);
-    var regex_mist_safeguard = new RegExp(/^(.+?) is protected by (the mist|Safeguard)!$/);
-    var regex_toprotosynthesis_quarkdrive = new RegExp(/^The opposing (.+?) used its Booster Energy to activate (Protosynthesis|its Quark Drive)!$/);
-    var regex_protosynthesis_quarkdrive = new RegExp(/^(.+?) used its Booster Energy to activate (Protosynthesis|its Quark Drive)!$/);
-    var regex_toair_light = new RegExp(/^The opposing (.+?) became cloaked in (freezing air|a freezing light)!$/);
-    var regex_air_light = new RegExp(/^(.+?) became cloaked in (freezing air|a freezing light)!$/);
-    var regex_todryskin_solarpower = new RegExp(/^The opposing (.+?) was hurt by its (Dry Skin|Solar Power).$/);
-    var regex_dryskin_solarpower = new RegExp(/^(.+?) was hurt by its (Dry Skin|Solar Power).$/);
-    var regex_todrowsing = new RegExp(/^The opposing (.+?) is drowsing!$/);
-    var regex_drowsing = new RegExp(/^(.+?) is drowsing!$/);
-    var regex_tobreaks_mold = new RegExp(/^The opposing (.+?) breaks the mold!$/);
-    var regex_breaks_mold = new RegExp(/^(.+?) breaks the mold!$/);
-    var regex_toendured_hit = new RegExp(/^The opposing (.+?) is endured the hit!$/);
-    var regex_endured_hit = new RegExp(/^(.+?) is endured the hit!$/);
-    var regex_toendured_hit2 = new RegExp(/^The opposing (.+?) endured the hit!$/);
-    var regex_endured_hit2 = new RegExp(/^(.+?) endured the hit!$/);
-    var regex_toburned_itself = new RegExp(/^The opposing (.+?) burned itself out!$/);
-    var regex_burned_itself = new RegExp(/^(.+?) burned itself out!$/);
-    var regex_toair_balloon = new RegExp(/^The opposing (.+?) floats in the air with its Air Balloon!$/);
-    var regex_air_balloon = new RegExp(/^(.+?) floats in the air with its Air Balloon!$/);
-    var regex_toalready_confused = new RegExp(/^The opposing (.+?) is already confused!$/);
-    var regex_already_confused = new RegExp(/^(.+?) is already confused!$/);
-    var regex_toswirling_magma = new RegExp(/^The opposing (.+?) became trapped by swirling magma!$/);
-    var regex_swirling_magma = new RegExp(/^(.+?) became trapped by swirling magma!$/);
-    var regex_toquicksand = new RegExp(/^The opposing (.+?) became trapped by the quicksand!$/);
-    var regex_quicksand = new RegExp(/^(.+?) became trapped by the quicksand!$/);
-    var regex_toconfused_fatigue = new RegExp(/^The opposing (.+?) became confused due to fatigue!$/);
-    var regex_confused_fatigue = new RegExp(/^(.+?) became confused due to fatigue!$/);
-    var regex_tobecame_confused = new RegExp(/^The opposing (.+?) became confused!$/);
-    var regex_became_confused = new RegExp(/^(.+?) became confused!$/);
-    var regex_toprevented_healing = new RegExp(/^The opposing (.+?) was prevented from healing!$/);
-    var regex_prevented_healing = new RegExp(/^(.+?) was prevented from healing!$/);
-    var regex_toquick_draw = new RegExp(/^Quick Draw made the opposing (.+?) move faster!$/);
-    var regex_quick_draw = new RegExp(/^Quick Draw made (.+?) move faster!$/);
-    var regex_tosalt_cured = new RegExp(/^The opposing (.+?) is being salt cured!$/);
-    var regex_salt_cured = new RegExp(/^(.+?) is being salt cured!$/);
-    var regex_tobeing_withdrawn = new RegExp(/^\(The opposing (.+?) is being withdrawn...\)$/);
-    var regex_being_withdrawn = new RegExp(/^\((.+?) is being withdrawn...\)$/);
-    var regex_toeject_pack = new RegExp(/^The opposing (.+?) is switched out by the Eject Pack!$/);
-    var regex_eject_pack = new RegExp(/^(.+?) is switched out by the Eject Pack!$/);
-    var regex_toeject_button = new RegExp(/^The opposing (.+?) is switched out with the Eject Button!$/);
-    var regex_eject_button = new RegExp(/^(.+?) is switched out with the Eject Button!$/);
-    var regex_topower_herb = new RegExp(/^The opposing (.+?) became fully charged due to its Power Herb!$/);
-    var regex_power_herb = new RegExp(/^(.+?) became fully charged due to its Power Herb!$/);
-    var regex_towhite_herb = new RegExp(/^The opposing (.+?) returned its status to normal using its White Herb!$/);
-    var regex_white_herb = new RegExp(/^(.+?) returned its status to normal using its White Herb!$/);
-    var regex_tofocussash_focusband = new RegExp(/^The opposing (.+?) hung on using its Focus (Sash|Band)!$/);
-    var regex_focussash_focusband = new RegExp(/^(.+?) hung on using its Focus (Sash|Band)!$/);
-    var regex_toair_balloon_popped = new RegExp(/^The opposing (.+?)'s Air Balloon popped!$/);
-    var regex_air_balloon_popped = new RegExp(/^(.+?)'s Air Balloon popped!$/);
-    var regex_toshell_gleam = new RegExp(/^The opposing (.+?) made its shell gleam! It's distorting type matchups!$/);
-    var regex_shell_gleam = new RegExp(/^(.+?) made its shell gleam! It's distorting type matchups!$/);
-    var regex_toquick_claw = new RegExp(/^The opposing (.+?) can act faster than normal, thanks to its Quick Claw!$/);
-    var regex_quick_claw = new RegExp(/^(.+?) can act faster than normal, thanks to its Quick Claw!$/);
-    var regex_tosupreme_overlord = new RegExp(/^The opposing (.+?) gained strength from the fallen!$/);
-    var regex_supreme_overlord = new RegExp(/^(.+?) gained strength from the fallen!$/);
-    var regex_toabsorbed_light = new RegExp(/^The opposing (.+?) absorbed light!$/);
-    var regex_absorbed_light = new RegExp(/^(.+?) absorbed light!$/);
-    var regex_toalready_burned = new RegExp(/^The opposing (.+?) is already burned!$/);
-    var regex_already_burned = new RegExp(/^(.+?) is already burned!$/);
-    var regex_tosticky_candy_syrup = new RegExp(/^The opposing (.+?) got covered in sticky candy syrup!$/);
-    var regex_sticky_candy_syrup = new RegExp(/^(.+?) got covered in sticky candy syrup!$/);
-    var regex_togoing_all = new RegExp(/^The opposing (.+?) is going all out for this attack!$/);
-    var regex_going_all = new RegExp(/^(.+?) is going all out for this attack!$/);
-    var regex_tocreate_decoy = new RegExp(/^The opposing (.+?) shed its tail to create a decoy!$/);
-    var regex_create_decoy = new RegExp(/^(.+?) shed its tail to create a decoy!$/);
-    var regex_tocut_hp2 = new RegExp(/^\(The opposing (.+?) cut its own HP to power up its move!\)$/);
-    var regex_cut_hp2 = new RegExp(/^\((.+?) cut its own HP to power up its move!\)$/);
-    var regex_tocut_hp = new RegExp(/^The opposing (.+?) cut its own HP to power up its move!$/);
-    var regex_cut_hp = new RegExp(/^(.+?) cut its own HP to power up its move!$/);
-    var regex_toloses_flying = new RegExp(/^\(The opposing (.+?) loses Flying type this turn.\)$/);
-    var regex_loses_flying = new RegExp(/^\((.+?) loses Flying type this turn.\)$/);
-    var regex_toreceived_encore = new RegExp(/^The opposing (.+?) received an encore!$/);
-    var regex_received_encore = new RegExp(/^(.+?) received an encore!$/);
-    var regex_totoxic_orb = new RegExp(/^The opposing (.+?) was badly poisoned by the Toxic Orb!$/);
-    var regex_toxic_orb = new RegExp(/^(.+?) was badly poisoned by the Toxic Orb!$/);
-    var regex_tosticky_web = new RegExp(/^The opposing (.+?) was caught in a sticky web!$/);
-    var regex_sticky_web = new RegExp(/^(.+?) was caught in a sticky web!$/);
-    var regex_tonot_lowered2 = new RegExp(/^The opposing (.+?)'s stats were not lowered!$/);
-    var regex_not_lowered2 = new RegExp(/^(.+?)'s stats were not lowered!$/);
-    var regex_tocant_use_item = new RegExp(/^The opposing (.+?) can't use items anymore!$/);
-    var regex_cant_use_item = new RegExp(/^(.+?) can't use items anymore!$/);
-    var regex_toheal_block_off = new RegExp(/^The opposing (.+?)'s Heal Block wore off!$/);
-    var regex_heal_block_off = new RegExp(/^(.+?)'s Heal Block wore off!$/);
-    var regex_torestored_littlehp_using = new RegExp(/^The opposing (.+?) restored a little HP using its (Leftovers|Shell Bell|Black Sludge)!$/);
-    var regex_restored_littlehp_using = new RegExp(/^(.+?) restored a little HP using its (Leftovers|Shell Bell|Black Sludge)!$/);
-    var regex_toparalyzed_cant_move = new RegExp(/^The opposing (.+?) is paralyzed! It can't move!$/);
-    var regex_paralyzed_cant_move = new RegExp(/^(.+?) is paralyzed! It can't move!$/);
-    var regex_toparalyzed_maybe_unable_move = new RegExp(/^The opposing (.+?) is paralyzed! It may be unable to move!$/);
-    var regex_paralyzed_maybe_unable_move = new RegExp(/^(.+?) is paralyzed! It may be unable to move!$/);
-    var regex_tosealed_moves = new RegExp(/^The opposing (.+?) sealed any moves its target shares with it!$/);
-    var regex_sealed_moves = new RegExp(/^(.+?) sealed any moves its target shares with it!$/);
-    var regex_tochose_doom = new RegExp(/^The opposing (.+?) chose Doom Desire as its destiny!$/);
-    var regex_chose_doom = new RegExp(/^(.+?) chose Doom Desire as its destiny!$/);
-    var regex_toelectromagnetism = new RegExp(/^The opposing (.+?) levitated with electromagnetism!$/);
-    var regex_electromagnetism = new RegExp(/^(.+?) levitated with electromagnetism!$/);
-    var regex_tostockpiled_off = new RegExp(/^The opposing (.+?)'s stockpiled effect wore off!$/);
-    var regex_stockpiled_off = new RegExp(/^(.+?)'s stockpiled effect wore off!$/);
-    var regex_toillusion_off = new RegExp(/^The opposing (.+?)'s illusion wore off!$/);
-    var regex_illusion_off = new RegExp(/^(.+?)'s illusion wore off!$/);
-    var regex_tosnapped_confusion = new RegExp(/^The opposing (.+?) snapped it out of its confusion!$/);
-    var regex_snapped_confusion = new RegExp(/^(.+?) snapped it out of its confusion!$/);
-    var regex_tosnapped_confusion2 = new RegExp(/^The opposing (.+?) snapped out of its confusion!$/);
-    var regex_snapped_confusion2 = new RegExp(/^(.+?) snapped out of its confusion!$/);
-    var regex_tosnapped_confusion3 = new RegExp(/^The opposing (.+?) snapped out of confusion!$/);
-    var regex_snapped_confusion3 = new RegExp(/^(.+?) snapped out of confusion!$/);
-    var regex_tofuturistic_engine = new RegExp(/^The opposing (.+?) turned the ground into Electric Terrain, energizing its futuristic engine!$/);
-    var regex_futuristic_engine = new RegExp(/^(.+?) turned the ground into Electric Terrain, energizing its futuristic engine!$/);
-    var regex_tofuturistic_engine2 = new RegExp(/^The opposing (.+?) used the Electric Terrain to energize its futuristic engine!$/);
-    var regex_futuristic_engine2 = new RegExp(/^(.+?) used the Electric Terrain to energize its futuristic engine!$/);
-    var regex_toancient_pulse = new RegExp(/^The opposing (.+?) turned the sunlight harsh, sending its ancient pulse into a frenzy!$/);
-    var regex_ancient_pulse = new RegExp(/^(.+?) turned the sunlight harsh, sending its ancient pulse into a frenzy!$/);
-    var regex_toancient_pulse2 = new RegExp(/^The opposing (.+?) basked in the sunlight, sending its ancient pulse into a frenzy!$/);
-    var regex_ancient_pulse2 = new RegExp(/^(.+?) basked in the sunlight, sending its ancient pulse into a frenzy!$/);
-    var regex_toflinched = new RegExp(/^The opposing (.+?) flinched and couldn't move!$/);
-    var regex_flinched = new RegExp(/^(.+?) flinched and couldn't move!$/);
-    var regex_tolost_somehp = new RegExp(/^The opposing (.+?) lost some of its HP!$/);
-    var regex_lost_somehp = new RegExp(/^(.+?) lost some of its HP!$/);
-    var regex_todamaged_recoil = new RegExp(/^The opposing (.+?) is damaged by the recoil!$/);
-    var regex_damaged_recoil = new RegExp(/^(.+?) is damaged by the recoil!$/);
-    var regex_tobuffeted_sandstorm_hail = new RegExp(/^The opposing (.+?) is buffeted by the (sandstorm|hail)!$/);
-    var regex_buffeted_sandstorm_hail = new RegExp(/^(.+?) is buffeted by the (sandstorm|hail)!$/);
-    var regex_totormented = new RegExp(/^The opposing (.+?) is tormented!$/);
-    var regex_tormented = new RegExp(/^(.+?) is tormented!$/);
-    var regex_toafflicted_by_curse = new RegExp(/^The opposing (.+?) is afflicted by the curse!$/);
-    var regex_afflicted_by_curse = new RegExp(/^(.+?) is afflicted by the curse!$/);
-    var regex_tolocked_in_nightmare = new RegExp(/^The opposing (.+?) is locked in a nightmare!$/);
-    var regex_locked_in_nightmare = new RegExp(/^(.+?) is locked in a nightmare!$/);
-    var regex_todemaged_by_recoil = new RegExp(/^The opposing (.+?) was damaged by the recoil!$/);
-    var regex_demaged_by_recoil = new RegExp(/^(.+?) was damaged by the recoil!$/);
-    var regex_tomystical_moonlight = new RegExp(/^The opposing (.+?) became cloaked in mystical moonlight!$/);
-    var regex_mystical_moonlight = new RegExp(/^(.+?) became cloaked in mystical moonlight!$/);
-    var regex_towas_hurt2 = new RegExp(/^\(The opposing (.+?) was hurt!\)$/);
-    var regex_was_hurt2 = new RegExp(/^\((.+?) was hurt!\)$/);
-    var regex_towas_hurt = new RegExp(/^The opposing (.+?) was hurt!$/);
-    var regex_was_hurt = new RegExp(/^(.+?) was hurt!$/);
-    var regex_tofrozen_solid = new RegExp(/^The opposing (.+?) is frozen solid!$/);
-    var regex_frozen_solid = new RegExp(/^(.+?) is frozen solid!$/);
-    var regex_totwisted_dimensions = new RegExp(/^The opposing (.+?) twisted the dimensions!$/);
-    var regex_twisted_dimensions = new RegExp(/^(.+?) twisted the dimensions!$/);
-    var regex_toability_suppressed = new RegExp(/^The opposing (.+?)'s Ability was suppressed!$/);
-    var regex_ability_suppressed = new RegExp(/^(.+?)'s Ability was suppressed!$/);
-    var regex_tousedupall_electricity = new RegExp(/^The opposing (.+?) used up all of its electricity!$/);
-    var regex_usedupall_electricity = new RegExp(/^(.+?) used up all of its electricity!$/);
-    var regex_tono_retreat = new RegExp(/^The opposing (.+?) can no longer escape because it used No Retreat!$/);
-    var regex_no_retreat = new RegExp(/^(.+?) can no longer escape because it used No Retreat!$/);
-    var regex_dragged_out = new RegExp(/^(.+?) was dragged out!$/);
-    var regex_toenergy_drained = new RegExp(/^The opposing (.+?) had its energy drained!$/);
-    var regex_energy_drained = new RegExp(/^(.+?) had its energy drained!$/);
-    var regex_toabsorbs_attack = new RegExp(/^The opposing (.+?) absorbs the attack!$/);
-    var regex_absorbs_attack = new RegExp(/^(.+?) absorbs the attack!$/);
-    var regex_totook_attack = new RegExp(/^The opposing (.+?) took the attack!$/);
-    var regex_took_attack = new RegExp(/^(.+?) took the attack!$/);
-    var regex_tie = new RegExp(/^Tie between (.+?) and (.+?)!$/);
-    var regex_tounder_ground = new RegExp(/^The opposing (.+?) burrowed its way under the ground!$/);
-    var regex_under_ground = new RegExp(/^(.+?) burrowed its way under the ground!$/);
-    var regex_toflew_high = new RegExp(/^The opposing (.+?) flew up high!$/);
-    var regex_flew_high = new RegExp(/^(.+?) flew up high!$/);
-    var regex_tohurled_air = new RegExp(/^The opposing (.+?) was hurled into the air!$/);
-    var regex_hurled_air = new RegExp(/^(.+?) was hurled into the air!$/);
-    var regex_towhippedup_whirlwind = new RegExp(/^The opposing (.+?) whipped up a whirlwind!$/);
-    var regex_whippedup_whirlwind = new RegExp(/^(.+?) whipped up a whirlwind!$/);
-    var regex_tohid_underwater = new RegExp(/^The opposing (.+?) hid underwater!$/);
-    var regex_hid_underwater = new RegExp(/^(.+?) hid underwater!$/);
-    var regex_tosprang_up = new RegExp(/^The opposing (.+?) sprang up!$/);
-    var regex_sprang_up = new RegExp(/^(.+?) sprang up!$/);
-    var regex_toitem_cannot_removed = new RegExp(/^The opposing (.+?)'s item cannot be removed!$/);
-    var regex_item_cannot_removed = new RegExp(/^(.+?)'s item cannot be removed!$/);
-    var regex_tomove_nolonger_disabled = new RegExp(/^The opposing (.+?)'s move is no longer disabled!$/);
-    var regex_move_nolonger_disabled = new RegExp(/^(.+?)'s move is no longer disabled!$/);
-    var regex_toloafing_around = new RegExp(/^The opposing (.+?) is loafing around!$/);
-    var regex_loafing_around = new RegExp(/^(.+?) is loafing around!$/);
-    var regex_tomust_recharge = new RegExp(/^The opposing (.+?) must recharge!$/);
-    var regex_must_recharge = new RegExp(/^(.+?) must recharge!$/);
-    var regex_toheals_status = new RegExp(/^The opposing (.+?) heals its status!$/);
-    var regex_heals_status = new RegExp(/^(.+?) heals its status!$/);
-    var regex_tohealed_burn = new RegExp(/^The opposing (.+?) healed its burn!$/);
-    var regex_healed_burn = new RegExp(/^(.+?) healed its burn!$/);
-    var regex_toburn_was_healed = new RegExp(/^The opposing (.+?)'s burn was healed!$/);
-    var regex_burn_was_healed = new RegExp(/^(.+?)'s burn was healed!$/);
-    var regex_tocured_its_poison = new RegExp(/^The opposing (.+?) cured its poison!$/);
-    var regex_cured_its_poison = new RegExp(/^(.+?) cured its poison!$/);
-    var regex_tocured_its_paralysis = new RegExp(/^The opposing (.+?) cured its paralysis!$/);
-    var regex_cured_its_paralysis = new RegExp(/^(.+?) cured its paralysis!$/);
-    var regex_tostatus_cleared = new RegExp(/^The opposing (.+?)'s status cleared!$/);
-    var regex_status_cleared = new RegExp(/^(.+?)'s status cleared!$/);
-    var regex_totake_attacker_down = new RegExp(/^The opposing (.+?) is hoping to take its attacker down with it!$/);
-    var regex_take_attacker_down = new RegExp(/^(.+?) is hoping to take its attacker down with it!$/);
-    var regex_totook_attacker_down = new RegExp(/^The opposing (.+?) took its attacker down with it!$/);
-    var regex_took_attacker_down = new RegExp(/^(.+?) took its attacker down with it!$/);
-    var regex_toplanted_its_roots = new RegExp(/^The opposing (.+?) planted its roots!$/);
-    var regex_planted_its_roots = new RegExp(/^(.+?) planted its roots!$/);
-    var regex_toanchored_itself_roots = new RegExp(/^The opposing (.+?) anchored itself with its roots!$/);
-    var regex_anchored_itself_roots = new RegExp(/^(.+?) anchored itself with its roots!$/);
-    var regex_tosurrounded_veil_water = new RegExp(/^The opposing (.+?) surrounded itself with a veil of water!$/);
-    var regex_surrounded_veil_water = new RegExp(/^(.+?) surrounded itself with a veil of water!$/);
-    var regex_towas_subjected_torment = new RegExp(/^The opposing (.+?) was subjected to torment!$/);
-    var regex_was_subjected_torment = new RegExp(/^(.+?) was subjected to torment!$/);
-    var regex_tosupersweet_aroma = new RegExp(/^A supersweet aroma is wafting from the syrup covering the opposing (.+?)!$/);
-    var regex_supersweet_aroma = new RegExp(/^A supersweet aroma is wafting from the syrup covering (.+?)!$/);
-    var regex_toreversed_other_auras = new RegExp(/^The opposing (.+?) reversed all other Pokemon's auras!$/);
-    var regex_reversed_other_auras = new RegExp(/^(.+?) reversed all other Pokemon's auras!$/);
-    var regex_togot_over_infatuation = new RegExp(/^The opposing (.+?) got over its infatuation!$/);
-    var regex_got_over_infatuation = new RegExp(/^(.+?) got over its infatuation!$/);
-    var regex_tounderwent_heroic_transformation = new RegExp(/^The opposing (.+?) underwent a heroic transformation!$/);
-    var regex_underwent_heroic_transformation = new RegExp(/^(.+?) underwent a heroic transformation!$/);
-    var regex_toimmobilized_by_love = new RegExp(/^The opposing (.+?) is immobilized by love!$/);
-    var regex_immobilized_by_love = new RegExp(/^(.+?) is immobilized by love!$/);
-    var regex_toshuddered = new RegExp(/^The opposing (.+?) shuddered!$/);
-    var regex_shuddered = new RegExp(/^(.+?) shuddered!$/);
-    var regex_tomove_was_postponed = new RegExp(/^The opposing (.+?)'s move was postponed!$/);
-    var regex_move_was_postponed = new RegExp(/^(.+?)'s move was postponed!$/);
-    var regex_totightening_its_focus = new RegExp(/^The opposing (.+?) is tightening its focus!$/);
-    var regex_tightening_its_focus = new RegExp(/^(.+?) is tightening its focus!$/);
-    var regex_toset_shell_trap = new RegExp(/^The opposing (.+?) set a shell trap!$/);
-    var regex_set_shell_trap = new RegExp(/^(.+?) set a shell trap!$/);
-    var regex_toshrouded_itself_magiccoat = new RegExp(/^The opposing (.+?) shrouded itself with Magic Coat!$/);
-    var regex_shrouded_itself_magiccoat = new RegExp(/^(.+?) shrouded itself with Magic Coat!$/);
-    var regex_also_timer_to_on = new RegExp(/^(.+?) also wants the timer to be on.$/);
-    var regex_torestorehp_using_zpower = new RegExp(/^The opposing (.+?) will restore its replacement's HP using its Z-Power!$/);
-    var regex_restorehp_using_zpower = new RegExp(/^(.+?) will restore its replacement's HP using its Z-Power!$/);
-    var regex_tocuthp_maximized_attack = new RegExp(/^The opposing (.+?) cut its own HP and maximized its Attack!$/);
-    var regex_cuthp_maximized_attack = new RegExp(/^(.+?) cut its own HP and maximized its Attack!$/);
-    var regex_torestored_its_hp = new RegExp(/^The opposing (.+?) restored its HP.$/);
-    var regex_restored_its_hp = new RegExp(/^(.+?) restored its HP.$/);
-    var regex_torestorehp_using_zpower2 = new RegExp(/^The opposing (.+?) restored its HP using its Z-Power!$/);
-    var regex_restorehp_using_zpower2 = new RegExp(/^(.+?) restored its HP using its Z-Power!$/);
-    var regex_toreturned_stats_zpower = new RegExp(/^The opposing (.+?) returned its decreased stats to normal using its Z-Power!$/);
-    var regex_returned_stats_zpower = new RegExp(/^(.+?) returned its decreased stats to normal using its Z-Power!$/);
-    var regex_tostarted_heatingup_beak = new RegExp(/^The opposing (.+?) started heating up its beak!$/);
-    var regex_started_heatingup_beak = new RegExp(/^(.+?) started heating up its beak!$/);
-    var regex_toswitched_items_target = new RegExp(/^The opposing (.+?) switched items with its target!$/);
-    var regex_switched_items_target = new RegExp(/^(.+?) switched items with its target!$/);
-    var regex_tomoves_have_electrified = new RegExp(/^The opposing (.+?)'s moves have been electrified!$/);
-    var regex_moves_have_electrified = new RegExp(/^(.+?)'s moves have been electrified!$/);
-    var regex_totarget_bear_grudge = new RegExp(/^The opposing (.+?) wants its target to bear a grudge!$/);
-    var regex_target_bear_grudge = new RegExp(/^(.+?) wants its target to bear a grudge!$/);
-    var regex_tolearned = new RegExp(/^The opposing (.+?) learned ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_learned = new RegExp(/^(.+?) learned ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_tokept_going_crashed = new RegExp(/^The opposing (.+?) kept going and crashed!$/);
-    var regex_kept_going_crashed = new RegExp(/^(.+?) kept going and crashed!$/);
-    var regex_tothawed_out = new RegExp(/^The opposing (.+?) thawed out!$/);
-    var regex_thawed_out = new RegExp(/^(.+?) thawed out!$/);
-    var regex_tothroat_chop = new RegExp(/^The effects of Throat Chop prevent the opposing (.+?) from using certain moves!$/);
-    var regex_throat_chop = new RegExp(/^The effects of Throat Chop prevent (.+?) from using certain moves!$/);
-    var regex_toprotected_aromaticveil = new RegExp(/^The opposing (.+?) is protected by an aromatic veil!$/);
-    var regex_protected_aromaticveil = new RegExp(/^(.+?) is protected by an aromatic veil!$/);
-    var regex_tosurrounded_sweetness = new RegExp(/^The opposing (.+?) surrounded itself with a veil of sweetness!$/);
-    var regex_surrounded_sweetness = new RegExp(/^(.+?) surrounded itself with a veil of sweetness!$/);
-    var regex_tocant_asleep_sweetness = new RegExp(/^The opposing (.+?) can't fall asleep due to a veil of sweetness!$/);
-    var regex_cant_asleep_sweetness = new RegExp(/^(.+?) can't fall asleep due to a veil of sweetness!$/);
-    var regex_tolost_focus = new RegExp(/^The opposing (.+?) lost its focus and couldn't move!$/);
-    var regex_lost_focus = new RegExp(/^(.+?) lost its focus and couldn't move!$/);
-    var regex_toattack_missed2 = new RegExp(/^The opposing (.+?)'s attack missed!$/);
-    var regex_attack_missed2 = new RegExp(/^(.+?)'s attack missed!$/);
-    var regex_tocenter_attention_zpower = new RegExp(/^The opposing (.+?) became the center of attention using its Z-Power!$/);
-    var regex_center_attention_zpower = new RegExp(/^(.+?) became the center of attention using its Z-Power!$/);
-    var regex_tobond_trainer = new RegExp(/^The opposing (.+?) became fully charged due to its bond with its Trainer!$/);
-    var regex_bond_trainer = new RegExp(/^(.+?) became fully charged due to its bond with its Trainer!$/);
-    var regex_toprimal_reversion = new RegExp(/^The opposing (.+?)'s Primal Reversion! It reverted to its primal state!$/);
-    var regex_primal_reversion = new RegExp(/^(.+?)'s Primal Reversion! It reverted to its primal state!$/);
-    var regex_toabsorbing_power = new RegExp(/^The opposing (.+?) is absorbing power!$/);
-    var regex_absorbing_power = new RegExp(/^(.+?) is absorbing power!$/);
-    var regex_totaunt_off = new RegExp(/^The opposing (.+?)'s taunt wore off!$/);
-    var regex_taunt_off = new RegExp(/^(.+?)'s taunt wore off!$/);
-    var regex_tocustap_berry = new RegExp(/^The opposing (.+?) can act faster than normal, thanks to its Custap Berry!$/);
-    var regex_custap_berry = new RegExp(/^(.+?) can act faster than normal, thanks to its Custap Berry!$/);
-    var regex_totwo_abilities = new RegExp(/^The opposing (.+?) has two Abilities!$/);
-    var regex_two_abilities = new RegExp(/^(.+?) has two Abilities!$/);
-    var regex_toprotected_Terrain = new RegExp(/^The opposing (.+?) is protected by the (Electric|Misty|Psychic) Terrain!$/);
-    var regex_protected_Terrain = new RegExp(/^(.+?) is protected by the (Electric|Misty|Psychic) Terrain!$/);
-    var regex_tomirrorherb2 = new RegExp(/^The Mirror Herb drastically (raised|lowered) the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_mirrorherb2 = new RegExp(/^The Mirror Herb drastically (raised|lowered) (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_tomirrorherb = new RegExp(/^The Mirror Herb (sharply raised|raised) the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_mirrorherb = new RegExp(/^The Mirror Herb (sharply raised|raised) (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_tomirrorherb_Contrary = new RegExp(/^The Mirror Herb (harshly lowered|lowered) the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_mirrorherb_Contrary = new RegExp(/^The Mirror Herb (harshly lowered|lowered) (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_toStarf_Berry = new RegExp(/^The Starf Berry (sharply raised|drastically raised|harshly lowered) the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_Starf_Berry = new RegExp(/^The Starf Berry (sharply raised|drastically raised|harshly lowered) (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_toWeakness_Policy = new RegExp(/^The Weakness Policy (sharply raised|drastically raised|harshly lowered) the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_Weakness_Policy = new RegExp(/^The Weakness Policy (sharply raised|drastically raised|harshly lowered) (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_toRoom_Service = new RegExp(/^The Room Service lowered the opposing (.+?)'s Speed!$/);
-    var regex_Room_Service = new RegExp(/^The Room Service lowered (.+?)'s Speed!$/);
-    var regex_toabsorbed_electricity = new RegExp(/^The opposing (.+?) absorbed electricity!$/);
-    var regex_absorbed_electricity = new RegExp(/^(.+?) absorbed electricity!$/);
-    var regex_tospace_power = new RegExp(/^The opposing (.+?) is overflowing with space power!$/);
-    var regex_space_power = new RegExp(/^(.+?) is overflowing with space power!$/);
-    var regex_togravity = new RegExp(/^The opposing (.+?) couldn't stay airborne because of gravity!$/);
-    var regex_gravity = new RegExp(/^(.+?) couldn't stay airborne because of gravity!$/);
-    var regex_toWhite_Herb = new RegExp(/^The opposing (.+?) returned its stats to normal using its White Herb!$/);
-    var regex_White_Herb = new RegExp(/^(.+?) returned its stats to normal using its White Herb!$/);
-    var regex_todisguise_busted = new RegExp(/^The opposing (.+?)'s disguise was busted!$/);
-    var regex_disguise_busted = new RegExp(/^(.+?)'s disguise was busted!$/);
-    var regex_toswapped_abilities = new RegExp(/^The opposing (.+?) swapped Abilities with its target!$/);
-    var regex_swapped_abilities = new RegExp(/^(.+?) swapped Abilities with its target!$/);
-    var regex_tocharging_power = new RegExp(/^The opposing (.+?) began charging power!$/);
-    var regex_charging_power = new RegExp(/^(.+?) began charging power!$/);
-    var regex_tofell_love = new RegExp(/^The opposing (.+?) fell in love!$/);
-    var regex_fell_love = new RegExp(/^(.+?) fell in love!$/);
-    var regex_toasleep_paralyzed = new RegExp(/^The opposing (.+?) is already (asleep|paralyzed)!$/);
-    var regex_asleep_paralyzed = new RegExp(/^(.+?) is already (asleep|paralyzed)!$/);
-    var regex_toidentified = new RegExp(/^The opposing (.+?) was identified!$/);
-    var regex_identified = new RegExp(/^(.+?) was identified!$/);
-    var regex_toswitched_Attack_Defense = new RegExp(/^The opposing (.+?) switched its Attack and Defense!$/);
-    var regex_switched_Attack_Defense = new RegExp(/^(.+?) switched its Attack and Defense!$/);
-    var regex_toanchors_itself = new RegExp(/^The opposing (.+?) anchors itself!$/);
-    var regex_anchors_itself = new RegExp(/^(.+?) anchors itself!$/);
-    var regex_toanchored_suction_cups = new RegExp(/^The opposing (.+?) is anchored in place with its suction cups!$/);
-    var regex_anchored_suction_cups = new RegExp(/^(.+?) is anchored in place with its suction cups!$/);
-    var regex_tostopped_shielding_itself = new RegExp(/^\(the opposing (.+?) stopped shielding itself.\)$/);
-    var regex_stopped_shielding_itself = new RegExp(/^\((.+?) stopped shielding itself.\)$/);
-    var regex_toshielded_itself = new RegExp(/^\(the opposing (.+?) shielded itself.\)$/);
-    var regex_shielded_itself = new RegExp(/^\((.+?) shielded itself.\)$/);
-    var regex_tocriticalhit_zpower = new RegExp(/^The opposing (.+?) boosted its critical-hit ratio using its Z-Power!$/);
-    var regex_criticalhit_zpower = new RegExp(/^(.+?) boosted its critical-hit ratio using its Z-Power!$/);
-    var regex_tomaking_uproar = new RegExp(/^The opposing (.+?) is making an uproar!$/);
-    var regex_making_uproar = new RegExp(/^(.+?) is making an uproar!$/);
-    var regex_tocaused_uproar = new RegExp(/^The opposing (.+?) caused an uproar!$/);
-    var regex_caused_uproar = new RegExp(/^(.+?) caused an uproar!$/);
-    var regex_tomove_no_disabled = new RegExp(/^The opposing (.+?)'s move is no longer disabled!$/);
-    var regex_move_no_disabled = new RegExp(/^(.+?)'s move is no longer disabled!$/);
-    var regex_tocan_use_item = new RegExp(/^The opposing (.+?) can use items again!$/);
-    var regex_can_use_item = new RegExp(/^(.+?) can use items again!$/);
-    var regex_totorment_wore_off = new RegExp(/^The opposing (.+?)'s torment wore off!$/);
-    var regex_torment_wore_off = new RegExp(/^(.+?)'s torment wore off!$/);
-    var regex_toshared_power_target = new RegExp(/^The opposing (.+?) shared its power with the target!$/);
-    var regex_shared_power_target = new RegExp(/^(.+?) shared its power with the target!$/);
-    var regex_toshared_guard_target = new RegExp(/^The opposing (.+?) shared its guard with the target!$/);
-    var regex_shared_guard_target = new RegExp(/^(.+?) shared its guard with the target!$/);
-    var regex_toswitched_speed_target = new RegExp(/^The opposing (.+?) switched Speed with its target!$/);
-    var regex_switched_speed_target = new RegExp(/^(.+?) switched Speed with its target!$/);
-    var regex_toBright_light = new RegExp(/^Bright light is about to burst out of the opposing (.+?)!$/);
-    var regex_Bright_light = new RegExp(/^Bright light is about to burst out of (.+?)!$/);
-    var regex_toalready_poisoned = new RegExp(/^The opposing (.+?) is already poisoned.$/);
-    var regex_already_poisoned = new RegExp(/^(.+?) is already poisoned.$/);
-    var regex_toalready_paralyzed = new RegExp(/^The opposing (.+?) is already paralyzed.$/);
-    var regex_already_paralyzed = new RegExp(/^(.+?) is already paralyzed.$/);
-    var regex_toalready_frozen = new RegExp(/^The opposing (.+?) is already frozen solid!$/);
-    var regex_already_frozen = new RegExp(/^(.+?) is already frozen solid!$/);
-    var regex_tosketched = new RegExp(/^The opposing (.+?) sketched ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_sketched = new RegExp(/^(.+?) sketched ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_toshell_trap = new RegExp(/^The opposing (.+?)'s shell trap didn't work!$/);
-    var regex_shell_trap = new RegExp(/^(.+?)'s shell trap didn't work!$/);
-    var regex_toDynamax = new RegExp(/^\(The opposing (.+?)'s Dynamax!\)$/);
-    var regex_Dynamax = new RegExp(/^\((.+?)'s Dynamax!\)$/);
-    var regex_no_battle_on_right_now = new RegExp(/^No (.+?) battles are going on right now.$/);
-    var regex_tosubstitute_faded = new RegExp(/^The opposing (.+?)'s substitute faded!$/);
-    var regex_substitute_faded = new RegExp(/^(.+?)'s substitute faded!$/);
-    var regex_not_found = new RegExp(/^The user '(.+?)' was not found.$/);
-    var regex_Challenging = new RegExp(/^Challenging (.+?)...$/);
-    var regex_is_offline = new RegExp(/^User (.+?) is offline. If you still want to PM them, send the message again, or use \/offlinemsg.$/);
-    var regex_tolonger_tormented = new RegExp(/^The opposing (.+?) is no longer tormented!$/);
-    var regex_longer_tormented = new RegExp(/^(.+?) is no longer tormented!$/);
-    var regex_tocured_infatuation = new RegExp(/^The opposing (.+?) cured its infatuation using its Mental Herb!$/);
-    var regex_cured_infatuation = new RegExp(/^(.+?) cured its infatuation using its Mental Herb!$/);
-    var regex_torocky_helmet = new RegExp(/^The opposing (.+?) was hurt by the Rocky Helmet!$/);
-    var regex_rocky_helmet = new RegExp(/^(.+?) was hurt by the Rocky Helmet!$/);
-    var regex_toCourt_Change = new RegExp(/^The opposing (.+?) swapped the battle effects affecting each side of the field!$/);
-    var regex_Court_Change = new RegExp(/^(.+?) swapped the battle effects affecting each side of the field!$/);
-    var regex_toalready_substitute = new RegExp(/^The opposing (.+?) already has a substitute!$/);
-    var regex_already_substitute = new RegExp(/^(.+?) already has a substitute!$/);
-    var regex_tovanished_instantly = new RegExp(/^The opposing (.+?) vanished instantly!$/);
-    var regex_vanished_instantly = new RegExp(/^(.+?) vanished instantly!$/);
-    var regex_toheavy_lifted = new RegExp(/^The opposing (.+?) is too heavy to be lifted!$/);
-    var regex_heavy_lifted = new RegExp(/^(.+?) is too heavy to be lifted!$/);
-    var regex_touproar_kept = new RegExp(/^But the uproar kept the opposing (.+?) awake!$/);
-    var regex_uproar_kept = new RegExp(/^But the uproar kept (.+?) awake!$/);
-    var regex_tobraced_itself = new RegExp(/^The opposing (.+?) braced itself!$/);
-    var regex_braced_itself = new RegExp(/^(.+?) braced itself!$/);
-    var regex_toswitched_stat_target = new RegExp(/^The opposing (.+?) switched stat changes with its target!$/);
-    var regex_switched_stat_target = new RegExp(/^(.+?) switched stat changes with its target!$/);
-    var regex_toswitched_def_spd = new RegExp(/^The opposing (.+?) switched all changes to its Defense and Sp. Def with its target!$/);
-    var regex_switched_def_spd = new RegExp(/^(.+?) switched all changes to its Defense and Sp. Def with its target!$/);
-    var regex_toswitched_atk_spa = new RegExp(/^The opposing (.+?) switched all changes to its Attack and Sp. Atk with its target!$/);
-    var regex_switched_atk_spa = new RegExp(/^(.+?) switched all changes to its Attack and Sp. Atk with its target!$/);
-    var regex_torevealed = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) was revealed!$/);
-    var regex_revealed = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) was revealed!$/);
-    var regex_toGMax_Wildfire = new RegExp(/^The opposing (.+?) is burning up within G-Max Wildfire’s flames!$/);
-    var regex_GMax_Wildfire = new RegExp(/^(.+?) is burning up within G-Max Wildfire’s flames!$/);
-    var regex_no_energy = new RegExp(/^(.+?) has no energy left to battle!$/);
-    var regex_already_in_battle = new RegExp(/^(.+?) is already in battle!$/);
-    var regex_towaiting_move = new RegExp(/^The opposing (.+?) is waiting for (.+?)'s move...$/);
-    var regex_waiting_move = new RegExp(/^(.+?) is waiting for (.+?)'s move...$/);
-    var regex_tosea_fire = new RegExp(/^The opposing (.+?) was hurt by the sea of fire!$/);
-    var regex_sea_fire = new RegExp(/^(.+?) was hurt by the sea of fire!$/);
-    var regex_toTelepathy = new RegExp(/^The opposing (.+?) can't be hit by attacks from its ally Pokemon!$/);
-    var regex_Telepathy = new RegExp(/^(.+?) can't be hit by attacks from its ally Pokemon!$/);
-    var regex_toKey_Stone = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) is reacting to the Key Stone!$/);
-    var regex_Key_Stone = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) is reacting to the Key Stone!$/);
-    var regex_tobecame_AshGreninja = new RegExp(/^The opposing (.+?) became Ash-Greninja!$/);
-    var regex_became_AshGreninja = new RegExp(/^(.+?) became Ash-Greninja!$/);
-    var regex_crazy_house = new RegExp(/^(.+?) was captured by (.+?)!$/);
-    var regex_tomelted = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) melted the ice!$/);
-    var regex_melted = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) melted the ice!$/);
-    var regex_toelectromagnetism_woreoff = new RegExp(/^The opposing (.+?)'s electromagnetism wore off!$/);
-    var regex_electromagnetism_woreoff = new RegExp(/^(.+?)'s electromagnetism wore off!$/);
-    var regex_tocant_use_gravity = new RegExp(/^The opposing (.+?) can't use ([A-z0-9,'.() ’:-]+?) because of gravity!$/);
-    var regex_cant_use_gravity = new RegExp(/^The opposing (.+?) can't use ([A-z0-9,'.() ’:-]+?) because of gravity!$/);
-    var regex_tomaxed_Attack = new RegExp(/^The opposing (.+?) maxed its Attack!$/);
-    var regex_maxed_Attack = new RegExp(/^(.+?) maxed its Attack!$/);
-    var regex_tocenter_attention = new RegExp(/^The opposing (.+?) became the center of attention!$/);
-    var regex_center_attention = new RegExp(/^(.+?) became the center of attention!$/);
-    var regex_toHospitality = new RegExp(/^The opposing (.+?) drank down all the matcha that the opposing (.+?) made!$/);
-    var regex_Hospitality = new RegExp(/^(.+?) drank down all the matcha that (.+?) made!$/);
-    var regex_toRowap_Berry_Jaboca_Berry = new RegExp(/^The opposing (.+?) was hurt by (.+?)'s (Rowap|Jaboca) Berry!$/);
-    var regex_Rowap_Berry_Jaboca_Berry = new RegExp(/^(.+?) was hurt by the opposing (.+?)'s (Rowap|Jaboca) Berry!$/);
-    var regex_tostoring_energy = new RegExp(/^The opposing (.+?) is storing energy!$/);
-    var regex_storing_energy = new RegExp(/^(.+?) is storing energy!$/);
-    var regex_tounleashed_energy = new RegExp(/^The opposing (.+?) unleashed its energy!$/);
-    var regex_unleashed_energy = new RegExp(/^(.+?) unleashed its energy!$/);
-    var regex_tobecame_nimble = new RegExp(/^The opposing (.+?) became nimble!$/);
-    var regex_became_nimble = new RegExp(/^(.+?) became nimble!$/);
-    var regex_rejected_Open_Team_Sheet = new RegExp(/^(.+?) rejected open team sheets.$/);
-    var regex_agreed_Open_Team_Sheet = new RegExp(/^(.+?) has agreed to open team sheets.$/);
-    var regex_tosqueezed_wrapped = new RegExp(/^The opposing (.+?) was (squeezed|wrapped) by (.+?)!$/);
-    var regex_squeezed_wrapped = new RegExp(/^(.+?) was (squeezed|wrapped) by the opposing (.+?)!$/);
-    var regex_tounaffected = new RegExp(/^The opposing (.+?) is unaffected!$/);
-    var regex_unaffected = new RegExp(/^(.+?) is unaffected!$/);
-    var regex_toabsorbed_nutrients_roots = new RegExp(/^The opposing (.+?) absorbed nutrients with its roots!$/);
-    var regex_absorbed_nutrients_roots = new RegExp(/^(.+?) absorbed nutrients with its roots!$/);
-    var regex_tonot_lowered = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) was not lowered!$/);
-    var regex_not_lowered = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) was not lowered!$/);
-    var regex_totype_added = new RegExp(/^([A-z0-9,'.() ’:-]+?) type was added to the opposing (.+?)!$/);
-    var regex_type_added = new RegExp(/^([A-z0-9,'.() ’:-]+?) type was added to (.+?)!$/);
-    var regex_tocant_get_going = new RegExp(/^The opposing (.+?) can't get it going!$/);
-    var regex_cant_get_going = new RegExp(/^(.+?) can't get it going!$/);
-    var regex_tofinally_get_going = new RegExp(/^The opposing (.+?) finally got its act together!$/);
-    var regex_finally_get_going = new RegExp(/^(.+?) finally got its act together!$/);
-    var regex_towas_burned_up = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) was burned up!$/);
-    var regex_was_burned_up = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) was burned up!$/);
-    var regex_tosurrounded_veil_petals = new RegExp(/^The opposing (.+?) surrounded itself with a veil of petals!$/);
-    var regex_surrounded_veil_petals = new RegExp(/^(.+?) surrounded itself with a veil of petals!$/);
-    var regex_toAbility_became_Mummy = new RegExp(/^The opposing (.+?)'s Ability became Mummy!$/);
-    var regex_Ability_became_Mummy = new RegExp(/^(.+?)'s Ability became Mummy!$/);
-    var regex_toreturned_normal = new RegExp(/^\(The opposing (.+?) returned to normal!\)$/);
-    var regex_returned_normal = new RegExp(/^\((.+?) returned to normal!\)$/);
-    var regex_tolingering_aroma = new RegExp(/^A lingering aroma clings to the opposing (.+?)!$/);
-    var regex_lingering_aroma = new RegExp(/^A lingering aroma clings to (.+?)!$/);
-    var regex_totoReflect_Type = new RegExp(/^The opposing (.+?)'s type became the same as the opposing (.+?)'s type!$/);
-    var regex_toReflect_Type2 = new RegExp(/^The opposing (.+?)'s type became the same as (.+?)'s type!$/);
-    var regex_toReflect_Type = new RegExp(/^(.+?)'s type became the same as the opposing (.+?)'s type!$/);
-    var regex_Reflect_Type = new RegExp(/^(.+?)'s type became the same as (.+?)'s type!$/);
-    var regex_totaken_over = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) was taken over!$/);
-    var regex_taken_over = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) was taken over!$/);
-    var regex_toweaker_to_fire = new RegExp(/^The opposing (.+?) became weaker to fire!$/);
-    var regex_weaker_to_fire = new RegExp(/^(.+?) became weaker to fire!$/);
-    var regex_tocalmed_down = new RegExp(/^The opposing (.+?) calmed down.$/);
-    var regex_calmed_down = new RegExp(/^(.+?) calmed down.$/);
-    var regex_toFlash_Fire = new RegExp(/^The power of the opposing (.+?)'s Fire-type moves rose!$/);
-    var regex_Flash_Fire = new RegExp(/^The power of (.+?)'s Fire-type moves rose!$/);
-    var regex_towaiting_target_move = new RegExp(/^The opposing (.+?) is waiting for a target to make a move!$/);
-    var regex_waiting_target_move = new RegExp(/^(.+?) is waiting for a target to make a move!$/);
-    var regex_tosnatched_move = new RegExp(/^The opposing (.+?) snatched (.+?)'s move!$/);
-    var regex_snatched_move = new RegExp(/^(.+?) snatched the opposing (.+?)'s move!$/);
-    var regex_toMat_Block = new RegExp(/^The opposing (.+?) intends to flip up a mat and block incoming attacks!$/);
-    var regex_Mat_Block = new RegExp(/^(.+?) intends to flip up a mat and block incoming attacks!$/);
-    var regex_kicked_up_mat = new RegExp(/^([A-z0-9,'.() ’:-]+?) was blocked by the kicked-up mat!$/);
-    var regex_no_wants_timer_on = new RegExp(/^(.+?) no longer wants the timer on, but the timer is staying on because (.+?) still does.$/);
-    var regex_toGMax_Vine_Lash = new RegExp(/^The opposing (.+?) is hurt by G-Max Vine Lash’s ferocious beating!$/);
-    var regex_GMax_Vine_Lash = new RegExp(/^(.+?) is hurt by G-Max Vine Lash’s ferocious beating!$/);
-    var regex_toGMax_Cannonade = new RegExp(/^The opposing (.+?) is hurt by G-Max Cannonade’s vortex!$/);
-    var regex_GMax_Cannonade = new RegExp(/^(.+?) is hurt by G-Max Cannonade’s vortex!$/);
-    var regex_tosharp_steel = new RegExp(/^The sharp steel bit into the opposing (.+?)!$/);
-    var regex_sharp_steel = new RegExp(/^The sharp steel bit into (.+?)!$/);
-    var regex_already_selected = new RegExp(/^(.+?) is already selected!$/);
-    var regex_toOctolock = new RegExp(/^The opposing (.+?) can no longer escape because of Octolock!$/);
-    var regex_Octolock = new RegExp(/^(.+?) can no longer escape because of Octolock!$/);
-    var regex_areintheback5 = new RegExp(/^([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?) are in the back.$/);
-    var regex_areintheback4 = new RegExp(/^([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?) are in the back.$/);
-    var regex_areintheback3 = new RegExp(/^([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?) are in the back.$/);
-    var regex_areintheback2 = new RegExp(/^([A-z0-9é,'.()* ’:-]+?), ([A-z0-9é,'.()* ’:-]+?) are in the back.$/);
-    var regex_areintheback = new RegExp(/^([A-z0-9é,'.()* ’:-]+?) are in the back.$/);
-    var regex_toPluck_BugBite = new RegExp(/^The opposing (.+?) stole and ate its target's ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_Pluck_BugBite = new RegExp(/^(.+?) stole and ate its target's ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_toliquid_ooze = new RegExp(/^The opposing (.+?) sucked up the liquid ooze!$/);
-    var regex_liquid_ooze = new RegExp(/^(.+?) sucked up the liquid ooze!$/);
-    var regex_tocovered_powder = new RegExp(/^The opposing (.+?) is covered in powder!$/);
-    var regex_covered_powder = new RegExp(/^(.+?) is covered in powder!$/);
-    var regex_tospecial_attacks = new RegExp(/^The opposing (.+?)'s protected against special attacks!$/);
-    var regex_special_attacks = new RegExp(/^(.+?)'s protected against special attacks!$/);
-    var regex_togained_armor = new RegExp(/^The opposing (.+?) gained armor!$/);
-    var regex_gained_armor = new RegExp(/^(.+?) gained armor!$/);
-    var regex_toformed_school = new RegExp(/^The opposing (.+?) formed a school!$/);
-    var regex_formed_school = new RegExp(/^(.+?) formed a school!$/);
-    var regex_tostopped_schooling = new RegExp(/^The opposing (.+?) stopped schooling!$/);
-    var regex_stopped_schooling = new RegExp(/^(.+?) stopped schooling!$/);
-    var regex_tobursting_flame = new RegExp(/^The bursting flame hit the opposing (.+?)!$/);
-    var regex_bursting_flame = new RegExp(/^The bursting flame hit (.+?)!$/);
-    var regex_send_offline_confirm = new RegExp(/^User (.+?) is offline. If you still want to PM them, send the message again to confirm.$/);
-    var regex_tofell_for_feint = new RegExp(/^The opposing (.+?) fell for the feint!$/);
-    var regex_fell_for_feint = new RegExp(/^(.+?) fell for the feint!$/);
-    var regex_tobroke_protection = new RegExp(/^It broke through the opposing (.+?)'s protection!$/);
-    var regex_broke_protection = new RegExp(/^It broke through (.+?)'s protection!$/);
-    var regex_toalready_preparing = new RegExp(/^The opposing (.+?) is already preparing its next move!$/);
-    var regex_already_preparing = new RegExp(/^(.+?) is already preparing its next move!$/);
-    var regex_tobeing_withdrawn2 = new RegExp(/^The opposing (.+?) is being withdrawn!$/);
-    var regex_being_withdrawn2 = new RegExp(/^(.+?) is being withdrawn!$/);
-    var regex_toclamped_down = new RegExp(/^The opposing (.+?) clamped down on (.+?)!$/);
-    var regex_clamped_down = new RegExp(/^(.+?) clamped down on the opposing (.+?)!$/);
-    var regex_totook_kind_offer = new RegExp(/^The opposing (.+?) took the kind offer!$/);
-    var regex_took_kind_offer = new RegExp(/^(.+?) took the kind offer!$/);
-    var regex_tohaving_nightmare = new RegExp(/^The opposing (.+?) began having a nightmare!$/);
-    var regex_having_nightmare = new RegExp(/^(.+?) began having a nightmare!$/);
-    var regex_reconnected2 = new RegExp(/^(.+?) reconnected.$/);
-    var regex_tobecause_gravity = new RegExp(/^The opposing (.+?) can't use ([A-z0-9,'.() ’:-]+?) because of gravity!$/);
-    var regex_because_gravity = new RegExp(/^(.+?) can't use ([A-z0-9,'.() ’:-]+?) because of gravity!$/);
-    var regex_Invite_sent_to = new RegExp(/^Invite sent to (.+?)!$/);
-    var regex_toGMax_Volcalith = new RegExp(/^The opposing (.+?) is hurt by the rocks thrown out by G-Max Volcalith!$/);
-    var regex_GMax_Volcalith = new RegExp(/^(.+?) is hurt by the rocks thrown out by G-Max Volcalith!$/);
-    var regex_toprotect_hurt = new RegExp(/^The opposing (.+?) couldn't fully protect itself and got hurt!$/);
-    var regex_protect_hurt = new RegExp(/^(.+?) couldn't fully protect itself and got hurt!$/);
-    var regex_cant_Dynamax = new RegExp(/^\[Invalid choice\] Can't move: (.+?) can't Dynamax now.$/);
-    var regex_toPower_Shift = new RegExp(/^The opposing (.+?) swapped its offensive stats with its defensive stats!$/);
-    var regex_Power_Shift = new RegExp(/^(.+?) swapped its offensive stats with its defensive stats!$/);
-    var regex_toanchored_roots = new RegExp(/^The opposing (.+?) is anchored in place with its roots!$/);
-    var regex_anchored_roots = new RegExp(/^(.+?) is anchored in place with its roots!$/);
-    var regex_toUltra_Burst = new RegExp(/^The opposing (.+?) regained its true power through Ultra Burst!$/);
-    var regex_Ultra_Burst = new RegExp(/^(.+?) regained its true power through Ultra Burst!$/);
-    var regex_from4 = new RegExp(/\(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\)$/);
-    var regex_from3 = new RegExp(/\(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\)$/);
-    var regex_from2 = new RegExp(/\(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\)$/);
-    var regex_from = new RegExp(/\(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\)$/);
-    var regex_toProtective_Pads = new RegExp(/^The opposing (.+?) protected itself with its Protective Pads!$/);
-    var regex_Protective_Pads = new RegExp(/^(.+?) protected itself with its Protective Pads!$/);
-    var regex_toAbility_Shield = new RegExp(/^The opposing (.+?)'s Ability is protected by the effects of its Ability Shield!$/);
-    var regex_Ability_Shield = new RegExp(/^(.+?)'s Ability is protected by the effects of its Ability Shield!$/);
-    var regex_togrudge = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) lost all of its PP due to the grudge!$/);
-    var regex_grudge = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) lost all of its PP due to the grudge!$/);
-    var regex_toalready_has_burn = new RegExp(/^The opposing (.+?) already has a burn.$/);
-    var regex_already_has_burn = new RegExp(/^(.+?) already has a burn.$/);
-    var regex_already_searching = new RegExp(/^Couldn't search: You are already searching for a (.+?) battle.$/);
-    var regex_todoesnt_become_confused = new RegExp(/^The opposing (.+?) doesn't become confused!$/);
-    var regex_doesnt_become_confused = new RegExp(/^(.+?) doesn't become confused!$/);
-    var regex_already_challenge = new RegExp(/^There's already a challenge (.+?) between you and (.+?)!$/);
-    var regex_tobecause_Heal_Block = new RegExp(/^The opposing (.+?) can't use ([A-z0-9,'.() ’:-]+?) because of Heal Block!$/);
-    var regex_because_Heal_Block = new RegExp(/^(.+?) can't use ([A-z0-9,'.() ’:-]+?) because of Heal Block!$/);
-    var regex_offering_tie = new RegExp(/^(.+?) is offering a tie.$/);
-    var regex_rejected_accepted_tie = new RegExp(/^(.+?) (rejected|accepted) the tie.$/);
-    var regex_toStickyBarb_burn_BlackSludge = new RegExp(/^The opposing (.+?) was hurt by its (Sticky Barb|burn|Black Sludge)!$/);
-    var regex_StickyBarb_burn_BlackSludge = new RegExp(/^(.+?) was hurt by its (Sticky Barb|burn|Black Sludge)!$/);
-    var regex_toCrafty_Quick_Wide_Shield = new RegExp(/^(Crafty|Quick|Wide) Guard protected the opposing (.+?)!$/);
-    var regex_Crafty_Quick_Wide_Shield = new RegExp(/^(Crafty|Quick|Wide) Guard protected (.+?)!$/);
-    var regex_toTreasures_of_ruin = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'() ’:-]+?) weakened the ([A-z0-9,'.() ’:-]+?) of all surrounding Pokemon!$/);
-    var regex_Treasures_of_ruin = new RegExp(/^(.+?)'s ([A-z0-9,'() ’:-]+?) weakened the ([A-z0-9,'.() ’:-]+?) of all surrounding Pokemon!$/);
-    var regex_Specific_to = new RegExp(/^Specific to (.+?)$/);
-    var regex_toprotective_mist = new RegExp(/^The opposing (.+?) surrounds itself with a protective mist!$/);
-    var regex_protective_mist = new RegExp(/^(.+?) surrounds itself with a protective mist!$/);
-    var regex_torose = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) (rose drastically|rose sharply|rose)!$/);
-    var regex_rose = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) (rose drastically|rose sharply|rose)!$/);
-    var regex_tofell = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) (fell severely|fell harshly|fell)!$/);
-    var regex_fell = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) (fell severely|fell harshly|fell)!$/);
-    var regex_toperishsong = new RegExp(/^The opposing (.+?)'s perish count fell to (3|2|1|0).$/);
-    var regex_perishsong = new RegExp(/^(.+?)'s perish count fell to (3|2|1|0).$/);
-    var regex_toDestiny_Knot = new RegExp(/^The opposing (.+?) fell in love because of the Destiny Knot!$/);
-    var regex_Destiny_Knot = new RegExp(/^(.+?) fell in love because of the Destiny Knot!$/);
-    var regex_toBerserk_Gene = new RegExp(/^The Berserk Gene sharply raised the opposing (.+?)'s Attack!$/);
-    var regex_Berserk_Gene = new RegExp(/^The Berserk Gene sharply raised (.+?)'s Attack!$/);
-    var regex_Guessed_spread = new RegExp(/^([A-UW-Za-z ]+?):\s(\d{1,3})\s([A-z]{2,3})\s\/\s(\d{1,3})\s([A-z]{2,3})\s\/\s(\d{1,3})\s([A-z]{2,3})(.+?)$/);
-    var regex_Guessed_spread2 = new RegExp(/^(\d{1,3})\s([A-z]{2,3})\s\/\s(\d{1,3})\s([A-z]{2,3})(.+?)$/);
-    var regex_Teaches = new RegExp(/^Teaches certain Pokemon the move ([A-z0-9' ’:-]+?). One use.$/);
-    var regex_allows_ZMove = new RegExp(/^If holder has (a|an) ([A-z]+?) move, this item allows it to use (a|an) ([A-z]+?) Z-Move.$/);
-    var regex_Multi_Attack = new RegExp(/^^Holder's Multi-Attack is ([A-z]+?) type.$/);
-    var regex_Judgment = new RegExp(/^Holder's ([A-z]+?)-type attacks have 1.2x power. Judgment is ([A-z]+?) type.$/);
-    var regex_attacks_have = new RegExp(/^Holder's ([A-z]+?)-type attacks have 1.(1|2)x power.$/);
-    var regex_Gem = new RegExp(/^Holder's first successful ([A-z]+?)-type attack will have 1.(3|5)x power. Single use.$/);
-    var regex_taken_supereffective = new RegExp(/^Halves damage taken from a supereffective ([A-z]+?)-type attack. Single use.$/);
-    var regex_Can_revived = new RegExp(/^Can be revived into ([A-z0-9,'() ’:-]+?).$/);
-    var regex_Evolves = new RegExp(/^Evolves ([A-z0-9,'.() ’:-]+?) into ([A-z0-9,'.() ’:-]+?) when (us|trad)ed.$/);
-    var regex_confuses_Nature = new RegExp(/^Restores ([A-z0-9/.%]+?) max HP at ([A-z0-9/.%]+?) max HP or less; confuses if -([A-z]+?) Nature. Single use.$/);
-    var regex_Mega_Evolve_item = new RegExp(/^If held by (a|an) ([A-z0-9']+?), this item allows it to Mega Evolve in battle.$/);
-    var regex_Spe_to = new RegExp(/^ (\d{1,3}) to (\d{1,3}) $/);
-    var regex_battles_ballte = new RegExp(/^([0-9+]+)([A-z0-9'() ’:-]+?) (battles|battle)$/);
-    var regex_Turn = new RegExp(/^Turn (\d{1,3})$/);
-    var regex_Transformed_into2 = new RegExp(/^\(Transformed into ([A-z0-9,'.() ’:-]+?)\)$/);
-    var regex_knocked_off = new RegExp(/^([A-z,'.0-9 ’:-]+?) \(knocked off\)$/);
-    var regex_hid_replay = new RegExp(/^(.+?) hid the replay of this battle.$/);
-    var regex_weather_suppressed = new RegExp(/\((Snow|Hail|Desolate Land|Sunny Day|Primordial Sea|Rain Dance|Sandstorm) suppressed by ([A-z ’:-]+?)\)$/);
-    var regex_Nature_Power = new RegExp(/^Nature Power turned into ([A-z0-9,'.() ’:-]+?)\)!$/);
-    var regex_Use_different_nature = new RegExp(/Use a different nature to save (\d{1,3}) EVs:/);
-    var regex_made_hidden = new RegExp(/^(.+?) made this room hidden.$/);
-    var regex_made_public = new RegExp(/^(.+?) made this room public.$/);
-    var regex_tofell_sky = new RegExp(/^The opposing (.+?) fell from the sky due to the gravity!$/);
-    var regex_fell_sky = new RegExp(/^(.+?) fell from the sky due to the gravity!$/);
-    var regex_lol = new RegExp(/^you don't have any(.+?)teams lol$/);
-    var regex_toconcentrated = new RegExp(/^The opposing (.+?) concentrated intensely!$/);
-    var regex_concentrated = new RegExp(/^(.+?) concentrated intensely!$/);
-    var regex_toshook_head = new RegExp(/^The opposing (.+?) shook its head. It seems like it can't use this move...$/);
-    var regex_shook_head = new RegExp(/^(.+?) shook its head. It seems like it can't use this move...$/);
-
-    //  \s
-
-
-    var regex_Mega_Evolution = new RegExp(/^\sMega\sEvolution$/);
-    var regex_Fallen = new RegExp(/^Fallen:\s(\d{1})$/);
-    var regex_modifiers = new RegExp(/^([0-9.×]+?)\s([A-z]+?)$/);
-    var regex_modifiers2 = new RegExp(/^already\s(4|0.33|0.25)×\s([A-z]+?)$/);
-    var regex_PQ = new RegExp(/^(Protosynthesis|Quark\sDrive):\s([A-z]+?)$/);
-    var regex_NR = new RegExp(/^No\sRetreat$/);
-    var regex_LR = new RegExp(/^Leech\sSeed$/);
-    var regex_SC = new RegExp(/^Salt\sCure$/);
-    var regex_SC2 = new RegExp(/^Stats\scopied$/);
-    var regex_DB = new RegExp(/^Destiny\sBond$/);
-    var regex_SD = new RegExp(/^Smack\sDown$/);
-    var regex_MS = new RegExp(/^Magma\sStorm$/);
-    var regex_FS = new RegExp(/^Fire\sSpin$/);
-    var regex_ST = new RegExp(/^Sand\sTomb$/);
-    var regex_ST2 = new RegExp(/^Snap\sTrap$/);
-    var regex_TC = new RegExp(/^Thunder\sCage$/);
-    var regex_TC2 = new RegExp(/^Throat\sChop$/);
-    var regex_ME = new RegExp(/^Miracle\sEye$/);
-    var regex_OS = new RegExp(/^Odor\sSleuth$/);
-    var regex_HB = new RegExp(/^Heal\sBlock$/);
-    var regex_HBE = new RegExp(/^Heal Block\sended$/);
-    var regex_PS = new RegExp(/^Perish\sin\s(3|2)$/);
-    var regex_PNT = new RegExp(/^Perish\snext\sturn$/);
-    var regex_PN = new RegExp(/^Perish\snow$/);
-    var regex_TS = new RegExp(/^Tar\sShot$/);
-    var regex_TS2 = new RegExp(/^Trap\sset$/);
-    var regex_TS3 = new RegExp(/^Torment\sended$/);
-    var regex_MR = new RegExp(/^Must\srecharge$/);
-    var regex_MR2 = new RegExp(/^Magnet\sRise$/);
-    var regex_RP = new RegExp(/^Rage\sPowder$/);
-    var regex_FM = new RegExp(/^Follow\sMe$/);
-    var regex_CHB = new RegExp(/^Critical\sHit\sBoost$/);
-    var regex_LF = new RegExp(/^Laser\sFocus$/);
-    var regex_HH = new RegExp(/^Helping\sHand$/);
-    var regex_PT = new RegExp(/^Power\sTrick$/);
-    var regex_WG = new RegExp(/^Wide\sGuard$/);
-    var regex_QG = new RegExp(/^Quick\sGuard$/);
-    var regex_MB = new RegExp(/^Mat\sBlock$/);
-    var regex_MC = new RegExp(/^Magic\sCoat$/);
-    var regex_GR = new RegExp(/^Glaive\sRush$/);
-    var regex_BB = new RegExp(/^Beak\sBlast$/);
-    var regex_AR = new RegExp(/^Aqua\sRing$/);
-    var regex_SS = new RegExp(/^Slow\sStart$/);
-    var regex_BO = new RegExp(/^Blue\sOrb$/);
-    var regex_RO = new RegExp(/^Red\sOrb$/);
-    var regex_AS = new RegExp(/^Attract\sended$/);
-    var regex_DS = new RegExp(/^Disable\sended$/);
-    var regex_ES = new RegExp(/^Encore\sended$/);
-    var regex_TE = new RegExp(/^Taunt\sended$/);
-    var regex_CE = new RegExp(/^Confusion\sended$/);
-    var regex_IKO = new RegExp(/^Item\sknocked\soff$/);
-    var regex_FF = new RegExp(/^Flash\sFire$/);
-    var regex_IF = new RegExp(/^Imprisoning\sfoe$/);
-    var regex_AP = new RegExp(/^Already\spoisoned$/);
-    var regex_AP2 = new RegExp(/^Already\sparalyzed$/);
-    var regex_AB = new RegExp(/^Already\sburned$/);
-    var regex_LS = new RegExp(/^Loafing\saround$/);
-    var regex_SDB = new RegExp(/^Stat\sdrop\sblocked$/);
-    var regex_BL = new RegExp(/^Boost\slost$/);
-    var regex_MG = new RegExp(/^Max\sGuard$/);
-    var regex_Guessed_spread3 = new RegExp(/^Guessed\sspread:\s\(Please\schoose\s4\smoves\sto\sget\sa\sguessed\sspread\) \($/);
+        if (originalStr.match(regex_Mega_Evolution)) {
+            return  "Mega进化";
+        }
+        if (originalStr.match(regex_Fallen)) {
+            return  "倒下的同伴：" + RegExp.$1;
+        }
+        if (originalStr.match(regex_modifiers)) {
+            if (translations[RegExp.$2])
+                return  RegExp.$1.replace("×", "x ") + translations[RegExp.$2].replace("命中率", "命中").replace("闪避率", "闪避");
+        }
+        if (originalStr.match(regex_modifiers2)) {
+            return  translations[RegExp.$2].replace("命中率", "命中").replace("闪避率", "闪避") + "已经×" + RegExp.$1 + "了";
+        }
+        if (originalStr.match(regex_PQ)) {
+            return  trans_from_dict(RegExp.$1 == "Protosynthesis" ? "古代活性" : "夸克充能") + "：" + translations[RegExp.$2];
+        }
+        if (originalStr.match(regex_NR)) {
+            return  "背水一战";
+        }
+        if (originalStr.match(regex_LR)) {
+            return  "寄生种子";
+        }
+        if (originalStr.match(regex_SC)) {
+            return  "盐腌";
+        }
+        if (originalStr.match(regex_SC2)) {
+            return  "复制了能力";
+        }
+        if (originalStr.match(regex_DB)) {
+            return  "同命";
+        }
+        if (originalStr.match(regex_SD)) {
+            return  "击落";
+        }
+        if (originalStr.match(regex_MS)) {
+            return  "熔岩风暴";
+        }
+        if (originalStr.match(regex_FS)) {
+            return  "火焰旋涡";
+        }
+        if (originalStr.match(regex_ST)) {
+            return  "流沙地狱";
+        }
+        if (originalStr.match(regex_ST2)) {
+            return  "捕兽夹";
+        }
+        if (originalStr.match(regex_TC)) {
+            return  "雷电囚笼";
+        }
+        if (originalStr.match(regex_TC2)) {
+            return  "地狱突刺";
+        }
+        if (originalStr.match(regex_ME)) {
+            return  "奇迹之眼";
+        }
+        if (originalStr.match(regex_OS)) {
+            return  "气味侦测";
+        }
+        if (originalStr.match(regex_HB)) {
+            return  "回复封锁";
+        }
+        if (originalStr.match(regex_HBE)) {
+            return  "回复封锁解除了";
+        }
+        if (originalStr.match(regex_PS)) {
+            return  RegExp.$1 + "回合后灭亡";
+        }
+        if (originalStr.match(regex_PNT)) {
+            return  "下回合灭亡";
+        }
+        if (originalStr.match(regex_PN)) {
+            return  "立即灭亡";
+        }
+        if (originalStr.match(regex_TS)) {
+            return  "沥青射击";
+        }
+        if (originalStr.match(regex_TS2)) {
+            return  "陷阱甲壳";
+        }
+        if (originalStr.match(regex_TS3)) {
+            return  "无理取闹解除了";
+        }
+        if (originalStr.match(regex_MR)) {
+            return  "需要恢复精力";
+        }
+        if (originalStr.match(regex_MR2)) {
+            return  "电磁飘浮";
+        }
+        if (originalStr.match(regex_RP)) {
+            return  "愤怒粉";
+        }
+        if (originalStr.match(regex_FM)) {
+            return  "看我嘛";
+        }
+        if (originalStr.match(regex_CHB)) {
+            return  "易中要害";
+        }
+        if (originalStr.match(regex_LF)) {
+            return  "磨砺";
+        }
+        if (originalStr.match(regex_HH)) {
+            return  "帮助";
+        }
+        if (originalStr.match(regex_PT)) {
+            return  "力量戏法";
+        }
+        if (originalStr.match(regex_WG)) {
+            return  "广域防守";
+        }
+        if (originalStr.match(regex_QG)) {
+            return  "快速防守";
+        }
+        if (originalStr.match(regex_MB)) {
+            return  "掀榻榻米";
+        }
+        if (originalStr.match(regex_MC)) {
+            return  "魔法反射";
+        }
+        if (originalStr.match(regex_GR)) {
+            return  "巨剑突击";
+        }
+        if (originalStr.match(regex_BB)) {
+            return  "鸟嘴加农炮";
+        }
+        if (originalStr.match(regex_AR)) {
+            return  "水流环";
+        }
+        if (originalStr.match(regex_SS)) {
+            return  "慢启动";
+        }
+        if (originalStr.match(regex_BO)) {
+            return  "靛蓝色宝珠";
+        }
+        if (originalStr.match(regex_RO)) {
+            return  "朱红色宝珠";
+        }
+        if (originalStr.match(regex_AS)) {
+            return  "迷人解除了";
+        }
+        if (originalStr.match(regex_DS)) {
+            return  "定身法解除了";
+        }
+        if (originalStr.match(regex_ES)) {
+            return  "再来一次解除了";
+        }
+        if (originalStr.match(regex_TE)) {
+            return  "挑衅解除了";
+        }
+        if (originalStr.match(regex_CE)) {
+            return  "混乱解除了";
+        }
+        if (originalStr.match(regex_IKO)) {
+            return  "物品被拍落了";
+        }
+        if (originalStr.match(regex_FF)) {
+            return  "引火";
+        }
+        if (originalStr.match(regex_IF)) {
+            return  "正在封印对手";
+        }
+        if (originalStr.match(regex_AP)) {
+            return  "已经中毒了";
+        }
+        if (originalStr.match(regex_AP2)) {
+            return  "已经麻痹了";
+        }
+        if (originalStr.match(regex_AB)) {
+            return  "已经灼伤了";
+        }
+        if (originalStr.match(regex_LS)) {
+            return  "正在偷懒";
+        }
+        if (originalStr.match(regex_SDB)) {
+            return  "能力不会降低";
+        }
+        if (originalStr.match(regex_BL)) {
+            return  "失去了能力提升";
+        }
+        if (originalStr.match(regex_MG)) {
+            return  "极巨防壁";
+        }
+        if (originalStr.match(regex_Guessed_spread3)) {
+            return  "分配推测：(请选择4个招式以获得分配推测) (";
+        }
 
 
 
 
-    //  debug
 
-    var regex_totoknock = new RegExp(/^The opposing (.+?) knocked off the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_toknock2 = new RegExp(/^The opposing (.+?) knocked off (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_toknock = new RegExp(/^(.+?) knocked off the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_knock = new RegExp(/^(.+?) knocked off (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_knock2 = new RegExp(/^knocked off (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_totothief = new RegExp(/^The opposing (.+?) stole the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_tothief2 = new RegExp(/^The opposing (.+?) stole (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_tothief = new RegExp(/^(.+?) stole the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_thief = new RegExp(/^(.+?) stole (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_tototrace = new RegExp(/^The opposing (.+?) traced the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_totrace2 = new RegExp(/^The opposing (.+?) traced (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_totrace = new RegExp(/^(.+?) traced the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_trace = new RegExp(/^(.+?) traced (.+?)\'s ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_totoroleplay = new RegExp(/^The opposing (.+?) copied the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) Ability!$/);
-    var regex_toroleplay2 = new RegExp(/^The opposing (.+?) copied (.+?)'s ([A-z0-9,'.() ’:-]+?) Ability!$/);
-    var regex_toroleplay = new RegExp(/^(.+?) copied the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) Ability!$/);
-    var regex_roleplay = new RegExp(/^(.+?) copied (.+?)'s ([A-z0-9,'.() ’:-]+?) Ability!$/);
-    var regex_tocannot_use = new RegExp(/^The opposing (.+?) cannot use ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_cannot_use = new RegExp(/^(.+?) cannot use ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_tostockpiled = new RegExp(/^The opposing (.+?) stockpiled (.+?)!$/);
-    var regex_stockpiled = new RegExp(/^(.+?) stockpiled (.+?)!$/);
-    var regex_toihb = new RegExp(/^The opposing (.+?) is hurt by ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_ihb = new RegExp(/^(.+?) is hurt by ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_tofreed = new RegExp(/^The opposing (.+?) was freed from (.+?)!$/);
-    var regex_freed = new RegExp(/^(.+?) was freed from (.+?)!$/);
-    var regex_tocant_use = new RegExp(/^The opposing (.+?) can't use ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_cant_use = new RegExp(/^(.+?) can't use ([A-z0-9,'.() ’:-]+?)!$/);
-    var regex_totrapped = new RegExp(/^The opposing (.+?) trapped (.+?)!$/);
-    var regex_trapped = new RegExp(/^(.+?) trapped the opposing (.+?)!$/);
-    var regex_joined = new RegExp(/^(.+?) joined$/);
-    var regex_left = new RegExp(/^(.+?) left$/);
-    var regex_toeerie_spell = new RegExp(/^It reduced the PP of the opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) by (.+?)!$/);
-    var regex_eerie_spell = new RegExp(/^It reduced the PP of (.+?)'s ([A-z0-9,'.() ’:-]+?) by (.+?)!$/);
-    var regex_Unavailable_choice_cant_move = new RegExp(/^[Unavailable choice] Can't move: (.+?)'s ([A-z0-9,'.() ’:-]+?) is disabled$/);
-    var regex_toleppaberry = new RegExp(/^The opposing (.+?) restored PP to its move ([A-z0-9,'.() ’:-]+?) using its Leppa Berry!$/);
-    var regex_leppaberry = new RegExp(/^(.+?) restored PP to its move ([A-z0-9,'.() ’:-]+?) using its Leppa Berry!$/);
-    var regex_tostat_changes = new RegExp(/^The opposing (.+?)'s stat changes!$/);
-    var regex_stat_changes = new RegExp(/^(.+?)'s stat changes!$/);
-    var regex_tosymbiosis = new RegExp(/^The opposing (.+?) shared its ([A-z0-9,'.() ’:-]+?) with the opposing (.+?)!$/);
-    var regex_symbiosis = new RegExp(/^(.+?) shared its ([A-z0-9,'.() ’:-]+?) with (.+?)!$/);
-    var regex_tohigh_low = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) won't go any (high|low)er!$/);
-    var regex_high_low = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) won't go any (high|low)er!$/);
-    var regex_towas_heightened = new RegExp(/^The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?) was heightened!$/);
-    var regex_was_heightened = new RegExp(/^(.+?)'s ([A-z0-9,'.() ’:-]+?) was heightened!$/);
-    var regex_Move_here = new RegExp(/^ Move here$/);
-    var regex_to_used = new RegExp(/^The opposing (.+?) used $/);
-    var regex_used = new RegExp(/^(.+?) used $/);
-    var regex_to123 = new RegExp(/^\[The opposing (.+?)'s ([A-z0-9,'.() ’:-]+?)\]$/);
-    var regex_123 = new RegExp(/^\[(.+?)'s ([A-z0-9,'.() ’:-]+?)\]$/);
-    var regex_1234 = new RegExp(/^\(([A-z0-9,'.() ’:-]+?)\)$/);
-    var regex_12345 = new RegExp(/^([A-z0-9,'.() ’:-]+?) \($/);
-    var regex_9 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
-    var regex_8 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
-    var regex_7 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
-    var regex_6 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
-    var regex_5 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
-    var regex_4 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
-    var regex_3 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
-    var regex_2 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$/);
-    var regex_1 = new RegExp(/^ ([A-z0-9é'() ’:-]+?) \/ $/);
-    var regex_333 = new RegExp(/^ ([A-z0-9*'., -]+?), ([A-z0-9*'., -]+?), ([A-z0-9*'., -]+?)$/);
-    var regex_222 = new RegExp(/^ ([A-z0-9*'., -]+?), ([A-z0-9*'., -]+?)$/);
-    var regex_111 = new RegExp(/^(不开启|超能力|节拍器|刷新|攻击)$/);
-    var regex_11 = new RegExp(/^！(.+?)$/);
+        //  debug
 
-    var regex_rating = new RegExp(/(.+)'s rating: (.+)/);
-    var regex_forwin = new RegExp(/\((.+) for winning\)/);
-    var regex_forlos = new RegExp(/\((.+) for losing\)/);
-    var regex_tourwsoumbaq = new RegExp(/Please respond to the tournament within (.+) seconds or you may be automatically disqualified./);
+        if (originalStr.match(regex_totoknock)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "拍落了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_toknock2)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "拍落了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_toknock)) {
+            return  trans_from_dict(RegExp.$1) + "拍落了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_knock)) {
+            return  trans_from_dict(RegExp.$1) + "拍落了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_knock2)) {
+            if (translations[RegExp.$2])
+                return  "拍落了" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "！";
+        }
+        if (originalStr.match(regex_totothief)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "夺取了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_tothief2)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "夺取了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_tothief)) {
+            return  trans_from_dict(RegExp.$1) + "夺取了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_thief)) {
+            return  trans_from_dict(RegExp.$1) + "夺取了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_tototrace)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "复制了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_totrace2)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "复制了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_totrace)) {
+            return  trans_from_dict(RegExp.$1) + "复制了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_trace)) {
+            return  trans_from_dict(RegExp.$1) + "复制了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_totoroleplay)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "复制了对手的" + trans_from_dict(RegExp.$2) + "的特性" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_toroleplay2)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "复制了" + trans_from_dict(RegExp.$2) + "的特性" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_toroleplay)) {
+            return   trans_from_dict(RegExp.$1) + "复制了对手的" + trans_from_dict(RegExp.$2) + "的特性" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_roleplay)) {
+            return   trans_from_dict(RegExp.$1) + "复制了" + trans_from_dict(RegExp.$2) + "的特性" + translations[RegExp.$3] + "！";
+        }
+        if (originalStr.match(regex_tocannot_use)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
+        }
+        if (originalStr.match(regex_cannot_use)) {
+            return   trans_from_dict(RegExp.$1) + "无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
+        }
+        if (originalStr.match(regex_tostockpiled)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "蓄力了" + RegExp.$2 + "次！";
+        }
+        if (originalStr.match(regex_stockpiled)) {
+            return   trans_from_dict(RegExp.$1) + "蓄力了" + RegExp.$2 + "次！";
+        }
+        if (originalStr.match(regex_toihb)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2) + "的伤害！";
+        }
+        if (originalStr.match(regex_ihb)) {
+            return  trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2) + "的伤害！";
+        }
+        if (originalStr.match(regex_tofreed)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "从" + trans_from_dict(RegExp.$2) + "中解脱了！";
+        }
+        if (originalStr.match(regex_freed)) {
+            return  trans_from_dict(RegExp.$1) + "从" + trans_from_dict(RegExp.$2) + "中解脱了！";
+        }
+        if (originalStr.match(regex_tocant_use)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
+        }
+        if (originalStr.match(regex_cant_use)) {
+            return trans_from_dict(RegExp.$1) + "无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
+        }
+        if (originalStr.match(regex_totrapped)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "困住了" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_trapped)) {
+            return   trans_from_dict(RegExp.$1) + "困住了对手的" + trans_from_dict(RegExp.$2) + "！";
+        }
+        if (originalStr.match(regex_joined)) {
+            return RegExp.$1.replace(", ", "，" ).replace("and"," 和 ") + "加入了房间";
+        }
+        if (originalStr.match(regex_left)) {
+            return RegExp.$1.replace(", ", "，" ).replace("and"," 和 ").replace(" joined; ","加入了房间; ") + "离开了";
+        }
+        if (originalStr.match(regex_toeerie_spell)) {
+            return   "削减了对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "的PP" + RegExp.$3 + "点！";
+        }
+        if (originalStr.match(regex_eerie_spell)) {
+            return   "削减了" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "的PP" + RegExp.$3 + "点！";
+        }
+        if (originalStr.match(regex_Unavailable_choice_cant_move)) {
+            return  "[无效的选择] 无法使出:" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "被禁用";
+        }
+        if (originalStr.match(regex_toleppaberry)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "用苹野果恢复了" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "的PP！";
+        }
+        if (originalStr.match(regex_leppaberry)) {
+            return  trans_from_dict(RegExp.$1) + "用苹野果恢复了" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "的PP！";
+        }
+        if (originalStr.match(regex_tostat_changes)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "的能力等级变化了！";
+        }
+        if (originalStr.match(regex_stat_changes)) {
+            return   trans_from_dict(RegExp.$1) + "的能力等级变化了！";
+        }
+        if (originalStr.match(regex_tosymbiosis)) {
+            return   "对手的" + trans_from_dict(RegExp.$1) + "将" + translations[RegExp.$2] + "交给了对手的" + trans_from_dict(RegExp.$3) + "！";
+        }
+        if (originalStr.match(regex_symbiosis)) {
+            return   trans_from_dict(RegExp.$1) + "将" + translations[RegExp.$2] + "交给了" + trans_from_dict(RegExp.$3) + "！";
+        }
+        if (originalStr.match(regex_tohigh_low)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "已经" + trans_from_dict(RegExp.$3 == "high" ? "无法再提高" : "降到最低") + "了！";
+        }
+        if (originalStr.match(regex_high_low)) {
+            return   trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "已经" + trans_from_dict(RegExp.$3 == "high" ? "无法再提高" : "降到最低") + "了！";
+        }
+        if (originalStr.match(regex_towas_heightened)) {
+            return  "对手的" +  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "升高了！";
+        }
+        if (originalStr.match(regex_was_heightened)) {
+            return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "升高了！";
+        }
+        if (originalStr.match(regex_Move_here)) {
+            return  "移动至";
+        }
+        if (originalStr.match(regex_to_used)) {
+            return  "对手的" + trans_from_dict(RegExp.$1) + "使出了";
+        }
+        if (originalStr.match(regex_used)) {
+            return  trans_from_dict(RegExp.$1) + "使出了";
+        }
+        if (originalStr.match(regex_to123)) {
+            if (translations[RegExp.$2])
+                return  "[对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "]";
+        }
+        if (originalStr.match(regex_123)) {
+            if (translations[RegExp.$2])
+                return  "[" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "]";
+        }
+        if (originalStr.match(regex_1234)) {
+            if (translations[RegExp.$1])
+                return "(" + translations[RegExp.$1] + ")";
+        }
+        if (originalStr.match(regex_12345)) {
+            if (translations[RegExp.$1])
+                return translations[RegExp.$1] + "(";
+        }
+        if (originalStr.match(regex_9)) {
+            if (translations[RegExp.$9])
+                return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3] +" / " + translations[RegExp.$4] +" / " + translations[RegExp.$5] + " / " + translations[RegExp.$6] +" / " + translations[RegExp.$7] + " / " + translations[RegExp.$8] +" / " + translations[RegExp.$9];
+            return originalStr;
+        }
+        if (originalStr.match(regex_8)) {
+            if (translations[RegExp.$8])
+                return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3] +" / " + translations[RegExp.$4] +" / " + translations[RegExp.$5] + " / " + translations[RegExp.$6] + " / " + translations[RegExp.$7] + " / " + translations[RegExp.$8];
+            return originalStr;
+        }
+        if (originalStr.match(regex_7)) {
+            if (translations[RegExp.$7])
+                return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3] +" / " + translations[RegExp.$4] +" / " + translations[RegExp.$5] + " / " + translations[RegExp.$6] + " / " + translations[RegExp.$7];
+            return originalStr;
+        }
+        if (originalStr.match(regex_6)) {
+            if (translations[RegExp.$6])
+                return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3] +" / " + translations[RegExp.$4] +" / " + translations[RegExp.$5] + " / " + translations[RegExp.$6];
+            return originalStr;
+        }
+        if (originalStr.match(regex_5)) {
+            if (translations[RegExp.$5])
+                return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3] +" / " + translations[RegExp.$4] +" / " + translations[RegExp.$5];
+            return originalStr;
+        }
+        if (originalStr.match(regex_4)) {
+            if (translations[RegExp.$4])
+                return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3] +" / " + translations[RegExp.$4];
+            return originalStr;
+        }
+        if (originalStr.match(regex_3)) {
+            if (translations[RegExp.$3])
+                return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3];
+            return originalStr;
+        }
+        if (originalStr.match(regex_2)) {
+            if (translations[RegExp.$2])
+                return  translations[RegExp.$1] + " / " + translations[RegExp.$2];
+            return originalStr;
+        }
+        if (originalStr.match(regex_1)) {
+            if (translations[RegExp.$1])
+                originalStr = originalStr.replace("");
+            originalStr =  translations[RegExp.$1] + " / ";
+            return originalStr;
+        }
+        if (originalStr.match(regex_333)) {
+            if (translations[RegExp.$3])
+                if (translations[RegExp.$2])
+                    if (translations[RegExp.$1])
+                        return  translations[RegExp.$1] + "，" + translations[RegExp.$2]+ "，" + translations[RegExp.$3];
+        }
+        if (originalStr.match(regex_222)) {
+            if (translations[RegExp.$2])
+                if (translations[RegExp.$1])
+                    return  translations[RegExp.$1] + "，" + translations[RegExp.$2];
+        }
+        if (originalStr.match(regex_111)) {
+            return  trans_from_dict(RegExp.$1 == "不开启" ? "定身法 " : RegExp.$1 == "超能力"  ? "精神强念 " : RegExp.$1 == "节拍器"  ? "挥指 " : RegExp.$1 == "刷新"  ? "焕然一新 " : "攻击 ");
+        }
+        if (originalStr.match(regex_11)) {
+            return  "!" + RegExp.$1;
+        }
+        if (originalStr.match(regex_rating)) {
+            return  RegExp.$1 + "的分数：" + RegExp.$2;
+        }
+        if (originalStr.match(regex_forwin)) {
+            return  "（获胜" + RegExp.$1 + "）";
+        }
+        if (originalStr.match(regex_forlos)) {
+            return  "（战败" + RegExp.$1 + "）";
+        }
+        if (originalStr.match(regex_tourwsoumbaq)) {
+            return  "请在" + RegExp.$1 + "秒内对比赛作出回应，否则您可能会被自动取消资格。";
+        }
+        if (originalStr.match(regex_statussetto)) {
+            return  "您的状态已被设置为：" + RegExp.$1 + "。";
+        }
+        if (originalStr.match(regex_tcdnetsamswt)) {
+            return  "指令" + RegExp.$1 +"不存在。如果要发送以" + RegExp.$2 + "开头的消息，请输入" + RegExp.$3;
+        }
+        if (originalStr.match(regex_useroffinemessge)) {
+            return  "用户" + RegExp.$1 +"已离线。再次发送消息可以留言。如果您正在使用" + RegExp.$2 + "指令，请改用" + RegExp.$3 + "指令。";
+        }
+        return originalStr.replace("(Tera type BP minimum)", "(太晶化后的最低招式威力为60)").replace("挑战Cup", "Challenge Cup").replace("Possible Illusion", "可能是幻觉").replace("(priority", "(优先度").replace("(approximate)", "(近似计算)").replace("[sent offline", "[离线发送").replace("of its health!)", "的生命值！)").replace("'s replays", "的回放").replace("(Hit 1 time)", "(受到1次伤害)").replace("(Hit 2 times)", "(受到2次伤害)").replace("(Hit 3 times)", "(受到3次伤害)").replace("(Hit 4 times)", "(受到4次伤害)").replace("(Hit 5 times)", "(受到5次伤害)").replace("(Hit 6 times)", "(受到6次伤害)").replace("(no Terrain)", "(没有场地)").replace("(Artist:", "(画家:").replace("(blocked by target's Dynamax)", "(对极巨化宝可梦无效)").replace("(fails if target's level is higher)", "(如果目标等级更高，使用失败)").replace("(+1% per level above target)", "(比目标每高1级，命中率+1%)").replace("(not Ice-type)", "(不是冰属性)");
+        ;
+    }
 
-    var regex_statussetto = new RegExp(/Your status has been set to: (.+)./);
-    var regex_tcdnetsamswt = new RegExp(/The command "(.+)" does not exist. To send a message starting with "(.+)", type "(.+)"./);
-    var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message again to confirm. If you are using (.+), use (.+) instead./);   
+    // ==========================================================
 
 
-    // ==========================================
-    // 5. 辅助翻译函数
-     // ==========================================
+    // 您重写并优化的宝可梦名字拆分翻译逻辑
     function translatePokemonName(name) {
         // 1. 优先完整匹配
         if (translations[name]) return translations[name];
 
-        // 2. 特殊保护机制：如果名字里包含 "-X-X"，先把它整体处理掉，防止被 split("-") 误拆
-        // 这样 "-X-X" 就会变成一个整体，不会参与后续的逻辑
-        if (name.includes("Wo-Chien")) {
-            name = name.replace("Wo-Chien", translations["Wo-Chien"]);
-        }
-        if (name.includes("Chien-Pao")) {
-            name = name.replace("Chien-Pao", translations["Chien-Pao"]);
-        }
-        if (name.includes("Chi-Yu")) {
-            name = name.replace("Chi-Yu", translations["Chi-Yu"]);
-        }
-        if (name.includes("Ting-Lu")) {
-            name = name.replace("Ting-Lu", translations["Ting-Lu"]);
-        }
-        if (name.includes("-Rapid-Strike-Fantasy")) {
-            name = name.replace("-Rapid-Strike-Fantasy", translations["-Rapid-Strike-Fantasy"]);
-        }
-        if (name.includes("-Rapid-Strike-G-Mega-Fantasy")) {
-            name = name.replace("-Rapid-Strike-G-Mega-Fantasy", translations["-Rapid-Strike-G-Mega-Fantasy"]);
-        }
-        if (name.includes("-Rapid-Strike-2-Fantasy")) {
-            name = name.replace("-Rapid-Strike-2-Fantasy", translations["-Rapid-Strike-2-Fantasy"]);
-        }
-        if (name.includes("-G-Mega")) {
-            name = name.replace("-G-Mega", translations["-G-Mega"]);
-        }
-        if (name.includes("-Low-Key")) {
-            name = name.replace("-Low-Key", translations["-Low-Key"]);
-        }
+        // 2. 特殊保护机制：如果名字里包含 "-X-X"
+        if (name.includes("Wo-Chien")) { name = name.replace("Wo-Chien", translations["Wo-Chien"]); }
+        if (name.includes("Chien-Pao")) { name = name.replace("Chien-Pao", translations["Chien-Pao"]); }
+        if (name.includes("Chi-Yu")) { name = name.replace("Chi-Yu", translations["Chi-Yu"]); }
+        if (name.includes("Ting-Lu")) { name = name.replace("Ting-Lu", translations["Ting-Lu"]); }
+        if (name.includes("-Rapid-Strike-Fantasy")) { name = name.replace("-Rapid-Strike-Fantasy", translations["-Rapid-Strike-Fantasy"]); }
+        if (name.includes("-Rapid-Strike-G-Mega-Fantasy")) { name = name.replace("-Rapid-Strike-G-Mega-Fantasy", translations["-Rapid-Strike-G-Mega-Fantasy"]); }
+        if (name.includes("-Rapid-Strike-2-Fantasy")) { name = name.replace("-Rapid-Strike-2-Fantasy", translations["-Rapid-Strike-2-Fantasy"]); }
+        if (name.includes("-G-Mega")) { name = name.replace("-G-Mega", translations["-G-Mega"]); }
+        if (name.includes("-Low-Key")) { name = name.replace("-Low-Key", translations["-Low-Key"]); }
 
         // 3. 对剩余部分执行正常的拆分逻辑
         let parts = name.split('-');
@@ -8799,3378 +12145,31 @@ var translations = {
         return translatedParts.join('');
     }
 
-    // 兼容原作者的 trans_from_dict 函数调用
-    function trans_from_dict(text) {
-        return translatePokemonName(text) || text;
-    }
-
-
-    // ==========================================
-    // 6. 核心句子翻译函数 (也就是你要粘贴的 t 函数)
-    // ==========================================
-            var t = function (originalStr) {
-            var tmp = originalStr.trim();
-            if (translations[tmp])
-                return translations[tmp];
-            if (originalStr.match(regex_chn))
-                return originalStr;
-            if (originalStr.match(regex_team)) {
-                return RegExp.$1 + "的队伍：";
-            }
-            if (originalStr.match(regex_item_was)) {
-                return  translations[RegExp.$1] + " (之前是" + translations[RegExp.$2] + ")";
-            }
-            if (originalStr.match(regex_toCommander)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "作为对对手的" + trans_from_dict(RegExp.$2) + "发号施令的要员而被对手的" + trans_from_dict(RegExp.$3) + "吞下去了！";
-            }
-            if (originalStr.match(regex_Commander)) {
-                return  trans_from_dict(RegExp.$1) + "作为对" + trans_from_dict(RegExp.$2) + "发号施令的要员而被" + trans_from_dict(RegExp.$3) + "吞下去了！";
-            }
-            if(originalStr.match(regex_timer_on)){
-                return "战斗计时器已开启：玩家若不行动则在时间耗尽后输掉比赛。(由" + RegExp.$1 + "开启)";
-            }
-            if (originalStr.match(regex_reconnected)) {
-                return RegExp.$1 + "重新连接了，还剩" + RegExp.$2 + "秒。";
-            }
-            if (originalStr.match(regex_seconds_left2)) {
-                return RegExp.$1 + "本回合还剩" + RegExp.$2 + "秒。";
-            }
-            if (originalStr.match(regex_seconds_left)) {
-                return RegExp.$1 + "还剩" + RegExp.$2 + "秒。";
-            }
-            if (originalStr.match(regex_reset_timer)) {
-                return "还剩" + RegExp.$1 + "秒可以重新开启计时器。";
-            }
-            if (originalStr.match(regex_tostruggle)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "没有可用来施展的招式！";
-            }
-            if (originalStr.match(regex_struggle)) {
-                return  trans_from_dict(RegExp.$1) + "没有可用来施展的招式！";
-            }
-            if (originalStr.match(regex_sent_out_first2)) {
-                return  "将首先派出" + translations[RegExp.$1] + "和" + translations[RegExp.$2] + "。";
-            }
-            if (originalStr.match(regex_sent_out_first)) {
-                return  "将首先派出" + translations[RegExp.$1] + "。";
-            }
-            if (originalStr.match(regex_sent_out2)) {
-                return  RegExp.$1 + "派出了" + trans_from_dict(RegExp.$2) + "(";
-            }
-            if (originalStr.match(regex_sent_out)) {
-                return  RegExp.$1 + "派出了";
-            }
-            if (originalStr.match(regex_withdrew)) {
-                return  RegExp.$1 + "换下了" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_tolost_health)) {
-                return  "(对手的" + trans_from_dict(RegExp.$1) + "失去了 " + RegExp.$2 + "% 的生命值！)";
-            }
-            if (originalStr.match(regex_lost_health)) {
-                return  "(" + trans_from_dict(RegExp.$1) + "失去了 " + RegExp.$2 + "% 的生命值！)";
-            }
-            if (originalStr.match(regex_tolost_health2)) {
-                return  "(对手的" + trans_from_dict(RegExp.$1) + "失去了 ";
-            }
-            if (originalStr.match(regex_lost_health2)) {
-                return   "(" + trans_from_dict(RegExp.$1) + "失去了 ";
-            }
-            if (originalStr.match(regex_come_back)) {
-                return trans_from_dict(RegExp.$1) + "，回来！";
-            }
-            if (originalStr.match(regex_go)) {
-                return "去吧！" + trans_from_dict(RegExp.$1) + "(";
-            }
-            if (originalStr.match(regex_forfeited)) {
-                return RegExp.$1 + "投降了。";
-            }
-            if (originalStr.match(regex_tomega)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "超级进化成了超级" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_mega)) {
-                return trans_from_dict(RegExp.$1) + "超级进化成了超级" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_tog6_mega)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "响应了" + RegExp.$3 + "的Mega手环！";
-            }
-            if (originalStr.match(regex_g6_mega)) {
-                return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "响应了" + RegExp.$3 + "的Mega手环！";
-            }
-            if (originalStr.match(regex_toafter_taunt)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "受到了挑衅，无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
-            }
-            if (originalStr.match(regex_after_taunt)) {
-                return trans_from_dict(RegExp.$1) + "受到了挑衅，无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
-            }
-            if (originalStr.match(regex_tocannot_use2)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
-            }
-            if (originalStr.match(regex_cannot_use2)) {
-                return trans_from_dict(RegExp.$1) + "无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
-            }
-            if (originalStr.match(regex_toeat2)) {
-                return "(对手的" + trans_from_dict(RegExp.$1) + "使用了" + translations[RegExp.$2] + "！)";
-            }
-            if (originalStr.match(regex_eat2)) {
-                return "(" + trans_from_dict(RegExp.$1) + "使用了" + translations[RegExp.$2] + "！)";
-            }
-            if (originalStr.match(regex_toeat)) {
-                return "(对手的" + trans_from_dict(RegExp.$1) + "吃掉了" + translations[RegExp.$2] + "！)";
-            }
-            if (originalStr.match(regex_eat)) {
-                return "(" + trans_from_dict(RegExp.$1) + "吃掉了" + translations[RegExp.$2] + "！)";
-            }
-            if (originalStr.match(regex_move_no_effect)) {
-                return "(这对" + trans_from_dict(RegExp.$1) + trans_from_dict(RegExp.$2) + "没有效果)";
-            }
-            if (originalStr.match(regex_tomax_guard)) {
-                return  "(对手的" + trans_from_dict(RegExp.$1) + "展开了极巨防壁！)";
-            }
-            if (originalStr.match(regex_max_guard)) {
-                return  "(" + trans_from_dict(RegExp.$1) + "展开了极巨防壁！)";
-            }
-            if (originalStr.match(regex_topointed_stones)) {
-                return "尖锐的岩石扎进了对手的" + trans_from_dict(RegExp.$1) + "的体内！";
-            }
-            if (originalStr.match(regex_pointed_stones)) {
-                return "尖锐的岩石扎进了" + trans_from_dict(RegExp.$1) + "的体内！";
-            }
-            if (originalStr.match(regex_tofuture_sight)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "预知了未来的攻击！";
-            }
-            if (originalStr.match(regex_future_sight)) {
-                return trans_from_dict(RegExp.$1) + "预知了未来的攻击！";
-            }
-            if (originalStr.match(regex_toFutureSight_DoomDesire_attack)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "Future Sight" ? "预知未来" : "破灭之愿") + "的攻击！";
-            }
-            if (originalStr.match(regex_FutureSight_DoomDesire_attack)) {
-                return trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "Future Sight" ? "预知未来" : "破灭之愿") + "的攻击！";
-            }
-            if (originalStr.match(regex_totype_change)) {
-                return "对手的" +  trans_from_dict(RegExp.$1) + "变成了" + translations[RegExp.$2] + "属性！";
-            }
-            if (originalStr.match(regex_type_change)) {
-                return  trans_from_dict(RegExp.$1) + "变成了" + translations[RegExp.$2] + "属性！";
-            }
-            if (originalStr.match(regex_hit_times)) {
-                return "击中了" + RegExp.$1 + "次！";
-            }
-            if (originalStr.match(regex_start_battle)) {
-                return RegExp.$1 + " 与 " + RegExp.$2 + " 的对战开始了！";
-            }
-            if (originalStr.match(regex_touturn)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "回到了" + RegExp.$2 + "的身边！";
-            }
-            if (originalStr.match(regex_uturn)) {
-                return   trans_from_dict(RegExp.$1) + "回到了" + RegExp.$2 + "的身边！";
-            }
-            if (originalStr.match(regex_tomagic_bounce)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "把" + translations[RegExp.$2].replace("不开启", "定身法") + "反射了回去！";
-            }
-            if (originalStr.match(regex_magic_bounce)) {
-                return  trans_from_dict(RegExp.$1) + "把" + translations[RegExp.$2].replace("不开启", "定身法") + "反射了回去！";
-            }
-            if (originalStr.match(regex_togems)) {
-                return translations[RegExp.$1] + "提升了对手的" + trans_from_dict(RegExp.$2) + "的威力！";
-            }
-            if (originalStr.match(regex_gems)) {
-                return translations[RegExp.$1] + "提升了" + trans_from_dict(RegExp.$2) + "的威力！";
-            }
-            if (originalStr.match(regex_battle)) {
-                return RegExp.$1 + "想要战斗！";
-            }
-            if (originalStr.match(regex_cancelled)) {
-                return RegExp.$1 + "取消了战斗。";
-            }
-            if (originalStr.match(regex_wftcy)) {
-                return  "等待" + RegExp.$1 + "挑战您";
-            }
-            if (originalStr.match(regex_waitingavailable)) {
-                return "等待战斗开始" + RegExp.$1;
-            }
-            if (originalStr.match(regex_waiting)) {
-                return "等待" + RegExp.$1;
-            }
-            if (originalStr.match(regex_accepted)) {
-                return RegExp.$1 + "接受了挑战，对战开始 «";
-            }
-            if (originalStr.match(regex_copyofuntitled2)) {
-                return  trans_from_dict(RegExp.$1 == "Untitled" ? "无标题 " : "箱子 ") + RegExp.$2 + " - 副本 - 副本";
-            }
-            if (originalStr.match(regex_copyofuntitled)) {
-                return  trans_from_dict(RegExp.$1 == "Untitled" ? "无标题 " : "箱子 ") + RegExp.$2 + " - 副本";
-            }
-            if (originalStr.match(regex_copyof)) {
-                return RegExp.$1 + " - 副本";
-            }
-            if (originalStr.match(regex_untitled)) {
-                return  trans_from_dict(RegExp.$1 == "Untitled" ? "无标题 " : "箱子 ") + RegExp.$2;
-            }
-            if (originalStr.match(regex_newteam)) {
-                return "新的" + RegExp.$1 + "队伍";
-            }
-            if (originalStr.match(regex_users2)) {
-                return  "(" +RegExp.$1 + "位用户)";
-            }
-            if (originalStr.match(regex_users)) {
-                return  RegExp.$1 + "位用户";
-            }
-            if (originalStr.match(regex_theopposingfainted)) {
-                return "对手的" +  trans_from_dict(RegExp.$1) + "倒下了！";
-            }
-            if (originalStr.match(regex_fainted)) {
-                return trans_from_dict(RegExp.$1) + "倒下了！";
-            }
-            if (originalStr.match(regex_torestored_littlehp_using)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "用" + trans_from_dict(RegExp.$2 == "Leftovers" ? "吃剩的东西" : RegExp.$2 == "Shell Bell"  ? "贝壳之铃" : "黑色污泥")  + "回复了少许HP。";
-            }
-            if (originalStr.match(regex_restored_littlehp_using)) {
-                return  trans_from_dict(RegExp.$1) + "用" + trans_from_dict(RegExp.$2 == "Leftovers" ? "吃剩的东西" : RegExp.$2 == "Shell Bell"  ? "贝壳之铃" : "黑色污泥") + "回复了少许HP。";
-            }
-            if (originalStr.match(regex_wish)) {
-                return trans_from_dict(RegExp.$1) + "的祈愿实现了！";
-            }
-            if (originalStr.match(regex_doestaffecttd)) {
-                return "对于对手的" + trans_from_dict(RegExp.$1) + "，好像没有效果......";
-            }
-            if (originalStr.match(regex_doestaffect)) {
-                return "对于" + trans_from_dict(RegExp.$1) + "，好像没有效果......";
-            }
-            if (originalStr.match(regex_younoteams)) {
-                return "您没有" + RegExp.$1 + "队伍";
-            }
-            if (originalStr.match(regex_youdontha)) {
-                return "您没有任何" + RegExp.$1 + "队伍";
-            }
-            if (originalStr.match(regex_theinverted)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "的能力变化颠倒过来了！";
-            }
-            if (originalStr.match(regex_inverted)) {
-                return  trans_from_dict(RegExp.$1) + "的能力变化颠倒过来了！";
-            }
-            if (originalStr.match(regex_rejectchallenge)) {
-                return  RegExp.$1 + "拒绝了挑战。";
-            }
-            if (originalStr.match(regex_thesustookto)) {
-                return  "替身代替对手的" + trans_from_dict(RegExp.$1) + "承受了攻击！";
-            }
-            if (originalStr.match(regex_thesustook)) {
-                return  "替身代替" + trans_from_dict(RegExp.$1) + "承受了攻击！";
-            }
-            if (originalStr.match(regex_totohbawi)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "受到了来自对手的" + trans_from_dict(RegExp.$2) + "的死缠烂打！";
-            }
-            if (originalStr.match(regex_tohbawi2)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "受到了来自" + trans_from_dict(RegExp.$2) + "的死缠烂打！";
-            }
-            if (originalStr.match(regex_tohbawi)) {
-                return  trans_from_dict(RegExp.$1) + "受到了来自对手的" + trans_from_dict(RegExp.$2) + "的死缠烂打！";
-            }
-            if (originalStr.match(regex_hbawi)) {
-                return  trans_from_dict(RegExp.$1) + "受到了来自" + trans_from_dict(RegExp.$2) + "的死缠烂打！";
-            }
-            if (originalStr.match(regex_iseoto)) {
-                return  "这对对手的" + trans_from_dict(RegExp.$1) + "效果绝佳！";
-            }
-            if (originalStr.match(regex_iseo)) {
-                return  "这对" + trans_from_dict(RegExp.$1) + "效果绝佳！";
-            }
-            if (originalStr.match(regex_isnveoto)) {
-                return  "这对对手的" + trans_from_dict(RegExp.$1) + "效果不好。";
-            }
-            if (originalStr.match(regex_isnveo)) {
-                return  "这对" + trans_from_dict(RegExp.$1) + "效果不好。";
-            }
-            if (originalStr.match(regex_achoto)) {
-                return  "击中了对手的" + trans_from_dict(RegExp.$1) + "的要害！";
-            }
-            if (originalStr.match(regex_acho)) {
-                return  "击中了" + trans_from_dict(RegExp.$1) + "的要害！";
-            }
-            if (originalStr.match(regex_willswitchin)) {
-                return   translations[RegExp.$1] + "将替换" + translations[RegExp.$2] + "上场。";
-            }
-            if (originalStr.match(regex_challengex)) {
-                return  "挑战" + RegExp.$1;
-            }
-            if (originalStr.match(regex_uteamsvf)) {
-                return  "您的队伍在" + RegExp.$1 + "分级中合法。";
-            }
-            if (originalStr.match(regex_Metronome)) {
-                return  "挥动手指后，使出了" + translations[RegExp.$1].replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
-            }
-            if (originalStr.match(regex_toiatbabi)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) +"被" + translations[RegExp.$2] + "袭击了！";
-            }
-            if (originalStr.match(regex_iatbabi)) {
-                return  trans_from_dict(RegExp.$1) +"被" + translations[RegExp.$2] + "袭击了！";
-            }
-            if (originalStr.match(regex_toctop2)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) +"腐蚀了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_toctop)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) +"腐蚀了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_ctop)) {
-                return  trans_from_dict(RegExp.$1) +"腐蚀了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_ctop2)) {
-                return  trans_from_dict(RegExp.$1) +"腐蚀了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_biftato)) {
-                return  "但是，对对手的" + trans_from_dict(RegExp.$1) + "没有起到效果！！";
-            }
-            if (originalStr.match(regex_bifta)) {
-                return  "但是，对" + trans_from_dict(RegExp.$1) + "没有起到效果！！";
-            }
-            if (originalStr.match(regex_toshpif)) {
-                return  "但是，对手的" + trans_from_dict(RegExp.$1) + "的体力是全满的！";
-            }
-            if (originalStr.match(regex_shpif)) {
-                return  "但是，" + trans_from_dict(RegExp.$1) + "的体力是全满的！";
-            }
-            if (originalStr.match(regex_tobiuiz)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "利用Z力量强化了自身的" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_biuiz)) {
-                return  trans_from_dict(RegExp.$1) + "利用Z力量强化了自身的" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_thwctfto)) {
-                return  "治愈愿望在对手的" + trans_from_dict(RegExp.$1) + "身上实现了！";
-            }
-            if (originalStr.match(regex_thwctf)) {
-                return  "治愈愿望在" + trans_from_dict(RegExp.$1) + "身上实现了！";
-            }
-            if (originalStr.match(regex_sfwhrtorm)) {
-                return  RegExp.$1 + "衷心的祈愿传递到了对手的" + translations[RegExp.$2].replace("烈空坐-超级进化", "烈空坐") + "那里！";
-            }
-            if (originalStr.match(regex_sfwhrrm)) {
-                return  RegExp.$1 + "衷心的祈愿传递到了" + translations[RegExp.$2].replace("烈空坐-超级进化", "烈空坐") + "那里！";
-            }
-            if (originalStr.match(regex_protosynthesisto)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "通过大晴天发动了古代活性！";
-            }
-            if (originalStr.match(regex_protosynthesis)) {
-                return  trans_from_dict(RegExp.$1) + "通过大晴天发动了古代活性！";
-            }
-            if (originalStr.match(regex_protosynthesisoffto)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的古代活性的效果消失了！";
-            }
-            if (originalStr.match(regex_protosynthesisoff)) {
-                return  trans_from_dict(RegExp.$1) + "的古代活性的效果消失了！";
-            }
-            if (originalStr.match(regex_toquarkdrive)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "通过电气场地发动了夸克充能！";
-            }
-            if (originalStr.match(regex_quarkdrive)) {
-                return  trans_from_dict(RegExp.$1) + "通过电气场地发动了夸克充能！";
-            }
-            if (originalStr.match(regex_toquarkdriveoff)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的夸克充能的效果消失了！";
-            }
-            if (originalStr.match(regex_quarkdriveoff)) {
-                return  trans_from_dict(RegExp.$1) + "的夸克充能的效果消失了！";
-            }
-            if (originalStr.match(regex_toelectric_seed)) {
-                return  "对手的" + trans_from_dict(RegExp.$2) + "用电气种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
-            }
-            if (originalStr.match(regex_electric_seed)) {
-                return  trans_from_dict(RegExp.$2) + "用电气种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
-            }
-            if (originalStr.match(regex_tograssy_seed)) {
-                return  "对手的" + trans_from_dict(RegExp.$2) + "用青草种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
-            }
-            if (originalStr.match(regex_grassy_seed)) {
-                return  trans_from_dict(RegExp.$2) + "用青草种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
-            }
-            if (originalStr.match(regex_topsychic_seed)) {
-                return  "对手的" + trans_from_dict(RegExp.$2) + "用精神种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
-            }
-            if (originalStr.match(regex_psychic_seed)) {
-                return  trans_from_dict(RegExp.$2) + "用精神种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
-            }
-            if (originalStr.match(regex_tomisty_seed)) {
-                return  "对手的" + trans_from_dict(RegExp.$2) + "用薄雾种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
-            }
-            if (originalStr.match(regex_misty_seed)) {
-                return  trans_from_dict(RegExp.$2) + "用薄雾种子" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
-            }
-            if (originalStr.match(regex_tobroke)) {
-                return  "突破了对手的" + trans_from_dict(RegExp.$1) + "的守护！";
-            }
-            if (originalStr.match(regex_broke)) {
-                return  "突破了" + trans_from_dict(RegExp.$1) + "的守护！";
-            }
-            if (originalStr.match(regex_totoredcard)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "猛地向对手的" + trans_from_dict(RegExp.$2) + "出示了红牌！";
-            }
-            if (originalStr.match(regex_toredcard2)) {
-                return  trans_from_dict(RegExp.$1) + "猛地向" + trans_from_dict(RegExp.$2) + "出示了红牌！";
-            }
-            if (originalStr.match(regex_toredcard)) {
-                return  trans_from_dict(RegExp.$1) + "猛地向对手的" + trans_from_dict(RegExp.$2) + "出示了红牌！";
-            }
-            if (originalStr.match(regex_redcard)) {
-                return  trans_from_dict(RegExp.$1) + "猛地向" + trans_from_dict(RegExp.$2) + "出示了红牌！";
-            }
-            if (originalStr.match(regex_towindpower)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "受到顺风而充电了！";
-            }
-            if (originalStr.match(regex_windpower)) {
-                return  trans_from_dict(RegExp.$1) + "受到顺风而充电了！";
-            }
-            if (originalStr.match(regex_torevivalblessing)) {
-                return  "对手的" +  trans_from_dict(RegExp.$1) + "复活并能继续战斗了！";
-            }
-            if (originalStr.match(regex_revivalblessing)) {
-                return  trans_from_dict(RegExp.$1) + "复活并能继续战斗了！";
-            }
-            if (originalStr.match(regex_toclearamulet)) {
-                return  "因为清净坠饰的效果，无法降低对手的" + trans_from_dict(RegExp.$1) + "的能力！";
-            }
-            if (originalStr.match(regex_clearamulet)) {
-                return  "因为清净坠饰的效果，无法降低" + trans_from_dict(RegExp.$1) + "的能力！";
-            }
-            if (originalStr.match(regex_toskullbash)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "把头缩进去了！";
-            }
-            if (originalStr.match(regex_skullbash)) {
-                return   trans_from_dict(RegExp.$1) + "把头缩进去了！";
-            }
-            if (originalStr.match(regex_totofrisk)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "察觉到了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_tofrisk2)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "察觉到了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_tofrisk)) {
-                return   trans_from_dict(RegExp.$1) + "察觉到了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_frisk)) {
-                return   trans_from_dict(RegExp.$1) + "察觉到了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_totopsychup)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "复制了对手的" + trans_from_dict(RegExp.$2) + "的能力变化！";
-            }
-            if (originalStr.match(regex_topsychup2)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "复制了" + trans_from_dict(RegExp.$2) + "的能力变化！";
-            }
-            if (originalStr.match(regex_topsychup)) {
-                return   trans_from_dict(RegExp.$1) + "复制了对手的" + trans_from_dict(RegExp.$2) + "的能力变化！";
-            }
-            if (originalStr.match(regex_psychup)) {
-                return   trans_from_dict(RegExp.$1) + "复制了" + trans_from_dict(RegExp.$2) + "的能力变化！";
-            }
-            if (originalStr.match(regex_toencore)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的再来一次状态解除了！";
-            }
-            if (originalStr.match(regex_encore)) {
-                return   trans_from_dict(RegExp.$1) + "的再来一次状态解除了！";
-            }
-            if (originalStr.match(regex_totocurse)) {
-                return  "对手的" +  trans_from_dict(RegExp.$1) + "削减了自己的HP，并诅咒了对手的" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_tocurse2)) {
-                return  "对手的" +  trans_from_dict(RegExp.$1) + "削减了自己的HP，并诅咒了" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_tocurse)) {
-                return  trans_from_dict(RegExp.$1) + "削减了自己的HP，并诅咒了对手的" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_curse)) {
-                return  trans_from_dict(RegExp.$1) + "削减了自己的HP，并诅咒了" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_toweakdamageberry)) {
-                return   translations[RegExp.$1] + "减轻了对对手的" + trans_from_dict(RegExp.$2) + "造成的伤害！";
-            }
-            if (originalStr.match(regex_weakdamageberry)) {
-                return   translations[RegExp.$1] + "减轻了对" + trans_from_dict(RegExp.$2) + "造成的伤害！";
-            }
-            if (originalStr.match(regex_celebrate)) {
-                return  "恭喜恭喜！" + RegExp.$1 + "！";
-            }
-            if (originalStr.match(regex_tohpberry)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "用" + translations[RegExp.$2] + "回复了体力！";
-            }
-            if (originalStr.match(regex_hpberry)) {
-                return  trans_from_dict(RegExp.$1) + "用" + translations[RegExp.$2] + "回复了体力！";
-            }
-            if (originalStr.match(regex_toaquaring)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "通过水环回复了体力！";
-            }
-            if (originalStr.match(regex_aquaring)) {
-                return   trans_from_dict(RegExp.$1) + "通过水环回复了体力！";
-            }
-            if (originalStr.match(regex_tosalacberry)) {
-                return   "对手的"  + trans_from_dict(RegExp.$2) + "用沙鳞果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了速度！";
-            }
-            if (originalStr.match(regex_salacberry)) {
-                return   trans_from_dict(RegExp.$2) + "用沙鳞果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了速度！";
-            }
-            if (originalStr.match(regex_toliechiberry)) {
-                return   "对手的"  + trans_from_dict(RegExp.$2) + "用枝荔果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了攻击！";
-            }
-            if (originalStr.match(regex_liechiberry)) {
-                return   trans_from_dict(RegExp.$2) + "用枝荔果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了攻击！";
-            }
-            if (originalStr.match(regex_topetayaberry)) {
-                return   "对手的"  + trans_from_dict(RegExp.$2) + "用龙火果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特攻！";
-            }
-            if (originalStr.match(regex_petayaberry)) {
-                return   trans_from_dict(RegExp.$2) + "用龙火果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特攻！";
-            }
-            if (originalStr.match(regex_toapicotberry)) {
-                return   "对手的"  + trans_from_dict(RegExp.$2) + "用杏仔果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
-            }
-            if (originalStr.match(regex_apicotberry)) {
-                return   trans_from_dict(RegExp.$2) + "用杏仔果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
-            }
-            if (originalStr.match(regex_toganlonberry)) {
-                return   "对手的"  + trans_from_dict(RegExp.$2) + "用龙睛果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
-            }
-            if (originalStr.match(regex_ganlonberry)) {
-                return   trans_from_dict(RegExp.$2) + "用龙睛果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
-            }
-            if (originalStr.match(regex_tomarangaberry)) {
-                return   "对手的"  + trans_from_dict(RegExp.$2) + "用香罗果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
-            }
-            if (originalStr.match(regex_marangaberry)) {
-                return   trans_from_dict(RegExp.$2) + "用香罗果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
-            }
-            if (originalStr.match(regex_toLuminous_Moss)) {
-                return   "对手的"  + trans_from_dict(RegExp.$2) + "用光苔" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
-            }
-            if (originalStr.match(regex_Luminous_Moss)) {
-                return   trans_from_dict(RegExp.$2) + "用光苔" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特防！";
-            }
-            if (originalStr.match(regex_toKee_Berry)) {
-                return   "对手的"  + trans_from_dict(RegExp.$2) + "用亚开果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
-            }
-            if (originalStr.match(regex_Kee_Berry)) {
-                return   trans_from_dict(RegExp.$2) + "用亚开果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了防御！";
-            }
-            if (originalStr.match(regex_toSnowball)) {
-                return   "对手的"  + trans_from_dict(RegExp.$2) + "用雪球" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了攻击！";
-            }
-            if (originalStr.match(regex_Snowball)) {
-                return   trans_from_dict(RegExp.$2) + "用雪球" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了攻击！";
-            }
-            if (originalStr.match(regex_toAbsorb_Bulb)) {
-                return   "对手的"  + trans_from_dict(RegExp.$2) + "用球根" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特攻！";
-            }
-            if (originalStr.match(regex_Absorb_Bulb)) {
-                return   trans_from_dict(RegExp.$2) + "用球根" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了特攻！";
-            }
-            if (originalStr.match(regex_toCell_Bettery)) {
-                return   "对手的"  + trans_from_dict(RegExp.$2) + "用充电电池" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了攻击！";
-            }
-            if (originalStr.match(regex_Cell_Bettery)) {
-                return   trans_from_dict(RegExp.$2) + "用充电电池" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了攻击！";
-            }
-            if (originalStr.match(regex_toAdrenaline_Orb)) {
-                return   "对手的"  + trans_from_dict(RegExp.$2) + "用胆怯球" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了速度！";
-            }
-            if (originalStr.match(regex_Adrenaline_Orb)) {
-                return   trans_from_dict(RegExp.$2) + "用胆怯球" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "了速度！";
-            }
-            if (originalStr.match(regex_tothroatspray)) {
-                return   "对手的" + trans_from_dict(RegExp.$2) + "用爽喉喷雾" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "特攻！";
-            }
-            if (originalStr.match(regex_throatspray)) {
-                return   trans_from_dict(RegExp.$2) + "用爽喉喷雾" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "raised"  ? "提升" : "降低") + "特攻！";
-            }
-            if (originalStr.match(regex_toclearsmog)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的能力变化消失了！";
-            }
-            if (originalStr.match(regex_tosafety_goggles)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "因防尘护目镜而不会受到" + translations[RegExp.$2] + "的攻击！";
-            }
-            if (originalStr.match(regex_safety_goggles)) {
-                return   trans_from_dict(RegExp.$1) + "因防尘护目镜而不会受到" + translations[RegExp.$2] + "的攻击！";
-            }
-            if (originalStr.match(regex_totohelpinghand)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "摆出了帮助对手的" + trans_from_dict(RegExp.$2) + "的架势！";
-            }
-            if (originalStr.match(regex_tohelpinghand2)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "摆出了帮助" + trans_from_dict(RegExp.$2) + "的架势！";
-            }
-            if (originalStr.match(regex_tohelpinghand)) {
-                return   trans_from_dict(RegExp.$1) + "摆出了帮助对手的" + trans_from_dict(RegExp.$2) + "的架势！";
-            }
-            if (originalStr.match(regex_helpinghand)) {
-                return   trans_from_dict(RegExp.$1) + "摆出了帮助" + trans_from_dict(RegExp.$2) + "的架势！";
-            }
-            if (originalStr.match(regex_clearsmog)) {
-                return   trans_from_dict(RegExp.$1) + "的能力变化消失了！";
-            }
-            if (originalStr.match(regex_toharvest)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "收获了" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_harvest)) {
-                return   trans_from_dict(RegExp.$1) + "收获了" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_toallyswitch)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "和对手的" + trans_from_dict(RegExp.$2) + "交换了场地！";
-            }
-            if (originalStr.match(regex_allyswitch)) {
-                return   trans_from_dict(RegExp.$1) + "和" + trans_from_dict(RegExp.$2) + "交换了场地！";
-            }
-            if (originalStr.match(regex_attract)) {
-                return   "对手的" + trans_from_dict(RegExp.$2) + "让" + trans_from_dict(RegExp.$1) + "着迷了！";
-            }
-            if (originalStr.match(regex_toattract)) {
-                return   trans_from_dict(RegExp.$2) + "让对手的" + trans_from_dict(RegExp.$1) + "着迷了！";
-            }
-            if (originalStr.match(regex_torecycle)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "捡来了" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_recycle)) {
-                return   trans_from_dict(RegExp.$1) + "捡来了" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_tofling)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "投掷了" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_fling)) {
-                return   trans_from_dict(RegExp.$1) + "投掷了" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_toobtained)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "获得了" + translations[RegExp.$2] + "。";
-            }
-            if (originalStr.match(regex_obtained)) {
-                return  trans_from_dict(RegExp.$1) + "获得了" + translations[RegExp.$2] + "。";
-            }
-            if (originalStr.match(regex_totolockon)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "锁定了对手的" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_tolockon2)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "锁定了" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_tolockon)) {
-                return  trans_from_dict(RegExp.$1) + "锁定了对手的" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_lockon)) {
-                return  trans_from_dict(RegExp.$1) + "锁定了" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_topoison)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "受到了毒的伤害！";
-            }
-            if (originalStr.match(regex_poison)) {
-                return  trans_from_dict(RegExp.$1) + "受到了毒的伤害！";
-            }
-            if (originalStr.match(regex_toelectromorphosis)) {
-                return  "对手的" + trans_from_dict(RegExp.$2) + "受到" + translations[RegExp.$1] + "而充电了！";
-            }
-            if (originalStr.match(regex_electromorphosis)) {
-                return  trans_from_dict(RegExp.$2) + "受到" + translations[RegExp.$1] + "而充电了！";
-            }
-            if (originalStr.match(regex_torequestpending)) {
-                return  "您有" + RegExp.$1 + "个好友请求待处理。";
-            }
-            if (originalStr.match(regex_requestpending)) {
-                return  "您有" + RegExp.$1 + "个已发送的好友请求。";
-            }
-            if (originalStr.match(regex_blockchallenges)) {
-                return  "此用户'" + RegExp.$1 + "'现在不接受挑战。";
-            }
-            if (originalStr.match(regex_removed)) {
-                return  "好友" + RegExp.$1 + "已移除。";
-            }
-            if (originalStr.match(regex_removed2)) {
-                return  "您现在不是" + RegExp.$1 + "的好友了。";
-            }
-            if (originalStr.match(regex_removed3)) {
-                return  "您取消了向" + RegExp.$1 + "发送的好友请求。";
-            }
-            if (originalStr.match(regex_friendrequest)) {
-                return  "您已经向" + RegExp.$1 + "发送了好友请求。";
-            }
-            if (originalStr.match(regex_friendrequest2)) {
-                return  "您向" + RegExp.$1 + "发送了好友请求！";
-            }
-            if (originalStr.match(regex_friendrequest3)) {
-                return  "您向" + RegExp.$1 + "发送了好友请求。";
-            }
-            if (originalStr.match(regex_acceptfriendrequest)) {
-                return  "您接受了" + RegExp.$1 + "的好友请求。";
-            }
-            if (originalStr.match(regex_denyfriendrequest)) {
-                return  "您拒绝了" + RegExp.$1 + "的好友请求。";
-            }
-            if (originalStr.match(regex_donothavefriendrequest)) {
-                return  "您没有来自" + RegExp.$1 + "的好友请求。";
-            }
-            if (originalStr.match(regex_donothavefriendrequest2)) {
-                return  "您没有来自" + RegExp.$1 + "的请求。";
-            }
-            if (originalStr.match(regex_accuracy)) {
-                return  "命中: " + RegExp.$1;
-            }
-            if (originalStr.match(regex_basepower_double2)) {
-                return   "对"+ translations[RegExp.$1] + "的威力: " + RegExp.$2 + " 至 " + RegExp.$3;
-            }
-            if (originalStr.match(regex_basepower_double)) {
-                return  "对" + translations[RegExp.$1] + "的威力: " + RegExp.$2;
-            }
-            if (originalStr.match(regex_basepower2)) {
-                return  "威力: " + RegExp.$1 + " 至 " + RegExp.$2;
-            }
-            if (originalStr.match(regex_basepower)) {
-                return  "威力: " + RegExp.$1;
-            }
-            if (originalStr.match(regex_disconnected)) {
-                return  RegExp.$1 + "断开了连接，有" + RegExp.$2 + "秒的时间重新连接！";
-            }
-            if (originalStr.match(regex_disconnected2)) {
-                return  RegExp.$1 + "断开了连接，有一分钟的时间重新连接！";
-            }
-            if (originalStr.match(regex_disconnected3)) {
-                return  RegExp.$1 + "断开了连接！";
-            }
-            if (originalStr.match(regex_usemove3)) {
-                return  translations[RegExp.$1] + "将对您的" + translations[RegExp.$3] + "使用" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
-            }
-            if (originalStr.match(regex_usemove2)) {
-                return  translations[RegExp.$1] + "将对" + translations[RegExp.$3] + "使用" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
-            }
-            if (originalStr.match(regex_usemove)) {
-                return  translations[RegExp.$1] + "将使用" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
-            }
-            if (originalStr.match(regex_reconnecte)) {
-                return  RegExp.$1 + "还有" + RegExp.$2 + "秒的时间重新连接！";
-            }
-            if (originalStr.match(regex_toskyattack)) {
-                return   "强光包围了对手的" + trans_from_dict(RegExp.$1) + "！";
-            }
-            if (originalStr.match(regex_skyattack)) {
-                return   "强光包围了" + trans_from_dict(RegExp.$1) + "！";
-            }
-            if (originalStr.match(regex_todisable)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "因定身法而无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
-            }
-            if (originalStr.match(regex_disable)) {
-                return   trans_from_dict(RegExp.$1) + "因定身法而无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
-            }
-            if (originalStr.match(regex_todisable2)) {
-                return   "封住了对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
-            }
-            if (originalStr.match(regex_disable2)) {
-                return   "封住了" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
-            }
-            if (originalStr.match(regex_last10team)) {
-                return  RegExp.$1 + "的最近10个队伍";
-            }
-            if (originalStr.match(regex_uploadedon)) {
-                return  "上传时间: " + RegExp.$1;
-            }
-            if (originalStr.match(regex_format)) {
-                return  "分级: " + RegExp.$1;
-            }
-            if (originalStr.match(regex_views)) {
-                return  "查看数: " + RegExp.$1;
-            }
-            if (originalStr.match(regex_teampassword)) {
-                return  "队伍已设置为私人。密码: " + RegExp.$1;
-            }
-            if (originalStr.match(regex_toskydrop)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "把" + trans_from_dict(RegExp.$2) + "带上了天空！";
-            }
-            if (originalStr.match(regex_skydrop)) {
-                return   trans_from_dict(RegExp.$1) + "把对手的" + trans_from_dict(RegExp.$2) + "带上了天空！";
-            }
-            if (originalStr.match(regex_inactivity)) {
-                return  RegExp.$1 + "因超时而输掉了比赛。";
-            }
-            if (originalStr.match(regex_deleted)) {
-                return  RegExp.$1 + "已删除。";
-            }
-            if (originalStr.match(regex_nextdamage)) {
-                return  " 下次伤害：" + RegExp.$1;
-            }
-            if (originalStr.match(regex_item_was_held_up)) {
-                return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; 红牌出示过了)";
-            }
-            if (originalStr.match(regex_item_was_popped)) {
-                return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; 气球破裂了)";
-            }
-            if (originalStr.match(regex_item_was_eaten)) {
-                return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; " + translations[RegExp.$3]  + "被吃掉了)";
-            }
-            if (originalStr.match(regex_item_was_consumed)) {
-                return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; " + translations[RegExp.$3]  + "消失了)";
-            }
-            if (originalStr.match(regex_item_was_stolen)) {
-                return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; " + translations[RegExp.$3]  + "被偷走了)";
-            }
-            if (originalStr.match(regex_item_was_flung)) {
-                return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; " + translations[RegExp.$3]  + "被投掷了)";
-            }
-            if (originalStr.match(regex_item_was_knockedoff)) {
-                return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; " + translations[RegExp.$3]  + "被拍落了)";
-            }
-            if (originalStr.match(regex_item_was_was)) {
-                return    translations[RegExp.$1] + " (" + trans_from_dict(RegExp.$2 == "stolen" ? "窃取" : RegExp.$2 == "tricked"  ? "戏法" : RegExp.$2 == "disturbed"  ? "灵骚" : RegExp.$2 == "frisked"  ? "察觉" : RegExp.$2 == "found" ? "回收": "收获") + "; 之前是" + translations[RegExp.$3]  + ")";
-            }
-            if (originalStr.match(regex_item_held_up)) {
-                return   translations[RegExp.$1] + " (红牌出示过了)";
-            }
-            if (originalStr.match(regex_item_popped)) {
-                return   translations[RegExp.$1] + " (气球破裂了)";
-            }
-            if (originalStr.match(regex_item_eaten)) {
-                return   translations[RegExp.$1] + " (" + translations[RegExp.$2] + "被吃掉了)";
-            }
-            if (originalStr.match(regex_item_consumed)) {
-                return    translations[RegExp.$1] + " (" + translations[RegExp.$2] + "消失了)";
-            }
-            if (originalStr.match(regex_item_knockedoff)) {
-                return   translations[RegExp.$1] + " (" + translations[RegExp.$2] + "被拍落了)";
-            }
-            if (originalStr.match(regex_item_flung)) {
-                return   translations[RegExp.$1] + " (" + translations[RegExp.$2] + "被投掷了)";
-            }
-            if (originalStr.match(regex_item_stolen2)) {
-                return   translations[RegExp.$1] + " (" + translations[RegExp.$2] + "被偷走了)";
-            }
-            if (originalStr.match(regex_item_incinerated)) {
-                return   translations[RegExp.$1] + " (" + translations[RegExp.$2] + "被烧掉了)";
-            }
-            if (originalStr.match(regex_item_stolen)) {
-                return   translations[RegExp.$1] + " (窃取)";
-            }
-            if (originalStr.match(regex_item_found)) {
-                return   translations[RegExp.$1] + " (回收)";
-            }
-            if (originalStr.match(regex_item_harvested)) {
-                return   translations[RegExp.$1] + " (收获)";
-            }
-            if (originalStr.match(regex_item_tricked)) {
-                return   translations[RegExp.$1] + " (戏法)";
-            }
-            if (originalStr.match(regex_item_disturbed)) {
-                return   translations[RegExp.$1] + " (灵骚)";
-            }
-            if (originalStr.match(regex_item_frisked)) {
-                return   translations[RegExp.$1] + " (察觉)";
-            }
-            if (originalStr.match(regex_base)) {
-                return   translations[RegExp.$1] + " (原本的特性: " + translations[RegExp.$2] + ")";
-            }
-            if (originalStr.match(regex_toonly)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "无法使出这个招式！";
-            }
-            if (originalStr.match(regex_only)) {
-                return   trans_from_dict(RegExp.$1) + "无法使出这个招式！";
-            }
-            if (originalStr.match(regex_use3)) {
-                return   translations[RegExp.$1] + "将" + trans_from_dict(RegExp.$2 == "Terastalliz" ? "太晶" : "超级进") + "化，然后对您的" +  translations[RegExp.$4] + "使用" + translations[RegExp.$3].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
-            }
-            if (originalStr.match(regex_use2)) {
-                return   translations[RegExp.$1] + "将" + trans_from_dict(RegExp.$2 == "Terastallize" ? "太晶" : RegExp.$2 == "Dynamax"  ? "极巨" : "超级进") + "化，然后对" + translations[RegExp.$4] + "使用" + translations[RegExp.$3].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
-            }
-            if (originalStr.match(regex_use)) {
-                return   translations[RegExp.$1] + "将" + trans_from_dict(RegExp.$2 == "Terastallize" ? "太晶" : RegExp.$2 == "Dynamax"  ? "极巨" : "超级进")  + "化，然后使用" + translations[RegExp.$3].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
-            }
-            if (originalStr.match(regex_tonatural_cure)) {
-                return   "(对手的" + trans_from_dict(RegExp.$1) + "通过自然回复治愈了异常状态！)";
-            }
-            if (originalStr.match(regex_natural_cure)) {
-                return   "(" + trans_from_dict(RegExp.$1) + "通过自然回复治愈了异常状态！)";
-            }
-            if (originalStr.match(regex_toacquired)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的特性变成" + translations[RegExp.$2] + "了！";
-            }
-            if (originalStr.match(regex_acquired)) {
-                return   trans_from_dict(RegExp.$1) + "的特性变成" + translations[RegExp.$2] + "了！";
-            }
-            if (originalStr.match(regex_namestarting)) {
-                return  "由于有玩家的名字以'" + RegExp.$1 + "'开头，这场战斗必须公开。";
-            }
-            if (originalStr.match(regex_toComplete_Forme)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "变成了完全体形态！";
-            }
-            if (originalStr.match(regex_Complete_Forme)) {
-                return  trans_from_dict(RegExp.$1) + "变成了完全体形态！";
-            }
-            if (originalStr.match(regex_totransformed_into)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "变成了" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_transformed_into)) {
-                return  trans_from_dict(RegExp.$1) + "变成了" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_wouldtake)) {
-                return  "如果失去特性，将受到 " + RegExp.$1 + " 伤害";
-            }
-            if (originalStr.match(regex_totofollwed)) {
-                return  "根据对手的" + trans_from_dict(RegExp.$2) + "的指示，对手的" + trans_from_dict(RegExp.$1) + "使出了招式！";
-            }
-            if (originalStr.match(regex_tofollwed2)) {
-                return  "根据对手的" + trans_from_dict(RegExp.$2) + "的指示，" + trans_from_dict(RegExp.$1) + "使出了招式！";
-            }
-            if (originalStr.match(regex_tofollwed)) {
-                return  "根据" + trans_from_dict(RegExp.$2) + "的指示，对手的" + trans_from_dict(RegExp.$1) + "使出了招式！";
-            }
-            if (originalStr.match(regex_follwed)) {
-                return  "根据" + trans_from_dict(RegExp.$2) + "的指示，" + trans_from_dict(RegExp.$1) + "使出了招式！";
-            }
-            if (originalStr.match(regex_suspect)) {
-                if (translations[RegExp.$2])
-                    return  RegExp.$1 + "正在进行" + translations[RegExp.$2] + "的可疑测试！有关如何参与测试的信息，请查看 ";
-                else
-                    return  RegExp.$1 + "正在进行" + RegExp.$2 + "的可疑测试！有关如何参与测试的信息，请查看 ";
-            }
-            if (originalStr.match(regex_changed)) {
-                return  "(形态改变: " + translations[RegExp.$1] + ")";
-            }
-            if (originalStr.match(regex_turnsasleep)) {
-                return  "  睡眠回合数: " + RegExp.$1;
-            }
-            if (originalStr.match(regex_switchto)) {
-                return  translations[RegExp.$1] + " 将交换:";
-            }
-            if (originalStr.match(regex_online)) {
-                return   " 在线 " + RegExp.$1;
-            }
-            if (originalStr.match(regex_offline)) {
-                return   " 离线 " + RegExp.$1;
-            }
-            if (originalStr.match(regex_toterastallized)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "太晶化变成了" + translations[RegExp.$2] + "属性！";
-            }
-            if (originalStr.match(regex_terastallized)) {
-                return   trans_from_dict(RegExp.$1) + "太晶化变成了" + translations[RegExp.$2] + "属性！";
-            }
-            if (originalStr.match(regex_topressure)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "释放着压迫感！";
-            }
-            if (originalStr.match(regex_pressure)) {
-                return   trans_from_dict(RegExp.$1) + "释放着压迫感！";
-            }
-            if (originalStr.match(regex_toseeded)) {
-                return   "将种子种殖在了对手的" + trans_from_dict(RegExp.$1) + "身上！";
-            }
-            if (originalStr.match(regex_seeded)) {
-                return   "将种子种殖在了" + trans_from_dict(RegExp.$1) + "身上！";
-            }
-            if (originalStr.match(regex_topoisoned)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + trans_from_dict(RegExp.$2 == "poisoned" ? "中毒了" : "中剧毒了") + "！";
-            }
-            if (originalStr.match(regex_poisoned)) {
-                return  trans_from_dict(RegExp.$1) + trans_from_dict(RegExp.$2 == "poisoned" ? "中毒了" : "中剧毒了") + "！";
-            }
-            if (originalStr.match(regex_toslept)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "睡着了，并且变得精力充沛！";
-            }
-            if (originalStr.match(regex_slept)) {
-                return  trans_from_dict(RegExp.$1) + "睡着了，并且变得精力充沛！";
-            }
-            if (originalStr.match(regex_toasleep)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "正在呼呼大睡。";
-            }
-            if (originalStr.match(regex_asleep)) {
-                return  trans_from_dict(RegExp.$1) + "正在呼呼大睡。";
-            }
-            if (originalStr.match(regex_towoke_up)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "醒过来了！";
-            }
-            if (originalStr.match(regex_woke_up)) {
-                return  trans_from_dict(RegExp.$1) + "醒过来了！";
-            }
-            if (originalStr.match(regex_toz_power)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "让Z力量笼罩了全身！";
-            }
-            if (originalStr.match(regex_z_power)) {
-                return  trans_from_dict(RegExp.$1) + "让Z力量笼罩了全身！";
-            }
-            if (originalStr.match(regex_toz_move)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "开始释放全力的Z招式！";
-            }
-            if (originalStr.match(regex_z_move)) {
-                return  trans_from_dict(RegExp.$1) + "开始释放全力的Z招式！";
-            }
-            if (originalStr.match(regex_toleech_seed)) {
-                return  "寄生植物夺取了对手的" + trans_from_dict(RegExp.$1) + "的体力！";
-            }
-            if (originalStr.match(regex_leech_seed)) {
-                return  "寄生植物夺取了" + trans_from_dict(RegExp.$1) + "的体力！";
-            }
-            if (originalStr.match(regex_toradiating_aura)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "释放着" + trans_from_dict(RegExp.$2 == "dark" ? "暗黑" : "妖精") + "气场！";
-            }
-            if (originalStr.match(regex_radiating_aura)) {
-                return  trans_from_dict(RegExp.$1) + "释放着" + trans_from_dict(RegExp.$2 == "dark" ? "暗黑" : "妖精") + "气场！";
-            }
-            if (originalStr.match(regex_toradiating_aura2)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "释放着" + trans_from_dict(RegExp.$2 == "bursting" ? "溅射" : "炽热") + "气场！";
-            }
-            if (originalStr.match(regex_radiating_aura2)) {
-                return  trans_from_dict(RegExp.$1) + "释放着" + trans_from_dict(RegExp.$2 == "bursting" ? "溅射" : "炽热") + "气场！";
-            }
-            if (originalStr.match(regex_toprotected)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "守护住了自己！";
-            }
-            if (originalStr.match(regex_protected)) {
-                return  trans_from_dict(RegExp.$1) + "守护住了自己！";
-            }
-            if (originalStr.match(regex_totaunt)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "中了挑衅！";
-            }
-            if (originalStr.match(regex_taunt)) {
-                return  trans_from_dict(RegExp.$1) + "中了挑衅！";
-            }
-            if (originalStr.match(regex_topumped)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "现在干劲十足！";
-            }
-            if (originalStr.match(regex_pumped)) {
-                return  trans_from_dict(RegExp.$1) + "现在干劲十足！";
-            }
-            if (originalStr.match(regex_toavoided)) {
-                return  "没有击中对手的" + trans_from_dict(RegExp.$1) + "！";
-            }
-            if (originalStr.match(regex_avoided)) {
-                return  "没有击中" + trans_from_dict(RegExp.$1) + "！";
-            }
-            if (originalStr.match(regex_togrew_drowsy)) {
-                return  "让对手的" + trans_from_dict(RegExp.$1) + "产生睡意了！";
-            }
-            if (originalStr.match(regex_grew_drowsy)) {
-                return  "让" + trans_from_dict(RegExp.$1) + "产生睡意了！";
-            }
-            if (originalStr.match(regex_tofell_straight_down)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "被击落，掉到了地面！";
-            }
-            if (originalStr.match(regex_fell_straight_down)) {
-                return  trans_from_dict(RegExp.$1) + "被击落，掉到了地面！";
-            }
-            if (originalStr.match(regex_tomust_encore)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "接受了再来一次！";
-            }
-            if (originalStr.match(regex_must_encore)) {
-                return  trans_from_dict(RegExp.$1) + "接受了再来一次！";
-            }
-            if (originalStr.match(regex_toencore_ended)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的再来一次状态解除了！";
-            }
-            if (originalStr.match(regex_encore_ended)) {
-                return  trans_from_dict(RegExp.$1) + "的再来一次状态解除了！";
-            }
-            if (originalStr.match(regex_toshook_off_taunt)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "从挑衅状态中解除了！";
-            }
-            if (originalStr.match(regex_shook_off_taunt)) {
-                return  trans_from_dict(RegExp.$1) + "从挑衅状态中解除了！";
-            }
-            if (originalStr.match(regex_tovortex_fieryvortex)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "被困在了" + trans_from_dict(RegExp.$2 == "vortex" ? "漩涡" : "火焰漩涡") + "之中！";
-            }
-            if (originalStr.match(regex_vortex_fieryvortex)) {
-                return  trans_from_dict(RegExp.$1) + "被困在了" + trans_from_dict(RegExp.$2 == "vortex" ? "漩涡" : "火焰漩涡") + "之中！";
-            }
-            if (originalStr.match(regex_toburned_frozen)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + trans_from_dict(RegExp.$2 == "burned" ? "灼伤" : "冻住") + "了！";
-            }
-            if (originalStr.match(regex_burned_frozen)) {
-                return  trans_from_dict(RegExp.$1) + trans_from_dict(RegExp.$2 == "burned" ? "灼伤" : "冻住") + "了！";
-            }
-            if (originalStr.match(regex_tospikes)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "受到了撒菱的伤害！";
-            }
-            if (originalStr.match(regex_spikes)) {
-                return  trans_from_dict(RegExp.$1) + "受到了撒菱的伤害！";
-            }
-            if (originalStr.match(regex_towas_cured_of)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "治愈了" + trans_from_dict(RegExp.$2 == "Freeze" ? "冰冻" : RegExp.$2 == "Burn"  ? "灼伤" : RegExp.$2 == "Sleep"  ? "睡眠" : RegExp.$2 == "paralysis"  ? "麻痹" : "中毒") + "！";
-            }
-            if (originalStr.match(regex_was_cured_of)) {
-                return  trans_from_dict(RegExp.$1) + "治愈了" + trans_from_dict(RegExp.$2 == "Freeze" ? "冰冻" : RegExp.$2 == "Burn"  ? "灼伤" : RegExp.$2 == "Sleep"  ? "睡眠" : RegExp.$2 == "paralysis"  ? "麻痹" : "中毒") + "！";
-            }
-            if (originalStr.match(regex_toput_in_substitute)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的替身出现了！";
-            }
-            if (originalStr.match(regex_put_in_substitute)) {
-                return   trans_from_dict(RegExp.$1) + "的替身出现了！";
-            }
-            if (originalStr.match(regex_tohp_restored)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的体力回复了。";
-            }
-            if (originalStr.match(regex_hp_restored)) {
-                return   trans_from_dict(RegExp.$1) + "的体力回复了。";
-            }
-            if (originalStr.match(regex_tohp_restored2)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "的体力回复了！";
-            }
-            if (originalStr.match(regex_hp_restored2)) {
-                return trans_from_dict(RegExp.$1) + "的体力回复了！";
-            }
-            if (originalStr.match(regex_tohp_restored3)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "通过Z力量回复了体力！";
-            }
-            if (originalStr.match(regex_hp_restored3)) {
-                return  trans_from_dict(RegExp.$1) + "通过Z力量回复了体力！";
-            }
-            if (originalStr.match(regex_totransformed)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的样子发生了变化！";
-            }
-            if (originalStr.match(regex_transformed)) {
-                return   trans_from_dict(RegExp.$1) + "的样子发生了变化！";
-            }
-            if (originalStr.match(regex_toconfused2)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "正在混乱中！";
-            }
-            if (originalStr.match(regex_confused2)) {
-                return   trans_from_dict(RegExp.$1) + "正在混乱中！";
-            }
-            if (originalStr.match(regex_toconfused)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "混乱了！";
-            }
-            if (originalStr.match(regex_confused)) {
-                return   trans_from_dict(RegExp.$1) + "混乱了！";
-            }
-            if (originalStr.match(regex_tofell_asleep)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "睡着了！";
-            }
-            if (originalStr.match(regex_fell_asleep)) {
-                return   trans_from_dict(RegExp.$1) + "睡着了！";
-            }
-            if (originalStr.match(regex_tocanno_longer_escape)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "无法逃走了！";
-            }
-            if (originalStr.match(regex_canno_longer_escape)) {
-                return   trans_from_dict(RegExp.$1) + "无法逃走了！";
-            }
-            if (originalStr.match(regex_tomist_safeguard)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "the mist" ? "白雾" : "神秘守护") + "的保护！";
-            }
-            if (originalStr.match(regex_mist_safeguard)) {
-                return   trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "the mist" ? "白雾" : "神秘守护") + "的保护！";
-            }
-            if (originalStr.match(regex_toprotosynthesis_quarkdrive)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "通过驱劲能量发动了" + trans_from_dict(RegExp.$2 == "Protosynthesis" ? "古代活性" : "夸克充能") + "！";
-            }
-            if (originalStr.match(regex_protosynthesis_quarkdrive)) {
-                return   trans_from_dict(RegExp.$1) + "通过驱劲能量发动了" + trans_from_dict(RegExp.$2 == "Protosynthesis" ? "古代活性" : "夸克充能") + "！";
-            }
-            if (originalStr.match(regex_toair_light)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "被" + trans_from_dict(RegExp.$2 == "freezing air" ? "冷冻的空气" : "冷光") + "包围了！";
-            }
-            if (originalStr.match(regex_air_light)) {
-                return   trans_from_dict(RegExp.$1) + "被" + trans_from_dict(RegExp.$2 == "freezing air" ? "冷冻的空气" : "冷光") + "包围了！";
-            }
-            if (originalStr.match(regex_todryskin_solarpower)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "因" + trans_from_dict(RegExp.$2 == "Dry Skin" ? "干燥皮肤" : "太阳能量") + "而受到了伤害。";
-            }
-            if (originalStr.match(regex_dryskin_solarpower)) {
-                return   trans_from_dict(RegExp.$1) + "因" + trans_from_dict(RegExp.$2 == "Dry Skin" ? "干燥皮肤" : "太阳能量") + "而受到了伤害。";
-            }
-            if (originalStr.match(regex_todrowsing)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "处于半梦半醒状态！";
-            }
-            if (originalStr.match(regex_drowsing)) {
-                return   trans_from_dict(RegExp.$1) + "处于半梦半醒状态！";
-            }
-            if (originalStr.match(regex_tobreaks_mold)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "打破了常规！";
-            }
-            if (originalStr.match(regex_breaks_mold)) {
-                return   trans_from_dict(RegExp.$1) + "打破了常规！";
-            }
-            if (originalStr.match(regex_toendured_hit)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "挺住了攻击！";
-            }
-            if (originalStr.match(regex_endured_hit)) {
-                return   trans_from_dict(RegExp.$1) + "挺住了攻击！";
-            }
-            if (originalStr.match(regex_toendured_hit2)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "挺住了攻击！";
-            }
-            if (originalStr.match(regex_endured_hit2)) {
-                return   trans_from_dict(RegExp.$1) + "挺住了攻击！";
-            }
-            if (originalStr.match(regex_toburned_itself)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "燃尽了自身！";
-            }
-            if (originalStr.match(regex_burned_itself)) {
-                return   trans_from_dict(RegExp.$1) + "燃尽了自身！";
-            }
-            if (originalStr.match(regex_toair_balloon)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "靠着气球浮在了空中！";
-            }
-            if (originalStr.match(regex_air_balloon)) {
-                return   trans_from_dict(RegExp.$1) + "靠着气球浮在了空中！";
-            }
-            if (originalStr.match(regex_toalready_confused)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "已经混乱了！";
-            }
-            if (originalStr.match(regex_already_confused)) {
-                return   trans_from_dict(RegExp.$1) + "已经混乱了！";
-            }
-            if (originalStr.match(regex_toswirling_magma)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "被困在了熔岩风暴之中！";
-            }
-            if (originalStr.match(regex_swirling_magma)) {
-                return   trans_from_dict(RegExp.$1) + "被困在了熔岩风暴之中！";
-            }
-            if (originalStr.match(regex_toquicksand)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "陷入了流沙地狱！";
-            }
-            if (originalStr.match(regex_quicksand)) {
-                return   trans_from_dict(RegExp.$1) + "陷入了流沙地狱！";
-            }
-            if (originalStr.match(regex_toconfused_fatigue)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "因精疲力尽而混乱了！";
-            }
-            if (originalStr.match(regex_confused_fatigue)) {
-                return   trans_from_dict(RegExp.$1) + "因精疲力尽而混乱了！";
-            }
-            if (originalStr.match(regex_tobecame_confused)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "混乱了！";
-            }
-            if (originalStr.match(regex_became_confused)) {
-                return   trans_from_dict(RegExp.$1) + "混乱了！";
-            }
-            if (originalStr.match(regex_toprevented_healing)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的回复行为被封住了！";
-            }
-            if (originalStr.match(regex_prevented_healing)) {
-                return   trans_from_dict(RegExp.$1) + "的回复行为被封住了！";
-            }
-            if (originalStr.match(regex_toquick_draw)) {
-                return   "速击使对手的" + trans_from_dict(RegExp.$1) + "行动变快了！";
-            }
-            if (originalStr.match(regex_quick_draw)) {
-                return   "速击使" + trans_from_dict(RegExp.$1) + "行动变快了！";
-            }
-            if (originalStr.match(regex_tosalt_cured)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "陷入了盐腌状态！";
-            }
-            if (originalStr.match(regex_salt_cured)) {
-                return   trans_from_dict(RegExp.$1) + "陷入了盐腌状态！";
-            }
-            if (originalStr.match(regex_tobeing_withdrawn)) {
-                return   "(对手的" + trans_from_dict(RegExp.$1) + "正在撤退......)";
-            }
-            if (originalStr.match(regex_being_withdrawn)) {
-                return   "(" + trans_from_dict(RegExp.$1) + "正在撤退......)";
-            }
-            if (originalStr.match(regex_toeject_pack)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "要用避难背包回去了！";
-            }
-            if (originalStr.match(regex_eject_pack)) {
-                return   trans_from_dict(RegExp.$1) + "要用避难背包回去了！";
-            }
-            if (originalStr.match(regex_toeject_button)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "要用逃脱按键回去了！";
-            }
-            if (originalStr.match(regex_eject_button)) {
-                return   trans_from_dict(RegExp.$1) + "要用逃脱按键回去了！";
-            }
-            if (originalStr.match(regex_topower_herb)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "用了强力香草后，充满了力量！";
-            }
-            if (originalStr.match(regex_power_herb)) {
-                return   trans_from_dict(RegExp.$1) + "用了强力香草后，充满了力量！";
-            }
-            if (originalStr.match(regex_towhite_herb)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "用白色香草复原了能力！";
-            }
-            if (originalStr.match(regex_white_herb)) {
-                return   trans_from_dict(RegExp.$1) + "用白色香草复原了能力！";
-            }
-            if (originalStr.match(regex_tofocussash_focusband)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "用气势" + trans_from_dict(RegExp.$2 == "Sash" ? "披" : "头") + "带撑住了！";
-            }
-            if (originalStr.match(regex_focussash_focusband)) {
-                return   trans_from_dict(RegExp.$1) + "用气势" + trans_from_dict(RegExp.$2 == "Sash" ? "披" : "头") + "带撑住了！";
-            }
-            if (originalStr.match(regex_toair_balloon_popped)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的气球破了！";
-            }
-            if (originalStr.match(regex_air_balloon_popped)) {
-                return   trans_from_dict(RegExp.$1) + "的气球破了！";
-            }
-            if (originalStr.match(regex_toshell_gleam)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "让甲壳发出光辉，使属性相克关系发生扭曲！！";
-            }
-            if (originalStr.match(regex_shell_gleam)) {
-                return   trans_from_dict(RegExp.$1) + "让甲壳发出光辉，使属性相克关系发生扭曲！！";
-            }
-            if (originalStr.match(regex_toquick_claw)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "用了先制之爪后，行动变快了！";
-            }
-            if (originalStr.match(regex_quick_claw)) {
-                return   trans_from_dict(RegExp.$1) + "用了先制之爪后，行动变快了！";
-            }
-            if (originalStr.match(regex_tosupreme_overlord)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "从被打倒的同伴身上得到力量了！";
-            }
-            if (originalStr.match(regex_supreme_overlord)) {
-                return   trans_from_dict(RegExp.$1) + "从被打倒的同伴身上得到力量了！";
-            }
-            if (originalStr.match(regex_toabsorbed_light)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "吸收了光！";
-            }
-            if (originalStr.match(regex_absorbed_light)) {
-                return   trans_from_dict(RegExp.$1) + "吸收了光！";
-            }
-            if (originalStr.match(regex_toalready_burned)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "已经被灼伤了！";
-            }
-            if (originalStr.match(regex_already_burned)) {
-                return   trans_from_dict(RegExp.$1) + "已经被灼伤了！";
-            }
-            if (originalStr.match(regex_tosticky_candy_syrup)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "陷入了满身糖状态！";
-            }
-            if (originalStr.match(regex_sticky_candy_syrup)) {
-                return   trans_from_dict(RegExp.$1) + "陷入了满身糖状态！";
-            }
-            if (originalStr.match(regex_togoing_all)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "拿出全力了！";
-            }
-            if (originalStr.match(regex_going_all)) {
-                return   trans_from_dict(RegExp.$1) + "拿出全力了！";
-            }
-            if (originalStr.match(regex_tocreate_decoy)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "断掉尾巴并将其作为替身了！";
-            }
-            if (originalStr.match(regex_create_decoy)) {
-                return   trans_from_dict(RegExp.$1) + "断掉尾巴并将其作为替身了！";
-            }
-            if (originalStr.match(regex_tocut_hp2)) {
-                return   "(对手的" + trans_from_dict(RegExp.$1) + "削减生命强化了招式！)";
-            }
-            if (originalStr.match(regex_cut_hp2)) {
-                return   "(" + trans_from_dict(RegExp.$1) + "削减生命强化了招式！)";
-            }
-            if (originalStr.match(regex_tocut_hp)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "削减生命强化了招式！";
-            }
-            if (originalStr.match(regex_cut_hp)) {
-                return   trans_from_dict(RegExp.$1) + "削减生命强化了招式！";
-            }
-            if (originalStr.match(regex_toloses_flying)) {
-                return   "(对手的" + trans_from_dict(RegExp.$1) + "本回合失去了飞行属性。)";
-            }
-            if (originalStr.match(regex_loses_flying)) {
-                return   "(" + trans_from_dict(RegExp.$1) + "本回合失去了飞行属性。)";
-            }
-            if (originalStr.match(regex_toreceived_encore)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "接受了再来一次！";
-            }
-            if (originalStr.match(regex_received_encore)) {
-                return   trans_from_dict(RegExp.$1) + "接受了再来一次！";
-            }
-            if (originalStr.match(regex_totoxic_orb)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "因剧毒宝珠而中剧毒了！";
-            }
-            if (originalStr.match(regex_toxic_orb)) {
-                return   trans_from_dict(RegExp.$1) + "因剧毒宝珠而中剧毒了！";
-            }
-            if (originalStr.match(regex_tosticky_web)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "被黏黏网粘住了！";
-            }
-            if (originalStr.match(regex_sticky_web)) {
-                return   trans_from_dict(RegExp.$1) + "被黏黏网粘住了！";
-            }
-            if (originalStr.match(regex_tonot_lowered2)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的能力不会降低！";
-            }
-            if (originalStr.match(regex_not_lowered2)) {
-                return   trans_from_dict(RegExp.$1) + "的能力不会降低！";
-            }
-            if (originalStr.match(regex_tocant_use_item)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "无法使用道具了！";
-            }
-            if (originalStr.match(regex_cant_use_item)) {
-                return   trans_from_dict(RegExp.$1) + "无法使用道具了！";
-            }
-            if (originalStr.match(regex_toheal_block_off)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的回复封印解除了！";
-            }
-            if (originalStr.match(regex_heal_block_off)) {
-                return   trans_from_dict(RegExp.$1) + "的回复封印解除了！";
-            }
-            if (originalStr.match(regex_toparalyzed_cant_move)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "因身体麻痹而无法行动！";
-            }
-            if (originalStr.match(regex_paralyzed_cant_move)) {
-                return   trans_from_dict(RegExp.$1) + "因身体麻痹而无法行动！";
-            }
-            if (originalStr.match(regex_toparalyzed_maybe_unable_move)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "麻痹了，很难使出招式！";
-            }
-            if (originalStr.match(regex_paralyzed_maybe_unable_move)) {
-                return   trans_from_dict(RegExp.$1) + "麻痹了，很难使出招式！";
-            }
-            if (originalStr.match(regex_tosealed_moves)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "封印了对手的招式！";
-            }
-            if (originalStr.match(regex_sealed_moves)) {
-                return   trans_from_dict(RegExp.$1) + "封印了对手的招式！";
-            }
-            if (originalStr.match(regex_tochose_doom)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "将破灭之愿托付给了未来！";
-            }
-            if (originalStr.match(regex_chose_doom)) {
-                return   trans_from_dict(RegExp.$1) + "将破灭之愿托付给了未来！";
-            }
-            if (originalStr.match(regex_toelectromagnetism)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "因电磁力浮了起来！";
-            }
-            if (originalStr.match(regex_electromagnetism)) {
-                return   trans_from_dict(RegExp.$1) + "因电磁力浮了起来！";
-            }
-            if (originalStr.match(regex_tostockpiled_off)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的蓄力效果消失了！";
-            }
-            if (originalStr.match(regex_stockpiled_off)) {
-                return   trans_from_dict(RegExp.$1) + "的蓄力效果消失了！";
-            }
-            if (originalStr.match(regex_toillusion_off)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "造成的幻觉被解除了！";
-            }
-            if (originalStr.match(regex_illusion_off)) {
-                return   trans_from_dict(RegExp.$1) + "造成的幻觉被解除了！";
-            }
-            if (originalStr.match(regex_tosnapped_confusion)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的混乱解除了！";
-            }
-            if (originalStr.match(regex_snapped_confusion)) {
-                return   trans_from_dict(RegExp.$1) + "的混乱解除了！";
-            }
-            if (originalStr.match(regex_tosnapped_confusion2)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的混乱解除了！";
-            }
-            if (originalStr.match(regex_snapped_confusion2)) {
-                return   trans_from_dict(RegExp.$1) + "的混乱解除了！";
-            }
-            if (originalStr.match(regex_tosnapped_confusion3)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的混乱解除了！";
-            }
-            if (originalStr.match(regex_snapped_confusion3)) {
-                return   trans_from_dict(RegExp.$1) + "的混乱解除了！";
-            }
-            if (originalStr.match(regex_tofuturistic_engine)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "布下电气场地使未来的机关跃动起来！！";
-            }
-            if (originalStr.match(regex_futuristic_engine)) {
-                return   trans_from_dict(RegExp.$1) + "布下电气场地使未来的机关跃动起来！！";
-            }
-            if (originalStr.match(regex_tofuturistic_engine2)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "用电气场地使未来的机关跃动起来！！";
-            }
-            if (originalStr.match(regex_futuristic_engine2)) {
-                return   trans_from_dict(RegExp.$1) + "用电气场地使未来的机关跃动起来！！";
-            }
-            if (originalStr.match(regex_toancient_pulse)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "令日照变强，激起了古代的脉动！";
-            }
-            if (originalStr.match(regex_ancient_pulse)) {
-                return   trans_from_dict(RegExp.$1) + "令日照变强，激起了古代的脉动！";
-            }
-            if (originalStr.match(regex_toancient_pulse2)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "受到日照而激起了古代的脉动！";
-            }
-            if (originalStr.match(regex_ancient_pulse2)) {
-                return   trans_from_dict(RegExp.$1) + "受到日照而激起了古代的脉动！";
-            }
-            if (originalStr.match(regex_toflinched)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "畏缩了，无法使出招式！";
-            }
-            if (originalStr.match(regex_flinched)) {
-                return   trans_from_dict(RegExp.$1) + "畏缩了，无法使出招式！";
-            }
-            if (originalStr.match(regex_tolost_somehp)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的生命被少量削减了！";
-            }
-            if (originalStr.match(regex_lost_somehp)) {
-                return   trans_from_dict(RegExp.$1) + "的生命被少量削减了！";
-            }
-            if (originalStr.match(regex_todamaged_recoil)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "受到了反作用力的伤害！";
-            }
-            if (originalStr.match(regex_damaged_recoil)) {
-                return   trans_from_dict(RegExp.$1) + "受到了反作用力的伤害！";
-            }
-            if (originalStr.match(regex_tobuffeted_sandstorm_hail)) {
-                return    trans_from_dict(RegExp.$2 == "sandstorm" ? "沙暴" : "冰雹") + "袭击了对手的" + trans_from_dict(RegExp.$1) + "！";
-            }
-            if (originalStr.match(regex_buffeted_sandstorm_hail)) {
-                return    trans_from_dict(RegExp.$2 == "sandstorm" ? "沙暴" : "冰雹") + "袭击了" + trans_from_dict(RegExp.$1) + "！";
-            }
-            if (originalStr.match(regex_totormented)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "正被恶梦缠身！";
-            }
-            if (originalStr.match(regex_tormented)) {
-                return   trans_from_dict(RegExp.$1) + "正被恶梦缠身！";
-            }
-            if (originalStr.match(regex_toafflicted_by_curse)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "正受到诅咒！";
-            }
-            if (originalStr.match(regex_afflicted_by_curse)) {
-                return   trans_from_dict(RegExp.$1) + "正受到诅咒！";
-            }
-            if (originalStr.match(regex_tolocked_in_nightmare)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "被困在了恶梦之中！";
-            }
-            if (originalStr.match(regex_locked_in_nightmare)) {
-                return   trans_from_dict(RegExp.$1) + "被困在了恶梦之中！";
-            }
-            if (originalStr.match(regex_todemaged_by_recoil)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "受到了反作用力造成的伤害！";
-            }
-            if (originalStr.match(regex_demaged_by_recoil)) {
-                return   trans_from_dict(RegExp.$1) + "受到了反作用力造成的伤害！";
-            }
-            if (originalStr.match(regex_tomystical_moonlight)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "被神秘的月光包围了！";
-            }
-            if (originalStr.match(regex_mystical_moonlight)) {
-                return   trans_from_dict(RegExp.$1) + "被神秘的月光包围了！";
-            }
-            if (originalStr.match(regex_towas_hurt2)) {
-                return   "(对手的" + trans_from_dict(RegExp.$1) + "受伤了！)";
-            }
-            if (originalStr.match(regex_was_hurt2)) {
-                return   "(" + trans_from_dict(RegExp.$1) + "受伤了！)";
-            }
-            if (originalStr.match(regex_towas_hurt)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "受伤了！";
-            }
-            if (originalStr.match(regex_was_hurt)) {
-                return   trans_from_dict(RegExp.$1) + "受伤了！";
-            }
-            if (originalStr.match(regex_tofrozen_solid)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "因冻住了而无法行动！";
-            }
-            if (originalStr.match(regex_frozen_solid)) {
-                return   trans_from_dict(RegExp.$1) + "因冻住了而无法行动！";
-            }
-            if (originalStr.match(regex_totwisted_dimensions)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "扭曲了时空！";
-            }
-            if (originalStr.match(regex_twisted_dimensions)) {
-                return   trans_from_dict(RegExp.$1) + "扭曲了时空！";
-            }
-            if (originalStr.match(regex_toability_suppressed)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的特性变得无效了！";
-            }
-            if (originalStr.match(regex_ability_suppressed)) {
-                return   trans_from_dict(RegExp.$1) + "的特性变得无效了！";
-            }
-            if (originalStr.match(regex_tousedupall_electricity)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "用尽电力了！";
-            }
-            if (originalStr.match(regex_usedupall_electricity)) {
-                return   trans_from_dict(RegExp.$1) + "用尽电力了！";
-            }
-            if (originalStr.match(regex_tono_retreat)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "受到背水一战的效果影响，无法逃走了！";
-            }
-            if (originalStr.match(regex_no_retreat)) {
-                return   trans_from_dict(RegExp.$1) + "受到背水一战的效果影响，无法逃走了！";
-            }
-            if (originalStr.match(regex_dragged_out)) {
-                return    trans_from_dict(RegExp.$1) + "被拖进了战斗！";
-            }
-            if (originalStr.match(regex_toenergy_drained)) {
-                return   "从对手的" + trans_from_dict(RegExp.$1) + "那里吸取了体力！";
-            }
-            if (originalStr.match(regex_energy_drained)) {
-                return   trans_from_dict(RegExp.$1) + "被吸取了体力！";
-            }
-            if (originalStr.match(regex_toabsorbs_attack)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "吸引了攻击！";
-            }
-            if (originalStr.match(regex_absorbs_attack)) {
-                return   trans_from_dict(RegExp.$1) + "吸引了攻击！";
-            }
-            if (originalStr.match(regex_totook_attack)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "吸引了攻击！";
-            }
-            if (originalStr.match(regex_took_attack)) {
-                return   trans_from_dict(RegExp.$1) + "吸引了攻击！";
-            }
-            if (originalStr.match(regex_tie)) {
-                return   trans_from_dict(RegExp.$1) + "和" + trans_from_dict(RegExp.$2) + "平局了！";
-            }
-            if (originalStr.match(regex_tounder_ground)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "钻入了洞里！";
-            }
-            if (originalStr.match(regex_under_ground)) {
-                return   trans_from_dict(RegExp.$1) + "钻入了洞里！";
-            }
-            if (originalStr.match(regex_toflew_high)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "飞向了高空！";
-            }
-            if (originalStr.match(regex_flew_high)) {
-                return   trans_from_dict(RegExp.$1) + "飞向了高空！";
-            }
-            if (originalStr.match(regex_tohurled_air)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "被投向了空中！";
-            }
-            if (originalStr.match(regex_hurled_air)) {
-                return   trans_from_dict(RegExp.$1) + "被投向了空中！";
-            }
-            if (originalStr.match(regex_towhippedup_whirlwind)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "掀起一阵旋风！";
-            }
-            if (originalStr.match(regex_whippedup_whirlwind)) {
-                return   trans_from_dict(RegExp.$1) + "掀起一阵旋风！";
-            }
-            if (originalStr.match(regex_tohid_underwater)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "潜入了水中！";
-            }
-            if (originalStr.match(regex_hid_underwater)) {
-                return   trans_from_dict(RegExp.$1) + "潜入了水中！";
-            }
-            if (originalStr.match(regex_tosprang_up)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "高高地跳了起来！";
-            }
-            if (originalStr.match(regex_sprang_up)) {
-                return   trans_from_dict(RegExp.$1) + "高高地跳了起来！";
-            }
-            if (originalStr.match(regex_toitem_cannot_removed)) {
-                return   "无法拿开对手的" + trans_from_dict(RegExp.$1) + "的道具！";
-            }
-            if (originalStr.match(regex_item_cannot_removed)) {
-                return   "无法拿开" + trans_from_dict(RegExp.$1) + "的道具！";
-            }
-            if (originalStr.match(regex_tomove_nolonger_disabled)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的招式不再被禁用！";
-            }
-            if (originalStr.match(regex_move_nolonger_disabled)) {
-                return   trans_from_dict(RegExp.$1) + "的招式不再被禁用！";
-            }
-            if (originalStr.match(regex_toloafing_around)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "正在偷懒！";
-            }
-            if (originalStr.match(regex_loafing_around)) {
-                return   trans_from_dict(RegExp.$1) + "正在偷懒！";
-            }
-            if (originalStr.match(regex_tomust_recharge)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "因攻击的反作用力而无法动弹！";
-            }
-            if (originalStr.match(regex_must_recharge)) {
-                return   trans_from_dict(RegExp.$1) + "因攻击的反作用力而无法动弹！";
-            }
-            if (originalStr.match(regex_toheals_status)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "治愈了异常状态！";
-            }
-            if (originalStr.match(regex_heals_status)) {
-                return   trans_from_dict(RegExp.$1) + "治愈了异常状态！";
-            }
-            if (originalStr.match(regex_tohealed_burn)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "治愈了灼伤状态！";
-            }
-            if (originalStr.match(regex_healed_burn)) {
-                return   trans_from_dict(RegExp.$1) + "治愈了灼伤状态！";
-            }
-            if (originalStr.match(regex_toburn_was_healed)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的灼伤被治愈了！";
-            }
-            if (originalStr.match(regex_burn_was_healed)) {
-                return   trans_from_dict(RegExp.$1) + "的灼伤被治愈了！";
-            }
-            if (originalStr.match(regex_tocured_its_poison)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "治愈了中毒状态！";
-            }
-            if (originalStr.match(regex_cured_its_poison)) {
-                return   trans_from_dict(RegExp.$1) + "治愈了中毒状态！";
-            }
-            if (originalStr.match(regex_tocured_its_paralysis)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "治愈了麻痹状态！";
-            }
-            if (originalStr.match(regex_cured_its_paralysis)) {
-                return   trans_from_dict(RegExp.$1) + "治愈了麻痹状态！";
-            }
-            if (originalStr.match(regex_tostatus_cleared)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的异常状态被清除了！";
-            }
-            if (originalStr.match(regex_status_cleared)) {
-                return    trans_from_dict(RegExp.$1) + "的异常状态被清除了！";
-            }
-            if (originalStr.match(regex_totake_attacker_down)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "想和对手同归于尽！";
-            }
-            if (originalStr.match(regex_take_attacker_down)) {
-                return   trans_from_dict(RegExp.$1) + "想和对手同归于尽！";
-            }
-            if (originalStr.match(regex_totook_attacker_down)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "和对手同归于尽了！";
-            }
-            if (originalStr.match(regex_took_attacker_down)) {
-                return   trans_from_dict(RegExp.$1) + "和对手同归于尽了！";
-            }
-            if (originalStr.match(regex_toplanted_its_roots)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "扎下了根！";
-            }
-            if (originalStr.match(regex_planted_its_roots)) {
-                return   trans_from_dict(RegExp.$1) + "扎下了根！";
-            }
-            if (originalStr.match(regex_toanchored_itself_roots)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "扎下了根！";
-            }
-            if (originalStr.match(regex_anchored_itself_roots)) {
-                return   trans_from_dict(RegExp.$1) + "扎下了根！";
-            }
-            if (originalStr.match(regex_tosurrounded_veil_water)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "套上了水环！";
-            }
-            if (originalStr.match(regex_surrounded_veil_water)) {
-                return   trans_from_dict(RegExp.$1) + "套上了水环！";
-            }
-            if (originalStr.match(regex_towas_subjected_torment)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "遭到了无理取闹！";
-            }
-            if (originalStr.match(regex_was_subjected_torment)) {
-                return   trans_from_dict(RegExp.$1) + "遭到了无理取闹！";
-            }
-            if (originalStr.match(regex_tosupersweet_aroma)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的蜜散发出了甜甜香气！";
-            }
-            if (originalStr.match(regex_supersweet_aroma)) {
-                return   trans_from_dict(RegExp.$1) + "的蜜散发出了甜甜香气！";
-            }
-            if (originalStr.match(regex_toreversed_other_auras)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "压制了所有气场！";
-            }
-            if (originalStr.match(regex_reversed_other_auras)) {
-                return   trans_from_dict(RegExp.$1) + "压制了所有气场！";
-            }
-            if (originalStr.match(regex_togot_over_infatuation)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "不再迷恋对方了！";
-            }
-            if (originalStr.match(regex_got_over_infatuation)) {
-                return   trans_from_dict(RegExp.$1) + "不再迷恋对方了！";
-            }
-            if (originalStr.match(regex_tounderwent_heroic_transformation)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "变身后归来了！";
-            }
-            if (originalStr.match(regex_underwent_heroic_transformation)) {
-                return   trans_from_dict(RegExp.$1) + "变身后归来了！";
-            }
-            if (originalStr.match(regex_toimmobilized_by_love)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "陷入了爱河！";
-            }
-            if (originalStr.match(regex_immobilized_by_love)) {
-                return   trans_from_dict(RegExp.$1) + "陷入了爱河！";
-            }
-            if (originalStr.match(regex_toshuddered)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "发抖了！";
-            }
-            if (originalStr.match(regex_shuddered)) {
-                return   trans_from_dict(RegExp.$1) + "发抖了！";
-            }
-            if (originalStr.match(regex_tomove_was_postponed)) {
-                return   "延后了对手的" + trans_from_dict(RegExp.$1) + "的顺序！";
-            }
-            if (originalStr.match(regex_move_was_postponed)) {
-                return   "延后了" + trans_from_dict(RegExp.$1) + "的顺序！";
-            }
-            if (originalStr.match(regex_totightening_its_focus)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "聚精会神了起来！";
-            }
-            if (originalStr.match(regex_tightening_its_focus)) {
-                return   trans_from_dict(RegExp.$1) + "聚精会神了起来！";
-            }
-            if (originalStr.match(regex_toset_shell_trap)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "布置了一个甲壳陷阱！";
-            }
-            if (originalStr.match(regex_set_shell_trap)) {
-                return   trans_from_dict(RegExp.$1) + "布置了一个甲壳陷阱！";
-            }
-            if (originalStr.match(regex_toshrouded_itself_magiccoat)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "给自己裹上了一层魔术外衣！";
-            }
-            if (originalStr.match(regex_shrouded_itself_magiccoat)) {
-                return   trans_from_dict(RegExp.$1) + "给自己裹上了一层魔术外衣！";
-            }
-            if (originalStr.match(regex_also_timer_to_on)) {
-                return   RegExp.$1 + "也想要开启计时器。";
-            }
-            if (originalStr.match(regex_torestorehp_using_zpower)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "用Z力量恢复了生命值！";
-            }
-            if (originalStr.match(regex_restorehp_using_zpower)) {
-                return   trans_from_dict(RegExp.$1) + "用Z力量恢复了生命值！";
-            }
-            if (originalStr.match(regex_tocuthp_maximized_attack)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "削减体力并释放了全部力量！";
-            }
-            if (originalStr.match(regex_cuthp_maximized_attack)) {
-                return   trans_from_dict(RegExp.$1) + "削减体力并释放了全部力量！";
-            }
-            if (originalStr.match(regex_torestored_its_hp)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "回复了HP。";
-            }
-            if (originalStr.match(regex_restored_its_hp)) {
-                return   trans_from_dict(RegExp.$1) + "回复了HP。";
-            }
-            if (originalStr.match(regex_torestorehp_using_zpower2)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "通过Z招式回复了HP！";
-            }
-            if (originalStr.match(regex_restorehp_using_zpower2)) {
-                return   trans_from_dict(RegExp.$1) + "通过Z招式回复了HP！";
-            }
-            if (originalStr.match(regex_toreturned_stats_zpower)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "通过Z招式将被降低的能力复原了！";
-            }
-            if (originalStr.match(regex_returned_stats_zpower)) {
-                return   trans_from_dict(RegExp.$1) + "通过Z招式将被降低的能力复原了！";
-            }
-            if (originalStr.match(regex_tostarted_heatingup_beak)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "开始给鸟嘴加热了！";
-            }
-            if (originalStr.match(regex_started_heatingup_beak)) {
-                return   trans_from_dict(RegExp.$1) + "开始给鸟嘴加热了！";
-            }
-            if (originalStr.match(regex_toswitched_items_target)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "互换了各自的道具！";
-            }
-            if (originalStr.match(regex_switched_items_target)) {
-                return   trans_from_dict(RegExp.$1) + "互换了各自的道具！";
-            }
-            if (originalStr.match(regex_tomoves_have_electrified)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的招式带电了！";
-            }
-            if (originalStr.match(regex_moves_have_electrified)) {
-                return   trans_from_dict(RegExp.$1) + "的招式带电了！";
-            }
-            if (originalStr.match(regex_totarget_bear_grudge)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "想向对手施放怨念！";
-            }
-            if (originalStr.match(regex_target_bear_grudge)) {
-                return   trans_from_dict(RegExp.$1) + "想向对手施放怨念！";
-            }
-            if (originalStr.match(regex_tolearned)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "学会了" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_learned)) {
-                return   trans_from_dict(RegExp.$1) + "学会了" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_tokept_going_crashed)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "因势头过猛而撞到了地面！";
-            }
-            if (originalStr.match(regex_kept_going_crashed)) {
-                return   trans_from_dict(RegExp.$1) + "因势头过猛而撞到了地面！";
-            }
-            if (originalStr.match(regex_tothawed_out)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的冰冻被融化了！";
-            }
-            if (originalStr.match(regex_thawed_out)) {
-                return   trans_from_dict(RegExp.$1) + "的冰冻被融化了！";
-            }
-            if (originalStr.match(regex_tothroat_chop)) {
-                return   "对手的地狱突刺的效果阻止了" + trans_from_dict(RegExp.$1) + "使用的声音类招式！";
-            }
-            if (originalStr.match(regex_throat_chop)) {
-                return   "地狱突刺的效果阻止了对手的" + trans_from_dict(RegExp.$1) + "使用的声音类招式！";
-            }
-            if (originalStr.match(regex_toprotected_aromaticveil)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "被芳香幕保护了！";
-            }
-            if (originalStr.match(regex_protected_aromaticveil)) {
-                return   trans_from_dict(RegExp.$1) + "被芳香幕保护了！";
-            }
-            if (originalStr.match(regex_tosurrounded_sweetness)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "被甜幕包围了！";
-            }
-            if (originalStr.match(regex_surrounded_sweetness)) {
-                return   trans_from_dict(RegExp.$1) + "被甜幕包围了！";
-            }
-            if (originalStr.match(regex_tocant_asleep_sweetness)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "因为甜幕无法入睡！";
-            }
-            if (originalStr.match(regex_cant_asleep_sweetness)) {
-                return   trans_from_dict(RegExp.$1) + "因为甜幕无法入睡！";
-            }
-            if (originalStr.match(regex_tolost_focus)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "聚气时受到干扰，无法使出招式！";
-            }
-            if (originalStr.match(regex_lost_focus)) {
-                return   trans_from_dict(RegExp.$1) + "聚气时受到干扰，无法使出招式！";
-            }
-            if (originalStr.match(regex_toattack_missed2)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的攻击没有命中！";
-            }
-            if (originalStr.match(regex_attack_missed2)) {
-                return   trans_from_dict(RegExp.$1) + "的攻击没有命中！";
-            }
-            if (originalStr.match(regex_tocenter_attention_zpower)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "使用Z力量变得万众瞩目了！";
-            }
-            if (originalStr.match(regex_center_attention_zpower)) {
-                return   trans_from_dict(RegExp.$1) + "使用Z力量变得万众瞩目了！";
-            }
-            if (originalStr.match(regex_tobond_trainer)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "浑身充满了牵绊之力！";
-            }
-            if (originalStr.match(regex_bond_trainer)) {
-                return   trans_from_dict(RegExp.$1) + "浑身充满了牵绊之力！";
-            }
-            if (originalStr.match(regex_toprimal_reversion)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的原始回归！恢复了原始的样子！";
-            }
-            if (originalStr.match(regex_primal_reversion)) {
-                return   trans_from_dict(RegExp.$1) + "的原始回归！恢复了原始的样子！";
-            }
-            if (originalStr.match(regex_toabsorbing_power)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "正在积蓄力量！";
-            }
-            if (originalStr.match(regex_absorbing_power)) {
-                return   trans_from_dict(RegExp.$1) + "正在积蓄力量！";
-            }
-            if (originalStr.match(regex_totaunt_off)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的挑衅效果解除了！";
-            }
-            if (originalStr.match(regex_taunt_off)) {
-                return   trans_from_dict(RegExp.$1) + "的挑衅效果解除了！";
-            }
-            if (originalStr.match(regex_tocustap_berry)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "用了释陀果后，行动变快了！";
-            }
-            if (originalStr.match(regex_custap_berry)) {
-                return   trans_from_dict(RegExp.$1) + "用了释陀果后，行动变快了！";
-            }
-            if (originalStr.match(regex_totwo_abilities)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "同时拥有了两种特性！";
-            }
-            if (originalStr.match(regex_two_abilities)) {
-                return   trans_from_dict(RegExp.$1) + "同时拥有了两种特性！";
-            }
-            if (originalStr.match(regex_toprotected_Terrain)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "Electric" ? "电气" : RegExp.$2 == "Misty"  ? "薄雾" : "精神") + "场地的保护！";
-            }
-            if (originalStr.match(regex_protected_Terrain)) {
-                return   trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "Electric" ? "电气" : RegExp.$2 == "Misty"  ? "薄雾" : "精神") + "场地的保护！";
-            }
-            if (originalStr.match(regex_tomirrorherb2)) {
-                return  "对手的" + trans_from_dict(RegExp.$2) +"用模仿香草巨幅" + trans_from_dict(RegExp.$1 == "raised" ? "提升" : "降低") + "了" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_mirrorherb2)) {
-                return  trans_from_dict(RegExp.$2) +"用模仿香草巨幅" + trans_from_dict(RegExp.$1 == "raised" ? "提升" : "降低") + "了" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_tomirrorherb)) {
-                return  "对手的" + trans_from_dict(RegExp.$2) + "用模仿香草" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : "提升") + "了" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_mirrorherb)) {
-                return  trans_from_dict(RegExp.$2) + "用模仿香草" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : "提升") + "了" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_tomirrorherb_Contrary)) {
-                return  "对手的" + trans_from_dict(RegExp.$2) + "用模仿香草" + trans_from_dict(RegExp.$1 == "harshly lowered" ? "大幅降低" : "降低") + "了"  + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_mirrorherb_Contrary)) {
-                return  trans_from_dict(RegExp.$2) + "用模仿香草" + trans_from_dict(RegExp.$1 == "harshly lowered" ? "大幅降低" : "降低") + "了"  + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_toStarf_Berry)) {
-                return   "对手的" + trans_from_dict(RegExp.$2) + "用星桃果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "drastically raised"  ? "巨幅提升" : "大幅降低") + "了" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_Starf_Berry)) {
-                return   trans_from_dict(RegExp.$2) + "用星桃果" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "drastically raised"  ? "巨幅提升" : "大幅降低") + "了" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_toWeakness_Policy)) {
-                return   "对手的" + trans_from_dict(RegExp.$2) + "用弱点保险" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "drastically raised"  ? "巨幅提升" : "大幅降低") + "了" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_Weakness_Policy)) {
-                return   trans_from_dict(RegExp.$2) + "用弱点保险" + trans_from_dict(RegExp.$1 == "sharply raised" ? "大幅提升" : RegExp.$1 == "drastically raised"  ? "巨幅提升" : "大幅降低") + "了" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_toRoom_Service)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "用客房服务降低了速度！";
-            }
-            if (originalStr.match(regex_Room_Service)) {
-                return   trans_from_dict(RegExp.$1) + "用客房服务降低了速度！";
-            }
-            if (originalStr.match(regex_toabsorbed_electricity)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "吸收了电力！";
-            }
-            if (originalStr.match(regex_absorbed_electricity)) {
-                return   trans_from_dict(RegExp.$1) + "吸收了电力！";
-            }
-            if (originalStr.match(regex_tospace_power)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "身上溢出了宇宙之力！";
-            }
-            if (originalStr.match(regex_space_power)) {
-                return   trans_from_dict(RegExp.$1) + "身上溢出了宇宙之力！";
-            }
-            if (originalStr.match(regex_togravity)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "因受到重力影响而无法待在空中！";
-            }
-            if (originalStr.match(regex_gravity)) {
-                return   trans_from_dict(RegExp.$1) + "因受到重力影响而无法待在空中！";
-            }
-            if (originalStr.match(regex_toWhite_Herb)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "用白色香草复原了能力！";
-            }
-            if (originalStr.match(regex_White_Herb)) {
-                return   trans_from_dict(RegExp.$1) + "用白色香草复原了能力！";
-            }
-            if (originalStr.match(regex_todisguise_busted)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的画皮脱落了！";
-            }
-            if (originalStr.match(regex_disguise_busted)) {
-                return   trans_from_dict(RegExp.$1) + "的画皮脱落了！";
-            }
-            if (originalStr.match(regex_toswapped_abilities)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "互换了各自的特性！";
-            }
-            if (originalStr.match(regex_swapped_abilities)) {
-                return   trans_from_dict(RegExp.$1) + "互换了各自的特性！";
-            }
-            if (originalStr.match(regex_tocharging_power)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "开始充电了！";
-            }
-            if (originalStr.match(regex_charging_power)) {
-                return   trans_from_dict(RegExp.$1) + "开始充电了！";
-            }
-            if (originalStr.match(regex_tofell_love)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "着迷了！";
-            }
-            if (originalStr.match(regex_fell_love)) {
-                return   trans_from_dict(RegExp.$1) + "着迷了！";
-            }
-            if (originalStr.match(regex_toasleep_paralyzed)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "已经"+ trans_from_dict(RegExp.$2 == "asleep" ? "睡着" : "麻痹") + "了！";
-            }
-            if (originalStr.match(regex_asleep_paralyzed)) {
-                return   trans_from_dict(RegExp.$1) + "已经"+ trans_from_dict(RegExp.$2 == "asleep" ? "睡着" : "麻痹") + "了！";
-            }
-            if (originalStr.match(regex_toidentified)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "被识破了！";
-            }
-            if (originalStr.match(regex_identified)) {
-                return   trans_from_dict(RegExp.$1) + "被识破了！";
-            }
-            if (originalStr.match(regex_toswitched_Attack_Defense)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "交换了攻击和防御！";
-            }
-            if (originalStr.match(regex_switched_Attack_Defense)) {
-                return   trans_from_dict(RegExp.$1) + "交换了攻击和防御！";
-            }
-            if (originalStr.match(regex_toanchors_itself)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "用吸盘粘在了地面上！";
-            }
-            if (originalStr.match(regex_anchors_itself)) {
-                return   trans_from_dict(RegExp.$1) + "用吸盘粘在了地面上！";
-            }
-            if (originalStr.match(regex_toanchored_suction_cups)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "用吸盘粘在了地面上！";
-            }
-            if (originalStr.match(regex_anchored_suction_cups)) {
-                return   trans_from_dict(RegExp.$1) + "用吸盘粘在了地面上！";
-            }
-            if (originalStr.match(regex_tostopped_shielding_itself)) {
-                return   "(对手的" + trans_from_dict(RegExp.$1) + "停止了自我保护。)";
-            }
-            if (originalStr.match(regex_stopped_shielding_itself)) {
-                return   "(" + trans_from_dict(RegExp.$1) + "停止了自我保护。)";
-            }
-            if (originalStr.match(regex_toshielded_itself)) {
-                return   "(对手的" + trans_from_dict(RegExp.$1) + "的自我保护。)";
-            }
-            if (originalStr.match(regex_shielded_itself)) {
-                return   "(" + trans_from_dict(RegExp.$1) + "的自我保护。)";
-            }
-            if (originalStr.match(regex_tocriticalhit_zpower)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "通过使用Z力量使击中要害率提升了！";
-            }
-            if (originalStr.match(regex_criticalhit_zpower)) {
-                return   trans_from_dict(RegExp.$1) + "通过使用Z力量使击中要害率提升了！";
-            }
-            if (originalStr.match(regex_tomaking_uproar)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "吵闹个不停！";
-            }
-            if (originalStr.match(regex_making_uproar)) {
-                return   trans_from_dict(RegExp.$1) + "吵闹个不停！";
-            }
-            if (originalStr.match(regex_tocaused_uproar)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "吵闹了起来！";
-            }
-            if (originalStr.match(regex_caused_uproar)) {
-                return   trans_from_dict(RegExp.$1) + "吵闹了起来！";
-            }
-            if (originalStr.match(regex_tomove_no_disabled)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的招式不再被封印了！";
-            }
-            if (originalStr.match(regex_move_no_disabled)) {
-                return   trans_from_dict(RegExp.$1) + "的招式不再被封印了！";
-            }
-            if (originalStr.match(regex_tocan_use_item)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "可以再次使用道具了！";
-            }
-            if (originalStr.match(regex_can_use_item)) {
-                return   trans_from_dict(RegExp.$1) + "可以再次使用道具了！";
-            }
-            if (originalStr.match(regex_totorment_wore_off)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "不再受对方无理取闹的影响了！";
-            }
-            if (originalStr.match(regex_torment_wore_off)) {
-                return   trans_from_dict(RegExp.$1) + "不再受对方无理取闹的影响了！";
-            }
-            if (originalStr.match(regex_toshared_power_target)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "把力量分享给了目标！";
-            }
-            if (originalStr.match(regex_shared_power_target)) {
-                return   trans_from_dict(RegExp.$1) + "把力量分享给了目标！";
-            }
-            if (originalStr.match(regex_toshared_guard_target)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "把防御分享给了目标！";
-            }
-            if (originalStr.match(regex_shared_guard_target)) {
-                return   trans_from_dict(RegExp.$1) + "把防御分享给了目标！";
-            }
-            if (originalStr.match(regex_toswitched_speed_target)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "与目标交换了速度！";
-            }
-            if (originalStr.match(regex_switched_speed_target)) {
-                return   trans_from_dict(RegExp.$1) + "与目标交换了速度！";
-            }
-            if (originalStr.match(regex_toBright_light)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的身上开始溢出耀眼的光芒！";
-            }
-            if (originalStr.match(regex_Bright_light)) {
-                return   trans_from_dict(RegExp.$1) + "的身上开始溢出耀眼的光芒！";
-            }
-            if (originalStr.match(regex_toalready_poisoned)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "已经中毒了。";
-            }
-            if (originalStr.match(regex_already_poisoned)) {
-                return  trans_from_dict(RegExp.$1) + "已经中毒了。";
-            }
-            if (originalStr.match(regex_toalready_paralyzed)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "已经被麻痹了。";
-            }
-            if (originalStr.match(regex_already_paralyzed)) {
-                return  trans_from_dict(RegExp.$1) + "已经被麻痹了。";
-            }
-            if (originalStr.match(regex_toalready_frozen)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "已经被冻住了！";
-            }
-            if (originalStr.match(regex_already_frozen)) {
-                return  trans_from_dict(RegExp.$1) + "已经被冻住了！";
-            }
-            if (originalStr.match(regex_tosketched)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "学会了" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_sketched)) {
-                return  trans_from_dict(RegExp.$1) + "学会了" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_toshell_trap)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的陷阱甲壳没有生效！";
-            }
-            if (originalStr.match(regex_shell_trap)) {
-                return  trans_from_dict(RegExp.$1) + "的陷阱甲壳没有生效！";
-            }
-            if (originalStr.match(regex_toDynamax)) {
-                return  "(对手的" + trans_from_dict(RegExp.$1) + "的极巨化！)";
-            }
-            if (originalStr.match(regex_Dynamax)) {
-                return  "(" + trans_from_dict(RegExp.$1) + "的极巨化！)";
-            }
-            if (originalStr.match(regex_no_battle_on_right_now)) {
-                return  "现在没有正在进行的" + RegExp.$1 + "。";
-            }
-            if (originalStr.match(regex_tosubstitute_faded)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的替身消失了......";
-            }
-            if (originalStr.match(regex_substitute_faded)) {
-                return  trans_from_dict(RegExp.$1) + "的替身消失了......";
-            }
-            if (originalStr.match(regex_not_found)) {
-                return  "没有找到用户'" + RegExp.$1 + "'。";
-            }
-            if (originalStr.match(regex_Challenging)) {
-                return  "正在向" + RegExp.$1 + "发起挑战...";
-            }
-            if (originalStr.match(regex_is_offline)) {
-                return  "用户" + RegExp.$1 + "处于离线状态。如果您仍然想对TA进行私聊，请再次发送消息，或使用指令/offlinemsg。";
-            }
-            if (originalStr.match(regex_tolonger_tormented)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "不再无理取闹了！";
-            }
-            if (originalStr.match(regex_longer_tormented)) {
-                return  trans_from_dict(RegExp.$1) + "不再无理取闹了！";
-            }
-            if (originalStr.match(regex_tocured_infatuation)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "用心灵香草治愈了着迷！";
-            }
-            if (originalStr.match(regex_cured_infatuation)) {
-                return  trans_from_dict(RegExp.$1) + "用心灵香草治愈了着迷！";
-            }
-            if (originalStr.match(regex_torocky_helmet)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "因凸凸头盔受到了伤害！";
-            }
-            if (originalStr.match(regex_rocky_helmet)) {
-                return  trans_from_dict(RegExp.$1) + "因凸凸头盔受到了伤害！";
-            }
-            if (originalStr.match(regex_toCourt_Change)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "交换了双方的场地效果！";
-            }
-            if (originalStr.match(regex_Court_Change)) {
-                return  trans_from_dict(RegExp.$1) + "交换了双方的场地效果！";
-            }
-            if (originalStr.match(regex_toalready_substitute)) {
-                return  "但是，对手的" + trans_from_dict(RegExp.$1) + "的替身已经出现了。";
-            }
-            if (originalStr.match(regex_already_substitute)) {
-                return  "但是，" + trans_from_dict(RegExp.$1) + "的替身已经出现了。";
-            }
-            if (originalStr.match(regex_tovanished_instantly)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的身影瞬间消失了！";
-            }
-            if (originalStr.match(regex_vanished_instantly)) {
-                return  trans_from_dict(RegExp.$1) + "的身影瞬间消失了！";
-            }
-            if (originalStr.match(regex_toheavy_lifted)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "太重了，无法被提起！";
-            }
-            if (originalStr.match(regex_heavy_lifted)) {
-                return  trans_from_dict(RegExp.$1) + "太重了，无法被提起！";
-            }
-            if (originalStr.match(regex_touproar_kept)) {
-                return  "但是吵闹让对手的" + trans_from_dict(RegExp.$1) + "醒过来了！";
-            }
-            if (originalStr.match(regex_uproar_kept)) {
-                return  "但是吵闹让" + trans_from_dict(RegExp.$1) + "醒过来了！";
-            }
-            if (originalStr.match(regex_tobraced_itself)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "摆出了挺住攻击的架势！";
-            }
-            if (originalStr.match(regex_braced_itself)) {
-                return  trans_from_dict(RegExp.$1) + "摆出了挺住攻击的架势！";
-            }
-            if (originalStr.match(regex_toswitched_stat_target)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "和目标互换了能力变化！";
-            }
-            if (originalStr.match(regex_switched_stat_target)) {
-                return  trans_from_dict(RegExp.$1) + "和目标互换了能力变化！";
-            }
-            if (originalStr.match(regex_toswitched_def_spd)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "和目标互换了防御和特防的能力变化！";
-            }
-            if (originalStr.match(regex_switched_def_spd)) {
-                return  trans_from_dict(RegExp.$1) + "和目标互换了防御和特防的能力变化！";
-            }
-            if (originalStr.match(regex_toswitched_atk_spa)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "和目标互换了攻击和特攻的能力变化！";
-            }
-            if (originalStr.match(regex_switched_atk_spa)) {
-                return  trans_from_dict(RegExp.$1) + "和目标互换了攻击和特攻的能力变化！";
-            }
-            if (originalStr.match(regex_torevealed)) {
-                return  "读取了对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_revealed)) {
-                return  "读取了" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_toGMax_Wildfire)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "被超极巨地狱灭焰的火焰包围，酷热难耐！";
-            }
-            if (originalStr.match(regex_GMax_Wildfire)) {
-                return  trans_from_dict(RegExp.$1) + "被超极巨地狱灭焰的火焰包围，酷热难耐！";
-            }
-            if (originalStr.match(regex_no_energy)) {
-                return  trans_from_dict(RegExp.$1) + "没有力气战斗了！";
-            }
-            if (originalStr.match(regex_already_in_battle)) {
-                return  trans_from_dict(RegExp.$1) + "已经在战斗了！";
-            }
-            if (originalStr.match(regex_towaiting_move)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "正在等待" + trans_from_dict(RegExp.$2) + "...";
-            }
-            if (originalStr.match(regex_waiting_move)) {
-                return  trans_from_dict(RegExp.$1) + "正在等待" + trans_from_dict(RegExp.$2) + "...";
-            }
-            if (originalStr.match(regex_tosea_fire)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "受到了火海的伤害！";
-            }
-            if (originalStr.match(regex_sea_fire)) {
-                return  trans_from_dict(RegExp.$1) + "受到了火海的伤害！";
-            }
-            if (originalStr.match(regex_toTelepathy)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "没有受到伙伴的攻击！";
-            }
-            if (originalStr.match(regex_Telepathy)) {
-                return  trans_from_dict(RegExp.$1) + "没有受到伙伴的攻击！";
-            }
-            if (originalStr.match(regex_toKey_Stone)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "对钥石起了反应！";
-            }
-            if (originalStr.match(regex_Key_Stone)) {
-                return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "对钥石起了反应！";
-            }
-            if (originalStr.match(regex_tobecame_AshGreninja)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "变身成了小智版甲贺忍蛙！";
-            }
-            if (originalStr.match(regex_became_AshGreninja)) {
-                return  trans_from_dict(RegExp.$1) + "变身成了小智版甲贺忍蛙！";
-            }
-            if (originalStr.match(regex_crazy_house)) {
-                return  RegExp.$2 + "夺取了" + trans_from_dict(RegExp.$1) + "！";
-            }
-            if (originalStr.match(regex_tomelted)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "解除了冰冻状态！";
-            }
-            if (originalStr.match(regex_melted)) {
-                return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "解除了冰冻状态！";
-            }
-            if (originalStr.match(regex_toelectromagnetism_woreoff)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的电磁力消失了！";
-            }
-            if (originalStr.match(regex_electromagnetism_woreoff)) {
-                return  trans_from_dict(RegExp.$1) + "的电磁力消失了！";
-            }
-            if (originalStr.match(regex_tocant_use_gravity)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "因重力而无法使出" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_cant_use_gravity)) {
-                return  trans_from_dict(RegExp.$1) + "因重力而无法使出" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_tomaxed_Attack)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的攻击被提高到了最大！";
-            }
-            if (originalStr.match(regex_maxed_Attack)) {
-                return  trans_from_dict(RegExp.$1) + "的攻击被提高到了最大！";
-            }
-            if (originalStr.match(regex_tocenter_attention)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "变得万众瞩目了！";
-            }
-            if (originalStr.match(regex_center_attention)) {
-                return  trans_from_dict(RegExp.$1) + "变得万众瞩目了！";
-            }
-            if (originalStr.match(regex_toHospitality)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "喝光了对手的" + trans_from_dict(RegExp.$2) + "泡的茶！";
-            }
-            if (originalStr.match(regex_Hospitality)) {
-                return  trans_from_dict(RegExp.$1) + "喝光了" + trans_from_dict(RegExp.$2) + "泡的茶！";
-            }
-            if (originalStr.match(regex_toRowap_Berry_Jaboca_Berry)) {
-                return    "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2) + "的" + trans_from_dict(RegExp.$3 == "Rowap" ? "雾莲" : "嘉珍") + "果的伤害！";
-            }
-            if (originalStr.match(regex_Rowap_Berry_Jaboca_Berry)) {
-                return    trans_from_dict(RegExp.$1) + "受到了对手的" + trans_from_dict(RegExp.$2) + "的" + trans_from_dict(RegExp.$3 == "Rowap" ? "雾莲" : "嘉珍") + "果的伤害！";
-            }
-            if (originalStr.match(regex_tostoring_energy)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "正在积蓄力量！";
-            }
-            if (originalStr.match(regex_storing_energy)) {
-                return  trans_from_dict(RegExp.$1) + "正在积蓄力量！";
-            }
-            if (originalStr.match(regex_tounleashed_energy)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "释放了自身的能量！";
-            }
-            if (originalStr.match(regex_unleashed_energy)) {
-                return  trans_from_dict(RegExp.$1) + "释放了自身的能量！";
-            }
-            if (originalStr.match(regex_tobecame_nimble)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "变得身轻如燕了！";
-            }
-            if (originalStr.match(regex_became_nimble)) {
-                return  trans_from_dict(RegExp.$1) + "变得身轻如燕了！";
-            }
-            if (originalStr.match(regex_rejected_Open_Team_Sheet)) {
-                return  RegExp.$1 + "拒绝公开队伍配置。";
-            }
-            if (originalStr.match(regex_agreed_Open_Team_Sheet)) {
-                return  RegExp.$1 + "同意公开队伍配置。";
-            }
-            if (originalStr.match(regex_tosqueezed_wrapped)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "被" + trans_from_dict(RegExp.$3) + "紧紧" + trans_from_dict(RegExp.$2 == "squeezed" ? "绑住" : "束缚") + "了！";
-            }
-            if (originalStr.match(regex_squeezed_wrapped)) {
-                return  trans_from_dict(RegExp.$1) + "被对手的" + trans_from_dict(RegExp.$3) + "紧紧" + trans_from_dict(RegExp.$2 == "squeezed" ? "绑住" : "束缚") + "了！";
-            }
-            if (originalStr.match(regex_tounaffected)) {
-                return  "对于对手的" + trans_from_dict(RegExp.$1) + "，完全没有效果！";
-            }
-            if (originalStr.match(regex_unaffected)) {
-                return  "对于" + trans_from_dict(RegExp.$1) + "，完全没有效果！";
-            }
-            if (originalStr.match(regex_toabsorbed_nutrients_roots)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "从根上吸取了养分！";
-            }
-            if (originalStr.match(regex_absorbed_nutrients_roots)) {
-                return  trans_from_dict(RegExp.$1) + "从根上吸取了养分！";
-            }
-            if (originalStr.match(regex_tonot_lowered)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的"+ translations[RegExp.$2] + "不会降低！";
-            }
-            if (originalStr.match(regex_not_lowered)) {
-                return   trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "不会降低！";
-            }
-            if (originalStr.match(regex_totype_added)) {
-                return  "对手的" + trans_from_dict(RegExp.$2) + "增加了" + translations[RegExp.$1] + "属性！";
-            }
-            if (originalStr.match(regex_type_added)) {
-                return  trans_from_dict(RegExp.$2) + "增加了" + translations[RegExp.$1] + "属性！";
-            }
-            if (originalStr.match(regex_tocant_get_going)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "无法拿出平时的水准！";
-            }
-            if (originalStr.match(regex_cant_get_going)) {
-                return  trans_from_dict(RegExp.$1) + "无法拿出平时的水准！";
-            }
-            if (originalStr.match(regex_tofinally_get_going)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "恢复了平时的水准！";
-            }
-            if (originalStr.match(regex_finally_get_going)) {
-                return  trans_from_dict(RegExp.$1) + "恢复了平时的水准！";
-            }
-            if (originalStr.match(regex_towas_burned_up)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "被烧尽了！";
-            }
-            if (originalStr.match(regex_was_burned_up)) {
-                return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "被烧尽了！";
-            }
-            if (originalStr.match(regex_tosurrounded_veil_petals)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "用花幕包裹了自己！";
-            }
-            if (originalStr.match(regex_surrounded_veil_petals)) {
-                return  trans_from_dict(RegExp.$1) + "用花幕包裹了自己！";
-            }
-            if (originalStr.match(regex_toAbility_became_Mummy)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的特性变成了木乃伊！";
-            }
-            if (originalStr.match(regex_Ability_became_Mummy)) {
-                return  trans_from_dict(RegExp.$1) + "的特性变成了木乃伊！";
-            }
-            if (originalStr.match(regex_toreturned_normal)) {
-                return  "(对手的" + trans_from_dict(RegExp.$1) + "复原了！)";
-            }
-            if (originalStr.match(regex_returned_normal)) {
-                return  "(" + trans_from_dict(RegExp.$1) + "复原了！)";
-            }
-            if (originalStr.match(regex_tolingering_aroma)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "沾上了味道且挥之不去！";
-            }
-            if (originalStr.match(regex_lingering_aroma)) {
-                return  trans_from_dict(RegExp.$1) + "沾上了味道且挥之不去！";
-            }
-            if (originalStr.match(regex_totoReflect_Type)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的属性变得和对手的对手的" + trans_from_dict(RegExp.$2) + "一样了！";
-            }
-            if (originalStr.match(regex_toReflect_Type2)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的属性变得和" + trans_from_dict(RegExp.$2) + "一样了！";
-            }
-            if (originalStr.match(regex_toReflect_Type)) {
-                return  trans_from_dict(RegExp.$1) + "的属性变得和对手的" + trans_from_dict(RegExp.$2) + "一样了！";
-            }
-            if (originalStr.match(regex_Reflect_Type)) {
-                return  trans_from_dict(RegExp.$1) + "的属性变得和" + trans_from_dict(RegExp.$2) + "一样了！";
-            }
-            if (originalStr.match(regex_totaken_over)) {
-                return  "继承了对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_taken_over)) {
-                return  "继承了" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_toweaker_to_fire)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "变得怕火了！";
-            }
-            if (originalStr.match(regex_weaker_to_fire)) {
-                return  trans_from_dict(RegExp.$1) + "变得怕火了！";
-            }
-            if (originalStr.match(regex_tocalmed_down)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "平静了下来。";
-            }
-            if (originalStr.match(regex_calmed_down)) {
-                return  trans_from_dict(RegExp.$1) + "平静了下来。";
-            }
-            if (originalStr.match(regex_toFlash_Fire)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的火焰威力提高了！";
-            }
-            if (originalStr.match(regex_Flash_Fire)) {
-                return  trans_from_dict(RegExp.$1) + "的火焰威力提高了！";
-            }
-            if (originalStr.match(regex_towaiting_target_move)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "正在等待一个招式进行抢夺！";
-            }
-            if (originalStr.match(regex_waiting_target_move)) {
-                return   trans_from_dict(RegExp.$1) + "正在等待一个招式进行抢夺！";
-            }
-            if (originalStr.match(regex_tosnatched_move)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "抢夺了" + trans_from_dict(RegExp.$2) + "的招式！";
-            }
-            if (originalStr.match(regex_snatched_move)) {
-                return  trans_from_dict(RegExp.$1) + "抢夺了对手的" + trans_from_dict(RegExp.$2) + "的招式！";
-            }
-            if (originalStr.match(regex_toMat_Block)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "举起了一块榻榻米挡下了即将到来的攻击！";
-            }
-            if (originalStr.match(regex_Mat_Block)) {
-                return  trans_from_dict(RegExp.$1) + "举起了一块榻榻米挡下了即将到来的攻击！";
-            }
-            if (originalStr.match(regex_kicked_up_mat)) {
-                return  "掀起的榻榻米挡住了" + translations[RegExp.$1] + "！";
-            }
-            if (originalStr.match(regex_no_wants_timer_on)) {
-                return  RegExp.$1 + "不再想要开启计时器，但计时器仍然启动着因为" + RegExp.$2 + "仍在启用。";
-            }
-            if (originalStr.match(regex_toGMax_Vine_Lash)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "被超极巨灰飞鞭灭强烈猛击！";
-            }
-            if (originalStr.match(regex_GMax_Vine_Lash)) {
-                return  trans_from_dict(RegExp.$1) + "被超极巨灰飞鞭灭强烈猛击！";
-            }
-            if (originalStr.match(regex_toGMax_Cannonade)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "被超极巨水炮轰灭的漩涡伤害了！";
-            }
-            if (originalStr.match(regex_GMax_Cannonade)) {
-                return  trans_from_dict(RegExp.$1) + "被超极巨水炮轰灭的漩涡伤害了！";
-            }
-            if (originalStr.match(regex_tosharp_steel)) {
-                return  "尖锐的钢刺扎进了对手的" + trans_from_dict(RegExp.$1) + "的体内！";
-            }
-            if (originalStr.match(regex_sharp_steel)) {
-                return  "尖锐的钢刺扎进了" + trans_from_dict(RegExp.$1) + "的体内！";
-            }
-            if (originalStr.match(regex_already_selected)) {
-                return  "已经选择了" + trans_from_dict(RegExp.$1) + "！";
-            }
-            if (originalStr.match(regex_toOctolock)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "受到蛸固的效果影响，变得无法逃走了！";
-            }
-            if (originalStr.match(regex_Octolock)) {
-                return  trans_from_dict(RegExp.$1) + "受到蛸固的效果影响，变得无法逃走了！";
-            }
-            if (originalStr.match(regex_areintheback5)) {
-                return  trans_from_dict(RegExp.$1) + ", " + trans_from_dict(RegExp.$2) + ", " + trans_from_dict(RegExp.$3) + ", " + trans_from_dict(RegExp.$4) + "和" + trans_from_dict(RegExp.$5) + "紧跟其后。";
-            }
-            if (originalStr.match(regex_areintheback4)) {
-                return  trans_from_dict(RegExp.$1) + ", " + trans_from_dict(RegExp.$2) + ", " + trans_from_dict(RegExp.$3) + "和" + trans_from_dict(RegExp.$4) + "紧跟其后。";
-            }
-            if (originalStr.match(regex_areintheback3)) {
-                return  trans_from_dict(RegExp.$1) + ", " + trans_from_dict(RegExp.$2) + "和" + trans_from_dict(RegExp.$3) + "紧跟其后。";
-            }
-            if (originalStr.match(regex_areintheback2)) {
-                return  trans_from_dict(RegExp.$1) + "和" + trans_from_dict(RegExp.$2) + "紧跟其后。";
-            }
-            if (originalStr.match(regex_areintheback)) {
-                return  trans_from_dict(RegExp.$1) + "紧跟其后。";
-            }
-            if (originalStr.match(regex_toPluck_BugBite)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "偷走并吃掉了目标的" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_Pluck_BugBite)) {
-                return  trans_from_dict(RegExp.$1) + "偷走并吃掉了目标的" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_toliquid_ooze)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "吸到了污泥浆！";
-            }
-            if (originalStr.match(regex_liquid_ooze)) {
-                return  trans_from_dict(RegExp.$1) + "吸到了污泥浆！";
-            }
-            if (originalStr.match(regex_tocovered_powder)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "被粉尘包裹着！";
-            }
-            if (originalStr.match(regex_covered_powder)) {
-                return  trans_from_dict(RegExp.$1) + "被粉尘包裹着！";
-            }
-            if (originalStr.match(regex_tospecial_attacks)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "获得了对特殊攻击的防护！";
-            }
-            if (originalStr.match(regex_special_attacks)) {
-                return  trans_from_dict(RegExp.$1) + "获得了对特殊攻击的防护！";
-            }
-            if (originalStr.match(regex_togained_armor)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "获得了对于物理攻击的防护！";
-            }
-            if (originalStr.match(regex_gained_armor)) {
-                return  trans_from_dict(RegExp.$1) + "获得了对于物理攻击的防护！";
-            }
-            if (originalStr.match(regex_toformed_school)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "一群群地聚集起来了！";
-            }
-            if (originalStr.match(regex_formed_school)) {
-                return  trans_from_dict(RegExp.$1) + "一群群地聚集起来了！";
-            }
-            if (originalStr.match(regex_tostopped_schooling)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "一群群地四散而去了！";
-            }
-            if (originalStr.match(regex_stopped_schooling)) {
-                return  trans_from_dict(RegExp.$1) + "一群群地四散而去了！";
-            }
-            if (originalStr.match(regex_tobursting_flame)) {
-                return  "溅射的火焰击中了对手的" + trans_from_dict(RegExp.$1) + "！";
-            }
-            if (originalStr.match(regex_bursting_flame)) {
-                return  "溅射的火焰击中了" + trans_from_dict(RegExp.$1) + "！";
-            }
-            if (originalStr.match(regex_send_offline_confirm)) {
-                return  "用户" + RegExp.$1 + "已离线。如果您仍然想对TA发送信息，请再次发送消息进行确认。";
-            }
-            if (originalStr.match(regex_tofell_for_feint)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "中了佯攻！";
-            }
-            if (originalStr.match(regex_fell_for_feint)) {
-                return  trans_from_dict(RegExp.$1) + "中了佯攻！";
-            }
-            if (originalStr.match(regex_tobroke_protection)) {
-                return  "突破了对手的" + trans_from_dict(RegExp.$1) + "的守护！";
-            }
-            if (originalStr.match(regex_broke_protection)) {
-                return  "突破了" + trans_from_dict(RegExp.$1) + "的守护！";
-            }
-            if (originalStr.match(regex_toalready_preparing)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "已经准备好了下轮行动！";
-            }
-            if (originalStr.match(regex_already_preparing)) {
-                return  trans_from_dict(RegExp.$1) + "已经准备好了下轮行动！";
-            }
-            if (originalStr.match(regex_tobeing_withdrawn2)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "准备回来！";
-            }
-            if (originalStr.match(regex_being_withdrawn2)) {
-                return  trans_from_dict(RegExp.$1) + "准备回来！";
-            }
-            if (originalStr.match(regex_toclamped_down)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "夹住了" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_clamped_down)) {
-                return  trans_from_dict(RegExp.$1) + "夹住了对手的" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_totook_kind_offer)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "接受了好意！";
-            }
-            if (originalStr.match(regex_took_kind_offer)) {
-                return  trans_from_dict(RegExp.$1) + "接受了好意！";
-            }
-            if (originalStr.match(regex_tohaving_nightmare)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "开始做恶梦了！";
-            }
-            if (originalStr.match(regex_having_nightmare)) {
-                return   trans_from_dict(RegExp.$1) + "开始做恶梦了！";
-            }
-            if (originalStr.match(regex_reconnected2)) {
-                return   RegExp.$1 + "重新连接了。";
-            }
-            if (originalStr.match(regex_tobecause_gravity)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "因重力而无法使出" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_because_gravity)) {
-                return  trans_from_dict(RegExp.$1) + "因重力而无法使出" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_Invite_sent_to)) {
-                return  "邀请了 " + RegExp.$1 + "！";
-            }
-            if (originalStr.match(regex_toGMax_Volcalith)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "被困在超极巨炎石喷发的岩石之中，疼痛难忍！";
-            }
-            if (originalStr.match(regex_GMax_Volcalith)) {
-                return  trans_from_dict(RegExp.$1) + "被困在超极巨炎石喷发的岩石之中，疼痛难忍！";
-            }
-            if (originalStr.match(regex_toprotect_hurt)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "没能防住攻击，受到了伤害！";
-            }
-            if (originalStr.match(regex_protect_hurt)) {
-                return  trans_from_dict(RegExp.$1) + "没能防住攻击，受到了伤害！";
-            }
-            if (originalStr.match(regex_cant_Dynamax)) {
-                return  "[无效的选择]不能使用：" + trans_from_dict(RegExp.$1) + "现在不能极巨化。";
-            }
-            if (originalStr.match(regex_toPower_Shift)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "互换了自身的攻击和防御！";
-            }
-            if (originalStr.match(regex_Power_Shift)) {
-                return  trans_from_dict(RegExp.$1) + "互换了自身的攻击和防御！";
-            }
-            if (originalStr.match(regex_toanchored_roots)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "用扎下的根固定住了！";
-            }
-            if (originalStr.match(regex_anchored_roots)) {
-                return  trans_from_dict(RegExp.$1) + "用扎下的根固定住了！";
-            }
-            if (originalStr.match(regex_toUltra_Burst)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "通过究极爆发现出了新的样子！";
-            }
-            if (originalStr.match(regex_Ultra_Burst)) {
-                return  trans_from_dict(RegExp.$1) + "通过究极爆发现出了新的样子！";
-            }
-            if (originalStr.match(regex_from4)) {
-                if (translations[RegExp.$8]) {
-                    originalStr = originalStr.replace(regex_from4, "");
-                    originalStr +=  "(因" + translations[RegExp.$2] + "而×" + RegExp.$1 + ") " + "(因" + translations[RegExp.$4] + "而×" + RegExp.$3 + ") " + "(因" + translations[RegExp.$6] + "而×" + RegExp.$5 + ") "+ "(因" + translations[RegExp.$8] + "而×" + RegExp.$7 + ")";
-                }
-                return originalStr.replace("因求雨而×", "因下雨而×").replace("因始源之海而×", "因大雨而×").replace("因终结之地而×", "因大日照而×");
-            }
-            if (originalStr.match(regex_from3)) {
-                if (translations[RegExp.$6]) {
-                    originalStr = originalStr.replace(regex_from3, "");
-                    originalStr +=  "(因" + translations[RegExp.$2] + "而×" + RegExp.$1 + ") " + "(因" + translations[RegExp.$4] + "而×" + RegExp.$3 + ") " + "(因" + translations[RegExp.$6] + "而×" + RegExp.$5 + ")";
-                }
-                return originalStr.replace("因求雨而×", "因下雨而×").replace("因始源之海而×", "因大雨而×").replace("因终结之地而×", "因大日照而×");
-            }
-            if (originalStr.match(regex_from2)) {
-                if (translations[RegExp.$4]) {
-                    originalStr = originalStr.replace(regex_from2, "");
-                    originalStr +=  "(因" + translations[RegExp.$2] + "而×" + RegExp.$1 + ") " + "(因" + translations[RegExp.$4] + "而×" + RegExp.$3 + ")";
-                }
-                return originalStr.replace("因求雨而×", "因下雨而×").replace("因始源之海而×", "因大雨而×").replace("因终结之地而×", "因大日照而×");
-            }
-            if (originalStr.match(regex_from)) {
-                if (translations[RegExp.$2]) {
-                    originalStr = originalStr.replace(regex_from, "");
-                    originalStr +=  "(因" + translations[RegExp.$2].replace("求雨", "下雨").replace("始源之海", "大雨").replace("终结之地", "大日照") + "而×" + RegExp.$1 + ")";
-                }
-                return originalStr;
-            }
-            if (originalStr.match(regex_toProtective_Pads)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "因部位护具而保护了自身！";
-            }
-            if (originalStr.match(regex_Protective_Pads)) {
-                return  trans_from_dict(RegExp.$1) + "因部位护具而保护了自身！";
-            }
-            if (originalStr.match(regex_toAbility_Shield)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的特性正受到特性护具效果的保护！";
-            }
-            if (originalStr.match(regex_Ability_Shield)) {
-                return  trans_from_dict(RegExp.$1) + "的特性正受到特性护具效果的保护！";
-            }
-            if (originalStr.match(regex_togrudge)) {
-                return  "因为怨念，对手的" + trans_from_dict(RegExp.$1) + "失去了其招式" + translations[RegExp.$2] + "的所有PP！";
-            }
-            if (originalStr.match(regex_grudge)) {
-                return   "因为怨念，" + trans_from_dict(RegExp.$1) + "失去了其招式" + translations[RegExp.$2] + "的所有PP！";
-            }
-            if (originalStr.match(regex_toalready_has_burn)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "已经灼伤了。";
-            }
-            if (originalStr.match(regex_already_has_burn)) {
-                return  trans_from_dict(RegExp.$1) + "已经灼伤了。";
-            }
-            if (originalStr.match(regex_already_searching)) {
-                return  "无法搜索：您已经在搜索一场" + RegExp.$1 + "对战了。";
-            }
-            if (originalStr.match(regex_todoesnt_become_confused)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "并没有混乱！";
-            }
-            if (originalStr.match(regex_doesnt_become_confused)) {
-                return  trans_from_dict(RegExp.$1) + "并没有混乱！";
-            }
-            if (originalStr.match(regex_already_challenge)) {
-                return  "您和" + RegExp.$2 + "之间已经有了一场" + RegExp.$1 + "挑战了！";
-            }
-            if (originalStr.match(regex_tobecause_Heal_Block)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "因回复封锁而无法使出" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_because_Heal_Block)) {
-                return  trans_from_dict(RegExp.$1) + "因回复封锁而无法使出" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_offering_tie)) {
-                return  RegExp.$1 + "请求平局。";
-            }
-            if (originalStr.match(regex_rejected_accepted_tie)) {
-                return  RegExp.$1 + trans_from_dict(RegExp.$2 == "rejected" ? "拒绝" : "同意") + "了平局。";
-            }
-            if (originalStr.match(regex_toStickyBarb_burn_BlackSludge)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "Sticky Barb" ? "附着针" : RegExp.$2 == "burn"  ? "灼伤" : "黑色污泥") + "的伤害！";
-            }
-            if (originalStr.match(regex_StickyBarb_burn_BlackSludge)) {
-                return  trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2 == "Sticky Barb" ? "附着针" : RegExp.$2 == "burn"  ? "灼伤" : "黑色污泥") + "的伤害！";
-            }
-            if (originalStr.match(regex_toCrafty_Quick_Wide_Shield)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$1 == "Crafty" ? "戏法" : RegExp.$1 == "Quick"  ? "快速" : "广域")  + "防守的保护！";
-            }
-            if (originalStr.match(regex_Crafty_Quick_Wide_Shield)) {
-                return  trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$1 == "Crafty" ? "戏法" : RegExp.$1 == "Quick"  ? "快速" : "广域")  + "防守的保护！";
-            }
-            if (originalStr.match(regex_toTreasures_of_ruin)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "令周围的宝可梦的" + translations[RegExp.$3] + "减弱了！";
-            }
-            if (originalStr.match(regex_Treasures_of_ruin)) {
-                return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "令周围的宝可梦的" + translations[RegExp.$3] + "减弱了！";
-            }
-            if (originalStr.match(regex_Specific_to)) {
-                return  translations[RegExp.$1] + "的专属道具";
-            }
-            if (originalStr.match(regex_toprotective_mist)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "受到了薄雾场地的保护！";
-            }
-            if (originalStr.match(regex_protective_mist)) {
-                return  trans_from_dict(RegExp.$1) + "受到了薄雾场地的保护！";
-            }
-            if (originalStr.match(regex_torose)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + trans_from_dict(RegExp.$3 == "rose drastically" ? "巨幅提高" : RegExp.$3 == "rose sharply"  ? "大幅提高" : "提高")  + "了！";
-            }
-            if (originalStr.match(regex_rose)) {
-                return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + trans_from_dict(RegExp.$3 == "rose drastically" ? "巨幅提高" : RegExp.$3 == "rose sharply"  ? "大幅提高" : "提高")  + "了！";
-            }
-            if (originalStr.match(regex_tofell)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + trans_from_dict(RegExp.$3 == "fell severely" ? "巨幅降低" : RegExp.$3 == "fell harshly"  ? "大幅降低" : "降低") + "了！";
-            }
-            if (originalStr.match(regex_fell)) {
-                return   trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + trans_from_dict(RegExp.$3 == "fell severely" ? "巨幅降低" : RegExp.$3 == "fell harshly"  ? "大幅降低" : "降低") + "了！";
-            }
-            if (originalStr.match(regex_toperishsong)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的灭亡计时变成" + RegExp.$2 + "了！";
-            }
-            if (originalStr.match(regex_perishsong)) {
-                return  trans_from_dict(RegExp.$1) + "的灭亡计时变成" + RegExp.$2 + "了！";
-            }
-            if (originalStr.match(regex_toDestiny_Knot)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "因红线而着迷了！";
-            }
-            if (originalStr.match(regex_Destiny_Knot)) {
-                return  trans_from_dict(RegExp.$1) + "因红线而着迷了！";
-            }
-            if (originalStr.match(regex_toBerserk_Gene)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "用破坏基因大幅提高了攻击！";
-            }
-            if (originalStr.match(regex_Berserk_Gene)) {
-                return  trans_from_dict(RegExp.$1) + "用破坏基因大幅提高了攻击！";
-            }
-            if (originalStr.match(regex_Guessed_spread)) {
-                originalStr = originalStr.replace("");
-                originalStr = translations[RegExp.$1] + ": " + RegExp.$2 + " " + translations[RegExp.$3] + " / " + RegExp.$4 + " " + translations[RegExp.$5] + " / " + RegExp.$6 + " " + translations[RegExp.$7] + RegExp.$8;
-                return originalStr.replace("Atk", "攻击").replace("Def", "防御").replace("SpA", "特攻").replace("SpD", "特防").replace("Spe", "速度").replace("+Atk", "+攻击").replace("+Def", "+防御").replace("+SpA", "+特攻").replace("+SpD", "+特防").replace("+Spe", "+速度").replace("-Atk", "-攻击").replace("-Def", "-防御").replace("-SpA", "-特攻").replace("-SpD", "-特防").replace("-Spe", "-速度");
-            }
-            if (originalStr.match(regex_Guessed_spread2)) {
-                originalStr = originalStr.replace("");
-                originalStr = RegExp.$1 + " " + translations[RegExp.$2] + " / " + RegExp.$3 + " " + translations[RegExp.$4] + RegExp.$5;
-                return originalStr.replace("Atk", "攻击").replace("Def", "防御").replace("SpA", "特攻").replace("SpD", "特防").replace("Spe", "速度").replace("+Atk", "+攻击").replace("+Def", "+防御").replace("+SpA", "+特攻").replace("+SpD", "+特防").replace("+Spe", "+速度").replace("-Atk", "-攻击").replace("-Def", "-防御").replace("-SpA", "-特攻").replace("-SpD", "-特防").replace("-Spe", "-速度");
-            }
-            if (originalStr.match(regex_Teaches)) {
-                return  "教会某些宝可梦" + translations[RegExp.$1] + "。一次性使用";
-            }
-            if (originalStr.match(regex_allows_ZMove)) {
-                return  trans_from_dict(RegExp.$1 == "a" ? "拥有" : "拥有") + translations[RegExp.$2] + "属性招式的携带者可以使" + trans_from_dict(RegExp.$3 == "a" ? "用" : "用") + translations[RegExp.$4] + "属性Z招式";
-            }
-            if (originalStr.match(regex_Multi_Attack)) {
-                return  "携带后多属性攻击变为" + translations[RegExp.$1] + "属性";
-            }
-            if (originalStr.match(regex_Judgment)) {
-                return  "携带后" + translations[RegExp.$1] + "招式威力提升20%，制裁光砾变为" + translations[RegExp.$2] + "属性";
-            }
-            if (originalStr.match(regex_attacks_have)) {
-                return  "携带后" + translations[RegExp.$1] + "属性招式威力提升" + RegExp.$2 + "0%";
-            }
-            if (originalStr.match(regex_Gem)) {
-                return  "使用" + translations[RegExp.$1] + "属性招式时提升本次攻击" + RegExp.$2 + "0%的威力。使用后消失";
-            }
-            if (originalStr.match(regex_taken_supereffective)) {
-                return  "受到效果绝佳的" + translations[RegExp.$1] + "属性招式时伤害减半。使用后消失";
-            }
-            if (originalStr.match(regex_Can_revived)) {
-                return  "可以用来复活" + translations[RegExp.$1];
-            }
-            if (originalStr.match(regex_Evolves)) {
-                if (translations[RegExp.$1])
-                    return  translations[RegExp.$1] + trans_from_dict(RegExp.$3 == "us" ? "使用" : "携带并通信交换") + "后，进化为" + translations[RegExp.$2];
-                else
-                    return  RegExp.$1 + trans_from_dict(RegExp.$3 == "us" ? "使用" : "携带并通信交换") + "后，进化为" + RegExp.$2;
-            }
-            if (originalStr.match(regex_confuses_Nature)) {
-                return  "HP低于" + RegExp.$2 + "最大HP时，恢复最大HP的" + RegExp.$1 + "，减" + translations[RegExp.$3] + "性格会混乱。使用后消失";
-            }
-            if (originalStr.match(regex_Mega_Evolve_item)){
-                if (translations[RegExp.$2])
-                    return  "让" + translations[RegExp.$2] + "携带后，在战斗时可以进行超级进化";
-                else
-                    return "让" + RegExp.$2 + "携带后，在战斗时可以进行超级进化"
-            }
-            if (originalStr.match(regex_Spe_to)) {
-                return   ": " + RegExp.$1 + " 至 " + RegExp.$2;
-            }
-            if (originalStr.match(regex_battles_ballte)) {
-                return  RegExp.$1 + "场 " + RegExp.$2 + trans_from_dict(RegExp.$3 == "battles" ? "对战" : "对战");
-            }
-            if (originalStr.match(regex_Turn)) {
-                return  "回合 " + RegExp.$1;
-            }
-            if (originalStr.match(regex_Transformed_into2)) {
-                return "(变成了" + trans_from_dict(RegExp.$1) + ")";
-            }
-            if (originalStr.match(regex_knocked_off)) {
-                return  translations[RegExp.$1] + " (拍落)";
-            }
-            if (originalStr.match(regex_hid_replay)) {
-                return  RegExp.$1 + "隐藏了这场战斗的回放。";
-            }
-            if (originalStr.match(regex_weather_suppressed)) {
-                if (translations[RegExp.$2])
-                    return  "(" + translations[RegExp.$2] + "使" + trans_from_dict(RegExp.$1 == "Snow" ? "下雪" : RegExp.$1 == "Hail"  ? "冰雹" : RegExp.$1 == "Desolate Land"  ? "大日照" : RegExp.$1 == "Sunny Day"  ? "大晴天" : RegExp.$1 == "Primordial Sea" ? "始源之海": RegExp.$1 == "Rain Dance" ? "下雨" : "沙暴") + "的影响无效了)";
-            }
-            if (originalStr.match(regex_Nature_Power)) {
-                return "自然之力变成了" + translations[RegExp.$1] + "！";
-            }
-            if (originalStr.match(regex_Use_different_nature)) {
-                return "使用这种性格可以多出" + RegExp.$1 + "点基础点数:";
-            }
-            if (originalStr.match(regex_made_hidden)) {
-                return  RegExp.$1 + "将房间隐藏了。";
-            }
-            if (originalStr.match(regex_made_public)) {
-                return  RegExp.$1 + "将房间公开了。";
-            }
-            if (originalStr.match(regex_tofell_sky)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "因重力而掉到了地面！";
-            }
-            if (originalStr.match(regex_fell_sky)) {
-                return  trans_from_dict(RegExp.$1) + "因重力而掉到了地面！";
-            }
-            if (originalStr.match(regex_lol)) {
-                return  "您还没有" + RegExp.$1.replace(" ", "") + "队伍";
-            }
-            if (originalStr.match(regex_toconcentrated)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "磨砺了精神！";
-            }
-            if (originalStr.match(regex_concentrated)) {
-                return  trans_from_dict(RegExp.$1) + "磨砺了精神！";
-            }
-            if (originalStr.match(regex_toshook_head)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "摇了摇头，好像无法使出这个招式......";
-            }
-            if (originalStr.match(regex_shook_head)) {
-                return  trans_from_dict(RegExp.$1) + "摇了摇头，好像无法使出这个招式......";
-            }
-
-
-            //  \s
-
-            if (originalStr.match(regex_Mega_Evolution)) {
-                return  "Mega进化";
-            }
-            if (originalStr.match(regex_Fallen)) {
-                return  "倒下的同伴：" + RegExp.$1;
-            }
-            if (originalStr.match(regex_modifiers)) {
-                if (translations[RegExp.$2])
-                    return  RegExp.$1.replace("×", "x ") + translations[RegExp.$2].replace("命中率", "命中").replace("闪避率", "闪避");
-            }
-            if (originalStr.match(regex_modifiers2)) {
-                return  translations[RegExp.$2].replace("命中率", "命中").replace("闪避率", "闪避") + "已经×" + RegExp.$1 + "了";
-            }
-            if (originalStr.match(regex_PQ)) {
-                return  trans_from_dict(RegExp.$1 == "Protosynthesis" ? "古代活性" : "夸克充能") + "：" + translations[RegExp.$2];
-            }
-            if (originalStr.match(regex_NR)) {
-                return  "背水一战";
-            }
-            if (originalStr.match(regex_LR)) {
-                return  "寄生种子";
-            }
-            if (originalStr.match(regex_SC)) {
-                return  "盐腌";
-            }
-            if (originalStr.match(regex_SC2)) {
-                return  "复制了能力";
-            }
-            if (originalStr.match(regex_DB)) {
-                return  "同命";
-            }
-            if (originalStr.match(regex_SD)) {
-                return  "击落";
-            }
-            if (originalStr.match(regex_MS)) {
-                return  "熔岩风暴";
-            }
-            if (originalStr.match(regex_FS)) {
-                return  "火焰旋涡";
-            }
-            if (originalStr.match(regex_ST)) {
-                return  "流沙地狱";
-            }
-            if (originalStr.match(regex_ST2)) {
-                return  "捕兽夹";
-            }
-            if (originalStr.match(regex_TC)) {
-                return  "雷电囚笼";
-            }
-            if (originalStr.match(regex_TC2)) {
-                return  "地狱突刺";
-            }
-            if (originalStr.match(regex_ME)) {
-                return  "奇迹之眼";
-            }
-            if (originalStr.match(regex_OS)) {
-                return  "气味侦测";
-            }
-            if (originalStr.match(regex_HB)) {
-                return  "回复封锁";
-            }
-            if (originalStr.match(regex_HBE)) {
-                return  "回复封锁解除了";
-            }
-            if (originalStr.match(regex_PS)) {
-                return  RegExp.$1 + "回合后灭亡";
-            }
-            if (originalStr.match(regex_PNT)) {
-                return  "下回合灭亡";
-            }
-            if (originalStr.match(regex_PN)) {
-                return  "立即灭亡";
-            }
-            if (originalStr.match(regex_TS)) {
-                return  "沥青射击";
-            }
-            if (originalStr.match(regex_TS2)) {
-                return  "陷阱甲壳";
-            }
-            if (originalStr.match(regex_TS3)) {
-                return  "无理取闹解除了";
-            }
-            if (originalStr.match(regex_MR)) {
-                return  "需要恢复精力";
-            }
-            if (originalStr.match(regex_MR2)) {
-                return  "电磁飘浮";
-            }
-            if (originalStr.match(regex_RP)) {
-                return  "愤怒粉";
-            }
-            if (originalStr.match(regex_FM)) {
-                return  "看我嘛";
-            }
-            if (originalStr.match(regex_CHB)) {
-                return  "易中要害";
-            }
-            if (originalStr.match(regex_LF)) {
-                return  "磨砺";
-            }
-            if (originalStr.match(regex_HH)) {
-                return  "帮助";
-            }
-            if (originalStr.match(regex_PT)) {
-                return  "力量戏法";
-            }
-            if (originalStr.match(regex_WG)) {
-                return  "广域防守";
-            }
-            if (originalStr.match(regex_QG)) {
-                return  "快速防守";
-            }
-            if (originalStr.match(regex_MB)) {
-                return  "掀榻榻米";
-            }
-            if (originalStr.match(regex_MC)) {
-                return  "魔法反射";
-            }
-            if (originalStr.match(regex_GR)) {
-                return  "巨剑突击";
-            }
-            if (originalStr.match(regex_BB)) {
-                return  "鸟嘴加农炮";
-            }
-            if (originalStr.match(regex_AR)) {
-                return  "水流环";
-            }
-            if (originalStr.match(regex_SS)) {
-                return  "慢启动";
-            }
-            if (originalStr.match(regex_BO)) {
-                return  "靛蓝色宝珠";
-            }
-            if (originalStr.match(regex_RO)) {
-                return  "朱红色宝珠";
-            }
-            if (originalStr.match(regex_AS)) {
-                return  "迷人解除了";
-            }
-            if (originalStr.match(regex_DS)) {
-                return  "定身法解除了";
-            }
-            if (originalStr.match(regex_ES)) {
-                return  "再来一次解除了";
-            }
-            if (originalStr.match(regex_TE)) {
-                return  "挑衅解除了";
-            }
-            if (originalStr.match(regex_CE)) {
-                return  "混乱解除了";
-            }
-            if (originalStr.match(regex_IKO)) {
-                return  "物品被拍落了";
-            }
-            if (originalStr.match(regex_FF)) {
-                return  "引火";
-            }
-            if (originalStr.match(regex_IF)) {
-                return  "正在封印对手";
-            }
-            if (originalStr.match(regex_AP)) {
-                return  "已经中毒了";
-            }
-            if (originalStr.match(regex_AP2)) {
-                return  "已经麻痹了";
-            }
-            if (originalStr.match(regex_AB)) {
-                return  "已经灼伤了";
-            }
-            if (originalStr.match(regex_LS)) {
-                return  "正在偷懒";
-            }
-            if (originalStr.match(regex_SDB)) {
-                return  "能力不会降低";
-            }
-            if (originalStr.match(regex_BL)) {
-                return  "失去了能力提升";
-            }
-            if (originalStr.match(regex_MG)) {
-                return  "极巨防壁";
-            }
-            if (originalStr.match(regex_Guessed_spread3)) {
-                return  "分配推测：(请选择4个招式以获得分配推测) (";
-            }
-
-
-
-
-
-            //  debug
-
-            if (originalStr.match(regex_totoknock)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "拍落了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_toknock2)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "拍落了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_toknock)) {
-                return  trans_from_dict(RegExp.$1) + "拍落了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_knock)) {
-                return  trans_from_dict(RegExp.$1) + "拍落了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_knock2)) {
-                if (translations[RegExp.$2])
-                    return  "拍落了" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "！";
-            }
-            if (originalStr.match(regex_totothief)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "夺取了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_tothief2)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "夺取了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_tothief)) {
-                return  trans_from_dict(RegExp.$1) + "夺取了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_thief)) {
-                return  trans_from_dict(RegExp.$1) + "夺取了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_tototrace)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "复制了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_totrace2)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "复制了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_totrace)) {
-                return  trans_from_dict(RegExp.$1) + "复制了对手的" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_trace)) {
-                return  trans_from_dict(RegExp.$1) + "复制了" + trans_from_dict(RegExp.$2) + "的" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_totoroleplay)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "复制了对手的" + trans_from_dict(RegExp.$2) + "的特性" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_toroleplay2)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "复制了" + trans_from_dict(RegExp.$2) + "的特性" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_toroleplay)) {
-                return   trans_from_dict(RegExp.$1) + "复制了对手的" + trans_from_dict(RegExp.$2) + "的特性" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_roleplay)) {
-                return   trans_from_dict(RegExp.$1) + "复制了" + trans_from_dict(RegExp.$2) + "的特性" + translations[RegExp.$3] + "！";
-            }
-            if (originalStr.match(regex_tocannot_use)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
-            }
-            if (originalStr.match(regex_cannot_use)) {
-                return   trans_from_dict(RegExp.$1) + "无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
-            }
-            if (originalStr.match(regex_tostockpiled)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "蓄力了" + RegExp.$2 + "次！";
-            }
-            if (originalStr.match(regex_stockpiled)) {
-                return   trans_from_dict(RegExp.$1) + "蓄力了" + RegExp.$2 + "次！";
-            }
-            if (originalStr.match(regex_toihb)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2) + "的伤害！";
-            }
-            if (originalStr.match(regex_ihb)) {
-                return  trans_from_dict(RegExp.$1) + "受到了" + trans_from_dict(RegExp.$2) + "的伤害！";
-            }
-            if (originalStr.match(regex_tofreed)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "从" + trans_from_dict(RegExp.$2) + "中解脱了！";
-            }
-            if (originalStr.match(regex_freed)) {
-                return  trans_from_dict(RegExp.$1) + "从" + trans_from_dict(RegExp.$2) + "中解脱了！";
-            }
-            if (originalStr.match(regex_tocant_use)) {
-                return "对手的" + trans_from_dict(RegExp.$1) + "无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
-            }
-            if (originalStr.match(regex_cant_use)) {
-                return trans_from_dict(RegExp.$1) + "无法使出" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "！";
-            }
-            if (originalStr.match(regex_totrapped)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "困住了" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_trapped)) {
-                return   trans_from_dict(RegExp.$1) + "困住了对手的" + trans_from_dict(RegExp.$2) + "！";
-            }
-            if (originalStr.match(regex_joined)) {
-                return RegExp.$1.replace(", ", "，" ).replace("and"," 和 ") + "加入了房间";
-            }
-            if (originalStr.match(regex_left)) {
-                return RegExp.$1.replace(", ", "，" ).replace("and"," 和 ").replace(" joined; ","加入了房间; ") + "离开了";
-            }
-            if (originalStr.match(regex_toeerie_spell)) {
-                return   "削减了对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "的PP" + RegExp.$3 + "点！";
-            }
-            if (originalStr.match(regex_eerie_spell)) {
-                return   "削减了" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "的PP" + RegExp.$3 + "点！";
-            }
-            if (originalStr.match(regex_Unavailable_choice_cant_move)) {
-                return  "[无效的选择] 无法使出:" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "被禁用";
-            }
-            if (originalStr.match(regex_toleppaberry)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "用苹野果恢复了" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "的PP！";
-            }
-            if (originalStr.match(regex_leppaberry)) {
-                return  trans_from_dict(RegExp.$1) + "用苹野果恢复了" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "的PP！";
-            }
-            if (originalStr.match(regex_tostat_changes)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "的能力等级变化了！";
-            }
-            if (originalStr.match(regex_stat_changes)) {
-                return   trans_from_dict(RegExp.$1) + "的能力等级变化了！";
-            }
-            if (originalStr.match(regex_tosymbiosis)) {
-                return   "对手的" + trans_from_dict(RegExp.$1) + "将" + translations[RegExp.$2] + "交给了对手的" + trans_from_dict(RegExp.$3) + "！";
-            }
-            if (originalStr.match(regex_symbiosis)) {
-                return   trans_from_dict(RegExp.$1) + "将" + translations[RegExp.$2] + "交给了" + trans_from_dict(RegExp.$3) + "！";
-            }
-            if (originalStr.match(regex_tohigh_low)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "已经" + trans_from_dict(RegExp.$3 == "high" ? "无法再提高" : "降到最低") + "了！";
-            }
-            if (originalStr.match(regex_high_low)) {
-                return   trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "已经" + trans_from_dict(RegExp.$3 == "high" ? "无法再提高" : "降到最低") + "了！";
-            }
-            if (originalStr.match(regex_towas_heightened)) {
-                return  "对手的" +  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "升高了！";
-            }
-            if (originalStr.match(regex_was_heightened)) {
-                return  trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "升高了！";
-            }
-            if (originalStr.match(regex_Move_here)) {
-                return  "移动至";
-            }
-            if (originalStr.match(regex_to_used)) {
-                return  "对手的" + trans_from_dict(RegExp.$1) + "使出了";
-            }
-            if (originalStr.match(regex_used)) {
-                return  trans_from_dict(RegExp.$1) + "使出了";
-            }
-            if (originalStr.match(regex_to123)) {
-                if (translations[RegExp.$2])
-                    return  "[对手的" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "]";
-            }
-            if (originalStr.match(regex_123)) {
-                if (translations[RegExp.$2])
-                    return  "[" + trans_from_dict(RegExp.$1) + "的" + translations[RegExp.$2] + "]";
-            }
-            if (originalStr.match(regex_1234)) {
-                if (translations[RegExp.$1])
-                    return "(" + translations[RegExp.$1] + ")";
-            }
-            if (originalStr.match(regex_12345)) {
-                if (translations[RegExp.$1])
-                    return translations[RegExp.$1] + "(";
-            }
-            if (originalStr.match(regex_9)) {
-                if (translations[RegExp.$9])
-                    return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3] +" / " + translations[RegExp.$4] +" / " + translations[RegExp.$5] + " / " + translations[RegExp.$6] +" / " + translations[RegExp.$7] + " / " + translations[RegExp.$8] +" / " + translations[RegExp.$9];
-                return originalStr;
-            }
-            if (originalStr.match(regex_8)) {
-                if (translations[RegExp.$8])
-                    return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3] +" / " + translations[RegExp.$4] +" / " + translations[RegExp.$5] + " / " + translations[RegExp.$6] + " / " + translations[RegExp.$7] + " / " + translations[RegExp.$8];
-                return originalStr;
-            }
-            if (originalStr.match(regex_7)) {
-                if (translations[RegExp.$7])
-                    return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3] +" / " + translations[RegExp.$4] +" / " + translations[RegExp.$5] + " / " + translations[RegExp.$6] + " / " + translations[RegExp.$7];
-                return originalStr;
-            }
-            if (originalStr.match(regex_6)) {
-                if (translations[RegExp.$6])
-                    return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3] +" / " + translations[RegExp.$4] +" / " + translations[RegExp.$5] + " / " + translations[RegExp.$6];
-                return originalStr;
-            }
-            if (originalStr.match(regex_5)) {
-                if (translations[RegExp.$5])
-                    return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3] +" / " + translations[RegExp.$4] +" / " + translations[RegExp.$5];
-                return originalStr;
-            }
-            if (originalStr.match(regex_4)) {
-                if (translations[RegExp.$4])
-                    return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3] +" / " + translations[RegExp.$4];
-                return originalStr;
-            }
-            if (originalStr.match(regex_3)) {
-                if (translations[RegExp.$3])
-                    return  translations[RegExp.$1] + " / " + translations[RegExp.$2] +" / " + translations[RegExp.$3];
-                return originalStr;
-            }
-            if (originalStr.match(regex_2)) {
-                if (translations[RegExp.$2])
-                    return  translations[RegExp.$1] + " / " + translations[RegExp.$2];
-                return originalStr;
-            }
-            if (originalStr.match(regex_1)) {
-                if (translations[RegExp.$1])
-                    originalStr = originalStr.replace("");
-                originalStr =  translations[RegExp.$1] + " / ";
-                return originalStr;
-            }
-            if (originalStr.match(regex_333)) {
-                if (translations[RegExp.$3])
-                    if (translations[RegExp.$2])
-                        if (translations[RegExp.$1])
-                            return  translations[RegExp.$1] + "，" + translations[RegExp.$2]+ "，" + translations[RegExp.$3];
-            }
-            if (originalStr.match(regex_222)) {
-                if (translations[RegExp.$2])
-                    if (translations[RegExp.$1])
-                        return  translations[RegExp.$1] + "，" + translations[RegExp.$2];
-            }
-            if (originalStr.match(regex_111)) {
-                return  trans_from_dict(RegExp.$1 == "不开启" ? "定身法 " : RegExp.$1 == "超能力"  ? "精神强念 " : RegExp.$1 == "节拍器"  ? "挥指 " : RegExp.$1 == "刷新"  ? "焕然一新 " : "攻击 ");
-            }
-            if (originalStr.match(regex_11)) {
-                return  "!" + RegExp.$1;
-            }
-            if (originalStr.match(regex_rating)) {
-                return  RegExp.$1 + "的分数：" + RegExp.$2;
-            }
-            if (originalStr.match(regex_forwin)) {
-                return  "（获胜" + RegExp.$1 + "）";
-            }
-            if (originalStr.match(regex_forlos)) {
-                return  "（战败" + RegExp.$1 + "）";
-            }
-            if (originalStr.match(regex_tourwsoumbaq)) {
-                return  "请在" + RegExp.$1 + "秒内对比赛作出回应，否则您可能会被自动取消资格。";
-            }
-            if (originalStr.match(regex_statussetto)) {
-                return  "您的状态已被设置为：" + RegExp.$1 + "。";
-            }
-            if (originalStr.match(regex_tcdnetsamswt)) {
-                return  "指令" + RegExp.$1 +"不存在。如果要发送以" + RegExp.$2 + "开头的消息，请输入" + RegExp.$3;
-            }
-            if (originalStr.match(regex_useroffinemessge)) {
-                return  "用户" + RegExp.$1 +"已离线。再次发送消息可以留言。如果您正在使用" + RegExp.$2 + "指令，请改用" + RegExp.$3 + "指令。";
-            }
-            return originalStr.replace("(Tera type BP minimum)", "(太晶化后的最低招式威力为60)").replace("挑战Cup", "Challenge Cup").replace("Possible Illusion", "可能是幻觉").replace("(priority", "(优先度").replace("(approximate)", "(近似计算)").replace("[sent offline", "[离线发送").replace("of its health!)", "的生命值！)").replace("'s replays", "的回放").replace("(Hit 1 time)", "(受到1次伤害)").replace("(Hit 2 times)", "(受到2次伤害)").replace("(Hit 3 times)", "(受到3次伤害)").replace("(Hit 4 times)", "(受到4次伤害)").replace("(Hit 5 times)", "(受到5次伤害)").replace("(Hit 6 times)", "(受到6次伤害)").replace("(no Terrain)", "(没有场地)").replace("(Artist:", "(画家:").replace("(blocked by target's Dynamax)", "(对极巨化宝可梦无效)").replace("(fails if target's level is higher)", "(如果目标等级更高，使用失败)").replace("(+1% per level above target)", "(比目标每高1级，命中率+1%)").replace("(not Ice-type)", "(不是冰属性)");
-            };
-
-        // ==========================================
-        // 7. 完美融合版的 translateNode 与 DOM 监听
-        // ==========================================
-        function translateNode(node) {
-        if (node.nodeType === 3) { // 如果是文本节点
-            let text = node.nodeValue;
-            let value = text; // 【关键修复2】：声明 value 变量，供长句判定使用
-            let trimmed = text.trim();
+    // 整合后的 DOM 节点替换逻辑
+    function translateNode(node) {
+        if (node.nodeType === 3) {
+            // 注意：这里统一改用 value 变量，以完美兼容旧文件复制过来的代码
+            let value = node.nodeValue;
+            let trimmed = value.trim();
             if (!trimmed) return;
 
+            // 优先级别 1：基础词典全文本精确匹配 (效率最高)
+            if (translations[trimmed]) {
+                node.nodeValue = value.replace(trimmed, translations[trimmed]);
+                return;
+            } 
+            
+            // 优先级别 2：处理宝可梦名字（带有短横线但不包含空格的短词）
+            if (trimmed.includes('-') && !trimmed.includes(' ')) {
+                let newText = translatePokemonName(trimmed);
+                if (newText !== trimmed) {
+                    node.nodeValue = value.replace(trimmed, newText);
+                    return;
+                }
+            }
+
+            // ==========================================================
+            function translateNode(node) {
             if (node.tagName == 'SCRIPT') return;
             var value = node.nodeValue;
             if (value.startsWith("If this move is successful, it deals damage or heals the target. 102/256 chance for")) node.nodeValue = "随机选择如下效果：102/256几率以40威力攻击对手；76/256几率以80威力攻击对手；26/256几率以120威力攻击对手；52/256几率回复对手1/4的最大HP(向下取整)。在第二世代使用礼物招式时，伤害计算公式中的等级、攻击、防御变量的值会发生改变。攻击的值会变为5（岩石属性或钢属性）或10（其他属性）。等级与防御的值由宝可梦的属性决定，其中等级会变为防御方宝可梦第二属性的内部编号，防御会变为攻击方宝可梦第二属性的内部编号（如果攻击方或防御方宝可梦只有一种属性，按照该宝可梦的第一属性计算）。各属性的内部编号如下：0=一般，1=格斗，2=飞行，3=毒，4=地面，5=岩石，7=虫，8=幽灵，9=钢，20=火，21=水，22=草，23=电，24=超能力，25=冰，26=龙，27=恶。";
@@ -12405,36 +12404,57 @@ var translations = {
             if (value.startsWith("The target immediately uses its last used move. Fails if")) node.nodeValue = "令目标再使用一次先前使用的招式。无视速度和优先度条件。以下情况会导致号令使用失败：目标没有使用招式且使用号令的宝可梦比目标提前使用；使出的招式已耗尽PP；处于畏缩；使用多回合攻击类招式、仿效、梦话、击掌奇袭、迎头一击、挥指、鹦鹉学舌、自然之力、借助、抢先一步、号令、蓄力的招式、鸟嘴加农炮、陷阱甲壳、真气拳、拦堵、王者盾牌、忍耐、模仿、写生、变身、吵闹、喋喋不休、打嗝、庆祝、牵手、极巨炮、挣扎、极巨招式、Z招式、使用后下一回合将无法动弹的招式。";
             if (value.startsWith("The user and its party members are protected from moves made by other Pokemon")) node.nodeValue = "在当回合内，使我方全体进入守住状态，保护我方全体不受到来自其他宝可梦的大部分招式的影响。此招式有1/X的成功几率，其中X从1开始，每次成功使用此招式时X增加三倍。如果使用失败，或上一回合使用的不是看穿、挺住、守住、王者盾牌、尖刺防守、碉堡、拦堵、极巨防壁、线阱、火焰守护、掀榻榻米、火焰守护、广域防守或快速防守，X重置为1。如果在本回合使用者最后行动，招式会失败。";
             if (value.startsWith("The user takes 1/4 of its maximum HP, rounded down, and puts it into a substitute to take its place in")) node.nodeValue = "用自己最大HP的1/4制造出替身，相等于替身的HP，向下取整。如果自身离场或替身HP为0，替身会消失。使用接棒或断尾传递替身时，替身的HP不变。替身存在时对手的攻击招式的伤害大都只能伤害替身，并防止本体免受其他宝可梦造成的异常状态和状态变化。声音的招式以及穿透特性的宝可梦使用的招式可以无视替身。天气和替身存在前的异常状态、状态变化正常影响本体。连续招式打破替身后可以继续攻击。如果在本体在陷入无法逃走状态时制造了替身，无法逃走状态将立即结束。如果HP不足或已经拥有替身，使用失败。";
-           // 如果上面那 100 多行代码成功匹配并汉化了文本，就直接返回，不继续往下跑
-            if (node.nodeValue !== text) return;
-
-            // 处理开头是圆点 '•' 的特殊列表情况（提取自你原来的代码）
-            if (value.indexOf('•') === 0) {
-                let cleanValue = value.replace('•', "").replace('Metronome', "挥指").replace('Refresh', "焕然一新").replace('Disable', "定身法").replace("Hidden Power 精神强念", "觉醒力量-超能力").replace("强念 Noise", "噪音").replace("强念 Fangs", "之牙").replace("强念 Terrain", "场地").replace('Psychic', "精神强念");
-                node.nodeValue = "• " + t(cleanValue) + " ";
-                return;
-            } 
-
-            // 尝试使用 t 函数进行短句和正则翻译
-            let translated = t(trimmed.replace("é", "e"));
-            if (translated && translated !== trimmed) {
-                node.nodeValue = text.replace(trimmed, translated);
-                return;
-            }
-
-            // 最后的兜底：带有 '-' 的宝可梦/形态名字处理
-            if (trimmed.includes('-')) {
-                let newText = translatePokemonName(trimmed);
-                if (newText !== trimmed) {
-                    node.nodeValue = text.replace(trimmed, newText);
+            if (value.length > 260) return;
+            if (node.parentNode?.tagName == "STRONG" || node.parentNode?.getAttribute("class") == "col movenamecol" ||
+                node.parentNode?.parentNode?.getAttribute("class") == "col movenamecol" || node.parentNode?.getAttribute("name") == "chooseMove") {
+                if (node.nodeValue == "Metronome") {
+                    node.nodeValue = "挥指";
+                    return;
+                } else if (node.nodeValue == "Refresh") {
+                    node.nodeValue = "焕然一新";
+                    return;
+                } else if (node.nodeValue == "Disable") {
+                    node.nodeValue = "定身法";
+                    return;
+                } else if (node.nodeValue == "Psychic") {
+                    node.nodeValue = "精神强念";
+                    return;
+                } else if (node.nodeValue == "National Dex") {
+                    node.nodeValue = "全国图鉴";
+                    return;
+                } else if (node.nodeValue == "Draft") {
+                    node.nodeValue = "选秀";
+                    return;
                 }
             }
-            
-        } else if (node.nodeType === 1) { // 如果是元素节点
+            if (value.lastIndexOf('!') == 0 || (value.lastIndexOf(')!') == 0)){
+                value = value.replace('!', "！");
+                node.nodeValue = value;
+            }
+            if (value.indexOf('•') == 0) {
+                value = value.replace('•', "").replace('Metronome', "挥指").replace('Refresh', "焕然一新").replace('Disable', "定身法").replace("Hidden Power 精神强念", "觉醒力量-超能力").replace("强念 Noise", "噪音").replace("强念 Fangs", "之牙").replace("强念 Terrain", "场地").replace('Psychic', "精神强念");
+                value = t(value);
+                node.nodeValue = "• " + value + " ";
+            } else {
+                node.nodeValue = t(node.nodeValue.replace("é", "e"));
+
+            }
+        }
+
+            // ==========================================================
+
+
+            // 优先级别 3：前面都没拦截下来，最后交由动态正则去匹配对战播报
+            let regexTranslated = t(value);
+            if (regexTranslated !== value) {
+                node.nodeValue = regexTranslated;
+            }
+
+        } else if (node.nodeType === 1) {
             let tag = node.tagName.toUpperCase();
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
 
-            // 名字特殊加粗标签处理
+            // 依然保留您在 pokemonnamecol 中对 <b> 标签的强行重写逻辑
             if (node.classList.contains('pokemonnamecol') || node.parentElement?.classList.contains('pokemonnamecol')) {
                 let fullText = node.textContent.trim();
                 if (fullText.includes('-')) {
@@ -12449,7 +12469,6 @@ var translations = {
                 }
             }
             
-            // 递归遍历子节点
             for (let i = 0; i < node.childNodes.length; i++) {
                 translateNode(node.childNodes[i]);
             }
