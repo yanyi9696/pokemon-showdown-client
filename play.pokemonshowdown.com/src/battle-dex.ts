@@ -1482,11 +1482,11 @@ export const Dex = new class implements ModdedDex {
             
             // 【终极微调参数】
 			// 1. 将大小限制在 100px * 100px 正方形内，确保不超出整行的高度边界
-            const bgSize = "background-size: 95px 995px; ";
+            const bgSize = "background-size: 95px 95px; ";
             
             // 2：X轴固定距离左边 12px（避开最左侧的边框），Y轴绝对不能写死 2px，必须用 center 或 50%
             // center 会让图片无论内部怎么留白，都以画框中心为轴对齐
-            return `background-image:url(${finalUrl});${bgSize}background-position: 12px center;background-repeat:no-repeat`;
+            return `background-image:url(${finalUrl});${bgSize}background-position: 12px 40%;background-repeat:no-repeat`;
         } else {
             // 属于你本地魔改的非 home 贴图，依然读取你本地或私服配置的路径
             const finalUrl = `${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`;
