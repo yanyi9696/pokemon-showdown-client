@@ -1477,20 +1477,21 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		// 精准修复：如果是官方的 home 立绘，直接强行去官方云端服务器拉取
-		if (data.spriteDir === 'sprites/home') {
-			const finalUrl = `https://play.pokemonshowdown.com/sprites/home${shiny}/${data.spriteid}.png`;
-			
-			// 【终极微调参数】
+        if (data.spriteDir === 'sprites/home') {
+            const finalUrl = `https://play.pokemonshowdown.com/sprites/home${shiny}/${data.spriteid}.png`;
+            
+            // 【终极微调参数】
 			// 1. 将大小限制在 100px * 100px 正方形内，确保不超出整行的高度边界
-			const bgSize = "background-size: 100px 100px; ";
-			
-			// 2. X轴固定距离左边 12px（避开最左侧的边框），Y轴直接写 center 让浏览器完美上下居中(左右调12px 上下调2px)
-			return `background-image:url(${finalUrl});${bgSize}background-position: 12px 2px;background-repeat:no-repeat`;
-		} else {
-			// 属于你本地魔改的非 home 贴图，依然读取你本地或私服配置的路径
-			const finalUrl = `${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`;
-			return `background-image:url(${finalUrl});background-position:${data.x}px ${data.y}px;background-repeat:no-repeat`;
-		}
+            const bgSize = "background-size: 95px 995px; ";
+            
+            // 2：X轴固定距离左边 12px（避开最左侧的边框），Y轴绝对不能写死 2px，必须用 center 或 50%
+            // center 会让图片无论内部怎么留白，都以画框中心为轴对齐
+            return `background-image:url(${finalUrl});${bgSize}background-position: 12px center;background-repeat:no-repeat`;
+        } else {
+            // 属于你本地魔改的非 home 贴图，依然读取你本地或私服配置的路径
+            const finalUrl = `${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`;
+            return `background-image:url(${finalUrl});background-position:${data.x}px ${data.y}px;background-repeat:no-repeat`;
+        }
 	}
 
 	getItemIcon(item: any) {
