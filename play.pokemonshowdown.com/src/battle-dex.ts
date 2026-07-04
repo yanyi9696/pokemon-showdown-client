@@ -1479,14 +1479,30 @@ export const Dex = new class implements ModdedDex {
 		// 精准修复：如果是官方的 home 立绘，直接强行去官方云端服务器拉取
         if (data.spriteDir === 'sprites/home') {
             const finalUrl = `https://play.pokemonshowdown.com/sprites/home${shiny}/${data.spriteid}.png`;
-            
-            // 【终极微调参数】
-			// 1. 将大小限制在 100px * 100px 正方形内，确保不超出整行的高度边界
             const bgSize = "background-size: 95px 95px; ";
             
-            // 2：X轴固定距离左边 12px（避开最左侧的边框），Y轴绝对不能写死 2px，必须用 center 或 50%
-            // center 会让图片无论内部怎么留白，都以画框中心为轴对齐
-            return `background-image:url(${finalUrl});${bgSize}background-position: 12px 40%;background-repeat:no-repeat`;
+            // 1. 设置绝大部分宝可梦默认的 Y 轴居中位置
+            let finalY = "30%"; 
+            
+            // 2. 提取出干净的宝可梦 ID（去掉 -fantasy 后缀，方便字典统一判定）
+            let baseId = data.spriteid;
+            if (baseId.endsWith('fantasy')) {
+                baseId = baseId.replace('fantasy', '');
+            }
+
+            // 3. 【特判字典】：在这里把所有“太靠上”的宝可梦揪出来单独调教
+            // 填入宝可梦的纯小写 ID，赋给它们一个更小的值（越小越往上抬）
+            const customOffsets: { [id: string]: string } = {
+                'corviknight': '45%', 
+            };
+
+            // 如果这只宝可梦在特判字典里，就用字典里的定制高度
+            if (customOffsets[baseId]) {
+                finalY = customOffsets[baseId];
+            }
+
+            // X轴固定 10px，Y轴动态应用 finalY
+            return `background-image:url(${finalUrl});${bgSize}background-position: 10px ${finalY};background-repeat:no-repeat`;
         } else {
             // 属于你本地魔改的非 home 贴图，依然读取你本地或私服配置的路径
             const finalUrl = `${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`;
