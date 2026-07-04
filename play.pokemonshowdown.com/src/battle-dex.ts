@@ -1486,8 +1486,8 @@ export const Dex = new class implements ModdedDex {
 			// 强行锁定官方 CDN 地址
 			finalUrl = `https://play.pokemonshowdown.com/sprites/home${shiny}/${data.spriteid}.png`;
 			bgSize = "background-size: 100px auto; ";
-			finalX = 0;
-			finalY = 0;
+			finalX = data.x + 8;   // 在原有基础上向右推 8 像素
+			finalY = data.y + 12;  // 在原有基础上向下推 12 像素
 		} else {
 			// 属于你本地魔改的非 home 贴图，依然读取你本地或私服配置的路径
 			finalUrl = `${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`;
