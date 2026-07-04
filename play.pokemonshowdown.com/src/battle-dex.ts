@@ -1476,24 +1476,21 @@ export const Dex = new class implements ModdedDex {
 			return `background-image:url(${customSpritePrefix}sprites/dex${shiny}/swampert-mega-x-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 
-		// 精准修复：如果是官方的 home 立绘，直接强行去官方云端服务器拉取，本地不需要有这个文件夹！
-		let finalUrl = "";
-		let bgSize = "";
-		let finalX = data.x;
-		let finalY = data.y;
-		
+		// 精准修复：如果是官方的 home 立绘，直接强行去官方云端服务器拉取
 		if (data.spriteDir === 'sprites/home') {
-			// 强行锁定官方 CDN 地址
-			finalUrl = `https://play.pokemonshowdown.com/sprites/home${shiny}/${data.spriteid}.png`;
-			bgSize = "background-size: 100px auto; ";
-			finalX = data.x + 8;   // 在原有基础上向右推 8 像素
-			finalY = data.y + 12;  // 在原有基础上向下推 12 像素
+			const finalUrl = `https://play.pokemonshowdown.com/sprites/home${shiny}/${data.spriteid}.png`;
+			
+			// 【终极微调参数】
+			// 1. 将大小限制在 75px * 75px 正方形内，确保不超出整行的高度边界
+			const bgSize = "background-size: 75px 75px; ";
+			
+			// 2. X轴固定距离左边 12px（避开最左侧的边框），Y轴直接写 center 让浏览器完美上下居中
+			return `background-image:url(${finalUrl});${bgSize}background-position: 12px center;background-repeat:no-repeat`;
 		} else {
 			// 属于你本地魔改的非 home 贴图，依然读取你本地或私服配置的路径
-			finalUrl = `${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`;
+			const finalUrl = `${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`;
+			return `background-image:url(${finalUrl});background-position:${data.x}px ${data.y}px;background-repeat:no-repeat`;
 		}
-
-		return `background-image:url(${finalUrl});${bgSize}background-position:${finalX}px ${finalY}px;background-repeat:no-repeat`;
 	}
 
 	getItemIcon(item: any) {
