@@ -12122,10 +12122,19 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
         if (translations[name]) return translations[name];
 
         // 2. 特殊保护机制：如果名字里包含 "-X-X"
+        //四灾
         if (name.includes("Wo-Chien")) { name = name.replace("Wo-Chien", translations["Wo-Chien"]); }
         if (name.includes("Chien-Pao")) { name = name.replace("Chien-Pao", translations["Chien-Pao"]); }
         if (name.includes("Chi-Yu")) { name = name.replace("Chi-Yu", translations["Chi-Yu"]); }
         if (name.includes("Ting-Lu")) { name = name.replace("Ting-Lu", translations["Ting-Lu"]); }
+        //悖谬
+        if (name.includes("Iron Thorns")) { name = name.replace("Iron Thorns", translations["Iron Thorns"]); }
+        if (name.includes("Sandy Shocks")) { name = name.replace("Sandy Shocks", translations["Sandy Shocks"]); }
+        if (name.includes("Slither Wing")) { name = name.replace("Slither Wing", translations["Slither Wing"]); }
+        //岛神
+        if (name.includes("Tapu Fini")) { name = name.replace("Tapu Fini", translations["Tapu Fini"]); }
+        //其他
+        if (name.includes("Type: Null")) { name = name.replace("Type: Null", translations["Type: Null"]); }
         if (name.includes("-Rapid-Strike-Fantasy")) { name = name.replace("-Rapid-Strike-Fantasy", translations["-Rapid-Strike-Fantasy"]); }
         if (name.includes("-Rapid-Strike-G-Mega-Fantasy")) { name = name.replace("-Rapid-Strike-G-Mega-Fantasy", translations["-Rapid-Strike-G-Mega-Fantasy"]); }
         if (name.includes("-Rapid-Strike-2-Fantasy")) { name = name.replace("-Rapid-Strike-2-Fantasy", translations["-Rapid-Strike-2-Fantasy"]); }
