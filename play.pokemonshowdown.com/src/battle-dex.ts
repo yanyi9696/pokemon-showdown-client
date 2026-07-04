@@ -1390,7 +1390,9 @@ export const Dex = new class implements ModdedDex {
 		let xydexExists = (!speciesForChecks.isNonstandard || speciesForChecks.isNonstandard === 'Past' || speciesForChecks.isNonstandard === 'CAP') || [
 			"pikachustarter", "eeveestarter", "meltan", "melmetal", "pokestarufo", "pokestarufo2", "pokestarbrycenman", "pokestarmt", "pokestarmt2", "pokestargiant", "pokestarhumanoid", "pokestarmonster", "pokestarf00", "pokestarf002", "pokestarspirit",
 		].includes(speciesForChecks.id);
-		if (speciesForChecks.gen >= 8 && speciesForChecks.isNonstandard !== 'CAP') xydexExists = false;
+		
+		// 【修改：注释掉下面这行，解放第 8、9 代的高清立绘】
+		// if (speciesForChecks.gen >= 8 && speciesForChecks.isNonstandard !== 'CAP') xydexExists = false;
 
 		if ((!gen || gen >= 6) && xydexExists) {
 			spriteData.spriteDir = 'sprites/home'; // 【修改2：强制高世代也使用 home 路径】
@@ -1484,8 +1486,8 @@ export const Dex = new class implements ModdedDex {
 			// 强行锁定官方 CDN 地址
 			finalUrl = `https://play.pokemonshowdown.com/sprites/home${shiny}/${data.spriteid}.png`;
 			bgSize = "background-size: 100px auto; ";
-			finalX = -5;
-			finalY = -10;
+			finalX = 0;
+			finalY = 0;
 		} else {
 			// 属于你本地魔改的非 home 贴图，依然读取你本地或私服配置的路径
 			finalUrl = `${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`;
