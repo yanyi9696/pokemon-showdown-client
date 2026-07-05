@@ -12148,6 +12148,25 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
             let trimmed = value.trim();
             if (!trimmed) return;
 
+            // 优先级别 0：基于 DOM 语境的多义词特殊处理 (必须在查词典前执行)
+            // 处理例如 Psychic 作为“超能力”属性还是“精神强念”招式的问题
+            let parentNode = node.parentNode;
+            if (parentNode) {
+                let pTag = parentNode.tagName;
+                let pClass = parentNode.getAttribute("class");
+                let gpClass = parentNode.parentNode?.getAttribute("class");
+                let pName = parentNode.getAttribute("name");
+
+                if (pTag === "STRONG" || pClass === "col movenamecol" || gpClass === "col movenamecol" || pName === "chooseMove") {
+                    if (trimmed === "Metronome") { node.nodeValue = value.replace(trimmed, "挥指"); return; }
+                    else if (trimmed === "Refresh") { node.nodeValue = value.replace(trimmed, "焕然一新"); return; }
+                    else if (trimmed === "Disable") { node.nodeValue = value.replace(trimmed, "定身法"); return; }
+                    else if (trimmed === "Psychic") { node.nodeValue = value.replace(trimmed, "精神强念"); return; }
+                    else if (trimmed === "National Dex") { node.nodeValue = value.replace(trimmed, "全国图鉴"); return; }
+                    else if (trimmed === "Draft") { node.nodeValue = value.replace(trimmed, "选秀"); return; }
+                }
+            }
+
             // 优先级别 1：基础词典全文本精确匹配
             if (translations[trimmed]) {
                 node.nodeValue = value.replace(trimmed, translations[trimmed]);
@@ -12404,40 +12423,32 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
             if (value.startsWith("The user and its party members are protected from moves made by other Pokemon")) node.nodeValue = "在当回合内，使我方全体进入守住状态，保护我方全体不受到来自其他宝可梦的大部分招式的影响。此招式有1/X的成功几率，其中X从1开始，每次成功使用此招式时X增加三倍。如果使用失败，或上一回合使用的不是看穿、挺住、守住、王者盾牌、尖刺防守、碉堡、拦堵、极巨防壁、线阱、火焰守护、掀榻榻米、火焰守护、广域防守或快速防守，X重置为1。如果在本回合使用者最后行动，招式会失败。";
             if (value.startsWith("The user takes 1/4 of its maximum HP, rounded down, and puts it into a substitute to take its place in")) node.nodeValue = "用自己最大HP的1/4制造出替身，相等于替身的HP，向下取整。如果自身离场或替身HP为0，替身会消失。使用接棒或断尾传递替身时，替身的HP不变。替身存在时对手的攻击招式的伤害大都只能伤害替身，并防止本体免受其他宝可梦造成的异常状态和状态变化。声音的招式以及穿透特性的宝可梦使用的招式可以无视替身。天气和替身存在前的异常状态、状态变化正常影响本体。连续招式打破替身后可以继续攻击。如果在本体在陷入无法逃走状态时制造了替身，无法逃走状态将立即结束。如果HP不足或已经拥有替身，使用失败。";
             if (value.length > 260) return;
-            if (node.parentNode?.tagName == "STRONG" || node.parentNode?.getAttribute("class") == "col movenamecol" ||
-                node.parentNode?.parentNode?.getAttribute("class") == "col movenamecol" || node.parentNode?.getAttribute("name") == "chooseMove") {
-                if (node.nodeValue == "Metronome") {
-                    node.nodeValue = "挥指";
-                    return;
-                } else if (node.nodeValue == "Refresh") {
-                    node.nodeValue = "焕然一新";
-                    return;
-                } else if (node.nodeValue == "Disable") {
-                    node.nodeValue = "定身法";
-                    return;
-                } else if (node.nodeValue == "Psychic") {
-                    node.nodeValue = "精神强念";
-                    return;
-                } else if (node.nodeValue == "National Dex") {
-                    node.nodeValue = "全国图鉴";
-                    return;
-                } else if (node.nodeValue == "Draft") {
-                    node.nodeValue = "选秀";
-                    return;
-                }
-            }
             // ==========================================================
 
 
-            // 优先级别 4：动态正则匹配与特殊字符处理
+            // 优先级别 4：动态正则匹配与特殊字符处理 (包含您的第二处处理)
             let regexTranslated = value;
-            if (value.indexOf('•') === 0) {
-                let cleanValue = value.replace('•', "").replace('Metronome', "挥指").replace('Refresh', "焕然一新").replace('Disable', "定身法").replace("Hidden Power 精神强念", "觉醒力量-超能力").replace("强念 Noise", "噪音").replace("强念 Fangs", "之牙").replace("强念 Terrain", "场地").replace('Psychic', "精神强念");
+            
+            // 处理带有圆点的文本（如组队界面或战斗界面的招式下拉列表）
+            if (trimmed.indexOf('•') === 0) {
+                // 这里的替换顺序非常讲究，必须先防误伤再替换多义词
+                let cleanValue = value.replace('•', "")
+                                      .replace('Metronome', "挥指")
+                                      .replace('Refresh', "焕然一新")
+                                      .replace('Disable', "定身法")
+                                      .replace("Hidden Power 精神强念", "觉醒力量-超能力") 
+                                      .replace("强念 Noise", "噪音")
+                                      .replace("强念 Fangs", "之牙")
+                                      .replace("强念 Terrain", "场地")
+                                      .replace('Psychic', "精神强念");
+                                      
                 regexTranslated = "• " + t(cleanValue) + " ";
             } else {
+                // 常规长文本走正则替换
                 regexTranslated = t(value.replace("é", "e"));
             }
 
+            // 发生改变才写回 DOM，优化性能
             if (regexTranslated !== value) {
                 node.nodeValue = regexTranslated;
             }
@@ -12446,7 +12457,7 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
             let tag = node.tagName.toUpperCase();
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
 
-            // 保留的 pokemonnamecol 强行重写逻辑
+            // 依然保留您在 pokemonnamecol 中对 <b> 标签的强行重写逻辑
             if (node.classList.contains('pokemonnamecol') || node.parentElement?.classList.contains('pokemonnamecol')) {
                 let fullText = node.textContent.trim();
                 if (fullText.includes('-')) {
