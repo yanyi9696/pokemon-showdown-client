@@ -51,6 +51,7 @@ var translations = {
     "Forum": "论坛",
     "Privacy policy": "隐私政策",
     "Pokémon": "宝可梦",
+    "FC": "幻想杯",
 
     "You are locked due to your proxy / VPN and can only private message members of the global moderation team.": "由于您的代理/VPN，您被锁定，只能向全服管理员团队发送私聊信息。",
     "Get help with this": "点击这里获取帮助",
