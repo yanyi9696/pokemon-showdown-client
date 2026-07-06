@@ -1469,6 +1469,11 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		return !BattleMoveSearch.BAD_STRONG_MOVES.includes(id);
 	}
 	private moveIsFantasy(id: ID, species: Dex.Species, moves: string[], set: Dex.PokemonSet | null) {
+        // 新增拦截逻辑：如果当前加载的 mod 不是 gen9fantasy
+        // 那么就直接返回 false，不触发专属招式顶置
+        if (!this.dex.modid.includes('gen9fantasy' as ID)) {
+            return false;
+        }
 		switch (id) {
 		case 'biansuzhefan':
 		case 'kingsshield':
