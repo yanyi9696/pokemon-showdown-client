@@ -546,14 +546,6 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	inteleongmax: 1320 + 81,
 	urshifugmax: 1320 + 82, urshifugmegafantasy: 1320 + 82, // Added fantasy mapping
 	urshifurapidstrikegmax: 1320 + 83, urshifurapidstrikegmegafantasy: 1320 + 83, // Added fantasy mapping
-
-	urshifu: 1025 + 1,
-	urshifurapidstrike: 1025 + 2,
-	urshifufantasy: 1025 + 3,
-	urshifurapidstrikefantasy: 1025 + 4,
-	urshifu2fantasy: 1025 + 5,
-	urshifurapidstrike2fantasy: 1025 + 6,
-	porygonzfantasy: 474,
 	
 	clefablemega: 1320 + 84,
 	victreebelmega: 1320 + 85, victreebelmegafantasy: 1320 + 85, // Added fantasy mapping
@@ -605,10 +597,20 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	tatsugiristretchymega: 1320 + 130,
 	baxcaliburmega: 1320 + 131,
 	//自制的mega沙漠蜻蜓等等
-	flygonmegafantasy: 1316, // Added fantasy mapping
-    onixfantasy: 1452 + 106, // Added fantasy mapping
-	shadowlugiafantasy: 1452 + 107, // Added fantasy mapping
-	swampertmegaxfantasy: 1317, // Added fantasy mapping
+	onixfantasy: 1644, // Added fantasy mapping
+	shadowlugiafantasy: 1645, // Added fantasy mapping
+	flygonmegafantasy: 1646, // Added fantasy mapping
+	swampertmegaxfantasy: 1647, // Added fantasy mapping
+
+
+	urshifu: 1650, // Added fantasy mapping
+	urshifurapidstrike: 1651, // Added fantasy mapping
+	urshifufantasy: 1652, // Added fantasy mapping
+	urshifurapidstrikefantasy: 1653, // Added fantasy mapping
+	urshifu2fantasy: 1654, // Added fantasy mapping
+	urshifurapidstrike2fantasy: 1655, // Added fantasy mapping
+
+	porygonzfantasy: 474, // 原版图标，不知道为何无法直接对应
 
 	// CAP
 	syclant: 1560 + 0,
