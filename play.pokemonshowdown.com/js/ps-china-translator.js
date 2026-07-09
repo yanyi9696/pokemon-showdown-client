@@ -12164,38 +12164,6 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
             let trimmed = value.trim();
             if (!trimmed) return;
 
-            // ==========================================
-            // 【列表标签拆分防御层】专门针对 Showdown 列表里的 <small> 标签拆分问题
-            // 当名字被底层 HTML 切成 "Nidoran" 和 "-F" 两个独立节点时，分别拦截处理
-            // ==========================================
-            if (trimmed === "Nidoran") {
-                // 通过往上找父级元素的完整文本，判断它是雌性还是雄性
-                let parentText = node.parentElement ? node.parentElement.textContent : "";
-                let grandText = node.parentElement?.parentElement ? node.parentElement.parentElement.textContent : "";
-                
-                if (parentText.includes("-F") || grandText.includes("-F")) {
-                    node.nodeValue = value.replace(trimmed, "尼多兰");
-                } else if (parentText.includes("-M") || grandText.includes("-M")) {
-                    node.nodeValue = value.replace(trimmed, "尼多朗");
-                } else {
-                    node.nodeValue = value.replace(trimmed, "尼多兰"); // 兜底
-                }
-                return;
-            }
-
-            if (trimmed === "-F" || trimmed === "-M") {
-                let parentText = node.parentElement ? node.parentElement.textContent : "";
-                let grandText = node.parentElement?.parentElement ? node.parentElement.parentElement.textContent : "";
-                
-                // 判断这个后缀是不是属于尼多兰/朗的。
-                // 注意：当这里执行时，前面的 Nidoran 可能已经被我们上一步翻译成了中文，所以要用正则一起查
-                if (/Nidoran|尼多兰|尼多朗/i.test(parentText) || /Nidoran|尼多兰|尼多朗/i.test(grandText)) {
-                    // 既然前面的主体已经是完整的中文名了，直接把这个被拆分出来的多余后缀清空！
-                    node.nodeValue = value.replace(trimmed, "");
-                    return;
-                }
-            }
-
             // 优先级别 0：基于 DOM 语境的多义词特殊处理 (必须在查词典前执行)
             // 处理例如 Psychic 作为“超能力”属性还是“精神强念”招式的问题
             let parentNode = node.parentNode;
@@ -12509,12 +12477,22 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
             if (node.classList.contains('pokemonnamecol') || node.parentElement?.classList.contains('pokemonnamecol')) {
                 let fullText = node.textContent.trim();
                 if (fullText.includes('-')) {
-                    let firstDashIndex = fullText.indexOf('-');
-                    let base = fullText.substring(0, firstDashIndex);
-                    let suffix = fullText.substring(firstDashIndex);
+                    // 先获取完整的翻译结果
+                    let fullTranslated = translatePokemonName(fullText);
                     
-                    if (translatePokemonName(fullText) !== fullText) {
-                        node.innerHTML = base + translatePokemonName(suffix).replace(base, "");
+                    if (fullTranslated !== fullText) {
+                        let firstDashIndex = fullText.indexOf('-');
+                        let base = fullText.substring(0, firstDashIndex);
+                        let suffix = fullText.substring(firstDashIndex);
+                        
+                        // 【修改点】判断：如果是 Nidoran 特判，或者翻译结果里已经完全没有原来的英文 base 了
+                        // 我们就直接输出完整的翻译结果，不再强行拼接英文 base
+                        if (fullText.startsWith("Nidoran-") || !fullTranslated.includes(base)) {
+                            node.innerHTML = fullTranslated;
+                        } else {
+                            // 否则保留你的原有逻辑（如果你想要其他宝可梦，如武道熊师保留部分英文/原有拼接逻辑）
+                            node.innerHTML = base + translatePokemonName(suffix).replace(base, "");
+                        }
                         return;
                     }
                 }
