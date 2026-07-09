@@ -12165,19 +12165,37 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
             if (!trimmed) return;
 
             // ==========================================
-            // 【绝对防御层】最高无上级：一图流死卡特定宝可梦名字
-            // 只要这段文本包含 Nidoran-F，在被任何字典、任何拆分蹂躏之前，直接就地正法！
+            // 【列表标签拆分防御层】专门针对 Showdown 列表里的 <small> 标签拆分问题
+            // 当名字被底层 HTML 切成 "Nidoran" 和 "-F" 两个独立节点时，分别拦截处理
             // ==========================================
-            if (/Nidoran-F/i.test(trimmed)) {
-                node.nodeValue = value.replace(/Nidoran-F/gi, "尼多兰");
-                return; // 直接结束当前节点的翻译，绝不给后面任何拆分函数碰它的机会！
-            }
-            if (/Nidoran-M/i.test(trimmed)) {
-                node.nodeValue = value.replace(/Nidoran-M/gi, "尼多朗");
+            if (trimmed === "Nidoran") {
+                // 通过往上找父级元素的完整文本，判断它是雌性还是雄性
+                let parentText = node.parentElement ? node.parentElement.textContent : "";
+                let grandText = node.parentElement?.parentElement ? node.parentElement.parentElement.textContent : "";
+                
+                if (parentText.includes("-F") || grandText.includes("-F")) {
+                    node.nodeValue = value.replace(trimmed, "尼多兰");
+                } else if (parentText.includes("-M") || grandText.includes("-M")) {
+                    node.nodeValue = value.replace(trimmed, "尼多朗");
+                } else {
+                    node.nodeValue = value.replace(trimmed, "尼多兰"); // 兜底
+                }
                 return;
             }
-            // ==========================================
-            
+
+            if (trimmed === "-F" || trimmed === "-M") {
+                let parentText = node.parentElement ? node.parentElement.textContent : "";
+                let grandText = node.parentElement?.parentElement ? node.parentElement.parentElement.textContent : "";
+                
+                // 判断这个后缀是不是属于尼多兰/朗的。
+                // 注意：当这里执行时，前面的 Nidoran 可能已经被我们上一步翻译成了中文，所以要用正则一起查
+                if (/Nidoran|尼多兰|尼多朗/i.test(parentText) || /Nidoran|尼多兰|尼多朗/i.test(grandText)) {
+                    // 既然前面的主体已经是完整的中文名了，直接把这个被拆分出来的多余后缀清空！
+                    node.nodeValue = value.replace(trimmed, "");
+                    return;
+                }
+            }
+
             // 优先级别 0：基于 DOM 语境的多义词特殊处理 (必须在查词典前执行)
             // 处理例如 Psychic 作为“超能力”属性还是“精神强念”招式的问题
             let parentNode = node.parentNode;
