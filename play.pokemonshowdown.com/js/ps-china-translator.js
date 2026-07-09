@@ -4713,7 +4713,7 @@ var translations = {
     "-Dada": "-阿爸",
     "-Low-Key": "-低调形态",
 
-    "-Rapid-Strike-Gmax": "-连击流-超级进化",
+    "-Rapid-Strike-Gmax": "-连击流-超极巨化",
     "-Low-Key-Gmax": "-低调形态-超极巨化",
     "-Droopy": "-下垂姿势",
     "-Stretchy": "-平挺姿势",
@@ -4832,7 +4832,7 @@ var translations = {
     "-Fantasy": "-幻想",
     "-G-Mega": "-超巨进化",
     "-Rapid-Strike-Fantasy": "-乱击流-幻想",
-    "-Rapid-Strike-G-Mega-Fantasy": "-瞬击流-幻想",
+    "-Rapid-Strike-G-Mega-Fantasy": "-瞬击流-超巨进化-幻想",
     "-Rapid-Strike-2-Fantasy": "-环击流-幻想",
 
 
@@ -4841,8 +4841,9 @@ var translations = {
 
     "Shadow Lugia": "黑暗洛奇亚",
     "Shadow Lugia-Fantasy": "黑暗洛奇亚-幻想",
-    "Urshifu-Fantasy": "武道熊师-瞬击流-幻想",
+    "Urshifu-Fantasy": "武道熊师-迅击流-幻想",
     "Urshifu-2-Fantasy": "武道熊师-崩击流-幻想",
+    "Urshifu-G-Mega-Fantasy": "武道熊师-爆击流-超巨进化-幻想",
 
 
 
@@ -12121,33 +12122,49 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
 
     // 您重写并优化的宝可梦名字拆分翻译逻辑
     function translatePokemonName(name) {
-        // 1. 优先完整匹配
-        if (translations[name]) return translations[name];
+    // 1. 优先完整匹配
+    if (translations[name]) return translations[name];
 
-        // 2. 特殊保护机制：如果名字里包含 "-X-X"
-        if (name.includes("Wo-Chien")) { name = name.replace("Wo-Chien", translations["Wo-Chien"]); }
-        if (name.includes("Chien-Pao")) { name = name.replace("Chien-Pao", translations["Chien-Pao"]); }
-        if (name.includes("Chi-Yu")) { name = name.replace("Chi-Yu", translations["Chi-Yu"]); }
-        if (name.includes("Ting-Lu")) { name = name.replace("Ting-Lu", translations["Ting-Lu"]); }
-        if (name.includes("Nidoran-F")) { name = name.replace("Nidoran-F", translations["Nidoran-F"]); }
-        if (name.includes("Nidoran-M")) { name = name.replace("Nidoran-M", translations["Nidoran-M"]); }
-        if (name.includes("Urshifu-Fantasy")) { name = name.replace("Urshifu-Fantasy", translations["Urshifu-Fantasy"]); }
-        if (name.includes("Urshifu-2-Fantasy")) { name = name.replace("Urshifu-2-Fantasy", translations["Urshifu-2-Fantasy"]); }
-        if (name.includes("-Rapid-Strike-Fantasy")) { name = name.replace("-Rapid-Strike-Fantasy", translations["-Rapid-Strike-Fantasy"]); }
-        if (name.includes("-Rapid-Strike-G-Mega-Fantasy")) { name = name.replace("-Rapid-Strike-G-Mega-Fantasy", translations["-Rapid-Strike-G-Mega-Fantasy"]); }
-        if (name.includes("-Rapid-Strike-2-Fantasy")) { name = name.replace("-Rapid-Strike-2-Fantasy", translations["-Rapid-Strike-2-Fantasy"]); }
-        if (name.includes("-G-Mega")) { name = name.replace("-G-Mega", translations["-G-Mega"]); }
-        if (name.includes("-Low-Key")) { name = name.replace("-Low-Key", translations["-Low-Key"]); }
+    // 2. 特殊保护机制：如果匹配到这些带横杠的特定宝可梦，翻译完直接返回，防止被后面的 split('-') 误伤
+    const specialCases = [
+        "Wo-Chien", "Chien-Pao", "Chi-Yu", "Ting-Lu", 
+        "Nidoran-F", "Nidoran-M", 
+        "Urshifu-Fantasy", "Urshifu-2-Fantasy", "Urshifu-G-Mega-Fantasy", 
+        "-Rapid-Strike-Fantasy", "-Rapid-Strike-G-Mega-Fantasy", "-Rapid-Strike-2-Fantasy", 
+        "-G-Mega", "-Low-Key"
+    ];
 
-        // 3. 对剩余部分执行正常的拆分逻辑
+    let isSpecial = false;
+    for (let key of specialCases) {
+        if (name.includes(key)) {
+            name = name.replace(key, translations[key] || key);
+            isSpecial = true;
+        }
+    }
+    
+    // 如果触发了特殊保护，并且此时名字已经被完全翻译（或者不包含剩余需要拆分的横杠）
+    // 或者为了保险，只要匹配到特殊宝可梦，我们就直接返回当前处理后的结果
+    if (isSpecial) {
+        // 如果后面还跟着别的后缀（比如 Nidoran-F-Fantasy 变成了 尼多兰-Fantasy）
+        // 我们需要单独把剩下的后缀翻译掉，而不是乱拆
         let parts = name.split('-');
         let translatedParts = parts.map((part, index) => {
-            if (index === 0) return translations[part] || part;
+            if (index === 0) return part; // 第一部分已经是中文了（如"尼多兰"），直接保留
             let key = "-" + part;
             return translations[key] || key;
         });
         return translatedParts.join('');
     }
+
+    // 3. 对常规的、没有特殊保护的剩余部分执行正常的拆分逻辑
+    let parts = name.split('-');
+    let translatedParts = parts.map((part, index) => {
+        if (index === 0) return translations[part] || part;
+        let key = "-" + part;
+        return translations[key] || key;
+    });
+    return translatedParts.join('');
+}
 
     function translateNode(node) {
         if (node.nodeType === 3) {
