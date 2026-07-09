@@ -12124,19 +12124,22 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
     function translatePokemonName(name) {
         // 1. 最高优先级：特殊保护机制与特判 (必须放在查字典之前！)
         // 这样无论你的字典里混进了什么脏数据，都会被这里的强制规则覆盖
-        if (name.includes("Nidoran-F")) { name = name.replace("Nidoran-F", "尼多兰"); }
-        if (name.includes("Nidoran-M")) { name = name.replace("Nidoran-M", "尼多朗"); }
+        // 【针对完整名字：强行拦截并直接返回】
+        // 使用 ^ 开头和 $ 结尾确保只精确匹配这个特定的完整词。
+        // 一旦命中，直接当成一个完整的字符串抛出，彻底切断被第3步错误拆分的可能。
+        if (/^Nidoran-F$/i.test(name)) return "尼多兰";
+        if (/^Nidoran-M$/i.test(name)) return "尼多朗";
         
-        if (name.includes("Wo-Chien")) { name = name.replace("Wo-Chien", "古简蜗"); }
-        if (name.includes("Chien-Pao")) { name = name.replace("Chien-Pao", "古剑豹"); }
-        if (name.includes("Chi-Yu")) { name = name.replace("Chi-Yu", "古玉鱼"); }
-        if (name.includes("Ting-Lu")) { name = name.replace("Ting-Lu", "古鼎鹿"); }
+        if (/^Wo-Chien$/i.test(name)) return "古简蜗";
+        if (/^Chien-Pao$/i.test(name)) return "古剑豹";
+        if (/^Chi-Yu$/i.test(name)) return "古玉鱼";
+        if (/^Ting-Lu$/i.test(name)) return "古鼎鹿";
         
-        if (name.includes("Urshifu-Fantasy")) { name = name.replace("Urshifu-Fantasy", "武道熊师-迅击流-幻想"); }
-        if (name.includes("Urshifu-G-Mega-Fantasy")) { name = name.replace("Urshifu-G-Mega-Fantasy", "武道熊师-爆击流-超巨进化-幻想"); }
-        if (name.includes("Urshifu-2-Fantasy")) { name = name.replace("Urshifu-2-Fantasy", "武道熊师-崩击流-幻想"); }
+        if (/^Urshifu-Fantasy$/i.test(name)) return "武道熊师-迅击流-幻想";
+        if (/^Urshifu-G-Mega-Fantasy$/i.test(name)) return "武道熊师-爆击流-超巨进化-幻想";
+        if (/^Urshifu-2-Fantasy$/i.test(name)) return "武道熊师-崩击流-幻想";
         
-        // 注意这里直接用字符串硬编码，脱离对 translations 的依赖更安全
+        // 【针对形态后缀：替换后放行】
         if (name.includes("-Rapid-Strike-Fantasy")) { name = name.replace("-Rapid-Strike-Fantasy", "-乱击流-幻想"); }
         if (name.includes("-Rapid-Strike-G-Mega-Fantasy")) { name = name.replace("-Rapid-Strike-G-Mega-Fantasy", "-瞬击流-超巨进化-幻想"); }
         if (name.includes("-Rapid-Strike-2-Fantasy")) { name = name.replace("-Rapid-Strike-2-Fantasy", "-环击流-幻想"); }
@@ -12163,38 +12166,6 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
             let value = node.nodeValue;
             let trimmed = value.trim();
             if (!trimmed) return;
-
-            // ===== 新增：最高优先级 00 修复（解决 DOM 节点被搜索高亮切碎的问题） =====
-            let parentNode = node.parentNode;
-            let pText = parentNode ? parentNode.textContent : "";
-
-            // 1. 如果没被切碎，是完整的一条
-            if (trimmed.match(/^Nidoran-F$/i)) { node.nodeValue = value.replace(trimmed, "尼多兰"); return; }
-            if (trimmed.match(/^Nidoran-M$/i)) { node.nodeValue = value.replace(trimmed, "尼多朗"); return; }
-            
-            // 2. 如果被切碎了，当前节点只有 "Nidoran"（判断父元素后缀决定雌雄）
-            if (trimmed.match(/^Nidoran$/i)) {
-                if (pText.match(/-F|雌/i)) { node.nodeValue = value.replace(trimmed, "尼多兰"); return; }
-                if (pText.match(/-M|雄/i)) { node.nodeValue = value.replace(trimmed, "尼多朗"); return; }
-                node.nodeValue = value.replace(trimmed, "尼多兰"); // 兜底
-                return;
-            }
-            
-            // 3. 如果被切碎了，当前节点是被孤立出来的后缀 "-F"，或者是已经被错误翻译的 "-雌性的样子"
-            // 只要它的父元素文本包含 Nidoran 或 尼多兰，就直接把它抹除！(因为前面的名字已经翻全了)
-            if (trimmed.match(/^(-F|F|-雌性的样子)$/i)) {
-                if (pText.match(/Nidoran|尼多兰/i)) { 
-                    node.nodeValue = value.replace(trimmed, ""); 
-                    return; 
-                }
-            }
-            if (trimmed.match(/^(-M|M|-雄性的样子)$/i)) {
-                if (pText.match(/Nidoran|尼多朗/i)) { 
-                    node.nodeValue = value.replace(trimmed, ""); 
-                    return; 
-                }
-            }
-            // =========================================================================
 
             // 优先级别 0：基于 DOM 语境的多义词特殊处理 (必须在查词典前执行)
             // 处理例如 Psychic 作为“超能力”属性还是“精神强念”招式的问题
