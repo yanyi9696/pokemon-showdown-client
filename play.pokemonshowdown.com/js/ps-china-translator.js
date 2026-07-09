@@ -12153,6 +12153,13 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
         });
         
         return translatedParts.join('');
+
+        // 4. 【终极兜底拦截】：不管前面怎么错，只要最终结果出现了特定的错误翻译，强制替换！
+        // 使用 /.../g 正则全局替换，防止出现类似 "Nidoran-雌性的样子-Mega" 这种意外
+        finalName = finalName.replace(/Nidoran-雌性的样子/g, "尼多兰");
+        finalName = finalName.replace(/Nidoran-雄性的样子/g, "尼多朗");
+
+        return finalName;
     }
 
     function translateNode(node) {
@@ -12160,21 +12167,6 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
             let value = node.nodeValue;
             let trimmed = value.trim();
             if (!trimmed) return;
-
-            // ==========================================
-            // 🌟 绝对最高优先级：DOM 节点直接拦截 (特判补丁)
-            // 放在所有逻辑之前，强行在完整文本中进行无视大小写的替换
-            // ==========================================
-            if (/nidoran-f/i.test(value)) {
-                // 注意这里用的是 value 而不是 trimmed，这样能完美保留原有的空格
-                node.nodeValue = value.replace(/nidoran-f/ig, "尼多兰");
-                return; // 直接结束，不给后续拆分任何机会
-            }
-            if (/nidoran-m/i.test(value)) {
-                node.nodeValue = value.replace(/nidoran-m/ig, "尼多朗");
-                return; 
-            }
-            // ==========================================
 
             // 优先级别 0：基于 DOM 语境的多义词特殊处理 (必须在查词典前执行)
             // 处理例如 Psychic 作为“超能力”属性还是“精神强念”招式的问题
