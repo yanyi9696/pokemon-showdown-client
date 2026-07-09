@@ -4841,6 +4841,8 @@ var translations = {
 
     "Shadow Lugia": "黑暗洛奇亚",
     "Shadow Lugia-Fantasy": "黑暗洛奇亚-幻想",
+    "Urshifu-Fantasy": "武道熊师-瞬击流-幻想",
+    "Urshifu-2-Fantasy": "武道熊师-崩击流-幻想",
 
 
 
@@ -12129,6 +12131,8 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
         if (name.includes("Ting-Lu")) { name = name.replace("Ting-Lu", translations["Ting-Lu"]); }
         if (name.includes("Nidoran-F")) { name = name.replace("Nidoran-F", translations["Nidoran-F"]); }
         if (name.includes("Nidoran-M")) { name = name.replace("Nidoran-M", translations["Nidoran-M"]); }
+        if (name.includes("Urshifu-Fantasy")) { name = name.replace("Urshifu-Fantasy", translations["Urshifu-Fantasy"]); }
+        if (name.includes("Urshifu-2-Fantasy")) { name = name.replace("Urshifu-2-Fantasy", translations["Urshifu-2-Fantasy"]); }
         if (name.includes("-Rapid-Strike-Fantasy")) { name = name.replace("-Rapid-Strike-Fantasy", translations["-Rapid-Strike-Fantasy"]); }
         if (name.includes("-Rapid-Strike-G-Mega-Fantasy")) { name = name.replace("-Rapid-Strike-G-Mega-Fantasy", translations["-Rapid-Strike-G-Mega-Fantasy"]); }
         if (name.includes("-Rapid-Strike-2-Fantasy")) { name = name.replace("-Rapid-Strike-2-Fantasy", translations["-Rapid-Strike-2-Fantasy"]); }
