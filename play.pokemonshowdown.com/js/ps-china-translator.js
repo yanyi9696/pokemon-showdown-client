@@ -12123,6 +12123,9 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
     // 您重写并优化的宝可梦名字拆分翻译逻辑
     function translatePokemonName(name) {
         // 1. 最高优先级：特殊保护机制与特判 (必须放在查字典之前！)
+        // 这样无论你的字典里混进了什么脏数据，都会被这里的强制规则覆盖
+        if (name.includes("Urshifu-G-Mega-Fantasy")) { name = name.replace("Urshifu-G-Mega-Fantasy", "武道熊师-爆击流-超巨进化-幻想"); }
+        
         // 注意这里直接用字符串硬编码，脱离对 translations 的依赖更安全
         if (name.includes("-Rapid-Strike-Fantasy")) { name = name.replace("-Rapid-Strike-Fantasy", "-乱击流-幻想"); }
         if (name.includes("-Rapid-Strike-G-Mega-Fantasy")) { name = name.replace("-Rapid-Strike-G-Mega-Fantasy", "-瞬击流-超巨进化-幻想"); }
