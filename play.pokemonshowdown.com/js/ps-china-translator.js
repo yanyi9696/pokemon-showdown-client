@@ -12123,26 +12123,27 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
     // 您重写并优化的宝可梦名字拆分翻译逻辑
     function translatePokemonName(name) {
         // 1. 最高优先级：特殊保护机制与特判 (必须放在查字典之前！)
-        // 这样无论你的字典里混进了什么脏数据，都会被这里的强制规则覆盖
-        if (name.includes("Nidoran-F")) { name = name.replace("Nidoran-F", "尼多兰"); }
-        if (name.includes("Nidoran-M")) { name = name.replace("Nidoran-M", "尼多朗"); }
+        // 【优化】使用 /目标字符串/ig 正则替换，i代表忽略大小写，g代表全局匹配。
+        // 这样无论传进来的是 nidoran-f 还是 NIDORAN-F，都会被精准拦截并汉化，不再漏网进入拆分逻辑。
         
-        if (name.includes("Wo-Chien")) { name = name.replace("Wo-Chien", "古简蜗"); }
-        if (name.includes("Chien-Pao")) { name = name.replace("Chien-Pao", "古剑豹"); }
-        if (name.includes("Chi-Yu")) { name = name.replace("Chi-Yu", "古玉鱼"); }
-        if (name.includes("Ting-Lu")) { name = name.replace("Ting-Lu", "古鼎鹿"); }
+        name = name.replace(/Nidoran-F/ig, "尼多兰");
+        name = name.replace(/Nidoran-M/ig, "尼多朗");
         
-        if (name.includes("Urshifu-Fantasy")) { name = name.replace("Urshifu-Fantasy", "武道熊师-迅击流-幻想"); }
-        if (name.includes("Urshifu-G-Mega-Fantasy")) { name = name.replace("Urshifu-G-Mega-Fantasy", "武道熊师-爆击流-超巨进化-幻想"); }
-        if (name.includes("Urshifu-2-Fantasy")) { name = name.replace("Urshifu-2-Fantasy", "武道熊师-崩击流-幻想"); }
+        name = name.replace(/Wo-Chien/ig, "古简蜗");
+        name = name.replace(/Chien-Pao/ig, "古剑豹");
+        name = name.replace(/Chi-Yu/ig, "古玉鱼");
+        name = name.replace(/Ting-Lu/ig, "古鼎鹿");
         
-        // 注意这里直接用字符串硬编码，脱离对 translations 的依赖更安全
-        if (name.includes("-Rapid-Strike-Fantasy")) { name = name.replace("-Rapid-Strike-Fantasy", "-乱击流-幻想"); }
-        if (name.includes("-Rapid-Strike-G-Mega-Fantasy")) { name = name.replace("-Rapid-Strike-G-Mega-Fantasy", "-瞬击流-超巨进化-幻想"); }
-        if (name.includes("-Rapid-Strike-2-Fantasy")) { name = name.replace("-Rapid-Strike-2-Fantasy", "-环击流-幻想"); }
+        name = name.replace(/Urshifu-Fantasy/ig, "武道熊师-迅击流-幻想");
+        name = name.replace(/Urshifu-G-Mega-Fantasy/ig, "武道熊师-爆击流-超巨进化-幻想");
+        name = name.replace(/Urshifu-2-Fantasy/ig, "武道熊师-崩击流-幻想");
         
-        if (name.includes("-G-Mega")) { name = name.replace("-G-Mega", "-超巨进化"); }
-        if (name.includes("-Low-Key")) { name = name.replace("-Low-Key", "-低调的样子"); }
+        name = name.replace(/-Rapid-Strike-Fantasy/ig, "-乱击流-幻想");
+        name = name.replace(/-Rapid-Strike-G-Mega-Fantasy/ig, "-瞬击流-超巨进化-幻想");
+        name = name.replace(/-Rapid-Strike-2-Fantasy/ig, "-环击流-幻想");
+        
+        name = name.replace(/-G-Mega/ig, "-超巨进化");
+        name = name.replace(/-Low-Key/ig, "-低调的样子");
 
         // 2. 优先完整匹配 (经过第1步修复后，如果是完整名字，在这里拦截)
         if (translations[name]) return translations[name];
