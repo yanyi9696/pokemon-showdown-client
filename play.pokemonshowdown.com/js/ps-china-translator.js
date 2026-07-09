@@ -12122,10 +12122,19 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
 
     // 您重写并优化的宝可梦名字拆分翻译逻辑
     function translatePokemonName(name) {
-        // 1. 优先完整匹配 (经过第1步修复后，如果是完整名字，在这里拦截)
+        // 1. 最高优先级：特殊保护机制与特判 (必须放在查字典之前！)
+        // 注意这里直接用字符串硬编码，脱离对 translations 的依赖更安全
+        if (name.includes("-Rapid-Strike-Fantasy")) { name = name.replace("-Rapid-Strike-Fantasy", "-乱击流-幻想"); }
+        if (name.includes("-Rapid-Strike-G-Mega-Fantasy")) { name = name.replace("-Rapid-Strike-G-Mega-Fantasy", "-瞬击流-超巨进化-幻想"); }
+        if (name.includes("-Rapid-Strike-2-Fantasy")) { name = name.replace("-Rapid-Strike-2-Fantasy", "-环击流-幻想"); }
+        
+        if (name.includes("-G-Mega")) { name = name.replace("-G-Mega", "-超巨进化"); }
+        if (name.includes("-Low-Key")) { name = name.replace("-Low-Key", "-低调的样子"); }
+
+        // 2. 优先完整匹配 (经过第1步修复后，如果是完整名字，在这里拦截)
         if (translations[name]) return translations[name];
 
-        // 2. 对剩余部分执行正常的拆分逻辑
+        // 3. 对剩余部分执行正常的拆分逻辑
         let parts = name.split('-');
         let translatedParts = parts.map((part, index) => {
             if (index === 0) return translations[part] || part;
