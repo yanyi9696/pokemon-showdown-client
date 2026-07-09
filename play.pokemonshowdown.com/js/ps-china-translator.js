@@ -12122,49 +12122,41 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
 
     // 您重写并优化的宝可梦名字拆分翻译逻辑
     function translatePokemonName(name) {
-    // 1. 优先完整匹配
-    if (translations[name]) return translations[name];
+        // 1. 最高优先级：特殊保护机制与特判 (必须放在查字典之前！)
+        // 这样无论你的字典里混进了什么脏数据，都会被这里的强制规则覆盖
+        if (name.includes("Nidoran-F")) { name = name.replace("Nidoran-F", "尼多兰"); }
+        if (name.includes("Nidoran-M")) { name = name.replace("Nidoran-M", "尼多朗"); }
+        
+        if (name.includes("Wo-Chien")) { name = name.replace("Wo-Chien", "古简蜗"); }
+        if (name.includes("Chien-Pao")) { name = name.replace("Chien-Pao", "古剑豹"); }
+        if (name.includes("Chi-Yu")) { name = name.replace("Chi-Yu", "古玉鱼"); }
+        if (name.includes("Ting-Lu")) { name = name.replace("Ting-Lu", "古鼎鹿"); }
+        
+        if (name.includes("Urshifu-Fantasy")) { name = name.replace("Urshifu-Fantasy", "武道熊师-迅击流-幻想"); }
+        if (name.includes("Urshifu-G-Mega-Fantasy")) { name = name.replace("Urshifu-G-Mega-Fantasy", "武道熊师-爆击流-超巨进化-幻想"); }
+        if (name.includes("Urshifu-2-Fantasy")) { name = name.replace("Urshifu-2-Fantasy", "武道熊师-崩击流-幻想"); }
+        
+        // 注意这里直接用字符串硬编码，脱离对 translations 的依赖更安全
+        if (name.includes("-Rapid-Strike-Fantasy")) { name = name.replace("-Rapid-Strike-Fantasy", "-乱击流-幻想"); }
+        if (name.includes("-Rapid-Strike-G-Mega-Fantasy")) { name = name.replace("-Rapid-Strike-G-Mega-Fantasy", "-瞬击流-超巨进化-幻想"); }
+        if (name.includes("-Rapid-Strike-2-Fantasy")) { name = name.replace("-Rapid-Strike-2-Fantasy", "-环击流-幻想"); }
+        
+        if (name.includes("-G-Mega")) { name = name.replace("-G-Mega", "-超巨进化"); }
+        if (name.includes("-Low-Key")) { name = name.replace("-Low-Key", "-低调的样子"); }
 
-    // 2. 特殊保护机制：如果匹配到这些带横杠的特定宝可梦，翻译完直接返回，防止被后面的 split('-') 误伤
-    const specialCases = [
-        "Wo-Chien", "Chien-Pao", "Chi-Yu", "Ting-Lu", 
-        "Nidoran-F", "Nidoran-M", 
-        "Urshifu-Fantasy", "Urshifu-2-Fantasy", "Urshifu-G-Mega-Fantasy", 
-        "-Rapid-Strike-Fantasy", "-Rapid-Strike-G-Mega-Fantasy", "-Rapid-Strike-2-Fantasy", 
-        "-G-Mega", "-Low-Key"
-    ];
+        // 2. 优先完整匹配 (经过第1步修复后，如果是完整名字，在这里拦截)
+        if (translations[name]) return translations[name];
 
-    let isSpecial = false;
-    for (let key of specialCases) {
-        if (name.includes(key)) {
-            name = name.replace(key, translations[key] || key);
-            isSpecial = true;
-        }
-    }
-    
-    // 如果触发了特殊保护，并且此时名字已经被完全翻译（或者不包含剩余需要拆分的横杠）
-    // 或者为了保险，只要匹配到特殊宝可梦，我们就直接返回当前处理后的结果
-    if (isSpecial) {
-        // 如果后面还跟着别的后缀（比如 Nidoran-F-Fantasy 变成了 尼多兰-Fantasy）
-        // 我们需要单独把剩下的后缀翻译掉，而不是乱拆
+        // 3. 对剩余部分执行正常的拆分逻辑
         let parts = name.split('-');
         let translatedParts = parts.map((part, index) => {
-            if (index === 0) return part; // 第一部分已经是中文了（如"尼多兰"），直接保留
+            if (index === 0) return translations[part] || part;
             let key = "-" + part;
             return translations[key] || key;
         });
+        
         return translatedParts.join('');
     }
-
-    // 3. 对常规的、没有特殊保护的剩余部分执行正常的拆分逻辑
-    let parts = name.split('-');
-    let translatedParts = parts.map((part, index) => {
-        if (index === 0) return translations[part] || part;
-        let key = "-" + part;
-        return translations[key] || key;
-    });
-    return translatedParts.join('');
-}
 
     function translateNode(node) {
         if (node.nodeType === 3) {
