@@ -12139,6 +12139,10 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
         if (/^Urshifu-G-Mega-Fantasy$/i.test(name)) return "武道熊师-爆击流-超巨进化-幻想";
         if (/^Urshifu-2-Fantasy$/i.test(name)) return "武道熊师-崩击流-幻想";
         
+        if (!name.includes('-')) {
+        return translations[name] || name;
+        }
+        
         // 【针对形态后缀：替换后放行】
         if (name.includes("-Rapid-Strike-Fantasy")) { name = name.replace("-Rapid-Strike-Fantasy", "-乱击流-幻想"); }
         if (name.includes("-Rapid-Strike-G-Mega-Fantasy")) { name = name.replace("-Rapid-Strike-G-Mega-Fantasy", "-瞬击流-超巨进化-幻想"); }
