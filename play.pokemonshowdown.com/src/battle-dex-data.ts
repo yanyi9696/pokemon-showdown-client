@@ -601,6 +601,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	shadowlugiafantasy: 1645, // Added fantasy mapping
 	flygonmegafantasy: 1646, // Added fantasy mapping
 	swampertmegaxfantasy: 1647, // Added fantasy mapping
+	marowakalolatotemfantasy: 1648, // Added fantasy mapping
 
 
 	urshifu: 1650, // Added fantasy mapping
