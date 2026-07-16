@@ -285,7 +285,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	grimeralola: 1032 + 133,
 	mukalola: 1032 + 134, mukalolafantasy: 1032 + 134, // Added fantasy mapping
 	exeggutoralola: 1032 + 135,
-	marowakalola: 1032 + 136,
+	marowakalola: 1032 + 136, marowakalolafantasy: 1032 + 136, // Added fantasy mapping
 	greninjaash: 1032 + 137, greninjaashfantasy: 1032 + 137, // Added fantasy mapping
 	zygarde10: 1032 + 138,
 	zygardecomplete: 1032 + 139,
