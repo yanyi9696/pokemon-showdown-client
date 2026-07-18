@@ -1110,6 +1110,10 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 				if ((this.species === 'necrozmaduskmane' || this.species === 'necrozmadawnwings') && itemId === 'ultranecroziumz') {
 					isStrictlySpeciesSpecific = true;
 				}
+				// 为幻想嘎啦嘎啦添加火Z的顶置支持
+				if (this.species === 'marowakalolafantasy' && itemId === 'firiumz') {
+					isStrictlySpeciesSpecific = true;
+				}
 				// --- 新增逻辑结束 ---
 			}
 			if (isStrictlySpeciesSpecific) {
