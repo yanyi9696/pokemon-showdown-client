@@ -2317,6 +2317,7 @@ var translations = {
     "Hidden Power Steel": "觉醒力量-钢",
     "Hidden Power Water": "觉醒力量-水",
 
+    "Ultra Burst": "究极爆发",
     "Z-Power": "Z-招式",
     "Z-Swords Dance": "Z-剑舞",
     "Z-Whirlwind": "Z-吹飞",
@@ -7004,6 +7005,7 @@ var translations = {
 
     //  fantasy状态
     "Qiang Hua Wu Xiao": "强化无效",
+    "Aura Burst": "气场爆发",
 
     //  fantasy战斗技能描述
     "Fantasy Sachet activated": "幻之香袋弥漫开来",

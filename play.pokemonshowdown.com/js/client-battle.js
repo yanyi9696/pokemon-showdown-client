@@ -744,7 +744,13 @@
 					checkboxes.push('<label class="megaevo"><input type="checkbox" name="zmove" />&nbsp;Z-Power</label>');
 				}
 				if (canUltraBurst) {
-					checkboxes.push('<label class="megaevo"><input type="checkbox" name="ultraburst" />&nbsp;Ultra Burst</label>');
+					// 如果不是奈克洛兹玛，说明这是我们自定义的气场爆发
+					if (canUltraBurst !== "Necrozma-Ultra") {
+						checkboxes.push('<label class="megaevo"><input type="checkbox" name="auraburst" />&nbsp;Aura Burst</label>');
+					} else {
+						// 保留原版奈克洛兹玛的按钮
+						checkboxes.push('<label class="megaevo"><input type="checkbox" name="ultraburst" />&nbsp;Ultra Burst</label>');
+					}
 				}
 				if (canDynamax) {
 					checkboxes.push('<label class="megaevo"><input type="checkbox" name="dynamax" />&nbsp;Dynamax</label>');
@@ -1287,6 +1293,7 @@
 				var isMegaY = !!(this.$('input[name=megaevoy]')[0] || '').checked;
 				var isZMove = !!(this.$('input[name=zmove]')[0] || '').checked;
 				var isUltraBurst = !!(this.$('input[name=ultraburst]')[0] || '').checked;
+				var isAuraBurst = !!(this.$('input[name=auraburst]')[0] || '').checked;
 				var isDynamax = !!(this.$('input[name=dynamax]')[0] || '').checked;
 				var isTerastal = !!(this.$('input[name=terastallize]')[0] || '').checked;
 
@@ -1294,7 +1301,7 @@
 				var choosableTargets = { normal: 1, any: 1, adjacentAlly: 1, adjacentAllyOrSelf: 1, adjacentFoe: 1 };
 				if (this.battle.gameType === 'freeforall') delete choosableTargets['adjacentAllyOrSelf'];
 
-				this.choice.choices.push('move ' + pos + (isMega ? ' mega' : '') + (isMegaX ? ' megax' : isMegaY ? ' megay' : '') + (isZMove ? ' zmove' : '') + (isUltraBurst ? ' ultra' : '') + (isDynamax ? ' dynamax' : '') + (isTerastal ? ' terastallize' : ''));
+				this.choice.choices.push('move ' + pos + (isMega ? ' mega' : '') + (isMegaX ? ' megax' : isMegaY ? ' megay' : '') + (isZMove ? ' zmove' : '') + (isUltraBurst || isAuraBurst ? ' ultra' : '') + (isDynamax ? ' dynamax' : '') + (isTerastal ? ' terastallize' : ''));
 				if (nearActive.length > 1 && target in choosableTargets) {
 					this.choice.type = 'movetarget';
 					this.choice.moveTarget = target;
