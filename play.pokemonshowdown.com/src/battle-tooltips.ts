@@ -1235,6 +1235,23 @@ export class BattleTooltips {
 					}
 				}
 			}
+			// ==== Aura Burst 状态数值提升补充 ====
+			if (clientPokemon.volatiles['auraburstatk'] || clientPokemon.volatiles['auraburstall']) {
+				stats.atk = Math.floor(stats.atk * 1.2);
+			}
+			if (clientPokemon.volatiles['auraburstdef'] || clientPokemon.volatiles['auraburstall']) {
+				stats.def = Math.floor(stats.def * 1.2);
+			}
+			if (clientPokemon.volatiles['auraburstspa'] || clientPokemon.volatiles['auraburstall']) {
+				stats.spa = Math.floor(stats.spa * 1.2);
+			}
+			if (clientPokemon.volatiles['auraburstspd'] || clientPokemon.volatiles['auraburstall']) {
+				stats.spd = Math.floor(stats.spd * 1.2);
+			}
+			if (clientPokemon.volatiles['auraburstspe'] || clientPokemon.volatiles['auraburstall']) {
+				speedModifiers.push(1.2);
+			}
+			// =====================================
 		}
 		if (pokemon.status) {
 			if (ability === 'marvelscale') {
