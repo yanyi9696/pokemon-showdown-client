@@ -1339,6 +1339,7 @@ var translations = {
     "Bing He Shen Qu": "冰河身躯",
     "Wen Li Hua": "纹理化",
     "Chuan Shuo De Ju Ren":"传说的巨人",
+    "Gu Hun": "骨魂",
 
     //  招式
 

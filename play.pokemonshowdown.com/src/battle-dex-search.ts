@@ -1479,6 +1479,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
             return false;
         }
 		switch (id) {
+		case 'shadowbone':
 		case 'biansuzhefan':
 		case 'kingsshield':
 		case 'crushgrip':
