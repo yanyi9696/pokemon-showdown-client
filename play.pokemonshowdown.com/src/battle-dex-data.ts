@@ -359,7 +359,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	arcaninehisui: 1032 + 207,
 	voltorbhisui: 1032 + 208,
 	electrodehisui: 1032 + 209,
-	typhlosionhisui: 1032 + 210,
+	typhlosionhisui: 1032 + 210, typhlosionhisuifantasy: 1032 + 210, // Added fantasy mapping
 	qwilfishhisui: 1032 + 211,
 	sneaselhisui: 1032 + 212,
 	samurotthisui: 1032 + 213,
