@@ -5000,39 +5000,37 @@
 			}
 			var abilitySpecies = species;
 			if (
-				species.isMega ||
-				(species.forme && species.forme.indexOf("Mega") === 0) ||
-				species.name.indexOf("-Mega") >= 0
-			) {
-				var baseSpecies = null;
-				var megaIndex = species.name.indexOf("-Mega");
-				var preMegaName =
-					megaIndex >= 0
-						? species.name.substr(0, megaIndex)
-						: species.baseSpecies;
-				if (species.id.endsWith("fantasy")) {
-					baseSpecies = this.curTeam.dex.species.get(
-						preMegaName + "-Fantasy"
-					);
-					if (!baseSpecies || !baseSpecies.exists) {
-						baseSpecies = this.curTeam.dex.species.get(
-							toID(species.baseSpecies) + "fantasy"
-						);
-					}
-				}
-				if (!baseSpecies || !baseSpecies.exists) {
-					baseSpecies = this.curTeam.dex.species.get(preMegaName);
-				}
-				if (!baseSpecies || !baseSpecies.exists) {
-					baseSpecies = this.curTeam.dex.species.get(species.baseSpecies);
-				}
-				if (baseSpecies && baseSpecies.exists) abilitySpecies = baseSpecies;
-			}
-			// --- 修改开始：针对自制呆壳兽 Mega 的底座特性抓取进行特判 ---
-            if (species.id === "slowbromegafantasy") {
-                abilitySpecies = this.curTeam.dex.species.get("slowbrogalarfantasy");
+                species.isMega ||
+                (species.forme && species.forme.indexOf("Mega") === 0) ||
+                species.name.indexOf("-Mega") >= 0 ||
+                species.name.indexOf("-Totem-Fantasy") >= 0 // <== 新增：识别气场爆发形态
+            ) {
+                var baseSpecies = null;
+                var megaIndex = species.name.indexOf("-Mega");
+                if (megaIndex < 0) megaIndex = species.name.indexOf("-Totem-Fantasy"); // <== 新增：获取后缀位置
+                var preMegaName =
+                    megaIndex >= 0
+                        ? species.name.substr(0, megaIndex)
+                        : species.baseSpecies;
+                if (species.id.endsWith("fantasy")) {
+                    baseSpecies = this.curTeam.dex.species.get(
+                        preMegaName + "-Fantasy"
+                    );
+                    if (!baseSpecies || !baseSpecies.exists) {
+                        baseSpecies = this.curTeam.dex.species.get(
+                            toID(species.baseSpecies) + "fantasy"
+                        );
+                    }
+                }
+                if (!baseSpecies || !baseSpecies.exists) {
+                    baseSpecies = this.curTeam.dex.species.get(preMegaName);
+                }
+                if (!baseSpecies || !baseSpecies.exists) {
+                    baseSpecies = this.curTeam.dex.species.get(species.baseSpecies);
+                }
+                if (baseSpecies && baseSpecies.exists) abilitySpecies = baseSpecies;
             }
-            // --- 修改结束 ---
+
 			set.ability = abilitySpecies.abilities["0"];
 			if (
 				species.id === "greninjaashfantasy" ||

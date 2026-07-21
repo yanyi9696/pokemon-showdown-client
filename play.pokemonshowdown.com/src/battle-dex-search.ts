@@ -952,9 +952,13 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 		}
 
 		const isMegaForme = species.isMega || species.forme.startsWith('Mega');
-		if (isMegaForme || megaBaseSpeciesFromItem) {
+		const isAuraBurstForme = species.id.endsWith('totemfantasy'); // <== 新增：判定是否为气场爆发形态
+		
+		// <== 修改：加入气场爆发条件
+		if (isMegaForme || megaBaseSpeciesFromItem || isAuraBurstForme) { 
 			let megaSpecies = species;
-			if (!isMegaForme && megaSpeciesFromItem) {
+			// <== 修改：加入气场爆发条件
+			if (!isMegaForme && !isAuraBurstForme && megaSpeciesFromItem) { 
 				let megaSpeciesId = toID(megaSpeciesFromItem);
 				if (species.id.endsWith('fantasy') && !megaSpeciesId.endsWith('fantasy')) {
 					const fantasyMegaSpeciesId = toID(megaSpeciesId + 'fantasy');
@@ -964,22 +968,34 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 				if (fromItemSpecies.exists) megaSpecies = fromItemSpecies;
 			}
 			const megaAbilityName = dex.abilities.get(megaSpecies.abilities['0']).name;
-			abilitySet.unshift(['html', `Will be <strong>${megaAbilityName}</strong> after Mega Evolving.`]);
-			let baseSpeciesId = toID(isMegaForme ? species.baseSpecies : megaBaseSpeciesFromItem!);
+			
+			// --- 修改开始：分流提示文本 ---
+			if (isAuraBurstForme) {
+				abilitySet.unshift(['html', `气场爆发之后，特性会变为 <strong>${megaAbilityName}</strong>。`]);
+			} else {
+				abilitySet.unshift(['html', `Will be <strong>${megaAbilityName}</strong> after Mega Evolving.`]);
+			}
+			// --- 修改结束 ---
+			
+			// <== 修改：加入气场爆发条件
+			let baseSpeciesId = toID((isMegaForme || isAuraBurstForme) ? species.baseSpecies : megaBaseSpeciesFromItem!); 
             
-            // --- 修改开始：专门针对呆壳兽的自制 Mega 形态进行特判 ---
-            if (species.id === 'slowbromegafantasy') {
-                // 直接强制将底座指向伽勒尔形态
-                baseSpeciesId = toID('slowbrogalarfantasy');
-            } 
-            else if (species.id.endsWith('fantasy')) {
-                // 其他 fantasy 宝可梦继续走原来的默认逻辑
-                const rawBaseId = toID(isMegaForme ? species.baseSpecies : megaBaseSpeciesFromItem!);
-                const fantasyBaseId = rawBaseId.endsWith('fantasy') ? rawBaseId : toID(rawBaseId + 'fantasy');
-                if (dex.species.get(fantasyBaseId).exists) {
-                    baseSpeciesId = fantasyBaseId;
-                }
-            }
+			// 处理 fantasy 形态的 Mega 宝可梦，确保其基础种族也能正确显示
+			if (species.id.endsWith('fantasy')) {
+				// <== 修改：加入气场爆发条件
+				const rawBaseId = toID((isMegaForme || isAuraBurstForme) ? species.baseSpecies : megaBaseSpeciesFromItem!); 
+				const fantasyBaseId = rawBaseId.endsWith('fantasy') ? rawBaseId : toID(rawBaseId + 'fantasy');
+				if (dex.species.get(fantasyBaseId).exists) {
+					baseSpeciesId = fantasyBaseId;
+				}
+			}
+			
+			// --- 新增：特判阿罗拉嘎啦嘎啦的气场爆发，精准锁定进化前形态 ---
+			if (species.id === 'marowakalolatotemfantasy') {
+				baseSpeciesId = toID('marowakalolafantasy');
+			}
+			// --- 新增结束 ---
+			
 			species = dex.species.get(baseSpeciesId);
 		}
 
