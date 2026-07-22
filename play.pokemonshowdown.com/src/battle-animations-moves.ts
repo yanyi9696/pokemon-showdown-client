@@ -12,6 +12,347 @@
 import { type AnimTable, BattleOtherAnims } from './battle-animations';
 
 export const BattleMoveAnims: AnimTable = {
+	liehuomengzhuang: {
+		anim(scene, [attacker, defender]) {
+			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/weather-sunnyday.jpg')`, 1300, 0.5);
+			scene.showEffect(attacker.sp, {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				opacity: 0.3,
+				time: 25,
+			}, {
+				y: attacker.y + 150,
+				opacity: 0,
+				time: 325,
+			}, 'decel');
+			scene.showEffect(attacker.sp, {
+				x: attacker.x,
+				y: attacker.y + 150,
+				z: attacker.z,
+				opacity: 0.3,
+				time: 625,
+			}, {
+				x: defender.leftof(-10),
+				y: defender.y + 5,
+				z: defender.behind(10),
+				opacity: 0,
+				time: 825,
+			}, 'decel');
+			scene.showEffect('flareball', {
+				x: attacker.x,
+				y: attacker.y + 150,
+				z: attacker.z,
+				scale: 1,
+				opacity: 0.6,
+				time: 600,
+			}, {
+				x: defender.leftof(-10),
+				y: defender.y + 5,
+				z: defender.behind(10),
+				opacity: 0.3,
+				time: 800,
+			}, 'accel', 'explode');
+			scene.showEffect('flareball', {
+				x: attacker.x,
+				y: attacker.y + 150,
+				z: attacker.behind(-50),
+				scale: 1,
+				opacity: 0.5,
+				time: 600,
+			}, {
+				x: defender.leftof(-10),
+				y: defender.y + 5,
+				z: defender.behind(10),
+				opacity: 0.6,
+				time: 800,
+			}, 'accel', 'explode');
+
+			scene.showEffect('flareball', {
+				x: defender.x,
+				y: defender.y - 60,
+				z: defender.z,
+				scale: 1,
+				xscale: 3,
+				opacity: 1,
+				time: 850,
+			}, {
+				scale: 2,
+				xscale: 12,
+				opacity: 0,
+				time: 1250,
+			}, 'linear', 'fade');
+			scene.showEffect('flareball', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				opacity: 0.7,
+				scale: 1,
+				time: 850,
+			}, {
+				scale: 6,
+				opacity: 0,
+				time: 1400,
+			}, 'linear');
+			scene.showEffect('flareball', {
+				x: defender.x,
+				y: defender.y + 350,
+				z: defender.z,
+				opacity: 1,
+				scale: 3,
+				yscale: 10,
+				time: 850,
+			}, {
+				xscale: 0,
+				time: 1500,
+			}, 'accel', 'fade');
+			scene.showEffect('flareball', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				opacity: 1,
+				scale: 3,
+				time: 850,
+			}, {
+				scale: 9,
+				time: 1400,
+			}, 'linear', 'explode');
+
+			attacker.anim({
+				x: attacker.x,
+				y: attacker.y + 250,
+				z: attacker.z,
+				time: 300,
+			}, 'decel');
+			attacker.delay(300);
+			attacker.anim({
+				x: defender.leftof(-10),
+				y: defender.y + 5,
+				z: defender.behind(10),
+				opacity: 1,
+				time: 200,
+			}, 'ballistic2Under');
+			attacker.delay(50);
+			attacker.anim({
+				opacity: 0,
+				time: 1,
+			});
+			attacker.delay(700);
+			attacker.anim({
+				opacity: 1,
+				time: 200,
+			});
+			defender.delay(650);
+			defender.anim({
+				y: defender.y - 10,
+				z: defender.behind(5),
+				time: 50,
+			}, 'swing');
+			defender.anim({
+				y: defender.y - 20,
+				z: defender.behind(20),
+				time: 200,
+			}, 'swing');
+			defender.anim({
+				time: 300,
+			}, 'swing');
+		},
+	},
+	kejimengchong: {
+		anim(scene, [attacker, defender]) {
+			scene.backgroundEffect(`url('https://${Config.routes.client}/fx/weather-electricterrain.png')`, 1300, 0.5);
+			scene.showEffect(attacker.sp, {
+				x: attacker.x,
+				y: attacker.y,
+				z: attacker.z,
+				opacity: 0.3,
+				time: 25,
+			}, {
+				y: attacker.y + 150,
+				opacity: 0,
+				time: 325,
+			}, 'decel');
+			scene.showEffect(attacker.sp, {
+				x: attacker.x,
+				y: attacker.y + 150,
+				z: attacker.z,
+				opacity: 0.3,
+				time: 625,
+			}, {
+				x: defender.leftof(-10),
+				y: defender.y + 5,
+				z: defender.behind(10),
+				opacity: 0,
+				time: 825,
+			}, 'decel');
+			scene.showEffect('waterwisp', {
+				x: attacker.x,
+				y: attacker.y + 150,
+				z: attacker.z,
+				scale: 1,
+				opacity: 0.6,
+				time: 600,
+			}, {
+				x: defender.leftof(-10),
+				y: defender.y + 5,
+				z: defender.behind(10),
+				opacity: 0.3,
+				time: 800,
+			}, 'accel', 'explode');
+			scene.showEffect('waterwisp', {
+				x: attacker.x,
+				y: attacker.y + 150,
+				z: attacker.behind(-50),
+				scale: 1,
+				opacity: 0.5,
+				time: 600,
+			}, {
+				x: defender.leftof(-10),
+				y: defender.y + 5,
+				z: defender.behind(10),
+				opacity: 0.6,
+				time: 800,
+			}, 'accel', 'explode');
+
+			scene.showEffect('waterwisp', {
+				x: defender.x,
+				y: defender.y - 60,
+				z: defender.z,
+				scale: 1,
+				xscale: 3,
+				opacity: 1,
+				time: 850,
+			}, {
+				scale: 2,
+				xscale: 12,
+				opacity: 0,
+				time: 1250,
+			}, 'linear', 'fade');
+			scene.showEffect('lightning', {
+				x: defender.x,
+				y: defender.y - 60,
+				z: defender.z,
+				scale: 1,
+				xscale: 3,
+				opacity: 1,
+				time: 850,
+			}, {
+				scale: 2,
+				xscale: 12,
+				opacity: 0,
+				time: 1250,
+			}, 'linear', 'fade');
+			scene.showEffect('waterwisp', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				opacity: 0.7,
+				scale: 1,
+				time: 850,
+			}, {
+				scale: 6,
+				opacity: 0,
+				time: 1400,
+			}, 'linear');
+			scene.showEffect('lightning', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				opacity: 0.7,
+				scale: 1,
+				time: 850,
+			}, {
+				scale: 6,
+				opacity: 0,
+				time: 1400,
+			}, 'linear');
+			scene.showEffect('waterwisp', {
+				x: defender.x,
+				y: defender.y + 350,
+				z: defender.z,
+				opacity: 1,
+				scale: 3,
+				yscale: 10,
+				time: 850,
+			}, {
+				xscale: 0,
+				time: 1500,
+			}, 'accel', 'fade');
+			scene.showEffect('lightning', {
+				x: defender.x,
+				y: defender.y + 350,
+				z: defender.z,
+				opacity: 1,
+				scale: 3,
+				yscale: 10,
+				time: 850,
+			}, {
+				xscale: 0,
+				time: 1500,
+			}, 'accel', 'fade');
+			scene.showEffect('waterwisp', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				opacity: 1,
+				scale: 3,
+				time: 850,
+			}, {
+				scale: 9,
+				time: 1400,
+			}, 'linear', 'explode');
+			scene.showEffect('lightning', {
+				x: defender.x,
+				y: defender.y,
+				z: defender.z,
+				opacity: 1,
+				scale: 3,
+				time: 850,
+			}, {
+				scale: 9,
+				time: 1400,
+			}, 'linear', 'explode');
+
+			attacker.anim({
+				x: attacker.x,
+				y: attacker.y + 250,
+				z: attacker.z,
+				time: 300,
+			}, 'decel');
+			attacker.delay(300);
+			attacker.anim({
+				x: defender.leftof(-10),
+				y: defender.y + 5,
+				z: defender.behind(10),
+				opacity: 1,
+				time: 200,
+			}, 'ballistic2Under');
+			attacker.delay(50);
+			attacker.anim({
+				opacity: 0,
+				time: 1,
+			});
+			attacker.delay(700);
+			attacker.anim({
+				opacity: 1,
+				time: 200,
+			});
+			defender.delay(650);
+			defender.anim({
+				y: defender.y - 10,
+				z: defender.behind(5),
+				time: 50,
+			}, 'swing');
+			defender.anim({
+				y: defender.y - 20,
+				z: defender.behind(20),
+				time: 200,
+			}, 'swing');
+			defender.anim({
+				time: 300,
+			}, 'swing');
+		},
+	},
 	biansuzhefan: {
 		anim(scene, [attacker, defender]) {
 			// 1. 攻击前：齿轮特效 (在 attacker 位置)

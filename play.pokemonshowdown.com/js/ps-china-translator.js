@@ -2297,6 +2297,8 @@ var translations = {
     "Wen Li Z": "纹理Z",
     "Zhen Xi": "鸩袭",
     "Huan Shen Bu":"幻身步",
+    "Lie Huo Meng Zhuang": "烈火猛撞",
+    "Ke Ji Meng Chong": "科技猛冲",
 
     //  觉醒力量
 

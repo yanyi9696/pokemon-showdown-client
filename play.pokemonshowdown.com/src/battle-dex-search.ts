@@ -1495,6 +1495,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
             return false;
         }
 		switch (id) {
+			case 'liehuomengzhuang':
+			case 'kejimengchong':
 			case 'powdersnow':
 			case 'shadowbone':
 			case 'biansuzhefan':
