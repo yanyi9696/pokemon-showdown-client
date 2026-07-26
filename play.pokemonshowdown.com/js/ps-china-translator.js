@@ -4834,6 +4834,7 @@ var translations = {
     //  Fantasy 后缀
 
     "-Fantasy": "-幻想",
+    "-Legend": "-传说",
     "-G-Mega": "-超巨进化",
     "-Rapid-Strike-Fantasy": "-乱击流-幻想",
     "-Rapid-Strike-G-Mega-Fantasy": "-瞬击流-超巨进化-幻想",
@@ -4843,6 +4844,7 @@ var translations = {
 
     //  Fantasy 名称
 
+    "Arceus-Legend": "阿尔宙斯-传说",
     "Shadow Lugia": "黑暗洛奇亚",
     "Shadow Lugia-Fantasy": "黑暗洛奇亚-幻想",
     "Urshifu-Fantasy": "武道熊师-迅击流-幻想",

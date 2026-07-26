@@ -1495,6 +1495,12 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
             return false;
         }
 		switch (id) {
+			case 'recover':
+			case 'roost':
+			case 'slackoff':
+			case 'softboiled':
+			case 'milkdrink':
+			case 'rest':
 			case 'supercellslam':
 			case 'jumpkick':
 			case 'spark':
