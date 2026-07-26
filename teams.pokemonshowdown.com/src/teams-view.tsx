@@ -60,25 +60,12 @@ function exportSet(set: Dex.PokemonSet) {
 	if (set.gigantamax) {
 		out += `Gigantamax: Yes  \n`;
 	}
+	if (set.gigantamax) {
+		out += `Gigantamax: Yes  \n`;
+	}
+	// 还原这里：只保留最基础的输出，删掉所有 currentTera 和 Dex 的拦截逻辑
 	if (set.teraType) {
-		let currentTera = set.teraType;
-		
-		// 获取宝可梦数据及第一属性
-		const speciesData = Dex.species.get(set.species);
-		const firstType = (speciesData && speciesData.types && speciesData.types.length > 0) ? speciesData.types[0] : 'Normal';
-
-		// 修复 1：不仅仅判断 '???'，还要拦截 currentTera 为空（未设置或被系统省略）的情况
-		if (!currentTera || currentTera === '???') {
-			
-			// 如果第一属性也是 '???'，默认赋值为 Normal，否则使用第一属性
-			currentTera = (firstType === '???') ? 'Normal' : firstType;
-			
-			// 修复 2：【最关键的一步】强制将修正后的太晶属性写回 set 对象！
-			// 这样能够防止后续的 Validator 读到空值而自动回退到 '???'
-			set.teraType = currentTera;
-		}
-		
-		out += `Tera Type: ${currentTera}  \n`;
+		out += `Tera Type: ${set.teraType}  \n`;
 	}
 
 	// stats

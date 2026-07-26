@@ -866,13 +866,31 @@ Storage.packTeam = function (team) {
 			buf += '|';
 		}
 
-		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType) {
+		// 【核心修复开始】
+		// 在判断是否需要写入额外数据前，先计算出“实际应生效的太晶属性”
+		var effectiveTeraType = set.teraType || '';
+		
+		if (!effectiveTeraType || effectiveTeraType === '???') {
+			var speciesData = Dex.species.get(set.species);
+			var firstType = (speciesData && speciesData.types && speciesData.types.length > 0) ? speciesData.types[0] : 'Normal';
+			
+			// 如果第一属性是 '???'，强制将打包数据写为 'Normal'
+			if (firstType === '???') {
+				effectiveTeraType = 'Normal';
+			}
+		}
+
+		// 注意：这里的 if 条件把 set.teraType 换成了 effectiveTeraType
+		// 这样即使 UI 把 set.teraType 删空了，只要 effectiveTeraType 有值，就会触发打包写入
+		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || effectiveTeraType) {
 			buf += ',' + (set.hpType || '');
 			buf += ',' + toID(set.pokeball);
 			buf += ',' + (set.gigantamax ? 'G' : '');
 			buf += ',' + (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : '');
-			buf += ',' + (set.teraType || '');
+			// 把原本的 (set.teraType || '') 替换为计算好的 effectiveTeraType
+			buf += ',' + effectiveTeraType; 
 		}
+		// 【核心修复结束】
 	}
 
 	return buf;
@@ -1417,28 +1435,11 @@ Storage.exportTeam = function (team, gen, hidestats) {
 		if (curSet.gigantamax) {
 			text += 'Gigantamax: Yes  \n';
 		}
-		if (gen === 9) {
-            var species = Dex.species.get(curSet.species);
-            var teraType = species.forceTeraType || curSet.teraType;
-            
-            // 拦截：太晶属性为空或者是 "???"
-            if (!teraType || teraType === '???') {
-                
-                // 优化点 1：直接利用 Showdown 自带的 baseSpecies 追溯本体，无需手动循环切字符串
-                // 如果没有 baseSpecies（虽然罕见），则 fallback 到当前物种
-                var baseSpecies = Dex.species.get(species.baseSpecies || species.name);
-                var firstType = (baseSpecies && baseSpecies.types && baseSpecies.types.length > 0) ? baseSpecies.types[0] : '???';
-                
-                // 兜底逻辑：如果本体的第一属性也是 '???'，才给一般系
-                teraType = (firstType === '???') ? 'Normal' : firstType;
-                
-                // 优化点 2：【最关键的一步】强制将修正后的太晶属性写回 curSet 内存对象！
-                // 这一步确保了后续队伍打包发送给服务器时，携带的是修正后的合法太晶属性
-                curSet.teraType = teraType;
-            }
-            
-            text += 'Tera Type: ' + teraType + " \n";
-        }
+		
+		if (curSet.teraType) {
+			text += 'Tera Type: ' + curSet.teraType + "  \n";
+		}
+        
 		if (!hidestats) {
 			var first = true;
 			if (curSet.evs) {
