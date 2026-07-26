@@ -1418,32 +1418,27 @@ Storage.exportTeam = function (team, gen, hidestats) {
 			text += 'Gigantamax: Yes  \n';
 		}
 		if (gen === 9) {
-			var species = Dex.species.get(curSet.species);
-			var teraType = species.forceTeraType || curSet.teraType;
-			
-			// 拦截：太晶属性为空或者是 "???"
-			if (!teraType || teraType === '???') {
-				var firstType = '???';
-				var checkName = curSet.species;
-				
-				// 逐层剥离后缀，确保带有多个后缀的形态也能正确追溯到本体的第一属性
-				for (var step = 0; step < 3; step++) {
-					var tempSpecies = Dex.species.get(checkName);
-					if (tempSpecies && tempSpecies.types && tempSpecies.types.length > 0 && tempSpecies.types[0] !== '???') {
-						firstType = tempSpecies.types[0];
-						break; // 只要找到了有效的非 ??? 属性，立刻停止追溯
-					}
-					var dashIndex = checkName.lastIndexOf('-');
-					if (dashIndex === -1) break; // 如果名字里没有横杠了，停止剥离
-					checkName = checkName.substring(0, dashIndex); // 切掉最后一个 '-' 及其后面的字符串
-				}
-				
-				// 最终兜底：如果连原版本体都没找到有效属性，才赋值给一般系
-				teraType = (firstType === '???') ? 'Normal' : firstType;
-			}
-			
-			text += 'Tera Type: ' + teraType + " \n";
-		}
+            var species = Dex.species.get(curSet.species);
+            var teraType = species.forceTeraType || curSet.teraType;
+            
+            // 拦截：太晶属性为空或者是 "???"
+            if (!teraType || teraType === '???') {
+                
+                // 优化点 1：直接利用 Showdown 自带的 baseSpecies 追溯本体，无需手动循环切字符串
+                // 如果没有 baseSpecies（虽然罕见），则 fallback 到当前物种
+                var baseSpecies = Dex.species.get(species.baseSpecies || species.name);
+                var firstType = (baseSpecies && baseSpecies.types && baseSpecies.types.length > 0) ? baseSpecies.types[0] : '???';
+                
+                // 兜底逻辑：如果本体的第一属性也是 '???'，才给一般系
+                teraType = (firstType === '???') ? 'Normal' : firstType;
+                
+                // 优化点 2：【最关键的一步】强制将修正后的太晶属性写回 curSet 内存对象！
+                // 这一步确保了后续队伍打包发送给服务器时，携带的是修正后的合法太晶属性
+                curSet.teraType = teraType;
+            }
+            
+            text += 'Tera Type: ' + teraType + " \n";
+        }
 		if (!hidestats) {
 			var first = true;
 			if (curSet.evs) {
