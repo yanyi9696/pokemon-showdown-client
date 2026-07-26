@@ -1340,6 +1340,7 @@ var translations = {
     "Wen Li Hua": "纹理化",
     "Chuan Shuo De Ju Ren":"传说的巨人",
     "Gu Hun": "骨魂",
+    "Legendary Power": "传说之力",
 
     //  招式
 
