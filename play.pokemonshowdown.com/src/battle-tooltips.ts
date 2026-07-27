@@ -1795,12 +1795,15 @@ export class BattleTooltips {
 		}
 
 		// 【在这里插入传说石板的专属 UI 同步逻辑】
-        if (move.id === 'judgment' && pokemon.item === 'legendplate') {
-            // 获取宝可梦当前的真实属性，并用 as any[] 强行绕过类型检查
-            const currentTypes = pokemon.getTypes(serverPokemon) as any[];
-            // 如果它已经不再是 '???'，就让制裁光砾的面板属性和自身属性保持一致
-            if (currentTypes && currentTypes[0] && currentTypes[0] !== '???') {
-                moveType = currentTypes[0] as any;
+        // 1. 判断是否携带了传说石板（兼容客户端和请求包两种数据来源）
+        const isLegendPlate = (pokemon && pokemon.item === 'legendplate') || (serverPokemon && serverPokemon.item === 'legendplate');
+        if (move.id === 'judgment' && isLegendPlate) {
+            // 2. 【核心修复】绝不能使用 getTypes(serverPokemon)！
+            // 必须直接读取我们在 battle.ts 中实时重绘的 pokemon.types 
+            const activeTypes = pokemon ? (pokemon as any).types : null;
+            // 3. 如果当前属性存在，且已经因为出招变色（不再是 '???'），则强制同步招式属性
+            if (activeTypes && activeTypes[0] && activeTypes[0] !== '???') {
+                moveType = activeTypes[0] as any;
             }
         }
 
