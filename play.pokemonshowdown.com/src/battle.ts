@@ -1706,7 +1706,7 @@ export class Battle {
 
 		const CONSUMED = ['eaten', 'popped', 'consumed', 'held up'];
 		switch (args[0]) {
-		// @ts-ignore : 强制忽略 TypeScript 对于 custom case '-legendplate' 不在 Args 联合类型里的报错
+		// @ts-ignore : 强制忽略 TypeScript 对于 custom case 的报错
         case '-legendplate': {
             const poke = this.getPokemon(args[1] as any);
             if (!poke) break;
@@ -1717,20 +1717,23 @@ export class Battle {
             // 获取对应的官方形态名称 (例如: Arceus-Ground)
             const formeName = newType === 'Normal' ? 'Arceus' : 'Arceus-' + newType;
             
-            // 【关键修改 1】直接修改客户端底层记录的形态！这会让引擎去自动拉取对应属性的阿尔宙斯模型
+            // 【核心模型替换】直接修改底层形态名称，强制引擎去拉取官方阿尔宙斯模型
             poke.speciesForme = formeName;
             
-            // 【关键修改 2】修改血条面板显示的属性
+            // 【修改面板属性】修改血条面板显示的属性
             (poke as any).types = [typeName];
             
-            // 【关键修改 3】调用客户端原生的变身动画！（闪光缩小再放大的特效）
-            this.scene.animTransform(poke);
+            // 【底层状态更新】利用客户端原生的形态转换机制，确保系统彻底识别新模型
+            poke.removeVolatile('transform' as any);
+            poke.addVolatile('formechange' as any, formeName as any);
             
-            // 【关键修改 4】强制重绘场上的宝可梦模型和血条状态
-            (this.scene as any).updatePokemonSprite(poke);
+            // 【关键：究极爆发动画！】传入 true 参数，触发极其炫酷的耀眼白光变身特效！
+            (this.scene as any).animTransform(poke, true);
+            
+            // 【修复崩溃】删除了会导致崩溃的 updatePokemonSprite，只保留安全的更新状态栏
             this.scene.updateStatbar(poke);
             
-            // 华丽的公屏播报
+            // 【华丽的公屏播报】因为没有报错阻挠，这次文本绝对会完美弹出！
             this.scene.message(`${poke.name} 借助传说石板的力量，转变为了 ${typeName} 属性！`);
             this.log(['html', `<div class="message"><strong>${poke.name}</strong> 的属性变成了 <span class="col type-${typeName.toLowerCase()}">${typeName}</span>！</div>`] as any);
             
