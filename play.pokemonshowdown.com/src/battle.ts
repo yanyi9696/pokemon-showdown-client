@@ -1706,6 +1706,33 @@ export class Battle {
 
 		const CONSUMED = ['eaten', 'popped', 'consumed', 'held up'];
 		switch (args[0]) {
+		// @ts-ignore : 强制忽略 TypeScript 对于 custom case '-legendplate' 不在 Args 联合类型里的报错
+        case '-legendplate': {
+            // 【关键修复】强制将 args[1] 转为 any
+            const poke = this.getPokemon(args[1] as any);
+            if (!poke) break;
+            
+            const newType = args[2] as string;
+            const typeName = this.dex.types.get(newType).name; 
+            
+            const formeName = newType === 'Normal' ? 'Arceus' : 'Arceus-' + newType;
+            
+            // 【关键修复 1】强行绕过类的只读/不存在属性限制
+            (poke as any).types = [typeName];
+            
+            // 【关键修复 2】强制转换为 any，满足底层要求 ID 类型的苛刻条件
+            poke.removeVolatile('transform' as any);
+            poke.addVolatile('formechange' as any, formeName as any);
+            
+            this.scene.message(`${poke.name} 借助传说石板的力量，转变为了 ${typeName} 属性！`);
+			this.log(['html', `<div class="message"><strong>${poke.name}</strong> 的属性变成了 <span class="col type-${typeName.toLowerCase()}">${typeName}</span>！</div>`] as any);
+            
+            // 【关键修复 3】删除错误的 updatePokemonSprite。
+            // addVolatile('formechange') 内部会自动切换模型和立绘，我们只需要更新状态栏信息即可
+            this.scene.updateStatbar(poke);
+            
+            break;
+        }
 		case '-damage': {
 			let poke = this.getPokemon(args[1])!;
 			let damage = poke.healthParse(args[2], true);
