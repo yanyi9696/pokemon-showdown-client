@@ -1794,6 +1794,16 @@ export class BattleTooltips {
 			}
 		}
 
+		// 【在这里插入传说石板的专属 UI 同步逻辑】
+        if (move.id === 'judgment' && pokemon.item === 'legendplate') {
+            // 获取宝可梦当前的真实属性，并用 as any[] 强行绕过类型检查
+            const currentTypes = pokemon.getTypes(serverPokemon) as any[];
+            // 如果它已经不再是 '???'，就让制裁光砾的面板属性和自身属性保持一致
+            if (currentTypes && currentTypes[0] && currentTypes[0] !== '???') {
+                moveType = currentTypes[0] as any;
+            }
+        }
+
 		if (move.id === 'photongeyser' || move.id === 'lightthatburnsthesky' || move.id === 'psystrike' ||
 			(move.id === 'terablast' && pokemon.terastallized) ||
 			(move.id === 'terastarstorm' && pokemon.getSpeciesForme() === 'Terapagos-Stellar')) {
