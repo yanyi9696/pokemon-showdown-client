@@ -4987,6 +4987,7 @@
 				"Shadow Lugia-Fantasy": "Shadow Bottle",
 				"Zarude-Dada-Fantasy": "Dada's Cloak",
 				"Marowak-Alola-Totem-Fantasy": "Firium Z",
+				"Lurantis-Totem-Fantasy": "Grassium Z",
 				// 如果以后有更多自制 Mega，可以在这里继续添加，例如：
 				// 'Pikachu-Mega': 'Pikachunite'
 			};

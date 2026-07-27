@@ -1215,6 +1215,30 @@ export const Dex = new class implements ModdedDex {
 			}
 		}
 
+		// 【修改代码:拦截 兰螳花-霸主-幻想形态】
+		else if (checkId === 'lurantistotemfantasy') {
+			// 同理,检测原有 url 的闪光标识
+			const isShiny = spriteData.url && spriteData.url.includes('-shiny');
+			
+			let facingDir = isFront ? 'gen5' : 'gen5-back';
+			if (isShiny) facingDir += '-shiny';
+
+			// 【重要】严格保持大小写一致
+			const filename = 'lurantis-totem-fantasy.png'; 
+			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			
+			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
+			spriteData.pixelated = false; 
+
+			if (isFront) {
+				spriteData.w = 100; 
+				spriteData.h = 100; 
+			} else {
+				spriteData.w = 110; 
+				spriteData.h = 110; 
+			}
+		}
+
 		// 以后如果有其他局内图片要替换,在这里加 else if 即可
 		/*
 		else if (checkId === 'onixfantasy') {
@@ -1503,6 +1527,15 @@ export const Dex = new class implements ModdedDex {
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			// 重点修改:在 dex 后面加上 ${shiny}
 			return `background-image:url(${customSpritePrefix}sprites/dex${shiny}/marowak-alola-totem-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
+		}
+		// 【新增代码:拦截 兰螳花-霸主-幻想形态】
+		else if (id === 'lurantistotemfantasy') {
+			const bgSize = "100px auto"; // 根据你画的巨沼怪图标比例进行调整
+			const offsetX = 10; // 左右微调
+			const offsetY = 5;  // 上下微调
+			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			// 重点修改:在 dex 后面加上 ${shiny}
+			return `background-image:url(${customSpritePrefix}sprites/dex${shiny}/lurantis-totem-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 
 		// 精准修复：如果是官方的 home 立绘，直接强行去官方云端服务器拉取

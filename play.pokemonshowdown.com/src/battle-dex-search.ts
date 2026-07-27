@@ -1495,6 +1495,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
             return false;
         }
 		switch (id) {
+			case 'razorwind':
 			case 'recover':
 			case 'roost':
 			case 'slackoff':
