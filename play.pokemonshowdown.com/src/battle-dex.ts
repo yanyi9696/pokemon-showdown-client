@@ -1317,22 +1317,32 @@ export const Dex = new class implements ModdedDex {
 
 		// 精准修复：如果是官方的 home 立绘，直接强行去官方云端服务器拉取
         if (data.spriteDir === 'sprites/home') {
-            const finalUrl = `https://play.pokemonshowdown.com/sprites/home${shiny}/${data.spriteid}.png`;
             const bgSize = "background-size: 95px 95px; ";
-            
-            // 1. 设置绝大部分宝可梦默认的 Y 轴居中位置
             let finalY = "20%"; 
             
-            // 2. 提取出干净的宝可梦 ID（去掉 -fantasy 后缀，方便字典统一判定）
+            // 2. 提取出干净的宝可梦 ID（去掉 -fantasy 后缀）
             let baseId = data.spriteid;
             if (baseId.endsWith('fantasy')) {
                 baseId = baseId.replace('fantasy', '');
             }
 
+            // --- 新增：处理没有官方 HOME 贴图的特殊宝可梦 ---
+            // 包含永恒之花、刺刺耳皮丘、换装皮卡丘等
+            const noHomeSprites = ['floette-eternal', 'pichu-spikyeared', 'pikachu-cosplay'];
+            
+            let finalUrl = "";
+            if (noHomeSprites.includes(baseId)) {
+                // 如果没有 HOME 贴图，强制回退到 dex（3D 渲染图）目录
+                finalUrl = `https://play.pokemonshowdown.com/sprites/dex${shiny}/${baseId}.png`;
+            } else {
+                // 正常宝可梦使用提取后的 baseId 请求 HOME 贴图，修复了原代码依然使用 data.spriteid 的 Bug
+                finalUrl = `https://play.pokemonshowdown.com/sprites/home${shiny}/${baseId}.png`;
+            }
+            // ------------------------------------------------
+
             // 3. 【特判字典】：在这里把所有“太靠上”的宝可梦揪出来单独调教
-            // 填入宝可梦的纯小写 ID，赋给它们一个更小的值（越小越往上抬）
             const customOffsets: { [id: string]: string } = {
-				'metagross': '0%',    // 巨金怪 往上提
+                'metagross': '0%',    // 巨金怪 往上提
                 'excadrill': '0%',    // 龙头地鼠 往上提
                 'corviknight': '40%',  // 钢铠鸦 往下压
             };
