@@ -1109,9 +1109,13 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			if (item.itemUser?.includes(currentSpeciesName)) {
 				isStrictlySpeciesSpecific = true;
 			}
-			if (!isStrictlySpeciesSpecific && item.megaEvolves === baseSpeciesName) {
+			// --- 修改这里开始 ---
+			// 原本是 item.megaEvolves === baseSpeciesName
+			// 改为 currentSpeciesName，这样就能排除掉 Slowbro-Galar 这种带有后缀的形态
+			if (!isStrictlySpeciesSpecific && item.megaEvolves === currentSpeciesName) {
 				isStrictlySpeciesSpecific = true;
 			}
+			// --- 修改这里结束 ---
 			if (!isStrictlySpeciesSpecific) {
 				if (baseSpeciesName === 'Groudon' && itemId === 'redorb') isStrictlySpeciesSpecific = true;
 				if (baseSpeciesName === 'Kyogre' && itemId === 'blueorb') isStrictlySpeciesSpecific = true;
