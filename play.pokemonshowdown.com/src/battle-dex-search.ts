@@ -989,7 +989,12 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 					baseSpeciesId = fantasyBaseId;
 				}
 			}
-		
+			
+			// --- 新增：特判阿罗拉嘎啦嘎啦的气场爆发，精准锁定进化前形态 ---
+			if (species.id === 'marowakalolatotemfantasy') {
+				baseSpeciesId = toID('marowakalolafantasy');
+			}
+			// --- 新增结束 ---
 			
 			species = dex.species.get(baseSpeciesId);
 		}

@@ -920,7 +920,7 @@ export const Dex = new class implements ModdedDex {
 			if (isShiny) facingDir += '-shiny';
 
 			// 【重要】严格保持大小写一致
-			const filename = 'swampert-Mega-X-Fantasy.png'; 
+			const filename = 'swampert-mega-x-fantasy.png'; 
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			
 			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
