@@ -1320,25 +1320,32 @@ export const Dex = new class implements ModdedDex {
             const bgSize = "background-size: 95px 95px; ";
             let finalY = "20%"; 
             
-            // 2. 提取出干净的宝可梦 ID（去掉 -fantasy 后缀）
+            // 2. 提取出干净的宝可梦 ID（去掉 -fantasy 后缀，方便字典统一判定）
             let baseId = data.spriteid;
             if (baseId.endsWith('fantasy')) {
                 baseId = baseId.replace('fantasy', '');
             }
 
-            // --- 新增：处理没有官方 HOME 贴图的特殊宝可梦 ---
-            // 包含永恒之花、刺刺耳皮丘、换装皮卡丘等
-            const noHomeSprites = ['floette-eternal', 'pichu-spikyeared', 'pikachu-cosplay'];
+            // --- 修改开始：分类处理缺失 HOME 贴图的宝可梦 ---
+            // 1. 需要回退到 dex 目录（官方 3D 模型）的宝可梦
+            const useDexSprites = ['floette-eternal', 'pichu-spikyeared', 'pikachu-cosplay'];
+            
+            // 2. 需要回退到 gen5 目录（官方存的同人/Pet Mod 2D 像素图）的宝可梦
+            // 包含了永恒之花的 Mega 形态
+            const useGen5Sprites = ['floettemega', 'floetteeternalmega']; 
             
             let finalUrl = "";
-            if (noHomeSprites.includes(baseId)) {
-                // 如果没有 HOME 贴图，强制回退到 dex（3D 渲染图）目录
+            if (useDexSprites.includes(baseId)) {
+                // 读取 3D 模型
                 finalUrl = `https://play.pokemonshowdown.com/sprites/dex${shiny}/${baseId}.png`;
+            } else if (useGen5Sprites.includes(baseId)) {
+                // 读取 2D 像素同人图
+                finalUrl = `https://play.pokemonshowdown.com/sprites/gen5${shiny}/${baseId}.png`;
             } else {
-                // 正常宝可梦使用提取后的 baseId 请求 HOME 贴图，修复了原代码依然使用 data.spriteid 的 Bug
+                // 正常的 HOME 贴图
                 finalUrl = `https://play.pokemonshowdown.com/sprites/home${shiny}/${baseId}.png`;
             }
-            // ------------------------------------------------
+            // --- 修改结束 ---
 
             // 3. 【特判字典】：在这里把所有“太靠上”的宝可梦揪出来单独调教
             const customOffsets: { [id: string]: string } = {
