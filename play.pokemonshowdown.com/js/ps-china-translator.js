@@ -3109,6 +3109,7 @@ var translations = {
     "Flygonite": "沙漠蜻蜓-幻想进化石",
     "Swampertite X": "巨沼怪-幻想进化石X",
     "Swampertite Y": "巨沼怪-幻想进化石Y",
+    "Slowbrogalarnite": "呆壳兽-伽勒尔-幻想进化石",
 
 
     //ZA新进化石

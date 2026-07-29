@@ -4910,6 +4910,7 @@
 				"Pidgeot-Mega-Fantasy": "Pidgeotite",
 				"Salamence-Mega-Fantasy": "Salamencite",
 				"Slowbro-Mega-Fantasy": "Slowbronite",
+				"Slowbro-Galar-Mega-Fantasy": "Slowbrogalarnite",
 				"Steelix-Mega-Fantasy": "Steelixite",
 				"Swampert-Mega-X-Fantasy": "Swampertite X",
 				"Swampert-Mega-Y-Fantasy": "Swampertite Y",
