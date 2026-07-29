@@ -1320,41 +1320,38 @@ export const Dex = new class implements ModdedDex {
             const bgSize = "background-size: 95px 95px; ";
             let finalY = "20%"; 
             
-            // 2. 提取出干净的宝可梦 ID（去掉 -fantasy 后缀，方便字典统一判定）
+            // 2. 提取出干净的宝可梦 ID
             let baseId = data.spriteid;
             if (baseId.endsWith('fantasy')) {
                 baseId = baseId.replace('fantasy', '');
             }
 
-            // --- 修改开始：分类处理缺失 HOME 贴图的宝可梦 ---
-            // 1. 需要回退到 dex 目录（官方 3D 模型）的宝可梦
+            // --- 修改开始：按目录和后缀分流 ---
+            // 1. 回退到 dex 目录 (读取官方 3D 静态 .png 模型)
             const useDexSprites = ['floette-eternal', 'pichu-spikyeared', 'pikachu-cosplay'];
             
-            // 2. 需要回退到 gen5 目录（官方存的同人/Pet Mod 2D 像素图）的宝可梦
-            // 包含了永恒之花的 Mega 形态
-            const useGen5Sprites = ['floettemega', 'floetteeternalmega']; 
+            // 2. 回退到 ani 目录 (读取 Showdown 官方图库里的动态 .gif)
+            const useAniSprites = ['floettemega', 'floetteeternalmega']; 
             
             let finalUrl = "";
             if (useDexSprites.includes(baseId)) {
-                // 读取 3D 模型
                 finalUrl = `https://play.pokemonshowdown.com/sprites/dex${shiny}/${baseId}.png`;
-            } else if (useGen5Sprites.includes(baseId)) {
-                // 读取 2D 像素同人图
-                finalUrl = `https://play.pokemonshowdown.com/sprites/gen5${shiny}/${baseId}.png`;
+            } else if (useAniSprites.includes(baseId)) {
+                // 注意这里：路径改为了 ani，后缀改为了 .gif
+                finalUrl = `https://play.pokemonshowdown.com/sprites/ani${shiny}/${baseId}.gif`;
             } else {
-                // 正常的 HOME 贴图
+                // 正常的 HOME 高清静态图
                 finalUrl = `https://play.pokemonshowdown.com/sprites/home${shiny}/${baseId}.png`;
             }
             // --- 修改结束 ---
 
             // 3. 【特判字典】：在这里把所有“太靠上”的宝可梦揪出来单独调教
             const customOffsets: { [id: string]: string } = {
-                'metagross': '0%',    // 巨金怪 往上提
-                'excadrill': '0%',    // 龙头地鼠 往上提
-                'corviknight': '40%',  // 钢铠鸦 往下压
+                'metagross': '0%',    
+                'excadrill': '0%',    
+                'corviknight': '40%',  
             };
 
-            // 如果这只宝可梦在特判字典里，就用字典里的定制高度
             if (customOffsets[baseId]) {
                 finalY = customOffsets[baseId];
             }
@@ -1362,7 +1359,6 @@ export const Dex = new class implements ModdedDex {
             // X轴固定 10px，Y轴动态应用 finalY
             return `background-image:url(${finalUrl});${bgSize}background-position: 10px ${finalY};background-repeat:no-repeat`;
         } else {
-            // 属于你本地魔改的非 home 贴图，依然读取你本地或私服配置的路径
             const finalUrl = `${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`;
             return `background-image:url(${finalUrl});background-position:${data.x}px ${data.y}px;background-repeat:no-repeat`;
         }
