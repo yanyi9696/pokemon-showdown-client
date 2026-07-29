@@ -935,6 +935,30 @@ export const Dex = new class implements ModdedDex {
 			}
 		}
 
+		// 【修改代码:拦截 呆壳兽-伽勒尔-Mega-幻想形态】
+		else if (checkId === 'slowbrogalarmegafantasy') {
+			// 同理,检测原有 url 的闪光标识
+			const isShiny = spriteData.url && spriteData.url.includes('-shiny');
+			
+			let facingDir = isFront ? 'gen5' : 'gen5-back';
+			if (isShiny) facingDir += '-shiny';
+
+			// 【重要】严格保持大小写一致
+			const filename = 'slowbro-galar-mega-fantasy.png'; 
+			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			
+			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
+			spriteData.pixelated = false; 
+
+			if (isFront) {
+				spriteData.w = 100; 
+				spriteData.h = 100; 
+			} else {
+				spriteData.w = 110; 
+				spriteData.h = 110; 
+			}
+		}
+
 		// 【修改代码:拦截 嘎啦嘎啦-阿罗拉-霸主-幻想形态】
 		else if (checkId === 'marowakalolatotemfantasy') {
 			// 同理,检测原有 url 的闪光标识
@@ -1263,9 +1287,18 @@ export const Dex = new class implements ModdedDex {
 			// 重点修改:在 dex 后面加上 ${shiny}
 			return `background-image:url(${customSpritePrefix}sprites/dex${shiny}/swampert-mega-x-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
+		// 【新增代码:拦截 呆壳兽-伽勒尔-Mega-幻想形态】
+		else if (id === 'slowbrogalarmegafantasy') {
+			const bgSize = "100px auto"; // 根据你画的呆壳兽-伽勒尔图标比例进行调整
+			const offsetX = 10; // 左右微调
+			const offsetY = 5;  // 上下微调
+			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			// 重点修改:在 dex 后面加上 ${shiny}
+			return `background-image:url(${customSpritePrefix}sprites/dex${shiny}/slowbro-galar-mega-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
+		}
 		// 【新增代码:拦截 嘎啦嘎啦-阿罗拉-霸主-幻想形态】
 		else if (id === 'marowakalolatotemfantasy') {
-			const bgSize = "100px auto"; // 根据你画的巨沼怪图标比例进行调整
+			const bgSize = "100px auto"; // 根据你画的嘎啦嘎啦图标比例进行调整
 			const offsetX = 10; // 左右微调
 			const offsetY = 5;  // 上下微调
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
@@ -1274,7 +1307,7 @@ export const Dex = new class implements ModdedDex {
 		}
 		// 【新增代码:拦截 兰螳花-霸主-幻想形态】
 		else if (id === 'lurantistotemfantasy') {
-			const bgSize = "100px auto"; // 根据你画的巨沼怪图标比例进行调整
+			const bgSize = "100px auto"; // 根据你画的兰螳花图标比例进行调整
 			const offsetX = 10; // 左右微调
 			const offsetY = 5;  // 上下微调
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
