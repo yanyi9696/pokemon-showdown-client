@@ -2855,8 +2855,12 @@ export class Battle {
 				poke.side.addSideCondition(effect, false);
 				this.scene.updateWeather();
 				break;
+			case 'razorwind':
+				poke.side.addSideCondition(effect, false);
+				this.scene.updateWeather();
+				break;
 			if (!(effect.id === 'typechange' && poke.terastallized) &&
-				effect.id !== 'futuresight' && effect.id !== 'doomdesire') {
+				effect.id !== 'futuresight' && effect.id !== 'doomdesire' && effect.id !== 'razorwind') {
 				poke.addVolatile(effect.id);
 			}
 			this.scene.updateStatbar(poke);
@@ -3200,7 +3204,7 @@ export class Battle {
 
 			switch (effect.id) {
 			case 'weixingshidi': // 微型湿地
-			case 'razorwind':
+			case 'razorwind': // 旋风刀
 			case 'tailwind':
 			case 'auroraveil':
 			case 'reflect':
