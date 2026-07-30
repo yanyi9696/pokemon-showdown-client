@@ -2975,9 +2975,7 @@ export class Battle {
 							this.scene.updateWeather();
 						}
 						// 【新增】旋风刀砸下来时的动画和UI移除逻辑
-                        if (effect.name === 'Razor Wind') {
-                            // 这里填 'razorwind'，调用旋风刀本来的动画
-                            this.scene.runOtherAnim('razorwind' as ID, [poke]);
+                       if (effect.name === 'Razor Wind') {
                             poke.side.foe.removeSideCondition('Razor Wind');
                             this.scene.updateWeather();
                         }
@@ -3202,6 +3200,7 @@ export class Battle {
 
 			switch (effect.id) {
 			case 'weixingshidi': // 微型湿地
+			case 'razorwind':
 			case 'tailwind':
 			case 'auroraveil':
 			case 'reflect':
