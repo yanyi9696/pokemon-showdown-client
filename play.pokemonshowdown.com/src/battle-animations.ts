@@ -1957,11 +1957,11 @@ export class PokemonSprite extends Sprite {
 		leizhustack3: ['擂主: 3', 'good'],
 		leizhustack4: ['擂主: 4', 'good'],
 		leizhustack5: ['擂主: 5', 'good'],
-		auraburstatk: ['Aura Burst: Atk: 1.2', 'good'],
-		auraburstdef: ['Aura Burst: Def: 1.2', 'good'],
-		auraburstspa: ['Aura Burst: SpA: 1.2', 'good'],
-		auraburstspd: ['Aura Burst: SpD: 1.2', 'good'],
-		auraburstspe: ['Aura Burst: Spe: 1.2', 'good'],
+		auraburstatk: ['Aura Burst: Atk: 1.5', 'good'],
+		auraburstdef: ['Aura Burst: Def: 1.5', 'good'],
+		auraburstspa: ['Aura Burst: SpA: 1.5', 'good'],
+		auraburstspd: ['Aura Burst: SpD: 1.5', 'good'],
+		auraburstspe: ['Aura Burst: Spe: 1.5', 'good'],
 		auraburstall: ['Aura Burst: All: 1.2', 'good'],
 	};
 	forme = '';
