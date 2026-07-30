@@ -492,7 +492,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	aggronmega: 1320 + 27, aggronmegafantasy: 1320 + 27,// Added fantasy mapping
 	medichammega: 1320 + 28,
 	manectricmega: 1320 + 29,
-	sharpedomega: 1320 + 30,
+	sharpedomega: 1320 + 30, sharpedomegafantasy: 1320 + 30,// Added fantasy mapping
 	cameruptmega: 1320 + 31,
 	altariamega: 1320 + 32, altariamegafantasy: 1320 + 32,// Added fantasy mapping
 	banettemega: 1320 + 33,
