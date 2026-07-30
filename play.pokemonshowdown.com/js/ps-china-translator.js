@@ -6900,6 +6900,9 @@ var translations = {
     //  fantasy场地
     "Foe's Wei Xing Shi Di": "对手的微型湿地",
     "Wei Xing Shi Di": "微型湿地",
+    "Foe's Future Sight": "对手的预知未来",
+    "Foe's Doom Desire": "对手的破灭之愿",
+    "Foe's Razor Wind": "对手的旋风刀",
 
     "(Type changed)": "(属性改变了)",
     "(Tera Type:": "(太晶属性: ",

@@ -718,6 +718,10 @@ export class Side {
 		case 'doomdesire':
 			this.sideConditions[condition] = ['Doom Desire', 1, 3, 0];
 			break;
+		// 【新增】注册旋风刀的场地倒计时 UI
+        case 'razorwind':
+            this.sideConditions[condition] = ['Razor Wind', 1, 3, 0];
+            break;
 		case 'stealthrock':
 		case 'spikes':
 		case 'toxicspikes':
@@ -2970,6 +2974,13 @@ export class Battle {
 							poke.side.foe.removeSideCondition('Future Sight');
 							this.scene.updateWeather();
 						}
+						// 【新增】旋风刀砸下来时的动画和UI移除逻辑
+                        if (effect.name === 'Razor Wind') {
+                            // 这里填 'razorwind'，调用旋风刀本来的动画
+                            this.scene.runOtherAnim('razorwind' as ID, [poke]);
+                            poke.side.foe.removeSideCondition('Razor Wind');
+                            this.scene.updateWeather();
+                        }
 					}
 				}
 			}
