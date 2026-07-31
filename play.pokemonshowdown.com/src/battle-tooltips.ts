@@ -1459,7 +1459,7 @@ export class BattleTooltips {
 		}
 		// ------------- 新增微型湿地 -------------
 		if (sideConditions['weixingshidi']) {
-			speedModifiers.push(1 / 3);
+			speedModifiers.push(1 / 2);
 		}
 		// ------------- 新增微型湿地 -------------
 
