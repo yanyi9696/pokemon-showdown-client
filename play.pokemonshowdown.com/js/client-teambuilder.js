@@ -4911,6 +4911,7 @@
 				"Salamence-Mega-Fantasy": "Salamencite",
 				"Slowbro-Mega-Fantasy": "Slowbronite",
 				"Slowbro-Galar-Mega-Fantasy": "Slowbrogalarnite",
+				"Sceptile-Mega-Fantasy": "Sceptilite",
 				"Steelix-Mega-Fantasy": "Steelixite",
 				"Swampert-Mega-X-Fantasy": "Swampertite X",
 				"Swampert-Mega-Y-Fantasy": "Swampertite Y",
