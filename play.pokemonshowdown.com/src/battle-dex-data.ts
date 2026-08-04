@@ -478,7 +478,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	mewtwomegax: 1320 + 13, mewtwomegaxfantasy: 1320 + 13,// Added fantasy mapping
 	mewtwomegay: 1320 + 14, mewtwomegayfantasy: 1320 + 14,// Added fantasy mapping
 	ampharosmega: 1320 + 15, ampharosmegafantasy: 1320 + 15,// Added fantasy mapping
-	steelixmega: 1320 + 16, steelixmegafantasy: 1320 + 16,// Added fantasy mapping
+	steelixmega: 1320 + 16, steelixmegayfantasy: 1320 + 16,// Added fantasy mapping
 	scizormega: 1320 + 17,
 	heracrossmega: 1320 + 18,
 	houndoommega: 1320 + 19,
@@ -610,7 +610,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	urshifurapidstrikefantasy: 1653, // Added fantasy mapping
 	urshifu2fantasy: 1654, // Added fantasy mapping
 	urshifurapidstrike2fantasy: 1655, // Added fantasy mapping
-
+	steelixmegaxfantasy: 1656, // Added fantasy mapping
 	lurantistotemfantasy: 1657, // Added fantasy mapping
 
 	porygonzfantasy: 474, // 原版图标，不知道为何无法直接对应
