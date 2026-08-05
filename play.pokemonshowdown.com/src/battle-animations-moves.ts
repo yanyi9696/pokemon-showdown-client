@@ -14,79 +14,31 @@ import { type AnimTable, BattleOtherAnims } from './battle-animations';
 export const BattleMoveAnims: AnimTable = {
 	jisheng: {
 		anim(scene, [attacker, defender]) {
-			// Swing backward
-			attacker.anim({
-				z: attacker.behind(15),
-				time: 200,
-			}, 'decel');
-			attacker.anim({
-				z: defender.behind(-170),
-				time: 100,
-			}, 'accel');
-			attacker.anim({
-				z: attacker.z,
-				time: 300,
-			}, 'swing');
-
-			// Launch the chain
-			scene.showEffect('shadowball', {
+			scene.backgroundEffect('#000000', 900, 0.2);
+			scene.showEffect(attacker.sp, {
 				x: attacker.x,
 				y: attacker.y,
 				z: attacker.z,
-				scale: 0.5,
-				opacity: 0.5,
-				time: 275,
+				opacity: 0,
 			}, {
+				y: attacker.y + 600,
+				yscale: 10,
+				opacity: 0.3,
+				time: 400,
+			}, 'accel', 'fade');
+			scene.showEffect(attacker.sp, {
 				x: defender.x,
-				y: defender.y,
+				y: defender.y + 500,
 				z: defender.z,
+				yscale: 10,
+				opacity: 0.3,
 				time: 500,
-			}, 'linear', '', { filter: 'hue-rotate(30deg) brightness(1.5)' });
-
-			// Chain expansion
-			for (let i = 0; i < 5; i++) {
-				scene.showEffect('shadowball', {
-					x: defender.x,
-					y: defender.y,
-					z: defender.z,
-					scale: 0.5,
-					opacity: 0.5,
-					time: 550,
-				}, {
-					x: defender.x + 30 * (i - 2),
-					time: 950,
-				}, 'decel', 'fade', { filter: 'hue-rotate(30deg) brightness(1.5)' });
-			}
-
-			// Defender gets squeezed
-			defender.delay(550);
-			defender.anim({
-				xscale: 0.6,
-				time: 200,
-			});
-			defender.delay(200);
-			defender.anim({
-				xscale: 1,
-				time: 150,
-			});
-
-			// Poison particles fly out
-			let x2 = [1, -1, -1, 1];
-			let y2 = [1, 1, -1, -1];
-
-			for (let i = 0; i < 4; i++) {
-				scene.showEffect('poisonwisp', {
-					x: defender.x,
-					y: defender.y,
-					z: defender.z,
-					scale: 0.7,
-					time: 950,
-				}, {
-					x: defender.x + x2[i] * 50,
-					y: defender.y + y2[i] * 38,
-					time: 1100,
-				}, 'ballistic', 'fade', { filter: 'hue-rotate(15deg)' });
-			}
+			}, {
+				y: defender.y,
+				opacity: 0,
+				yscale: 1,
+				time: 900,
+			}, 'decel', 'fade');
 		},
 	},
 	liehuomengzhuang: {
