@@ -3113,6 +3113,7 @@ var translations = {
     "Steelixite X": "大钢蛇-幻想进化石X",
     "Steelixite Y": "大钢蛇-幻想进化石Y",
     "Slowbrogalarnite": "呆壳兽-伽勒尔-幻想进化石",
+    "Rayquazite": "烈空坐-幻想进化石",
 
 
     //ZA新进化石

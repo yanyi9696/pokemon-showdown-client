@@ -504,7 +504,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	latiosmega: 1320 + 39,
 	kyogreprimal: 1320 + 40,
 	groudonprimal: 1320 + 41,
-	rayquazamega: 1320 + 42,
+	rayquazamega: 1320 + 42, rayquazamegafantasy: 1320 + 42, // Added fantasy mapping
 	lopunnymega: 1320 + 43, lopunnymegafantasy: 1320 + 43, // Added fantasy mapping
 	garchompmega: 1320 + 44, garchompmegafantasy: 1320 + 44, // Added fantasy mapping
 	lucariomega: 1320 + 45,
