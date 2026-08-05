@@ -1499,6 +1499,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
             return false;
         }
 		switch (id) {
+			case 'jisheng':
 			case 'swift':
 			case 'wringout':
 			case 'razorwind':

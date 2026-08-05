@@ -1340,7 +1340,7 @@ var translations = {
     "Wen Li Hua": "纹理化",
     "Chuan Shuo De Ju Ren":"传说的巨人",
     "Gu Hun": "骨魂",
-    "Legendary Power": "传说之力",
+    "Chuan Shuo Zhi Li": "传说之力",
 
     //  招式
 
@@ -2300,6 +2300,7 @@ var translations = {
     "Huan Shen Bu":"幻身步",
     "Lie Huo Meng Zhuang": "烈火猛撞",
     "Ke Ji Meng Chong": "科技猛冲",
+    "Ji Sheng": "寄生",
 
     //  觉醒力量
 
