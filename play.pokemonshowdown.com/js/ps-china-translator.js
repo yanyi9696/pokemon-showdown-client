@@ -1341,6 +1341,7 @@ var translations = {
     "Chuan Shuo De Ju Ren":"传说的巨人",
     "Gu Hun": "骨魂",
     "Chuan Shuo Zhi Li": "传说之力",
+    "Zhi Liao": "炙疗",
 
     //  招式
 
