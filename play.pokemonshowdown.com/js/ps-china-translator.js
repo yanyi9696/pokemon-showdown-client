@@ -3108,6 +3108,7 @@ var translations = {
     "Fantasy Ultra Energy": "幻之究极能量",
     "Shadow Bottle": "暗影之瓶",
     "Dada's Cloak": "阿爸的披风",
+    "Legend Plate": "传说石板",
     "Flygonite": "沙漠蜻蜓-幻想进化石",
     "Swampertite X": "巨沼怪-幻想进化石X",
     "Swampertite Y": "巨沼怪-幻想进化石Y",
@@ -10135,6 +10136,12 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
         }
         if (originalStr.match(regex_toxic_orb)) {
             return   trans_from_dict(RegExp.$1) + "因剧毒宝珠而中剧毒了！";
+        }
+        if (originalStr.match(regex_toflame_orb)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "因火焰宝珠而灼伤了！";
+        }
+        if (originalStr.match(regex_flame_orb)) {
+            return trans_from_dict(RegExp.$1) + "因火焰宝珠而灼伤了！";
         }
         if (originalStr.match(regex_tosticky_web)) {
             return   "对手的" + trans_from_dict(RegExp.$1) + "被黏黏网粘住了！";

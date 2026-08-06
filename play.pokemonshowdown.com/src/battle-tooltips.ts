@@ -1040,7 +1040,8 @@ export class BattleTooltips {
 		if (pokemon.status) {
 			if (this.battle.gen > 2 && ability === 'guts') {
 				stats.atk = Math.floor(stats.atk * 1.5);
-			} else if (this.battle.gen < 2 && pokemon.status === 'brn') {
+			} else if (this.battle.gen < 2 && pokemon.status === 'brn' && ability !== 'zhiliao') { 
+				// 加入 ability !== 'zhiliao' 确保炙疗特性不会被减半攻击
 				stats.atk = Math.floor(stats.atk * 0.5);
 			}
 			// 1. 处理冻伤导致的特攻减半显示
@@ -2520,7 +2521,12 @@ export class BattleTooltips {
 			// 在施加烧伤的威力惩罚前，检查是否携带“幻之生命宝珠”
 			if (toID(serverPokemon.item) !== 'fantasylifeorb') {
 				// ==================== 修改点 (END) ======================
-				if (!value.tryAbility("Guts")) value.modify(0.5, 'Burn');
+				
+				// 将你的“炙疗”特性加入到与 Guts (毅力) 同级的判定中
+				if (!value.tryAbility("Guts") && !value.tryAbility("Zhi Liao")) {
+					value.modify(0.5, 'Burn');
+				}
+				
 				// ==================== 修改点 (START) ====================
 				// 为我们上面添加的 if 语句闭合括号
 			}
