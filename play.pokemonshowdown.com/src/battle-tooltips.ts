@@ -578,6 +578,7 @@ export class BattleTooltips {
 				}
 				if (move.id === 'weatherball') {
 					value.abilityModify(2, "Mega Sol");
+                    value.abilityModify(2, "Chao Ji Yu Shui");
 					switch (this.battle.weather) {
 						case 'sunnyday':
 						case 'desolateland':
@@ -1672,8 +1673,10 @@ export class BattleTooltips {
 					break;
 				}
 			} else if (value.abilityModify(0, 'Mega Sol')) {
-					moveType = 'Fire';
-			}
+                 	moveType = 'Fire';
+            } else if (value.abilityModify(0, 'Chao Ji Yu Shui')) {
+                	moveType = 'Water'; // 超级雨水使气象球变为水属性
+            }
 		}
 		if (move.id === 'terrainpulse' && pokemon.isGrounded(serverPokemon)) {
 			if (this.battle.hasPseudoWeather('Electric Terrain')) {
@@ -2030,10 +2033,13 @@ export class BattleTooltips {
 		value.set(move.accuracy as number);
 
 		if (move.id === 'hurricane' || move.id === 'thunder') {
-			if (value.tryAbility('Mega Sol')) value.set(50, 'Mega Sol');
-			if (value.tryWeather('Sunny Day')) value.set(50, 'Sunny Day');
-			if (value.tryWeather('Desolate Land')) value.set(50, 'Desolate Land');
-		}
+            if (value.tryAbility('Mega Sol')) value.set(50, 'Mega Sol');
+            if (value.tryWeather('Sunny Day')) value.set(50, 'Sunny Day');
+            if (value.tryWeather('Desolate Land')) value.set(50, 'Desolate Land');
+            
+            // 雨天/超级雨水特性使命中变为必中（true）
+            if (value.tryAbility('Chao Ji Yu Shui')) value.set(true as any, 'Chao Ji Yu Shui');
+        }
 
 		// Chained modifiers round down on 0.5
 		let accuracyAfterChain = (value.value * chain) / 4096;
