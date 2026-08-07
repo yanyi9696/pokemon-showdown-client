@@ -550,7 +550,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	clefablemega: 1320 + 84,
 	victreebelmega: 1320 + 85, victreebelmegafantasy: 1320 + 85, // Added fantasy mapping
 	starmiemega: 1320 + 86,
-	dragonitemega: 1320 + 87,
+	dragonitemega: 1320 + 87, dragonitemegafantasy: 1320 + 87, // Added fantasy mapping
 	meganiummega: 1320 + 88, meganiummegafantasy: 1320 + 88, // Added fantasy mapping
 	feraligatrmega: 1320 + 89,
 	skarmorymega: 1320 + 90, skarmorymegafantasy: 1320 + 90, // Added fantasy mapping
