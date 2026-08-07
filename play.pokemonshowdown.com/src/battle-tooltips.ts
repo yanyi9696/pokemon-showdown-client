@@ -2193,10 +2193,15 @@ export class BattleTooltips {
 			}
 		}
 		if (move.id === 'weatherball') {
-			if (this.battle.weather !== 'deltastream') {
-				value.weatherModify(2);
-			}
-		}
+            // 首先判断场上是否有真实天气，如果有则由原版逻辑翻倍
+            if (value.weatherModify(2)) {
+                // 原版天气导致的威力翻倍已触发
+            } else if (value.abilityModify(2, 'Mega Sol')) {
+                // 场上无天气，但拥有超级日光特性时翻倍
+            } else if (value.abilityModify(2, 'Chao Ji Yu Shui')) {
+                // 场上无天气，但拥有超级雨水特性时翻倍
+            }
+        }
 		if (move.id === 'hydrosteam') {
 			value.weatherModify(1.5, 'Sunny Day');
 		}
