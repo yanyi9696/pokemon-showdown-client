@@ -1343,6 +1343,8 @@ var translations = {
     "Chuan Shuo Zhi Li": "传说之力",
     "Zhi Liao": "炙疗",
     "Chao Ji Yu Shui": "超级雨水",
+    "Bing Neng Li Zhe": "冰能力者",
+    "Shuang Zhong Da Zui": "双重大嘴",
 
     //  招式
 
@@ -2303,6 +2305,7 @@ var translations = {
     "Lie Huo Meng Zhuang": "烈火猛撞",
     "Ke Ji Meng Chong": "科技猛冲",
     "Ji Sheng": "寄生",
+    "Qing Su Mi Hun": "情愫迷魂",
 
     //  觉醒力量
 

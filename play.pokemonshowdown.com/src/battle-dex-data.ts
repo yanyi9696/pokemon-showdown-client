@@ -488,7 +488,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	swampertmega: 1320 + 23, swampertmegayfantasy: 1320 + 23,// Added fantasy mapping
 	gardevoirmega: 1320 + 24,
 	sableyemega: 1320 + 25,
-	mawilemega: 1320 + 26,
+	mawilemega: 1320 + 26, mawilemegafantasy: 1320 + 26,// Added fantasy mapping
 	aggronmega: 1320 + 27, aggronmegafantasy: 1320 + 27,// Added fantasy mapping
 	medichammega: 1320 + 28,
 	manectricmega: 1320 + 29,
