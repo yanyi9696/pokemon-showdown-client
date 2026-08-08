@@ -1344,7 +1344,7 @@ var translations = {
     "Zhi Liao": "炙疗",
     "Chao Ji Yu Shui": "超级雨水",
     "Bing Neng Li Zhe": "冰能力者",
-    "Shuang Zhong Da Zui": "双重大嘴",
+    "Shuang Chong Da Zui": "双重大嘴",
 
     //  招式
 
