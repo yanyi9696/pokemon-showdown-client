@@ -4916,6 +4916,7 @@
 				"Steelix-Mega-Y-Fantasy": "Steelixite Y",
 				"Swampert-Mega-X-Fantasy": "Swampertite X",
 				"Swampert-Mega-Y-Fantasy": "Swampertite Y",
+				"Mawile-Mega-Fantasy": "Mawilite",
 				"Mewtwo-Mega-X-Fantasy": "Mewtwonite X",
 				"Mewtwo-Mega-Y-Fantasy": "Mewtwonite Y",
 				// ZA的新宝可梦
