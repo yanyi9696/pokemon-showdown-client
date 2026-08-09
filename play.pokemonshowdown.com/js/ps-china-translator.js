@@ -1308,7 +1308,7 @@ var translations = {
     "Lei Ting Xing Zhe": "雷霆行者",
     "Wo Ju": "蜗居",
     "Chong Hua Pi": "重画皮",
-    "Mu Hou Hei Shou": "幕后黑手",
+    "Luo Jing Xia Shi": "落井下石",
     "Shi Chong": "食虫",
     "Shou Hun": "收魂",
     "Chao Yue Qian Ban Bian Shen": "超越牵绊变身",
@@ -1344,6 +1344,7 @@ var translations = {
     "Zhi Liao": "炙疗",
     "Chao Ji Yu Shui": "超级雨水",
     "Bing Neng Li Zhe": "冰能力者",
+    "Huo Neng Li Zhe": "火能力者",
     "Shuang Chong Da Zui": "双重大嘴",
 
     //  招式

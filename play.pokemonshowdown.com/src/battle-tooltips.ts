@@ -2439,7 +2439,45 @@ export class BattleTooltips {
 		if (moveType === 'Fire') {
 			value.abilityModify(1.5, "Fire Mane");
 		}
-		// =================================================================
+		
+        // 钢属性
+        if (moveType === 'Steel') {
+            value.abilityModify(1.5, "Steelworker");      // 钢能力者
+        }
+        
+        // 冰属性
+        if (moveType === 'Ice') {
+            value.abilityModify(1.5, "Bing Neng Li Zhe"); // 冰能力者
+        }
+        
+        // 火属性
+        if (moveType === 'Fire') {
+            value.abilityModify(1.5, "Huo Neng Li Zhe");  // 火能力者
+        }
+        
+        // 电属性
+        if (moveType === 'Electric') {
+            // 获取当前是否为你的 FC (Fantasy) 模式
+            // 使用 ?. 是为了防止某些极其特殊的边缘情况下 this.battle.tier 未定义报错
+            let isFantasyTier = this.battle.tier?.includes('FC'); 
+            
+            // 官方第九世代削弱为1.3，但在 FC 模式下恢复为 1.5
+            let transistorBoost = (this.battle.gen >= 9 && !isFantasyTier) ? 1.3 : 1.5;
+            
+            value.abilityModify(transistorBoost, "Transistor"); 
+        }
+        
+        // 龙属性
+        if (moveType === 'Dragon') {
+            value.abilityModify(1.5, "Dragon's Maw");     // 龙颚
+        }
+        
+        // 水属性
+        if (moveType === 'Water') {
+            value.abilityModify(2.0, "Water Bubble");     // 水泡 (威力翻倍)
+        }
+        
+        // ============================================================================
 
 
 		if (move.category !== 'Status') {
