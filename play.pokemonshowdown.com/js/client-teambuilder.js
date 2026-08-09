@@ -4914,6 +4914,7 @@
 				"Sceptile-Mega-Fantasy": "Sceptilite",
 				"Steelix-Mega-X-Fantasy": "Steelixite X",
 				"Steelix-Mega-Y-Fantasy": "Steelixite Y",
+				"Steelix-Mega-Z-Fantasy": "Steelixite Z",
 				"Swampert-Mega-X-Fantasy": "Swampertite X",
 				"Swampert-Mega-Y-Fantasy": "Swampertite Y",
 				"Mawile-Mega-Fantasy": "Mawilite",

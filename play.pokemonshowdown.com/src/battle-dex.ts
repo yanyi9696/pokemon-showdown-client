@@ -1215,6 +1215,30 @@ export const Dex = new class implements ModdedDex {
 			}
 		}
 
+		// 【修改代码:拦截 大钢蛇-Mega-Z-幻想形态】
+		else if (checkId === 'steelixmegazfantasy') {
+			// 同理,检测原有 url 的闪光标识
+			const isShiny = spriteData.url && spriteData.url.includes('-shiny');
+			
+			let facingDir = isFront ? 'gen5' : 'gen5-back';
+			if (isShiny) facingDir += '-shiny';
+
+			// 【重要】严格保持大小写一致
+			const filename = 'steelix-mega-z-fantasy.png'; 
+			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			
+			spriteData.url = `${customSpritePrefix}sprites/${facingDir}/${filename}?v1`;
+			spriteData.pixelated = false; 
+
+			if (isFront) {
+				spriteData.w = 100; 
+				spriteData.h = 100; 
+			} else {
+				spriteData.w = 110; 
+				spriteData.h = 110; 
+			}
+		}
+
 		// 【修改代码:拦截 呆壳兽-伽勒尔-Mega-幻想形态】
 		else if (checkId === 'slowbrogalarmegafantasy') {
 			// 同理,检测原有 url 的闪光标识
@@ -1575,6 +1599,15 @@ export const Dex = new class implements ModdedDex {
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			// 重点修改:在 dex 后面加上 ${shiny}
 			return `background-image:url(${customSpritePrefix}sprites/dex${shiny}/steelix-mega-x-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
+		}
+		// 【新增代码:拦截 大钢蛇-Mega-Z-幻想形态】
+		else if (id === 'steelixmegazfantasy') {
+			const bgSize = "100px auto"; // 根据你画的大钢蛇图标比例进行调整
+			const offsetX = 10; // 左右微调
+			const offsetY = 5;  // 上下微调
+			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			// 重点修改:在 dex 后面加上 ${shiny}
+			return `background-image:url(${customSpritePrefix}sprites/dex${shiny}/steelix-mega-z-fantasy.png);background-size:${bgSize};background-position:${offsetX}px ${offsetY}px;background-repeat:no-repeat`;
 		}
 		// 【新增代码:拦截 呆壳兽-伽勒尔-Mega-幻想形态】
 		else if (id === 'slowbrogalarmegafantasy') {

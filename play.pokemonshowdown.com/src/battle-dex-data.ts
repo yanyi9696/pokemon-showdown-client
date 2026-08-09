@@ -611,7 +611,8 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	urshifu2fantasy: 1654, // Added fantasy mapping
 	urshifurapidstrike2fantasy: 1655, // Added fantasy mapping
 	steelixmegaxfantasy: 1656, // Added fantasy mapping
-	lurantistotemfantasy: 1657, // Added fantasy mapping
+	steelixmegazfantasy: 1657, // Added fantasy mapping
+	lurantistotemfantasy: 1658, // Added fantasy mapping
 
 	porygonzfantasy: 474, // 原版图标，不知道为何无法直接对应
 

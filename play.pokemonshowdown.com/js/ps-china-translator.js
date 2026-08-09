@@ -3118,6 +3118,7 @@ var translations = {
     "Swampertite Y": "巨沼怪-幻想进化石Y",
     "Steelixite X": "大钢蛇-幻想进化石X",
     "Steelixite Y": "大钢蛇-幻想进化石Y",
+    "Steelixite Z": "大钢蛇-幻想进化石Z",
     "Slowbrogalarnite": "呆壳兽-伽勒尔-幻想进化石",
     "Rayquazite": "烈空坐-幻想进化石",
 
