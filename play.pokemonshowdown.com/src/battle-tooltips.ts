@@ -2481,12 +2481,19 @@ export class BattleTooltips {
 
 		// ==================== 修复：宝石永久 10% 威力增幅（悬停提示） ====================
         if (pokemon.volatiles) {
-            // 获取底层的纯英文属性（例如 'Grass' 而不是汉化后的 '草'）
-            let engType = move.type || moveType; 
-            // 拼接成标准 ID，例如 'gemboostgrass'
-            let gemId = 'gemboost' + engType.toLowerCase().replace(/[^a-z0-9]/g, '');
+            // 1. 建立一个中英对照表，强制把汉化属性转回底层英文
+            const typeToEng: { [key: string]: string } = {
+                '一般': 'normal', '普通': 'normal', '格斗': 'fighting', '飞行': 'flying',
+                '毒': 'poison', '地面': 'ground', '岩石': 'rock', '虫': 'bug', '幽灵': 'ghost',
+                '钢': 'steel', '火': 'fire', '水': 'water', '草': 'grass', '电': 'electric',
+                '超能力': 'psychic', '冰': 'ice', '龙': 'dragon', '恶': 'dark', '妖精': 'fairy'
+            };
             
-            // 直接查找该 ID，不需要使用 for 循环，更加稳妥
+            // 2. 如果是中文则转换，如果是原版英文则直接转小写
+            let engType = typeToEng[moveType] || moveType.toLowerCase();
+            let gemId = 'gemboost' + engType;
+            
+            // 3. 精准匹配底层状态！
             if (pokemon.volatiles[gemId]) {
                 value.abilityModify(1.1, "宝石威力增幅");
             }
