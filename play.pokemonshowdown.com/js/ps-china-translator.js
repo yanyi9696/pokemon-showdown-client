@@ -8795,6 +8795,22 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
             return translations[tmp];
         if (originalStr.match(regex_chn))
             return originalStr;
+        // ==================== 宝石余威增幅汉化 ====================
+        if (originalStr.match(/([0-9.]+)[x×] from ([A-Za-z]+) Gem Boost/i)) {
+            var gemTypeDict = {
+                "Bug": "虫", "Dark": "恶", "Dragon": "龙", "Electric": "电", "Fairy": "妖精", 
+                "Fighting": "格斗", "Fire": "火", "Flying": "飞行", "Ghost": "幽灵", "Grass": "草", 
+                "Ground": "地面", "Ice": "冰", "Normal": "一般", "Poison": "毒", "Psychic": "超能力", 
+                "Rock": "岩石", "Steel": "钢", "Water": "水"
+            };
+            var multiplier = RegExp.$1; // 提取数值，例如 "1.1"
+            var typeEn = RegExp.$2;     // 提取英文属性，例如 "Grass"
+            var typeChn = gemTypeDict[typeEn] || typeEn; // 转换为中文，如果没有匹配到则默认保持原样
+            
+            // 使用 replace 只替换括号内的文字，这样外层的括号和其他文本都会完好保留
+            return originalStr.replace(/[0-9.]+[x×] from [A-Za-z]+ Gem Boost/i, "因" + typeChn + "之宝石余威而x" + multiplier);
+        }
+        // ==========================================================
         if (originalStr.match(regex_team)) {
             return RegExp.$1 + "的队伍：";
         }
@@ -12147,22 +12163,6 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
         }
         return originalStr.replace("(Tera type BP minimum)", "(太晶化后的最低招式威力为60)").replace("挑战Cup", "Challenge Cup").replace("Possible Illusion", "可能是幻觉").replace("(priority", "(优先度").replace("(approximate)", "(近似计算)").replace("[sent offline", "[离线发送").replace("of its health!)", "的生命值！)").replace("'s replays", "的回放").replace("(Hit 1 time)", "(受到1次伤害)").replace("(Hit 2 times)", "(受到2次伤害)").replace("(Hit 3 times)", "(受到3次伤害)").replace("(Hit 4 times)", "(受到4次伤害)").replace("(Hit 5 times)", "(受到5次伤害)").replace("(Hit 6 times)", "(受到6次伤害)").replace("(no Terrain)", "(没有场地)").replace("(Artist:", "(画家:").replace("(blocked by target's Dynamax)", "(对极巨化宝可梦无效)").replace("(fails if target's level is higher)", "(如果目标等级更高，使用失败)").replace("(+1% per level above target)", "(比目标每高1级，命中率+1%)").replace("(not Ice-type)", "(不是冰属性)");
         ;
-        // ==================== 宝石余威增幅汉化 ====================
-        if (originalStr.match(/([0-9.]+)[x×] from ([A-Za-z]+) Gem Boost/i)) {
-            var gemTypeDict = {
-                "Bug": "虫", "Dark": "恶", "Dragon": "龙", "Electric": "电", "Fairy": "妖精", 
-                "Fighting": "格斗", "Fire": "火", "Flying": "飞行", "Ghost": "幽灵", "Grass": "草", 
-                "Ground": "地面", "Ice": "冰", "Normal": "一般", "Poison": "毒", "Psychic": "超能力", 
-                "Rock": "岩石", "Steel": "钢", "Water": "水"
-            };
-            var multiplier = RegExp.$1; // 提取数值，例如 "1.1"
-            var typeEn = RegExp.$2;     // 提取英文属性，例如 "Grass"
-            var typeChn = gemTypeDict[typeEn] || typeEn; // 转换为中文，如果没有匹配到则默认保持原样
-            
-            // 使用 replace 只替换括号内的文字，这样外层的括号和其他文本都会完好保留
-            return originalStr.replace(/[0-9.]+[x×] from [A-Za-z]+ Gem Boost/i, "因" + typeChn + "之宝石余威而x" + multiplier);
-        }
-        // ==========================================================
     }
 
     // ==========================================================
