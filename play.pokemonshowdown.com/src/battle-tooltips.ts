@@ -2479,10 +2479,15 @@ export class BattleTooltips {
         
         // ============================================================================
 
-		// ==================== 修复：宝石永久 10% 威力增幅 ====================
-        let gemConditionID = 'gemboost' + moveType.toLowerCase();
-        if (pokemon.volatiles[gemConditionID]) {
-            value.abilityModify(1.1, "Gem Boost"); 
+		// ==================== 修复：宝石永久 10% 威力增幅（悬停提示） ====================
+        if (pokemon.volatiles) {
+            for (let v in pokemon.volatiles) {
+                // 忽略大小写进行暴力匹配，只要是以 gemboost 开头且后缀是当前属性就能触发
+                if (v.toLowerCase() === ('gemboost' + moveType).toLowerCase()) {
+                    value.abilityModify(1.1, "宝石威力增幅");
+                    break;
+                }
+            }
         }
         // ============================================================================
 
