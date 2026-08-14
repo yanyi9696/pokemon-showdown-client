@@ -2481,16 +2481,17 @@ export class BattleTooltips {
 
 		// ==================== 修复：宝石永久 10% 威力增幅（悬停提示） ====================
         if (pokemon.volatiles) {
-            for (let v in pokemon.volatiles) {
-                // 忽略大小写进行暴力匹配，只要是以 gemboost 开头且后缀是当前属性就能触发
-                if (v.toLowerCase() === ('gemboost' + moveType).toLowerCase()) {
-                    value.abilityModify(1.1, "宝石威力增幅");
-                    break;
-                }
+            // 获取底层的纯英文属性（例如 'Grass' 而不是汉化后的 '草'）
+            let engType = move.type || moveType; 
+            // 拼接成标准 ID，例如 'gemboostgrass'
+            let gemId = 'gemboost' + engType.toLowerCase().replace(/[^a-z0-9]/g, '');
+            
+            // 直接查找该 ID，不需要使用 for 循环，更加稳妥
+            if (pokemon.volatiles[gemId]) {
+                value.abilityModify(1.1, "宝石威力增幅");
             }
         }
         // ============================================================================
-
 
 		if (move.category !== 'Status') {
 			let auraBoosted = '';
