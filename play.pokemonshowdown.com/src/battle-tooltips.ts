@@ -2479,6 +2479,13 @@ export class BattleTooltips {
         
         // ============================================================================
 
+		// ==================== 修复：宝石永久 10% 威力增幅 ====================
+        let gemConditionID = 'gemboost' + moveType.toLowerCase();
+        if (pokemon.volatiles[gemConditionID]) {
+            value.abilityModify(1.1, "Gem Boost"); 
+        }
+        // ============================================================================
+
 
 		if (move.category !== 'Status') {
 			let auraBoosted = '';

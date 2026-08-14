@@ -1562,13 +1562,19 @@ for (const mod of modNames)
 
 		// 您的自定义MOD道具
 		if ([
-			'fantasyitem', 'fantasypowerlens', 'fantasyringtarget', 'fantasylifeorb',
-			'fantasysachet', 'fantasyscopelens', 'fantasysyrupyapple', 'fantasyprotector',
-			'fantasyicestone','fantasylaxincense'
-		].includes(id)) {
-			modSpecificItems.push(id);
-			continue;
-		}
+            // 自定义MOD道具
+            'fantasyitem', 'fantasypowerlens', 'fantasyringtarget', 'fantasylifeorb',
+            'fantasysachet', 'fantasyscopelens', 'fantasysyrupyapple', 'fantasyprotector',
+            'fantasyicestone','fantasylaxincense',
+            
+            // 18种属性宝石道具
+            'buggem', 'darkgem', 'dragongem', 'electricgem', 'fairygem', 'fightinggem',
+            'firegem', 'flyinggem', 'ghostgem', 'grassgem', 'groundgem', 'icegem',
+            'normalgem', 'poisongem', 'psychicgem', 'rockgem', 'steelgem', 'watergem'
+        ].includes(id)) {
+            modSpecificItems.push(id);
+            continue;
+        }
 
 		// 对标准道具进行分类
 		switch (id) {
