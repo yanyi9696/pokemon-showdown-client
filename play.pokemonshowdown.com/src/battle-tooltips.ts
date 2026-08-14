@@ -2478,27 +2478,17 @@ export class BattleTooltips {
         }
         
         // ============================================================================
-
-		// ==================== 修复：宝石永久 10% 威力增幅（悬停提示） ====================
-        if (pokemon.volatiles) {
-            // 建立完整的属性对照字典，防止任何汉化导致的错位
-            const tMap: {[key: string]: string} = {
-                '草':'grass', '火':'fire', '水':'water', '电':'electric', '冰':'ice', 
-                '虫':'bug', '恶':'dark', '龙':'dragon', '钢':'steel', '岩石':'rock', 
-                '地面':'ground', '毒':'poison', '幽灵':'ghost', '格斗':'fighting', 
-                '飞行':'flying', '超能力':'psychic', '妖精':'fairy', '一般':'normal', '普通':'normal'
-            };
-            
-            // 提取出当前招式最原始的小写英文
-            let engType = tMap[moveType] || (move.type ? move.type.toLowerCase() : moveType.toLowerCase());
-            
-            // 暴力遍历宝可梦身上的所有状态
-            for (let v of Object.keys(pokemon.volatiles)) {
-                // 只要状态 ID 里同时包含 'gemboost' 和 'grass' (或者其他属性)，就强行触发！
-                if (v.includes('gemboost') && v.includes(engType)) {
-                    value.abilityModify(1.1, "宝石威力增幅");
-                    break;
-                }
+		
+		// ==================== 新增：宝石失去后永久增幅 10% ====================
+        // 服务端触发的 gemboost[Type] 在客户端会被记录为小写的 volatile ID
+        let gemBoostVolatile = 'gemboost' + moveType.toLowerCase();
+        
+        if (pokemon.volatiles[gemBoostVolatile]) {
+            let correspondingGem = moveType.toLowerCase() + 'gem';
+            // 核心拦截：根据你的服务端逻辑，如果当前还携带着该宝石，这回合会触发 30% 爆发
+            // 服务端用 `if (user.volatiles['gem']) return;` 拦截了这 10%，所以面板这里也不叠加
+            if (pokemon.item !== correspondingGem) {
+                value.modify(1.1, moveType + " Gem Boost"); // 在面板上显示如 "Bug Gem Boost: 1.1x"
             }
         }
         // ============================================================================
