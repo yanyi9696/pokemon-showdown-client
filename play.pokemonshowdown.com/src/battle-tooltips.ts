@@ -2478,17 +2478,28 @@ export class BattleTooltips {
         }
         
         // ============================================================================
-		
+
 		// ==================== 新增：宝石失去后永久增幅 10% ====================
-        // 服务端触发的 gemboost[Type] 在客户端会被记录为小写的 volatile ID
         let gemBoostVolatile = 'gemboost' + moveType.toLowerCase();
         
         if (pokemon.volatiles[gemBoostVolatile]) {
             let correspondingGem = moveType.toLowerCase() + 'gem';
-            // 核心拦截：根据你的服务端逻辑，如果当前还携带着该宝石，这回合会触发 30% 爆发
-            // 服务端用 `if (user.volatiles['gem']) return;` 拦截了这 10%，所以面板这里也不叠加
+            
             if (pokemon.item !== correspondingGem) {
-                value.modify(1.1, moveType + " Gem Boost"); // 在面板上显示如 "Bug Gem Boost: 1.1x"
+                // 1. 建立十八系属性中英文对照表
+                const typeZhMap: { [key: string]: string } = {
+                    'Bug': '虫', 'Dark': '恶', 'Dragon': '龙', 'Electric': '电',
+                    'Fairy': '妖精', 'Fighting': '格斗', 'Fire': '火', 'Flying': '飞行',
+                    'Ghost': '幽灵', 'Grass': '草', 'Ground': '地面', 'Ice': '冰',
+                    'Normal': '一般', 'Poison': '毒', 'Psychic': '超能力', 'Rock': '岩石',
+                    'Steel': '钢', 'Water': '水'
+                };
+                
+                // 2. 匹配当前招式属性的中文，如果没有匹配到则默认用原英文
+                let typeZh = typeZhMap[moveType] || moveType;
+                
+                // 3. 传入汉化后的文本
+                value.modify(1.1, typeZh + "之宝石余威"); 
             }
         }
         // ============================================================================
