@@ -2481,21 +2481,24 @@ export class BattleTooltips {
 
 		// ==================== 修复：宝石永久 10% 威力增幅（悬停提示） ====================
         if (pokemon.volatiles) {
-            // 1. 建立一个中英对照表，强制把汉化属性转回底层英文
-            const typeToEng: { [key: string]: string } = {
-                '一般': 'normal', '普通': 'normal', '格斗': 'fighting', '飞行': 'flying',
-                '毒': 'poison', '地面': 'ground', '岩石': 'rock', '虫': 'bug', '幽灵': 'ghost',
-                '钢': 'steel', '火': 'fire', '水': 'water', '草': 'grass', '电': 'electric',
-                '超能力': 'psychic', '冰': 'ice', '龙': 'dragon', '恶': 'dark', '妖精': 'fairy'
+            // 建立完整的属性对照字典，防止任何汉化导致的错位
+            const tMap: {[key: string]: string} = {
+                '草':'grass', '火':'fire', '水':'water', '电':'electric', '冰':'ice', 
+                '虫':'bug', '恶':'dark', '龙':'dragon', '钢':'steel', '岩石':'rock', 
+                '地面':'ground', '毒':'poison', '幽灵':'ghost', '格斗':'fighting', 
+                '飞行':'flying', '超能力':'psychic', '妖精':'fairy', '一般':'normal', '普通':'normal'
             };
             
-            // 2. 如果是中文则转换，如果是原版英文则直接转小写
-            let engType = typeToEng[moveType] || moveType.toLowerCase();
-            let gemId = 'gemboost' + engType;
+            // 提取出当前招式最原始的小写英文
+            let engType = tMap[moveType] || (move.type ? move.type.toLowerCase() : moveType.toLowerCase());
             
-            // 3. 精准匹配底层状态！
-            if (pokemon.volatiles[gemId]) {
-                value.abilityModify(1.1, "宝石威力增幅");
+            // 暴力遍历宝可梦身上的所有状态
+            for (let v of Object.keys(pokemon.volatiles)) {
+                // 只要状态 ID 里同时包含 'gemboost' 和 'grass' (或者其他属性)，就强行触发！
+                if (v.includes('gemboost') && v.includes(engType)) {
+                    value.abilityModify(1.1, "宝石威力增幅");
+                    break;
+                }
             }
         }
         // ============================================================================
