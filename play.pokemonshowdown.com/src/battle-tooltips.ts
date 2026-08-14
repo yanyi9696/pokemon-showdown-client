@@ -2486,20 +2486,8 @@ export class BattleTooltips {
             let correspondingGem = moveType.toLowerCase() + 'gem';
             
             if (pokemon.item !== correspondingGem) {
-                // 1. 建立十八系属性中英文对照表
-                const typeZhMap: { [key: string]: string } = {
-                    'Bug': '虫', 'Dark': '恶', 'Dragon': '龙', 'Electric': '电',
-                    'Fairy': '妖精', 'Fighting': '格斗', 'Fire': '火', 'Flying': '飞行',
-                    'Ghost': '幽灵', 'Grass': '草', 'Ground': '地面', 'Ice': '冰',
-                    'Normal': '一般', 'Poison': '毒', 'Psychic': '超能力', 'Rock': '岩石',
-                    'Steel': '钢', 'Water': '水'
-                };
-                
-                // 2. 匹配当前招式属性的中文，如果没有匹配到则默认用原英文
-                let typeZh = typeZhMap[moveType] || moveType;
-                
-                // 3. 传入汉化后的文本
-                value.modify(1.1, typeZh + "之宝石余威"); 
+                // 保持原汁原味的英文，把翻译工作交给外层的汉化插件处理
+                value.modify(1.1, moveType + " Gem Boost"); 
             }
         }
         // ============================================================================
