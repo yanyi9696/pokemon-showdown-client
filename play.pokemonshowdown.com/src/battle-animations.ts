@@ -1981,6 +1981,7 @@ export class PokemonSprite extends Sprite {
 		gemboostrock: ['岩石宝石: 1.1', 'good'],
 		gembooststeel: ['钢之宝石: 1.1', 'good'],
 		gemboostwater: ['水之宝石: 1.1', 'good'],
+		gemboostdefense: ['幻之防御宝石: 1.1', 'good'],
 	};
 	forme = '';
 	cryurl: string | undefined = undefined;

@@ -1565,7 +1565,7 @@ for (const mod of modNames)
             // 自定义MOD道具
             'fantasyitem', 'fantasypowerlens', 'fantasyringtarget', 'fantasylifeorb',
             'fantasysachet', 'fantasyscopelens', 'fantasysyrupyapple', 'fantasyprotector',
-            'fantasyicestone','fantasylaxincense',
+            'fantasyicestone','fantasylaxincense','fantasydefensegem',
             
             // 18种属性宝石道具
             'buggem', 'darkgem', 'dragongem', 'electricgem', 'fairygem', 'fightinggem',

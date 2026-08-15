@@ -1361,7 +1361,12 @@ export class BattleTooltips {
 			stats.atk = Math.floor(stats.atk * 0.8);
 			stats.spa = Math.floor(stats.spa * 0.8);
 		}
-		// ==================== 新增：自制道具的面板显示 (END) ======================
+		// ==================== 新增：幻防宝石消耗后的双防面板提升 ====================
+        if (pokemon && (pokemon as any).volatiles && (pokemon as any).volatiles['gemboostdefense']) {
+            stats.def = Math.floor(stats.def * 1.1);
+            stats.spd = Math.floor(stats.spd * 1.1);
+        }
+		// ==================== 新增：自制道具的面板显示 (END) ========================
 
 		// SSB
 		if (this.battle.tier.includes('Super Staff Bros')) {
