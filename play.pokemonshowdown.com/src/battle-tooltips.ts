@@ -1829,14 +1829,26 @@ export class BattleTooltips {
                 moveType = activeTypes[0] as any;
             }
         }
-		// 【新增：猴把戏的专属 UI 同步逻辑】
+		// 【修改后：猴把戏的专属 UI 同步逻辑】
         if (move.id === 'houbaxi') {
-            // 读取我们在 battle.ts 的 case '-houbaxi' 中实时更新的 pokemon.types
-            const activeTypes = pokemon ? (pokemon as any).types : null;
+            // 获取当前的形态名称，使用 (as any) 绕过客户端严格的 TS 类型检查
+            const speciesName = pokemon 
+                ? (pokemon.speciesForme || (pokemon as any).species) 
+                : (serverPokemon ? ((serverPokemon as any).speciesForme || (serverPokemon as any).species) : '');
             
-            // 如果属性存在，则强制将面板上的猴把戏属性渲染为当前宝可梦的属性（火/水/草）
-            if (activeTypes && activeTypes[0]) {
-                moveType = activeTypes[0] as any;
+            // 根据当前形态直接强行渲染招式属性
+            if (speciesName === 'Simisage-Fantasy') {
+                moveType = 'Grass' as any;
+            } else if (speciesName === 'Simisear-Fantasy') {
+                moveType = 'Fire' as any;
+            } else if (speciesName === 'Simipour-Fantasy') {
+                moveType = 'Water' as any;
+            } else {
+                // 兜底逻辑：如果因为某些原因不是这三种形态，则读取其当前的第一属性
+                const activeTypes = pokemon ? (pokemon as any).types : null;
+                if (activeTypes && activeTypes[0] && activeTypes[0] !== '???') {
+                    moveType = activeTypes[0] as any;
+                }
             }
         }
 
