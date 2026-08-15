@@ -1743,6 +1743,37 @@ export class Battle {
             
             break;
         }
+		// @ts-ignore : 强制忽略 TypeScript 对于 custom case 的报错
+		case '-houbaxi': {
+			const poke = this.getPokemon(args[1] as any);
+			if (!poke) break;
+			
+			const formeName = args[2] as string; // 例如: Simisear-Fantasy
+			const newType = args[3] as string;   // 例如: Fire
+			const typeName = this.dex.types.get(newType).name; 
+			
+			// 【核心模型替换】直接修改底层形态名称，强制引擎去拉取对应的三猴模型
+			poke.speciesForme = formeName;
+			
+			// 【修改面板属性】修改血条面板显示的属性
+			(poke as any).types = [typeName];
+			
+			// 【底层状态更新】确保系统彻底识别新模型
+			poke.removeVolatile('transform' as any);
+			poke.addVolatile('formechange' as any, formeName as any);
+			
+			// 【触发究极爆发动画】传递 true 触发炫酷白光
+			(this.scene as any).animTransform(poke, true);
+			
+			// 【更新状态栏】刷新血条面板显示
+			this.scene.updateStatbar(poke);
+			
+			// 【华丽播报】
+			this.scene.message(`${poke.name} 施展把戏，转变为了 ${typeName} 属性！`);
+			this.log(['html', `<div class="message"><strong>${poke.name}</strong> 顺应战局，属性变成了 <span class="col type-${typeName.toLowerCase()}">${typeName}</span>！</div>`] as any);
+			
+			break;
+		}
 		case '-damage': {
 			let poke = this.getPokemon(args[1])!;
 			let damage = poke.healthParse(args[2], true);
