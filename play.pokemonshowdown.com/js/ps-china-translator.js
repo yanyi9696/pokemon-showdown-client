@@ -3122,6 +3122,7 @@ var translations = {
     "Steelixite Z": "大钢蛇-幻想进化石Z",
     "Slowbrogalarnite": "呆壳兽-伽勒尔-幻想进化石",
     "Rayquazite": "烈空坐-幻想进化石",
+    "Fantasy Defense Gem": "幻之防御宝石",
 
 
     //ZA新进化石
