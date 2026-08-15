@@ -1829,6 +1829,16 @@ export class BattleTooltips {
                 moveType = activeTypes[0] as any;
             }
         }
+		// 【新增：猴把戏的专属 UI 同步逻辑】
+        if (move.id === 'houbaxi') {
+            // 读取我们在 battle.ts 的 case '-houbaxi' 中实时更新的 pokemon.types
+            const activeTypes = pokemon ? (pokemon as any).types : null;
+            
+            // 如果属性存在，则强制将面板上的猴把戏属性渲染为当前宝可梦的属性（火/水/草）
+            if (activeTypes && activeTypes[0]) {
+                moveType = activeTypes[0] as any;
+            }
+        }
 
 		if (move.id === 'photongeyser' || move.id === 'lightthatburnsthesky' || move.id === 'psystrike' ||
 			(move.id === 'terablast' && pokemon.terastallized) ||

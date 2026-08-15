@@ -2307,6 +2307,7 @@ var translations = {
     "Ke Ji Meng Chong": "科技猛冲",
     "Ji Sheng": "寄生",
     "Qing Su Mi Hun": "情愫迷魂",
+    "Hou Ba Xi": "猴把戏",
 
     //  觉醒力量
 
