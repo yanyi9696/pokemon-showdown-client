@@ -1479,23 +1479,23 @@ export class BattleTooltips {
 		stats.spe = stats.spe % 1 > 0.5 ? Math.ceil(stats.spe) : Math.floor(stats.spe);
 
 		if (pokemon.status === 'par' && ability !== 'quickfeet') {
-			// ==================== 修改点 (START) ====================
-			// 在施加麻痹的速度惩罚前，检查是否携带“幻之生命宝珠”
-			if (item !== 'fantasylifeorb') {
-				// ==================== 修改点 (END) ======================
-				if (this.battle.gen > 6) {
-					stats.spe = Math.floor(stats.spe * 0.5);
-				} else {
-					stats.spe = Math.floor(stats.spe * 0.25);
-				}
-				// ==================== 修改点 (START) ====================
-				// 为我们上面添加的 if 语句闭合括号
-			}
-			// ==================== 修改点 (END) ======================
-		}
+            // ==================== 修改点 (START) ====================
+            // 在施加麻痹的速度惩罚前，检查是否携带“幻之生命宝珠” 或 拥有“电疗(dianliao)”特性
+            if (item !== 'fantasylifeorb' && ability !== 'dianliao') {
+                // ==================== 修改点 (END) ======================
+                if (this.battle.gen > 6) {
+                    stats.spe = Math.floor(stats.spe * 0.5);
+                } else {
+                    stats.spe = Math.floor(stats.spe * 0.25);
+                }
+                // ==================== 修改点 (START) ====================
+                // 为我们上面添加的 if 语句闭合括号
+            }
+            // ==================== 修改点 (END) ======================
+        }
 
-		return stats;
-	}
+        return stats;
+    }
 
 	renderStats(clientPokemon: Pokemon | null, serverPokemon?: ServerPokemon | null, short?: boolean) {
 		const isTransformed = clientPokemon?.volatiles.transform;

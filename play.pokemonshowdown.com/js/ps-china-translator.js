@@ -1342,6 +1342,7 @@ var translations = {
     "Gu Hun": "骨魂",
     "Chuan Shuo Zhi Li": "传说之力",
     "Zhi Liao": "炙疗",
+    "Dian Liao": "电疗",
     "Chao Ji Yu Shui": "超级雨水",
     "Bing Neng Li Zhe": "冰能力者",
     "Huo Neng Li Zhe": "火能力者",
