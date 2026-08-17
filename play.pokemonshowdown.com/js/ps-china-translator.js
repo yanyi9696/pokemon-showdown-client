@@ -2723,6 +2723,7 @@ var translations = {
     "Beast Ball": "究极球",
     "Beedrillite": "大针蜂进化石",
     "Belue Berry": "靛莓果",
+    "Berry": "橙橙果",
     "Berry Juice": "树果汁",
     "Berry Sweet": "野莓糖饰",
     "Big Root": "大根茎",
