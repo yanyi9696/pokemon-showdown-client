@@ -470,7 +470,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	pidgeotmega: 1320 + 5, pidgeotmegafantasy: 1320 + 5,// Added fantasy mapping
 	alakazammega: 1320 + 6,
 	slowbromega: 1320 + 7, slowbromegafantasy: 1320 + 7,// Added fantasy mapping
-	gengarmega: 1320 + 8,
+	gengarmega: 1320 + 8, gengarmegafantasy: 1320 + 8,// Added fantasy mapping
 	kangaskhanmega: 1320 + 9,
 	pinsirmega: 1320 + 10,
 	gyaradosmega: 1320 + 11, gyaradosmegafantasy: 1320 + 11,// Added fantasy mapping

@@ -4904,6 +4904,7 @@
 				"Aggron-Mega-Fantasy": "Aggronite",
 				"Audino-Mega-Fantasy": "Audinite",
 				"Garchomp-Mega-Fantasy": "Garchompite",
+				"Gengar-Mega-Fantasy": "Gengarite",
 				"Glalie-Mega-Fantasy": "Glalitite",
 				"Gyarados-Mega-Fantasy": "Gyaradosite",
 				"Lopunny-Mega-Fantasy": "Lopunnite",

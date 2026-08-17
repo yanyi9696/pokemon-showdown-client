@@ -1346,6 +1346,7 @@ var translations = {
     "Bing Neng Li Zhe": "冰能力者",
     "Huo Neng Li Zhe": "火能力者",
     "Shuang Chong Da Zui": "双重大嘴",
+    "Gui Ying": "鬼影",
 
     //  招式
 
