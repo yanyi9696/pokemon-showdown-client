@@ -936,11 +936,12 @@ export const Dex = new class implements ModdedDex {
 		// --- Determine the sprite ID to use for the filename ---
 		let baseSpriteId = species.spriteid || species.id; // Start with current species' sprite ID or ID
 
-		// Special handling for Urshifu-Rapid-Strike-G-Mega-Fantasy to use Gmax sprites
-		if (species.id === 'urshifurapidstrikegmegafantasy') {
-			const target = Dex.species.get('urshifurapidstrikegmax');
+		// 通用拦截：强制所有后缀为 G-Mega-Fantasy 的宝可梦优先使用 Gmax 贴图
+		if (species.id.endsWith('gmegafantasy')) {
+			const gmaxId = species.id.replace('gmegafantasy', 'gmax') as ID;
+			const target = Dex.species.get(gmaxId);
 			if (target.exists) {
-				baseSpriteId = target.spriteid || target.id;
+				baseSpriteId = (target.spriteid || target.id) as ID; // 这里加上 as ID
 			}
 		}
 
@@ -1416,8 +1417,15 @@ export const Dex = new class implements ModdedDex {
 		// ID for base sprite/data lookup (strip fantasy)
 		let lookupId = finalId;
 
-		if (finalId === 'urshifurapidstrikegmegafantasy') {
-			lookupId = 'urshifurapidstrikegmax' as ID;
+		// 通用拦截：强制小图标也映射到 Gmax
+		if (finalId.endsWith('gmegafantasy')) {
+			const gmaxId = finalId.replace('gmegafantasy', 'gmax') as ID;
+			const target = Dex.species.get(gmaxId);
+			if (target.exists) {
+				lookupId = (target.spriteid || target.id) as ID; // 这里加上 as ID
+			} else {
+				lookupId = gmaxId;
+			}
 		}
 
 		if (lookupId.endsWith('fantasy')) {
@@ -1471,10 +1479,12 @@ export const Dex = new class implements ModdedDex {
 		// Ensure spriteid is defined and remove '-fantasy' suffix for filename
 		if (!spriteid) spriteid = id;
 
-		if (id === 'urshifurapidstrikegmegafantasy') {
-			const target = Dex.species.get('urshifurapidstrikegmax');
+		// 通用拦截：队伍编辑器立绘强制使用 Gmax
+		if (id.endsWith('gmegafantasy')) {
+			const gmaxId = id.replace('gmegafantasy', 'gmax') as ID;
+			const target = Dex.species.get(gmaxId);
 			if (target.exists) {
-				spriteid = target.spriteid || target.id;
+				spriteid = (target.spriteid || target.id) as ID; // 这里加上 as ID
 			}
 		}
 
