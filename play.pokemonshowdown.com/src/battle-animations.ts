@@ -1924,6 +1924,7 @@ export class PokemonSprite extends Sprite {
 		longzhige: ['龙之歌', 'bad'],
 		woju: ['蜗居', 'good'],
 		emengchanrao: ['噩梦缠绕', 'bad'],
+		linghunshayuan: ['灵魂沙渊', 'bad'],
 		xianxingzhiling: ['先行指令', 'good'],
 		yuannengshifang: ['源能释放', 'neutral'],
 		tundu: ['吞毒', 'good'],

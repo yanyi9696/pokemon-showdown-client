@@ -1502,6 +1502,13 @@ export const Dex = new class implements ModdedDex {
 
 		if (spriteid.endsWith('gmax') || spriteid.endsWith('gigantamax')) {
 			spriteData.spriteDir = 'sprites/gen5';
+			
+			// 修改这里：为超极巨化以及 G-Mega 贴图专门设置坐标偏移
+			// 正数向右，负数向左
+			spriteData.x = 10; 
+			// 正数向下，负数向上
+			spriteData.y = 15; 
+			
 			return spriteData;
 		}
 

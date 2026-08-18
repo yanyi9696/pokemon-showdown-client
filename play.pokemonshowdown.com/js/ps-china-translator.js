@@ -10010,6 +10010,12 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
         if (originalStr.match(regex_swirling_magma)) {
             return   trans_from_dict(RegExp.$1) + "被困在了熔岩风暴之中！";
         }
+        if (originalStr.match(regex_tolinghunshayuan)) {
+            return "对手的" + trans_from_dict(RegExp.$1) + "被困在了灵魂沙渊之中！";
+        }
+        if (originalStr.match(regex_linghunshayuan)) {
+            return trans_from_dict(RegExp.$1) + "被困在了灵魂沙渊之中！";
+        }
         if (originalStr.match(regex_toquicksand)) {
             return   "对手的" + trans_from_dict(RegExp.$1) + "陷入了流沙地狱！";
         }
