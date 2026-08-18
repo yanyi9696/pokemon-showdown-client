@@ -4894,6 +4894,7 @@
 				"Orbeetle-G-Mega-Fantasy": "G-Mega Wishing Star",
 				"Drednaw-G-Mega-Fantasy": "G-Mega Wishing Star",
 				"Melmetal-G-Mega-Fantasy": "G-Mega Wishing Star",
+				"Gengar-G-Mega-Fantasy": "G-Mega Wishing Star",
 				// megafantasy
 				"Altaria-Mega-Fantasy": "Altarianite",
 				"Ampharos-Mega-Fantasy": "Ampharosite",

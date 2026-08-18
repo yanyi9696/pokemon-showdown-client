@@ -517,7 +517,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	pikachugmax: 1320 + 52,
 	meowthgmax: 1320 + 53,
 	machampgmax: 1320 + 54,
-	gengargmax: 1320 + 55,
+	gengargmax: 1320 + 55, gengargmegafantasy: 1320 + 55, // Added fantasy mapping
 	kinglergmax: 1320 + 56,
 	laprasgmax: 1320 + 57,
 	eeveegmax: 1320 + 58,
