@@ -1348,6 +1348,8 @@ var translations = {
     "Huo Neng Li Zhe": "火能力者",
     "Shuang Chong Da Zui": "双重大嘴",
     "Gui Ying": "鬼影",
+    "Zhen She": "震慑",
+    "Kuang Sha Zhi Li": "狂沙之力",
 
     //  招式
 
@@ -4254,6 +4256,7 @@ var translations = {
     "Frigibax": "凉脊龙",
     "Arctibax": "冻脊龙",
     "Baxcalibur": "戟脊龙",
+    "Tatsugiri-Curly": "米立龙-上弓姿势",
     "Tatsugiri-Droopy": "米立龙-下垂姿势",
     "Tatsugiri-Stretchy": "米立龙-平挺姿势",
     "Tatsugiri": "米立龙",

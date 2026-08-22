@@ -482,7 +482,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	scizormega: 1320 + 17,
 	heracrossmega: 1320 + 18,
 	houndoommega: 1320 + 19,
-	tyranitarmega: 1320 + 20,
+	tyranitarmega: 1320 + 20, tyranitarmegafantasy: 1320 + 20,// Added fantasy mapping
 	sceptilemega: 1320 + 21, sceptilemegafantasy: 1320 + 21,// Added fantasy mapping
 	blazikenmega: 1320 + 22,
 	swampertmega: 1320 + 23, swampertmegayfantasy: 1320 + 23,// Added fantasy mapping
