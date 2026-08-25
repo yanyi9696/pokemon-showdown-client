@@ -5146,7 +5146,7 @@ var translations = {
     "If the terrain is Grassy Terrain, raises holder's Defense by 1 stage. Single use.": "当场地为青草场地时防御提升1级。使用后消失",
     "A high-performance Ball that provides a higher catch rate than a Poke Ball.": "比起精灵球来更容易捉到宝可梦的，性能还算不错的球",
     "Holder's partial-trapping moves always last 7 turns.": "绑紧招式所造成的束缚状态持续时间固定为7回合",
-    "If held by a Giratina, its Ghost- and Dragon-type attacks have 1.2x power.": "骑拉帝纳携带后形态转换为起源形态，并且龙属性和幽灵属性的招式威力提升20%",
+    "If held by a Giratina, its Ghost- and Dragon-type attacks have 1.2x power.": "骑拉帝纳携带后龙属性和幽灵属性的招式威力提升20%",
     "A remedial Poke Ball that restores the caught Pokemon's HP and status problem.": "能回复捉到的宝可梦的HP并治愈异常状态",
     "Holder's use of Sunny Day lasts 8 turns instead of 5.": "引起的大晴天天气从5回合延长至8回合",
     "A Poke Ball for catching very heavy Pokemon.": "能很容易地捕捉身体沉重的宝可梦",
