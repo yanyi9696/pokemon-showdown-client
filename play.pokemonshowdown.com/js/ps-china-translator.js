@@ -3170,6 +3170,8 @@ var translations = {
     "Raichunite Y": "雷丘进化石Y",
     "Scovillainite": "狠辣椒进化石",
     "Staraptite": "姆克鹰进化石",
+    "Tatsugirinite": "米立龙进化石",
+    "Baxcalibrite": "戟脊龙进化石",
     "Zeraorite": "捷拉奥拉进化石",
     "Zygardite": "基格尔德进化石",
     "Absolite Z": "阿勃梭鲁进化石Z",
@@ -5281,6 +5283,7 @@ var translations = {
     "Ogerpon-Hearthflame: 1.2x power attacks; Terastallize to gain Embody Aspect.": "厄诡椪-火灶携带后招式威力提升20%；太晶化后特性变为面影辉映",
     "Ogerpon-Wellspring: 1.2x power attacks; Terastallize to gain Embody Aspect.": "厄诡椪-水井携带后招式威力提升20%；太晶化后特性变为面影辉映",
     "Holder's Ability cannot be changed, suppressed, or ignored by any effect.":"持有者的特性不能被任何效果改变、抑制或忽视",
+    "Holder cannot be prevented from choosing to switch out by any effect.":"持有者不能被任何效果阻止选择交换",
 
 
 
