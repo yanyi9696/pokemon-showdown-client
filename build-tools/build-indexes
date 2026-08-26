@@ -1566,6 +1566,7 @@ for (const mod of modNames)
             'fantasyitem', 'fantasypowerlens', 'fantasyringtarget', 'fantasylifeorb',
             'fantasysachet', 'fantasyscopelens', 'fantasysyrupyapple', 'fantasyprotector',
             'fantasyicestone','fantasylaxincense','fantasydefensegem', 'lightball',
+			'fantasymachobrace',
             
             // 18种属性宝石道具
             'buggem', 'darkgem', 'dragongem', 'electricgem', 'fairygem', 'fightinggem',
