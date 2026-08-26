@@ -3129,6 +3129,7 @@ var translations = {
     "Slowbrogalarnite": "呆壳兽-伽勒尔-幻想进化石",
     "Rayquazite": "烈空坐-幻想进化石",
     "Fantasy Defense Gem": "幻之防御宝石",
+    "Fantasy Macho Brace": "幻之强制锻炼器",
 
 
     //ZA新进化石

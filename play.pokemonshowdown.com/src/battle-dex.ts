@@ -1657,7 +1657,7 @@ export const Dex = new class implements ModdedDex {
 		// 精准修复：如果是官方的 home 立绘，直接强行去官方云端服务器拉取
         if (data.spriteDir === 'sprites/home') {
             const bgSize = "background-size: 95px 95px; ";
-            let finalY = "20%"; 
+            let finalY = "30%"; 
             
             // 2. 提取出干净的宝可梦 ID（去掉 -fantasy 后缀）
             let baseId = data.spriteid;
