@@ -2826,7 +2826,18 @@ export class BattleTooltips {
 			}
 		}
 		// ==================== 新增：幻之焦点镜的面板显示 (END) ======================
-
+		
+		// ==================== 新增：幻之强制锻炼器的面板显示 (START) ====================
+        if (value && value.tryItem('Fantasy Macho Brace')) {
+            // 检查招式是否为蓄力招式 (即图鉴数据中自带 charge 标签)
+            if (move.flags && move.flags.charge) {
+                // 将面板显示的威力乘以 1.2 倍
+                value.itemModify(1.2, 'Fantasy Macho Brace'); 
+                return value;
+            }
+        }
+        // ==================== 新增：幻之强制锻炼器的面板显示 (END) ======================
+		
 		// Type-enhancing items
 		if (BattleTooltips.itemTypes[item.name] === moveType) {
 			value.itemModify(this.battle.gen < 4 ? 1.1 : 1.2);
