@@ -566,7 +566,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	greninjamega: 1320 + 100, greninjamegafantasy: 1320 + 100, // Added fantasy mapping
 	pyroarmega: 1320 + 101,
 	floettemega: 1320 + 102, floettemegafantasy: 1320 + 102, // Added fantasy mapping
-	malamarmega: 1320 + 103,
+	malamarmega: 1320 + 103, malamarmegafantasy: 1320 + 103, // Added fantasy mapping
 	barbaraclemega: 1320 + 104,
 	dragalgemega: 1320 + 105, dragalgemegafantasy: 1320 + 105, // Added fantasy mapping
 	hawluchamega: 1320 + 106, hawluchamegafantasy: 1320 + 106, // Added fantasy mapping

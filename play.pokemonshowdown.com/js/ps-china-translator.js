@@ -1350,6 +1350,7 @@ var translations = {
     "Gui Ying": "鬼影",
     "Zhen She": "震慑",
     "Kuang Sha Zhi Li": "狂沙之力",
+    "Jing Shen Cao Zong Zhe": "精神操纵者",
 
     //  招式
 
@@ -4744,6 +4745,7 @@ var translations = {
 
     "-Rapid-Strike-Gmax": "-连击流-超极巨化",
     "-Low-Key-Gmax": "-低调形态-超极巨化",
+    "-Curly": "-上弓姿势",
     "-Droopy": "-下垂姿势",
     "-Stretchy": "-平挺姿势",
     "-Blue": "-氰蓝",
