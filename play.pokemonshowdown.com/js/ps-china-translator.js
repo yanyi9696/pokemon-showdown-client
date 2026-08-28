@@ -1351,6 +1351,7 @@ var translations = {
     "Zhen She": "震慑",
     "Kuang Sha Zhi Li": "狂沙之力",
     "Jing Shen Cao Zong Zhe": "精神操纵者",
+    "Zheng Qiang": "争强",
 
     //  招式
 
