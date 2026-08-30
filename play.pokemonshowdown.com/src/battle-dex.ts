@@ -2548,30 +2548,44 @@ const ModModifier: {
 			};
 
 			// 2. 确定当前编辑器环境的过滤阈值 (实现你要求的按分级过滤)
-			let currentMaxWeight = 100; // 默认 AG 环境显示全部
-			const modidStr = dex.modid.join('');
-			if (modidStr.includes('champions')) {
-			currentMaxWeight = 100; // 冠军组:显示包括 AG 的所有宝可梦
-			} else if (modidStr.includes('freeforall')) {
-			currentMaxWeight = 90;  // FFA:显示到 Uber 为止
-			} else if (modidStr.includes('ubersuu')) { // 必须放在 uber 之前判断
-			currentMaxWeight = 80;
-			} else if (modidStr.includes('uber')) {
-				currentMaxWeight = 90;
-			} else if (modidStr.includes('ou')) {
-				currentMaxWeight = 70;
-			} else if (modidStr.includes('uubl')) {
-				currentMaxWeight = 65; // UUBL 环境允许显示权重 <= 65 的宝可梦
-			} else if (modidStr.includes('uu')) {
-				currentMaxWeight = 60; // 纯 UU 环境不显示 UUBL (65)
-			} else if (modidStr.includes('rubl')) {
-				currentMaxWeight = 55; // RUBL 环境允许显示权重 <= 55 的宝可梦
-			} else if (modidStr.includes('ru') || modidStr.includes('max9pick6')) {
-                // 【修改点】：在这里显式兼容你的 9选6 RU 模式，确保它们共享 50 的权重阈值
-				currentMaxWeight = 50; // 纯 RU 环境不显示 RUBL (55)
-			} else if (modidStr.includes('lc')) {
-				currentMaxWeight = 10;
-			}
+            let currentMaxWeight = 100; // 默认 AG 环境显示全部
+            
+            // 【核心修复】：获取更完整、可靠的当前环境字符串，并统一转小写防止匹配失败
+            let modidStr = dex.modid ? dex.modid.join('').toLowerCase() : '';
+            if (extra) {
+                // extra 通常为 format 对象，优先使用 format.id (例如 gen9fcrumax9pick6)
+                if (extra.id) {
+                    modidStr = extra.id;
+                } else if (extra.name) {
+                    modidStr = extra.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                }
+            }
+
+            // 【重点逻辑】：忽略掉 max9pick6 等类似后缀，防止干扰原有分级词汇的匹配
+            // 使用正则 /max\d*pick\d*/g 可以兼容 max9pick6、max6pick4 等任意数字组合
+            modidStr = modidStr.replace(/max\d*pick\d*/g, '');
+
+            if (modidStr.includes('champions')) {
+                currentMaxWeight = 100; // 冠军组:显示包括 AG 的所有宝可梦
+            } else if (modidStr.includes('freeforall')) {
+                currentMaxWeight = 90;  // FFA:显示到 Uber 为止
+            } else if (modidStr.includes('ubersuu')) { // 必须放在 uber 之前判断
+                currentMaxWeight = 80;
+            } else if (modidStr.includes('uber')) {
+                currentMaxWeight = 90;
+            } else if (modidStr.includes('ou')) {
+                currentMaxWeight = 70;
+            } else if (modidStr.includes('uubl')) {
+                currentMaxWeight = 65; // UUBL 环境允许显示权重 <= 65 的宝可梦
+            } else if (modidStr.includes('uu')) {
+                currentMaxWeight = 60; // 纯 UU 环境不显示 UUBL (65)
+            } else if (modidStr.includes('rubl')) {
+                currentMaxWeight = 55; // RUBL 环境允许显示权重 <= 55 的宝可梦
+            } else if (modidStr.includes('ru')) {
+                currentMaxWeight = 50; // 纯 RU 环境不显示 RUBL (55)
+            } else if (modidStr.includes('lc')) {
+                currentMaxWeight = 10;
+            }
 
 			// 3. 你的手动维护列表 (保持原样,用于确保“必顶置”)
 			const pinnedPokemon = [
