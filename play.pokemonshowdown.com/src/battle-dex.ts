@@ -1686,9 +1686,14 @@ export const Dex = new class implements ModdedDex {
             // 3. 【特判字典】：在这里把所有“太靠上”的宝可梦揪出来单独调教
             // 填入宝可梦的纯小写 ID，赋给它们一个更小的值（越小越往上抬）
             const customOffsets: { [id: string]: string } = {
+				'excadrill': '0%',    // 龙头地鼠 往上提
 				'metagross': '0%',    // 巨金怪 往上提
-                'excadrill': '0%',    // 龙头地鼠 往上提
+				'melmetal': '0%',    // 美录梅塔 往上提
+				'darmanitanzen': '10%',    // 达摩狒狒-达摩模式 往上提
+				'durant': '10%',    // 铁蚁 往上提
+				'kartana': '10%',    // 纸御剑 往上提
                 'corviknight': '40%',  // 钢铠鸦 往下压
+				
             };
 
             // 如果这只宝可梦在特判字典里，就用字典里的定制高度
@@ -2560,8 +2565,9 @@ const ModModifier: {
 				currentMaxWeight = 60; // 纯 UU 环境不显示 UUBL (65)
 			} else if (modidStr.includes('rubl')) {
 				currentMaxWeight = 55; // RUBL 环境允许显示权重 <= 55 的宝可梦
-			} else if (modidStr.includes('ru')) {
-				currentMaxWeight = 50; // 纯 RU 环境不显示 RUBL (55)
+			} else if (modidStr.includes('ru') || modidStr.includes('max9pick6')) {
+                // 【修改点】：在这里显式兼容你的 9选6 RU 模式，确保它们共享 50 的权重阈值
+                currentMaxWeight = 50; // 纯 RU 环境不显示 RUBL (55)
 			} else if (modidStr.includes('lc')) {
 				currentMaxWeight = 10;
 			}
