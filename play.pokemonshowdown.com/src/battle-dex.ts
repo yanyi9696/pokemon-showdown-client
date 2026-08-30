@@ -2546,58 +2546,38 @@ const ModModifier: {
 				'LC': 10
 			};
 
-			// 2. 确定当前编辑器环境的过滤阈值
+			// 2. 确定当前编辑器环境的过滤阈值 (实现你要求的按分级过滤)
             let currentMaxWeight = 100; // 默认 AG 环境显示全部
-            
-            // 【究极修复】：多重兜底获取当前分级 ID
-            let formatIdStr = dex.modid.join('').toLowerCase();
-            
-            // 尝试 1：从 extra 参数获取 (防范其为空)
-            if (extra) {
-                if (extra.id) formatIdStr += String(extra.id).toLowerCase();
-                else if (extra.name) formatIdStr += String(extra.name).toLowerCase();
-                else if (typeof extra === 'string') formatIdStr += extra.toLowerCase();
+            const modidStr = dex.modid.join('');
+
+            // 【最简单暴力的强行判断】：直接从客户端环境抓取当前的具体模式名称
+            let realFormatName = '';
+            if (typeof window !== 'undefined' && window.app && window.app.room && window.app.room.format) {
+                realFormatName = window.app.room.format;
             }
 
-            // 尝试 2：直接从客户端 URL 和 UI 状态强行抓取分级 (100% 命中)
-            try {
-                if (typeof window !== 'undefined') {
-                    const w = window as any;
-                    // 从 URL hash 抓取，例如 "#teambuilder|gen9fcrumax9pick6"
-                    if (w.location && w.location.hash) {
-                        formatIdStr += String(w.location.hash).toLowerCase();
-                    }
-                    // 从客户端 Teambuilder 内存抓取
-                    if (w.app && w.app.rooms && w.app.rooms['teambuilder']) {
-                        const tb = w.app.rooms['teambuilder'];
-                        if (tb.curFormat) formatIdStr += String(tb.curFormat).toLowerCase();
-                        if (tb.format) formatIdStr += String(tb.format).toLowerCase();
-                        if (tb.curTeam && tb.curTeam.format) formatIdStr += String(tb.curTeam.format).toLowerCase();
-                    }
-                }
-            } catch (e) {}
-
-            // 开始做严谨的分级判断（顺序从高到底，防止互相干扰）
-            if (formatIdStr.includes('champions')) {
-                currentMaxWeight = 100;
-            } else if (formatIdStr.includes('freeforall')) {
-                currentMaxWeight = 90;
-            } else if (formatIdStr.includes('ubersuu')) {
-                currentMaxWeight = 80;
-            } else if (formatIdStr.includes('uber')) {
-                currentMaxWeight = 90;
-            } else if (formatIdStr.includes('ou') && !formatIdStr.includes('ubersuu')) {
-                currentMaxWeight = 70;
-            } else if (formatIdStr.includes('uubl')) {
-                currentMaxWeight = 65;
-            } else if (formatIdStr.includes('uu') && !formatIdStr.includes('uubl') && !formatIdStr.includes('ubersuu')) {
-                currentMaxWeight = 60;
-            } else if (formatIdStr.includes('rubl')) {
-                currentMaxWeight = 55;
-            } else if (formatIdStr.includes('ru') && !formatIdStr.includes('rubl')) {
-                // 【核心】：这里能准确识别出 "gen9fcrumax9pick6" 里的 "ru"
+            // 强行把新模式等同于 RU：只要名字对得上，或者 ID 包含 max9pick6，直接锁死 50
+            if (realFormatName === '[Gen 9] FC RU Max 9 Pick 6' || modidStr.includes('max9pick6')) {
                 currentMaxWeight = 50; 
-            } else if (formatIdStr.includes('lc')) {
+            } else if (modidStr.includes('champions')) {
+                currentMaxWeight = 100; // 冠军组:显示包括 AG 的所有宝可梦
+            } else if (modidStr.includes('freeforall')) {
+                currentMaxWeight = 90;  // FFA:显示到 Uber 为止
+            } else if (modidStr.includes('ubersuu')) { // 必须放在 uber 之前判断
+                currentMaxWeight = 80;
+            } else if (modidStr.includes('uber')) {
+                currentMaxWeight = 90;
+            } else if (modidStr.includes('ou')) {
+                currentMaxWeight = 70;
+            } else if (modidStr.includes('uubl')) {
+                currentMaxWeight = 65; // UUBL 环境允许显示权重 <= 65 的宝可梦
+            } else if (modidStr.includes('uu')) {
+                currentMaxWeight = 60; // 纯 UU 环境不显示 UUBL (65)
+            } else if (modidStr.includes('rubl')) {
+                currentMaxWeight = 55; // RUBL 环境允许显示权重 <= 55 的宝可梦
+            } else if (modidStr.includes('ru')) {
+                currentMaxWeight = 50; // 纯 RU 环境不显示 RUBL (55)
+            } else if (modidStr.includes('lc')) {
                 currentMaxWeight = 10;
             }
 
