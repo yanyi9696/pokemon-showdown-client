@@ -1354,6 +1354,7 @@ var translations = {
     "Jing Shen Cao Zong Zhe": "精神操纵者",
     "Zheng Qiang": "争强",
     "Shi Shan": "噬山",
+    "Feng Rao Guo Du": "丰饶国度",
 
     //  招式
 

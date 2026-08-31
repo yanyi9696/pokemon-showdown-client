@@ -1281,9 +1281,20 @@ export class BattleTooltips {
 			stats.def = Math.floor(stats.def * (ability === 'zengfuxitong' ? 2 : 1.5));
 			stats.spd = Math.floor(stats.spd * (ability === 'zengfuxitong' ? 2 : 1.5));
 		}
-		if (ability === 'grasspelt' && this.battle.hasPseudoWeather('Grassy Terrain')) {
-			stats.def = Math.floor(stats.def * 1.5);
-		}
+		// --- 修改开始：青草场地相关的特性数值修正 ---
+        if (this.battle.hasPseudoWeather('Grassy Terrain')) {
+            if (ability === 'grasspelt') {
+                stats.def = Math.floor(stats.def * 1.5);
+            }
+            if (ability === 'fengraoguodu') {
+                stats.atk = Math.floor(stats.atk * 1.3333);
+                stats.def = Math.floor(stats.def * 1.3333);
+                stats.spa = Math.floor(stats.spa * 1.3333);
+                stats.spd = Math.floor(stats.spd * 1.3333);
+                speedModifiers.push(1.3333); // 速度通常通过 modifiers 数组结算
+            }
+        }
+        // --- 修改结束 ---
 		if (this.battle.hasPseudoWeather('Electric Terrain')) {
 			if (ability === 'surgesurfer') {
 				speedModifiers.push(2);
