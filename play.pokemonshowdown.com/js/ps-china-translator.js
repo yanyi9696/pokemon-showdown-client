@@ -1283,6 +1283,7 @@ var translations = {
     "Spicy Spray": "辣椒喷发",
     "Eelevate": "鳗鳗高升",
     "Fire Mane": "火焰鬃毛",
+    "Aura Guard": "波导护盾",
     "No Ability": "无特性",
 
       //  Fantasy 特性
