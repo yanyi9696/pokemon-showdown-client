@@ -555,13 +555,13 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	feraligatrmega: 1320 + 89,
 	skarmorymega: 1320 + 90, skarmorymegafantasy: 1320 + 90, // Added fantasy mapping
 	froslassmega: 1320 + 91, froslassmegafantasy: 1320 + 91, // Added fantasy mapping
-	emboarmega: 1320 + 92,
+	emboarmega: 1320 + 92, emboarmegafantasy: 1320 + 92, // Added fantasy mapping
 	excadrillmega: 1320 + 93, excadrillmegafantasy: 1320 + 93, // Added fantasy mapping
 	scolipedemega: 1320 + 94, scolipedemegafantasy: 1320 + 94, // Added fantasy mapping
 	scraftymega: 1320 + 95,
 	eelektrossmega: 1320 + 96,
 	chandeluremega: 1320 + 97, chandeluremegafantasy: 1320 + 97, // Added fantasy mapping
-	chesnaughtmega: 1320 + 98,
+	chesnaughtmega: 1320 + 98, chesnaughtmegafantasy: 1320 + 98, // Added fantasy mapping
 	delphoxmega: 1320 + 99, delphoxmegafantasy: 1320 + 99, // Added fantasy mapping
 	greninjamega: 1320 + 100, greninjamegafantasy: 1320 + 100, // Added fantasy mapping
 	pyroarmega: 1320 + 101,
