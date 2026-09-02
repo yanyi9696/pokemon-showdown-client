@@ -1124,11 +1124,16 @@ export class BattleTooltips {
 		if (item === 'choiceband' && !clientPokemon?.volatiles['dynamax']) {
 			stats.atk = Math.floor(stats.atk * (ability === 'zengfuxitong' ? 2 : 1.5));
 		}
-		if (ability === 'purepower' || ability === 'hugepower') {
+		// 将 'guhun' 加入到物攻翻倍的判断中
+		if (ability === 'purepower' || ability === 'hugepower' || ability === 'guhun') {
 			stats.atk *= 2;
 		}
 		if (ability === 'hustle' || (ability === 'gorillatactics' && !clientPokemon?.volatiles['dynamax'])) {
 			stats.atk = Math.floor(stats.atk * 1.5);
+		}
+		// 为 'guhun' 单独添加特攻翻倍的逻辑
+		if (ability === 'guhun') {
+			stats.spa *= 2;
 		}
 		if (weather) {
 			if (this.battle.gen >= 4 && this.pokemonHasType(pokemon, 'Rock') && weather === 'sandstorm') {
