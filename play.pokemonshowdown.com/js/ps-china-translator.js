@@ -2987,7 +2987,7 @@ var translations = {
     "Prism Scale": "美丽鳞片",
     "Protective Pads": "部位护具",
     "Protector": "护具",
-    "Psychic Gem": "超能力宝石",
+    "Psychic Gem": "超能宝石",
     "Psychic Memory": "精神存储碟",
     "Psychic Seed": "精神种子",
     "Psychium Z": "超能力Z",
