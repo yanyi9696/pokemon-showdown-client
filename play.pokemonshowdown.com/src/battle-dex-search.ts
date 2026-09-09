@@ -1109,6 +1109,10 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 			if (item.itemUser?.includes(currentSpeciesName)) {
 				isStrictlySpeciesSpecific = true;
 			}
+			// Thick Club applies to the whole Cubone/Marowak family, including Fantasy formes.
+			if (itemId === 'thickclub' && (baseSpeciesName === 'Cubone' || baseSpeciesName === 'Marowak')) {
+				isStrictlySpeciesSpecific = true;
+			}
 			// --- 修改这里开始 ---
 			// 原本是 item.megaEvolves === baseSpeciesName
 			// 改为 currentSpeciesName，这样就能排除掉 Slowbro-Galar 这种带有后缀的形态

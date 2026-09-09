@@ -1821,7 +1821,7 @@
 				if (renderTeraType) {
 					buf +=
 						'<span class="detailcell"><label>Tera Type</label>' +
-						(species.forceTeraType || set.teraType || (species.types[0] === '???' ? 'Normal' : species.types[0])) +
+						(species.forceTeraType || set.teraType || species.defaultTeraType) +
 						"</span>";
 				}
 			}
@@ -2579,9 +2579,10 @@
 			curSet.name = this.curSet.name || undefined;
 
 			// never preserve current set tera, even if smogon set used default
-			if (this.curSet.gen === 9) {
+			if (this.curTeam.gen === 9) {
+				var speciesData = this.curTeam.dex.species.getFromPokemon(curSet);
 				curSet.teraType =
-					species.forceTeraType || sampleSet.teraType || (species.types[0] === '???' ? 'Normal' : species.types[0]);
+					speciesData.forceTeraType || sampleSet.teraType || speciesData.defaultTeraType;
 			}
 
 			var text = Storage.exportTeam([curSet], this.curTeam.gen);
@@ -4007,7 +4008,7 @@
 					var types = Dex.types.all().filter(function (type) {
 						return type.id;
 					});
-					var teraType = set.teraType || (species.types[0] === '???' ? 'Normal' : species.types[0]);
+					var teraType = set.teraType || species.defaultTeraType;
 					for (var i = 0; i < types.length; i++) {
 						buf +=
 							'<option value="' +
@@ -4111,7 +4112,7 @@
 
 			// Tera type
 			var teraType = this.$chart.find("select[name=teratype]").val();
-			var defaultTeraType = species.types[0] === '???' ? 'Normal' : species.types[0];
+			var defaultTeraType = species.defaultTeraType;
 			if (Dex.types.isName(teraType) && teraType !== defaultTeraType) {
 				set.teraType = teraType;
 			} else {
@@ -4211,7 +4212,7 @@
 				if (renderTeraType)
 					buf +=
 						'<span class="detailcell"><label>Tera Type</label>' +
-						(species.forceTeraType || set.teraType || (species.types[0] === '???' ? 'Normal' : species.types[0])) +
+						(species.forceTeraType || set.teraType || species.defaultTeraType) +
 						"</span>";
 			}
 			this.$("button[name=details]").html(buf);

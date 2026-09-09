@@ -2840,7 +2840,7 @@ export const Teams = new class {
 
 		return team;
 	}
-	export(team: Dex.PokemonSet[] | string, gen: number, hidestats = false) {
+	export(team: Dex.PokemonSet[] | string, gen: number, hidestats = false, dex: ModdedDex = Dex.forGen(gen)) {
 		if (!team) return '';
 		if (typeof team === 'string') {
 			if (team.includes('\n')) return team;
@@ -2884,16 +2884,11 @@ export const Teams = new class {
 				text += 'Gigantamax: Yes  \n';
 			}
 			if (gen === 9) {
-				const species = Dex.species.get(curSet.species);
+				const species = dex.species.get(curSet.species);
 				let teraType = species.forceTeraType || curSet.teraType;
-				
-				// 拦截：如果太晶属性为空或者是 "???"，就抓取第一属性
 				if (!teraType || teraType === '???') {
-					teraType = (species.types && species.types.length > 0 && species.types[0] !== '???') 
-						? species.types[0] 
-						: 'Normal';
+					teraType = species.defaultTeraType;
 				}
-				
 				text += `Tera Type: ${teraType}  \n`;
 			}
 			if (!hidestats) {

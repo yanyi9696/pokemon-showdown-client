@@ -219,7 +219,7 @@ if (!Storage.bg.id) {
 // localStorage is banned, and since prefs are cached in other
 // places in certain cases.
 
-Storage.origin = 'https://' + Config.routes.client;
+Storage.origin = Config.storageorigin || 'https://' + Config.routes.client;
 
 Storage.prefs = function (prop, value, save) {
 	if (value === undefined) {
@@ -342,7 +342,7 @@ Storage.initPrefs = function () {
 	Storage.loadTeams();
 	if (Config.testclient) {
 		return this.initTestClient();
-	} else if (location.protocol + '//' + location.hostname === Storage.origin) {
+	} else if (location.origin === Storage.origin) {
 		// Same origin, everything can be kept as default
 		Config.server = Config.server || Config.defaultserver;
 		this.whenPrefsLoaded.load();
@@ -431,6 +431,7 @@ Storage.onMessage = function ($e) {
 		}
 		Storage.loadPackedTeams(data.substr(1));
 		Storage.saveTeams = function () {
+			if (window.FantasyAI) window.FantasyAI.syncTeams();
 			var packedTeams = Storage.packAllTeams(Storage.teams);
 			Storage.postCrossOriginMessage('T' + packedTeams);
 
@@ -675,6 +676,7 @@ Storage.loadPackedTeams = function (buffer) {
 };
 
 Storage.saveTeams = function () {
+	if (window.FantasyAI) window.FantasyAI.syncTeams();
 	try {
 		if (window.localStorage) {
 			localStorage.setItem('showdown_teams', Storage.packAllTeams(this.teams));
@@ -866,31 +868,15 @@ Storage.packTeam = function (team) {
 			buf += '|';
 		}
 
-		// 【核心修复开始】
-		// 在判断是否需要写入额外数据前，先计算出“实际应生效的太晶属性”
-		var effectiveTeraType = set.teraType || '';
-		
-		if (!effectiveTeraType || effectiveTeraType === '???') {
-			var speciesData = Dex.species.get(set.species);
-			var firstType = (speciesData && speciesData.types && speciesData.types.length > 0) ? speciesData.types[0] : 'Normal';
-			
-			// 如果第一属性是 '???'，强制将打包数据写为 'Normal'
-			if (firstType === '???') {
-				effectiveTeraType = 'Normal';
-			}
-		}
-
-		// 注意：这里的 if 条件把 set.teraType 换成了 effectiveTeraType
-		// 这样即使 UI 把 set.teraType 删空了，只要 effectiveTeraType 有值，就会触发打包写入
-		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || effectiveTeraType) {
+		// Resolve unspecified Tera types later, using the battle format's Dex.
+		var teraType = set.teraType === '???' ? '' : (set.teraType || '');
+		if (set.pokeball || (set.hpType && !hasHP) || set.gigantamax || (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || teraType) {
 			buf += ',' + (set.hpType || '');
 			buf += ',' + toID(set.pokeball);
 			buf += ',' + (set.gigantamax ? 'G' : '');
 			buf += ',' + (set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : '');
-			// 把原本的 (set.teraType || '') 替换为计算好的 effectiveTeraType
-			buf += ',' + effectiveTeraType; 
+			buf += ',' + teraType;
 		}
-		// 【核心修复结束】
 	}
 
 	return buf;
@@ -1435,11 +1421,11 @@ Storage.exportTeam = function (team, gen, hidestats) {
 		if (curSet.gigantamax) {
 			text += 'Gigantamax: Yes  \n';
 		}
-		
+
 		if (curSet.teraType) {
 			text += 'Tera Type: ' + curSet.teraType + "  \n";
 		}
-        
+
 		if (!hidestats) {
 			var first = true;
 			if (curSet.evs) {

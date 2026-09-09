@@ -54,6 +54,7 @@
 
 			buf += '<div class="menugroup">';
 			buf += '<p><button class="button mainmenu2" name="joinRoom" value="teambuilder">Teambuilder</button></p>';
+			buf += '<p><button class="button mainmenu1" name="joinRoom" value="fantasyai">AI 挑战</button></p>';
 			buf += '<p><button class="button mainmenu3" name="joinRoom" value="ladder">Ladder</button></p>';
 			buf += '<p><button class="button mainmenu4" name="send" value="/smogtours">Tournaments</button></p>';
 			buf += '</div>';
@@ -1263,7 +1264,7 @@
 		},
 		initialize: function (data) {
 			this.data = data;
-			this.open = {"FC": true};
+			this.open = { "FC": true };
 			if (!this.starred) this.starred = Storage.prefs('starredformats') || {};
 			if (!this.search) this.search = "";
 			this.onselect = data.onselect;

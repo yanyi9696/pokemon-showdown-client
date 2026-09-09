@@ -137,6 +137,12 @@
 		},
 		add: function (data) {
 			if (!data) return;
+			if (data.substr(0, 11) === '|fantasyai|') {
+				this.fantasyAI = JSON.parse(data.slice(11));
+				window.FantasyAI.rememberBattle(this.id, this.fantasyAI);
+				this.updateControls();
+				return;
+			}
 			if (data.substr(0, 6) === '|init|') {
 				return this.init(data);
 			}
@@ -309,6 +315,7 @@
 					// was a player
 					this.closeNotification('choice');
 					this.$controls.html('<div class="controls"><p>' + replayDownloadButton + '<button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />Instant replay</button></p><p><button class="button" name="closeAndMainMenu"><strong>Main menu</strong><br /><small>(closes this battle)</small></button> <button class="button" name="closeAndRematch"><strong>Rematch</strong><br /><small>(closes this battle)</small></button></p></div>');
+					if (this.fantasyAI) this.$controls.find('button[name=closeAndRematch]').html('<strong>重新挑战</strong><br /><small>返回选择页</small>');
 				} else {
 					this.$controls.html('<div class="controls"><p>' + replayDownloadButton + '<button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />Instant replay</button></p>' + switchViewpointButton + '</div>');
 				}
@@ -1268,6 +1275,10 @@
 			app.focusRoom('');
 		},
 		closeAndRematch: function () {
+			if (this.fantasyAI) {
+				window.FantasyAI.rematch(this.id, this.fantasyAI);
+				return;
+			}
 			app.once('response:fullformat', function (data) {
 				app.rooms[''].requestNotifications();
 				if (data) {

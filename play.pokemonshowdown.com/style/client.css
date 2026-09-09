@@ -3329,3 +3329,37 @@ a.ilink.yours {
 .dark iframe.textbox:focus {
 	background: #DDDDDD;
 }
+.fantasy-ai {
+	max-width: 620px;
+	box-sizing: border-box;
+	overflow-wrap: anywhere;
+}
+.fantasy-ai select {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+	min-height: 34px;
+}
+.fantasy-ai-trainer {
+	display: flex;
+	gap: 12px;
+	align-items: flex-start;
+}
+.fantasy-ai-trainer img {
+	flex: 0 0 80px;
+	image-rendering: pixelated;
+}
+.fantasy-ai-trainer > div { min-width: 0; }
+.fantasy-ai-trainer p { margin: 8px 0; }
+.fantasy-ai-team {
+	max-width: 100%;
+	height: auto;
+	min-height: 54px;
+}
+.fantasy-ai-team strong { white-space: normal; }
+.fantasy-ai-error { white-space: pre-wrap; }
+@media (max-width: 420px) {
+	.fantasy-ai-trainer { gap: 6px; }
+	.fantasy-ai { padding: 10px; }
+}

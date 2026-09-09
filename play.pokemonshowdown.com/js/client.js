@@ -1653,6 +1653,7 @@ function toId() {
 			var roomTable = {
 				'': MainMenuRoom,
 				'teambuilder': TeambuilderRoom,
+				'fantasyai': window.FantasyAIRoom,
 				'rooms': RoomsRoom,
 				'battles': BattlesRoom,
 				'ladder': LadderRoom,

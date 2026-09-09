@@ -1581,6 +1581,7 @@ export class Species implements Effect {
 	readonly canGigantamax: boolean;
 	readonly cannotDynamax: boolean;
 	readonly forceTeraType: TypeName;
+	readonly defaultTeraType: TypeName;
 	readonly battleOnly: string | string[] | undefined;
 	readonly isNonstandard: string | null;
 	readonly unreleasedHidden: boolean | 'Past';
@@ -1605,6 +1606,7 @@ export class Species implements Effect {
 
 		this.num = data.num || 0;
 		this.types = data.types || ['???'];
+		this.defaultTeraType = this.types[0] === '???' ? (this.types[1] || 'Normal') : this.types[0];
 		this.abilities = data.abilities || { 0: "No Ability" };
 		this.baseStats = data.baseStats || { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
 		this.bst = this.baseStats.hp + this.baseStats.atk + this.baseStats.def +
