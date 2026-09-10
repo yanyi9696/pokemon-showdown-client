@@ -198,6 +198,15 @@ describe('Fantasy AI client', () => {
 		assert(c.room.html.includes('&lt;script>bad'));
 		assert(c.room.html.includes('队伍已删除或无法可靠对应'));
 	});
+	it('explains team move knowledge and the hard-mode submitted-move advantage', () => {
+		const c = client();
+		c.room.receiveState({ protocolVersion: 2, formats, enabled: true, trainers: [trainer], activeBattles: [] });
+		assert(c.room.html.includes('知晓你全队每只宝可梦的配招'));
+		c.room.selection.difficulty = 'hard';
+		c.room.render();
+		assert(c.room.html.includes('初始配置和精确能力值'));
+		assert(c.room.html.includes('提交后读取本回合所选招式'));
+	});
 	it('requires a server with explicit creation-result support and ignores malformed stored requests', () => {
 		const c = client();
 		c.room.receiveState({ enabled: true, trainers: [trainer], activeBattles: [] });

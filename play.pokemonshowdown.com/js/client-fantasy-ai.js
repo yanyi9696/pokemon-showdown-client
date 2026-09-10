@@ -362,7 +362,7 @@
 				buf += '</div></div>';
 			}
 			buf += '<p><label class="label" for="fantasy-ai-difficulty">难度</label><select class="select" id="fantasy-ai-difficulty" name="difficulty" aria-describedby="fantasy-ai-info"' + (pending ? ' disabled' : '') + '><option value="normal"' + (selection.difficulty === 'normal' ? ' selected' : '') + '>普通</option><option value="hard"' + (selection.difficulty === 'hard' ? ' selected' : '') + '>高难</option></select></p>';
-			buf += '<p id="fantasy-ai-info"><small>' + (selection.difficulty === 'hard' ? 'AI 开局获知你全队的初始配置和精确能力值，但不读取当前隐藏状态或尚未执行的行动。' : 'AI 根据公开的队伍预览和对战信息进行判断，不预先获知你的完整配置。') + '</small></p>';
+			buf += '<p id="fantasy-ai-info"><small>' + (selection.difficulty === 'hard' ? 'AI 知晓你全队的初始配置和精确能力值，还会在你提交后读取本回合所选招式。' : 'AI 知晓你全队每只宝可梦的配招，并根据公开对战信息进行判断。') + '</small></p>';
 			buf += '<p><label class="label" for="fantasy-ai-team">我的队伍</label><select class="select" id="fantasy-ai-team" name="team"' + (pending || !Storage.whenTeamsLoaded.isLoaded ? ' disabled' : '') + '><option value="">请选择队伍</option>';
 			Storage.teams.forEach(function (entry) {
 				buf += '<option value="' + escape(entry.fantasyAIId) + '"' + (entry.fantasyAIId === selection.teamId ? ' selected' : '') + '>' + escape(entry.name) + ' — ' + escape(entry.format || '未指定赛制') + '</option>';
