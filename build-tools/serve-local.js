@@ -9,8 +9,11 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.resolve(__dirname, '../play.pokemonshowdown.com');
-const port = 8080;
-const battlePort = 8000;
+const port = Number(process.env.PS_LOCAL_PORT || 8080);
+const battlePort = Number(process.env.PS_BATTLE_PORT || 8000);
+if (![port, battlePort].every(value => Number.isInteger(value) && value > 0 && value <= 65535)) {
+	throw new Error('Local HTTP and battle ports must be integers between 1 and 65535.');
+}
 const origin = `http://localhost:${port}`;
 const mime = {
 	'.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',

@@ -7,5 +7,32 @@
 .fantasyrogue .rogue-starters label { padding: 4px; }
 .fantasyrogue .rogue-upgrades { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 12px; }
 .fantasyrogue .button { margin: 3px 0; }
+.fantasyrogue .rogue-exp { margin: 5px 0 0; color: #24628b; font-size: 12px; }
+.fantasyrogue .rogue-notices { padding: 8px; background: #f0f5f9; border: 1px solid #ccd6df; border-radius: 4px; }
+.fantasyrogue summary { cursor: pointer; }
+.fantasyrogue select { max-width: 100%; }
 .rogue-balls { clear: both; padding: 8px; }
 .rogue-balls p { margin: 0 0 6px; }
+.fantasyrogue .rogue-item {
+	display: inline-block;
+	vertical-align: middle;
+	background-image: url(/sprites/fantasy-rogue/items.png);
+	background-repeat: no-repeat;
+	image-rendering: pixelated;
+}
+.fantasyrogue .rogue-item-candy {
+	width: 23px;
+	height: 23px;
+	background-position: -229px -400px;
+}
+.fantasyrogue .rogue-item-cord {
+	width: 27px;
+	height: 26px;
+	background-position: -28px -115px;
+}
+.fantasyrogue .rogue-item-potion { width: 17px; height: 23px; background-position: -218px -169px; }
+.fantasyrogue .rogue-item-superpotion { width: 17px; height: 23px; background-position: -234px -192px; }
+.fantasyrogue .rogue-item-hyperpotion { width: 17px; height: 23px; background-position: -215px -331px; }
+.fantasyrogue .rogue-item-revive { width: 12px; height: 17px; background-position: -479px -54px; }
+.fantasyrogue .rogue-item-fullheal { width: 15px; height: 23px; background-position: -200px -331px; }
+.fantasyrogue .rogue-item-elixir { width: 18px; height: 24px; background-position: -77px -168px; }

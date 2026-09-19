@@ -77,4 +77,22 @@ describe('Fantasy Rogue client', () => {
 		const template = fs.readFileSync(require.resolve('../play.pokemonshowdown.com/index.template.html'), 'utf8');
 		assert(template.includes('client-fantasy-rogue.js'));
 	});
+	it('blocks floor advancement while learning and submits the pending member rather than a client team', () => {
+		const c = client(); const data = state();
+		data.run = {phase: 'ready', floor: 1, encounter: 0, encounters: 3, money: 100, bag: {}, boosts: data.account.boosts,
+			team: [{id: 'run:floor:catch', set: {species: 'Bulbasaur', level: 9, moves: ['tackle']}, hp: 20, maxhp: 20, pp: []}],
+			pendingMoves: [{member: 'run:floor:catch', move: 'vinewhip'}]};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('name="act" value="battle" disabled'));
+		c.room.learnMove('0');
+		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'learn'); assert.equal(request.member, 'run:floor:catch');
+		assert.equal(request.value, '0'); assert(!('team' in request));
+	});
+	it('preserves the full colon-containing member id when replacing a captured party member', () => {
+		const c = client(); c.room.receiveState(state());
+		c.room.replaceMember('run:15:elite:0');
+		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'replace'); assert.equal(request.value, 'run:15:elite:0');
+	});
 });
