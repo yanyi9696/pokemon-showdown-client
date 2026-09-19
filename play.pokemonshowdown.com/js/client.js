@@ -1654,6 +1654,7 @@ function toId() {
 				'': MainMenuRoom,
 				'teambuilder': TeambuilderRoom,
 				'fantasyai': window.FantasyAIRoom,
+				'fantasyrogue': window.FantasyRogueRoom,
 				'rooms': RoomsRoom,
 				'battles': BattlesRoom,
 				'ladder': LadderRoom,

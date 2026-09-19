@@ -137,6 +137,11 @@
 		},
 		add: function (data) {
 			if (!data) return;
+			if (data.substr(0, 14) === '|fantasyrogue|') {
+				this.fantasyRogue = JSON.parse(data.slice(14));
+				this.updateControls();
+				return;
+			}
 			if (data.substr(0, 11) === '|fantasyai|') {
 				this.fantasyAI = JSON.parse(data.slice(11));
 				window.FantasyAI.rememberBattle(this.id, this.fantasyAI);
@@ -316,6 +321,7 @@
 					this.closeNotification('choice');
 					this.$controls.html('<div class="controls"><p>' + replayDownloadButton + '<button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />Instant replay</button></p><p><button class="button" name="closeAndMainMenu"><strong>Main menu</strong><br /><small>(closes this battle)</small></button> <button class="button" name="closeAndRematch"><strong>Rematch</strong><br /><small>(closes this battle)</small></button></p></div>');
 					if (this.fantasyAI) this.$controls.find('button[name=closeAndRematch]').html('<strong>重新挑战</strong><br /><small>返回选择页</small>');
+					if (this.fantasyRogue) this.$controls.find('button[name=closeAndRematch]').html('<strong>继续冒险</strong><br /><small>返回幻想杯肉鸽</small>');
 				} else {
 					this.$controls.html('<div class="controls"><p>' + replayDownloadButton + '<button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />Instant replay</button></p>' + switchViewpointButton + '</div>');
 				}
@@ -812,10 +818,23 @@
 				this.$controls.html(
 					'<div class="controls">' +
 					'<div class="whatdo">' + requestTitle + this.getTimerHTML() + '</div>' +
-					moveControls + shiftControls + switchControls +
+					moveControls + shiftControls + switchControls + this.rogueBallControls() +
 					'</div>'
 				);
 			}
+		},
+		rogueBallControls: function () {
+			var rogue = this.request && this.request.fantasyRogue;
+			if (!rogue || !rogue.catchable) return '';
+			return '<div class="rogue-balls"><p>投球占用本次行动；失败后对方仍会出招。</p>' + rogue.balls.map(function (ball) {
+				return '<button class="button" name="chooseRogueBall" value="' + BattleLog.escapeHTML(ball.id) + '"' +
+					(ball.count ? '' : ' disabled') + '>' + BattleLog.escapeHTML(ball.name) + ' × ' + ball.count + '</button> ';
+			}).join('') + '</div>';
+		},
+		chooseRogueBall: function (id) {
+			if (!this.choice || !this.request || !this.request.fantasyRogue || !this.request.fantasyRogue.catchable) return;
+			this.choice.choices.push('rogueball ' + id);
+			this.endChoice();
 		},
 		displayParty: function (switchables, trapped) {
 			var party = '';
@@ -1275,6 +1294,11 @@
 			app.focusRoom('');
 		},
 		closeAndRematch: function () {
+			if (this.fantasyRogue) {
+				app.joinRoom('fantasyrogue');
+				this.close();
+				return;
+			}
 			if (this.fantasyAI) {
 				window.FantasyAI.rematch(this.id, this.fantasyAI);
 				return;
