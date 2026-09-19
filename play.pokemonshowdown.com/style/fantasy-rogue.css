@@ -16,7 +16,7 @@
 .fantasyrogue .rogue-item {
 	display: inline-block;
 	vertical-align: middle;
-	background-image: url(/sprites/fantasy-rogue/items.png);
+	background-image: url(../sprites/fantasy-rogue/items.png);
 	background-repeat: no-repeat;
 	image-rendering: pixelated;
 }
