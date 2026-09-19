@@ -29,6 +29,8 @@
 			this.listenTo(app, 'response:fantasyrogueaction', this.receiveAction);
 			this.listenTo(app, 'init:socketopened', this.refresh);
 			this.listenTo(app, 'init:socketclosed', this.disconnected);
+			// Sent after the server confirms a login, even if the user ID did not change.
+			this.listenTo(app, 'init:choosename', this.refresh);
 			this.listenTo(app.user, 'change:userid', this.identityChanged);
 			this.render();
 		},

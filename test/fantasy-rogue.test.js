@@ -1,6 +1,7 @@
 const assert = require('assert').strict;
 const fs = require('fs');
 const vm = require('vm');
+const {EventEmitter} = require('events');
 
 function client() {
 	const sent = [], joined = [];
@@ -9,13 +10,17 @@ function client() {
 		Room: {extend: room => room},
 		BattleLog: {escapeHTML: text => String(text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')},
 		Dex: {getPokemonIcon: () => '', moves: {get: id => ({name: id})}},
-		app: {user: {get: () => userid}, socket: {readyState: 1}, send: message => sent.push(message), joinRoom: id => joined.push(id)},
+		app: Object.assign(new EventEmitter(), {
+			user: Object.assign(new EventEmitter(), {get: () => userid}),
+			socket: {readyState: 1}, send: message => sent.push(message), joinRoom: id => joined.push(id),
+		}),
 		setTimeout: () => 1, clearTimeout: () => {},
 	};
 	vm.runInNewContext(fs.readFileSync(require.resolve('../play.pokemonshowdown.com/js/client-fantasy-rogue.js'), 'utf8'), context);
 	const room = Object.create(context.FantasyRogueRoom);
-	room.$el = {html: html => { room.html = html; }};
-	room.state = null; room.pending = null;
+	room.$el = {addClass() {}, html: html => { room.html = html; }};
+	room.listenTo = (source, event, callback) => source.on(event, callback.bind(room));
+	room.initialize();
 	return {...context, room, sent, joined, setUser: id => { userid = id; }};
 }
 function state() {
@@ -70,6 +75,17 @@ describe('Fantasy Rogue client', () => {
 		assert(!c.room.html.includes('<img'));
 		c.setUser('another'); c.room.identityChanged();
 		assert.equal(c.room.state, null);
+	});
+	it('refreshes a denied save after the server confirms login with the same user ID', () => {
+		const c = client(); const denied = state();
+		denied.account = null; denied.message = '请先登录注册账号，以保存冒险进度。';
+		c.room.receiveState(denied);
+		assert(c.room.html.includes('请先登录注册账号'));
+		c.app.emit('init:choosename');
+		assert.deepEqual(c.sent, ['/cmd fantasyrogue']);
+		c.room.receiveState(state());
+		assert(!c.room.html.includes('请先登录注册账号'));
+		assert(c.room.html.includes('花费 1 点提升'));
 	});
 	it('wires the home entry directly below AI challenge and includes the room script', () => {
 		const home = fs.readFileSync(require.resolve('../play.pokemonshowdown.com/js/client-mainmenu.js'), 'utf8');
