@@ -7,8 +7,26 @@ if (!require('assert').strict) {
 
 var execSync = require('child_process').execSync;
 var fs = require('fs');
+var path = require('path');
 
 process.chdir(__dirname);
+
+var args = process.argv.slice(2);
+var localServerOption = args.indexOf('--local-server');
+if (localServerOption >= 0) {
+	var localServerDir = args[localServerOption + 1];
+	if (!localServerDir || localServerDir.startsWith('--')) {
+		console.error('Usage: node build full --local-server <server-directory>');
+		process.exit(1);
+	}
+	process.env.PS_SERVER_PATH = path.resolve(__dirname, localServerDir);
+	args.splice(localServerOption, 2);
+}
+if (args.length > 1 || (args[0] && args[0].startsWith('--'))) {
+	console.error('Usage: node build [full|indexes|learnsets|minidex] [--local-server <server-directory>]');
+	process.exit(1);
+}
+require('./build-tools/server-source');
 
 try {
 	require.resolve('@babel/core');
@@ -32,7 +50,7 @@ try {
 var options = {cwd: __dirname, stdio: 'inherit'};
 var full = '';
 
-switch (process.argv[2] || '') {
+switch (args[0] || '') {
 case 'full':
 	execSync(`node ./build-tools/build-indexes`, options);
 	execSync(`node ./build-tools/build-learnsets`, options);
@@ -59,8 +77,8 @@ case 'test-only':
 case '':
 	break;
 default:
-	console.log(`Unrecognized command ${process.argv[2]}`);
-	process.exit();
+	console.log(`Unrecognized command ${args[0]}`);
+	process.exit(1);
 	break;
 }
 

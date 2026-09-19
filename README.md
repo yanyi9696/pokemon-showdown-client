@@ -45,6 +45,21 @@ Client testing now requires a build step! Install the latest Node.js (we
 require v14 or later) and Git, and run `node build` (on Windows) or `./build`
 (on other OSes) to build.
 
+For local private-server development, a full build can use your existing server
+checkout without cloning or pulling from GitHub:
+
+```powershell
+node build full --local-server ..\pokemon-showdown
+```
+
+The path is relative to this client repository (absolute paths are also accepted).
+Install dependencies in both repositories first. This command builds that server
+checkout and uses it for all generated data, including mod data, learnsets,
+sprite metadata, and shared client code. It does not change either repository's
+branch or synchronize Git. Normal `node build full` retains its remote-cache
+workflow. `PS_SERVER_PATH` can also select the server for individual build tools;
+build the server first when running a data generator on its own.
+
 You can make and test client changes simply by building after each change,
 and opening `testclient.html`. This will allow you to test changes to the
 client without setting up your own login server.
