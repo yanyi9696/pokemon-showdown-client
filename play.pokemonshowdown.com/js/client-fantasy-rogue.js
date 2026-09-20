@@ -316,8 +316,8 @@
 				button('moveMember', '-1', '前移', locked || run.team[0] === mon, fa('arrow-left')) +
 				button('moveMember', '1', '后移', locked || run.team[run.team.length - 1] === mon, fa('arrow-right')) + '</span></div>';
 			html += '<div class="rogue-member-sheet"><div class="rogue-identity">' +
-				'<div class="rogue-sprite" role="img" aria-label="' + escape(localName(mon.set.species)) + '" style="' +
-				(typeof Dex.getTeambuilderSprite === 'function' ? Dex.getTeambuilderSprite(mon.set) : '') + '"></div>' +
+				'<div class="rogue-sprite-frame"><div class="rogue-sprite" role="img" aria-label="' + escape(localName(mon.set.species)) + '" style="' +
+				(typeof Dex.getTeambuilderSprite === 'function' ? Dex.getTeambuilderSprite(mon.set) : '') + '"></div></div>' +
 				'<div>' + typeIcons(mon.types || species.types) + '</div><strong>HP ' + mon.hp + ' / ' + mon.maxhp + '</strong>' +
 				'<meter min="0" max="' + mon.maxhp + '" value="' + mon.hp + '" aria-label="生命值"></meter>' +
 				'<small>' + (mon.hp ? escape(localName(mon.status || '状态正常')) : '已倒下') + '</small></div>';
