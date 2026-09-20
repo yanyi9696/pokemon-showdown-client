@@ -588,7 +588,8 @@
 			var canDynamax = curActive.canDynamax || switchables[pos].canDynamax;
 			var maxMoves = curActive.maxMoves || switchables[pos].maxMoves;
 			var gigantamax = curActive.gigantamax;
-			var canTerastallize = curActive.canTerastallize || switchables[pos].canTerastallize;
+			var canTerastallize = this.request.side.fantasyRogueTera !== false &&
+				(curActive.canTerastallize || switchables[pos].canTerastallize);
 			if (canZMove && typeof canZMove[0] === 'string') {
 				canZMove = _.map(canZMove, function (move) {
 					return { move: move, target: Dex.moves.get(move).target };

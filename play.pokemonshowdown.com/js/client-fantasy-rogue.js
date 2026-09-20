@@ -427,6 +427,8 @@
 				html += '<h3>第 ' + run.floor + ' / 200 层' + (run.node ? ' · ' + escape(run.node.name) : '') + '</h3>' +
 					this.renderFloor(run, busy) + '<p class="rogue-boosts">本局永久加成：' +
 					Object.keys(statNames).map(function (stat) { return statNames[stat] + ' +' + run.boosts[stat]; }).join(' / ') + '</p>' +
+					'<p class="rogue-tera">' + fa(run.teraUnlocked ? 'diamond' : 'lock') + '太晶化：' +
+					(run.teraUnlocked ? '本局已解锁，每场战斗限用一次。' : '未解锁，需通过冒险事件解锁。') + '</p>' +
 					this.renderEditor(run, busy) + this.renderBag(run, busy);
 				if (run.notices && run.notices.length) html += '<details class="rogue-notices"><summary>本次战斗的经验与成长明细</summary><ul>' +
 					run.notices.map(function (notice) { return '<li>' + escape(noticeText(notice)) + '</li>'; }).join('') + '</ul></details>';

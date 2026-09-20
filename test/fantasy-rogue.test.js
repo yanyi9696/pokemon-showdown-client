@@ -154,6 +154,15 @@ describe('Fantasy Rogue client', () => {
 		assert(html.includes('当前冒险进行中'));
 		assert(!html.includes('value="upgrade:'));
 	});
+	it('shows Tera locked for legacy and new adventures until the server grants the event unlock', () => {
+		const c = client(); const data = adventure();
+		c.room.receiveState(data);
+		assert(c.room.html.includes('未解锁，需通过冒险事件解锁'));
+		data.run.teraUnlocked = true;
+		c.room.receiveState(data);
+		assert(c.room.html.includes('本局已解锁，每场战斗限用一次'));
+		assert(!c.room.html.includes('未解锁，需通过冒险事件解锁'));
+	});
 	it('displays Boss reward quantities, full move details and a localized short description during learning', () => {
 		const c = client(); const data = adventure('settlement');
 		data.run.pendingMoves = [{member: data.run.team[0].id, move: 'vinewhip'}];
