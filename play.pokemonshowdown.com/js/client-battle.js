@@ -137,6 +137,14 @@
 		},
 		add: function (data) {
 			if (!data) return;
+			if (data === '|fantasyrogueend|') {
+				if (this.fantasyRogue && this.fantasyRogue.userid === app.user.get('userid')) {
+					this.battleEnded = true;
+					app.joinRoom('fantasyrogue');
+					this.close();
+				}
+				return;
+			}
 			if (data.substr(0, 14) === '|fantasyrogue|') {
 				this.fantasyRogue = JSON.parse(data.slice(14));
 				this.updateControls();
@@ -477,6 +485,15 @@
 				this.updateWaitControls();
 				break;
 			}
+			if (this.fantasyRogue && this.fantasyRogue.userid === app.user.get('userid') && !this.battleEnded && this.request) {
+				this.$controls.find('.rogue-retreat').remove();
+				this.$controls.append('<div class="rogue-retreat"><button class="button" name="retreatRogue">撤退</button>' +
+					'<small>返回场外；伤害、PP 和道具消耗保留。</small></div>');
+			}
+		},
+		retreatRogue: function () {
+			if (!this.fantasyRogue || this.fantasyRogue.userid !== app.user.get('userid') || this.battleEnded) return;
+			this.send('/fantasyrogue retreat');
 		},
 		timerInterval: 0,
 		getTimerHTML: function (nextTick) {

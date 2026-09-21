@@ -53,8 +53,8 @@ function adventure(phase = 'choose') {
 		lastReward: {floor: 8, money: 246, items: {potion: 1}, points: 0},
 		team: [{id: 'run:1:member:0', hp: 10, maxhp: 20, status: '', baseStats: {...stats, hp: 45}, stats: {...stats, hp: 20},
 			set: {species: 'Bulbasaur', level: 5, ability: 'Overgrow', item: '', moves: ['tackle', 'growl'], evs: {...stats, spa: 1}, ivs: stats},
-			pp: [{id: 'tackle', pp: 2, maxpp: 56}, {id: 'growl', pp: 15, maxpp: 64}],
-			moveMemory: [{id: 'tackle', pp: 2, maxpp: 56}, {id: 'growl', pp: 15, maxpp: 64}, {id: 'vinewhip', pp: 4, maxpp: 40}],
+			pp: [{id: 'tackle', pp: 2, maxpp: 35}, {id: 'growl', pp: 15, maxpp: 40}],
+			moveMemory: [{id: 'tackle', pp: 2, maxpp: 35}, {id: 'growl', pp: 15, maxpp: 40}, {id: 'vinewhip', pp: 4, maxpp: 25}],
 			abilityPool: [{id: 'overgrow', hidden: false}, {id: 'chlorophyll', hidden: true}],
 		}]};
 	return data;
@@ -172,13 +172,14 @@ describe('Fantasy Rogue client', () => {
 			assert(c.room.html.includes(text), text);
 		}
 		assert(c.room.html.indexOf('学习招式') < c.room.html.indexOf('本局永久加成'));
+		assert(c.room.html.includes('<small>PP</small>25'));
 	});
 	it('offers only learned moves, displays hidden ability labels and keeps EVs locked without an event', () => {
 		const c = client(); c.room.receiveState(adventure());
 		assert(c.room.html.includes('种族值') && c.room.html.includes('努力值') && c.room.html.includes('个体值'));
 		assert(!c.room.html.includes('name="ev-hp"'));
 		c.room.editSection('moves:1');
-		assert(c.room.html.includes('vinewhip') && c.room.html.includes('4/40'));
+		assert(c.room.html.includes('vinewhip') && c.room.html.includes('4/25'));
 		c.room.chooseMove('vinewhip');
 		let request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
 		assert.equal(request.action, 'setmove');
@@ -211,5 +212,66 @@ describe('Fantasy Rogue client', () => {
 		c.room.receiveState(data);
 		assert(c.room.html.includes('value="buy:potion"'));
 		assert(!c.room.html.includes('value="buy:oranberry"'));
+	});
+	it('keeps the current encounter after a wipe and offers emergency treatment only when the server allows it', () => {
+		const c = client(); const data = adventure('ready');
+		Object.assign(data.run, {encounter: 2, encounters: 3, recovery: 'defeat', canEmergency: true, emergencyCost: 5000, money: 4999});
+		data.run.team[0].hp = 0;
+		c.room.receiveState(data);
+		assert(c.room.html.includes('继续第 3 / 3 场战斗'));
+		assert(c.room.html.includes('value="battle" disabled'));
+		assert(c.room.html.includes('value="emergency" disabled'));
+		assert(c.room.html.includes('还需 1 金币'));
+		assert(!c.room.html.includes('免费重试整层'));
+		data.run.money = 5000; c.room.receiveState(data);
+		assert(!c.room.html.includes('value="emergency" disabled'));
+		c.room.act('emergency'); c.room.act('emergency');
+		assert.equal(c.sent.length, 1);
+		assert.equal(JSON.parse(c.sent[0].slice('/fantasyrogue action '.length)).action, 'emergency');
+		c.room.pending = null; data.run.canEmergency = false; c.room.receiveState(data);
+		assert(!c.room.html.includes('value="emergency"'));
+	});
+	it('blocks supplies in a continuous challenge and shows checkpoint retry only after its wipe', () => {
+		const c = client(); const data = adventure('ready');
+		data.run.node.noHealing = true; data.run.healingLocked = true;
+		c.room.receiveState(data);
+		assert(c.room.html.includes('禁止场外治疗和急救'));
+		assert(c.room.html.includes('value="potion" disabled'));
+		data.run.phase = 'failed'; data.run.recovery = 'defeat'; c.room.receiveState(data);
+		assert(c.room.html.includes('免费重试整层'));
+		assert(!c.room.html.includes('下一次仍挑战第'));
+	});
+});
+
+describe('Fantasy Rogue native battle recovery UI', () => {
+	function battleClient() {
+		const sent = [], joined = [];
+		const extend = value => value;
+		const context = {jQuery: {}, ConsoleRoom: {extend}, Popup: {extend},
+			app: {user: {get: () => 'rogueplayer'}, joinRoom: id => joined.push(id)}};
+		vm.runInNewContext(fs.readFileSync(require.resolve('../play.pokemonshowdown.com/js/client-battle.js'), 'utf8'), context);
+		const room = Object.create(context.BattleRoom);
+		Object.assign(room, {fantasyRogue: {userid: 'rogueplayer'}, send: message => sent.push(message),
+			close: () => { room.closed = true; }, request: {requestType: 'move'}, updateSide() {},
+			updateMoveControls() { room.html = ''; }, updateWaitControls() { room.html = ''; },
+			$controls: {find: () => ({remove() {}}), append: html => { room.html += html; }}});
+		return {room, sent, joined};
+	}
+	it('renders and sends retreat only for the campaign owner, including while waiting on a turn', () => {
+		const c = battleClient(); c.room.updateControlsForPlayer();
+		assert(c.room.html.includes('name="retreatRogue"'));
+		c.room.choice.waiting = true; c.room.updateControlsForPlayer();
+		assert(c.room.html.includes('name="retreatRogue"'));
+		c.room.retreatRogue(); assert.deepEqual(c.sent, ['/fantasyrogue retreat']);
+		c.room.fantasyRogue.userid = 'someoneelse'; c.room.updateControlsForPlayer();
+		assert(!c.room.html.includes('name="retreatRogue"'));
+		c.room.retreatRogue(); assert.equal(c.sent.length, 1);
+	});
+	it('returns to the adventure and closes the settled battle only for its owner', () => {
+		const c = battleClient(); c.room.add('|fantasyrogueend|');
+		assert.deepEqual(c.joined, ['fantasyrogue']); assert(c.room.closed && c.room.battleEnded);
+		const spectator = battleClient(); spectator.room.fantasyRogue.userid = 'someoneelse';
+		spectator.room.add('|fantasyrogueend|');
+		assert(!spectator.room.closed); assert.deepEqual(spectator.joined, []);
 	});
 });

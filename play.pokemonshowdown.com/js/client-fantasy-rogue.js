@@ -29,7 +29,7 @@
 	}
 	function moveRow(id, pp) {
 		var move = dex().moves.get(id);
-		var maximum = move.noPPBoosts || move.isZ ? move.pp : Math.floor(move.pp * 8 / 5);
+		var maximum = move.pp;
 		return '<div class="rogue-move-row"><strong class="rogue-move-name">' + escape(localName(move.name)) + '</strong>' +
 			'<span class="rogue-move-icons">' + typeIcons([move.type || 'Normal']) + ' ' +
 			(Dex.getCategoryIcon ? Dex.getCategoryIcon(move.category) : escape(localName(move.category || ''))) + '</span>' +
@@ -113,6 +113,7 @@
 			var previous = this.state && this.state.run;
 			var incoming = state.run;
 			var focusFloor = incoming && (!previous || previous.id !== incoming.id || previous.floor !== incoming.floor ||
+				previous.recovery !== incoming.recovery ||
 				JSON.stringify((previous.pendingMoves || [])[0]) !== JSON.stringify((incoming.pendingMoves || [])[0]) ||
 				!!previous.pendingCapture !== !!incoming.pendingCapture);
 			this.state = state;
@@ -221,6 +222,12 @@
 		},
 		renderFloor: function (run, busy) {
 			var html = '<section class="rogue-floor" aria-label="本层操作">';
+			if (run.recovery) {
+				html += '<p class="rogue-recovery"><strong>' + (run.recovery === 'retreat' ? '已撤退' : '本场战败') +
+					'</strong> · 伤害、PP、异常状态和道具消耗已保留。' + (run.phase === 'failed' ? '本层需重新连续挑战。' :
+					'下一次仍挑战第 ' + (run.encounter + 1) + ' 场，对手恢复本场初始状态。') + '</p>';
+			}
+			if (run.node && run.node.noHealing) html += '<p class="rogue-caption">连续挑战：开战后禁止场外治疗和急救，全队倒下需重新挑战整层。</p>';
 			if (run.lastReward && (run.lastReward.money || run.lastReward.points || Object.keys(run.lastReward.items || {}).length)) {
 				html += '<div class="rogue-receipt"><strong>' + fa('check-circle') + '已到账 · 第 ' + run.lastReward.floor + ' 层</strong>' +
 					loot(run.lastReward, this.state.items) + '</div>';
@@ -255,12 +262,20 @@
 				html += '</div>';
 				if (!(run.choices || []).length) html += '<p>本层内容等待配置，存档已保留。</p>';
 			} else if (run.phase === 'ready') {
+				var allFainted = !run.team.some(function (mon) { return mon.hp > 0; });
 				html += '<h3>本层战斗 · ' + (run.encounter + 1) + ' / ' + run.encounters + '</h3>' +
-					button('act', 'battle', '进入第 ' + (run.encounter + 1) + ' / ' + run.encounters + ' 场战斗', busy);
+					button('act', 'battle', (run.recovery ? '继续第 ' : '进入第 ') + (run.encounter + 1) + ' / ' + run.encounters + ' 场战斗', busy || allFainted);
+				if (allFainted) html += '<p>全队濒死，请先在背包中使用复活道具。</p>';
+				if (run.canEmergency) {
+					html += '<p>已无复活道具，可送往宝可梦中心急救：复活全队并恢复全部 HP、PP 和异常状态。</p>' +
+						button('act', 'emergency', '花费 ' + run.emergencyCost + ' 金币急救全队', busy || run.money < run.emergencyCost, fa('medkit'));
+					if (run.money < run.emergencyCost) html += '<p class="rogue-caption">金币不足，还需 ' + (run.emergencyCost - run.money) + ' 金币。</p>';
+				}
 			} else if (run.phase === 'battle') {
-				html += '<h3>战斗进行中</h3>' + button('joinRoom', run.roomid, '返回当前战斗', !run.roomid);
+				html += '<h3>' + (run.retreating ? '正在保存撤退结果…' : '战斗进行中') + '</h3>' +
+					button('joinRoom', run.roomid, '返回当前战斗', !run.roomid) + button('act', 'retreat', '撤退', busy || run.retreating);
 			} else if (run.phase === 'failed') {
-				html += '<h3>本层挑战失败</h3><p>免费重试会恢复入层时的队伍、经验、道具和货币。已保存的捕捉解锁保留，同一只不重复计数。</p>' +
+				html += '<h3>连续挑战失败</h3><p>本层不允许途中治疗。重新挑战会恢复入层时的队伍和资源，已保存的捕捉解锁保留。</p>' +
 					button('act', 'retry', '免费重试整层', busy);
 			} else if (run.phase === 'rest') {
 				html += '<h3>宝可梦中心</h3><p>无限次恢复存活伙伴的 HP、全部已学招式 PP 和异常状态。倒下伙伴需要先使用活力碎片。</p>' +
@@ -347,7 +362,7 @@
 			if (!editable(run)) html += '<p class="rogue-caption">当前可查看队伍，完成战斗及待处理结算后可调整。</p>';
 			(mon.evolutions || []).forEach(function (evo) {
 				html += button('evolveMember', mon.id + '|' + idOf(evo.species), '进化为 ' + localName(evo.species) +
-					(evo.item ? '（消耗进化道具）' : ''), locked || !mon.hp || (evo.item && !run.bag[evo.item]));
+					(evo.item ? '（消耗进化道具）' : ''), locked || run.healingLocked || !mon.hp || (evo.item && !run.bag[evo.item]));
 			});
 			html += '<div class="rogue-editor-options">';
 			if (panel === 'moves') {
@@ -382,7 +397,7 @@
 			return html + '</div></section>';
 		},
 		renderBag: function (run, busy) {
-			var usable = editable(run) && !busy;
+			var usable = editable(run) && !busy && !run.healingLocked;
 			var itemTarget = this.itemTarget || this.selectedMember;
 			var html = '<section class="rogue-bag"><h3>' + fa('suitcase') + '背包</h3>' +
 				'<div class="rogue-wallet">' + fa('money') + '金币 <strong>' + run.money + '</strong></div>' +
