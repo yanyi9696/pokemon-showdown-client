@@ -629,6 +629,7 @@
 					// support dragging and dropping buttons.
 					buf += '<li><div name="edit" data-value="' + i + '" class="team';
 					if (team.capacity === 24) buf += " pc-box";
+					if (team.capacity === 9) buf += " team-extended";
 					buf +=
 						'" draggable="true">' +
 						BattleLog.escapeHTML(formatText) +
@@ -990,6 +991,7 @@
 			}
 			i = +i;
 			this.curTeam = teams[i];
+			this.curTeam.capacity = Storage.getTeamCapacity(this.curTeam.format, this.curTeam.capacity === 24);
 			this.curTeam.iconCache = "!";
 			this.curTeam.dex = Dex.mod(this.curTeam.format);
 			this.curTeam.gen = this.curTeam.dex.gen;
@@ -1102,7 +1104,7 @@
 					name: "Copy of " + orig.name,
 					format: orig.format,
 					team: orig.team,
-					capacity: orig.capacity,
+					capacity: Storage.getTeamCapacity(orig.format, orig.capacity === 24),
 					folder: orig.folder,
 					iconCache: "",
 				};
@@ -1117,7 +1119,7 @@
 					name: (isBox ? "Box " : "Untitled ") + (teams.length + 1),
 					format: format,
 					team: "",
-					capacity: isBox ? 24 : 6,
+					capacity: Storage.getTeamCapacity(format, isBox),
 					folder: folder,
 					iconCache: "",
 				};
@@ -1323,6 +1325,7 @@
 					team.folder = format.slice(0, -1);
 				} else {
 					team.format = format;
+					team.capacity = Storage.getTeamCapacity(format, team.capacity === 24);
 				}
 				edited = true;
 			}
@@ -1516,7 +1519,7 @@
 						name: name,
 						format: format,
 						team: team,
-						capacity: capacity,
+						capacity: Storage.getTeamCapacity(format, capacity === 24),
 						folder: "",
 						iconCache: "",
 					});
@@ -1534,6 +1537,105 @@
 		 * Team view
 		 *********************************************************/
 
+		getDefensiveEffectiveness: function (types, abilityid, attackType) {
+			var dex = this.curTeam.dex;
+			var isFantasy = dex.modid.includes("gen9fantasy");
+			var factor = 1;
+			for (var i = 0; i < types.length; i++) {
+				var damageTaken = dex.types.get(types[i]).damageTaken;
+				var matchup = damageTaken && damageTaken[attackType];
+				if (matchup === 3) return 0;
+				if (matchup === 1 && (
+					(abilityid === "deltastream" && types[i] === "Flying") ||
+					(isFantasy && abilityid === "fengchao" && types[i] === "Bug") ||
+					(isFantasy && abilityid === "weichongnitai")
+				)) matchup = 0;
+				if (matchup === 1) factor *= 2;
+				if (matchup === 2) factor *= 0.5;
+			}
+			if (isFantasy && abilityid === "mishi") factor = 1 / factor;
+			if (isFantasy && abilityid === "weichongnitai" && ["Flying", "Rock", "Fire"].includes(attackType)) {
+				factor = 2;
+			}
+			if (abilityid === "wonderguard" && factor <= 1) return 0;
+
+			// Permanent, type-dependent ability effects, as in the upstream coverage chart.
+			var immunities = {
+				Ground: ["levitate", "eartheater"],
+				Water: ["dryskin", "waterabsorb", "desolateland"],
+				Fire: ["flashfire", "wellbakedbody", "primordialsea"],
+				Electric: ["motordrive", "voltabsorb"],
+				Grass: ["sapsipper"]
+			};
+			if (dex.gen >= 5) {
+				immunities.Electric.push("lightningrod");
+				immunities.Water.push("stormdrain");
+			}
+			if (isFantasy) {
+				immunities.Water.push("watercompaction");
+				immunities.Grass.push("shishan");
+				immunities.Ground.push("shishan");
+				immunities.Bug = ["shichong"];
+				immunities.Poison = ["tundu"];
+				immunities.Steel = ["gangtiejuhewu"];
+			}
+			if (immunities[attackType] && immunities[attackType].includes(abilityid)) return 0;
+			if ((attackType === "Fire" || attackType === "Ice") && abilityid === "thickfat") factor *= 0.5;
+			if (attackType === "Fire") {
+				if (abilityid === "heatproof") factor *= isFantasy && factor > 1 ? 0.25 : 0.5;
+				if (abilityid === "waterbubble" || (isFantasy && abilityid === "huolinfen")) factor *= 0.5;
+				if (abilityid === "fluffy") factor *= 2;
+				if (abilityid === "dryskin") factor *= 1.25;
+			}
+			if (attackType === "Ghost" && abilityid === "purifyingsalt") factor *= 0.5;
+			if (isFantasy && abilityid === "tiekai" && factor <= 1) factor *= 0.75;
+			return factor;
+		},
+		getDefensiveCoverage: function () {
+			var dex = this.curTeam.dex;
+			var counters = [];
+			for (var typeid in window.BattleTypeChart) {
+				// Stellar and the typeless placeholder are not ordinary attacking types.
+				if (typeid === "stellar" || typeid === "???") continue;
+				var type = dex.types.get(typeid);
+				if (type.exists) counters.push({ type: type.name, resists: 0, weaknesses: 0 });
+			}
+			for (var i = 0; i < this.curSetList.length; i++) {
+				var set = this.curSetList[i];
+				if (!set.species) continue;
+				var species = dex.species.getFromPokemon(set);
+				if (!species.exists) continue;
+				var abilityid = dex.gen >= 3 && !dex.modid.includes("gen7letsgo") ?
+					toID(set.ability || species.abilities["0"]) : "";
+				for (var j = 0; j < counters.length; j++) {
+					var counter = counters[j];
+					var factor = this.getDefensiveEffectiveness(species.types, abilityid, counter.type);
+					if (factor < 1) counter.resists++;
+					if (factor > 1) counter.weaknesses++;
+				}
+			}
+			counters.sort(function (a, b) {
+				return a.resists - b.resists || b.weaknesses - a.weaknesses || a.type.localeCompare(b.type);
+			});
+			return counters;
+		},
+		renderDefensiveCoverage: function () {
+			if (this.curTeam.capacity === 24 || !this.curSetList.length) return "";
+			var counters = this.getDefensiveCoverage();
+			var buf = '<details class="team-defensive-coverage" open>' +
+				'<summary><strong>Defensive coverage</strong></summary>' +
+				'<table class="defensive-coverage-table"><tbody>';
+			for (var i = 0; i < counters.length; i++) {
+				var counter = counters[i];
+				buf += '<tr><th scope="row">' + BattleLog.escapeHTML(counter.type) + '</th>' +
+					'<td>' + counter.resists + ' <small>Resist</small></td>' +
+					'<td>' + counter.weaknesses + ' <small>Weak</small></td></tr>';
+			}
+			buf += '</tbody></table><p class="defensive-coverage-note">' +
+				'Resist includes immunities. Based on current formes and persistent type-related abilities; ' +
+				'items, Terastallization, and other battle effects are not included.</p></details>';
+			return buf;
+		},
 		updateTeamView: function () {
 			this.curChartName = "";
 			this.curChartType = "";
@@ -1615,7 +1717,7 @@
 					}
 					buf += this.renderSet(this.curSetList[i], i);
 				}
-				if (this.deletedSet && i === this.deletedSetLoc) {
+				if (this.deletedSet && i === this.deletedSetLoc && i < this.curTeam.capacity) {
 					buf +=
 						'<li><button name="undeleteSet" class="button"><i class="fa fa-undo"></i> Undo Delete</button></li>';
 				}
@@ -1677,7 +1779,9 @@
 					buf +=
 						'<p><button name="pokepasteExport" value="openteamsheet" type="submit" class="button exportbutton"><i class="fa fa-upload"></i> Upload to PokePaste (Open Team Sheet)</button></p>';
 				}
-				buf += "</form></div>";
+				buf += "</form>";
+				buf += this.renderDefensiveCoverage();
+				buf += "</div>";
 			}
 			this.$el.html('<div class="teamwrapper">' + buf + "</div>");
 			this.$(".teamedit textarea").focus().select();
@@ -1967,16 +2071,12 @@
 								self.$(".teamnameedit").val(title).change();
 							}
 
-							Storage.activeSetList = self.curSetList =
-								Storage.importTeam(data.paste);
-						} else {
-							Storage.activeSetList = self.curSetList =
-								Storage.importTeam(data);
+							data = data.paste;
 						}
 						self
 							.$(".teamedit textarea, .teamedit .savebutton")
 							.attr("disabled", null);
-						self.back();
+						self.importTeam(data);
 					},
 					error: function () {
 						app.addPopupMessage(
@@ -1988,9 +2088,17 @@
 					},
 				});
 			} else {
-				Storage.activeSetList = this.curSetList = Storage.importTeam(text);
-				this.back();
+				this.importTeam(text);
 			}
+		},
+		importTeam: function (text) {
+			var team = Storage.importTeam(text);
+			if (this.curTeam.capacity === 9 && team.length > this.curTeam.capacity) {
+				app.addPopupMessage("This format supports a maximum of 9 Pokémon per team.");
+				return;
+			}
+			Storage.activeSetList = this.curSetList = team;
+			this.back();
 		},
 		importableUrl: function (value) {
 			var match = value.match(
@@ -2020,7 +2128,7 @@
 		addPokemon: function () {
 			if (!this.curTeam) return;
 			var team = this.curSetList;
-			if (!team.length || team[team.length - 1].species) {
+			if (team.length < this.curTeam.capacity && (!team.length || team[team.length - 1].species)) {
 				var newPokemon = {
 					name: "",
 					species: "",
@@ -2083,7 +2191,7 @@
 			if (team.length >= this.curTeam.capacity) return;
 			if (!this.clipboardCount()) return;
 
-			if (team.push($.extend(true, {}, this.clipboard[0])) >= 6) {
+			if (team.push($.extend(true, {}, this.clipboard[0])) >= this.curTeam.capacity) {
 				$(btn).css("display", "none");
 			}
 			this.update();
@@ -2167,6 +2275,7 @@
 			// and also we still need it as a string somewhere
 			// so when check mods, use this.curTeam.dex.modid
 			this.curTeam.format = format;
+			this.curTeam.capacity = Storage.getTeamCapacity(format, this.curTeam.capacity === 24);
 			this.curTeam.dex = Dex.mod(this.curTeam.format);
 			this.curTeam.gen = this.curTeam.dex.gen;
 			this.save();
@@ -2628,6 +2737,9 @@
 		},
 		undeleteSet: function () {
 			if (this.deletedSet) {
+				var lastSet = this.curSetList[this.curSetList.length - 1];
+				if (lastSet && !lastSet.species) this.curSetList.pop();
+				if (this.curSetList.length >= this.curTeam.capacity) return;
 				var loc = this.deletedSetLoc;
 				this.curSetList.splice(loc, 0, this.deletedSet);
 				this.deletedSet = null;

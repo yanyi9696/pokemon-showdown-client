@@ -1532,11 +1532,21 @@ export class Battle {
 				}
 			}
 			let pp = 1;
-			if (this.abilityActive('Pressure') && move.id !== 'stickyweb') {
+			const fantasyPressure = this.dex.modid.includes('gen9fantasy' as ID);
+			if (
+				this.abilityActive('Pressure') && (fantasyPressure || move.id !== 'stickyweb') &&
+				(!fantasyPressure || !callerMoveForPressure)
+			) {
 				const foeTargets = [];
 				const moveTarget = move.pressureTarget;
 
-				if (
+				if (fantasyPressure) {
+					// Fantasy Pressure affects every opposing move, including recovery and setup.
+					// Called moves already paid the extra PP on their original caller.
+					for (const active of this.getAllActive()) {
+						if (active.side !== pokemon.side && active.side.ally !== pokemon.side) foeTargets.push(active);
+					}
+				} else if (
 					!target && this.gameType === 'singles' &&
 					!['self', 'allies', 'allySide', 'adjacentAlly', 'adjacentAllyOrSelf', 'allyTeam'].includes(moveTarget)
 				) {

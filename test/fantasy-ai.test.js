@@ -41,6 +41,20 @@ const formats = [
 const trainer = { id: 'test', name: 'Test trainer', description: 'Balanced', avatar: '1', style: 'balanced', format: 'gen9fcou' };
 
 describe('Fantasy AI client', () => {
+	it('shows shared global capacity and honors the server per-player limit', () => {
+		const c = client();
+		c.Storage.teams = [team()]; c.FantasyAI.syncTeams();
+		c.room.selection.teamId = c.Storage.teams[0].fantasyAIId;
+		c.room.receiveState({ protocolVersion: 2, formats, enabled: true, trainers: [trainer], activeBattles: ['battle-old'],
+			capacity: { active: 2, maxBattles: 4, maxBattlesPerPlayer: 2 } });
+		c.room.changeFormat({ currentTarget: { value: 'gen9fcou' } });
+		c.room.changeTrainer({ currentTarget: { value: trainer.id } });
+		assert(c.room.html.includes('当前 2 / 4 场；每人最多 2 场'));
+		assert(c.room.html.includes('所有训练家、赛制和难度共用名额'));
+		assert(!c.room.html.includes('name="startChallenge" disabled'));
+		c.room.startChallenge();
+		assert(c.sent.some(message => message.startsWith('/fantasyai challenge')));
+	});
 	it('filters trainers by format, clears incompatible selections, and submits the chosen format', () => {
 		const c = client();
 		const uu = { ...trainer, id: 'uu-trainer', format: 'gen9fcuu' };

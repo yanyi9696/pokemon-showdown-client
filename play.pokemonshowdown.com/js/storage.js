@@ -579,6 +579,11 @@ Storage.initTestClient = function () {
 
 Storage.teams = null;
 
+Storage.getTeamCapacity = function (format, isBox) {
+	if (isBox) return 24;
+	return format === 'gen9fcrumax9pick6' ? 9 : 6;
+};
+
 Storage.loadTeams = function () {
 	if (window.nodewebkit) {
 		return;
@@ -655,6 +660,7 @@ Storage.loadRemoteTeams = function (after) {
 					return { species: mon };
 				});
 				team.team = Storage.packTeam(mons);
+				team.capacity = Storage.getTeamCapacity(team.format, team.capacity === 24);
 				Storage.teams.unshift(team);
 			}
 		}
@@ -736,7 +742,7 @@ Storage.unpackAllTeams = function (buffer) {
 				format: format,
 				gen: parseInt(format[3], 10) || 6,
 				team: Storage.packTeam(oldTeam.team),
-				capacity: capacity,
+				capacity: Storage.getTeamCapacity(format, capacity === 24),
 				folder: '',
 				iconCache: ''
 			};
@@ -765,7 +771,7 @@ Storage.unpackLine = function (line) {
 		format: format,
 		gen: parseInt(format[3], 10) || 6,
 		team: line.slice(pipeIndex + 1),
-		capacity: isBox ? 24 : 6,
+		capacity: Storage.getTeamCapacity(format, isBox),
 		folder: line.slice(bracketIndex + 1, slashIndex > 0 ? slashIndex : bracketIndex + 1),
 		iconCache: ''
 	};
@@ -1233,7 +1239,7 @@ Storage.importTeam = function (buffer, teams) {
 				format: format,
 				gen: parseInt(format[3], 10) || 6,
 				team: team,
-				capacity: capacity,
+				capacity: Storage.getTeamCapacity(format, capacity === 24),
 				folder: folder,
 				iconCache: ''
 			});
@@ -1678,7 +1684,7 @@ Storage.nwLoadTeamFile = function (filename, localApp) {
 				format: format,
 				gen: parseInt(format[3], 10) || 6,
 				team: Storage.packTeam(Storage.importTeam('' + data)),
-				capacity: capacity,
+				capacity: Storage.getTeamCapacity(format, capacity === 24),
 				folder: folder,
 				iconCache: '',
 				filename: filename

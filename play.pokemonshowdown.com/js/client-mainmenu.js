@@ -1088,7 +1088,7 @@
 				}
 				if (this.curTeamFormat !== teamFormat) {
 					for (var i = 0; i < teams.length; i++) {
-						if (teams[i].format === teamFormat && teams[i].capacity === 6) {
+						if (teams[i].format === teamFormat && teams[i].capacity !== 24) {
 							teamIndex = i;
 							break;
 						}
@@ -1097,7 +1097,8 @@
 			} else {
 				teamIndex = +teamIndex;
 			}
-			return '<button class="select teamselect" name="team" value="' + (teamIndex < 0 ? '' : teamIndex) + '">' + TeamPopup.renderTeam(teamIndex) + '</button>';
+			var teamClass = teams[teamIndex] && teams[teamIndex].capacity === 9 ? ' teamselect-extended' : '';
+			return '<button class="select teamselect' + teamClass + '" name="team" value="' + (teamIndex < 0 ? '' : teamIndex) + '">' + TeamPopup.renderTeam(teamIndex) + '</button>';
 		},
 
 		// buttons
@@ -1619,6 +1620,7 @@
 		selectTeam: function (i) {
 			i = +i;
 			this.sourceEl.val(i).html(TeamPopup.renderTeam(i));
+			this.sourceEl.toggleClass('teamselect-extended', !!(Storage.teams[i] && Storage.teams[i].capacity === 9));
 			if (this.sourceEl[0].offsetParent.className === 'mainmenuwrapper') {
 				var formatid = this.sourceEl.closest('form').find('button[name=format]').val();
 				app.rooms[''].curTeamIndex = i;

@@ -64,6 +64,20 @@ You can make and test client changes simply by building after each change,
 and opening `testclient.html`. This will allow you to test changes to the
 client without setting up your own login server.
 
+### Build with a local server checkout
+
+If the server source is available locally, a full build can regenerate client
+data without cloning or pulling from GitHub. From the client repository, run:
+
+```sh
+node build full --local-server ../pokemon-showdown
+```
+
+This builds the selected server checkout and uses it for all generated data and
+shared client code, including local uncommitted data changes. Both repositories
+must already have their dependencies installed. Without `--local-server`, a full
+build keeps using the remote repository in `caches/pokemon-showdown`.
+
 ### Test keys
 
 For security reasons, browsers [don't let other websites control PS][5], so

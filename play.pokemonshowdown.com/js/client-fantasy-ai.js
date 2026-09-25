@@ -289,7 +289,7 @@
 			var trainer = this.selectedTrainer();
 			var team = this.selectedTeam();
 			if (this.loading || this.selection.pending || !this.state || !this.state.enabled ||
-				!trainer || !team || this.state.activeBattles.length) return;
+				!trainer || !team || this.state.activeBattles.length >= (this.state.capacity && this.state.capacity.maxBattlesPerPlayer || 1)) return;
 			if (!app.user.get('named')) return this.login();
 			if (!app.socket || app.socket.readyState !== 1 || app.isDisconnected) return this.disconnected();
 			if (!Storage.getPackedTeam(team) || Storage.getPackedTeam(team).length > 20000) {
@@ -322,6 +322,8 @@
 			var trainers = this.availableTrainers();
 			var team = this.selectedTeam();
 			var state = this.state;
+			var capacity = state && state.capacity;
+			var playerLimit = capacity && capacity.maxBattlesPerPlayer || 1;
 			var pending = !!selection.pending;
 			var unavailable = !state || !state.enabled;
 			var connected = app.socket && app.socket.readyState === 1 && !app.isDisconnected;
@@ -329,6 +331,9 @@
 			var buf = '<div class="pad fantasy-ai"><p><button class="button" name="joinRoom" value="">返回首页</button></p><h2>AI 挑战</h2>';
 			buf += '<p>选择赛制、训练家、难度和自己的队伍，开始不计天梯的六对六对战。</p>';
 			buf += '<div role="status" aria-live="polite">';
+			if (capacity) {
+				buf += '<p>全服 AI 挑战：当前 ' + escape(String(capacity.active)) + ' / ' + escape(String(capacity.maxBattles)) + ' 场；每人最多 ' + escape(String(playerLimit)) + ' 场。<br /><small>所有训练家、赛制和难度共用名额，包括正在创建和断线保留的对局。点击刷新可更新人数。</small></p>';
+			}
 			if (this.loading) buf += '<p><em>正在读取训练家和已有对局…</em></p>';
 			if (this.error) buf += '<p class="message-error fantasy-ai-error">' + escape(this.error) + '</p>';
 			if (state && !state.enabled) buf += '<p class="message-error">AI 挑战尚未开放。</p>';
@@ -374,7 +379,7 @@
 			if (Storage.whenTeamsLoaded.isLoaded && selection.teamId && !team) buf += '<p class="message-error">上次选择的队伍已删除或无法可靠对应，请重新选择。</p>';
 			buf += '<p><button class="button" name="editTeam">' + (team ? '修改所选队伍' : '打开队伍编辑器') + '</button></p>';
 			if (!app.user.get('named')) buf += '<p>请先按客户端的正常规则选择用户名或登录。</p><p><button class="button" name="login">选择用户名 / 登录</button></p>';
-			buf += '<p><button class="button" name="startChallenge"' + (disabled || !trainer || !team || !app.user.get('named') || state && state.activeBattles.length ? ' disabled' : '') + '><strong>开始挑战</strong></button></p>';
+			buf += '<p><button class="button" name="startChallenge"' + (disabled || !trainer || !team || !app.user.get('named') || state && state.activeBattles.length >= playerLimit ? ' disabled' : '') + '><strong>开始挑战</strong></button></p>';
 			buf += '<p><small>两档使用相同队伍、策略和计算预算。队伍由服务器按所选 FC 赛制与六对六规则校验。断线后默认保留十分钟，不会替你自动出招。</small></p></div>';
 			this.$el.html(buf);
 		}

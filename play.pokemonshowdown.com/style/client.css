@@ -532,6 +532,13 @@ p.or:after {
 	white-space: nowrap;
 	overflow: hidden;
 }
+.select.teamselect-extended {
+	height: 80px;
+}
+.teamselect-extended small .picon:nth-child(7),
+.teamlist .team-extended small .picon:nth-child(7) {
+	clear: left;
+}
 .teamselect strong {
 	display: block;
 	font-size: 8pt;
@@ -2257,6 +2264,9 @@ a.ilink.yours {
 .teamlist .team.pc-box {
 	height: 139px;
 }
+.teamlist .team.team-extended {
+	height: 79px;
+}
 
 .teamedit {
 	position: absolute;
@@ -2797,6 +2807,43 @@ a.ilink.yours {
 }
 .teamchartbox.individual .teamchart {
 	margin-top: -2px;
+}
+.team-defensive-coverage {
+	margin: 24px 7px 8px;
+	padding-top: 16px;
+	border-top: 1px solid #BBBBBB;
+}
+.team-defensive-coverage summary {
+	cursor: pointer;
+}
+.defensive-coverage-table {
+	margin-top: 4px;
+	border-collapse: collapse;
+	font-size: 10pt;
+}
+.defensive-coverage-table th,
+.defensive-coverage-table td {
+	padding: 3px 6px;
+	border: 1px solid #BBBBBB;
+	text-align: left;
+	white-space: nowrap;
+}
+.defensive-coverage-table small,
+.defensive-coverage-note {
+	color: #666666;
+}
+.defensive-coverage-note {
+	max-width: 600px;
+	font-size: 9pt;
+}
+.dark .team-defensive-coverage,
+.dark .defensive-coverage-table th,
+.dark .defensive-coverage-table td {
+	border-color: #555555;
+}
+.dark .defensive-coverage-table small,
+.dark .defensive-coverage-note {
+	color: #AAAAAA;
 }
 .teambuilder-results .result a {
 	border-radius: 4px;
