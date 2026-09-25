@@ -13,6 +13,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const child_process = require('child_process');
 const compiler = require('./compiler');
+const { serverPath } = require('./server-source');
 
 const thisDir = __dirname;
 const rootDir = path.resolve(thisDir, '..');
@@ -83,13 +84,13 @@ let compiledFiles = 0;
 // eslint-disable-next-line no-eval
 const compileOpts = Object.assign(eval('(' + fs.readFileSync('.babelrc') + ')'), {
 	babelrc: false,
-	incremental: true,
+	incremental: process.argv[2] !== 'full',
 	ignore: ['play.pokemonshowdown.com/src/battle-animations.js', 'play.pokemonshowdown.com/src/battle-animations-moves.js'],
 });
 if (process.argv[2] === 'full') {
 	delete compileOpts.ignore;
 	compiler.compileToDir(
-		['caches/pokemon-showdown/server/chat-formatter.ts', 'caches/pokemon-showdown/sim/teams.ts'],
+		[serverPath('server/chat-formatter.ts'), serverPath('sim/teams.ts')],
 		'play.pokemonshowdown.com/js/server/',
 		compileOpts
 	);
@@ -113,7 +114,7 @@ compiledFiles += compiler.compileToFile(
 		'play.pokemonshowdown.com/src/battle-dex-data.ts',
 		'play.pokemonshowdown.com/src/battle-log.ts',
 		'play.pokemonshowdown.com/src/battle-log-misc.js',
-		'caches/pokemon-showdown/server/chat-formatter.ts',
+		serverPath('server/chat-formatter.ts'),
 		'play.pokemonshowdown.com/data/text.js',
 		'play.pokemonshowdown.com/data/text-afd.js',
 		'play.pokemonshowdown.com/src/battle-text-parser.ts',

@@ -1,6 +1,7 @@
 const assert = require('assert').strict;
 
 window = global;
+global.document = { getElementsByTagName: () => [], getElementById: () => ({}) };
 
 require('../play.pokemonshowdown.com/js/battle-dex-data.js');
 require('../play.pokemonshowdown.com/js/battle-dex.js');
@@ -86,6 +87,74 @@ describe('Battle', () => {
 		assert(p2kyurem.prevItem === 'Leftovers');
 
 		assert.deepEqual(p1leafeon.moveTrack, [['Knock Off', 1]]);
+	});
+});
+
+describe('Fantasy Pressure PP display', () => {
+	let battle;
+	afterEach(() => battle?.destroy());
+
+	function create(tier = '[Gen 9] FC Ubers UU', doubles = false) {
+		global.BattleMovedex = require('../play.pokemonshowdown.com/data/moves.js').BattleMovedex;
+		global.BattleAbilities = require('../play.pokemonshowdown.com/data/abilities.js').BattleAbilities;
+		global.BattleTeambuilderTable = require('../play.pokemonshowdown.com/data/teambuilder-tables.js').BattleTeambuilderTable;
+		Object.assign(global, require('../play.pokemonshowdown.com/data/gen9fantasy.js'));
+		battle = new Battle({ debug: true, log: [
+			'|gen|9', `|gametype|${doubles ? 'doubles' : 'singles'}`, `|tier|${tier}`, '|start',
+			'|switch|p1a: Mew|Mew|100/100', '|switch|p2a: Giratina|Giratina|100/100',
+			'|-ability|p2a: Giratina|Pressure',
+			...(doubles ? [
+				'|switch|p1b: Mewtwo|Mewtwo|100/100', '|-ability|p1b: Mewtwo|Pressure',
+				'|switch|p2b: Dialga|Dialga|100/100', '|-ability|p2b: Dialga|Pressure',
+			] : []),
+			'|turn|1',
+		] });
+		return battle.p1.active[0];
+	}
+
+	for (const [move, target] of [
+		['Recover', 'p1a: Mew'], ['Swords Dance', 'p1a: Mew'], ['Heal Bell', 'p1a: Mew'],
+		['Sticky Web', 'p2a: Giratina'], ['Shadow Ball', 'p2a: Giratina'],
+	]) {
+		it(`counts the extra PP for ${move} in Fantasy battles`, () => {
+			const user = create();
+			battle.add(`|move|p1a: Mew|${move}|${target}`);
+			assert.deepEqual(user.moveTrack, [[move, 2]]);
+		});
+	}
+
+	it('charges Sleep Talk once and leaves the called move unused', () => {
+		const user = create();
+		battle.add('|move|p1a: Mew|Sleep Talk|p1a: Mew');
+		battle.add('|move|p1a: Mew|Shadow Ball|p2a: Giratina|[from] move: Sleep Talk');
+		assert.deepEqual(user.moveTrack, [['Sleep Talk', 2], ['Shadow Ball', 0]]);
+	});
+
+	it('counts each opposing holder once and excludes allied Pressure', () => {
+		const user = create('[Gen 9] FC Doubles', true);
+		battle.add('|move|p1a: Mew|Recover|p1a: Mew');
+		assert.deepEqual(user.moveTrack, [['Recover', 3]]);
+	});
+
+	it('stops counting a holder after it switches out', () => {
+		const user = create();
+		battle.add('|switch|p2a: Blissey|Blissey|100/100');
+		battle.add('|move|p1a: Mew|Recover|p1a: Mew');
+		assert.deepEqual(user.moveTrack, [['Recover', 1]]);
+	});
+
+	it('respects ability suppression', () => {
+		const user = create();
+		battle.add('|-endability|p2a: Giratina');
+		battle.add('|move|p1a: Mew|Recover|p1a: Mew');
+		assert.deepEqual(user.moveTrack, [['Recover', 1]]);
+	});
+
+	it('keeps standard-format self-targeting moves at one PP', () => {
+		const user = create('[Gen 9] OU');
+		battle.add('|move|p1a: Mew|Recover|p1a: Mew');
+		battle.add('|move|p1a: Mew|Shadow Ball|p2a: Giratina');
+		assert.deepEqual(user.moveTrack, [['Recover', 1], ['Shadow Ball', 2]]);
 	});
 });
 
