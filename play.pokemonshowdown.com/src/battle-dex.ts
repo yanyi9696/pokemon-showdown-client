@@ -240,6 +240,27 @@ export interface TeambuilderSpriteData {
 	shiny?: boolean;
 }
 
+// ZA Megas with official gen5 placeholders available in both normal and shiny variants.
+// Use sprite IDs because this server still labels several ZA formes as Gen 6.
+// Synced from https://play.pokemonshowdown.com/sprites/gen5/ on 2026-09-26.
+const teambuilderGen5Sprites: { [id: string]: string } = {
+	clefablemega: 'clefable-mega', victreebelmega: 'victreebel-mega',
+	starmiemega: 'starmie-mega', dragonitemega: 'dragonite-mega',
+	meganiummega: 'meganium-mega', feraligatrmega: 'feraligatr-mega',
+	skarmorymega: 'skarmory-mega', chimechomega: 'chimecho-mega',
+	absolmegaz: 'absol-megaz', garchompmegaz: 'garchomp-megaz',
+	lucariomegaz: 'lucario-megaz', froslassmega: 'froslass-mega',
+	emboarmega: 'emboar-mega', excadrillmega: 'excadrill-mega',
+	chandeluremega: 'chandelure-mega', golurkmega: 'golurk-mega',
+	chesnaughtmega: 'chesnaught-mega', delphoxmega: 'delphox-mega',
+	greninjamega: 'greninja-mega', floettemega: 'floette-mega',
+	meowsticmmega: 'meowstic-mmega', meowsticfmega: 'meowstic-fmega',
+	hawluchamega: 'hawlucha-mega', crabominablemega: 'crabominable-mega',
+	golisopodmega: 'golisopod-mega', drampamega: 'drampa-mega',
+	scovillainmega: 'scovillain-mega', glimmoramega: 'glimmora-mega',
+	baxcaliburmega: 'baxcalibur-mega',
+};
+
 export const Dex = new class implements ModdedDex {
 	readonly Ability = Ability;
 	readonly Item = Item;
@@ -1250,6 +1271,15 @@ export const Dex = new class implements ModdedDex {
 		};
 		if (pokemon.shiny) spriteData.shiny = true;
 
+		const gen5Sprite = teambuilderGen5Sprites[toID(spriteid)];
+		if (gen5Sprite) {
+			spriteData.spriteid = gen5Sprite;
+			spriteData.spriteDir = 'sprites/gen5';
+			spriteData.x = 10;
+			spriteData.y = 5;
+			return spriteData;
+		}
+
 		if (spriteid.endsWith('gmax') || spriteid.endsWith('gigantamax')) {
 			spriteData.spriteDir = 'sprites/gen5';
 			
@@ -1449,11 +1479,13 @@ export const Dex = new class implements ModdedDex {
 
             // X轴固定 10px，Y轴动态应用 finalY
             return `background-image:url(${finalUrl});${bgSize}background-position: 10px ${finalY};background-repeat:no-repeat`;
-        } else {
-            // 属于你本地魔改的非 home 贴图，依然读取你本地或私服配置的路径
-            const finalUrl = `${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`;
-            return `background-image:url(${finalUrl});background-position:${data.x}px ${data.y}px;background-repeat:no-repeat`;
-        }
+		} else {
+			// ZA placeholders come from the official host; other sprites keep their configured source.
+			const spritePrefix = teambuilderGen5Sprites[toID(data.spriteid)] ?
+				'https://play.pokemonshowdown.com/' : Dex.resourcePrefix;
+			const finalUrl = `${spritePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png`;
+			return `background-image:url(${finalUrl});background-position:${data.x}px ${data.y}px;background-repeat:no-repeat`;
+		}
 	}
 
 	getItemIcon(item: any) {
