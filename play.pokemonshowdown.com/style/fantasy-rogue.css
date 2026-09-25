@@ -1,10 +1,14 @@
-/* A mid-tone, static Stellar palette with the native buttons' top-to-bottom shading. */
+/* Fixed Stellar crystal facets with a soft top glint and deeper shading below. */
 .menugroup .button.mainmenu-rogue {
 	background:
-		linear-gradient(to bottom, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 50%),
-		linear-gradient(to bottom, rgba(20, 12, 38, 0), rgba(20, 12, 38, .18)),
-		linear-gradient(90deg, #8564aa 0%, #ae6c9b 23%, #a08c50 48%, #519281 73%, #5a80ad 100%);
-	border-color: #79638f;
+		radial-gradient(ellipse at 35% 0%, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 60%),
+		linear-gradient(to bottom,
+			rgba(255, 255, 255, .28) 0%, rgba(255, 255, 255, .10) 30%,
+			rgba(22, 20, 54, .04) 60%, rgba(22, 20, 54, .16) 100%),
+		url(fantasy-rogue-stellar.svg);
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	border-color: #777d9d;
 }
 .button.mainmenu-rogue:hover, .button.mainmenu-rogue:focus-visible { border-color: #655282; box-shadow: 0 0 0 1px #cbb8e8; }
 .button.mainmenu-rogue:active { box-shadow: inset 0 1px 3px rgba(56, 43, 84, .3); }
