@@ -1,21 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-	<path fill="#438eae" d="M0 0H100V100H0Z"/>
-	<path fill="#b8c96a" d="M0 0H36L39 34 20 27Z"/>
-	<path fill="#d7be51" d="M36 0H63L66 29 39 34Z"/>
-	<path fill="#dda34b" d="M63 0H100L82 22 66 29Z"/>
-	<path fill="#dc8053" d="M100 0V35L78 42 82 22Z"/>
-	<path fill="#9ec45a" d="M0 0 20 27 0 32Z"/>
-	<path fill="#7db65f" d="M0 32 20 27 39 34 35 65 19 56 0 48Z"/>
-	<path fill="#adbc56" d="M39 34 66 29 54 48Z"/>
-	<path fill="#d4a157" d="M66 29 82 22 78 42 66 61 54 48Z"/>
-	<path fill="#c86998" d="M100 35V66L80 68 66 61 78 42Z"/>
-	<path fill="#996bb5" d="M66 61 80 68 100 66V100H74Z"/>
-	<path fill="#6b81b5" d="M66 61 74 100H48L49 76Z"/>
-	<path fill="#588faa" d="M35 65 54 48 66 61 49 76Z"/>
-	<path fill="#67aa87" d="M39 34 54 48 35 65Z"/>
-	<path fill="#36a79b" d="M0 48 19 56 14 76 0 67Z"/>
-	<path fill="#32a4bb" d="M19 56 35 65 31 82 14 76Z"/>
-	<path fill="#318ebe" d="M0 67 14 76 31 82 16 100H0Z"/>
-	<path fill="#3f9fad" d="M35 65 49 76 48 100H31V82Z"/>
-	<path fill="#4aa0c1" d="M31 82V100H16Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 48" preserveAspectRatio="none">
+	<defs>
+		<linearGradient id="warm" x2="1" y2="0">
+			<stop stop-color="#83d24c"/>
+			<stop offset=".24" stop-color="#d5d849"/>
+			<stop offset=".44" stop-color="#efc249"/>
+			<stop offset=".65" stop-color="#f9a055"/>
+			<stop offset=".84" stop-color="#e77a95"/>
+			<stop offset="1" stop-color="#ad73ca"/>
+		</linearGradient>
+		<linearGradient id="cool" x2="1" y2="0">
+			<stop stop-color="#10abc9"/>
+			<stop offset=".3" stop-color="#50becb"/>
+			<stop offset=".56" stop-color="#6e9cd2"/>
+			<stop offset=".8" stop-color="#8c7ad3"/>
+			<stop offset="1" stop-color="#9764bd"/>
+		</linearGradient>
+		<linearGradient id="cool-opacity" x2="0" y2="1">
+			<stop stop-color="#fff" stop-opacity="0"/>
+			<stop offset=".18" stop-color="#fff" stop-opacity=".06"/>
+			<stop offset=".7" stop-color="#fff" stop-opacity=".92"/>
+			<stop offset="1" stop-color="#fff"/>
+		</linearGradient>
+		<mask id="lower-refraction">
+			<path fill="url(#cool-opacity)" d="M0 0H300V48H0Z"/>
+		</mask>
+		<linearGradient id="glass" x2="0" y2="1">
+			<stop stop-color="#fff" stop-opacity=".56"/>
+			<stop offset=".24" stop-color="#fff" stop-opacity=".18"/>
+			<stop offset=".55" stop-color="#fff" stop-opacity="0"/>
+			<stop offset="1" stop-color="#234774" stop-opacity=".12"/>
+		</linearGradient>
+		<linearGradient id="reflection" x1="0" y1="0" x2=".5" y2="1">
+			<stop stop-color="#fff" stop-opacity=".76"/>
+			<stop offset="1" stop-color="#fff" stop-opacity=".06"/>
+		</linearGradient>
+	</defs>
+	<!-- One continuous spectrum keeps the broad faces from becoming separate color tiles. -->
+	<path fill="url(#warm)" d="M0 0H300V48H0Z"/>
+	<path fill="url(#cool)" mask="url(#lower-refraction)" d="M0 0H300V48H0Z"/>
+	<path fill="url(#glass)" d="M0 0H300V48H0Z"/>
+	<!-- Reflections sit at the ends, leaving a calm central face behind the label. -->
+	<path fill="url(#reflection)" d="M0 0H92L61 18 0 31Z"/>
+	<path fill="#d6ffff" fill-opacity=".18" d="M0 31 61 18 94 48H0Z"/>
+	<path fill="url(#reflection)" d="M208 0H300L253 25Z"/>
+	<path fill="#f8eaff" fill-opacity=".2" d="M253 25 300 10V48H279Z"/>
+	<path fill="none" stroke="#fff" stroke-opacity=".38" stroke-width=".7" d="M0 31 61 18 92 0M208 0 253 25 300 10"/>
 </svg>
