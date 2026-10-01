@@ -598,8 +598,15 @@
 			if (!curActive) return;
 			var trapped = curActive.trapped;
 			var canMegaEvo = curActive.canMegaEvo || switchables[pos].canMegaEvo;
+			var canGMegaEvo = curActive.canGMegaEvo || switchables[pos].canGMegaEvo;
 			var canMegaEvoX = curActive.canMegaEvoX || switchables[pos].canMegaEvoX;
 			var canMegaEvoY = curActive.canMegaEvoY || switchables[pos].canMegaEvoY;
+			for (var choiceIndex = 0; choiceIndex < pos; choiceIndex++) {
+				if (!/\bmega(?:x|y)?\b/.test(this.choice.choices[choiceIndex])) continue;
+				var usedGMega = !!this.request.active[choiceIndex].canGMegaEvo;
+				if (usedGMega === !!canGMegaEvo) canMegaEvo = false;
+				if (!usedGMega) canMegaEvoX = canMegaEvoY = false;
+			}
 			var canZMove = curActive.canZMove || switchables[pos].canZMove;
 			var canUltraBurst = curActive.canUltraBurst || switchables[pos].canUltraBurst;
 			var canDynamax = curActive.canDynamax || switchables[pos].canDynamax;
@@ -763,7 +770,7 @@
 				}
 				var checkboxes = [];
 				if (canMegaEvo) {
-					checkboxes.push('<label class="megaevo"><input type="checkbox" name="megaevo" />&nbsp;Mega&nbsp;Evolution</label>');
+					checkboxes.push('<label class="megaevo"><input type="checkbox" name="megaevo" />&nbsp;' + (canGMegaEvo ? 'G-Mega' : 'Mega') + '&nbsp;Evolution</label>');
 				}
 				if (canMegaEvoX) {
 					checkboxes.push('<label class="megaevo"><input type="checkbox" name="megaevox" />&nbsp;Mega&nbsp;Evolution&nbsp;X</label>');
@@ -1063,7 +1070,7 @@
 						if (parts.length > 2) {
 							var targetPos = parts[2];
 							if (targetPos === 'mega') {
-								buf += 'Mega Evolve, then ';
+								buf += this.request.active[i].canGMegaEvo ? 'G-Mega Evolve, then ' : 'Mega Evolve, then ';
 								targetPos = parts[3];
 							}
 							if (targetPos === 'megax') {

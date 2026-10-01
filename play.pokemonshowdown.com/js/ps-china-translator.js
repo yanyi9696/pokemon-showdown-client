@@ -8631,6 +8631,7 @@ var regex_shook_head = new RegExp(/^(.+?) shook its head. It seems like it can't
 
 
 var regex_Mega_Evolution = new RegExp(/^\sMega\sEvolution$/);
+var regex_GMega_Evolution = /^\s*G-Mega\s+Evolution\s*$/;
 var regex_Fallen = new RegExp(/^Fallen:\s(\d{1})$/);
 var regex_modifiers = new RegExp(/^([0-9.×]+?)\s([A-z]+?)$/);
 var regex_modifiers2 = new RegExp(/^already\s(4|0.33|0.25)×\s([A-z]+?)$/);
@@ -11759,6 +11760,9 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
 
         //  \s
 
+        if (originalStr.match(regex_GMega_Evolution)) {
+            return "超巨进化";
+        }
         if (originalStr.match(regex_Mega_Evolution)) {
             return  "Mega进化";
         }
@@ -12228,11 +12232,158 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
         return translatedParts.join('');
     }
 
+    // 队伍校验弹窗使用多行文本；在名字后缀替换和长文本过滤之前逐行处理。
+    const validationHeading = "您的队伍未通过校验，原因如下：";
+    const validationKinds = { item: "道具", ability: "特性", move: "招式", nature: "性格" };
+    function validationName(name, kind) {
+        if (kind === 'move') {
+            const moveNames = { Psychic: "精神强念", Metronome: "挥指", Refresh: "焕然一新", Disable: "定身法" };
+            if (moveNames[name]) return moveNames[name];
+        }
+        if (translations[name]) return translations[name];
+        // 校验器用“昵称 (种族)”标注昵称，保留昵称本身。
+        const named = !kind && name.match(/^(.*) \(([^()]+)\)$/);
+        if (named) return named[1] + "（" + translatePokemonName(named[2]) + "）";
+        return translatePokemonName(name);
+    }
+    function validationList(text, kind) {
+        return text.split(/(, | or | \+ | \+\+ )/).map(part => {
+            if (part === ', ') return "、";
+            if (part === ' or ') return "或";
+            if (part === ' + ' || part === ' ++ ') return part;
+            return validationName(part, kind);
+        }).join('');
+    }
+    function validationRule(name) {
+        return translations[name] || translations[name + ':']?.replace(/：$/, '') || name;
+    }
+    function validationSource(source) {
+        return source ? "（规则：" + validationRule(source) + "）" : '';
+    }
+    function validationSubject(text) {
+        const part = text.match(/^(.+?)'s (item|ability|move|nature) (.+)$/);
+        if (part) return validationName(part[1]) + "的" + validationKinds[part[2]] + "“" + validationName(part[3], part[2]) + "”";
+        if (text === 'Mega evolutions') return "Mega进化";
+        const noItem = text.match(/^(.+?) not holding an item$/);
+        if (noItem) return validationName(noItem[1]) + "不携带道具的配置";
+        return validationName(text);
+    }
+    const validationMessages = {
+        "Your team was rejected for the following reason:": validationHeading,
+        "Your team was rejected for the following reasons:": validationHeading,
+        "This format requires you to use your own team.": "此赛制需要使用您自己组建的队伍。",
+        "This format doesn't let you use your own team.": "此赛制不允许使用自组队伍。",
+        "This is not a Pokemon.": "无效的宝可梦配置。",
+        "Your Pokémon must have different nicknames.": "队伍中宝可梦的昵称不能重复。",
+        "Your team must share a type.": "队伍中的宝可梦必须拥有至少一种共同属性。",
+        "You can only have one of Pikachu-Starter or Eevee-Starter on a team.": "队伍中只能携带一只搭档皮卡丘或搭档伊布。",
+        "(Event-only moves are banned.)": "（禁止使用活动限定招式。）",
+        "Only Fantasy Pokémon are allowed in [Gen 9] FC Only.": "[Gen 9] FC Only 只允许使用幻想宝可梦。",
+        "Allowed tiers: Uber, (Uber), OU, UUBL, UU, RUBL, RU.": "允许的分级：Uber、(Uber)、OU、UUBL、UU、RUBL、RU。",
+        "If you're not using a custom client, please report this as a bug.": "如果您没有使用自定义客户端，请将此问题作为漏洞反馈。",
+    };
+    const validationPatterns = [
+        [/^(.+?) is not a valid species in this format\.$/, (_, mon) => validationName(mon) + "不是此赛制中的有效宝可梦。"],
+        [/^(.+?) is not a Fantasy Pok[eé]mon\.$/, (_, mon) => validationName(mon) + "不是幻想宝可梦。"],
+        [/^(.+?) with (.+) is not legal\.$/, (_, mon, item) => validationName(mon) + "携带“" + validationName(item, 'item') + "”的配置不合法。"],
+        [/^Reason: Its Mega Evolution \((.+)\) is banned in this tier\.$/, (_, mon) => "原因：其" + (mon.includes('-G-Mega') ? "超巨进化" : "Mega进化") + "形态（" + validationName(mon) + "）在此分级中被禁止使用。"],
+        [/^(.+?) has unsupported tier "(.+)" for FC Only scoring\.$/, (_, mon, tier) => validationName(mon) + "的分级“" + tier + "”不在 FC Only 积分规则支持的范围内。"],
+        [/^Your team has (\d+) points, exceeding the (\d+)-point limit\.$/, (_, points, limit) => "队伍总积分为" + points + "，超过了" + limit + "分的上限。"],
+        [/^Breakdown: (.+)$/, (_, details) => "积分明细：" + details.split(', ').map(entry => {
+            return entry.split(' -> ').map(part => {
+                const score = part.match(/^(.+?)(\((?:[^()]|\([^()]*\))*\))(.*)$/);
+                return score ? validationName(score[1]) + score[2] + score[3] : part;
+            }).join(' → ').replace(/\[\+(\d+) budget\]/g, '[积分上限+$1]');
+        }).join('、')],
+        [/^(.+?) can't learn any moves at all\.$/, (_, mon) => validationName(mon) + "无法学习任何招式。"],
+        [/^(.+?) can't learn (.+)\.$/, (_, mon, move) => validationName(mon) + "无法学习“" + validationName(move, 'move') + "”。"],
+        [/^(.+?) can't have (.+)\.$/, (_, mon, ability) => validationName(mon) + "不能拥有特性“" + validationName(ability, 'ability') + "”。"],
+        [/^(.+?) needs to have an ability\.$/, (_, mon) => validationName(mon) + "必须设置特性。"],
+        [/^(.+?) has no moves \(it must have at least one to be usable\)\.$/, (_, mon) => validationName(mon) + "没有招式，至少需要设置一个招式。"],
+        [/^(.+?) has (\d+) moves, which is more than the limit of (\d+)\.$/, (_, mon, count, limit) => validationName(mon) + "设置了" + count + "个招式，超过了" + limit + "个的上限。"],
+        [/^(.+?) has multiple copies of (.+)\.$/, (_, mon, move) => validationName(mon) + "重复设置了招式“" + validationName(move, 'move') + "”。"],
+        [/^The Pokemon "(.+)" does not exist\.$/, (_, mon) => "不存在名为“" + mon + "”的宝可梦。"],
+        [/^"(.+)" is an invalid (item|ability|move|nature)\.$/, (_, name, kind) => "无效的" + validationKinds[kind] + "：“" + name + "”。"],
+        [/^(.+?) has an invalid happiness value\.$/, (_, mon) => validationName(mon) + "的亲密度数值无效。"],
+        [/^(.+?)'s (Hidden Power|Terastal) type \((.+)\) is invalid\.$/, (_, mon, mechanic, type) => validationName(mon) + "的" + (mechanic === 'Hidden Power' ? "觉醒力量" : "太晶") + "属性“" + validationName(type) + "”无效。"],
+        [/^(.+?)'s Hidden Ability is unreleased\.$/, (_, mon) => validationName(mon) + "的隐藏特性尚未开放。"],
+        [/^(.+?)'s Hidden Ability is only available from Virtual Console, which is not allowed in this format\.$/, (_, mon) => validationName(mon) + "的隐藏特性只能来自 Virtual Console，而此赛制不允许该来源。"],
+        [/^(.+?) must be at least level (\d+) to have a Hidden Ability\.$/, (_, mon, level) => validationName(mon) + "至少需要" + level + "级才能拥有隐藏特性。"],
+        [/^(.+?) must be male to have a Hidden Ability\.$/, (_, mon) => validationName(mon) + "必须为雄性才能拥有隐藏特性。"],
+        [/^(.+?)'s move (.+?) is incompatible with (.+)\.$/, (_, mon, move, other) => validationName(mon) + "的招式“" + validationName(move, 'move') + "”与" + (other === 'its Pokemon GO origin' ? "其 Pokémon GO 来源" : validationList(other, 'move')) + "不兼容。"],
+        [/^(.+?)'s moves (.+?) are incompatible( with its Pokemon GO origin)?\.$/, (_, mon, moves, origin) => validationName(mon) + "的招式组合（" + validationList(moves, 'move') + "）" + (origin ? "与其 Pokémon GO 来源不兼容。" : "无法合法共存。")],
+        [/^(.+?)'s move (.+?) can only be learned in gens without Hidden Abilities\.$/, (_, mon, move) => validationName(mon) + "只能在尚无隐藏特性的世代学会“" + validationName(move, 'move') + "”，因此不能同时拥有隐藏特性。"],
+        [/^(.+?) has a (?:Hidden Ability - it can't use moves from before Gen|hidden ability - it can't have moves only learned before gen) (\d+)\.$/, (_, mon, gen) => validationName(mon) + "拥有隐藏特性，不能使用仅在第" + gen + "世代之前可习得的招式。"],
+        [/^(.+?) transforms in-battle with (.+), please fix its (ability|item|moves)\.$/, (_, mon, requirement, kind) => validationName(mon) + "需要" + ({ ability: "特性", item: "道具", moves: "招式" })[kind] + "“" + validationName(requirement, kind === 'moves' ? 'move' : kind) + "”才能在战斗中变为该形态，请修改配置。"],
+        [/^(.+?) needs to hold (.+?)(?: to be in its (.+) forme)?\.$/, (_, mon, items, forme) => validationName(mon) + "必须携带" + validationList(items, 'item') + (forme ? "才能保持“" + validationName('-' + forme).replace(/^-/, '') + "”形态" : '') + "。"],
+        [/^(.+?) needs to know the move (.+?) to be in its (.+) forme\.$/, (_, mon, move, forme) => validationName(mon) + "必须学会“" + validationName(move, 'move') + "”才能保持“" + validationName('-' + forme).replace(/^-/, '') + "”形态。"],
+        [/^\(It will revert to its (.+) forme if you remove the item or give it a different item\.\)$/, (_, forme) => "（移除或更换道具后，会恢复为" + (forme === 'base' ? "基础" : validationName('-' + forme).replace(/^-/, '')) + "形态。）"],
+        [/^\(It will revert to its (.*) forme if it forgets the move\.\)$/, (_, forme) => "（忘记该招式后，会恢复为" + (forme ? validationName('-' + forme).replace(/^-/, '') : "基础") + "形态。）"],
+        [/^(.+?) is required to hold (.+)\.$/, (_, mon, item) => validationName(mon) + "必须携带“" + validationName(item, 'item') + "”。"],
+        [/^(.+?) is required to have (.+)\.$/, (_, mon, move) => validationName(mon) + "必须学会“" + validationName(move, 'move') + "”。"],
+        [/^(.+?) \(level (\d+)\) is (below the minimum|above the maximum) level of (\d+)(?: from (.+))?\.?$/, (_, mon, level, bound, limit, source) => validationName(mon) + "的等级为" + level + "，" + (bound === 'below the minimum' ? "低于最低等级" : "超过最高等级") + limit + validationSource(source) + "。"],
+        [/^(.+?) must be at least level (\d+) to be evolved\.$/, (_, mon, level) => validationName(mon) + "至少需要" + level + "级才能进化。"],
+        [/^(.+?) has (\d+) total EVs, which is more than this format's limit of (\d+)\.$/, (_, mon, total, limit) => validationName(mon) + "的努力值总和为" + total + "，超过此赛制的上限" + limit + "。"],
+        [/^(.+?) has more than (\d+) (EVs|Awakening Values) in (.+)\.$/, (_, mon, limit, kind, stat) => validationName(mon) + "的" + validationName(stat) + (kind === 'EVs' ? "努力值" : "觉醒值") + "超过了" + limit + "。"],
+        [/^(.+?) has less than 0 (EVs|Awakening Values) in (.+)\.$/, (_, mon, kind, stat) => validationName(mon) + "的" + validationName(stat) + (kind === 'EVs' ? "努力值" : "觉醒值") + "不能小于0。"],
+        [/^(.+?) has EVs, which is not allowed by this format\.$/, (_, mon) => validationName(mon) + "设置了努力值，但此赛制不允许使用努力值。"],
+        [/^(.+?) has exactly 0 EVs - did you forget to EV it\? \(If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake\)\.$/, (_, mon) => validationName(mon) + "的努力值总和为0，是否忘记分配？如果是有意设置，请给任一项努力值增加1点；这不会改变能力值，但可以确认并非遗漏。"],
+        [/^(.+?) has exactly (\d+) EVs, but this format does not restrict you to 510 EVs \(If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake\)\.$/, (_, mon, total) => validationName(mon) + "的努力值总和为" + total + "，但此赛制没有510点总努力值限制。如果是有意设置，请给任一项努力值增加1点以确认。"],
+        [/^You must bring at least (\d+) Pok[eé]mon \(your team has (\d+)\)\.$/, (_, limit, count) => "队伍至少需要" + limit + "只宝可梦，当前有" + count + "只。"],
+        [/^You may only bring up to (\d+) Pok[eé]mon \(your team has (\d+)\)\.$/, (_, limit, count) => "队伍最多允许" + limit + "只宝可梦，当前有" + count + "只。"],
+        [/^You are limited to one of each Pokémon by Species Clause\.$/, () => "根据种族条款，队伍中每种宝可梦最多只能携带一只。"],
+        [/^You are limited to (\d+) of each item by Item Clause\.$/, (_, limit) => "根据道具条款，每种道具最多只能携带" + limit + "个。"],
+        [/^\(You have more than (one|\d+) (.+)\)$/, (_, limit, name) => "（您的队伍中“" + validationName(name) + "”的数量超过了" + (limit === 'one' ? '1' : limit) + "。）"],
+        [/^Your team has the combination of (.+), which is banned(?: by (.+))?\.$/, (_, combination, source) => "队伍包含被禁止的组合：" + validationList(combination) + validationSource(source) + "。"],
+        [/^(.+?) has the combination of (.+), which is (?:banned(?: by (.+))?|impossible to obtain legitimately)\.$/, (_, mon, combination, source) => validationName(mon) + "的组合“" + validationList(combination) + "”不合法" + validationSource(source) + "。"],
+        [/^You are limited to (\d+) of (.+?)(?: by (.+))?\.$/, (_, limit, rule, source) => "队伍中的“" + validationList(rule) + "”最多允许" + limit + validationSource(source) + "。"],
+        [/^(.+?) is limited to (\d+) of (.+?)(?: by (.+))?\.$/, (_, mon, limit, rule, source) => validationName(mon) + "最多允许配置" + limit + "项“" + validationList(rule) + "”" + validationSource(source) + "。"],
+        [/^(.+?) (?:is|are) tagged (.+), which is banned(?: by (.+))?\.$/, (_, subject, tag, source) => validationSubject(subject) + "属于被禁止的分类“" + validationName(tag) + "”" + validationSource(source) + "。"],
+        [/^(.+?) (?:is|are) banned(?:(?: by| due to) (.+))?\.$/, (_, subject, source) => validationSubject(subject) + "被禁止使用" + validationSource(source) + "。"],
+        [/^(.+?) is illegal\.$/, (_, subject) => validationSubject(subject) + "不符合此赛制的规则。"],
+        [/^(.+?) (?:is|are) not obtainable\.$/, (_, subject) => validationSubject(subject) + "无法合法获得。"],
+        [/^(.+?) is not obtainable without hacking or glitches(?: in Gen (\d+))?\.$/, (_, subject, gen) => validationSubject(subject) + (gen ? "在第" + gen + "世代" : '') + "只能通过修改游戏或利用漏洞获得，不能合法使用。"],
+        [/^(.+?) does not exist in Gen (\d+)\.$/, (_, subject, gen) => validationSubject(subject) + "在第" + gen + "世代中不存在。"],
+        [/^(.+?) does not exist in (this game|the National Dex)\.$/, (_, subject, game) => validationSubject(subject) + "不在" + (game === 'this game' ? "此游戏" : "全国图鉴") + "中。"],
+        [/^(.+?) is not possible to obtain in this game\.$/, (_, subject) => validationSubject(subject) + "无法在此游戏中获得。"],
+        [/^(.+?) is not in the list of allowed (pokemon|items|abilities|moves|natures)\.$/, (_, subject) => validationSubject(subject) + "不在此赛制的允许名单中。"],
+        [/^Your team must contain (.+)\.$/, (_, mon) => "队伍中必须包含" + validationName(mon) + "。"],
+        [/^(.+?) must have its Tera Type set to (.+)\.$/, (_, mon, type) => validationName(mon) + "的太晶属性必须设为" + validationName(type) + "。"],
+        [/^Nickname "(.+)" too long \(should be (\d+) characters or fewer\)$/, (_, name, limit) => "昵称“" + name + "”过长，最多允许" + limit + "个字符。"],
+        [/^Your Pokémon has a banned nickname: (.+)$/, (_, name) => "宝可梦使用了被禁止的昵称：" + name],
+    ];
+    function translateTeamValidationText(value) {
+        return value.split('\n').map(line => {
+            const parts = line.match(/^(\s*(?:[-•]\s*)?)(.*?)(\s*)$/);
+            if (!parts || !parts[2]) return line;
+            const message = parts[2];
+            let translated = validationMessages[message] || translations[message];
+            if (!translated) {
+                for (const [pattern, render] of validationPatterns) {
+                    const match = message.match(pattern);
+                    if (!match) continue;
+                    translated = render(...match);
+                    break;
+                }
+            }
+            // 未识别的原因保留原文，不丢弃或只翻译其中的宝可梦名字。
+            return translated ? parts[1] + translated + parts[3] : line;
+        }).join('\n');
+    }
+
     function translateNode(node) {
         if (node.nodeType === 3) {
             let value = node.nodeValue;
             let trimmed = value.trim();
             if (!trimmed) return;
+
+            const popup = node.parentElement?.closest('.ps-popup');
+            if (popup && (/Your team was rejected for the following reasons?:/.test(popup.textContent) ||
+                popup.textContent.includes(validationHeading))) {
+                const translated = translateTeamValidationText(value);
+                if (translated !== value) node.nodeValue = translated;
+                return;
+            }
 
             // 优先级别 0：基于 DOM 语境的多义词特殊处理 (必须在查词典前执行)
             // 处理例如 Psychic 作为“超能力”属性还是“精神强念”招式的问题

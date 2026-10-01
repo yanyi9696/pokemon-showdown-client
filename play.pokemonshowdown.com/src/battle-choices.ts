@@ -44,6 +44,8 @@ export interface BattleRequestActivePokemon {
 	canDynamax?: boolean;
 	canGigantamax?: boolean;
 	canMegaEvo?: boolean;
+	/** G-Mega uses the `mega` command with a separate team opportunity. */
+	canGMegaEvo?: boolean;
 	canMegaEvoX?: boolean;
 	canMegaEvoY?: boolean;
 	canUltraBurst?: boolean;
@@ -134,6 +136,7 @@ export class BattleChoiceBuilder {
 	};
 	alreadySwitchingIn: number[] = [];
 	alreadyMega = false;
+	alreadyGMega = false;
 	alreadyMax = false;
 	alreadyZ = false;
 	alreadyTera = false;
@@ -207,7 +210,11 @@ export class BattleChoiceBuilder {
 					return null;
 				}
 			}
-			if (choice.mega || choice.megax || choice.megay) this.alreadyMega = true;
+			if (choice.mega && this.currentMoveRequest()?.canGMegaEvo) {
+				this.alreadyGMega = true;
+			} else if (choice.mega || choice.megax || choice.megay) {
+				this.alreadyMega = true;
+			}
 			if (choice.z) this.alreadyZ = true;
 			if (choice.max) this.alreadyMax = true;
 			if (choice.tera) this.alreadyTera = true;

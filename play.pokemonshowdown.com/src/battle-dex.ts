@@ -1271,7 +1271,8 @@ export const Dex = new class implements ModdedDex {
 		};
 		if (pokemon.shiny) spriteData.shiny = true;
 
-		const gen5Sprite = teambuilderGen5Sprites[toID(spriteid)];
+		// Older clients may have replaced the sprite ID with the base forme already.
+		const gen5Sprite = teambuilderGen5Sprites[toID(spriteid)] || teambuilderGen5Sprites[id.replace(/fantasy$/, '')];
 		if (gen5Sprite) {
 			spriteData.spriteid = gen5Sprite;
 			spriteData.spriteDir = 'sprites/gen5';
