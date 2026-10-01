@@ -11759,6 +11759,9 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
 
         //  \s
 
+        if (originalStr.match(regex_G-Mega_Evolution)) {
+            return  "超巨进化";
+        }
         if (originalStr.match(regex_Mega_Evolution)) {
             return  "Mega进化";
         }
