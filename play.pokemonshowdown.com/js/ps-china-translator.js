@@ -8631,6 +8631,7 @@ var regex_shook_head = new RegExp(/^(.+?) shook its head. It seems like it can't
 
 
 var regex_Mega_Evolution = new RegExp(/^\sMega\sEvolution$/);
+var regex_GMega_Evolution = /^\s*G-Mega\s+Evolution\s*$/;
 var regex_Fallen = new RegExp(/^Fallen:\s(\d{1})$/);
 var regex_modifiers = new RegExp(/^([0-9.×]+?)\s([A-z]+?)$/);
 var regex_modifiers2 = new RegExp(/^already\s(4|0.33|0.25)×\s([A-z]+?)$/);
@@ -11759,8 +11760,8 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
 
         //  \s
 
-        if (originalStr.match(regex_G-Mega_Evolution)) {
-            return  "超巨进化";
+        if (originalStr.match(regex_GMega_Evolution)) {
+            return "超巨进化";
         }
         if (originalStr.match(regex_Mega_Evolution)) {
             return  "Mega进化";
