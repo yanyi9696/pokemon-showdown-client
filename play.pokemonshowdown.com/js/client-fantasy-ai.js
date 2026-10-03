@@ -49,7 +49,7 @@
 			if (!pending || typeof pending.requestId !== 'string' || !/^[a-zA-Z0-9-]{8,80}$/.test(pending.requestId)) pending = null;
 			return {
 				format: typeof saved.format === 'string' ? saved.format : '',
-				trainerId: saved.trainerId || '', difficulty: saved.difficulty === 'hard' ? 'hard' : 'normal',
+				trainerId: saved.trainerId || '', difficulty: ['hard', 'extreme'].includes(saved.difficulty) ? saved.difficulty : 'normal',
 				teamId: saved.teamId || '', pending: pending,
 				battles: saved.battles && typeof saved.battles === 'object' ? saved.battles : {}
 			};
@@ -126,7 +126,7 @@
 			var previous = this.selection;
 			this.scope = FantasyAI.scope();
 			this.selection = FantasyAI.read(this.scope);
-			var hasSavedChoice = this.selection.format || this.selection.trainerId || this.selection.teamId || this.selection.difficulty === 'hard';
+			var hasSavedChoice = this.selection.format || this.selection.trainerId || this.selection.teamId || this.selection.difficulty !== 'normal';
 			// Returning players recover their own choices; explicit edits made before login take priority.
 			if (!this.wasNamed && app.user.get('named') && !this.selection.pending &&
 				(this.guestSelectionChanged || !hasSavedChoice)) {
@@ -239,6 +239,11 @@
 			var format = this.selection.format;
 			return this.state && this.state.formats.find(function (entry) { return entry.id === format; });
 		},
+		supportsDifficulty: function () {
+			return this.selection.difficulty !== 'extreme' || !!(this.state &&
+				this.state.difficulties && this.state.difficulties.includes('extreme') &&
+				this.selectedFormat() && this.selectedFormat().extremeCap);
+		},
 		availableTrainers: function () {
 			var format = this.selectedFormat();
 			return format ? this.state.trainers.filter(function (trainer) { return trainer.format === format.id; }) : [];
@@ -258,7 +263,7 @@
 		},
 		changeDifficulty: function (e) {
 			if (!app.user.get('named')) this.guestSelectionChanged = true;
-			this.selection.difficulty = e.currentTarget.value === 'hard' ? 'hard' : 'normal';
+			this.selection.difficulty = ['hard', 'extreme'].includes(e.currentTarget.value) ? e.currentTarget.value : 'normal';
 			this.save(); this.render();
 		},
 		changeTeam: function (e) {
@@ -288,7 +293,7 @@
 			FantasyAI.syncTeams();
 			var trainer = this.selectedTrainer();
 			var team = this.selectedTeam();
-			if (this.loading || this.selection.pending || !this.state || !this.state.enabled ||
+			if (this.loading || this.selection.pending || !this.state || !this.state.enabled || !this.supportsDifficulty() ||
 				!trainer || !team || this.state.activeBattles.length >= (this.state.capacity && this.state.capacity.maxBattlesPerPlayer || 1)) return;
 			if (!app.user.get('named')) return this.login();
 			if (!app.socket || app.socket.readyState !== 1 || app.isDisconnected) return this.disconnected();
@@ -366,8 +371,19 @@
 				if (trainer.developmentOnly) buf += '<small>开发测试内容（非正式训练家）</small>';
 				buf += '</div></div>';
 			}
-			buf += '<p><label class="label" for="fantasy-ai-difficulty">难度</label><select class="select" id="fantasy-ai-difficulty" name="difficulty" aria-describedby="fantasy-ai-info"' + (pending ? ' disabled' : '') + '><option value="normal"' + (selection.difficulty === 'normal' ? ' selected' : '') + '>普通</option><option value="hard"' + (selection.difficulty === 'hard' ? ' selected' : '') + '>高难</option></select></p>';
-			buf += '<p id="fantasy-ai-info"><small>' + (selection.difficulty === 'hard' ? 'AI 知晓你全队的初始配置和精确能力值，还会在你提交后读取本回合所选招式。' : 'AI 知晓你全队每只宝可梦的配招，并根据公开对战信息进行判断。') + '</small></p>';
+			buf += '<p><label class="label" for="fantasy-ai-difficulty">难度</label><select class="select" id="fantasy-ai-difficulty" name="difficulty" aria-describedby="fantasy-ai-info"' + (pending ? ' disabled' : '') + '><option value="normal"' + (selection.difficulty === 'normal' ? ' selected' : '') + '>普通</option><option value="hard"' + (selection.difficulty === 'hard' ? ' selected' : '') + '>高难</option>';
+			if (selection.difficulty === 'extreme' || state && state.difficulties && state.difficulties.includes('extreme')) {
+				buf += '<option value="extreme"' + (selection.difficulty === 'extreme' ? ' selected' : '') + '>极限</option>';
+			}
+			buf += '</select></p>';
+			buf += '<p id="fantasy-ai-info"><small>' + (selection.difficulty !== 'normal' ? 'AI 知晓你全队的完整实时信息，包括精确 HP、PP、能力值、携带道具、特性、太晶属性和隐藏状态；也能读取你已提交的首发顺序、招式、换入目标、太晶化、Mega／超巨进化等操作。不会预知未来随机结果。' : 'AI 知晓你全队每只宝可梦的配招，并根据公开对战信息进行判断。') + '</small></p>';
+			if (selection.difficulty === 'extreme') {
+				if (!this.supportsDifficulty()) {
+					buf += '<p class="message-error">请先选择支持极限难度的赛制；若服务器尚未更新，请刷新后重试。</p>';
+				} else {
+					buf += '<div class="infobox">极限：使用高难 AI。玩家队伍仅可使用 <strong>' + escape(format.extremeCap) + ' 及以下</strong>宝可梦；可主动变为超标 Mega、超巨进化、原始回归等形态的配置也禁止。其他道具、特性和招式禁令沿用原挑战赛制，NPC 队伍不受这项额外分级限制。</div>';
+				}
+			}
 			buf += '<p><label class="label" for="fantasy-ai-team">我的队伍</label><select class="select" id="fantasy-ai-team" name="team"' + (pending || !Storage.whenTeamsLoaded.isLoaded ? ' disabled' : '') + '><option value="">请选择队伍</option>';
 			Storage.teams.forEach(function (entry) {
 				buf += '<option value="' + escape(entry.fantasyAIId) + '"' + (entry.fantasyAIId === selection.teamId ? ' selected' : '') + '>' + escape(entry.name) + ' — ' + escape(entry.format || '未指定赛制') + '</option>';
@@ -379,8 +395,8 @@
 			if (Storage.whenTeamsLoaded.isLoaded && selection.teamId && !team) buf += '<p class="message-error">上次选择的队伍已删除或无法可靠对应，请重新选择。</p>';
 			buf += '<p><button class="button" name="editTeam">' + (team ? '修改所选队伍' : '打开队伍编辑器') + '</button></p>';
 			if (!app.user.get('named')) buf += '<p>请先按客户端的正常规则选择用户名或登录。</p><p><button class="button" name="login">选择用户名 / 登录</button></p>';
-			buf += '<p><button class="button" name="startChallenge"' + (disabled || !trainer || !team || !app.user.get('named') || state && state.activeBattles.length >= playerLimit ? ' disabled' : '') + '><strong>开始挑战</strong></button></p>';
-			buf += '<p><small>两档使用相同队伍、策略和计算预算。队伍由服务器按所选 FC 赛制与六对六规则校验。断线后默认保留十分钟，不会替你自动出招。</small></p></div>';
+			buf += '<p><button class="button" name="startChallenge"' + (disabled || !this.supportsDifficulty() || !trainer || !team || !app.user.get('named') || state && state.activeBattles.length >= playerLimit ? ' disabled' : '') + '><strong>开始挑战</strong></button></p>';
+			buf += '<p><small>各档使用相同 NPC 队伍和计算预算。队伍由服务器按所选 FC 赛制与六对六规则校验；极限额外限制玩家宝可梦分级。断线后默认保留十分钟，不会替你自动出招。</small></p></div>';
 			this.$el.html(buf);
 		}
 	});

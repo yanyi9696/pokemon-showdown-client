@@ -36,7 +36,8 @@ function client() {
 }
 const team = (name = 'Team A') => ({ name, format: 'gen9fcou', folder: '', team: 'Mew||leftovers|synchronize|psychic' });
 const formats = [
-	{ id: 'gen9fcubersuu', name: 'FC UBUU' }, { id: 'gen9fcou', name: 'FC OU' }, { id: 'gen9fcuu', name: 'FC UU' },
+	{ id: 'gen9fcubersuu', name: 'FC UBUU', extremeCap: 'OU' },
+	{ id: 'gen9fcou', name: 'FC OU', extremeCap: 'UUBL' }, { id: 'gen9fcuu', name: 'FC UU', extremeCap: 'RUBL' },
 ];
 const trainer = { id: 'test', name: 'Test trainer', description: 'Balanced', avatar: '1', style: 'balanced', format: 'gen9fcou' };
 
@@ -212,14 +213,51 @@ describe('Fantasy AI client', () => {
 		assert(c.room.html.includes('&lt;script>bad'));
 		assert(c.room.html.includes('队伍已删除或无法可靠对应'));
 	});
-	it('explains team move knowledge and the hard-mode submitted-move advantage', () => {
+	it('explains normal knowledge and the complete hard-mode information advantage', () => {
 		const c = client();
 		c.room.receiveState({ protocolVersion: 2, formats, enabled: true, trainers: [trainer], activeBattles: [] });
 		assert(c.room.html.includes('知晓你全队每只宝可梦的配招'));
 		c.room.selection.difficulty = 'hard';
 		c.room.render();
-		assert(c.room.html.includes('初始配置和精确能力值'));
-		assert(c.room.html.includes('提交后读取本回合所选招式'));
+		for (const text of ['完整实时信息', '携带道具', '太晶属性', '精确 HP、PP', '换入目标', '首发顺序', '不会预知未来随机结果']) {
+			assert(c.room.html.includes(text), text);
+		}
+	});
+	it('shows extreme caps, persists the selection, and restores extreme for rematches', () => {
+		const c = client();
+		c.Storage.teams = [team()]; c.FantasyAI.syncTeams();
+		c.room.selection.teamId = c.Storage.teams[0].fantasyAIId;
+		c.room.receiveState({ protocolVersion: 2, formats, difficulties: ['normal', 'hard', 'extreme'],
+			enabled: true, trainers: [trainer], activeBattles: [] });
+		c.room.changeDifficulty({ currentTarget: { value: 'extreme' } });
+		for (const format of formats) {
+			c.room.changeFormat({ currentTarget: { value: format.id } });
+			assert(c.room.html.includes(format.extremeCap + ' 及以下'));
+		}
+		assert(c.room.html.includes('NPC 队伍不受这项额外分级限制'));
+		assert(c.room.html.includes('原始回归'));
+		c.room.changeFormat({ currentTarget: { value: trainer.format } });
+		c.room.changeTrainer({ currentTarget: { value: trainer.id } });
+		c.room.startChallenge();
+		assert(c.sent.some(message => message.includes('challenge test, extreme,')));
+		assert.equal(c.FantasyAI.read(c.room.scope).difficulty, 'extreme');
+		c.FantasyAI.rememberBattle('battle-extreme', { userid: 'tester', format: trainer.format, trainerId: trainer.id, difficulty: 'extreme' });
+		c.room.selection.difficulty = 'normal';
+		c.room.restoreBattle('battle-extreme');
+		assert.equal(c.room.selection.difficulty, 'extreme');
+	});
+	it('does not silently create another difficulty when an old server cannot support extreme', () => {
+		const c = client();
+		c.Storage.teams = [team()]; c.FantasyAI.syncTeams();
+		c.room.selection.teamId = c.Storage.teams[0].fantasyAIId;
+		c.room.receiveState({ protocolVersion: 2, formats, enabled: true, trainers: [trainer], activeBattles: [] });
+		assert(!c.room.html.includes('value="extreme"'));
+		c.room.changeFormat({ currentTarget: { value: trainer.format } });
+		c.room.changeTrainer({ currentTarget: { value: trainer.id } });
+		c.room.changeDifficulty({ currentTarget: { value: 'extreme' } });
+		assert(c.room.html.includes('服务器尚未更新'));
+		c.room.startChallenge();
+		assert(!c.sent.some(message => message.startsWith('/fantasyai challenge')));
 	});
 	it('requires a server with explicit creation-result support and ignores malformed stored requests', () => {
 		const c = client();
