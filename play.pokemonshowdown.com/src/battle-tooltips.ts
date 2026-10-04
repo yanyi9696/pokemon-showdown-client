@@ -12,7 +12,7 @@ import { Pokemon, type Battle, type ServerPokemon } from "./battle";
 import { Dex, type ModdedDex, toID, type ID } from "./battle-dex";
 import type { BattleScene } from "./battle-animations";
 import { BattleLog } from "./battle-log";
-import { Move, BattleNatures } from "./battle-dex-data";
+import { Move, BattleNatures, type Type } from "./battle-dex-data";
 import { BattleTextParser } from "./battle-text-parser";
 
 class ModifiableValue {
@@ -777,6 +777,16 @@ export class BattleTooltips {
 				text += `<p class="movetag">&#x2713; Wind <small>(activates Wind Power and Wind Rider)</small></p>`;
 			}
 		}
+		for (const target of foeActive) {
+			if (!target || target.fainted) continue;
+			const factor = this.getMoveEffectiveness(pokemon, move, moveType, category, target, serverPokemon);
+			if (factor === null) continue;
+			const label = factor === 0 ? '无效（免疫）' : factor < 1 ? '效果不佳（抵抗）' :
+				factor > 1 ? '效果绝佳（克制）' : '正常效果';
+			const icon = factor === 0 ? '×' : factor < 1 ? '△' : factor > 1 ? '◎' : '○';
+			text += `<p class="move-effectiveness">${icon} 对 <span>${BattleLog.escapeHTML(target.name || target.speciesForme)}</span>：` +
+				`<strong>${label}</strong> <small>（${factor}×）</small></p>`;
+		}
 		return text;
 	}
 
@@ -1518,6 +1528,15 @@ export class BattleTooltips {
 		if (!serverPokemon || isTransformed) {
 			if (!clientPokemon) throw new Error('Must pass either clientPokemon or serverPokemon');
 			let [min, max] = this.getSpeedRange(clientPokemon);
+			if (this.battle.gen >= 3 && !/Random|Computer-Generated|Let's Go/.test(this.battle.tier)) {
+				const { ev0, ev252 } = this.getSpeedBenchmarks(clientPokemon);
+				return '<p><small>速度</small> ' +
+					`<span title="极限低速：0 速度个体、0 速度努力、减速性格">${min}</span>－` +
+					`<span title="0速：31 速度个体、0 速度努力、速度无修正性格">${ev0}</span>－` +
+					`<span title="满速：31 速度个体、252 速度努力、速度无修正性格">${ev252}</span>－` +
+					`<span title="极速：31 速度个体、252 速度努力、加速性格">${max}</span>` +
+					'<br /><small>极限低速／0速／满速／极速；未计道具、特性及其他修正</small></p>';
+			}
 			return `<p><small>Spe</small> ${min} to ${max} <small>(before items/abilities/modifiers)</small></p>`;
 		}
 		const stats = serverPokemon.stats;
@@ -1594,6 +1613,15 @@ export class BattleTooltips {
 	/**
 	 * Calculates possible Speed stat range of an opponent
 	 */
+	getSpeedBenchmarks(pokemon: Pokemon) {
+		const baseSpe = pokemon.getSpecies().baseStats.spe;
+		const level = pokemon.volatiles.transform?.[4] || pokemon.level;
+		return {
+			ev0: Math.floor((2 * baseSpe + 31) * level / 100) + 5,
+			ev252: Math.floor((2 * baseSpe + 94) * level / 100) + 5,
+		};
+	}
+
 	getSpeedRange(pokemon: Pokemon): [number, number] {
 		const tr = Math.trunc || Math.floor;
 		const species = pokemon.getSpecies();
@@ -1944,6 +1972,237 @@ export class BattleTooltips {
 			}
 		}
 		return [moveType, category];
+	}
+
+	getMoveTypeText(move: Dex.Move, value: ModifiableValue, forMaxMove?: boolean | Dex.Move) {
+		const [type, category] = this.getMoveType(move, value, forMaxMove);
+		const pokemon = value.pokemon;
+		if (!pokemon) return [type, ''];
+		const targets = [...pokemon.side.foe.active];
+		if (this.battle.gameType === 'freeforall') {
+			targets.push(...pokemon.side.active.filter(target => target !== pokemon));
+		}
+		const tags = targets.filter(target => target && !target.fainted).map(target => {
+			const factor = this.getMoveEffectiveness(pokemon, move, type, category, target!, value.serverPokemon);
+			return factor === null || factor === 1 ? '' : factor === 0 ? '×' : factor < 1 ? '△' : '◎';
+		});
+		return [type, tags.some(Boolean) ? tags.map(tag => tag || '○').join(' ') : ''];
+	}
+
+	// Type effectiveness adapted from the MIT-licensed official Showdown client.
+	static getTypeAbilityWeakness(attackType: Dex.TypeName, abilityid: ID, dex: ModdedDex = Dex, strict?: boolean) {
+		if (attackType === 'Ground' && ['levitate', 'eelevate'].includes(abilityid)) return 0;
+		if (attackType === 'Water' && abilityid === 'dryskin') return 0;
+		if (attackType === 'Fire' && abilityid === 'flashfire') return 0;
+		if (attackType === 'Electric' && abilityid === 'lightningrod' && dex.gen >= 5) return 0;
+		if (attackType === 'Grass' && abilityid === 'sapsipper') return 0;
+		if (attackType === 'Electric' && abilityid === 'motordrive') return 0;
+		if (attackType === 'Water' && abilityid === 'stormdrain' && dex.gen >= 5) return 0;
+		if (attackType === 'Electric' && abilityid === 'voltabsorb') return 0;
+		if (attackType === 'Water' && abilityid === 'waterabsorb') return 0;
+		if (attackType === 'Ground' && abilityid === 'eartheater') return 0;
+		if (attackType === 'Fire' && abilityid === 'wellbakedbody') return 0;
+
+		if (attackType === 'Fire' && abilityid === 'primordialsea' && !strict) return 0;
+		if (attackType === 'Water' && abilityid === 'desolateland' && !strict) return 0;
+
+		let factor = 1;
+		if ((attackType === 'Fire' || attackType === 'Ice') && abilityid === 'thickfat') factor *= 0.5;
+		if (attackType === 'Fire' && abilityid === 'waterbubble') factor *= 0.5;
+		if (attackType === 'Fire' && abilityid === 'heatproof') factor *= 0.5;
+		if (attackType === 'Ghost' && abilityid === 'purifyingsalt') factor *= 0.5;
+		if (attackType === 'Fire' && abilityid === 'fluffy') factor *= 2;
+		if ((attackType === 'Electric' || attackType === 'Rock' || attackType === 'Ice') && abilityid === 'deltastream') {
+			factor *= 0.5;
+		}
+		return factor;
+	}
+	getMoveEffectiveness(
+		source: Pokemon, move: Dex.Move, attackType: Dex.TypeName, category: Dex.Move['category'], target: Pokemon,
+		serverSource?: ServerPokemon
+	): number | null {
+		if (([
+			'adjacentAlly', 'adjacentAllyOrSelf', 'self', 'allySide', 'foeSide', 'all',
+		] satisfies Dex.MoveTarget[] as Dex.MoveTarget[]).includes(move.target)) {
+			return null;
+		}
+		const hardcoreMode = this.battle.hardcoreMode;
+		const inverse = this.battle.rules['Inverse Mod'];
+		const targetTypes = target.getTypeList();
+		const sourceAbility = source.effectiveAbility(serverSource);
+		// Mold Breaker doesn't ignore _everything_, but it sure ignores everything that affects effectiveness
+		const ignoreAbility = hardcoreMode || [
+			'Mold Breaker', 'Teravolt', 'Turboblaze',
+		].includes(sourceAbility) || ['sunsteelstrike', 'moongeistbeam', 'photongeyser', 'lightthatburnsthesky',
+			'searingsunrazesmash', 'menacingmoonrazemaelstrom'].includes(move.id);
+		const targetAbility = ignoreAbility ? '' : target.effectiveAbility();
+		const dex = this.battle.dex;
+		const priority = move.priority + (category === 'Status' && sourceAbility === 'Prankster' ? 1 : 0);
+
+		if (hardcoreMode && (move.category === 'Status' || dex.gen < 7)) return null;
+		if (move.id === 'struggle' && dex.gen > 1) return 1;
+
+		let inflictsStatus = null;
+		let inflictsEffect = null;
+		if (category === 'Status') {
+			if (['glare', 'stunspore', 'thunderwave'].includes(move.id)) inflictsStatus = 'par';
+			if (['toxic', 'poisongas', 'poisonpowder'].includes(move.id)) inflictsStatus = 'psn';
+			if ([
+				'darkvoid', 'grasswhistle', 'hypnosis', 'lovelykiss', 'sing', 'sleeppowder', 'spore', 'yawn',
+			].includes(move.id)) inflictsStatus = 'slp';
+			if (move.id === 'willowisp') inflictsStatus = 'brn';
+			if (['block', 'meanlook', 'spiderweb'].includes(move.id)) inflictsEffect = 'trapped';
+			if (['confuseray', 'supersonic', 'sweetkiss', 'teeterdance'].includes(move.id)) inflictsEffect = 'confusion';
+		}
+
+		/** any factor that's "effectiveness-like" rather than literal type effectiveness */
+		let otherFactor = BattleTooltips.getTypeAbilityWeakness(attackType, toID(targetAbility), dex, true);
+		// Gen 3 type-immunity abilities don't affect status moves
+		if (category === 'Status' && dex.gen <= 3) otherFactor = 1;
+
+		let factor = 1;
+		if (!otherFactor && (targetAbility === "Levitate" || targetAbility === "Eelevate")) {
+			otherFactor = 1;
+			if (!target.isGrounded() && move.id !== 'thousandarrows' && !hardcoreMode) {
+				factor = 0; // Levitate acts as a type-based immunity (doesn't affect most status moves)
+			}
+		}
+		for (const targetType of targetTypes) {
+			const tType = dex.types.get(targetType) as Type;
+
+			// special type immunities
+			if (inflictsStatus && tType.damageTaken?.[(inflictsStatus || inflictsEffect) as 'trapped'] === 3) {
+				if (!(inflictsStatus === 'psn' && sourceAbility === 'Corrosion')) {
+					return 0;
+				}
+			}
+			if (category === 'Status' && sourceAbility === 'Prankster' && tType.damageTaken?.['prankster'] === 3) {
+				return 0;
+			}
+			if (move.flags['powder'] && tType.damageTaken?.['powder'] === 3) otherFactor = 0;
+			if (move.flags['powder'] && targetAbility === 'Overcoat' && dex.gen >= 6) otherFactor = 0;
+			if (move.flags['sound'] && targetAbility === 'Soundproof') otherFactor = 0;
+			if (move.flags['bullet'] && targetAbility === 'Bulletproof') otherFactor = 0;
+
+			// regular type effectiveness
+			if (tType.damageTaken?.[attackType] === 3) {
+				if (target.item === 'Ring Target') continue;
+				if (targetType === 'Ghost' && (sourceAbility === "Scrappy" || sourceAbility === "Mind's Eye")) continue;
+				if (targetType === 'Ghost' && (target.volatiles['foresight'] || target.volatiles['odorsleuth'])) continue;
+				if (targetType === 'Dark' && (target.volatiles['miracleeye'])) continue;
+				if (targetType === 'Flying' && target.isGrounded()) continue;
+				if (targetType === 'Flying' && move.id === 'thousandarrows' && !target.isGrounded()) {
+					factor = 1;
+					break;
+				}
+				// Inverse replaces immunities with weaknesses. This has to
+				// be coded here, else it won't calculate secondary type's
+				// effectiveness. It sets a resistance to be consistent with
+				// the inversion done at the end.
+				if (inverse) {
+					factor *= 0.5;
+				} else {
+					factor = 0;
+				}
+			} else if (move.id === 'freezedry' && targetType === 'Water') {
+				factor *= 2;
+			} else {
+				let typeFactor = [1, 2, 0.5, 0][tType.damageTaken?.[attackType] || 0] ?? 1;
+				if (targetType === 'Flying' && this.battle.weather === 'deltastream' && typeFactor > 1) typeFactor = 1;
+				if (toID(targetAbility) === 'yuanhaiyangliu' && category !== 'Status' &&
+					['raindance', 'primordialsea'].includes(this.battle.weather) && typeFactor > 1) typeFactor = 1;
+				factor *= typeFactor;
+			}
+			if (move.id === 'sheercold' && targetType === 'Ice') otherFactor = 0;
+		}
+
+		// Air Balloon etc. Levitate is already handled but there are a few that aren't
+		if (category !== 'Status' && attackType === 'Ground' && factor &&
+			!target.isGrounded() && move.id !== 'thousandarrows') {
+			// isGrounded() still sees Levitate even when this move bypasses the ability.
+			const onlyIgnoredLevitate = ignoreAbility && target.effectiveAbility() === 'Levitate' &&
+				!targetTypes.includes('Flying') && target.item !== 'Air Balloon' &&
+				!target.volatiles['magnetrise'] && !target.volatiles['telekinesis'];
+			if (!onlyIgnoredLevitate) otherFactor = 0;
+		}
+		if (this.battle.hasPseudoWeather('Misty Terrain') && target.isGrounded() && inflictsStatus) {
+			return 0;
+		}
+		if (this.battle.hasPseudoWeather('Psychic Terrain') && target.isGrounded() && priority > 0) {
+			otherFactor = 0;
+		}
+		if (this.battle.weather === 'primordialsea' && attackType === 'Fire' && move.category !== 'Status') {
+			otherFactor = 0;
+		}
+		if (this.battle.weather === 'desolateland' && attackType === 'Water' && move.category !== 'Status') {
+			otherFactor = 0;
+		}
+
+		// status immunities
+		if (target.status && inflictsStatus) {
+			if (dex.gen === 1 && inflictsStatus === 'slp' && target.volatiles['mustrecharge']) {
+				// unfortunately gen 1 can actually override status here
+			} else {
+				return 0;
+			}
+		}
+		if (targetAbility === "Comatose" && inflictsStatus) return 0;
+		if (targetAbility === "Purifying Salt" && inflictsStatus) return 0;
+		if (targetAbility === "Shields Down" && target.speciesForme === 'Minior-Meteor' && inflictsStatus) return 0;
+		if (targetAbility === "Leaf Guard" && this.battle.weather === 'sunnyday' && inflictsStatus) return 0;
+		if (targetAbility === "Sweet Veil" && inflictsStatus === 'slp') return 0;
+		if (targetAbility === "Pastel Veil" && inflictsStatus === 'psn') return 0;
+		if (["Water Veil", "Water Bubble", "Thermal Exchange"].includes(targetAbility) && inflictsStatus === 'brn') return 0;
+
+		if (targetAbility === 'Wonder Guard' && factor < 2 && category !== 'Status') otherFactor = 0;
+		if (targetAbility === "Good as Gold" && category === 'Status') return 0;
+		if (targetAbility === "Own Tempo" && inflictsEffect === 'confusion') return 0;
+		if (sourceAbility === 'Tinted Lens' && factor < 1) otherFactor *= 2;
+		if (targetAbility === 'Sturdy' && move.ohko) otherFactor = 0;
+		if (targetAbility === 'Damp' && [
+			'explosion', 'mindblown', 'mistyexplosion', 'selfdestruct',
+		].includes(move.id)) otherFactor = 0;
+		if (targetAbility === 'Aroma Veil' && [
+			'disable', 'encore', 'healblock', 'taunt', 'torment', 'attract',
+		].includes(move.id)) return 0;
+
+		if (category === 'Status') {
+			if (target.volatiles['substitute'] && !move.flags['bypasssub'] && sourceAbility !== 'Infiltrator') {
+				if (dex.gen !== 1) return 0;
+				if (inflictsStatus !== 'par' && inflictsStatus !== 'slp' && inflictsEffect !== 'confusion') return 0;
+			}
+			if (move.id === 'thunderwave') return factor * otherFactor === 0 ? 0 : null;
+			return otherFactor === 0 ? 0 : null;
+		}
+
+		if (
+			// static amount, OHKO
+			['seismictoss', 'nightshade', 'sonicboom', 'dragonrage'].includes(move.id) || move.ohko ||
+			// countering
+			move.id === 'comeuppance' || move.id === 'counter' || move.id === 'mirrorcoat' || move.id === 'metalburst' ||
+			// special
+			move.id === 'endeavor' || move.id === 'bide' || move.id === 'ruination' || move.id === 'superfang' ||
+			move.id === 'finalgambit' || move.id === 'guardianofalola' || move.id === 'naturesmadness' || move.id === 'psywave'
+		) {
+			if (hardcoreMode) return null;
+			return factor * otherFactor === 0 ? 0 : 1;
+		}
+		if (hardcoreMode && dex.gen <= 9) {
+			if (factor > 2) factor = 2;
+			if (factor < 0.5) factor = 0.5;
+			if (inverse && dex.gen >= 7) return 1 / factor;
+			return factor;
+		}
+		if (hardcoreMode) {
+			if (inverse && dex.gen >= 7) return 1 / factor;
+			return factor;
+		}
+
+		// Inverse Mod reverses effectiveness
+		if (inverse) {
+			return 1 / (factor * otherFactor);
+		}
+		return factor * otherFactor;
 	}
 
 	// Gets the current accuracy for a move.

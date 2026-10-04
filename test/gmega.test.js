@@ -38,7 +38,7 @@ describe('Independent G-Mega controls', () => {
 				nearSide: { active: [{}, {}] }, mySide: { n: 0 }, pokemonControlled: 2, gameType: 'doubles',
 				dex: { moves: { get: name => ({ name, id: name.toLowerCase(), type: 'Normal' }) } },
 			};
-			room.tooltips = { getMoveType: () => ['Normal'] };
+			room.tooltips = { getMoveTypeText: () => ['Normal', ''] };
 			room.getTimerHTML = () => '';
 			room.displayParty = () => '';
 			let html;

@@ -14,6 +14,7 @@
     "test": "node build && tsc && eslint --cache --cache-location caches/eslintcache.json --max-warnings 0 && mocha test/*.js",
     "fix": "eslint --cache --cache-location caches/eslintcache.json --fix",
     "build": "node build",
+    "build:battle-assist": "node build-tools/build-battle-assist.js",
     "build-full": "node build full"
   },
   "dependencies": {
