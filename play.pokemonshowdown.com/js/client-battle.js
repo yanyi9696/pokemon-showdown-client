@@ -694,7 +694,8 @@
 					if (move.id === 'Struggle' || move.id === 'Recharge') pp = '&ndash;';
 					if (move.id === 'Recharge') move.type = '&ndash;';
 					if (name.substr(0, 12) === 'Hidden Power') name = 'Hidden Power';
-					var moveType = this.tooltips.getMoveType(move, typeValueTracker)[0];
+					var moveTypeText = this.tooltips.getMoveTypeText(move, typeValueTracker);
+					var moveType = moveTypeText[0];
 					var tooltipArgs = 'move|' + moveData.move + '|' + pos;
 					if (moveData.disabled) {
 						movebuttons += '<button disabled class="movebutton has-tooltip" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '">';
@@ -702,7 +703,7 @@
 						movebuttons += '<button class="movebutton type-' + moveType + ' has-tooltip" name="chooseMove" value="' + (i + 1) + '" data-move="' + BattleLog.escapeHTML(moveData.move) + '" data-target="' + BattleLog.escapeHTML(moveData.target) + '" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '">';
 						hasMoves = true;
 					}
-					movebuttons += name + '<br /><small class="type">' + (moveType ? Dex.types.get(moveType).name : "Unknown") + '</small> <small class="pp">' + pp + '</small>&nbsp;</button> ';
+					movebuttons += name + '<br /><small class="type"><span>' + (moveType ? Dex.types.get(moveType).name : "Unknown") + '</span> ' + moveTypeText[1] + '</small> <small class="pp">' + pp + '</small>&nbsp;</button> ';
 				}
 				if (!hasMoves) {
 					moveMenu += '<button class="movebutton" name="chooseMove" value="0" data-move="Struggle" data-target="randomNormal">Struggle<br /><small class="type">Normal</small> <small class="pp">&ndash;</small>&nbsp;</button> ';
@@ -721,7 +722,8 @@
 								var baseMove = this.battle.dex.moves.get(curActive.moves[i].move);
 								// might not exist, such as for Z status moves - fall back on base move to determine type then
 								var specialMove = gigantamax || this.battle.dex.moves.get(specialMoves[i].move);
-								var moveType = this.tooltips.getMoveType(specialMove.exists && !specialMove.isMax ? specialMove : baseMove, typeValueTracker, specialMove.isMax ? gigantamax || switchables[pos].gigantamax || true : undefined)[0];
+								var moveTypeText = this.tooltips.getMoveTypeText(specialMove.exists && !specialMove.isMax ? specialMove : baseMove, typeValueTracker, specialMove.isMax ? gigantamax || switchables[pos].gigantamax || true : undefined);
+								var moveType = moveTypeText[0];
 								if (specialMove.isMax && specialMove.name !== 'Max Guard' && !specialMove.id.startsWith('gmax')) {
 									specialMove = this.tooltips.getMaxMoveFromType(moveType);
 								}
@@ -735,7 +737,7 @@
 								} else if (!curActive.moves[i].maxpp) {
 									pp = '&ndash;';
 								}
-								movebuttons += specialMove.name + '<br /><small class="type">' + (moveType ? Dex.types.get(moveType).name : "Unknown") + '</small> <small class="pp">' + pp + '</small>&nbsp;</button> ';
+								movebuttons += specialMove.name + '<br /><small class="type"><span>' + (moveType ? Dex.types.get(moveType).name : "Unknown") + '</span> ' + moveTypeText[1] + '</small> <small class="pp">' + pp + '</small>&nbsp;</button> ';
 							} else {
 								movebuttons += '<button disabled>&nbsp;</button>';
 							}
