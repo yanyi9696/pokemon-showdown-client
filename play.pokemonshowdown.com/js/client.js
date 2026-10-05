@@ -1786,6 +1786,7 @@ function toId() {
 		 */
 		updateLayout: function () {
 			if (!this.curRoom) return; // can happen during initialization
+			if (this.updateFantasyCalcdexLayout()) return;
 
 			// If we don't have any right rooms at all, just show the left
 			// room in full. Home is a left room, so we'll always have a
@@ -1902,6 +1903,42 @@ function toId() {
 			this.curRoom.show('left', leftWidth);
 			this.curSideRoom.show('right', leftWidth);
 			this.topbar.updateTabbar();
+		},
+		updateFantasyCalcdexLayout: function () {
+			// Only the embedded calculator opts into this layout. Other side rooms
+			// and extension calculators keep the normal Showdown layout.
+			var calculator = this.curRoom.fantasyCalcdex ? this.curRoom : this.sideRoom;
+			var layout = calculator && calculator.fantasyCalcdex;
+			if (!layout) return false;
+			var battle = this.rooms[layout.battleId];
+			if (!battle || (this.curRoom !== battle && this.curRoom !== calculator)) return false;
+			if (this.curRoom === calculator) {
+				this.curRoom = window.room = battle;
+				layout.visible = true;
+			}
+			if (this.curSideRoom && this.curSideRoom !== calculator) this.curSideRoom.hide();
+			this.sideRoom = calculator;
+			this.curSideRoom = layout.visible ? calculator : null;
+			var available = $(window).width();
+			if (!layout.visible) {
+				calculator.hide();
+				battle.show('full');
+			} else if (available < 1152) {
+				// Phone/tablet: a scrollable full-width calculator, with the battle
+				// retained underneath so closing it immediately returns to the turn.
+				// Room.hide() also blurs/pauses the battle. The calculator still
+				// needs its live protocol updates while covering the battlefield.
+				battle.$el.hide();
+				calculator.show('full');
+			} else {
+				// Reserve at least 190px for the log beside the 640px battlefield.
+				var calculatorWidth = Math.min(650, Math.max(320, Math.round(available * 0.36)), available - 831);
+				var battleWidth = available - calculatorWidth - 1;
+				battle.show('left', battleWidth);
+				calculator.show('right', battleWidth);
+			}
+			this.topbar.updateTabbar();
+			return true;
 		},
 		updateSideRoom: function (id) {
 			if (id && this.rooms[id].isSideRoom) {
