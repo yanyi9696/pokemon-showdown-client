@@ -79,7 +79,8 @@ const server = http.createServer((req, res) => {
 		].join('\n'));
 		return;
 	}
-	if (pathname === '/' || !path.extname(pathname)) pathname = '/index.html';
+	// Calculator releases include extensionless license files; serve them as files.
+	if (pathname === '/' || (!path.extname(pathname) && !pathname.startsWith('/showdex/'))) pathname = '/index.html';
 	const filename = path.resolve(root, '.' + pathname);
 	if (!filename.startsWith(root + path.sep) || pathname.split('/').some(part => part.startsWith('.'))) {
 		res.writeHead(403); res.end(); return;

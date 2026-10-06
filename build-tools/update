@@ -19,6 +19,9 @@ const thisDir = __dirname;
 const rootDir = path.resolve(thisDir, '..');
 process.chdir(rootDir);
 
+// Fail the build instead of silently publishing a script tag whose bundle is absent.
+const showdexAssets = require('./showdex-assets').verifyShowdexAssets();
+
 const AUTOCONFIG_START = '/*** Begin automatically generated configuration ***/';
 const AUTOCONFIG_END = '/*** End automatically generated configuration ***/';
 const UTF8 = { encoding: 'utf8' };
@@ -144,7 +147,7 @@ process.stdout.write("Updating cachebuster and URLs... ");
 
 const URL_REGEX = /(src|href)="(.*?)(\?[a-z0-9]*?)?"/g;
 
-function addCachebuster(_, attr, url, urlQuery) {
+function addCachebuster(_, attr, url, urlQuery, templateDir) {
 	url = url.replace('/replay.pokemonshowdown.com/', '/' + routes.replays + '/');
 	url = url.replace('/dex.pokemonshowdown.com/', '/' + routes.dex + '/');
 	url = url.replace('/play.pokemonshowdown.com/', '/' + routes.client + '/');
@@ -152,6 +155,9 @@ function addCachebuster(_, attr, url, urlQuery) {
 	url = url.replace('/teams.pokemonshowdown.com/', '/' + routes.teams + '/');
 
 	if (urlQuery) {
+		if (/(^|\/)showdex\/main\.js$/.test(url)) {
+			return attr + '="' + url + '?' + showdexAssets.files['main.js'].sha256.slice(0, 12) + '"';
+		}
 		if (url.startsWith('/')) {
 			let hash = Math.random(); // just in case creating the hash fails
 			try {
@@ -164,10 +170,12 @@ function addCachebuster(_, attr, url, urlQuery) {
 		} else {
 			// TODO: generalize better
 			let hash;
-			for (const subdir of ['teams', 'replays']) {
+			const directories = typeof templateDir === 'string' ? [templateDir] :
+				['teams.pokemonshowdown.com', 'replay.pokemonshowdown.com'];
+			for (const subdir of directories) {
 				if (hash) break;
 				try {
-					const fstr = fs.readFileSync(subdir + '.pokemonshowdown.com/' + url, UTF8);
+					const fstr = fs.readFileSync(path.join(subdir, url), UTF8);
 					hash = crypto.createHash('md5').update(fstr).digest('hex').substr(0, 8);
 				} catch {}
 			}
@@ -190,12 +198,14 @@ let replayEmbedContents = fs.readFileSync('play.pokemonshowdown.com/js/replay-em
 // Nihilslave: Disable this to get correct sprites if ur client doesn't have them.
 replayEmbedContents = replayEmbedContents.replace(/play\.pokemonshowdown\.com/g, routes.client);
 // Nihilslave: update the url over time
-let date = new Date();
+const date = new Date();
 replayEmbedContents = replayEmbedContents.replace(/a7/g, date.getTime());
 // Nihilslave: we use testclient.html
-let testclientContents = fs.readFileSync('play.pokemonshowdown.com/testclient.template.html', {encoding: 'utf-8'});
-testclientContents = testclientContents.replace(URL_REGEX, addCachebuster);
-testclientContents = testclientContents.replace('Mmm dd, yyyy', date.toDateString().split(" ")[1] + ' ' + date.getDate() + ', ' + date.getFullYear());
+let testclientContents = fs.readFileSync('play.pokemonshowdown.com/testclient.template.html', { encoding: 'utf-8' });
+testclientContents = testclientContents.replace(URL_REGEX, (match, attr, url, query) =>
+	addCachebuster(match, attr, url, query, 'play.pokemonshowdown.com'));
+testclientContents = testclientContents.replace('Mmm dd, yyyy',
+	date.toDateString().split(" ")[1] + ' ' + date.getDate() + ', ' + date.getFullYear());
 
 // add news, only if it's actually likely to exist
 process.stdout.write("and news... ");
