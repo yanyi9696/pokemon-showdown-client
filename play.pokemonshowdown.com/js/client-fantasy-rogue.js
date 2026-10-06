@@ -256,12 +256,15 @@
 				html += '<h3>选择本层路线</h3><div class="rogue-routes">';
 				(run.choices || []).forEach(function (node) {
 					html += '<div class="rogue-route"><strong>' + escape(node.name) + '</strong><small>' + kindNames[node.kind] +
+						(node.biome ? ' · Lv.' + node.biome.level + ' · ' + (node.biome.tier * 20) + '～' +
+							(node.biome.tier * 20 + 20) + ' 档宝可梦池' : '') +
 						'</small><p class="rogue-caption">整层完成奖励</p>' + loot(node.reward, this.state.items) +
 						button('act', 'select:' + node.id, '选择此路线', busy) + '</div>';
 				}, this);
 				html += '</div>';
 				if (!(run.choices || []).length) html += '<p>本层内容等待配置，存档已保留。</p>';
 			} else if (run.phase === 'ready') {
+				if (run.node && run.node.bonusEncounter) html += '<p><strong>额外遭遇</strong> · 发现了区域名单之外的宝可梦！</p>';
 				var allFainted = !run.team.some(function (mon) { return mon.hp > 0; });
 				html += '<h3>本层战斗 · ' + (run.encounter + 1) + ' / ' + run.encounters + '</h3>' +
 					button('act', 'battle', (run.recovery ? '继续第 ' : '进入第 ') + (run.encounter + 1) + ' / ' + run.encounters + ' 场战斗', busy || allFainted);
