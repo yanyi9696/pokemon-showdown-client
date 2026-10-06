@@ -1,0 +1,1 @@
+Showdex by Keith Choison and contributors (AGPL-3.0). Complete source for this client build: source.tar.gz. Build with pnpm install --frozen-lockfile, then node scripts/build-fantasy.mjs <output-directory>.

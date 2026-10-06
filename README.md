@@ -63,6 +63,34 @@ shared client code, including local uncommitted data changes. Both repositories
 must already have their dependencies installed. Without `--local-server`, a full
 build keeps using the remote repository in `caches/pokemon-showdown`.
 
+### 幻想杯线上部署（含内置计算器）
+
+`play.pokemonshowdown.com/showdex/` 现在随客户端仓库交付，包含可直接运行的
+Showdex、资源清单、许可证和对应源码包。线上只需服务端和客户端两个仓库；
+玩家不需要浏览器插件，服务器也不需要安装 Showdex 的构建依赖。
+
+在服务器的客户端仓库目录执行：
+
+```sh
+node build full --local-server ../pokemon-showdown
+node build-tools/showdex-assets.js
+```
+
+第一条命令会重新构建旁边的服务端，并生成对应的幻想杯宝可梦、招式、特性、
+道具数据；计算器继续使用这些数据和服务器的原生伤害计算，不必手动更新名单。
+然后按原来的管理方式重启对战服务。网页根目录应指向 `play.pokemonshowdown.com/`，
+或者完整复制该目录（包括 `showdex/`）到现有网页根目录。
+
+部署后检查 `https://你的域名/showdex/main.js`、`showdex/asset-manifest.json`
+和 `showdex/source.tar.gz` 均可访问。若页面有计算器脚本标签而 `main.js` 返回 404，
+就是静态资源没有发布到实际网页根目录，重启对战进程不能解决这个问题。
+普通 `node build` 和完整构建都会检查资源清单，缺文件或版本混杂时直接报错；
+生成的网页也会按文件内容更新版本参数，避免一直使用 `?v1` 的旧缓存。
+
+修改计算器界面源码时，在开发机准备好相邻 `showdex` 仓库及其依赖后执行
+`npm run build:battle-assist`，将更新后的 `showdex/` 资源与客户端改动一起提交。
+无需修改计算器源码的日常宝可梦数据更新，使用上面的完整构建命令即可。
+
 ### Test keys
 
 For security reasons, browsers [don't let other websites control PS][5], so

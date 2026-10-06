@@ -24,7 +24,8 @@ geckodriver.log
 /play.pokemonshowdown.com/crossprotocol.html
 /play.pokemonshowdown.com/testclient.html
 /play.pokemonshowdown.com/data/
-/play.pokemonshowdown.com/showdex/
+# The embedded calculator is shipped with the client; debug maps are not needed online.
+/play.pokemonshowdown.com/showdex/*.map
 /play.pokemonshowdown.com/replays/
 
 /play.pokemonshowdown.com/js/server/

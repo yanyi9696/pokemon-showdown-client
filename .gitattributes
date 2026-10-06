@@ -1,2 +1,4 @@
 # .gitattributes
 * text=auto
+# Preserve release checksums across Windows and Linux checkouts.
+play.pokemonshowdown.com/showdex/** -text
