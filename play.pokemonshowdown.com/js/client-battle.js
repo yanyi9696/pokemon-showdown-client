@@ -137,6 +137,13 @@
 		},
 		add: function (data) {
 			if (!data) return;
+			if (data.substr(0, 20) === '|fantasyroguedefeat|') {
+				if (this.fantasyRogue && this.fantasyRogue.userid === app.user.get('userid')) {
+					this.fantasyRogueDefeat = JSON.parse(data.slice(20));
+					this.updateControls();
+				}
+				return;
+			}
 			if (data === '|fantasyrogueend|') {
 				if (this.fantasyRogue && this.fantasyRogue.userid === app.user.get('userid')) {
 					this.battleEnded = true;
@@ -330,6 +337,10 @@
 					this.$controls.html('<div class="controls"><p>' + replayDownloadButton + '<button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />Instant replay</button></p><p><button class="button" name="closeAndMainMenu"><strong>Main menu</strong><br /><small>(closes this battle)</small></button> <button class="button" name="closeAndRematch"><strong>Rematch</strong><br /><small>(closes this battle)</small></button></p></div>');
 					if (this.fantasyAI) this.$controls.find('button[name=closeAndRematch]').html('<strong>重新挑战</strong><br /><small>返回选择页</small>');
 					if (this.fantasyRogue) this.$controls.find('button[name=closeAndRematch]').html('<strong>继续冒险</strong><br /><small>返回幻想杯肉鸽</small>');
+					if (this.fantasyRogueDefeat && this.fantasyRogue && this.fantasyRogue.userid === app.user.get('userid')) {
+						this.$controls.prepend(this.rogueDefeatHTML());
+						this.$controls.find('button[name=closeAndRematch]').html('<strong>返回冒险</strong><br /><small>处理战败并继续</small>');
+					}
 				} else {
 					this.$controls.html('<div class="controls"><p>' + replayDownloadButton + '<button class="button" name="instantReplay"><i class="fa fa-undo"></i><br />Instant replay</button></p>' + switchViewpointButton + '</div>');
 				}
@@ -490,6 +501,23 @@
 				this.$controls.append('<div class="rogue-retreat"><button class="button" name="retreatRogue">撤退</button>' +
 					'<small>返回场外；伤害、PP 和道具消耗保留。</small></div>');
 			}
+		},
+		rogueDefeatHTML: function () {
+			var result = this.fantasyRogueDefeat;
+			var html = '<div class="rogue-defeat" role="status"><strong>本场战败 · 第 ' + Number(result.floor) + ' 层</strong>' +
+				'<p>队伍保持战败时的状态；HP、PP、异常状态和道具消耗已保存，本场不发放胜利奖励。</p>';
+			if (result.retryFloor) {
+				html += '<p>本层为连续挑战，禁止途中治疗。全队倒下后需重试整层，恢复入层时的队伍、道具和货币，撤回本层收益；捕捉解锁记录保留且不重复计数。</p>';
+			} else {
+				html += '<p>已通过的场次保留，下次仍挑战第 ' + Number(result.encounter) + ' / ' + Number(result.encounters) + ' 场，对手恢复本场初始状态。</p>';
+				if (result.noHealing) {
+					html += '<p>本层为连续挑战，禁止途中治疗，请用仍可战斗的成员继续。</p>';
+				} else {
+					html += '<p>返回后可用道具复活和治疗；全队濒死且没有可用复活道具时，可自选支付 <b>' + Number(result.emergencyCost) +
+						' 金币</b>急救全队，金币不会自动扣除。</p>';
+				}
+			}
+			return html + '<p>查看完战斗结果后，点击“返回冒险”离开。</p></div>';
 		},
 		retreatRogue: function () {
 			if (!this.fantasyRogue || this.fantasyRogue.userid !== app.user.get('userid') || this.battleEnded) return;
@@ -854,8 +882,15 @@
 			var rogue = this.request && this.request.fantasyRogue;
 			if (!rogue || !rogue.catchable) return '';
 			return '<div class="rogue-balls"><p>投球占用本次行动；失败后对方仍会出招。</p>' + rogue.balls.map(function (ball) {
-				return '<button class="button" name="chooseRogueBall" value="' + BattleLog.escapeHTML(ball.id) + '"' +
-					(ball.count ? '' : ' disabled') + '>' + BattleLog.escapeHTML(ball.name) + ' × ' + ball.count + '</button> ';
+				var chance = ball.chance;
+				var percent = typeof chance !== 'number' ? '暂不可捕捉' : chance === 1 ? '100%' : chance === 0 ? '0%' :
+					chance < 0.0001 ? '低于 0.01%' : chance > 0.9999 ? '高于 99.99%' : (chance * 100).toFixed(2) + '%';
+				var tip = '当前捕捉成功率：' + percent;
+				return '<span class="rogue-ball-option"><button class="button" name="chooseRogueBall" value="' + BattleLog.escapeHTML(ball.id) + '"' +
+					' aria-label="' + BattleLog.escapeHTML(ball.name + ' × ' + ball.count + '，' + tip) + '"' +
+					(ball.count ? '' : ' disabled') + '><span class="itemicon" style="' + Dex.getItemIcon(ball.id) + '"></span>' +
+					BattleLog.escapeHTML(ball.name) + ' × ' + ball.count + '</button><span class="rogue-catch-tip" role="tooltip"><strong>' +
+					BattleLog.escapeHTML(tip) + '</strong><br />含会心捕捉；随对手 HP、异常状态和球种变化。</span></span> ';
 			}).join('') + '</div>';
 		},
 		chooseRogueBall: function (id) {

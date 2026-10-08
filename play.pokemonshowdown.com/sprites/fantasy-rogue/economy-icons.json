@@ -1,0 +1,77 @@
+[
+  {
+    "id": "tinymushroom",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/tiny-mushroom.png",
+    "sha256": "f854dd7c3eb7bdac139f708ac4a8347f8d733e8f5a97e42c11f952c821818c08"
+  },
+  {
+    "id": "balmmushroom",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/balm-mushroom.png",
+    "sha256": "602e5bbcae59270cc73ecad0c19471af72cf6271766f291d376228254ba8473f"
+  },
+  {
+    "id": "prettyfeather",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/pretty-wing.png",
+    "sha256": "78b05ebd8802e8037c5f192111f5bc14ebf2ce9d2392fa2aac902dd816945d25"
+  },
+  {
+    "id": "stardust",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/stardust.png",
+    "sha256": "d34d3e6eb8739af2f321d5806d49ed2522bb3bf405a48f529182c5b606d292ff"
+  },
+  {
+    "id": "starpiece",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/star-piece.png",
+    "sha256": "8cfad719f903e5497158b6b5cccb0006a90d53e833d4016223de87ce2532ee2b"
+  },
+  {
+    "id": "cometshard",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/comet-shard.png",
+    "sha256": "8bf51580cbbef6d562ef82110d9637587a75c7bf56ebc4b1aae53196e37416b2"
+  },
+  {
+    "id": "pearl",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/pearl.png",
+    "sha256": "3d1edd31a9ea7caa00f4be9c225be60225bbb517123d229011b95dfa3b7d3584"
+  },
+  {
+    "id": "bigpearl",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/big-pearl.png",
+    "sha256": "55127e482888f2de3de46782b8096fe2aaa73a2878099f0fc7a051d7a93633b4"
+  },
+  {
+    "id": "pearlstring",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/pearl-string.png",
+    "sha256": "899f81be14ead220ee8346fb2ebe2a7d1191d768ed0962026966a8a2a461f085"
+  },
+  {
+    "id": "healthfeather",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/health-wing.png",
+    "sha256": "509736429ff690b989ab83dbf863ccdba88b91f64a8b2098f19b3e1872fab1ac"
+  },
+  {
+    "id": "musclefeather",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/muscle-wing.png",
+    "sha256": "258d3a906f6249750dd7b9ff1ba40c92abdd6c5f819cd84a446d28f51ace2353"
+  },
+  {
+    "id": "resistfeather",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/resist-wing.png",
+    "sha256": "e9c5cc4c246e720066e7589eb0bb7c3c590f2f725f7484969c4813343c35d335"
+  },
+  {
+    "id": "geniusfeather",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/genius-wing.png",
+    "sha256": "fcc5d9e92c96cc3f282122718f54aa7dbcf1248aeff1331af0fc9562f3185fe2"
+  },
+  {
+    "id": "cleverfeather",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/clever-wing.png",
+    "sha256": "e8f26811e652e8b7bec02fdfaed479ddb943b23d734b6ce04814959281aaec1b"
+  },
+  {
+    "id": "swiftfeather",
+    "source": "https://github.com/PokeAPI/sprites/blob/master/sprites/items/swift-wing.png",
+    "sha256": "bbf0bb71b3de68e1f242a7a1f49305bd0d92a9b7a2b6caad9c5f39dbbead43b4"
+  }
+]

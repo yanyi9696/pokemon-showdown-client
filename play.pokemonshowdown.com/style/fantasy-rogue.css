@@ -30,6 +30,9 @@
 .fantasyrogue .picon { display: inline-block; vertical-align: middle; width: 40px; height: 30px; }
 .fantasyrogue .rogue-starters { display: flex; flex-wrap: wrap; gap: 3px 8px; }
 .fantasyrogue .rogue-starters label { padding: 2px; }
+.fantasyrogue .rogue-starters label.is-disabled { color: #7b838a; opacity: .6; filter: grayscale(1); cursor: not-allowed; }
+.fantasyrogue .rogue-unlock-guide { margin: 8px 0; padding: 7px 9px; background: rgba(247, 251, 255, .92); border: 1px solid #bccdda; border-radius: 4px; }
+.fantasyrogue .rogue-unlock-guide ul { margin: 4px 0; padding-left: 20px; line-height: 1.6; }
 .fantasyrogue .rogue-upgrades { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 12px; }
 .fantasyrogue .button { box-sizing: border-box; min-height: 24px; padding: 2px 6px; margin: 2px 0; vertical-align: middle; }
 .fantasyrogue .rogue-exp { margin: 5px 0 0; color: #24628b; font-size: 12px; }
@@ -41,10 +44,93 @@
 .fantasyrogue .rogue-caption { color: #4b6477; font-size: 12px; margin: 4px 0; }
 .fantasyrogue .rogue-floor { padding: 8px 10px; background: rgba(245, 250, 255, .95); border: 1px solid #8bacbf; border-radius: 6px; }
 .fantasyrogue .rogue-floor h3 { display: inline-block; vertical-align: middle; margin: 0 12px 4px 0; padding: 0; border: 0; }
-.fantasyrogue .rogue-routes { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 6px; }
-.fantasyrogue .rogue-route { padding: 8px; background: #fff; border: 1px solid #bdccda; border-radius: 4px; display: flex; flex-direction: column; align-items: flex-start; }
-.fantasyrogue .rogue-route > small { margin-top: 3px; color: #50647b; }
-.fantasyrogue .rogue-route > .button { margin-top: auto; }
+.fantasyrogue .rogue-routes {
+	display: grid; grid-template-columns: repeat(auto-fit, minmax(156px, 1fr)); gap: 8px;
+	padding: 12px 2px 2px; margin-top: 0;
+}
+.fantasyrogue .rogue-route {
+	--route-color: 175, 63, 86;
+	--route-light: 255, 199, 201;
+	--card-cut: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+	position: relative; isolation: isolate; min-width: 0;
+	padding: 9px 10px 11px; background: none;
+	color: #273b4a; border: 0; border-radius: 0;
+	display: grid; grid-template-columns: 30px minmax(0, 1fr); grid-template-rows: auto auto auto 1fr auto; gap: 4px 7px; align-items: start;
+	font: inherit; text-align: left; line-height: inherit; cursor: pointer;
+	transition: transform .15s, filter .15s;
+}
+.fantasyrogue .rogue-route::before {
+	content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; clip-path: var(--card-cut);
+	background: rgba(var(--route-color), .4);
+}
+.fantasyrogue .rogue-route::after {
+	content: ""; position: absolute; inset: 1.5px; z-index: 0; pointer-events: none; clip-path: var(--card-cut);
+	background: url(fantasy-rogue-card-pattern.svg), linear-gradient(155deg, #f9fcff, rgb(var(--route-light)));
+	background-size: 24px 21px, 100% 100%;
+	box-shadow: inset 0 0 12px rgba(255, 255, 255, .5);
+}
+.fantasyrogue .rogue-route-blue { --route-color: 76, 109, 197; --route-light: 174, 222, 255; }
+.fantasyrogue .rogue-route-green { --route-color: 46, 136, 108; --route-light: 174, 246, 197; }
+.fantasyrogue .rogue-route-rose { --route-color: 156, 65, 148; --route-light: 255, 187, 229; }
+.fantasyrogue .rogue-route > :not(.rogue-vortex) { position: relative; z-index: 2; }
+.fantasyrogue .rogue-route > .rogue-route-marker { position: absolute; z-index: 3; top: -10px; left: calc(50% - 9px); display: none; pointer-events: none; }
+.fantasyrogue .rogue-route.is-selected > .rogue-route-marker { display: block; }
+.fantasyrogue .rogue-route-emblem {
+	display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+	grid-column: 1; grid-row: 1; width: 28px; height: 28px; color: rgb(var(--route-color));
+	background: rgba(255, 255, 255, .6); border: 1px solid rgba(var(--route-color), .2); border-radius: 5px;
+}
+.fantasyrogue .rogue-route-emblem .fa { font-size: 19px; }
+.fantasyrogue .rogue-route > strong { grid-column: 2; grid-row: 1; align-self: center; text-align: left; }
+.fantasyrogue .rogue-route > small { grid-column: 1 / -1; margin: 0; color: #4b6477; text-align: left; }
+.fantasyrogue .rogue-route > .rogue-caption { grid-column: 1 / -1; margin: 3px 0 0; padding-top: 4px; border-top: 1px solid rgba(var(--route-color), .16); color: #4b6477; }
+.fantasyrogue .rogue-route > .rogue-loot { grid-column: 1 / -1; width: 100%; flex-direction: row; align-content: flex-start; align-items: flex-start; gap: 3px 8px; margin: 0 0 3px; }
+.fantasyrogue .rogue-route .rogue-loot strong { color: #1c573c; }
+.fantasyrogue .rogue-route .rogue-growth-reward { color: #855a00; }
+.fantasyrogue .rogue-route > .rogue-route-hint {
+	grid-column: 1 / -1; align-self: end; padding: 4px 0 0; border-top: 1px solid rgba(var(--route-color), .16);
+	font-size: 12px; color: #4b6477; text-align: center;
+}
+.fantasyrogue .rogue-route-hint::after {
+	content: ""; position: absolute; bottom: -6px; left: 23%; right: 23%; height: 2px;
+	background: rgba(var(--route-color), .4); pointer-events: none;
+}
+.fantasyrogue .rogue-route:not(:disabled):hover, .fantasyrogue .rogue-route:not(:disabled):focus-visible {
+	transform: translateY(-1px); filter: drop-shadow(0 1px 2px rgba(var(--route-color), .2));
+}
+.fantasyrogue .rogue-route.is-selected, .fantasyrogue .rogue-route.is-selected:hover, .fantasyrogue .rogue-route.is-selected:focus-visible {
+	transform: translateY(-2px); filter: drop-shadow(0 0 2px rgba(var(--route-color), .5));
+}
+.fantasyrogue .rogue-route.is-selected::before { background: #fff; }
+.fantasyrogue .rogue-route.is-selected::after { inset: 4px; box-shadow: inset 0 0 20px rgba(255, 255, 255, .18); }
+.fantasyrogue .rogue-route.is-selected > .rogue-route-hint { color: rgb(var(--route-color)); font-weight: bold; }
+.fantasyrogue .rogue-route:focus-visible { outline: none; }
+.fantasyrogue .rogue-route:focus-visible::before { background: #fff; }
+.fantasyrogue .rogue-route:focus-visible::after { inset: 3px; }
+.fantasyrogue .rogue-route:disabled { cursor: default; opacity: .55; }
+.fantasyrogue .rogue-vortex { position: absolute; inset: 0; z-index: 1; clip-path: var(--card-cut); overflow: hidden; contain: strict; pointer-events: none; opacity: 0; transition: opacity .2s; color: rgb(var(--route-color)); }
+.fantasyrogue .rogue-particle-field { position: absolute; inset: 0; display: block; fill: currentColor; opacity: 0; transform: scale(.18); transform-origin: 50% 50%; }
+.fantasyrogue .rogue-route:not(:disabled):hover > .rogue-vortex,
+.fantasyrogue .rogue-route:not(:disabled):focus-visible > .rogue-vortex { opacity: 1; }
+.fantasyrogue .rogue-route:not(:disabled):hover .rogue-particle-field,
+.fantasyrogue .rogue-route:not(:disabled):focus-visible .rogue-particle-field {
+	animation: rogue-particles-outward 6s linear infinite;
+	animation-delay: var(--particle-delay);
+	will-change: transform, opacity;
+}
+@keyframes rogue-particles-outward {
+	0% { transform: scale(.18); opacity: 0; }
+	25% { transform: scale(.33); opacity: .06; }
+	50% { transform: scale(.57); opacity: .18; }
+	75% { transform: scale(.96); opacity: .4; }
+	100% { transform: scale(1.6); opacity: .64; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.fantasyrogue .rogue-route, .fantasyrogue .rogue-vortex { transition: none; }
+	.fantasyrogue .rogue-route:not(:disabled):hover, .fantasyrogue .rogue-route:not(:disabled):focus-visible { transform: none; }
+	.fantasyrogue .rogue-route .rogue-vortex .rogue-particle-field { display: none; animation: none; will-change: auto; }
+	.fantasyrogue .rogue-route .rogue-vortex { background: radial-gradient(ellipse, rgba(var(--route-light), .3), transparent 70%); }
+}
 .fantasyrogue .rogue-loot { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 4px 0 6px; align-items: center; }
 .fantasyrogue .rogue-loot > span { display: inline-flex; align-items: center; gap: 4px; }
 .fantasyrogue .rogue-loot strong { font-size: 16px; color: #1c573c; white-space: nowrap; }
@@ -159,6 +245,9 @@
 .rogue-retreat { clear: both; padding: 5px 8px; }
 .rogue-retreat .button { margin-right: 6px; }
 .rogue-retreat small { color: #555; }
+.rogue-defeat { margin: 6px 0 10px; padding: 8px 10px; color: #49372b; background: #fff3dc; border: 1px solid #c99750; border-left: 4px solid #bc5a43; border-radius: 4px; }
+.rogue-defeat > strong { color: #a3342d; }
+.rogue-defeat p { margin: 5px 0; line-height: 1.5; }
 .fantasyrogue .rogue-recovery { padding: 5px 8px; border-left: 3px solid #c5943e; background: #fff6df; }
 .fantasyrogue .rogue-item {
 	display: inline-block;
@@ -183,3 +272,73 @@
 .fantasyrogue .rogue-item-revive { width: 12px; height: 17px; background-position: -479px -54px; }
 .fantasyrogue .rogue-item-fullheal { width: 15px; height: 23px; background-position: -200px -331px; }
 .fantasyrogue .rogue-item-elixir { width: 18px; height: 24px; background-position: -77px -168px; }
+.fantasyrogue .rogue-item-blackaugurite { width: 22px; height: 25px; background-position: -55px -115px; }
+.fantasyrogue .rogue-item-bigmushroom { width: 19px; height: 19px; background-position: -336px -343px; }
+.fantasyrogue .rogue-item-nugget { width: 16px; height: 16px; background-position: -451px -351px; }
+.fantasyrogue .rogue-item-bignugget { width: 20px; height: 20px; background-position: -232px -22px; }
+.fantasyrogue .rogue-item-hpup { width: 16px; height: 24px; background-position: -103px -189px; }
+.fantasyrogue .rogue-item-protein { width: 16px; height: 24px; background-position: -165px -175px; }
+.fantasyrogue .rogue-item-iron { width: 16px; height: 24px; background-position: -103px -213px; }
+.fantasyrogue .rogue-item-calcium { width: 16px; height: 24px; background-position: -86px -139px; }
+.fantasyrogue .rogue-item-zinc { width: 16px; height: 24px; background-position: -181px -170px; }
+.fantasyrogue .rogue-item-carbos { width: 16px; height: 24px; background-position: -61px -169px; }
+.fantasyrogue .rogue-loot-icon { width: 24px; height: 24px; vertical-align: middle; image-rendering: pixelated; object-fit: contain; flex-shrink: 0; }
+.fantasyrogue .rogue-treasures { grid-column: 1 / -1; border-top: 1px solid #bdcedc; padding-top: 5px; }
+.fantasyrogue .rogue-treasures h4 { margin: 3px 0 6px; }
+.fantasyrogue .rogue-treasures h4 small { color: #5a6e80; font-weight: normal; margin-left: 8px; }
+.fantasyrogue .rogue-shop { margin: 8px 0; }
+.fantasyrogue .rogue-shop-balance { float: right; color: #715617; }
+.fantasyrogue .rogue-exchange { margin: 7px 0; padding: 7px 8px; background: #fff7df; border: 1px solid #e1c78c; border-radius: 4px; }
+.fantasyrogue .rogue-exchange > strong { margin-right: 10px; }
+.fantasyrogue .rogue-exchange .rogue-inventory { margin-top: 5px; }
+.fantasyrogue .rogue-shop-group { border-top: 1px solid #cbd9e5; padding-top: 5px; margin-top: 6px; }
+.fantasyrogue .rogue-shop-group > summary { cursor: pointer; font-weight: bold; margin-bottom: 5px; }
+
+.ps-popup.rogue-starter-popup { width: 410px; max-width: calc(100vw - 24px); box-sizing: border-box; }
+.rogue-starter-config { max-height: calc(100vh - 72px); overflow-y: auto; }
+.rogue-starter-config h3 { margin: 3px 0 12px; }
+.rogue-starter-config select { max-width: 100%; }
+.rogue-starter-config table { width: 100%; border-collapse: collapse; background: #f4f8fb; }
+.rogue-starter-config th, .rogue-starter-config td { padding: 5px 8px; text-align: left; }
+.rogue-starter-config thead { background: #dce8f2; }
+.rogue-starter-config input[type=number] { width: 66px; }
+.rogue-starter-config .rogue-config-note { color: #52697b; font-size: 12px; line-height: 1.5; }
+.rogue-starter-config .rogue-config-error { color: #a32626; }
+.rogue-start-move-label { display: inline-block; width: 49%; margin: 3px 0; }
+.rogue-start-move-label select { width: 120px; max-width: 70%; }
+.rogue-start-move-preview .rogue-move-row { display: flex; flex-wrap: wrap; gap: 6px 10px; padding: 6px; background: #e8f2f8; }
+.rogue-start-move-preview small { display: block; color: #52697b; }
+.rogue-start-move-preview .rogue-move-desc { width: 100%; }
+.fantasyrogue .rogue-starter-builds p { margin: 5px 0; }
+.rogue-ball-option { position: relative; display: inline-block; margin: 2px 0; }
+.rogue-ball-option .itemicon { display: inline-block; width: 24px; height: 24px; vertical-align: middle; }
+.rogue-catch-tip {
+	display: none; position: absolute; z-index: 20; left: 0; bottom: calc(100% + 6px);
+	width: 240px; max-width: 65vw; padding: 8px 10px; border: 1px solid #8ba9bf;
+	border-radius: 5px; background: #f5faff; color: #273b4a; font-size: 12px; line-height: 1.5;
+	box-shadow: 0 2px 7px #0003; pointer-events: none;
+}
+.rogue-ball-option:hover .rogue-catch-tip, .rogue-ball-option:focus-within .rogue-catch-tip { display: block; }
+
+.ps-popup.rogue-spirit-popup {
+	width: 350px; max-width: calc(100vw - 28px); min-height: 330px; box-sizing: border-box;
+	padding: 18px 22px; text-align: center; color: #263b50; border: 1px solid #91aeca;
+	border-radius: 10px; background: linear-gradient(155deg, #f8fcffed, #dceaf4eb);
+	box-shadow: 0 8px 30px #223d6755, inset 0 1px 0 #fff; backdrop-filter: blur(8px);
+}
+.rogue-spirit-popup .rogue-spirit-art { width: 140px; height: 120px; margin: 0 auto 5px; background-repeat: no-repeat; background-position: center !important; }
+.rogue-spirit-popup h3 { margin: 7px 0 10px; font-size: 19px; }
+.rogue-spirit-popup p { margin: 10px 0 18px; line-height: 1.65; text-align: left; }
+.rogue-spirit-popup .rogue-caption { color: #647e95; }
+.fantasyrogue .rogue-spirit-badge { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.fantasyrogue .rogue-spirit-badge .button { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px 2px 1px; }
+.fantasyrogue .rogue-stars { color: #95680f; letter-spacing: 2px; }
+.fantasyrogue .rogue-box { margin: 8px 0; }
+.fantasyrogue .rogue-box > .rogue-inventory { margin-top: 6px; }
+.fantasyrogue .rogue-box .rogue-item-card { min-width: 0; }
+.fantasyrogue .rogue-item-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 4px; }
+.fantasyrogue .rogue-item-actions > .button { margin: 0; }
+.fantasyrogue .rogue-hp-shop { padding: 6px 8px; border-radius: 4px; border: 1px solid #cc9caa; background: #fff1f4; }
+
+/* Party and inventory are a native right-side room, alongside Lobby and Hellodex. */
+.fantasyrogue.rogue-party-room > .pad { max-width: none; }

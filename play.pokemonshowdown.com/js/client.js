@@ -1655,6 +1655,7 @@ function toId() {
 				'teambuilder': TeambuilderRoom,
 				'fantasyai': window.FantasyAIRoom,
 				'fantasyrogue': window.FantasyRogueRoom,
+				'fantasyrogueparty': window.FantasyRoguePartyRoom,
 				'rooms': RoomsRoom,
 				'battles': BattlesRoom,
 				'ladder': LadderRoom,
@@ -1708,6 +1709,7 @@ function toId() {
 		focusRoom: function (id, focusTextbox) {
 			var room = this.rooms[id];
 			if (!room) return false;
+			if (room.type === 'fantasyrogue' && this.curRoom !== room) room.openPartyOnLayout = true;
 			BattleTooltips.hideTooltip();
 			if (this.curRoom === room || this.curSideRoom === room) {
 				room.focus(null, focusTextbox);
@@ -1787,6 +1789,7 @@ function toId() {
 		 */
 		updateLayout: function () {
 			if (!this.curRoom) return; // can happen during initialization
+			if (this.curRoom.type === 'fantasyrogue') this.curRoom.preparePanel();
 			if (this.updateFantasyCalcdexLayout()) return;
 
 			// If we don't have any right rooms at all, just show the left
