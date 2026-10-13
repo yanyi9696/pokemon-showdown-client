@@ -90,6 +90,30 @@ describe('Battle', () => {
 	});
 });
 
+describe('Fantasy rogue capture playback', () => {
+	it('dispatches the server outcome before subsequent moves and victory', () => {
+		const battle = new Battle({debug: true, log: [
+			'|player|p1|Player', '|player|p2|Wild', '|gen|9', '|start',
+			'|switch|p1a: Snivy|Snivy, L5|20/20', '|switch|p2a: Magikarp|Magikarp, L3|15/15', '|turn|1',
+		]});
+		const captures = [];
+		battle.scene.rogueCaptureAnim = (pokemon, ball, success, shakes, critical) => {
+			captures.push({species: pokemon.speciesForme, ball, success, shakes, critical, ended: battle.ended});
+		};
+		battle.add('|-roguecapture|p2a: Magikarp|pokeball|failure|1|normal');
+		battle.add('|move|p2a: Magikarp|Splash|p2a: Magikarp');
+		battle.add('|-roguecapture|p2a: Magikarp|greatball|success|3|normal');
+		battle.add('|win|Player');
+		assert.deepEqual(captures, [
+			{species: 'Magikarp', ball: 'pokeball', success: false, shakes: 1, critical: false, ended: false},
+			{species: 'Magikarp', ball: 'greatball', success: true, shakes: 3, critical: false, ended: false},
+		]);
+		assert.equal(battle.ended, true);
+		assert.deepEqual(battle.sides[1].pokemon[0].moveTrack, [['Splash', 1]]);
+		battle.destroy();
+	});
+});
+
 describe('Fantasy Pressure PP display', () => {
 	let battle;
 	afterEach(() => battle?.destroy());

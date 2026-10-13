@@ -1656,6 +1656,7 @@ function toId() {
 				'fantasyai': window.FantasyAIRoom,
 				'fantasyrogue': window.FantasyRogueRoom,
 				'fantasyrogueparty': window.FantasyRoguePartyRoom,
+				'fantasyroguegallery': window.FantasyRogueGalleryRoom,
 				'rooms': RoomsRoom,
 				'battles': BattlesRoom,
 				'ladder': LadderRoom,
@@ -1816,7 +1817,7 @@ function toId() {
 
 			var leftMin = (this.curRoom.minWidth || this.curRoom.bestWidth);
 			var leftMinMain = (this.curRoom.minMainWidth || leftMin);
-			var rightMin = (this.sideRoom.minWidth || this.sideRoom.bestWidth);
+			var rightMin = this.curRoom.type === 'fantasyrogue' ? 320 : (this.sideRoom.minWidth || this.sideRoom.bestWidth);
 			var available = $(window).width();
 			if (this.curRoom.isSideRoom) {
 				// we're trying to focus a side room
@@ -1886,7 +1887,8 @@ function toId() {
 			// maxWidth applies only to left rooms.
 
 			var leftMax = (this.curRoom.maxWidth || this.curRoom.bestWidth);
-			var rightMax = (this.sideRoom.maxWidth || this.sideRoom.bestWidth);
+			// Keep the lobby's split while changing rogue inventory/chat tabs.
+			var rightMax = this.curRoom.type === 'fantasyrogue' ? 1024 : (this.sideRoom.maxWidth || this.sideRoom.bestWidth);
 			var leftWidth = leftMin;
 			if (leftMax + rightMax <= available) {
 				leftWidth = leftMax;

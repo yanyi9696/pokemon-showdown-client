@@ -327,6 +327,75 @@ export class BattleScene implements BattleSceneStub {
 
 		return $effect;
 	}
+	/** A server-reported capture is one queued animation; neither outcome nor odds are rolled here. */
+	rogueCaptureAnim(pokemon: Pokemon, ball: string, success: boolean, shakes: number, critical: boolean) {
+		const target = pokemon.sprite;
+		if (!this.animating || !target?.$el) return;
+		const speed = this.acceleration;
+		const start = this.timeOffset;
+		const ms = (value: number) => value / speed;
+		const hit = 420, absorb = 340, drop = 220;
+		const count = critical ? 1 : Math.max(0, Math.min(3, shakes));
+		const release = hit + absorb + drop + 140 + count * 360;
+		const item = Dex.items.get(ball);
+		const icon = Dex.getItemIcon(item.exists ? item : 'pokeball');
+		const origin = pokemon.side.foe.active[0]?.sprite;
+		const ballSprite = new Sprite({ w: 24, h: 24, rawHTML:
+			`<div class="rogue-capture-ball" style="position:absolute;display:block;pointer-events:none">` +
+			`<span style="display:block;position:absolute;width:24px;height:24px;left:50%;top:50%;margin:-12px;` +
+			`image-rendering:pixelated;transform:scale(1.5);${icon}"></span></div>` },
+		{ x: origin?.x || -80, y: (origin?.y || 0) + 35, z: origin?.z || 0 }, this);
+		this.$fx.append(ballSprite.$el);
+		ballSprite.delay(start).anim({ x: target.x, y: target.y + 20, z: target.z, time: ms(hit) }, 'ballistic2');
+		const landing = { x: target.x, y: target.y - 35, z: target.z };
+		ballSprite.delay(ms(absorb)).anim({ ...landing, time: ms(drop) }, 'accel').delay(ms(140));
+		target.delay(start + ms(hit)).anim({ x: target.x, y: target.y + 20, z: target.z,
+			scale: 0.05, opacity: 0, time: ms(absorb) }, 'accel');
+		if (target.$statbar) {
+			target.$statbar.delay(start + ms(hit)).animate({ opacity: 0 }, ms(absorb));
+			if (!success) target.$statbar.delay(ms(release - hit - absorb)).animate({ opacity: 1 }, ms(300));
+			this.waitFor(target.$statbar);
+		}
+		this.showEffect('shine', { x: target.x, y: target.y + 20, z: target.z, scale: 0.8, opacity: 0.7, time: ms(hit) },
+			{ x: target.x, y: target.y + 20, z: target.z, scale: 0.1, opacity: 0, time: ms(hit + absorb) }, 'decel');
+		for (let i = 0; i < count; i++) {
+			ballSprite.anim({ ...landing, x: target.x - 7, time: ms(80) }, 'swing')
+				.anim({ ...landing, x: target.x + 7, time: ms(100) }, 'swing')
+				.anim({ ...landing, time: ms(80) }, 'swing').delay(ms(100));
+		}
+		if (success) {
+			// Each pixel star starts at the ball's center, then springs out on its
+			// own path. Use the scene queue so pause, seeking and speed still work.
+			const starData = { w: 18, h: 18, rawHTML:
+				'<div class="rogue-capture-star" aria-hidden="true" style="position:absolute;pointer-events:none">' +
+				'<svg viewBox="0 0 18 18" width="100%" height="100%" shape-rendering="crispEdges">' +
+				'<path fill="#b87822" d="M8 0h2v3h2v3h6v4h-3v3h1v5h-4v-2H6v2H2v-5h1v-3H0V6h6V3h2Z"/>' +
+				'<path fill="#ffe67c" d="M8 2h2v4h2v2h4v2h-3v3h1v3h-2v-2H6v2H4v-3h1v-3H2V8h4V6h2Z"/>' +
+				'<path fill="#fffad1" d="M8 6h2v2h2v2H6V8h2Z"/></svg></div>' };
+			for (const [dx, dy] of [[-45, 30], [0, 55], [45, 30], [-28, -16], [28, -16]]) {
+				const star = new Sprite(starData, { ...landing, scale: 0.15, opacity: 0 }, this);
+				// Sprite skips its initial CSS when opacity is zero.
+				star.anim({ ...landing, scale: 0.15, opacity: 0, time: 0 });
+				this.$fx.append(star.$el);
+				star.delay(start + ms(release))
+					.anim({ ...landing, x: landing.x + dx * 0.28, y: landing.y + dy * 0.28,
+						scale: 0.7, opacity: 1, time: ms(90) }, 'linear')
+					.anim({ ...landing, x: landing.x + dx, y: landing.y + dy,
+						scale: 1, opacity: 1, time: ms(250) }, 'decel')
+					.anim({ ...landing, x: landing.x + dx * 1.2, y: landing.y + dy * 1.2 - 4,
+						scale: 0.35, opacity: 0, time: ms(240) }, 'linear');
+				this.waitFor(star.$el);
+			}
+			ballSprite.delay(ms(500)).anim({ ...landing, opacity: 0, time: ms(160) });
+		} else {
+			ballSprite.anim({ ...landing, opacity: 0, scale: 1.8, time: ms(150) });
+			target.delay(ms(release - hit - absorb)).anim({ x: target.x, y: target.y, z: target.z,
+				scale: 1, opacity: 1, time: ms(300) }, 'decel');
+		}
+		this.waitFor(target.$el);
+		this.waitFor(ballSprite.$el);
+		this.wait(ms(release + (success ? 700 : 400)));
+	}
 	backgroundEffect(bg: string, duration: number, opacity = 1, delay = 0) {
 		let $effect = $('<div class="background"></div>');
 		$effect.css({

@@ -45,7 +45,8 @@ function client() {
 	room.$ = selector => ({
 		each(callback) { for (const element of room.controls[selector] || []) callback.call(element); },
 		text(value) { room.controls[selector] = value; },
-			prop(name, value) { room.controls[selector] = {[name]: value}; },
+		prop(name, value) { room.controls[selector] = {[name]: value}; },
+		trigger(name) { room.lastTriggered = {selector, name}; },
 	});
 	room.listenTo = (source, event, callback) => source.on(event, callback.bind(room));
 	room.initialize();
@@ -57,6 +58,112 @@ function state() {
 		message: '正式队伍与数值等待配置', starters: [], items: [], run: null,
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
+describe('Fantasy Rogue story and clear-card controls', () => {
+	it('continues the server page, blocks duplicate clicks, and hides starter controls while reading', () => {
+		const c = client(), data = state();
+		data.story = {stage: 'opening', scene: 'chamber', title: '醒来', text: '你在塔里吗？', key: 'opening:0', index: 0, total: 8, canSkip: false};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('你在塔里吗？'));
+		assert(!c.room.html.includes('name="startAdventure"')); assert(!c.room.html.includes('name="storySkip"'));
+		c.room.storyNext(); c.room.storyNext();
+		assert.equal(c.sent.length, 1);
+		const command = JSON.parse(c.sent[0].slice('/fantasyrogue story '.length));
+		assert.equal(command.action, 'storynext'); assert.equal(command.value, 'opening:0');
+		const next = structuredClone(data); next.story.index++; next.story.key = 'opening:1'; next.story.canSkip = true;
+		c.room.receiveAction({userid: data.userid, id: command.id, ok: true, state: next});
+		assert(c.room.html.includes('2/8')); assert(c.room.html.includes('name="storySkip"'));
+	});
+	it('keeps the same scene and dialogue nodes through pending, acknowledgement and repeated renders', () => {
+		const c = client(), data = state();
+		data.story = {stage: 'opening', scene: 'chamber', title: '醒来', text: '第一句', key: 'opening:0', index: 0, total: 8, canSkip: true};
+		c.room.receiveState(data);
+		const nodes = {};
+		for (const name of ['.rogue-story-scene', '.rogue-story-chapter', 'strong', 'span', 'small', 'button[name=storySkip]']) nodes[name] = {};
+		nodes['.rogue-story-dialogue'] = {setAttribute() {}, querySelector: key => nodes[key]};
+		const section = {dataset: {story: c.room.storySignature(data.story)}, setAttribute() {}, querySelector: key => nodes[key]};
+		c.room.$el[0] = {querySelector: () => section};
+		c.room.$el.html = () => { throw new Error('Must not rebuild the scene on a page turn'); };
+		c.room.updateParty = () => { throw new Error('Must not rebuild the unchanged party on a page turn'); };
+		c.room.storyNext();
+		assert(nodes['.rogue-story-dialogue'].disabled);
+		assert(!c.room.html.includes('正在保存操作'));
+		const command = JSON.parse(c.sent[0].slice('/fantasyrogue story '.length));
+		const next = structuredClone(data); next.account.revision++;
+		Object.assign(next.story, {index: 1, key: 'opening:1', text: '第二句', scene: 'letter'});
+		c.room.receiveAction({userid: data.userid, id: command.id, ok: true, state: next});
+		assert.equal(nodes.span.textContent, '第二句');
+		assert.equal(nodes['.rogue-story-scene'].className, 'rogue-story-scene scene-letter');
+		assert.equal(nodes['.rogue-story-dialogue'].disabled, false);
+		c.room.render(true); assert.equal(nodes.small.textContent, '轻点继续 ▷ · 2/8');
+	});
+	it('cycles the deck by keyboard without claiming a card until it is clicked', () => {
+		const c = client(), data = state();
+		data.story = {stage: 'cards', cards: Array.from({length: 19}, (_, i) => ({id: String(i), type: '', name: '卡片 ' + i, text: '效果'}))};
+		c.room.receiveState(data);
+		let prevented = false;
+		c.room.cardKey({key: 'ArrowLeft', preventDefault() { prevented = true; }});
+		assert(prevented); assert.equal(c.room.startCardIndex, 18); assert.equal(c.sent.length, 0);
+		assert(c.room.html.includes('value="18" class="rogue-start-card"'));
+		c.room.cardKey({key: 'ArrowRight', preventDefault() {}}); assert.equal(c.room.startCardIndex, 0);
+		c.room.pickStartCard('0'); c.room.pickStartCard('0'); assert.equal(c.sent.length, 1);
+		assert.equal(JSON.parse(c.sent[0].slice('/fantasyrogue action '.length)).action, 'startcard');
+	});
+	it('hands the final battle an ending notice without interrupting its animation', () => {
+		const c = client(), data = adventure('battle');
+		data.run.id = 'last-run'; data.run.floor = 200; data.run.roomid = 'battle-final';
+		c.room.receiveState(data);
+		let updates = 0;
+		c.app.rooms['battle-final'] = {fantasyRogue: {userid: data.userid}, updateControls() { updates++; }};
+		const result = structuredClone(data); result.run.phase = 'complete'; delete result.run.roomid;
+		result.story = {stage: 'ending', scene: 'summit', title: '塔顶', text: '旅途结束。', index: 0, total: 6};
+		c.room.receiveState(result);
+		assert(c.app.rooms['battle-final'].fantasyRogueEnding); assert.equal(updates, 1);
+		assert.equal(c.joined.length, 0);
+	});
+	function gallery(c) {
+		const room = Object.create(c.FantasyRogueGalleryRoom);
+		room.$el = {addClass() {}, html: html => { room.html = html; }};
+		room.$ = () => ({val: () => room.chosen || ''});
+		room.listenTo = (source, event, callback) => source.on(event, callback.bind(room));
+		room.initialize();
+		room.receiveGallery({userid: 'rogueplayer', account: {revision: 1}, own: [], cards: [], invitations: [], offset: 0, rulesVersion: 'current'});
+		return room;
+	}
+	it('publishes only the selected saved ID and requires confirmation before deleting a card', () => {
+		const c = client(), room = gallery(c);
+		room.publishCard('archive1|public'); room.publishCard('archive1|public'); assert.equal(c.sent.length, 1);
+		const command = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.equal(command.member, 'archive1'); assert.equal(command.value, 'public'); assert(!command.team);
+		room.receiveMutation({userid: 'rogueplayer', id: command.id, ok: true});
+		const count = c.sent.length;
+		room.deleteCard('archive1'); assert.equal(c.sent.length, count);
+		const popup = Object.create(c.RogueCardConfirmPopup);
+		popup.$el = {html() {}}; popup.close = () => {};
+		popup.initialize(c.app.lastPopup.data);
+		c.setUser('differentplayer'); popup.confirmCard(); assert.equal(c.sent.length, count);
+		c.setUser('rogueplayer'); popup.confirmCard();
+		assert.equal(JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length)).action, 'deletecard');
+	});
+	it('enters a duel only after an acknowledgement for the signed-in player', () => {
+		const c = client(), room = gallery(c); room.chosen = 'myarchive';
+		room.acceptDuel('invite1'); room.acceptDuel('invite1'); assert.equal(c.sent.length, 1);
+		const command = JSON.parse(c.sent[0].slice('/fantasyrogue duel '.length));
+		assert.equal(command.card, 'myarchive'); assert.equal(command.id, 'invite1'); assert(!command.team);
+		room.receiveDuel({userid: 'another', ok: true, roomid: 'battle-other'}); assert.equal(c.joined.length, 0);
+		room.receiveDuel({userid: 'rogueplayer', ok: true, roomid: 'battle-ours'}); assert.deepEqual(c.joined, ['battle-ours']);
+	});
+	it('offers a newly freed collection slot for a pending clear instead of forcing another replacement', () => {
+		const c = client(); c.room.receiveState(state());
+		const html = c.room.renderPendingClear({}, [{id: 'kept1'}, {id: 'kept2'}], false);
+		assert(html.includes('收藏至空位')); assert(!html.includes('替换第'));
+		c.room.resolveClear('');
+		const popup = Object.create(c.RogueCardConfirmPopup);
+		popup.$el = {html() {}}; popup.close = () => {};
+		popup.initialize(c.app.lastPopup.data); popup.confirmCard();
+		const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(command.action, 'saveclear'); assert.equal(command.value, '');
+	});
+});
 function adventure(phase = 'choose') {
 	const data = state();
 	const stats = {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
@@ -77,7 +184,142 @@ function adventure(phase = 'choose') {
 		}]};
 	return data;
 }
+// Use the real layout/focus lifecycle: a focus-only mock misses a hidden room
+// that was already marked as the current side room by preparePanel.
+function enableRoomLayout(c, width) {
+	function extend(properties) {
+		function Class() {}
+		Class.prototype = properties; Class.extend = extend; return Class;
+	}
+	const context = {
+		Config: {}, navigator: {userAgent: 'Rogue layout test'}, document: {},
+		Backbone: {Model: {extend}, Router: {extend}, View: {extend}},
+		jQuery: () => ({on() {}, width: () => width}), BattleTooltips: {hideTooltip() {}},
+	};
+	context.window = context;
+	vm.runInNewContext(fs.readFileSync(require.resolve('../play.pokemonshowdown.com/js/client.js'), 'utf8'), context);
+	const proto = context.App.prototype;
+	for (const method of ['focusRoom', 'updateLayout', 'updateSideRoom', 'removeRoom', 'updateFantasyCalcdexLayout']) {
+		c.app[method] = proto[method];
+	}
+	const prepare = room => Object.assign(room, {
+		visible: false,
+		show(position, boundary) { this.visible = true; this.position = position; this.boundary = boundary; },
+		hide() { this.visible = false; }, focus() {}, destroy() { this.visible = false; },
+	});
+	prepare(c.room); prepare(c.panel);
+	c.room.$el.removeClass = () => {}; c.room.$el.addClass = () => {};
+	c.app.rooms.lobby = prepare({id: 'lobby', type: 'chat', isSideRoom: true, minWidth: 320, bestWidth: 1024});
+	c.app.rooms[''] = prepare({id: '', tinyWidth: 320});
+	c.app.roomList = [c.room]; c.app.sideRoomList = [c.panel, c.app.rooms.lobby];
+	c.app.curRoom = c.room; c.app.sideRoom = c.app.rooms.lobby;
+	c.app.topbar = {updateTabbar() { c.app.visibleTabs = Object.keys(c.app.rooms); }};
+	c.app.navigate = () => {}; c.app.updateTitle = () => {};
+	c.app.updateLayout();
+}
+
 describe('Fantasy Rogue client', () => {
+	it('requires confirmation for evolution and only animates an acknowledged success once', () => {
+		const c = client(), data = adventure(), mon = data.run.team[0];
+		mon.evolutionDetails = [{species: 'Ivysaur', ready: true, requirements: []}];
+		c.room.receiveState(data);
+		assert(c.panel.html.includes('↑ 可进化'));
+		c.room.evolveMember(mon.id + '|ivysaur');
+		assert.equal(c.sent.length, 0);
+		assert.equal(c.app.lastPopup.type, c.RogueEvolutionPopup);
+		const popup = Object.create(c.RogueEvolutionPopup);
+		popup.$el = {addClass() {}, html: html => { popup.html = html; }};
+		popup.close = () => { popup.closed = true; };
+		popup.initialize(c.app.lastPopup.data);
+		assert(popup.html.includes('确认进化'));
+		popup.close(); assert.equal(c.sent.length, 0, 'cancel has no side effects');
+		popup.confirmEvolution();
+		assert.equal(c.sent.length, 1);
+		const command = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		const next = structuredClone(data); next.account.revision++; next.run.team[0].set.species = 'Ivysaur';
+		const result = {userid: data.userid, id: command.id, ok: true, state: next};
+		c.room.receiveAction(result);
+		assert.equal(c.app.lastPopup.type, c.RogueEvolutionAnimationPopup);
+		assert.equal(c.app.lastPopup.data.before.species, 'Bulbasaur');
+		assert.equal(c.app.lastPopup.data.after.species, 'Ivysaur');
+		c.app.lastPopup = null; c.room.receiveAction(result);
+		assert.equal(c.app.lastPopup, null, 'duplicate acknowledgement must not replay');
+	});
+	it('rejects stale evolution confirmations and never plays an animation for a failed action', () => {
+		const c = client(), data = adventure(), mon = data.run.team[0];
+		mon.evolutionDetails = [{species: 'Ivysaur', ready: true, requirements: []}];
+		c.room.receiveState(data); c.room.evolveMember(mon.id + '|ivysaur');
+		const popup = Object.create(c.RogueEvolutionPopup);
+		popup.$el = {addClass() {}, html() {}}; popup.close = () => {};
+		popup.initialize(c.app.lastPopup.data);
+		mon.evolutionDetails[0].ready = false; popup.confirmEvolution(); assert.equal(c.sent.length, 0);
+		mon.evolutionDetails[0].ready = true; c.setUser('anotherplayer'); popup.confirmEvolution(); assert.equal(c.sent.length, 0);
+		c.setUser(data.userid); popup.confirmEvolution();
+		const id = c.room.pending.id; c.app.lastPopup = null;
+		c.room.receiveAction({userid: data.userid, id, ok: false, message: '缺少进化道具。', state: data});
+		assert.equal(c.app.lastPopup, null); assert.equal(c.room.error, '缺少进化道具。');
+	});
+	it('lets an evolution animation be skipped without a second command and offers eligible next evolution', () => {
+		const c = client(), data = adventure(), mon = data.run.team[0];
+		mon.set.species = 'Ivysaur'; mon.evolutionDetails = [{species: 'Venusaur', ready: true, requirements: []}];
+		c.room.receiveState(data);
+		const popup = Object.create(c.RogueEvolutionAnimationPopup);
+		popup.$el = {addClass() {}, html: html => { popup.html = html; }};
+		popup.$ = () => ({text() {}, html: html => { popup.actions = html; }});
+		popup.close = () => { popup.closed = true; };
+		popup.initialize({room: c.room, member: mon.id, before: {species: 'Bulbasaur'}, after: mon.set});
+		assert(popup.html.includes('跳过动画')); popup.close(); assert.equal(c.sent.length, 0);
+		popup.finishAnimation(); assert(popup.actions.includes('继续进化'));
+		popup.continueEvolution(); assert.equal(c.app.lastPopup.type, c.RogueEvolutionPopup);
+		assert.equal(c.sent.length, 0, 'next stage needs another confirmation');
+	});
+	it('reopens a closed party room and its tab without hiding the floor or changing the desktop split', () => {
+		const c = client(); c.room.receiveState(adventure()); enableRoomLayout(c, 1920);
+		const boundary = c.room.boundary;
+		for (let i = 0; i < 3; i++) {
+			c.room.openParty();
+			assert(c.panel.visible, 'The panel must be shown, not only selected internally');
+			assert(c.app.visibleTabs.includes(c.panel.id));
+			assert.equal(c.app.curRoom, c.room); assert.equal(c.room.boundary, boundary);
+			c.app.removeRoom(c.panel.id);
+			assert(!c.panel.visible); assert(!c.app.rooms[c.panel.id]);
+			assert(c.app.rooms.lobby.visible);
+		}
+		c.room.openParty(); c.app.focusRoom('lobby');
+		c.room.receiveState(c.room.state); c.app.updateLayout();
+		assert(c.app.rooms.lobby.visible && !c.panel.visible, 'Refreshing must respect the selected lobby tab');
+	});
+	it('can reopen the party with no other right tabs and on a single-panel screen', () => {
+		for (const width of [1920, 390]) {
+			const c = client(); c.room.receiveState(adventure()); enableRoomLayout(c, width);
+			c.app.removeRoom(c.panel.id); c.app.removeRoom('lobby');
+			c.room.openParty();
+			assert(c.panel.visible); assert(c.app.visibleTabs.includes(c.panel.id));
+			assert.equal(c.panel.position, width === 390 ? 'full' : 'right');
+		}
+	});
+	it('shares the selected party member with the bag in both directions, without retaining a stale item target', () => {
+		const c = client(), data = adventure();
+		const first = data.run.team[0];
+		data.run.team.push({...first, id: 'other', hp: 20, status: ''});
+		first.hp = 5; first.status = 'psn';
+		c.room.itemTarget = 'other'; c.room.receiveState(data);
+		assert(c.panel.html.includes('value="' + first.id + '" selected'));
+		assert(c.panel.html.includes('name="useItem" value="potion">使用'));
+		c.panel.changeItemTarget({currentTarget: {value: 'other'}});
+		assert.equal(c.room.selectedPokemon().id, 'other');
+		assert(c.panel.html.includes('name="useItem" value="potion" disabled>HP 已满'));
+		c.room.selectMember(first.id); c.room.useItem('potion');
+		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.equal(request.member, first.id); assert.equal(request.value, 'potion');
+	});
+	it('keeps abandon and its confirmation only below the floor content', () => {
+		const c = client(); c.room.receiveState(adventure());
+		assert(c.room.html.includes('name="askAbandon"')); assert(!c.panel.html.includes('name="askAbandon"'));
+		c.room.askAbandon();
+		assert(c.room.html.includes('name="abandon"')); assert(!c.panel.html.includes('name="abandon"'));
+		c.room.receiveState(adventure('battle')); assert(!c.room.html.includes('name="abandon"'));
+	});
 	it('keeps floor content on the left and party, inventory and growth in a native side room', () => {
 		const c = client(); c.room.receiveState(adventure('rest'));
 		assert(c.room.html.includes('宝可梦中心商店'));
@@ -168,7 +410,7 @@ describe('Fantasy Rogue client', () => {
 		assert(!c.html.includes('value="sell:all"'));
 		assert(c.html.includes('到商店兑换金币'));
 	});
-	it('opens starter configuration on selection, saves unlocked choices and rejects invalid values', () => {
+	it('waits for team confirmation, validates unlocked choices, and starts directly from the final configuration', () => {
 		const c = client(); const data = state(); data.configured = true;
 		const base = {hp: 20, atk: 20, def: 20, spa: 20, spd: 20, spe: 20};
 		data.natures = [{id: 'modest', name: 'Modest', plus: 'spa', minus: 'atk'}, {id: 'adamant', name: 'Adamant'}];
@@ -179,7 +421,11 @@ describe('Fantasy Rogue client', () => {
 		c.room.receiveState(data);
 		const input = {value: 'bulbasaur', checked: true};
 		c.room.changeStarter({currentTarget: input});
-		assert.equal(c.app.lastPopup.data.starter.id, 'bulbasaur');
+		assert(!c.app.lastPopup);
+		assert(c.room.html.includes('确认队伍，继续配置'));
+		assert(!c.room.html.includes('开始新的冒险'));
+		c.room.confirmStarters();
+		assert.equal(c.app.lastPopup.data.starters[0], 'bulbasaur');
 		assert.equal(c.room.starterBuilds.bulbasaur.ivs.spa, 29);
 		assert.equal(c.sent.length, 0);
 		const popup = Object.create(c.app.lastPopup.type);
@@ -192,18 +438,60 @@ describe('Fantasy Rogue client', () => {
 		assert(popup.html.includes('雌性') && !popup.html.includes('雄性'));
 		assert(!popup.html.includes('name="move-'));
 		assert(popup.html.includes('Chlorophyll（隐藏特性）'));
+		assert(popup.html.includes('开始本次冒险'));
 		const form = {nature: 'modest', gender: 'F', ability: 'chlorophyll'};
 		for (const stat of Object.keys(base)) form['iv-' + stat] = String(base[stat]);
 		popup.submit({...form, 'iv-spa': '30'}); assert(!popup.closed && popup.error);
 		popup.submit({...form, ability: 'levitate'}); assert(!popup.closed);
 		popup.submit({...form, 'iv-spa': '25', 'iv-atk': '0'}); assert(popup.closed);
-		c.room.startAdventure();
+		popup.submit(form); assert.equal(c.sent.length, 1);
 		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
 		assert.equal(request.starterBuilds.bulbasaur.nature, 'modest');
 		assert.equal(request.starterBuilds.bulbasaur.gender, 'F');
 		assert.equal(request.starterBuilds.bulbasaur.ivs.spa, 25);
 		assert.equal(request.starterBuilds.bulbasaur.ability, 'chlorophyll');
 		assert(!request.starterBuilds.bulbasaur.moves);
+	});
+	it('configures the confirmed team in order in one window and retains builds when going back', () => {
+		const c = client(), data = state(); data.configured = true; data.account.slots = 3;
+		data.starters = ['bulbasaur', 'charmander', 'squirtle'].map(id => ({id, species: id, available: true}));
+		c.room.receiveState(data);
+		for (const starter of data.starters) c.room.changeStarter({currentTarget: {value: starter.id, checked: true}});
+		assert(!c.app.lastPopup); c.room.confirmStarters();
+		const popup = Object.create(c.RogueStarterPopup);
+		const form = {nature: 'random', gender: 'random', ability: 'random'};
+		for (const stat of ['hp', 'atk', 'def', 'spa', 'spd', 'spe']) form['iv-' + stat] = '20';
+		popup.$el = {addClass() {}, html: html => { popup.html = html; }};
+		popup.$ = () => ({serializeArray: () => Object.entries(form).map(([name, value]) => ({name, value})), text() {}});
+		popup.close = () => { popup.closed = true; };
+		popup.initialize(c.app.lastPopup.data);
+		assert(popup.html.includes('1 / 3')); assert(popup.html.includes('确认配置，下一只'));
+		popup.submit(form); assert(!popup.closed); assert.equal(c.sent.length, 0);
+		assert.equal(popup.starter.id, 'charmander'); assert(popup.html.includes('2 / 3'));
+		popup.previousStarter(); assert.equal(popup.starter.id, 'bulbasaur');
+		assert(c.room.starterBuilds.charmander);
+		popup.submit(form); popup.submit(form);
+		assert.equal(popup.starter.id, 'squirtle'); assert(popup.html.includes('开始本次冒险'));
+		assert.equal(c.sent.length, 0);
+		popup.submit(form);
+		const command = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.deepEqual(command.starters, ['bulbasaur', 'charmander', 'squirtle']);
+		assert.equal(Object.keys(command.starterBuilds).length, 3);
+		assert(popup.closed);
+	});
+	it('does not submit a configuration after switching account or changing the confirmed roster', () => {
+		for (const accountChange of [true, false]) {
+			const c = client(), data = state(); data.configured = true;
+			data.starters = [{id: 'bulbasaur', species: 'Bulbasaur', available: true}];
+			c.room.receiveState(data); c.room.changeStarter({currentTarget: {value: 'bulbasaur', checked: true}});
+			c.room.confirmStarters();
+			const popup = Object.create(c.RogueStarterPopup);
+			popup.$el = {addClass() {}, html() {}}; popup.close = () => { popup.closed = true; };
+			popup.initialize(c.app.lastPopup.data);
+			if (accountChange) c.setUser('other');
+			else c.room.selectedStarters = [];
+			popup.submit({}); assert(popup.closed); assert.equal(c.sent.length, 0);
+		}
 	});
 	it('shows unlock requirements instead of locked species, and uses the current slot price', () => {
 		const c = client(); const data = state();
@@ -236,7 +524,7 @@ describe('Fantasy Rogue client', () => {
 		assert(c.html.includes('value="charmander" disabled'));
 		inputs[0].checked = false; c.room.changeStarter({currentTarget: inputs[0]});
 		assert(inputs.every(input => !input.disabled));
-		assert.equal(c.room.controls['button[name=startAdventure]'].disabled, true);
+		assert.equal(c.room.controls['button[name=confirmStarters]'].disabled, true);
 		const expanded = JSON.parse(JSON.stringify(data)); expanded.account.slots = 2; expanded.account.revision++;
 		c.room.receiveState(expanded);
 		for (const input of inputs.slice(0, 2)) { input.checked = true; c.room.changeStarter({currentTarget: input}); }
@@ -273,10 +561,26 @@ describe('Fantasy Rogue client', () => {
 		c.room.receiveState(next); c.room.chooseRoute('wild');
 		assert.equal(c.sent.length, 0);
 	});
+	it('shows all evolution branches, exact item names, friendship and tower time', () => {
+		const c = client(), data = adventure();
+		data.run.time = { id: 'dusk', name: '黄昏' };
+		const mon = data.run.team[0];
+		mon.friendship = 159;
+		mon.evolutionDetails = [{species: 'Pikachu', ready: false, requirements: [
+			{text: '亲密度达到 160（当前 159）', met: false}, {text: '满足上述条件后升 1 级', met: false},
+		]}, {species: 'Vaporeon', ready: false, requirements: [{text: '使用', name: 'Water Stone', met: false}]}];
+		c.room.receiveState(data);
+		assert(c.panel.html.includes('亲密度 159 / 255'));
+		assert(c.panel.html.includes('亲密度达到 160（当前 159）'));
+		assert(c.panel.html.includes('Water Stone'));
+		assert(c.room.html.includes('黄昏'));
+		assert(c.panel.html.indexOf('rogue-evolution-details') > c.panel.html.indexOf('rogue-stats'));
+		assert(/name="evolveMember"[^>]*disabled/.test(c.panel.html));
+	});
 	it('renders the unconfigured lobby and six growth branches without a fake start', () => {
 		const c = client(); c.room.receiveState(state());
 		assert(c.html.includes('等待配置'));
-		assert(c.html.includes('name="startAdventure" value="" disabled'));
+		assert(c.html.includes('name="confirmStarters" value="" disabled'));
 		assert.equal((c.html.match(/花费 1 点提升/g) || []).length, 6);
 		assert(c.html.includes('从下一次冒险生效'));
 	});
@@ -472,7 +776,7 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 			battle: {scene: {}, seeking: null, atQueueEnd: false, paused: false, ended: false, stepQueue: [], add() {}},
 			$controls: {find: () => ({remove() {}, html() {}}), html: html => { room.html = html; },
 				append: html => { room.html += html; }, prepend: html => { room.html = html + room.html; }}});
-		return {room, sent, joined};
+		return {room, sent, joined, app: context.app};
 	}
 	it('shows precise capture probability in ball hover content, including certain and tiny chances', () => {
 		const c = battleClient();
@@ -518,6 +822,18 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 		assert(c.room.html.includes('HP、PP')); assert(!c.room.html.includes('需重试整层'));
 		assert(!c.room.closed); assert.deepEqual(c.joined, []);
 		c.room.closeAndRematch(); assert(c.room.closed); assert.deepEqual(c.joined, ['fantasyrogue']);
+	});
+	it('opens the saved ending once only after the final victory playback finishes', () => {
+		const c = battleClient(); c.app.curRoom = c.room; c.room.fantasyRogueEnding = true;
+		c.room.updateControls(); assert.equal(c.joined.length, 0);
+		c.room.battle.ended = true; c.room.updateControls(); assert.equal(c.joined.length, 0);
+		c.room.battle.atQueueEnd = true; c.room.updateControls();
+		assert.deepEqual(c.joined, ['fantasyrogue']); assert(!c.room.closed);
+		c.room.updateControls(); assert.equal(c.joined.length, 1);
+		const spectator = battleClient(); spectator.app.curRoom = spectator.room;
+		spectator.room.fantasyRogueEnding = true; spectator.room.fantasyRogue.userid = 'other';
+		spectator.room.battle.ended = true; spectator.room.battle.atQueueEnd = true; spectator.room.updateControls();
+		assert.equal(spectator.joined.length, 0);
 	});
 	it('restores the defeat notice after playback has already ended and distinguishes continuous challenges', () => {
 		const c = battleClient(); c.room.battle.ended = true; c.room.battle.atQueueEnd = true;

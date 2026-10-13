@@ -327,6 +327,12 @@
 			}
 
 			if (this.battle.ended) {
+				if (this.fantasyRogueEnding && !this.fantasyRogueEndingShown && app.curRoom === this &&
+					this.fantasyRogue && this.fantasyRogue.userid === app.user.get('userid')) {
+					this.fantasyRogueEndingShown = true;
+					app.joinRoom('fantasyrogue');
+					return;
+				}
 
 				var replayDownloadButton = '<span style="float:right;"><a href="//' + Config.routes.replays + '/download" class="button replayDownloadButton"><i class="fa fa-download"></i> Download replay</a><br /><br /><button class="button" name="saveReplay"><i class="fa fa-upload"></i> Upload and share replay</button></span>';
 

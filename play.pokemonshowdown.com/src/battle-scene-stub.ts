@@ -27,6 +27,7 @@ export class BattleSceneStub {
 	destroy(): void { }
 	finishAnimations(): JQuery.Promise<JQuery> | undefined { return undefined; }
 	healAnim(pokemon: Pokemon, damage: string | number): void { }
+	rogueCaptureAnim(pokemon: Pokemon, ball: string, success: boolean, shakes: number, critical: boolean): void { }
 	hideJoinButtons(): void { }
 	incrementTurn(): void { }
 	updateAcceleration(): void { }

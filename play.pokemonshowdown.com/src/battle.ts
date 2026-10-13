@@ -3351,6 +3351,12 @@ export class Battle {
 			this.log(args, kwArgs);
 			break;
 		}
+		case '-roguecapture': {
+			const poke = this.getPokemon(args[1]);
+			if (poke) this.scene.rogueCaptureAnim(poke, toID(args[2]), args[3] === 'success',
+				Math.max(0, Math.min(3, Number(args[4]) || 0)), args[5] === 'critical');
+			break;
+		}
 		case '-anim': {
 			let poke = this.getPokemon(args[1])!;
 			let move = Dex.moves.get(args[2]);
