@@ -1520,6 +1520,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			case 'supercellslam':
 			case 'jumpkick':
 			case 'spark':
+			case 'chargebeam':
 			case 'rockthrow':
 			case 'liehuomengzhuang':
 			case 'kejimengchong':
