@@ -1877,6 +1877,13 @@ export class PokemonSprite extends Sprite {
 		typechange: null,
 		typeadd: null,
 		fantasystats: null,
+		roguebrn: ['烧伤', 'bad'],
+		roguepar: ['麻痹', 'bad'],
+		rogueslp: ['睡眠', 'bad'],
+		roguepsn: ['中毒', 'bad'],
+		roguetox: ['剧毒', 'bad'],
+		roguefst: ['冻伤', 'bad'],
+		roguefrz: ['冰冻', 'bad'],
 		dynamax: ['Dynamaxed', 'good'],
 		trapped: null, // linked volatiles are not implemented yet
 		throatchop: ['Throat Chop', 'bad'],

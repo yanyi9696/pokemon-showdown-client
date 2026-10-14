@@ -450,3 +450,80 @@
 
 /* Party and inventory are a native right-side room, alongside Lobby and Hellodex. */
 .fantasyrogue.rogue-party-room > .pad { max-width: none; }
+
+.fantasyrogue .rogue-blessing-silver {
+	--blessing-border: #90a3b6; --blessing-color: 91, 121, 151; --blessing-dark: 51, 77, 104;
+	--blessing-bg: linear-gradient(145deg, #fafdff, #dce5ee);
+	--blessing-emblem: linear-gradient(145deg, #8aa9c3, #4e6b89); --blessing-icon: #f6fbff;
+}
+.fantasyrogue .rogue-blessing-gold {
+	--blessing-border: #c69b39; --blessing-color: 175, 124, 33; --blessing-dark: 119, 78, 16;
+	--blessing-bg: linear-gradient(145deg, #fffae8, #efd28f);
+	--blessing-emblem: linear-gradient(145deg, #d3a544, #937027); --blessing-icon: #fff7d6;
+}
+.fantasyrogue .rogue-blessing-prismatic, .fantasyrogue .rogue-blessing-mixed {
+	--blessing-border: #9280be; --blessing-color: 124, 95, 167; --blessing-dark: 87, 54, 131;
+	--blessing-bg: linear-gradient(125deg, #e5dcff, #f6dff1 28%, #dbe9ff 55%, #d1f1ed 78%, #e6ddff);
+	--blessing-emblem: linear-gradient(145deg, #b8b9f0, #aa81c5 48%, #619cb4); --blessing-icon: #fff;
+}
+.fantasyrogue .rogue-blessing-intro { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 8px 0 16px; color: #456075; }
+.fantasyrogue .rogue-blessing-tier-badge { padding: 2px 10px; border: 1px solid var(--blessing-border); border-radius: 3px; background: var(--blessing-bg); color: rgb(var(--blessing-dark)); font-size: 13px; font-weight: bold; letter-spacing: 1px; }
+.fantasyrogue .rogue-blessing-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 6px 2px 0; }
+.fantasyrogue .rogue-blessing-options:has(> :nth-child(2):last-child) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.fantasyrogue .rogue-blessing-option { min-width: 0; display: flex; flex-direction: column; }
+/* The route frame, diamond marker and pressed/focus states are shared on purpose. */
+.fantasyrogue .rogue-blessing-card {
+	--route-color: var(--blessing-color); --route-dark: var(--blessing-dark);
+	display: flex; flex-direction: column; align-items: stretch; gap: 0; flex: 1;
+	width: 100%; padding: 14px 14px 13px; color: #2c4354; line-height: 1.65;
+}
+.fantasyrogue .rogue-blessing-card::after {
+	background-image: linear-gradient(180deg, #fff0 8%, #ffffff80 40%, #f8fbffed 77%), url(fantasy-rogue-blessing-pattern.svg), var(--blessing-bg);
+	background-size: 100% 100%, 112px 98px, 100% 100%;
+}
+.fantasyrogue .rogue-blessing-art { display: flex; justify-content: center; align-items: center; height: 132px; margin: 12px -5px 8px; }
+.fantasyrogue .rogue-blessing-emblem {
+	--emblem-cut: polygon(50% 0, 94% 25%, 94% 75%, 50% 100%, 6% 75%, 6% 25%);
+	position: relative; display: flex; align-items: center; justify-content: center; width: 104px; height: 116px;
+	color: var(--blessing-icon); filter: drop-shadow(0 3px 6px rgba(var(--blessing-color), .2));
+}
+.fantasyrogue .rogue-blessing-emblem::before, .fantasyrogue .rogue-blessing-emblem::after { content: ''; position: absolute; inset: 0; clip-path: var(--emblem-cut); background: rgba(var(--blessing-color), .55); }
+.fantasyrogue .rogue-blessing-emblem::after { inset: 3px; border: 2px solid #ffffffb0; background: var(--blessing-emblem); }
+.fantasyrogue .rogue-blessing-emblem .fa { position: relative; z-index: 1; font-size: 40px; text-shadow: 0 2px 3px #1e304522; }
+.fantasyrogue .rogue-blessing-card > .rogue-blessing-title { align-self: stretch; display: flex; align-items: center; justify-content: center; min-height: 2.9em; margin: 0; font-size: 17px; line-height: 1.45; text-align: center; color: rgb(var(--blessing-dark)); overflow-wrap: anywhere; }
+.fantasyrogue .rogue-blessing-card > .rogue-blessing-type { position: absolute; top: 10px; right: 10px; padding: 0 5px; border: 1px solid rgba(var(--blessing-color), .25); border-radius: 3px; background: #ffffffb3; color: rgb(var(--blessing-dark)); font-size: 11px; }
+.fantasyrogue .rogue-blessing-card > .rogue-blessing-quality { position: absolute; top: 10px; left: 12px; color: rgb(var(--blessing-dark)); font-size: 11px; letter-spacing: 1px; }
+.fantasyrogue .rogue-blessing-description { flex: 1; min-height: 8em; margin: 7px 0 14px; padding-top: 10px; border-top: 1px solid rgba(var(--blessing-color), .25); font-size: 14px; line-height: 1.75; text-align: left; overflow-wrap: anywhere; }
+.fantasyrogue .rogue-blessing-cost { margin: 0 0 7px; color: rgb(var(--blessing-dark)); font-size: 12px; text-align: center; }
+.fantasyrogue .rogue-blessing-card > .rogue-route-hint { align-self: stretch; }
+.fantasyrogue .rogue-blessing-card.is-chosen { opacity: .58; }
+.fantasyrogue .rogue-blessing-card.is-chosen > .rogue-route-hint { color: #2a614b; font-weight: bold; }
+.fantasyrogue .rogue-blessing-refresh { display: flex; justify-content: center; padding: 12px 0 4px; }
+.fantasyrogue .rogue-blessing-refresh .button { min-height: 34px; margin: 0; padding: 5px 13px; border: 1px solid rgba(var(--blessing-color), .38); border-radius: 18px; background: #f9fcffdb; color: rgb(var(--blessing-dark)); box-shadow: none; font-size: 13px; }
+.fantasyrogue .rogue-blessing-refresh .button:not(:disabled):hover { background: var(--blessing-bg); border-color: var(--blessing-border); }
+.fantasyrogue .rogue-blessing-refresh .button:focus-visible { outline: 2px solid rgb(var(--blessing-dark)); outline-offset: 2px; }
+.fantasyrogue .rogue-blessing-refresh .button:disabled { opacity: .5; cursor: default; }
+.fantasyrogue .rogue-blessing-note { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid #d2dfeb; line-height: 1.8; }
+@container (max-width: 660px) {
+	.fantasyrogue .rogue-blessing-options { gap: 8px; }
+	.fantasyrogue .rogue-blessing-card { padding: 10px 10px 12px; }
+	.fantasyrogue .rogue-blessing-art { height: 108px; margin-bottom: 4px; }
+	.fantasyrogue .rogue-blessing-emblem { width: 80px; height: 90px; }
+	.fantasyrogue .rogue-blessing-emblem .fa { font-size: 32px; }
+	.fantasyrogue .rogue-blessing-card > .rogue-blessing-title { font-size: 15px; }
+	.fantasyrogue .rogue-blessing-description { font-size: 13px; line-height: 1.7; }
+}
+@container (max-width: 460px) {
+	.fantasyrogue .rogue-blessing-options, .fantasyrogue .rogue-blessing-options:has(> :nth-child(2):last-child) { grid-template-columns: 1fr; gap: 16px; }
+	.fantasyrogue .rogue-blessing-card { padding: 12px 16px; }
+	.fantasyrogue .rogue-blessing-art { height: 86px; }
+	.fantasyrogue .rogue-blessing-emblem { width: 68px; height: 76px; }
+	.fantasyrogue .rogue-blessing-card > .rogue-blessing-title { min-height: 0; font-size: 17px; }
+	.fantasyrogue .rogue-blessing-description { min-height: 0; font-size: 14px; }
+}
+.fantasyrogue .rogue-blessing-rewards { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 0; }
+.fantasyrogue .rogue-blessing-gift { padding: 12px; border: 1px solid #aac3d6; background: #edf7ffe8; border-radius: 6px; line-height: 1.7; }
+.fantasyrogue .rogue-owned-blessings { padding: 8px 0; }
+.fantasyrogue .rogue-owned-blessing { margin: 7px 0; padding: 9px 12px; border-left: 4px solid var(--blessing-border); background: var(--blessing-bg); border-radius: 4px; }
+.fantasyrogue .rogue-owned-blessing > summary { cursor: pointer; font-weight: bold; line-height: 1.6; }
+.fantasyrogue .rogue-owned-blessing p { margin: 8px 0; line-height: 1.65; }

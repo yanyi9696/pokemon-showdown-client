@@ -186,6 +186,143 @@ function adventure(phase = 'choose') {
 }
 // Use the real layout/focus lifecycle: a focus-only mock misses a hidden room
 // that was already marked as the current side room by preparePanel.
+describe('Fantasy Rogue blessing controls', () => {
+	function ready(phase = 'blessing') {
+		const c = client(), data = adventure(phase);
+		data.run.floor = 100; data.run.partyLimit = 6;
+		data.run.blessings = { owned: [], pending: [], shards: 25, candy: 0, swordUses: 0, swordRewards: [], levels: 5,
+			round: { tier: 'gold', remaining: 1, options: [{id: 'fategold', name: '黄金命运', text: '获得一个随机黄金祝福，不额外加级。', refreshes: 1}] } };
+		c.room.receiveState(data); return {c, data};
+	}
+	it('shows phase-specific level costs and independently submits refreshes', () => {
+		const {c} = ready();
+		assert(c.room.html.includes('黄金命运')); assert(c.room.html.includes('额外 +10 级')); assert(c.room.html.includes('额外 +20 级'));
+		assert(c.room.html.includes('刷新 1 次'));
+		c.room.refreshBlessing('0');
+		const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'blessingrefresh'); assert.equal(request.slot, 0);
+	});
+	it('selects a whole blessing card first and grants only on a second activation', () => {
+		const {c, data} = ready();
+		data.run.blessings.round.options.push({id: 'starters', name: '最初的伙伴', text: '选择伙伴', refreshes: 1});
+		c.room.receiveState(data);
+		const cards = data.run.blessings.round.options.map((option, index) => {
+			const classes = new Set(), hint = {};
+			return {value: String(index), hint, classList: {
+				toggle(name, enabled) { if (enabled) classes.add(name); else classes.delete(name); },
+				contains: name => classes.has(name),
+			}, setAttribute(key, value) { this[key] = value; }, querySelector: () => hint};
+		});
+		c.room.controls['.rogue-blessing-card'] = cards;
+		assert(c.room.html.includes('type="button" name="chooseBlessing"'));
+		assert(!c.room.html.includes('获得此祝福'));
+		c.room.chooseBlessing('0'); assert.equal(c.sent.length, 0);
+		assert.equal(cards[0]['aria-pressed'], 'true'); assert(cards[0].hint.textContent.includes('再点一次领取'));
+		c.room.chooseBlessing('1'); assert.equal(c.sent.length, 0);
+		assert.equal(cards[0]['aria-pressed'], 'false'); assert.equal(cards[1]['aria-pressed'], 'true');
+		c.room.chooseBlessing('1'); c.room.chooseBlessing('1');
+		assert.equal(c.sent.length, 1);
+		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'blessing'); assert.equal(request.slot, 1);
+	});
+	it('shows mixed slot qualities and costs in silver, gold, prismatic order', () => {
+		const {c, data} = ready();
+		data.run.blessings.round.tier = 'mixed';
+		data.run.blessings.round.options = ['silver', 'gold', 'prismatic'].map((tier, index) => ({
+			id: ['bond', 'smallfinal', 'psychic'][index], name: tier, text: '完整说明', tier, refreshes: 1,
+		}));
+		for (const floor of [50, 100, 150]) {
+			data.run.floor = floor;
+			c.room.receiveState(data);
+			const cards = [...c.room.html.matchAll(/<article class="rogue-blessing-option rogue-blessing-(\w+)">([\s\S]*?)<\/article>/g)];
+			assert.deepEqual(cards.map(card => card[1]), ['silver', 'gold', 'prismatic']);
+			assert(cards[0][2].includes('对手不额外加级'));
+			assert(cards[1][2].includes('对手等级 +' + floor / 10));
+			assert(cards[2][2].includes('对手等级 +' + floor / 5));
+			assert(cards.every(card => card[2].includes('刷新 1 次')));
+		}
+	});
+	it('refreshes without granting and requires selecting the replacement card again', () => {
+		const {c, data} = ready();
+		c.room.chooseBlessing('0'); c.room.refreshBlessing('0');
+		assert.equal(c.sent.length, 1); assert.equal(c.room.selectedBlessing, null);
+		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'blessingrefresh');
+		const refreshed = structuredClone(data); refreshed.account.revision++;
+		refreshed.run.blessings.round.options[0] = {id: 'starters', name: '最初的伙伴', text: '选择伙伴', refreshes: 0};
+		c.room.receiveAction({userid: data.userid, id: request.id, ok: true, state: refreshed});
+		c.room.refreshBlessing('0'); assert.equal(c.sent.length, 1, 'no refreshes remain');
+		c.room.chooseBlessing('0'); assert.equal(c.sent.length, 1);
+		c.room.chooseBlessing('0'); assert.equal(c.sent.length, 2);
+	});
+	it('clears blessing confirmation on a save revision, disconnect, or player change', () => {
+		const {c, data} = ready();
+		c.room.chooseBlessing('0');
+		const revised = structuredClone(data); revised.account.revision++;
+		c.room.receiveState(revised); assert.equal(c.room.selectedBlessing, null);
+		c.room.chooseBlessing('0'); assert.equal(c.sent.length, 0);
+		c.room.disconnected(); assert.equal(c.room.selectedBlessing, null);
+		c.room.chooseBlessing('0'); assert.equal(c.sent.length, 0);
+		c.room.identityChanged(); assert.equal(c.room.selectedBlessing, null);
+	});
+	it('blocks chosen cards, invalid slots, and cards hidden behind pending reward choices', () => {
+		const {c, data} = ready();
+		data.run.blessings.round.options[0].chosen = true;
+		c.room.receiveState(data);
+		c.room.chooseBlessing('0'); c.room.refreshBlessing('0');
+		c.room.chooseBlessing('-1'); c.room.chooseBlessing('0.5'); c.room.chooseBlessing('99');
+		assert.equal(c.sent.length, 0); assert.equal(c.room.selectedBlessing, null);
+		assert(/rogue-blessing-card is-chosen[^>]+disabled/.test(c.room.html));
+		data.run.blessings.round.options[0].chosen = false;
+		data.run.blessings.pending.push({id: 'gift', kind: 'toolbox', title: '奖励', options: []});
+		c.room.chooseBlessing('0'); c.room.refreshBlessing('0');
+		assert.equal(c.sent.length, 0);
+	});
+	it('keeps the first pick claimed while selecting the second blessing in a two-pick round', () => {
+		const {c, data} = ready();
+		data.run.blessings.round.remaining = 2;
+		data.run.blessings.round.options.push({id: 'bigmoney', name: '金金金金钱钱钱钱', text: '获得金币', refreshes: 1});
+		c.room.receiveState(data); c.room.chooseBlessing('0'); c.room.chooseBlessing('0');
+		const acknowledged = structuredClone(data); acknowledged.account.revision++;
+		acknowledged.run.blessings.round.remaining = 1;
+		acknowledged.run.blessings.round.options[0].chosen = true;
+		c.room.receiveAction({userid: data.userid, id: c.room.pending.id, ok: true, state: acknowledged});
+		c.room.chooseBlessing('0'); assert.equal(c.sent.length, 1);
+		c.room.chooseBlessing('1'); assert.equal(c.sent.length, 1);
+		c.room.chooseBlessing('1'); assert.equal(c.sent.length, 2);
+		assert.equal(JSON.parse(c.sent[1].slice('/fantasyrogue action '.length)).slot, 1);
+	});
+	it('keeps owned blessings and overflowing psychic charge in the inventory tab', () => {
+		const {c, data} = ready('choose');
+		data.run.blessings.owned = [{id: 'psychic', family: 'psychic', tier: 'prismatic', name: '灵能百分百', text: '一击必杀'}];
+		data.run.blessings.psychic = 102.75; c.room.receiveState(data);
+		assert(c.panel.html.includes('102.75%')); assert(c.panel.html.includes('灵能百分百'));
+		assert(!c.room.html.includes('102.75%'));
+	});
+	it('previews the actual blessed wild level while preserving the original ecology tier', () => {
+		const {c, data} = ready('choose');
+		data.run.choices[0].biome = {level: 51, tier: 2};
+		data.run.blessings.levels = 20; c.room.receiveState(data);
+		assert(c.room.html.includes('Lv.71（含祝福 +20）'));
+		assert(c.room.html.includes('40～60 档宝可梦池'));
+	});
+	it('preserves the complete saved member ID in a permanent-upgrade confirmation', () => {
+		const {c} = ready('choose');
+		c.room.blessingMemberAction('fantasize:run:50:catch:2');
+		assert.equal(c.app.lastPopup.data.details.member, 'run:50:catch:2');
+		assert.equal(c.app.lastPopup.data.action, 'fantasize'); assert.equal(c.sent.length, 0);
+	});
+	it('asks before replacing a partner bound to a blessing', () => {
+		const {c, data} = ready();
+		data.run.blessings.owned = [{id: 'starquest', name: '下一站，巨星', target: data.run.team[0].id}];
+		data.run.blessings.pending = [{id: 'reward:1', kind: 'gift', title: '新伙伴', pokemon: data.run.team[0]}];
+		c.room.state = data;
+		c.room.chooseBlessingReward(data.run.team[0].id);
+		assert(c.app.lastPopup.data.text.includes('下一站，巨星')); assert.equal(c.sent.length, 0);
+		assert.equal(c.app.lastPopup.data.details.member, 'reward:1');
+	});
+});
+
 function enableRoomLayout(c, width) {
 	function extend(properties) {
 		function Class() {}
@@ -674,11 +811,11 @@ describe('Fantasy Rogue client', () => {
 	it('shows Tera locked for legacy and new adventures until the server grants the event unlock', () => {
 		const c = client(); const data = adventure();
 		c.room.receiveState(data);
-		assert(c.html.includes('未解锁，需通过冒险事件解锁'));
+		assert(c.html.includes('未解锁，可通过预定祝福或第 100 层馆主赠礼解锁'));
 		data.run.teraUnlocked = true;
 		c.room.receiveState(data);
 		assert(c.html.includes('本局已解锁，每场战斗限用一次'));
-		assert(!c.html.includes('未解锁，需通过冒险事件解锁'));
+		assert(!c.html.includes('未解锁，可通过预定祝福或第 100 层馆主赠礼解锁'));
 	});
 	it('displays Boss reward quantities, full move details and a localized short description during learning', () => {
 		const c = client(); const data = adventure('settlement');
@@ -798,6 +935,18 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 		c.room.fantasyRogue.userid = 'someoneelse'; c.room.updateControlsForPlayer();
 		assert(!c.room.html.includes('name="retreatRogue"'));
 		c.room.retreatRogue(); assert.equal(c.sent.length, 1);
+	});
+	it('shows overflowing psychic charge during trainer battles and spends a normal action', () => {
+		const c = battleClient();
+		c.room.request.fantasyRogue = {catchable: false, psychic: 105.5};
+		assert(c.room.rogueBallControls().includes('105.5%'));
+		assert(c.room.rogueBallControls().includes('释放灵能 · 一击必杀'));
+		c.room.choice = {choices: []}; c.room.endChoice = () => { c.room.finishedChoice = true; };
+		c.room.chooseRoguePsychic();
+		assert.equal(c.room.choice.choices.join(','), 'roguepsychic 1'); assert(c.room.finishedChoice);
+		c.room.choice.choices = []; c.room.request.fantasyRogue.psychic = 99;
+		assert(c.room.rogueBallControls().includes('disabled'));
+		c.room.chooseRoguePsychic(); assert.equal(c.room.choice.choices.length, 0);
 	});
 	it('still returns immediately after an explicit retreat only for its owner', () => {
 		const c = battleClient(); c.room.add('|fantasyrogueend|');

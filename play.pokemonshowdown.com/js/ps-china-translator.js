@@ -19,6 +19,19 @@
 // @updateURL https://update.greasyfork.org/scripts/432623/PSChina%20Server%20Translation%20SV.meta.js
 // ==/UserScript==
 var translations = {
+    "Rogue Psychic Burst": "灵能百分百",
+    "Rogue Evoboost": "九彩升华齐聚顶",
+    "Rogue Great Mage": "大法师",
+    "Rogue Ascent": "登龙",
+    "Rogue Emblem Bug": "虫属性转", "Rogue Emblem Dark": "恶属性转",
+    "Rogue Emblem Dragon": "龙属性转", "Rogue Emblem Electric": "电属性转",
+    "Rogue Emblem Fairy": "妖精属性转", "Rogue Emblem Fighting": "格斗属性转",
+    "Rogue Emblem Fire": "火属性转", "Rogue Emblem Flying": "飞行属性转",
+    "Rogue Emblem Ghost": "幽灵属性转", "Rogue Emblem Grass": "草属性转",
+    "Rogue Emblem Ground": "地面属性转", "Rogue Emblem Normal": "一般属性转",
+    "Rogue Emblem Ice": "冰属性转", "Rogue Emblem Poison": "毒属性转",
+    "Rogue Emblem Psychic": "超能属性转", "Rogue Emblem Steel": "钢属性转",
+    "Rogue Emblem Rock": "岩石属性转", "Rogue Emblem Water": "水属性转",
     /// 系统
 
     "Connecting...": "连接中...",

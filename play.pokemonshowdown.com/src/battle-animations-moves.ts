@@ -42246,6 +42246,7 @@ export const BattleMoveAnims: AnimTable = {
 };
 
 // placeholder animations
+BattleMoveAnims['roguepsychicburst'] = { anim: BattleMoveAnims['psychic'].anim };
 BattleMoveAnims['torment'] = { anim: BattleMoveAnims['swagger'].anim };
 
 BattleMoveAnims['mefirst'] = { anim: BattleMoveAnims['mimic'].anim };
