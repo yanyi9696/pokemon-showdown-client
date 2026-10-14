@@ -79,6 +79,106 @@
 @keyframes rogue-story-appear { from { opacity: .15; translate: 0 5px; } to { opacity: 1; translate: 0 0; } }
 @media (prefers-reduced-motion: reduce) { .fantasyrogue .rogue-start-card, .fantasyrogue .rogue-story-spirit { animation: none; } }
 .fantasyrogue .pad { max-width: 1080px; padding: 8px 12px 16px; container-type: inline-size; }
+.fantasyrogue .rogue-start-menu { max-width: 820px; margin: 32px auto 24px; padding: 22px 14px; color: #304e66; }
+.fantasyrogue .rogue-start-heading { text-align: center; margin-bottom: 26px; }
+.fantasyrogue .rogue-start-heading h2 { font-size: 25px; font-weight: 700; letter-spacing: .04em; margin: 8px 0; }
+.fantasyrogue .rogue-start-heading p { font-size: 14px; color: #526e80; }
+.fantasyrogue .rogue-start-primary {
+	display: flex; align-items: center; gap: 18px; width: 100%; min-height: 138px; box-sizing: border-box;
+	padding: 24px 26px; border: 2px solid #e4f7ff; border-radius: 14px; text-align: left; cursor: pointer;
+	color: #173b56; background: linear-gradient(100deg, #e8fbf6b8, #e4ddfba3 53%, #f9e6c9c7), url(fantasy-rogue-stellar.svg) center / cover;
+	box-shadow: 0 8px 22px #3e62772b, inset 0 1px 0 #fff;
+	transition: box-shadow .16s, border-color .16s;
+}
+.fantasyrogue .rogue-start-primary strong { display: block; font-size: clamp(19px, 3.6cqw, 29px); line-height: 1.5; letter-spacing: .025em; }
+.fantasyrogue .rogue-start-primary small { display: block; font-size: 13px; margin-top: 8px; color: #385c74; }
+.fantasyrogue .rogue-start-symbol { flex: 0 0 54px; height: 54px; display: grid; place-items: center; font-size: 32px; border: 1px solid #fff; border-radius: 50%; background: #ffffff65; }
+.fantasyrogue .rogue-start-symbol i { margin: 0; }
+.fantasyrogue .rogue-start-arrow { margin-left: auto; font-size: 30px; }
+.fantasyrogue .rogue-start-primary:hover { border-color: #628ca9; box-shadow: 0 8px 24px #3e627748, inset 0 1px 0 #fff; }
+.fantasyrogue .rogue-start-primary:disabled { cursor: wait; opacity: .65; }
+.fantasyrogue .rogue-start-books { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
+.fantasyrogue .rogue-start-book {
+	--book-accent: #426e8b; --book-tint: #cbe8f0;
+	display: flex; flex-direction: column; align-items: center; min-height: 260px; gap: 10px;
+	padding: 25px 10px 18px; box-sizing: border-box; color: #314e61; cursor: pointer; border: 1px solid #a5bdcc;
+	border-radius: 10px; background: linear-gradient(160deg, #ffffffed, #f2f8fbe8 58%, var(--book-tint));
+	box-shadow: 0 4px 12px #41596a18, inset 0 3px 0 #fff; transition: border-color .16s, box-shadow .16s;
+}
+.fantasyrogue .rogue-start-book.book-blessings { --book-accent: #77619b; --book-tint: #e0d7f1; }
+.fantasyrogue .rogue-start-book.book-events { --book-accent: #5e7d65; --book-tint: #d6e8db; }
+.fantasyrogue .rogue-start-book:hover { border-color: var(--book-accent); box-shadow: 0 4px 14px #41596a32, inset 0 3px 0 var(--book-accent); }
+.fantasyrogue .rogue-book-emblem { display: grid; place-items: center; width: 66px; height: 66px; font-size: 28px; color: var(--book-accent); background: #ffffff9c; border: 1px solid var(--book-tint); border-radius: 18px; margin-bottom: 4px; }
+.fantasyrogue .rogue-book-emblem i { margin: 0; }
+.fantasyrogue .rogue-start-book strong { font-size: 19px; }
+.fantasyrogue .rogue-start-book > span:not(.rogue-book-emblem) { font-size: 13px; color: var(--book-accent); }
+.fantasyrogue .rogue-start-book small { font-size: 12px; line-height: 1.9; color: #617789; }
+.fantasyrogue .rogue-start-book b { font-size: 12px; font-weight: 400; margin-top: auto; padding-top: 8px; color: var(--book-accent); }
+.fantasyrogue .rogue-start-note { text-align: center; font-size: 12px; color: #536c7b; padding-top: 20px; }
+.fantasyrogue .rogue-start-primary:focus-visible, .fantasyrogue .rogue-start-book:focus-visible { outline: 3px solid #345f88; outline-offset: 4px; }
+.fantasyrogue .rogue-codex { padding: 14px 0 24px; color: #304c60; }
+.fantasyrogue .rogue-codex-heading { padding: 10px 0 14px; border-bottom: 1px solid #9fb9ca; margin-bottom: 16px; }
+.fantasyrogue .rogue-codex-heading h2 { font-size: 24px; }
+.fantasyrogue .rogue-guide-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fantasyrogue .rogue-guide-intro article, .fantasyrogue .rogue-guide-rules { background: #f5faffee; border: 1px solid #b5cbd8; border-radius: 8px; padding: 14px; line-height: 1.85; }
+.fantasyrogue .rogue-guide-intro h3 { border: 0; margin-top: 0; font-size: 16px; }
+.fantasyrogue .rogue-guide-rules { margin: 12px 0; }
+.fantasyrogue .rogue-guide-rules summary { font-weight: bold; }
+.fantasyrogue .rogue-guide-rules h4 { margin: 14px 0 4px; }
+.fantasyrogue .rogue-codex-progress { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+.fantasyrogue .rogue-codex-progress span { flex-basis: 100%; color: #597487; font-size: 13px; padding: 4px 0 12px; }
+.fantasyrogue .rogue-codex-filters { display: flex; flex-wrap: wrap; gap: 7px; margin: 16px 0 10px; }
+.fantasyrogue .rogue-codex-filters .button { padding: 7px 16px; border-radius: 18px; background: #f4f9fce8; color: #42627a; border: 1px solid #aec4d2; }
+.fantasyrogue .rogue-codex-filters .is-active { color: #fff; background: #466d89; border-color: #466d89; text-shadow: none; }
+.fantasyrogue .rogue-codex-search { display: flex; gap: 8px; align-items: center; margin: 10px 0 18px; flex-wrap: wrap; }
+.fantasyrogue .rogue-codex-search input { box-sizing: border-box; max-width: 100%; padding: 7px 9px; border: 1px solid #a9bdca; border-radius: 5px; background: #fffffff2; color: #2b4355; }
+.fantasyrogue .rogue-codex-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.fantasyrogue .rogue-codex-entry {
+	--codex-accent: #557589; --codex-tint: #e2edf4;
+	border: 1px solid #b0c7d5; border-top: 3px solid var(--codex-accent); border-radius: 8px;
+	background: linear-gradient(135deg, #ffffff, var(--codex-tint) 210px); padding: 14px; line-height: 1.8; min-width: 0;
+}
+.fantasyrogue .rogue-codex-entry.tier-silver { --codex-accent: #637587; --codex-tint: #e7ecf2; }
+.fantasyrogue .rogue-codex-entry.tier-gold { --codex-accent: #9a7025; --codex-tint: #fbefce; }
+.fantasyrogue .rogue-codex-entry.tier-prismatic { --codex-accent: #8760ae; --codex-tint: #ede2fa; background: linear-gradient(135deg, #fff, #e3f4fc 40%, #f1e4fa 75%, #fbe6ed); }
+.fantasyrogue .rogue-codex-entry.is-locked { filter: grayscale(.35); opacity: .68; }
+.fantasyrogue .rogue-codex-entry-top { display: flex; align-items: center; gap: 8px; color: var(--codex-accent); min-height: 30px; }
+.fantasyrogue .rogue-codex-entry-top > span:first-child { font-size: 20px; }
+.fantasyrogue .rogue-codex-entry-top .rogue-codex-lock { margin-left: auto; font-size: 11px; }
+.fantasyrogue .rogue-codex-entry h3 { font-size: 17px; color: var(--codex-accent); border: 0; margin: 8px 0; overflow-wrap: anywhere; }
+.fantasyrogue .rogue-codex-entry p { overflow-wrap: anywhere; }
+.fantasyrogue .rogue-codex-effect { font-size: 14px; white-space: pre-line; }
+.fantasyrogue .is-locked .rogue-codex-effect { letter-spacing: .2em; padding: 8px 0; }
+.fantasyrogue .rogue-codex-pagination { display: flex; justify-content: center; gap: 14px; align-items: center; margin-top: 22px; font-size: 12px; }
+.fantasyrogue .rogue-codex-empty { text-align: center; padding: 32px 0; }
+.fantasyrogue .rogue-event-reading { background: #f5faffef; padding: 24px; margin-top: 12px; border: 1px solid #aec6d5; border-radius: 10px; }
+.fantasyrogue .rogue-event-reading > p { margin: 20px 0; line-height: 2; font-size: 16px; }
+.fantasyrogue .rogue-event-reading .rogue-reading-note { font-size: 12px; color: #637988; padding-bottom: 14px; border-bottom: 1px solid #cedde7; }
+.fantasyrogue .rogue-reading-skip { color: #59718a; font-size: 13px; }
+.fantasyrogue .rogue-reading-options { display: grid; gap: 10px; margin: 24px 0; }
+.fantasyrogue .rogue-reading-options .button { padding: 12px 16px; text-align: left; white-space: normal; font-size: 14px; }
+.fantasyrogue .rogue-event-reading footer { border-top: 1px solid #cedde7; padding-top: 18px; }
+@media (max-height: 800px) {
+	.fantasyrogue .rogue-start-menu { margin-top: 10px; padding-top: 8px; padding-bottom: 8px; }
+	.fantasyrogue .rogue-start-heading { margin-bottom: 18px; }
+	.fantasyrogue .rogue-start-heading h2 { font-size: 23px; }
+	.fantasyrogue .rogue-start-primary { min-height: 105px; padding-top: 16px; padding-bottom: 16px; }
+	.fantasyrogue .rogue-start-book { min-height: 215px; padding-top: 16px; gap: 8px; }
+	.fantasyrogue .rogue-book-emblem { width: 48px; height: 48px; font-size: 25px; }
+	.fantasyrogue .rogue-start-note { padding-top: 12px; }
+}
+@container (max-width: 510px) {
+	.fantasyrogue .rogue-start-menu { padding: 10px 0; margin-top: 20px; }
+	.fantasyrogue .rogue-start-primary { padding: 16px 14px; gap: 10px; min-height: 112px; }
+	.fantasyrogue .rogue-start-symbol { flex-basis: 36px; height: 36px; font-size: 24px; }
+	.fantasyrogue .rogue-start-books { gap: 8px; }
+	.fantasyrogue .rogue-start-book { min-height: 225px; padding: 18px 5px 14px; }
+	.fantasyrogue .rogue-start-book strong { font-size: 15px; }
+	.fantasyrogue .rogue-book-emblem { width: 46px; height: 46px; font-size: 24px; }
+	.fantasyrogue .rogue-start-book small { font-size: 11px; }
+	.fantasyrogue .rogue-start-arrow { display: none; }
+	.fantasyrogue .rogue-guide-intro, .fantasyrogue .rogue-codex-grid { grid-template-columns: 1fr; }
+}
 .fantasyrogue p { margin: 6px 0; }
 .fantasyrogue .pad > p:first-child { margin-top: 0; }
 .fantasyrogue h2 { margin: 10px 0 6px; }
@@ -201,6 +301,7 @@
 .fantasyrogue .rogue-loot { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 4px 0 6px; align-items: center; }
 .fantasyrogue .rogue-loot > span { display: inline-flex; align-items: center; gap: 4px; }
 .fantasyrogue .rogue-loot strong { font-size: 16px; color: #1c573c; white-space: nowrap; }
+.fantasyrogue .rogue-loot .rogue-cost strong { color: #a52b3f; }
 .fantasyrogue .rogue-receipt { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; border: 1px solid #8cc6a8; background: #edf8ef; border-radius: 4px; padding: 6px 8px; margin-bottom: 8px; }
 .fantasyrogue .rogue-receipt > strong { color: #245c39; }
 .fantasyrogue .rogue-reward-preview { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; border-top: 1px solid #c7d5df; margin-top: 6px; padding-top: 6px; }
@@ -527,3 +628,16 @@
 .fantasyrogue .rogue-owned-blessing { margin: 7px 0; padding: 9px 12px; border-left: 4px solid var(--blessing-border); background: var(--blessing-bg); border-radius: 4px; }
 .fantasyrogue .rogue-owned-blessing > summary { cursor: pointer; font-weight: bold; line-height: 1.6; }
 .fantasyrogue .rogue-owned-blessing p { margin: 8px 0; line-height: 1.65; }
+.fantasyrogue .rogue-event-text { font-size: 15px; line-height: 1.85; margin: 16px 0 22px; }
+.fantasyrogue .rogue-event-text p { margin: 12px 0; }
+.fantasyrogue .rogue-event-options { display: grid; gap: 12px; }
+.fantasyrogue .rogue-event-option { padding: 12px 16px; text-align: left; white-space: normal; }
+.fantasyrogue .rogue-event-option strong { display: block; font-size: 15px; }
+.fantasyrogue .rogue-event-option small { display: block; margin-top: 6px; color: #526d82; line-height: 1.6; }
+.fantasyrogue .rogue-event-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.fantasyrogue .rogue-event-teams > div { padding: 12px; border: 1px solid #b9cddd; border-radius: 5px; background: #f4f9fd; }
+.fantasyrogue .rogue-event-teams p { display: flex; align-items: center; margin: 5px 0; }
+.ps-popup.rogue-event-replay { width: 664px; max-width: calc(100vw - 20px); padding: 12px; box-sizing: border-box; }
+.rogue-event-replay .battle { position: relative; top: auto; left: auto; width: 640px; height: 360px; max-width: 100%; }
+.rogue-event-replay .battle-log { position: relative; top: auto; left: auto; right: auto; bottom: auto; height: 170px; margin-top: 10px; border: 1px solid #bbcddd; background: #f5f9fc; }
+.rogue-event-replay > p .button { margin: 4px; }

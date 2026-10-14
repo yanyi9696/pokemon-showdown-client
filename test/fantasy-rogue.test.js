@@ -3,7 +3,7 @@ const fs = require('fs');
 const vm = require('vm');
 const {EventEmitter} = require('events');
 
-function client() {
+function client(startScreen = false) {
 	const sent = [], joined = [];
 	let userid = 'rogueplayer';
 	const context = {
@@ -26,7 +26,7 @@ function client() {
 		app: Object.assign(new EventEmitter(), {
 			rooms: {},
 			user: Object.assign(new EventEmitter(), {get: () => userid}),
-			socket: {readyState: 1}, send: message => sent.push(message), joinRoom: id => joined.push(id),
+			socket: {readyState: 1}, send: message => sent.push(message), joinRoom: id => joined.push(id), updateLayout() {},
 			addPopup: (type, data) => { context.app.lastPopup = {type, data}; },
 		}),
 		setTimeout: () => 1, clearTimeout: () => {},
@@ -50,6 +50,8 @@ function client() {
 	});
 	room.listenTo = (source, event, callback) => source.on(event, callback.bind(room));
 	room.initialize();
+	// Existing flow tests exercise a player who has already pressed the start button.
+	if (!startScreen) room.screen = 'game';
 	room.preparePanel();
 	return {...context, room, panel, get html() { return room.html + panel.html; }, sent, joined, setUser: id => { userid = id; }};
 }
@@ -58,6 +60,63 @@ function state() {
 		message: '正式队伍与数值等待配置', starters: [], items: [], run: null,
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
+describe('Fantasy Rogue start menu and codex', () => {
+	it('starts on the four-button menu and enters the saved story only after pressing start', () => {
+		const c = client(true), data = state();
+		data.story = {stage: 'opening', scene: 'chamber', title: '醒来', text: '未点击前不显示的剧情', index: 0, total: 8};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('开始你的幻想杯肉鸽之旅'));
+		assert.equal((c.room.html.match(/name="openCodex"/g) || []).length, 3);
+		assert(!c.room.html.includes(data.story.text));
+		c.room.enterGame(); assert(c.room.html.includes(data.story.text));
+		c.room.startMenu(); assert(!c.room.html.includes(data.story.text));
+		c.room.enterGame(); assert.equal(c.room.state, data); assert.equal(c.sent.length, 0);
+	});
+	it('does not auto-open the saved tower spirit popup on the landing page', () => {
+		const c = client(true), data = adventure('intro');
+		data.run.id = 'saved'; data.run.spirit = {id: 'test', name: '塔灵', species: 'Mew'};
+		let opened = 0; c.room.showSpirit = () => opened++;
+		c.room.receiveState(data); assert.equal(opened, 0);
+		c.room.enterGame(); assert.equal(opened, 1);
+		c.room.startMenu(); c.room.enterGame(); assert.equal(opened, 1);
+	});
+	it('shows full unlocked effects, tier colors and locked question marks, with filters', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('blessings');
+		assert.equal(c.sent[0], '/cmd fantasyroguecodex blessings');
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'blessings', entries: [
+			{id: 'a', name: '已选祝福', tier: 'gold', unlocked: true, text: '完整效果：伤害提升 20%。'},
+			{id: 'b', name: '未选祝福', tier: 'prismatic', unlocked: false, text: '？？？'},
+		]});
+		assert(c.room.html.includes('完整效果：伤害提升 20%。'));
+		assert(c.room.html.includes('tier-prismatic is-locked')); assert(c.room.html.includes('？？？'));
+		c.room.filterCodex('unlocked'); assert(!c.room.html.includes('未选祝福'));
+		c.room.filterCodex('prismatic'); assert(!c.room.html.includes('已选祝福'));
+	});
+	it('reads event choices without submitting any gameplay commands or showing battle logs', () => {
+		const c = client(true), data = adventure(); c.room.receiveState(data); c.room.openCodex('events');
+		const before = JSON.stringify(data), sentBefore = c.sent.length;
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'events', entries: [
+			{id: 'forest', name: '斗蛐蛐！', unlocked: true, text: '概况', replay: {title: '斗蛐蛐！', start: 'start', pages: {
+				start: {text: ['事件开头'], options: [{label: '声援', next: 'battle'}]},
+				battle: {text: ['战斗后的文字'], options: [], battleSkipped: true},
+			}}}, {id: 'room', name: '房间', unlocked: false, text: '？？？'},
+		]});
+		c.room.readEvent('room'); assert(!c.room.codexReplay);
+		c.room.readEvent('forest'); assert(c.room.html.includes('事件开头'));
+		c.room.replayEventNext('nonexistent'); assert.equal(c.room.codexReplayHistory.length, 1);
+		c.room.replayEventNext('battle'); assert(c.room.html.includes('战斗画面已跳过'));
+		c.room.replayEventBack(); assert(c.room.html.includes('事件开头'));
+		assert.equal(JSON.stringify(data), before); assert.equal(c.sent.length, sentBefore); assert.equal(c.joined.length, 0);
+	});
+	it('clears account-specific codex data on identity change and ignores responses for other users', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('events');
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'events', entries: []});
+		c.setUser('other'); c.room.identityChanged();
+		assert.equal(Object.keys(c.room.codices).length, 0); assert.equal(c.room.screen, 'home');
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'events', entries: [{name: '不应展示'}]});
+		assert.equal(Object.keys(c.room.codices).length, 0);
+	});
+});
 describe('Fantasy Rogue story and clear-card controls', () => {
 	it('continues the server page, blocks duplicate clicks, and hides starter controls while reading', () => {
 		const c = client(), data = state();
@@ -184,6 +243,49 @@ function adventure(phase = 'choose') {
 		}]};
 	return data;
 }
+describe('Fantasy Rogue event display and spectator playback', () => {
+	it('shows the renamed event, opponent preview, costs and disabled unaffordable choices', () => {
+		const c = client(), data = adventure('event');
+		data.run.event = {key: 'forest-one', stage: 'choice', title: '斗蛐蛐！', paragraphs: ['双方各有三只。'],
+			teams: [[{species: 'Bulbasaur', level: 10}], [{species: 'Squirtle', level: 10}]],
+			options: [{id: 'left', name: '声援左边', text: '观战后按实际结果结算'},
+				{id: 'trade', name: '交换', text: '需要 500 金币', disabled: true}]};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('斗蛐蛐！')); assert(c.room.html.includes('右边的队伍'));
+		assert(c.room.html.includes('value="trade" disabled'));
+		c.room.chooseEvent('left'); c.room.chooseEvent('left');
+		assert.equal(c.sent.length, 1);
+		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.equal(request.member, 'forest-one'); assert.equal(request.value, 'left');
+	});
+	it('lets the player prepare after defeat and shows money losses with a single minus sign', () => {
+		const c = client(), data = adventure('event');
+		data.run.event = {key: 'closed-event', stage: 'result', title: '事件结束', paragraphs: ['损耗已保留。'], options: []};
+		data.run.team[0].hp = 0;
+		data.run.lastReward = {floor: 10, money: -500, items: {}};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('已结算')); assert(c.room.html.includes('−500')); assert(!c.room.html.includes('+-500'));
+		assert(c.room.html.includes('请先在右侧背包中复活'));
+		assert(c.room.html.includes('value="continue" disabled'));
+		data.run.team[0].hp = 5; c.room.receiveState(data);
+		assert(!c.room.html.includes('value="continue" disabled'));
+	});
+	it('opens the native replay and cannot settle before playback ends or after the event changes', () => {
+		const c = client(), data = adventure('event');
+		data.run.event = {key: 'forest-watch', stage: 'watch', title: '斗蛐蛐！', paragraphs: [], replay: ['|start', '|win|左边的队伍']};
+		c.room.receiveState(data); c.room.watchEvent();
+		assert.equal(c.app.lastPopup.type, c.RogueEventReplayPopup);
+		const popup = Object.create(c.RogueEventReplayPopup);
+		popup.owner = c.room; popup.eventKey = data.run.event.key; popup.userid = 'rogueplayer';
+		popup.battle = {ended: false, atQueueEnd: false}; popup.close = () => { popup.closed = true; };
+		popup.finishEvent(); assert.equal(c.sent.length, 0); assert(!popup.closed);
+		popup.battle.ended = true; popup.finishEvent(); assert.equal(c.sent.length, 0);
+		popup.battle.atQueueEnd = true;
+		c.room.state.run.event.key = 'new-event'; popup.finishEvent(); assert.equal(c.sent.length, 0);
+		c.room.state.run.event.key = 'forest-watch'; popup.finishEvent();
+		assert.equal(JSON.parse(c.sent[0].slice('/fantasyrogue action '.length)).value, 'watched');
+	});
+});
 // Use the real layout/focus lifecycle: a focus-only mock misses a hidden room
 // that was already marked as the current side room by preparePanel.
 describe('Fantasy Rogue blessing controls', () => {

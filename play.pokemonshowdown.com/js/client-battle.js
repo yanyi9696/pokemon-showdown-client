@@ -512,7 +512,9 @@
 			var result = this.fantasyRogueDefeat;
 			var html = '<div class="rogue-defeat" role="status"><strong>本场战败 · 第 ' + Number(result.floor) + ' 层</strong>' +
 				'<p>队伍保持战败时的状态；HP、PP、异常状态和道具消耗已保存，本场不发放胜利奖励。</p>';
-			if (result.shopClosed) {
+			if (result.eventClosed) {
+				html += '<p>本次事件已经结束，无需重打。返回冒险后可安置已捕获的伙伴；复活至少一名伙伴后继续前进。</p>';
+			} else if (result.shopClosed) {
 				html += '<p>零元购挑战已经结束，本层商店关闭。返回冒险后可安置已捕获的伙伴，再继续下一层。</p>';
 			} else if (result.retryFloor) {
 				html += '<p>本层为连续挑战，禁止途中治疗。全队倒下后需重试整层，恢复入层时的队伍、道具和货币，撤回本层收益；捕捉解锁记录保留且不重复计数。</p>';
