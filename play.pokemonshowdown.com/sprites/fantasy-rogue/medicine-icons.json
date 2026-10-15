@@ -1,0 +1,27 @@
+[
+  {
+    "id": "antidote",
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/antidote.png",
+    "sha256": "efb20083fb01637ef6a1cb40f915f2b077a5f275ada59348f4cb81c56afc1581"
+  },
+  {
+    "id": "burnheal",
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/burn-heal.png",
+    "sha256": "b9ceaa0f24332b138de4ccf9b632e7f70c12bbb2e7327f8e6b1da3dfef3fd2d2"
+  },
+  {
+    "id": "iceheal",
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ice-heal.png",
+    "sha256": "215aab7f1f823e079e9e4a4f7870fe513a99caa82475d3b4724ce598ac8968df"
+  },
+  {
+    "id": "awakening",
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/awakening.png",
+    "sha256": "2d45dbca4dbfb4e54177eaeeb5d43a455dcae92b9f3aa4de03c8a698f2163f0b"
+  },
+  {
+    "id": "paralyzeheal",
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/paralyze-heal.png",
+    "sha256": "fe3c35089c2be77bb364c9de2bdbdc8fa89d19a1ba2b3457186ea72c9fbc2c58"
+  }
+]

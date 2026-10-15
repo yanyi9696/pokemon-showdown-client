@@ -43,6 +43,7 @@ function client(startScreen = false) {
 	room.$el = {addClass() {}, html: html => { room.html = html; }};
 	room.controls = {};
 	room.$ = selector => ({
+		val() { return room.controls[selector]; },
 		each(callback) { for (const element of room.controls[selector] || []) callback.call(element); },
 		text(value) { room.controls[selector] = value; },
 		prop(name, value) { room.controls[selector] = {[name]: value}; },
@@ -61,6 +62,136 @@ function state() {
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
 describe('Fantasy Rogue start menu and codex', () => {
+	it('shows the outside king on the party tabs and sends an ability choice for that member', () => {
+		const c = client(), data = adventure('ready'), mon = data.run.team[0];
+		data.run.blessings = {owned: [], pending: [], completed: [], levels: 0, shards: 0,
+			dragonKing: {member: mon.id, species: mon.set.species, total: 732}};
+		c.room.receiveState(data);
+		assert(c.html.includes('title="队伍龙王"')); assert(c.html.includes('六项常驻能力合计 732'));
+		assert(c.html.includes('name="chooseDragonKing"')); c.room.chooseDragonKing('drizzle');
+		assert(c.sent[c.sent.length - 1].includes('"action":"dragonking"'));
+		assert(c.sent[c.sent.length - 1].includes('"member":"' + mon.id + '"'));
+	});
+	it('confirms permanent tonic use on the selected partner and disables an already applied tonic', () => {
+		const c = client(), data = adventure('ready'), mon = data.run.team[0];
+		data.items.push({id: 'roguewine', name: '酒', kind: 'tonic', description: '使用后永久生效。'});
+		data.run.bag.roguewine = 1; c.room.receiveState(data); const sent = c.sent.length;
+		c.room.useItem('roguewine'); assert.equal(c.sent.length, sent);
+		assert.equal(c.app.lastPopup.data.action, 'use'); assert.equal(c.app.lastPopup.data.details.member, mon.id);
+		mon.tonics = {wine: true, cephalosporin: true, poison: true}; c.room.receiveState(data);
+		assert(c.html.includes('value="roguewine" disabled')); assert(c.html.includes('毒招威力 ×1.5'));
+	});
+	it('opens a PP target picker before consuming single-move Ether', () => {
+		const c = client(), data = adventure('rest');
+		data.items.push({id: 'ether', name: 'PP 单项小补剂', kind: 'ether', singleMove: true, amount: 10});
+		data.run.bag.ether = 6;
+		data.run.team[0].pp = [{id: 'tackle', pp: 0, maxpp: 35}, {id: 'growl', pp: 40, maxpp: 40}];
+		c.room.receiveState(data); const sent = c.sent.length;
+		c.room.useItem('ether'); assert.equal(c.sent.length, sent);
+		const popup = Object.create(c.app.lastPopup.type); let html;
+		popup.$el = {html: value => { html = value; }}; popup.close = () => {};
+		popup.initialize(c.app.lastPopup.data);
+		assert(html.includes('value="1" disabled'));
+		popup.restorePP('0');
+		assert(c.sent[c.sent.length - 1].includes('"slot":0'));
+		assert(c.sent[c.sent.length - 1].includes('"value":"ether"'));
+	});
+	it('uses real medicine images and uniform system-status text', () => {
+		const c = client(), data = adventure('rest');
+		data.items = ['antidote', 'burnheal', 'iceheal', 'awakening', 'paralyzeheal'].map(id => ({id, name: id, kind: 'cure'}));
+		data.items.forEach(item => { data.run.bag[item.id] = 1; });
+		c.room.receiveState(data);
+		for (const item of data.items) assert(c.html.includes('sprites/fantasy-rogue/' + item.id + '.png'));
+		assert(c.html.includes('rogue-tera rogue-system-status'));
+		assert(c.html.includes('class="rogue-system-status">超进化：'));
+	});
+	it('spans trade-route description across the card instead of the icon column', () => {
+		const c = client(), data = adventure('choose');
+		data.run.choices = [{id: 'trade', name: '招式学习机商店', kind: 'trade', encounters: 0, reward: {money: 0, items: {}}}];
+		c.room.receiveState(data);
+		assert(c.html.includes('class="rogue-route-description">每种商品限购一件'));
+	});
+
+	it('only enables medicines matching a partner status, including stacked secondary statuses', () => {
+		const c = client(), data = adventure('rest');
+		data.items = [
+			{id: 'awakening', name: '解眠药', kind: 'cure', cureStatuses: ['slp']},
+			{id: 'antidote', name: '解毒药', kind: 'cure', cureStatuses: ['psn', 'tox']},
+		];
+		Object.assign(data.run.bag, {awakening: 1, antidote: 1});
+		data.run.team[0].status = 'brn'; data.run.team[0].statuses = {brn: {}, slp: {time: 2}};
+		c.room.receiveState(data);
+		assert(!c.html.includes('value="awakening" disabled')); assert(c.html.includes('value="antidote" disabled'));
+		data.run.team[0].status = ''; data.run.team[0].statuses = {tox: {stage: 2}};
+		c.room.receiveState(data);
+		assert(c.html.includes('value="awakening" disabled')); assert(!c.html.includes('value="antidote" disabled'));
+	});
+	it('hides the adventure-screen retreat action for locked event battles', () => {
+		const c = client(), data = adventure('battle'); data.run.canRetreat = false;
+		c.room.receiveState(data);
+		assert(!c.room.html.includes('value="retreat"')); assert(c.room.html.includes('本次事件对战不能撤退'));
+	});
+	it('separates custom and enhanced content, uses a shared cup symbol, and matches blessing-family icons', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('guide');
+		const move = {type: 'Normal', category: 'Physical', power: 50, accuracy: 100, pp: 20};
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'guide', guide: {intro: [], modules: {
+			moves: [{...move, id: 'custom', name: '自制招式', origin: 'fantasy'}, {...move, id: 'tackle', name: '原版增强招式', origin: 'enhanced'}],
+			abilities: [{id: 'customability', name: '自制特性', origin: 'fantasy'}, {id: 'shellarmor', name: '原版增强特性', origin: 'enhanced'}],
+		}}});
+		for (const [module, label] of [['moves', '招式'], ['abilities', '特性']]) {
+			c.room.filterCodex(module); assert(c.room.html.includes('自制' + label));
+			assert(!c.room.html.includes('<h3>原版增强' + label)); assert(c.room.html.includes('fa-trophy'));
+			c.room.filterCodex(module + 'enhanced'); assert(c.room.html.includes('<h3>原版增强' + label));
+			assert(!c.room.html.includes('<h3>自制' + label)); assert(c.room.html.includes('fa-trophy'));
+		}
+		c.room.openCodex('blessings');
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'blessings', entries: [
+			{id: 'inheritmovesfire', family: 'inheritmoves', name: '纽带', tier: 'gold', unlocked: true, text: '效果'},
+		]});
+		assert(c.room.html.includes('fa-share-alt'));
+	});
+	it('lets logged-out players click start and immediately explains the login requirement', () => {
+		const c = client(true); c.setUser('');
+		c.room.state = {account: null}; c.room.render();
+		assert(!c.room.html.includes('name="enterGame" disabled'));
+		c.room.enterGame();
+		assert.equal(c.room.screen, 'home');
+		assert(c.app.lastPopup.data.text.includes('请先登录账号'));
+	});
+	it('offers a prominent return button even while a codex is loading and filters event categories', () => {
+		const c = client(true); c.room.receiveState(state());
+		for (const section of ['guide', 'blessings', 'events']) {
+			c.room.openCodex(section); assert(c.room.html.includes('button rogue-codex-back'));
+		}
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'events', entries: [
+			{id: 'trade:mint', name: '薄荷商店', category: 'trade', unlocked: false, text: '？？？'},
+			{id: 'forest', name: '斗蛐蛐！', category: 'event', unlocked: false, text: '？？？'},
+		]});
+		c.room.filterCodex('trade'); assert(c.room.html.includes('薄荷商店')); assert(!c.room.html.includes('斗蛐蛐！'));
+		c.room.startMenu(); assert(c.room.html.includes('开始你的幻想杯肉鸽之旅'));
+	});
+	it('uses the supplied item sprite and separates general, exclusive and special item explanations', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('guide');
+		const icons = []; c.Dex.getItemIcon = item => { icons.push(item); return 'background-position:-24px -48px'; };
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'guide', guide: {intro: [], modules: {items: [
+			{id: 'fantasypowerlens', name: '幻之力量镜', text: '通用效果', category: 'general', spritenum: 34},
+			{id: 'dadascloak', name: '阿爸的披风', text: '专属效果', category: 'exclusive', spritenum: 7},
+		]}, itemNotes: [{id: 'typegems', name: '十八属性宝石', text: '特殊说明'}]}});
+		assert.equal(icons[0].spritenum, 34); assert(!c.room.html.includes('专属效果'));
+		c.room.filterCodex('exclusive'); assert(c.room.html.includes('专属效果')); assert(!c.room.html.includes('通用效果'));
+		c.room.filterCodex('special'); assert(c.room.html.includes('特殊说明'));
+	});
+	it('opens trade stock directly without center healing and keeps abandon outside scrollable content', () => {
+		const c = client(), data = adventure('rest');
+		data.run.node = {kind: 'trade', name: '薄荷商店', trade: {kind: 'mint'}, reward: {money: 0, items: {}}};
+		data.items = [{id: 'roguemintmodest', name: 'Modest薄荷', kind: 'mint', price: 500, shopFloor: 1, description: '特攻提高'}];
+		data.shopItems = ['roguemintmodest']; c.room.receiveState(data);
+		assert(c.room.html.includes('欢迎来到薄荷商店！'));
+		assert(c.room.html.includes('金币购买 · 限购 1'));
+		assert(!c.room.html.includes('恢复存活伙伴'));
+		assert(c.room.html.startsWith('<div class="rogue-game-layout"><div class="pad rogue-game-content">'));
+		assert(c.room.html.includes('</div><footer class="rogue-abandon"'));
+	});
 	it('starts on the four-button menu and enters the saved story only after pressing start', () => {
 		const c = client(true), data = state();
 		data.story = {stage: 'opening', scene: 'chamber', title: '醒来', text: '未点击前不显示的剧情', index: 0, total: 8};
@@ -244,6 +375,48 @@ function adventure(phase = 'choose') {
 	return data;
 }
 describe('Fantasy Rogue event display and spectator playback', () => {
+	it('localizes a move picker, retains the event key and sends only the selected move', () => {
+		const c = client(), data = adventure('event');
+		Object.assign(c.translations, {Bulbasaur: '妙蛙种子', 'Grass Pledge': '草之誓约', Grass: '草', Special: '特殊'});
+		data.run.event = {key: 'tutor-key', stage: 'choice', title: '读万卷书，行万里路',
+			paragraphs: ['为 Bulbasaur 选择一个尚未掌握的合法传授招式。'], options: [],
+			picker: {label: '选择招式', options: [
+				{id: 'move:grasspledge', name: 'Grass Pledge', text: '免费 · Grass · Special · 威力 80'},
+				{id: 'move:gigadrain', name: 'Giga Drain', text: '1200 金币', disabled: true},
+			]}};
+		c.room.receiveState(data);
+		for (const label of ['为 妙蛙种子', '草之誓约', '免费 · 草 · 特殊', '确认学习', 'value="move:gigadrain" disabled']) assert(c.room.html.includes(label), label);
+		c.room.controls['select[name=eventMove]'] = 'move:grasspledge';
+		c.room.chooseEventMove(); c.room.chooseEventMove();
+		assert.equal(c.sent.length, 1);
+		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.equal(request.member, 'tutor-key'); assert.equal(request.value, 'move:grasspledge');
+	});
+	it('displays EV limits and remaining points, and sends the full allocation for server validation', () => {
+		const c = client(), data = adventure('event'), empty = {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
+		data.run.event = {key: 'elder-key', stage: 'choice', title: '这是武术的胜利', paragraphs: [],
+			options: [{id: 'allocate', name: '确认分配', text: ''}],
+			evAllocation: {member: data.run.team[0].id, total: 30, minimum: {...empty, atk: 10}, current: {...empty, atk: 10}}};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('尚待分配：20 点'));
+		assert(c.room.html.includes('name="event-ev-atk" min="10" max="252"'));
+		const evs = {...empty, atk: 10, spa: 20};
+		for (const stat in evs) c.room.controls['input[name=event-ev-' + stat + ']'] = evs[stat];
+		c.room.updateEventEVTotal(); assert.equal(c.room.controls['.rogue-event-ev-remaining'], '尚待分配：0 点');
+		c.room.chooseEvent('allocate');
+		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.deepEqual(request.evs, evs); assert.equal(request.member, 'elder-key');
+	});
+	it('previews regional changes and distinguishes restoration from ordinary event battle costs', () => {
+		const c = client(), data = adventure('event');
+		data.run.event = {key: 'memory-key', stage: 'choice', title: '旅行的回忆', paragraphs: [], options: [],
+			preview: {before: 'Vulpix', after: 'Vulpix-Alola', types: ['Ice'], ability: 'Snow Cloak', stats: data.run.team[0].stats,
+				hp: 3, maxhp: 20, removed: ['flamethrower'], added: ['iceshard'], equipped: ['iceshard']}};
+		c.room.receiveState(data); assert(c.room.html.includes('Vulpix → Vulpix-Alola'));
+		for (const text of ['移除不合法招式', '新增当前等级招式', '转换后携带招式', '变化后 HP：3 / 20']) assert(c.room.html.includes(text));
+		data.run.phase = 'ready'; data.run.event.memoryBattle = true; data.run.event.stage = 'battle'; c.room.receiveState(data);
+		assert(c.room.html.includes('恢复原队伍与背包的战前状态'));
+	});
 	it('shows the renamed event, opponent preview, costs and disabled unaffordable choices', () => {
 		const c = client(), data = adventure('event');
 		data.run.event = {key: 'forest-one', stage: 'choice', title: '斗蛐蛐！', paragraphs: ['双方各有三只。'],
@@ -846,12 +1019,13 @@ describe('Fantasy Rogue client', () => {
 		c.room.receiveState(state());
 		assert.equal(c.room.state.account.revision, 3);
 	});
-	it('renders fixed rest without route choices and keeps repeated healing and revive available', () => {
+	it('renders paid center care alongside an equally prominent continue action', () => {
 		const c = client(); const data = state();
 		data.items = [{id: 'revive', name: '活力碎片', kind: 'revive', price: 20}];
-		data.run = {phase: 'rest', floor: 9, money: 100, team: [], bag: {revive: 1}, boosts: data.account.boosts};
+		data.run = {phase: 'rest', floor: 9, money: 1000, centerCare: {cost: 550, needed: true, fainted: 1}, team: [], bag: {revive: 1}, boosts: data.account.boosts};
 		c.room.receiveState(data);
-		assert(c.html.includes('恢复存活伙伴'));
+		assert(c.html.includes('全队治疗 · 550 金币'));
+		assert(c.html.includes('rogue-center-actions'));
 		assert(c.html.includes('活力碎片'));
 		assert(c.html.includes('补给完成，进入下一层'));
 		assert(!c.html.includes('选择本层路线'));
@@ -1015,8 +1189,23 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 			battle: {scene: {}, seeking: null, atQueueEnd: false, paused: false, ended: false, stepQueue: [], add() {}},
 			$controls: {find: () => ({remove() {}, html() {}}), html: html => { room.html = html; },
 				append: html => { room.html += html; }, prepend: html => { room.html = html + room.html; }}});
-		return {room, sent, joined, app: context.app};
+		return {room, sent, joined, app: context.app, context};
 	}
+	it('prompts once per king succession, keeps fallback controls and rejects stale popup clicks', () => {
+		const c = battleClient(), popups = [];
+		c.context.translations = {Dratini: '迷你龙'};
+		c.app.addPopup = (type, data) => popups.push({type, data});
+		c.room.request = {rqid: 8, requestType: 'switch', fantasyRogue: {dragonKing: {member: 'second', species: 'Dratini', token: 2, pending: true}}};
+		c.room.updateControlsForPlayer(); c.room.updateControlsForPlayer();
+		assert.equal(popups.length, 1); assert(c.room.html.includes('龙王的工作 · 继任')); assert(c.room.html.includes('name="chooseDragonKing"'));
+		assert(c.room.html.includes('迷你龙接任本场龙王'));
+		c.room.chooseDragonKing('drizzle', {}); assert.deepEqual(c.sent, ['/choose rogueking drizzle 2|8']);
+		c.room.chooseDragonKing('drizzle', 1); assert.equal(c.sent.length, 1);
+		const popup = Object.create(popups[0].type); popup.$el = {html() {}}; popup.close = () => {};
+		popup.initialize(popups[0].data);
+		c.room.request.fantasyRogue.dragonKing.token = 3; c.room.updateControlsForPlayer(); assert.equal(popups.length, 2);
+		popup.chooseDragonKing('longzhihuxi'); assert.equal(c.sent.length, 1);
+	});
 	it('shows precise capture probability in ball hover content, including certain and tiny chances', () => {
 		const c = battleClient();
 		c.room.request.fantasyRogue = {catchable: true, balls: [
@@ -1038,6 +1227,16 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 		assert(!c.room.html.includes('name="retreatRogue"'));
 		c.room.retreatRogue(); assert.equal(c.sent.length, 1);
 	});
+	it('omits event retreat and blocks the native forfeit popup while the encounter remains playable', () => {
+		const c = battleClient(); c.room.fantasyRogue.canRetreat = false;
+		c.room.updateControlsForPlayer(); assert(!c.room.html.includes('name="retreatRogue"'));
+		c.room.retreatRogue(); assert.equal(c.sent.length, 0);
+		const popup = Object.create(c.context.ForfeitPopup);
+		popup.$el = {html: html => { popup.html = html; }};
+		popup.initialize({room: c.room, gameType: 'battle'});
+		assert(popup.html.includes('不能撤退或投降')); assert(!popup.html.includes('type="submit"'));
+		popup.submit({}); assert.equal(c.sent.length, 0);
+	});
 	it('shows overflowing psychic charge during trainer battles and spends a normal action', () => {
 		const c = battleClient();
 		c.room.request.fantasyRogue = {catchable: false, psychic: 105.5};
@@ -1056,6 +1255,15 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 		const spectator = battleClient(); spectator.room.fantasyRogue.userid = 'someoneelse';
 		spectator.room.add('|fantasyrogueend|');
 		assert(!spectator.room.closed); assert.deepEqual(spectator.joined, []);
+	});
+	it('reports restored resources after a memory battle defeat without telling players to revive again', () => {
+		const c = battleClient();
+		c.room.battle.ended = true; c.room.battle.atQueueEnd = true;
+		c.room.add('|fantasyroguedefeat|' + JSON.stringify({floor: 41, eventClosed: true, memoryRestored: true}));
+		assert(c.room.html.includes('已恢复到战前状态'));
+		assert(c.room.html.includes('保留实际经验与捕捉结果'));
+		assert(!c.room.html.includes('消耗已保存'));
+		assert(!c.room.html.includes('复活至少一名伙伴'));
 	});
 	it('plays the final turn before showing defeat consequences and waits for manual return', () => {
 		const c = battleClient();

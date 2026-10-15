@@ -3,6 +3,8 @@
 	var escape = BattleLog.escapeHTML;
 	var globals = this;
 	function localName(name) {
+		if (/薄荷$/.test(name)) return localName(name.slice(0, -2)).split(/[（(]/)[0].trim() + '薄荷';
+		if (/^招式学习机：/.test(name)) return '招式学习机：' + localName(name.slice(6));
 		if (name === 'Rogue Great Mage') return '大法师';
 		return globals.translations && globals.translations[name] || name;
 	}
@@ -17,11 +19,11 @@
 		return label + (nature.plus && nature.minus ? '（+' + statNames[nature.plus] + '，−' + statNames[nature.minus] + '）' : '（无修正）');
 	}
 	var kindNames = {wild: '野生战斗', battle: '战斗', elite: '精英', encounter: '遭遇', trainer: '训练家', rest: '休整',
-		boss: '首领', gym: '道馆', event: '事件', reward: '奖励', shop: '商店', adventure: '奇遇', fog: '未知区域'};
+		boss: '首领', gym: '道馆', event: '事件', reward: '奖励', shop: '商店', trade: '交易', adventure: '奇遇', fog: '未知区域'};
 	function routeTone(kind) {
 		if (kind === 'rest') return 'green';
 		if (kind === 'adventure' || kind === 'fog') return 'rose';
-		if (['event', 'reward', 'shop'].indexOf(kind) >= 0) return 'blue';
+		if (['event', 'reward', 'shop', 'trade'].indexOf(kind) >= 0) return 'blue';
 		return 'red';
 	}
 	function cardSelectionMarker() {
@@ -30,7 +32,7 @@
 	}
 	function routeEmblem(kind) {
 		var icons = {wild: 'compass', battle: 'bolt', elite: 'shield', encounter: 'bolt', trainer: 'flag',
-			boss: 'trophy', gym: 'university', event: 'question', reward: 'gift', shop: 'shopping-bag', rest: 'medkit', adventure: 'magic'};
+			boss: 'trophy', gym: 'university', event: 'question', reward: 'gift', shop: 'shopping-bag', trade: 'shopping-bag', rest: 'medkit', adventure: 'magic'};
 		return cardSelectionMarker() +
 			'<span class="rogue-route-emblem" aria-hidden="true"><i class="fa fa-' + (icons[kind] || 'compass') + '"></i></span>';
 	}
@@ -44,7 +46,8 @@
 			survive: 'heart', seeds: 'leaf', secondchoice: 'exchange', bigmoney: 'money', learnall: 'book', style: 'trophy',
 			medic: 'medkit', insight: 'sun-o', inheritmoves: 'share-alt', entrance: 'star', meltan: 'cubes', swords: 'gavel',
 			execute: 'crosshairs', hpgrowth: 'heartbeat', regis: 'university', sound: 'volume-up', multihit: 'forward',
-			hoopa: 'magic', typelink: 'link', typeevolution: 'diamond', psychic: 'superpowers'};
+			hoopa: 'magic', typelink: 'link', typeevolution: 'diamond', psychic: 'superpowers',
+			dragonking: 'trophy', wine: 'glass', cephalosporin: 'medkit'};
 		if ((option.family || option.id).indexOf('fate') === 0) return 'diamond';
 		return icons[option.family || option.id] || 'star';
 	}
@@ -69,20 +72,21 @@
 		}
 		return (routeParticles += '</span>');
 	}
-	var itemKinds = {ball: '精灵球', heal: '恢复道具', revive: '复活道具', cure: '状态恢复', ether: 'PP 恢复', candy: '经验糖果', evolution: '进化道具', held: '携带道具', treasure: '贵重物品', effort: '基础点数'};
+	var itemKinds = {ball: '精灵球', heal: '恢复道具', revive: '复活道具', cure: '状态恢复', ether: 'PP 恢复', candy: '经验糖果', evolution: '进化道具', held: '携带道具', treasure: '贵重物品', effort: '基础点数', tonic: '祝福道具'};
 	var economyIcons = ['tinymushroom', 'balmmushroom', 'prettyfeather', 'stardust', 'starpiece', 'cometshard', 'pearl', 'bigpearl', 'pearlstring',
-		'healthfeather', 'musclefeather', 'resistfeather', 'geniusfeather', 'cleverfeather', 'swiftfeather'];
+		'antidote', 'burnheal', 'iceheal', 'awakening', 'paralyzeheal', 'healthfeather', 'musclefeather', 'resistfeather', 'geniusfeather', 'cleverfeather', 'swiftfeather'];
 	function dex() { return Dex.mod ? Dex.mod('gen9fantasy') : Dex; }
 	function idOf(name) { return (name || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
 	function fa(name) { return '<i class="fa fa-' + name + '" aria-hidden="true"></i> '; }
 	function itemIcon(item) {
+		if (item.kind === 'mint' || item.kind === 'machine') return fa(item.kind === 'mint' ? 'leaf' : 'circle-o');
 		if (economyIcons.indexOf(item.id) >= 0) return '<img class="rogue-loot-icon" src="sprites/fantasy-rogue/' + item.id + '.png" alt="" /> ';
 		var frame = item.id.indexOf('expcandy') === 0 ? 'candy' : item.id === 'linkingcord' ? 'cord' :
-			['potion', 'superpotion', 'hyperpotion', 'revive', 'fullheal', 'elixir', 'blackaugurite',
+			['potion', 'superpotion', 'hyperpotion', 'revive', 'fullheal', 'elixir', 'ether', 'blackaugurite',
 				'bigmushroom', 'nugget', 'bignugget', 'hpup', 'protein', 'iron', 'calcium', 'zinc', 'carbos'].indexOf(item.id) >= 0 ? item.id : '';
 		if (frame) return '<span class="rogue-item rogue-item-' + frame + '" aria-hidden="true"></span> ';
 		return typeof Dex.getItemIcon === 'function' ? '<span class="itemicon" aria-hidden="true" style="' +
-			Dex.getItemIcon(item.icon || item.id) + '"></span> ' : fa('cube');
+			Dex.getItemIcon(typeof item.spritenum === 'number' ? item : dex().items.get(item.icon || item.id)) + '"></span> ' : fa('cube');
 	}
 	function button(name, value, label, disabled, icon) {
 		return '<button class="button" name="' + name + '" value="' + escape(value || '') + '"' +
@@ -105,6 +109,7 @@
 			'<span class="rogue-move-desc">' + escape(localName(move.shortDesc || move.desc || '暂无招式简介')) + '</span></div>';
 	}
 	function itemDescription(item) {
+		if (item.description) return item.description;
 		if (item.kind === 'treasure') return '仅商店兑换 · 每个 ' + item.sellPrice + ' 金币';
 		if (item.kind === 'effort') return statNames[item.stat] + '基础点数 +' + item.amount + '（单项上限 252，总计 510）';
 		if (item.kind === 'held' && dex().items) {
@@ -115,13 +120,18 @@
 		if (item.kind === 'heal') return '恢复 ' + item.amount + ' HP，不复活倒下成员';
 		if (item.kind === 'revive') return '复活并恢复 ' + Math.round(item.amount * 100) + '% HP';
 		if (item.kind === 'cure') return '解除存活伙伴的异常状态';
-		if (item.kind === 'ether') return '当前各招式恢复 ' + item.amount + ' PP';
+		if (item.kind === 'ether') return (item.singleMove ? '自选一个招式恢复 ' : '当前各招式恢复 ') + item.amount + ' PP';
 		if (item.kind === 'candy') return '增加 ' + item.amount + ' 经验';
 		return '在队伍面板选择符合条件的进化';
 	}
 	function editable(run) {
 		return ['choose', 'ready', 'rest', 'reward', 'event'].indexOf(run.phase) >= 0 &&
 			!run.pendingCapture && !(run.pendingMoves || []).length;
+	}
+	function canCure(item, mon) {
+		return Object.keys(mon.statuses || {}).concat(mon.status || []).some(function (status) {
+			return status && (!item.cureStatuses || item.cureStatuses.indexOf(status) >= 0);
+		});
 	}
 	function loot(reward, items, inline) {
 		if (!reward) return '';
@@ -149,6 +159,12 @@
 			return localName(name) + ' ' + verb;
 		}).replace(/(进化为|学会了) (.+?)([！。])$/, function (all, verb, name, end) {
 			return verb + ' ' + localName(name) + end;
+		});
+	}
+	function eventText(text) {
+		return text.replace(/[A-Za-z][A-Za-z0-9'’. -]*/g, function (phrase) {
+			var name = phrase.trim();
+			return localName(name) + phrase.slice(name.length);
 		});
 	}
 	function clearCardHTML(card) {
@@ -189,7 +205,7 @@
 		events: {'change input[name=starter]': 'changeStarter', 'change input[name=useSpirit]': 'changeSpirit',
 			'change select[name=testSpirit]': 'changeSpirit', 'change select[name=hpTarget]': 'changeHPTarget',
 			'change select[name=target]': 'changeItemTarget', 'keydown .rogue-start-deck': 'cardKey',
-			'keydown input[name=codexSearch]': 'codexSearchKey'},
+			'keydown input[name=codexSearch]': 'codexSearchKey', 'input .rogue-event-allocation input': 'updateEventEVTotal'},
 		initialize: function () {
 			this.$el.addClass('ps-room-light scrollable fantasyrogue');
 			this.state = null;
@@ -271,7 +287,13 @@
 			this.render();
 		},
 		enterGame: function () {
-			if (!this.state || !this.state.account) return;
+			if (!this.state || !this.state.account) {
+				var userid = app.user.get('userid');
+				app.addPopup(globals.RogueNoticePopup, {text: !userid || /^guest[0-9]*$/.test(userid) || this.state && !this.state.account ?
+					'请先登录账号，再开始冒险。本地测试请先点击右上角“输入用户名”设置固定昵称。' :
+					'正在读取冒险存档，请稍后重试；若连接中断，请重新连接服务器。'});
+				this.refresh(); return;
+			}
 			this.screen = 'game'; this.openPartyOnLayout = true;
 			this.render(); app.updateLayout();
 			this.maybeShowSpirit();
@@ -365,6 +387,13 @@
 			if (result.state) this.receiveState(result.state, action === 'storynext' || action === 'storyskip');
 			else this.refresh();
 			if (result.ok && action === 'battle' && result.state.run && result.state.run.roomid) app.joinRoom(result.state.run.roomid);
+			if (result.ok && action === 'event' && result.state && result.state.run && result.state.run.event && result.state.run.event.exchange) {
+				var exchange = result.state.run.event.exchange;
+				if (this.exchangeKey !== result.state.run.event.key) {
+					this.exchangeKey = result.state.run.event.key;
+					app.addPopup(globals.RogueExchangeAnimationPopup, {exchange: exchange});
+				}
+			}
 			if (result.ok && action === 'evolve' && evolution && result.state && result.state.run &&
 				result.state.run.id === evolution.runid) {
 				var evolved = result.state.run.team.find(function (mon) { return mon.id === evolution.member; });
@@ -552,9 +581,32 @@
 		useItem: function (id) {
 			var mon = this.selectedPokemon();
 			if (!mon) return;
+			var item = this.state.items.find(function (entry) { return entry.id === id; });
+			if (item && item.kind === 'tonic') {
+				app.addPopup(globals.RogueCardConfirmPopup, {room: this, action: 'use', details: {value: id, member: mon.id},
+					title: '为' + localName(mon.set.species) + '使用' + item.name, text: item.description});
+				return;
+			}
+			if (item && item.singleMove) {
+				app.addPopup(globals.RogueEtherPopup, {room: this, member: mon, item: item});
+				return;
+			}
 			this.submit('use', {value: id, member: mon.id});
 		},
 		changeItemTarget: function (event) { this.selectMember(event.currentTarget.value); },
+		chooseDragonKing: function (ability) {
+			var king = this.state.run.blessings && this.state.run.blessings.dragonKing;
+			if (king && !king.ability) this.submit('dragonking', {member: king.member, value: ability});
+		},
+		renderDragonKing: function (run, busy) {
+			var king = run.blessings && run.blessings.dragonKing;
+			if (!king) return '';
+			var locked = busy || !(editable(run) || run.phase === 'blessing');
+			return '<div class="rogue-keepsake rogue-dragon-king"><strong>' + fa('trophy') + '龙王 · ' + escape(localName(king.species)) +
+				'</strong><p>六项常驻能力合计 ' + king.total + ' · ' + (king.ability ? '额外特性：' + (king.ability === 'drizzle' ? '降雨' : '龙之呼吸') : '请选择额外特性') +
+				'</p>' + (!king.ability ? button('chooseDragonKing', 'longzhihuxi', '龙之呼吸', locked) + ' ' + button('chooseDragonKing', 'drizzle', '降雨', locked) : '') +
+				'<p class="rogue-caption">其余伙伴战斗经验 +30%。战斗中倒下会由剩余最强龙系临时继任；战后恢复队伍龙王。</p></div>';
+		},
 		learnMove: function (slot) {
 			var move = this.state.run.pendingMoves[0];
 			if (move) this.submit('learn', {value: slot, member: move.member});
@@ -797,7 +849,23 @@
 		exchangeShards: function (value) { this.submit('exchangeshards', {value: value}); },
 		chooseEvent: function (choice) {
 			var event = this.state && this.state.run && this.state.run.event;
-			if (event) this.submit('event', {member: event.key, value: choice});
+			if (!event) return;
+			var details = {member: event.key, value: choice};
+			if (choice === 'allocate' && event.evAllocation) {
+				details.evs = {};
+				var self = this;
+				Object.keys(statNames).forEach(function (stat) { details.evs[stat] = Number(self.$('input[name=event-ev-' + stat + ']').val()); });
+			}
+			this.submit('event', details);
+		},
+		chooseEventMove: function () { this.chooseEvent(this.$('select[name=eventMove]').val()); },
+		updateEventEVTotal: function () {
+			var event = this.state && this.state.run && this.state.run.event;
+			if (!event || !event.evAllocation) return;
+			var self = this, used = Object.keys(statNames).reduce(function (sum, stat) {
+				return sum + Number(self.$('input[name=event-ev-' + stat + ']').val());
+			}, 0);
+			this.$('.rogue-event-ev-remaining').text('尚待分配：' + (event.evAllocation.total - used) + ' 点');
 		},
 		watchEvent: function () {
 			var event = this.state && this.state.run && this.state.run.event;
@@ -807,7 +875,30 @@
 			var event = run.event;
 			if (!event) return '';
 			var html = '<article class="rogue-event"><h3>' + escape(event.title) + '</h3><div class="rogue-event-text">' +
-				(event.paragraphs || []).map(function (line) { return '<p>' + escape(line) + '</p>'; }).join('') + '</div>';
+				(event.paragraphs || []).map(function (line) { return '<p>' + escape(eventText(line)) + '</p>'; }).join('') + '</div>';
+			if (event.preview) {
+				var preview = event.preview;
+				html += '<div class="rogue-event-preview"><strong>' + escape(localName(preview.before)) + ' → ' + escape(localName(preview.after)) + '</strong>' +
+					'<div class="rogue-event-form-sprite" style="' + Dex.getTeambuilderSprite({species: preview.after}) + '"></div>' +
+					'<p>属性：' + preview.types.map(localName).join(' / ') + ' · 特性：' + escape(localName(preview.ability)) + '</p><p>' +
+					Object.keys(statNames).map(function (stat) { return statNames[stat] + ' ' + preview.stats[stat]; }).join(' / ') + '</p>' +
+					'<p>变化后 HP：' + preview.hp + ' / ' + preview.maxhp + '，不会复活濒死伙伴。</p><p>移除不合法招式：' +
+					(preview.removed.map(function (id) { return escape(localName(Dex.moves.get(id).name)); }).join('、') || '无') + '</p><p>新增当前等级招式：' +
+					(preview.added.map(function (id) { return escape(localName(Dex.moves.get(id).name)); }).join('、') || '无') + '</p><p>转换后携带招式：' +
+					(preview.equipped || []).map(function (id) { return escape(localName(Dex.moves.get(id).name)); }).join('、') + '</p></div>';
+			}
+			if (event.evAllocation) {
+				var allocation = event.evAllocation;
+				html += '<div class="rogue-event-allocation"><p>请恰好分配 <strong>' + allocation.total + '</strong> 点，每项最多 252。</p>' +
+					'<p class="rogue-event-ev-remaining" aria-live="polite">尚待分配：' +
+					(allocation.total - Object.keys(statNames).reduce(function (sum, stat) { return sum + allocation.current[stat]; }, 0)) + ' 点</p>' +
+					Object.keys(statNames).map(function (stat) { return '<label>' + statNames[stat] + '<input type="number" name="event-ev-' + stat +
+						'" min="' + allocation.minimum[stat] + '" max="252" step="1" value="' + allocation.current[stat] + '"' + (busy ? ' disabled' : '') + ' /></label>'; }).join('') + '</div>';
+			}
+			if (event.picker) html += '<div class="rogue-event-picker"><label>' + escape(event.picker.label) +
+				'<select name="eventMove"' + (busy ? ' disabled' : '') + '>' + event.picker.options.map(function (entry) {
+					return '<option value="' + escape(entry.id) + '"' + (entry.disabled ? ' disabled' : '') + '>' + escape(localName(entry.name)) + ' · ' + escape(eventText(entry.text)) + '</option>';
+				}).join('') + '</select></label>' + button('chooseEventMove', '', '确认学习', busy || !event.picker.options.some(function (entry) { return !entry.disabled; })) + '</div>';
 			if (event.stage === 'choice' && event.teams) {
 				html += '<div class="rogue-event-teams">' + event.teams.map(function (team, index) {
 					return '<div><strong>' + (index ? '右边的队伍' : '左边的队伍') + '</strong>' + team.map(function (mon) {
@@ -826,7 +917,7 @@
 			} else if (event.stage === 'choice') {
 				html += '<div class="rogue-event-options">' + event.options.map(function (option) {
 					return '<button class="button rogue-event-option" name="chooseEvent" value="' + escape(option.id) + '"' +
-						(busy || option.disabled ? ' disabled' : '') + '><strong>' + escape(option.name) + '</strong><small>' + escape(option.text) + '</small></button>';
+						(busy || option.disabled ? ' disabled' : '') + '><strong>' + escape(localName(option.name)) + '</strong><small>' + escape(eventText(option.text)) + '</small></button>';
 				}).join('') + '</div>';
 			}
 			return html + '</article>';
@@ -885,14 +976,16 @@
 						(node.biome ? ' · Lv.' + (node.biome.level + (run.blessings ? run.blessings.levels : 0)) +
 							(run.blessings && run.blessings.levels ? '（含祝福 +' + run.blessings.levels + '）' : '') + ' · ' + (node.biome.tier * 20) + '～' +
 							(node.biome.tier * 20 + 20) + ' 档宝可梦池' : '') +
-						'</small><span class="rogue-caption">' + (node.fogged ? '路线与收益被迷雾遮蔽' : node.wildLoot ? '本层战利品 · 每场结束入包' : node.kind === 'event' ? '进入后揭晓事件，选择会影响收益与风险' : '整层完成奖励') + '</span>' +
-						(node.wildLoot ? wildLootSummary(node.wildLoot, this.state.items) : loot(node.reward, this.state.items, true)) +
+						'</small><span class="rogue-caption">' + (node.fogged ? '路线与收益被迷雾遮蔽' : node.wildLoot ? '本层战利品 · 每场结束入包' : node.kind === 'trade' ? '选购专门商品 · 可以直接离开' : node.kind === 'event' ? '进入后揭晓事件，选择会影响收益与风险' : '整层完成奖励') + '</span>' +
+						(node.kind === 'trade' ? '<span class="rogue-route-description">每种商品限购一件，商品不会随刷新改变。</span>' : node.wildLoot ? wildLootSummary(node.wildLoot, this.state.items) : loot(node.reward, this.state.items, true)) +
 						'<span class="rogue-route-hint">' + (selected ? '已选中 · 再点一次进入' : '点击选中') + '</span></button>';
 				}, this);
 				html += '</div>';
 				if (!(run.choices || []).length) html += '<p>本层内容等待配置，存档已保留。</p>';
 			} else if (run.phase === 'ready') {
-				if (run.event) html += this.renderEvent(run, busy) + '<p class="rogue-caption">可先调整队伍。战败或撤退后事件结束，保留损耗，不发胜利奖励。</p>';
+				if (run.event) html += this.renderEvent(run, busy) + '<p class="rogue-caption">可先调整队伍。' + (run.event.memoryBattle ?
+					'幻境结束后恢复原队伍与背包的战前状态，保留捕捉与实际经验。' : '战败后事件结束，保留损耗，不发胜利奖励。') +
+					(run.canRetreat === false ? '本次事件对战不能撤退。' : '') + '</p>';
 				if (run.node && run.node.rocket && !run.node.rocket.cleared) html += '<p><strong>火箭队袭击！</strong>击败后开放商店，并获得 <b>' + run.node.rocket.reward + ' 金币</b>。</p>';
 				if (run.node && run.node.bonusEncounter) html += '<p><strong>额外遭遇</strong> · 发现了区域名单之外的宝可梦！</p>';
 				var allFainted = !run.team.some(function (mon) { return mon.hp > 0; });
@@ -906,15 +999,22 @@
 				}
 			} else if (run.phase === 'battle') {
 				html += '<h3>' + (run.retreating ? '正在保存撤退结果…' : '战斗进行中') + '</h3>' +
-					button('joinRoom', run.roomid, '返回当前战斗', !run.roomid) + button('act', 'retreat', '撤退', busy || run.retreating);
+					button('joinRoom', run.roomid, '返回当前战斗', !run.roomid) + (run.canRetreat === false ?
+					'<p class="rogue-caption">本次事件对战不能撤退，请完成战斗。</p>' : button('act', 'retreat', '撤退', busy || run.retreating));
 			} else if (run.phase === 'failed') {
 				html += '<h3>连续挑战失败</h3><p>本层不允许途中治疗。重新挑战会恢复入层时的队伍和资源，已保存的捕捉解锁保留。</p>' +
 					button('act', 'retry', '免费重试整层', busy);
+			} else if (run.phase === 'rest' && run.node && run.node.kind === 'trade') {
+				html += '<h3>' + escape(run.node.name) + '</h3><p>欢迎来到' + escape(run.node.name) + '！</p>' +
+					button('act', 'continue', '交易完成，进入下一层', busy);
 			} else if (run.phase === 'rest') {
-				html += '<h3>宝可梦中心</h3><p>' + (run.spirit && run.spirit.id === 'yveltal' ? '塔灵交易：不恢复 HP；' : '无限次恢复存活伙伴的 HP、') +
-					'全部已学招式 PP 和异常状态可恢复。倒下伙伴需要先使用活力碎片。</p>' +
-					button('act', 'heal', '恢复存活伙伴', busy, fa('heart')) +
-					button('act', 'continue', '补给完成，进入下一层', busy);
+				var care = run.centerCare || {cost: 0, needed: false};
+				html += '<h3>宝可梦中心</h3><p>' + (run.spirit && run.spirit.id === 'yveltal' ? '塔灵交易：存活伙伴只恢复 PP 和异常状态，不恢复 HP、不复活。' :
+					'复活倒下的伙伴，并恢复全队 HP、全部已学招式 PP 和异常状态。') + '</p>' +
+					'<p class="rogue-caption">本次治疗：' + care.cost + ' 金币' + (care.fainted ? '（含 ' + care.fainted + ' 只伙伴的复活费用）' : '（无需复活附加费）') +
+					'</p><div class="rogue-center-actions">' +
+					button('act', 'heal', care.needed ? '全队治疗 · ' + care.cost + ' 金币' : '全队状态良好', busy || !care.needed || run.money < care.cost, fa('heart')) +
+					button('act', 'continue', '补给完成，进入下一层', busy) + '</div>';
 			} else if (run.phase === 'reward') {
 				html += '<h3>领取本层奖励</h3>' + button('act', 'continue', '领取本层奖励并继续', busy, fa('gift'));
 			} else if (run.phase === 'complete') {
@@ -967,6 +1067,7 @@
 			run.team.forEach(function (member) {
 				html += '<button role="tab" aria-selected="' + (member.id === mon.id) + '" name="selectMember" value="' + escape(member.id) + '">' +
 					'<span class="picon" style="' + Dex.getPokemonIcon(member.set.species) + '"></span><span>' + escape(localName(member.set.species)) +
+					(run.blessings && run.blessings.dragonKing && run.blessings.dragonKing.member === member.id ? ' <em class="rogue-king-mark" title="队伍龙王">♛</em>' : '') +
 					((member.evolutionDetails || []).some(function (evo) { return evo.ready; }) ? '<em class="rogue-evolution-mark" title="已满足进化条件">↑</em>' : '') +
 					'</span><small>Lv.' + member.set.level + ' · ' + (member.hp ? 'HP ' + member.hp + '/' + member.maxhp : '已倒下') + '</small></button>';
 			});
@@ -986,11 +1087,12 @@
 			var exp = mon.experienceProgress;
 			var ability = dex().abilities ? dex().abilities.get(mon.set.ability || '') : {name: mon.set.ability || ''};
 			var item = this.state.items.filter(function (entry) { return entry.id === idOf(mon.set.item); })[0];
-			var nature = localName(mon.set.nature || '—');
+			var nature = localName(mon.mintNature || mon.set.nature || '—');
 			var natureParts = nature.split(/\s*(?=[（(])/);
 			html += '<div class="rogue-member-details"><div class="rogue-details-line"><span>等级<br /><b>' + mon.set.level +
 				'</b></span><span>性别<br /><b>' + escape(mon.set.gender || '—') + '</b></span><span class="rogue-nature">性格<br /><b>' +
-				escape(natureParts[0]) + '<span class="rogue-nature-effect">' + escape(natureParts.slice(1).join('')) + '</span></b></span></div>' +
+				escape(natureParts[0]) + (mon.mintNature ? '薄荷' : '') + '<span class="rogue-nature-effect" title="' +
+				escape(mon.mintNature ? '原性格：' + localName(mon.set.nature) + '（进化条件不变）' : '') + '">' + escape(natureParts.slice(1).join('')) + '</span></b></span></div>' +
 				'<p class="rogue-exp">' + (mon.fixedLevel ? '驻时伙伴 · 等级固定 ' + mon.fixedLevel : exp ? '经验：' + (exp.needed ? exp.current + ' / ' + exp.needed + '（下一级）' : '已达 100 级') : '经验：—') + '</p>' +
 				'<label>携带道具</label>' + button('editSection', 'items', item ? localName(item.name) : mon.set.item ? localName(mon.set.item) : '无道具', false, item ? itemIcon(item) : fa('cube')) +
 				'<label>特性</label>' + button('editSection', 'abilities', localName(ability.name || '—'), false) + '</div>';
@@ -1009,6 +1111,9 @@
 			});
 			html += '</button></div>';
 			var growth = [];
+			if (mon.tonics && mon.tonics.wine) growth.push('酒：每次登场混乱 · 每场首个实际招式威力 ×2');
+			if (mon.tonics && mon.tonics.cephalosporin) growth.push('头孢：免疫七种异常状态，不免疫混乱');
+			if (mon.tonics && mon.tonics.wine && mon.tonics.cephalosporin) growth.push('组合效果：幽灵副属性' + (mon.tonics.poison ? ' · 毒招威力 ×1.5' : ''));
 			if (mon.bond !== undefined) growth.push('羁绊 ' + mon.bond + ' / 100');
 			if (mon.insight) growth.push('生死领悟 ' + mon.insight.points + ' / 100 · 每次 +' + mon.insight.gain);
 			if (mon.bonusHP) growth.push('永久 HP +' + mon.bonusHP);
@@ -1104,14 +1209,17 @@
 			var held = this.state.items.filter(function (item) { return item.kind !== 'treasure' && run.bag[item.id] > 0; });
 			held.forEach(function (item) {
 				html += '<div class="rogue-item-card"><div class="rogue-item-heading">' + itemIcon(item) + '<strong>' + escape(localName(item.name)) +
-					'</strong><b>×' + run.bag[item.id] + '</b></div><small>' + escape(item.category || itemKinds[item.kind]) + '</small><p>' + escape(itemDescription(item)) + '</p>';
+					'</strong><b>×' + run.bag[item.id] + '</b></div><small>' + escape(item.category || (item.kind === 'mint' ? '性格薄荷' : item.kind === 'machine' ? '招式学习机' : itemKinds[item.kind])) + '</small><p>' + escape(itemDescription(item)) + '</p>';
 				if (['ball', 'evolution', 'held'].indexOf(item.kind) < 0) {
 					var reason = !target ? '请选择目标' : '';
 					if (target) {
 						if (item.kind === 'heal') reason = !target.hp ? '需先复活' : target.hp >= target.maxhp ? 'HP 已满' : '';
 						if (item.kind === 'revive') reason = target.hp ? '仅能复活濒死伙伴' : '';
-						if (item.kind === 'cure') reason = !target.hp ? '需先复活' : !target.status ? '无异常状态' : '';
+						if (item.kind === 'cure') reason = !target.hp ? '需先复活' : !canCure(item, target) ? '无对应异常状态' : '';
 						if (item.kind === 'ether') reason = !target.hp ? '需先复活' : !target.pp.some(function (slot) { return slot.pp < slot.maxpp; }) ? 'PP 已满' : '';
+						if (item.kind === 'mint') reason = target.mintNature === item.nature ? '已生效' : '';
+						if (item.kind === 'tonic') reason = target.tonics && target.tonics[item.id.replace(/^rogue/, '')] ? '已生效' : '';
+						if (item.kind === 'machine') reason = (target.machineMoves || []).indexOf(item.move) < 0 ? '无法学习或已经掌握' : '';
 						if (item.kind === 'candy') reason = !target.hp ? '需先复活' : target.fixedLevel || target.set.level >= 100 ? '无法获得经验' : '';
 						if (item.kind === 'effort') reason = target.set.evs[item.stat] >= 252 || Object.keys(statNames).reduce(function (sum, stat) {
 							return sum + (target.set.evs[stat] || 0);
@@ -1146,7 +1254,7 @@
 			var treasures = this.state.items.filter(function (item) { return item.kind === 'treasure' && run.bag[item.id] > 0; });
 			var total = treasures.reduce(function (sum, item) { return sum + run.bag[item.id] * item.sellPrice; }, 0);
 			var html = '<section class="rogue-shop rogue-floor" aria-label="商店"><h3>' + fa('shopping-cart') +
-				'宝可梦中心商店</h3><span class="rogue-shop-balance">金币 <b>' + run.money + '</b></span>' +
+				(run.node && run.node.kind === 'trade' ? escape(run.node.name) : '宝可梦中心商店') + '</h3><span class="rogue-shop-balance">金币 <b>' + run.money + '</b></span>' +
 				'<div class="rogue-exchange"><strong>' + fa('diamond') + '战利品兑换</strong> ' +
 				(total ? '可兑换 <b>' + total + '</b> 金币 ' + button('act', 'sell:all', '全部兑换', !usable) : '<span class="rogue-caption">暂时没有贵重物品</span>');
 			if (treasures.length) {
@@ -1173,20 +1281,20 @@
 				return item.kind !== 'treasure' && (item.kind !== 'candy' || typeof item.shopFloor === 'number') && item.shopFloor !== false && (item.shopFloor || 1) <= run.floor &&
 					(!this.state.shopItems || this.state.shopItems.indexOf(item.id) >= 0);
 			}, this);
-			var groups = [{name: '精灵球与补给', kinds: ['ball', 'heal', 'revive', 'cure', 'ether']},
-				{name: '基础点数训练', kinds: ['effort']}, {name: '进化与携带道具', kinds: ['evolution', 'held']}, {name: '塔灵特供 · 经验糖果', kinds: ['candy']}];
+			var groups = [{name: '性格薄荷', kinds: ['mint']}, {name: '招式学习机', kinds: ['machine']}, {name: '精灵球与补给', kinds: ['ball', 'heal', 'revive', 'cure', 'ether']},
+				{name: '基础点数训练', kinds: ['effort']}, {name: '进化与携带道具', kinds: ['evolution', 'held']}, {name: run.node && run.node.kind === 'trade' ? '经验糖果' : '塔灵特供 · 经验糖果', kinds: ['candy']}];
 			groups.forEach(function (group, index) {
 				var entries = stock.filter(function (item) { return group.kinds.indexOf(item.kind) >= 0; });
 				if (!entries.length) return;
 				html += '<details class="rogue-shop-group" data-shop-group="' + index + '"' +
-					(sections[index] === undefined ? (index === 0 ? ' open' : '') : sections[index] ? ' open' : '') +
+					(run.node && run.node.kind === 'trade' || sections[index] === undefined && group.kinds[0] === 'ball' || sections[index] ? ' open' : '') +
 					'><summary>' + group.name + ' · ' + entries.length +
 					' 种</summary><div class="rogue-inventory">';
 				entries.forEach(function (item) {
 					html += '<div class="rogue-item-card"><div class="rogue-item-heading">' + itemIcon(item) + '<strong>' + escape(localName(item.name)) +
 						'</strong></div><p>' + escape(itemDescription(item)) + '</p><p>' + fa('money') + '<b>' + item.price + '</b> 金币 · 持有 ' +
 						(run.bag[item.id] || 0) + '</p><div class="rogue-item-actions">' +
-						button('act', 'buy:' + item.id, '金币购买', !usable || run.money < item.price);
+						button('act', 'buy:' + item.id, '金币购买' + (run.node && run.node.kind === 'trade' ? ' · 限购 1' : ''), !usable || run.money < item.price);
 					if (run.spirit && run.spirit.id === 'yveltal') {
 						var hpCost = Math.ceil(hpBuyer.maxhp * Math.min(.8, Math.max(.1, Math.ceil(item.price / 250) * .05)));
 						html += button('buyWithHP', item.id, '支付 ' + hpCost + ' HP', !usable || hpRemaining <= 0 || hpBuyer.hp <= hpCost);
@@ -1196,7 +1304,7 @@
 				html += '</div></details>';
 			});
 			var later = this.state.items.filter(function (item) { return typeof item.shopFloor === 'number' && item.shopFloor > run.floor; });
-			if (later.length) {
+			if (later.length && (!run.node || run.node.kind !== 'trade')) {
 				var next = Math.min.apply(null, later.map(function (item) { return item.shopFloor; }));
 				html += '<p class="rogue-caption">第 ' + next + ' 层解锁：' + later.filter(function (item) { return item.shopFloor === next; })
 					.map(function (item) { return escape(localName(item.name)); }).join('、') + '</p>';
@@ -1221,11 +1329,11 @@
 					'</strong><p>' + escape(run.startCard.text) + '</p></div>';
 				html += '<p class="rogue-boosts">本局永久加成：' +
 					Object.keys(statNames).map(function (stat) { return statNames[stat] + ' +' + run.boosts[stat]; }).join(' / ') + '</p>' +
-					'<p class="rogue-tera">' + fa(run.teraUnlocked ? 'diamond' : 'lock') + '太晶化：' +
+					'<p class="rogue-tera rogue-system-status">' + fa(run.teraUnlocked ? 'diamond' : 'lock') + '太晶化：' +
 					(run.teraUnlocked ? '本局已解锁，每场战斗限用一次。' : '未解锁，可通过预定祝福或第 100 层馆主赠礼解锁。') + '</p>' +
-					'<p class="rogue-caption">超进化：' + (run.megaUnlocked ? '已解锁' : '未解锁') + ' · 超巨进化：' + (run.gmegaUnlocked ? '已解锁' : '未解锁') + ' · Z 招式：' + (run.zUnlocked ? '已解锁' : '未解锁') +
+					'<p class="rogue-system-status">超进化：' + (run.megaUnlocked ? '已解锁' : '未解锁') + ' · 超巨进化：' + (run.gmegaUnlocked ? '已解锁' : '未解锁') + ' · Z 招式：' + (run.zUnlocked ? '已解锁' : '未解锁') +
 					'。普通超级石与 Z 纯晶需先解锁系统，再携带使用。</p>' +
-					this.renderEditor(run, busy) + this.renderBox(run, busy) + this.renderBag(run, busy) + this.renderBlessings(run, busy);
+					this.renderDragonKing(run, busy) + this.renderEditor(run, busy) + this.renderBox(run, busy) + this.renderBag(run, busy) + this.renderBlessings(run, busy);
 				if (run.notices && run.notices.length) html += '<details class="rogue-notices"><summary>本次战斗的经验与成长明细</summary><ul>' +
 					run.notices.map(function (notice) { return '<li>' + escape(noticeText(notice)) + '</li>'; }).join('') + '</ul></details>';
 			} else html += '<p class="rogue-caption">开始冒险后，在这里调整队伍、使用道具。</p>';
@@ -1262,7 +1370,7 @@
 			return '<section class="rogue-start-menu" aria-label="幻想杯肉鸽开始界面">' +
 				'<div class="rogue-start-heading"><span class="rogue-caption">一座塔，无数种可能</span><h2>你的幻想，从这里开始</h2>' +
 				'<p>与宝可梦同行，发现每次旅途的不一样。</p></div>' +
-				'<button class="rogue-start-primary" name="enterGame"' + (!state || !state.account ? ' disabled' : '') + '>' +
+				'<button class="rogue-start-primary" name="enterGame">' +
 				'<span class="rogue-start-symbol" aria-hidden="true">' + fa('compass') + '</span><span><strong>开始你的幻想杯肉鸽之旅</strong><small>' +
 				escape(hint) + '</small></span><span class="rogue-start-arrow" aria-hidden="true">→</span></button>' +
 				'<div class="rogue-start-books">' + [
@@ -1278,8 +1386,9 @@
 		renderCodex: function () {
 			var section = this.screen, data = this.codices[section], titles = {guide: '幻想杯图鉴', blessings: '祝福图鉴', events: '事件图鉴'};
 			var html = '<section class="rogue-codex"><div class="rogue-codex-heading"><span class="rogue-caption">旅途手册 / ' + titles[section] +
-				'</span><h2>' + titles[section] + '</h2></div>';
+				'</span><h2>' + titles[section] + '</h2><button class="button rogue-codex-back" name="startMenu">' + fa('arrow-left') + '返回开始页</button></div>';
 			if (!data) return html + '<p>正在翻开图鉴…</p></section>';
+			if (data.preview) html += '<p class="rogue-caption">本地测试：全部条目完整展示，不改变存档的实际解锁记录。</p>';
 			if (section === 'events' && this.codexReplay) {
 				var replay = this.codexReplay, history = this.codexReplayHistory, page = replay.pages[history[history.length - 1]];
 				return html + button('closeEventReplay', '', '返回事件列表', false, fa('arrow-left')) +
@@ -1292,48 +1401,68 @@
 					}).join('') + (!page.options.length ? '<p>这段见闻到这里告一段落。</p>' : '') + '</div><footer>' +
 					button('replayEventBack', '', '返回上一段', history.length <= 1) + button('replayEventRestart', '', '从头回顾') + '</footer></article></section>';
 			}
-			var filters, entries;
+			var filters, entries, guideModule = this.codexFilter.replace(/enhanced$/, '');
 			if (section === 'guide') {
 				html += '<div class="rogue-guide-intro">' + data.guide.intro.slice(0, 2).map(function (entry) {
 					return '<article><h3>' + escape(entry.title) + '</h3><p>' + escape(entry.text) + '</p></article>';
 				}).join('') + '</div><details class="rogue-guide-rules"><summary>出发前，了解这些基础规则</summary>' +
 					data.guide.intro.slice(2).map(function (entry) { return '<h4>' + escape(entry.title) + '</h4><p>' + escape(entry.text) + '</p>'; }).join('') + '</details>';
 				filters = [['items', '道具'], ['moves', '招式'], ['abilities', '特性'], ['pokemon', '幻想宝可梦']];
-				entries = data.guide.modules[this.codexFilter] || [];
+				entries = ['items', 'exclusive'].indexOf(this.codexFilter) >= 0 ? (data.guide.modules.items || []).filter(function (entry) {
+					return this.codexFilter === 'exclusive' ? entry.category === 'exclusive' : entry.category !== 'exclusive';
+				}, this) : this.codexFilter === 'special' ? data.guide.itemNotes || [] : data.guide.modules[guideModule] || [];
+				if (guideModule === 'moves' || guideModule === 'abilities') entries = entries.filter(function (entry) {
+					return (entry.origin || 'fantasy') === (/enhanced$/.test(this.codexFilter) ? 'enhanced' : 'fantasy');
+				}, this);
 				html += '<p class="rogue-caption">以下为幻想形态与主要调整内容；形态、道具能否在爬塔中使用，还需满足相应获取和解锁条件。</p>';
 			} else {
 				filters = section === 'blessings' ? [['all', '全部'], ['silver', '白银'], ['gold', '黄金'], ['prismatic', '棱彩'], ['unlocked', '已解锁']] :
-					[['all', '全部'], ['unlocked', '已经历']];
+					[['all', '全部'], ['event', '事件'], ['encounter', '遭遇'], ['trade', '交易'], ['adventure', '奇遇'], ['unlocked', '已经历']];
 				entries = data.entries;
 				var unlocked = entries.filter(function (entry) { return entry.unlocked; }).length;
-				html += '<p class="rogue-codex-progress">' + (section === 'blessings' ? '已解锁 ' : '已经历 ') + '<b>' + unlocked + ' / ' + entries.length +
+					html += '<p class="rogue-codex-progress">' + (data.preview ? '可查看 ' : section === 'blessings' ? '已解锁 ' : '已经历 ') + '<b>' + unlocked + ' / ' + entries.length +
 					'</b><span>' + (section === 'blessings' ? '获得过的祝福会完整记录，后续冒险仍可查阅。' : '进入过的事件会收入图鉴，可以重读文字分支。') + '</span></p>';
 				var filter = this.codexFilter;
-				entries = entries.filter(function (entry) { return filter === 'all' || (filter === 'unlocked' ? entry.unlocked : entry.tier === filter); });
+				entries = entries.filter(function (entry) { return filter === 'all' || (filter === 'unlocked' ? entry.unlocked : (section === 'events' ? entry.category || 'event' : entry.tier) === filter); });
 			}
 			var active = this.codexFilter, query = this.codexQuery.toLowerCase();
+			var itemSection = section === 'guide' && ['items', 'exclusive', 'special'].indexOf(active) >= 0;
 			html += '<nav class="rogue-codex-filters" aria-label="图鉴分类">' + filters.map(function (entry) {
-				return '<button class="button' + (active === entry[0] ? ' is-active' : '') + '" aria-pressed="' + (active === entry[0]) +
+				var selected = active === entry[0] || active === entry[0] + 'enhanced' || itemSection && entry[0] === 'items';
+				return '<button class="button' + (selected ? ' is-active' : '') + '" aria-pressed="' + selected +
 					'" name="filterCodex" value="' + entry[0] + '">' + entry[1] + '</button>';
-			}).join('') + '</nav><div class="rogue-codex-search"><label>按名称查找 <input type="search" name="codexSearch" value="' +
+			}).join('') + '</nav>';
+			if (itemSection) html += '<nav class="rogue-codex-filters rogue-item-categories" aria-label="道具分类">' +
+				[['items', '通用道具'], ['exclusive', '专属道具'], ['special', '特殊道具说明']].map(function (entry) {
+					return '<button class="button' + (active === entry[0] ? ' is-active' : '') + '" name="filterCodex" value="' +
+						entry[0] + '" aria-pressed="' + (active === entry[0]) + '">' + entry[1] + '</button>';
+				}).join('') + '</nav>';
+			if (section === 'guide' && ['moves', 'abilities'].indexOf(guideModule) >= 0) {
+				html += '<nav class="rogue-codex-filters" aria-label="内容来源">' +
+					[[guideModule, '幻想杯自制内容'], [guideModule + 'enhanced', guideModule === 'moves' ? '原版招式增强' : '原版特性增强']].map(function (entry) {
+						return '<button class="button' + (active === entry[0] ? ' is-active' : '') + '" name="filterCodex" value="' +
+							entry[0] + '" aria-pressed="' + (active === entry[0]) + '">' + entry[1] + '</button>';
+					}).join('') + '</nav>';
+			}
+			html += '<div class="rogue-codex-search"><label>按名称查找 <input type="search" name="codexSearch" value="' +
 				escape(this.codexQuery) + '" placeholder="输入名称，按回车" /></label>' + button('searchCodex', '', '查找', false, fa('search')) + '</div>';
 			entries = entries.filter(function (entry) { return !query || (localName(entry.name) + ' ' + entry.name).toLowerCase().indexOf(query) >= 0; });
 			var total = Math.max(1, Math.ceil(entries.length / 12)); this.codexPage = Math.min(this.codexPage, total - 1);
 			html += '<div class="rogue-codex-grid">' + entries.slice(this.codexPage * 12, (this.codexPage + 1) * 12).map(function (entry) {
 				var tier = {silver: '白银', gold: '黄金', prismatic: '棱彩'}[entry.tier];
 				var icon = section === 'guide' ? (active === 'pokemon' ? '<span class="picon" style="' + Dex.getPokemonIcon(entry.name) + '"></span>' :
-					active === 'items' ? itemIcon(entry) : fa(active === 'moves' ? 'bolt' : 'sun-o')) : fa(section === 'events' ? 'map-signs' : 'diamond');
+					['items', 'exclusive'].indexOf(active) >= 0 ? itemIcon(entry) : fa('trophy')) : fa(section === 'events' ? 'map-signs' : blessingIcon(entry));
 				var body = '<p class="rogue-codex-effect">' + escape(localName(entry.text || '')) + '</p>';
-				if (section === 'guide' && active === 'moves') body = '<p class="rogue-caption">' + typeIcons([entry.type]) + ' · ' + escape(localName(entry.category)) +
+				if (section === 'guide' && guideModule === 'moves') body = '<p class="rogue-caption">' + typeIcons([entry.type]) + ' · ' + escape(localName(entry.category)) +
 					' · 威力 ' + (entry.power || '—') + ' · 命中 ' + (entry.accuracy === true ? '必中' : entry.accuracy + '%') + ' · PP ' + entry.pp + '</p>' + body;
 				if (section === 'guide' && active === 'pokemon') body = '<p>' + typeIcons(entry.types) + '</p><p>特性：' +
 					entry.abilities.map(function (name) { return escape(localName(name)); }).join(' / ') + '</p><p class="rogue-caption">' +
 					Object.keys(statNames).map(function (stat) { return statNames[stat] + ' ' + entry.stats[stat]; }).join(' · ') + '</p>' +
 					(entry.battleOnly ? '<p class="rogue-caption">战斗中触发的特殊形态' + (entry.requiredItem ? ' · ' + escape(localName(entry.requiredItem)) : '') + '</p>' : '');
 				return '<article class="rogue-codex-entry tier-' + (entry.tier || 'plain') + (entry.unlocked === false ? ' is-locked' : '') + '">' +
-					'<div class="rogue-codex-entry-top"><span>' + icon + '</span><small>' + (tier ? tier + '阶' : section === 'events' ? '事件' : '幻想杯') +
+					'<div class="rogue-codex-entry-top"><span>' + icon + '</span><small>' + (tier ? tier + '阶' : section === 'events' ? kindNames[entry.category || 'event'] : '幻想杯') +
 					'</small>' + (entry.unlocked === false ? '<span class="rogue-codex-lock">' + fa('lock') + '未解锁</span>' : '') + '</div>' +
-					'<h3>' + escape(localName(entry.name)) + '</h3>' + body + (section === 'events' && entry.unlocked ?
+					'<h3>' + escape(localName(entry.name)) + '</h3>' + body + (section === 'events' && entry.unlocked && entry.replay ?
 					button('readEvent', entry.id, '回顾这段见闻', false, fa('book')) : '') + '</article>';
 			}).join('') + '</div>';
 			if (!entries.length) html += '<p class="rogue-codex-empty">这里还没有符合条件的记录。</p>';
@@ -1377,7 +1506,7 @@
 			var ongoing = run && run.phase !== 'complete';
 			if (run) html += '<h3>' + (run.phase === 'intro' ? '启程之前' : '第 ' + run.floor + ' / 200 层') + (run.node ? ' · ' + escape(run.node.name) : '') +
 				(run.time ? '<span class="rogue-time" title="白天两层 → 黄昏一层 → 夜晚两层 → 黎明一层，循环交替">' + escape(run.time.name) + '</span>' : '') + '</h3>' +
-				this.renderFloor(run, busy) + this.renderShop(run, busy) + this.renderAbandon(run, busy);
+				this.renderFloor(run, busy) + this.renderShop(run, busy);
 			if (!ongoing) {
 				html += '<h3>选择本次冒险的伙伴</h3><p class="rogue-caption">先选好队伍，再依次配置每一只宝可梦。</p>';
 				if (account.spiritUnlocked) {
@@ -1406,7 +1535,11 @@
 					'<p class="rogue-caption">同一进化链合并计数，解锁对应最初形态；捕捉成功立即保存，同层同一只重复捕捉不重复计数。</p></div>';
 				html += '<p>' + button('confirmStarters', '', '确认队伍，继续配置', busy || !state.configured || !this.selectedStarters.length) + '</p>';
 			}
-			this.$el.html(html + '</div>');
+			var footer = this.renderAbandon(run, busy);
+			if (footer) {
+				html = html.replace('<div class="pad">', '<div class="rogue-game-layout"><div class="pad rogue-game-content">');
+				this.$el.html(html + '</div>' + footer + '</div>');
+			} else this.$el.html(html + '</div>');
 		},
 		renderPendingClear: function (pending, cards, busy) {
 			if ((cards || []).length < 3) return '<div class="rogue-keepsake"><h4>保存本次通关卡</h4><p>收藏中已有空位，可直接收下本次记录。</p>' +
@@ -1560,6 +1693,25 @@
 			return globals.Popup.prototype.remove.apply(this, arguments);
 		}
 	});
+	this.RogueEtherPopup = this.Popup.extend({
+		type: 'modal',
+		initialize: function (data) {
+			this.data = data; this.userid = app.user.get('userid');
+			this.$el.html('<h3>选择恢复 PP 的招式</h3><p>使用 ' + escape(data.item.name) + '</p>' +
+				data.member.pp.map(function (move, i) {
+					return '<p>' + button('restorePP', '' + i, localName(dex().moves.get(move.id).name) + ' · ' + move.pp + '/' + move.maxpp + ' PP', move.pp >= move.maxpp) + '</p>';
+				}).join('') + button('close', '', '取消'));
+		},
+		restorePP: function (slot) {
+			if (app.user.get('userid') === this.userid) this.data.room.submit('use', {value: this.data.item.id, member: this.data.member.id, slot: Number(slot)});
+			this.close();
+		}
+	});
+	this.RogueNoticePopup = this.Popup.extend({
+		initialize: function (data) {
+			this.$el.html('<p role="alert">' + escape(data.text) + '</p>' + button('close', '', '知道了'));
+		}
+	});
 	this.RogueCardConfirmPopup = this.Popup.extend({
 		type: 'modal',
 		initialize: function (data) {
@@ -1652,6 +1804,22 @@
 			}
 			this.close();
 		}
+	});
+	this.RogueExchangeAnimationPopup = this.Popup.extend({
+		type: 'modal',
+		initialize: function (data) {
+			var exchange = data.exchange, self = this;
+			this.$el.addClass('rogue-exchange-animation');
+			this.$el.html('<h3>旅行的回忆</h3><div class="rogue-exchange-stage" aria-hidden="true">' +
+				'<div class="rogue-exchange-before" style="' + Dex.getTeambuilderSprite({species: exchange.before}) + '"></div>' +
+				'<span class="rogue-exchange-ball left"></span><span class="rogue-exchange-ball right"></span>' +
+				'<div class="rogue-exchange-after" style="' + Dex.getTeambuilderSprite({species: exchange.after}) + '"></div></div>' +
+				'<p>两颗精灵球交错而过。一眨眼，你又站在了旅游摊前。</p><p>' + escape(localName(exchange.before)) + ' → ' + escape(localName(exchange.after)) +
+				'；还是原来那位伙伴。</p>' + button('close', '', '跳过动画，回到摊位'));
+			if (globals.matchMedia && globals.matchMedia('(prefers-reduced-motion: reduce)').matches) this.$el.addClass('complete');
+			else this.animationTimer = setTimeout(function () { self.$el.addClass('complete'); }, 2400);
+		},
+		remove: function () { clearTimeout(this.animationTimer); return globals.Popup.prototype.remove.apply(this, arguments); },
 	});
 	this.RogueEvolutionAnimationPopup = this.Popup.extend({
 		type: 'modal',

@@ -637,7 +637,88 @@
 .fantasyrogue .rogue-event-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
 .fantasyrogue .rogue-event-teams > div { padding: 12px; border: 1px solid #b9cddd; border-radius: 5px; background: #f4f9fd; }
 .fantasyrogue .rogue-event-teams p { display: flex; align-items: center; margin: 5px 0; }
+.fantasyrogue .rogue-event-preview,
+.fantasyrogue .rogue-event-allocation,
+.fantasyrogue .rogue-event-picker { padding: 16px; margin: 16px 0; border: 1px solid #b9cddd; border-radius: 8px; background: #f5faff; }
+.fantasyrogue .rogue-event-form-sprite { width: 120px; height: 100px; margin: 8px auto; background-repeat: no-repeat; background-position: center; }
+.fantasyrogue .rogue-event-allocation { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.fantasyrogue .rogue-event-allocation p { grid-column: 1 / -1; margin: 0; }
+.fantasyrogue .rogue-event-allocation label { display: flex; align-items: center; gap: 8px; }
+.fantasyrogue .rogue-event-allocation input { width: 64px; padding: 6px; font-size: 16px; }
+.fantasyrogue .rogue-event-picker select { display: block; max-width: 100%; width: 100%; margin: 10px 0; padding: 10px; font-size: 15px; }
+.fantasyrogue .rogue-event-picker .button { padding: 10px 20px; font-weight: bold; font-size: 16px; }
+.ps-popup.rogue-exchange-animation { width: 480px; max-width: calc(100vw - 32px); padding: 20px; }
+.rogue-exchange-stage { height: 180px; position: relative; container-type: inline-size; overflow: hidden; border-radius: 12px; background: linear-gradient(145deg, #dcecf5, #eef3dc); }
+.rogue-exchange-before, .rogue-exchange-after { position: absolute; width: 120px; height: 110px; top: 35px; background-repeat: no-repeat; background-position: center; }
+.rogue-exchange-before { left: 10%; animation: rogue-memory-recall 2.4s linear forwards; }
+.rogue-exchange-after { right: 10%; opacity: 0; animation: rogue-memory-release 2.4s linear forwards; }
+.rogue-exchange-ball { position: absolute; top: 75px; width: 24px; height: 24px; border: 2px solid #344c60; border-radius: 50%; background: linear-gradient(#de5f70 46%, #344c60 46%, #344c60 54%, #fff 54%); opacity: 0; }
+.rogue-exchange-ball.left { left: 22%; --travel-distance: calc(56cqw - 28px); animation: rogue-memory-ball 2.4s linear forwards; }
+.rogue-exchange-ball.right { right: 22%; --travel-distance: calc(28px - 56cqw); animation: rogue-memory-ball 2.4s linear forwards; }
+@keyframes rogue-memory-recall { 0%, 10% { opacity: 1; transform: scale(1); } 30%, 100% { opacity: 0; transform: scale(.1); } }
+@keyframes rogue-memory-release { 0%, 75% { opacity: 0; transform: scale(.1); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes rogue-memory-ball { 0%, 20%, 100% { opacity: 0; } 30% { opacity: 1; transform: translateX(0); } 70%, 80% { opacity: 1; transform: translateX(var(--travel-distance)); } }
+@container (max-width: 460px) {
+	.fantasyrogue .rogue-event-allocation { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.rogue-exchange-animation.complete .rogue-exchange-before, .rogue-exchange-animation.complete .rogue-exchange-ball { animation: none; opacity: 0; }
+.rogue-exchange-animation.complete .rogue-exchange-after { animation: none; opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+	.rogue-exchange-stage * { animation: none !important; }
+	.rogue-exchange-before, .rogue-exchange-ball { opacity: 0; }
+	.rogue-exchange-after { opacity: 1; }
+}
 .ps-popup.rogue-event-replay { width: 664px; max-width: calc(100vw - 20px); padding: 12px; box-sizing: border-box; }
 .rogue-event-replay .battle { position: relative; top: auto; left: auto; width: 640px; height: 360px; max-width: 100%; }
 .rogue-event-replay .battle-log { position: relative; top: auto; left: auto; right: auto; bottom: auto; height: 170px; margin-top: 10px; border: 1px solid #bbcddd; background: #f5f9fc; }
 .rogue-event-replay > p .button { margin: 4px; }
+.fantasyrogue .rogue-game-layout {
+	height: 100%; display: flex; flex-direction: column; overflow: hidden;
+}
+.fantasyrogue .rogue-game-content {
+	flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+}
+.fantasyrogue .rogue-game-layout > .rogue-abandon {
+	flex: 0 0 auto; margin: 0 15px; padding: 12px 2px 16px;
+	border-top: 1px solid #91aebf; background: rgba(240,247,251,.94);
+}
+.fantasyrogue .rogue-game-layout .rogue-abandon-note { margin: 4px 0 10px; }
+.fantasyrogue .rogue-codex-heading { position: relative; padding-bottom: 18px; }
+.fantasyrogue .button.rogue-codex-back {
+	display: block; padding: 12px 24px; margin: 12px 0 0; font-size: 18px; font-weight: bold;
+	background: #e4f2fc; color: #254a69; border: 2px solid #527d9e; border-radius: 8px;
+}
+.fantasyrogue .rogue-floor .button[name="act"][value="continue"],
+.fantasyrogue .rogue-floor .button[name="act"][value="battle"],
+.fantasyrogue .rogue-floor .button[name="chooseEvent"],
+.fantasyrogue .rogue-floor .button[name="chooseLongBlessingReward"] {
+	padding: 12px 22px; margin: 10px 8px 10px 0; min-height: 46px; font-size: 17px; font-weight: bold;
+	border: 2px solid #527d9e; border-radius: 8px; color: #244760;
+	background: linear-gradient(#f5fbff, #c8e2f4); box-shadow: 0 2px 4px #56788c30;
+}
+.fantasyrogue .rogue-floor .button:focus-visible,
+.fantasyrogue .rogue-codex-back:focus-visible { outline: 3px solid #407ba4; outline-offset: 3px; }
+
+/* Route copy spans both grid columns, including narrow trade cards. */
+.fantasyrogue .rogue-route-description { grid-column: 1 / -1; min-width: 0; line-height: 1.65; }
+.fantasyrogue .rogue-center-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+.fantasyrogue .rogue-center-actions > .button { flex: 1 1 220px; min-height: 46px; padding: 10px 16px; font-size: 16px; font-weight: bold; color: #24546e; border: 1px solid #86acc1; background: linear-gradient(#f8fcff, #dbeef8); }
+.fantasyrogue .rogue-item-ether { width: 18px; height: 24px; background-position: -85px -192px; }
+/* Compact party details without changing column widths between partners. */
+.fantasyrogue .rogue-system-status { font-size: 13px; line-height: 1.5; color: #4b6477; margin: 4px 0; }
+.fantasyrogue .rogue-team-tabs button { padding-top: 2px; padding-bottom: 2px; }
+.fantasyrogue .rogue-member-sheet { padding: 5px 6px; }
+.fantasyrogue .rogue-details-line { min-height: 46px; }
+.fantasyrogue .rogue-details-line > span { padding: 1px 2px; line-height: 12px; }
+.fantasyrogue .rogue-details-line b { line-height: 16px; }
+.fantasyrogue .rogue-nature-effect { min-height: 16px; }
+.fantasyrogue .rogue-member-details > .rogue-exp { min-height: 16px; line-height: 16px; margin: 2px 0; }
+.fantasyrogue .rogue-member-sheet label { margin-top: 1px; line-height: 16px; }
+.fantasyrogue .rogue-member-sheet .button { min-height: 24px; padding-top: 2px; padding-bottom: 2px; margin-top: 0; margin-bottom: 2px; }
+.fantasyrogue .rogue-stat-summary > span { margin: 2px 0; }
+.fantasyrogue .rogue-stats td, .fantasyrogue .rogue-stats th { padding-top: 1px; padding-bottom: 1px; line-height: 19px; }
+.fantasyrogue .rogue-editor-options { padding-top: 5px; padding-bottom: 5px; }
+.fantasyrogue .rogue-evolution-details { padding: 6px 8px; }
+.fantasyrogue .rogue-evolution-details h4 { margin-bottom: 4px; }
+.fantasyrogue .rogue-evolution-branch { padding: 4px 0; }
+.fantasyrogue .rogue-evolution-branch ul { line-height: 1.5; }

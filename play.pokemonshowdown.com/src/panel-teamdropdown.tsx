@@ -1143,7 +1143,7 @@ class FormatDropdownPanel extends PSRoomPanel {
 					{columns.map((column) => (
 						<ul class="options" onClick={this.click}>
 							{column.map((format) =>
-								format.id ? (
+								format.id !== null ? (
 									<li>
 										<button value={format.name} class="option">
 											{format.name

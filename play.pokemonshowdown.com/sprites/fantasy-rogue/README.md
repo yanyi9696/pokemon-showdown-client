@@ -19,3 +19,7 @@
 该图集没有小蘑菇、芳香蘑菇、珍珠系列、星星系列及努力值羽毛。缺少的 15 张正作道具像素图来自 [PokeAPI/sprites 的 items 目录](https://github.com/PokeAPI/sprites/tree/master/sprites/items)，以原始 PNG 保存，未重绘；逐文件来源及 SHA-256 见 `economy-icons.json`。获取日期为 2026-10-07，下载通过 jsDelivr 的该仓库镜像，游戏运行时只读取本站文件。
 
 PokeAPI 仓库代码许可不转移 Pokémon 原始美术版权；游戏图像的原作者为 Nintendo / Game Freak / Creatures。与现有图集相同，保留原始版权归属，不宣称原创。
+
+## 2026-10-15 状态药与单项 PP 补剂
+
+五种状态药沿用 PokeAPI 原始 30×30 道具 PNG，未重绘；来源及 SHA-256 见 `medicine-icons.json`，原始美术版权归属同上。单项 PP 小补剂使用已有图集的 `ether`，坐标 x85/y192/w18/h24。游戏运行时均使用本地文件。
