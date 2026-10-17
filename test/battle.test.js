@@ -109,8 +109,22 @@ describe('Fantasy rogue capture playback', () => {
 			{species: 'Magikarp', ball: 'greatball', success: true, shakes: 3, critical: false, ended: false},
 		]);
 		assert.equal(battle.ended, true);
-		assert.deepEqual(battle.sides[1].pokemon[0].moveTrack, [['Splash', 1]]);
+		assert.equal(battle.sides[1].pokemon[0].rogueCapturedBall, 'greatball');
+		battle.sides[1].pokemon[0].reset();
+		assert.equal(battle.sides[1].pokemon[0].rogueCapturedBall, undefined);
 		battle.destroy();
+	});
+});
+
+describe('Fantasy Rogue private ability playback', () => {
+	it('keeps extra ability metadata through playback and clears it on replay reset', () => {
+		const battle = new Battle({debug: true, log: ['|player|p1|Player', '|player|p2|Wild', '|gen|9', '|start',
+			'|switch|p1a: Bulbasaur|Bulbasaur, L5|20/20', '|switch|p2a: Magikarp|Magikarp, L3|15/15', '|turn|1']});
+		const info = {abilities: ['roguegreatmage'], active: true, training: {atk: .08, def: .04},
+			mentor: {name: '破阵之证', text: '招式伤害 +55%，双防 +25%。', damage: 55, defense: 25, speed: 0}};
+		battle.add('|-rogueinfo|p1a: Bulbasaur|' + JSON.stringify(info));
+		assert.deepEqual(battle.p1.active[0].rogueAbilityInfo, info);
+		battle.p1.active[0].reset(); assert.equal(battle.p1.active[0].rogueAbilityInfo, undefined); battle.destroy();
 	});
 });
 

@@ -64,7 +64,13 @@ class ModifiableValue {
 		return true;
 	}
 	tryAbility(abilityName: string) {
-		if (abilityName !== this.abilityName) return false;
+		const rogueInfo = this.pokemon?.isActive?.() ?
+			this.pokemon.rogueAbilityInfo || this.serverPokemon.rogueAbilityInfo : this.serverPokemon.rogueAbilityInfo;
+		if (abilityName !== this.abilityName) {
+			// Extra abilities participate in the native move power/type/accuracy
+			// tooltips as well as the Pokémon's own stat panel.
+			return !!rogueInfo?.active && rogueInfo.abilities.includes(toID(abilityName));
+		}
 		if (this.pokemon?.volatiles['gastroacid']) {
 			this.comment.push(` (${abilityName} suppressed by Gastro Acid)`);
 			return false;
@@ -934,6 +940,32 @@ export class BattleTooltips {
 			text += '</p>';
 		}
 
+		const rogueInfo = isActive ? clientPokemon?.rogueAbilityInfo || serverPokemon?.rogueAbilityInfo : serverPokemon?.rogueAbilityInfo;
+		if (rogueInfo?.abilities.length) {
+			text += '<div class="tooltip-section"><p><small>额外特性' + (rogueInfo.active ? '' : '（暂时失效）') + '：</small></p>';
+			for (const id of rogueInfo.abilities) {
+				const ability = this.battle.dex.abilities.get(id);
+				text += '<p><strong>' + BattleLog.escapeHTML(id === 'roguegreatmage' ? '大法师' : ability.name) + '</strong>：' +
+					BattleLog.escapeHTML(id === 'roguegreatmage' ? '特攻变为原来的 2 倍。' : ability.shortDesc || ability.desc || '') + '</p>';
+				if (rogueInfo.abilitySources?.[id]) text += '<p><small>' + BattleLog.escapeHTML(rogueInfo.abilitySources[id]) + '</small></p>';
+			}
+			text += '</div>';
+		}
+		if (rogueInfo?.mentor || rogueInfo?.training && Object.values(rogueInfo.training).some(Boolean)) {
+			text += '<div class="tooltip-section">';
+			if (rogueInfo.mentor) text += '<p><strong>首领卡 · ' + BattleLog.escapeHTML(rogueInfo.mentor.name) +
+				'</strong></p><p>' + BattleLog.escapeHTML(rogueInfo.mentor.text) + '</p>';
+			if (rogueInfo.training) {
+				const names = { atk: '攻击', spa: '特攻', def: '防御', spd: '特防', spe: '速度' };
+				const gains = Object.entries(rogueInfo.training).filter(([, n]) => n).map(([stat, n]) =>
+					`${names[stat as keyof typeof names]} +${Math.round(n * 10000) / 100}%`);
+				if (gains.length) text += '<p><strong>本局永久增幅</strong>：' + gains.join(' / ') + '</p><p><small>全队与个人训练合计，已计入能力值。</small></p>';
+			}
+			text += '</div>';
+		}
+		if (rogueInfo?.statSources?.length) text += '<div class="tooltip-section">' + rogueInfo.statSources.map(source =>
+			'<p><small>' + BattleLog.escapeHTML(source) + '</small></p>').join('') + '</div>';
+		if (rogueInfo?.maxhp) text += `<p>最大 HP：<strong>${rogueInfo.maxhp}</strong></p>`;
 		text += this.renderStats(clientPokemon, serverPokemon, !isActive);
 
 		if (serverPokemon && !isActive) {
@@ -1016,6 +1048,9 @@ export class BattleTooltips {
 	}
 
 	calculateModifiedStats(clientPokemon: Pokemon | null, serverPokemon: ServerPokemon, statStagesOnly?: boolean) {
+		const rogueInfo = clientPokemon?.isActive?.() ? clientPokemon.rogueAbilityInfo || serverPokemon.rogueAbilityInfo : serverPokemon.rogueAbilityInfo;
+		// Authoritative owner-only values include every format, ability, item and volatile modifier.
+		if (!statStagesOnly && rogueInfo?.stats) return { ...rogueInfo.stats };
 		let stats = { ...serverPokemon.stats };
 		let pokemon = clientPokemon || serverPokemon;
 		const isPowerTrick = clientPokemon?.volatiles['powertrick'];
@@ -1042,6 +1077,20 @@ export class BattleTooltips {
 			}
 		}
 		if (statStagesOnly) return stats;
+		// Training is already included in serverPokemon.stats. Only the temporary card is added here.
+		if (rogueInfo?.mentor) {
+			const round = (n: number) => Math.ceil(n - 0.5);
+			stats.def = round(stats.def * (1 + rogueInfo.mentor.defense / 100));
+			stats.spd = round(stats.spd * (1 + rogueInfo.mentor.defense / 100));
+			stats.spe = round(stats.spe * (1 + rogueInfo.mentor.speed / 100));
+		}
+		// Granted abilities use the same unconditional stat modifiers as their
+		// native equivalents. Apply before item/weather rounding and never twice.
+		if (rogueInfo?.active) {
+			const extras = rogueInfo.abilities.filter(id => id !== toID(serverPokemon.ability || serverPokemon.baseAbility));
+			if (extras.includes('hugepower')) stats.atk *= 2;
+			if (extras.includes('roguegreatmage')) stats.spa *= 2;
+		}
 
 		const ability = toID(
 			clientPokemon?.effectiveAbility(serverPokemon) ?? (serverPokemon.ability || serverPokemon.baseAbility)
@@ -1551,7 +1600,7 @@ export class BattleTooltips {
 				let statLabel = this.battle.gen === 1 && statName === 'spa' ? 'spc' : statName;
 				buf += statName === 'atk' ? '<small>' : '<small> / ';
 				buf += `${BattleText[statLabel].statShortName}&nbsp;</small>`;
-				buf += `${stats[statName]}`;
+				buf += `<strong>${stats[statName]}</strong>`;
 				if (modifiedStats[statName] !== stats[statName]) hasModifiedStat = true;
 			}
 			buf += '</p>';
@@ -1568,7 +1617,7 @@ export class BattleTooltips {
 			buf += statName === 'atk' ? '<small>' : '<small> / ';
 			buf += `${BattleText[statLabel].statShortName}&nbsp;</small>`;
 			if (modifiedStats[statName] === stats[statName]) {
-				buf += `${modifiedStats[statName]}`;
+				buf += `<strong>${modifiedStats[statName]}</strong>`;
 			} else if (modifiedStats[statName] < stats[statName]) {
 				buf += `<strong class="stat-lowered">${modifiedStats[statName]}</strong>`;
 			} else {
@@ -1589,7 +1638,7 @@ export class BattleTooltips {
 			maxpp = 5;
 		} else {
 			move = this.battle.dex.moves.get(moveName);
-			maxpp = (move.pp === 1 || move.noPPBoosts ? move.pp : move.pp * 8 / 5);
+			maxpp = (move.pp === 1 || move.noPPBoosts || ['gen9fantasyrogue', 'gen9fantasyrogueduel'].includes(toID(this.battle.tier)) ? move.pp : move.pp * 8 / 5);
 			if (this.battle.gen < 3) maxpp = Math.min(61, maxpp);
 		}
 		const bullet = moveName.startsWith('*') || move.isZ ? '<span style="color:#888">&#8226;</span>' : '&#8226;';
@@ -2368,6 +2417,32 @@ export class BattleTooltips {
 	// Takes into account the target for some moves.
 	// If it is unsure of the actual base power, it gives an estimate.
 	getMoveBasePower(move: Dex.Move, moveType: Dex.TypeName, value: ModifiableValue, target: Pokemon | null = null) {
+		this.getNativeMoveBasePower(move, moveType, value, target);
+		const info = value.pokemon?.isActive?.() ? value.pokemon.rogueAbilityInfo || value.serverPokemon.rogueAbilityInfo : value.serverPokemon.rogueAbilityInfo;
+		const modifiers = info?.moves?.[move.id];
+		if (move.category !== 'Status' && modifiers) {
+			// Damage multipliers are labelled separately; they do not change the move's base power.
+			for (const source of modifiers.damage) value.comment.push(` <br /><small>${BattleLog.escapeHTML(source)}</small>`);
+		}
+		return value;
+	}
+	applyRogueMovePower(move: Dex.Move, moveType: Dex.TypeName, value: ModifiableValue) {
+		const info = value.pokemon?.isActive?.() ? value.pokemon.rogueAbilityInfo || value.serverPokemon.rogueAbilityInfo : value.serverPokemon.rogueAbilityInfo;
+		const modifiers = info?.moves?.[move.id];
+		if (!modifiers || move.category === 'Status') return;
+		for (const entry of modifiers.types?.[moveType] || modifiers.power) {
+			const source = BattleLog.escapeHTML(entry.source);
+			if (entry.factor) value.modify(entry.factor, `【${source}】`);
+			if (entry.add && value.value) {
+				value.value += entry.add;
+				if (value.maxValue) value.maxValue += entry.add;
+				value.comment.push(` （【${source}】威力 +${entry.add}）`);
+			}
+		}
+		value.value = Math.floor(value.value + 1e-9);
+		if (value.maxValue) value.maxValue = Math.floor(value.maxValue + 1e-9);
+	}
+	getNativeMoveBasePower(move: Dex.Move, moveType: Dex.TypeName, value: ModifiableValue, target: Pokemon | null = null) {
 		const pokemon = value.pokemon;
 		const serverPokemon = value.serverPokemon;
 
@@ -2642,6 +2717,9 @@ export class BattleTooltips {
 		if (!value.value) return value;
 
 		// Other ability boosts
+		// Format base-power additions precede the engine's chained ability/item multipliers.
+		const technicianEligible = value.value <= 60;
+		this.applyRogueMovePower(move, moveType, value);
 		if (pokemon.status === 'brn' && move.category === 'Special') {
 			value.abilityModify(1.5, "Flare Boost");
 		}
@@ -2659,7 +2737,7 @@ export class BattleTooltips {
 		if (move.flags['bite']) {
 			value.abilityModify(1.5, "Strong Jaw");
 		}
-		if (value.value <= 60) {
+		if (technicianEligible) {
 			value.abilityModify(1.5, "Technician");
 		}
 		if (['psn', 'tox'].includes(pokemon.status) && move.category === 'Physical') {

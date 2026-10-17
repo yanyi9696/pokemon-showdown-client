@@ -7,6 +7,7 @@ const context = vm.createContext({ console, setTimeout, clearTimeout,
 	document: { getElementsByTagName: () => [], getElementById: () => ({}) } });
 context.window = context;
 context.exports = context;
+context.BattleLog = {escapeHTML: value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')};
 for (const file of ['data/pokedex.js', 'data/typechart.js', 'data/moves.js', 'data/abilities.js',
 	'data/items.js', 'data/teambuilder-tables.js', 'data/gen9fantasy.js',
 	'js/battle-dex-data.js', 'js/battle-dex.js', 'js/battle-tooltips.js']) {
@@ -28,6 +29,72 @@ function factor(move, target, source = mon('Mew')) {
 	return tips.getMoveEffectiveness(source, m, m.type, m.category, target);
 }
 describe('Battle effectiveness and four speed benchmarks', () => {
+	it('uses authoritative six-stat values without reapplying ability, training or boss modifiers', () => {
+		const final = {atk: 371, def: 244, spa: 123, spd: 188, spe: 477};
+		const p = mon('Mew', {isActive: () => true, rogueAbilityInfo: {abilities: ['hugepower'], active: true, stats: final}});
+		assert.deepEqual(JSON.parse(JSON.stringify(tips.calculateModifiedStats(p, {stats: {atk: 100}, item: 'choiceband'}))), final);
+	});
+	it('labels ascent and boss-card damage separately and applies flat blessing power before Punk Rock', () => {
+		const Value = vm.runInContext('ModifiableValue', context);
+		const ownBattle = {...battle, sides: [], abilityActive: () => false, mySide: {sideConditions: {}}};
+		const ownTips = Object.create(tips); ownTips.battle = ownBattle;
+		const p = mon('Mew', {boosts: {}, isActive: () => true, side: {active: [], foe: {active: []}},
+			effectiveAbility: () => 'Punk Rock', rogueAbilityInfo: {abilities: [], active: true, moves: {
+				bugbuzz: {power: [{source: '林间大合唱', add: 10}], damage: ['【首领卡 · 同行之证】伤害 +55%']},
+				slash: {power: [{source: '登龙', factor: 1.3}], damage: []},
+			}}});
+		const server = {speciesForme: 'Mew', item: '', baseAbility: 'Punk Rock', stats: {atk: 10, def: 10, spa: 10, spd: 10, spe: 10}};
+		const buzz = ownTips.getMoveBasePower(dex.moves.get('bugbuzz'), 'Bug', new Value(ownBattle, p, server));
+		assert.equal(buzz.value, 130); assert.match(String(buzz), /林间大合唱/); assert.match(String(buzz), /伤害 \+55%/);
+		const slash = ownTips.getMoveBasePower(dex.moves.get('slash'), 'Normal', new Value(ownBattle, p, server));
+		assert.equal(slash.value, 91); assert.match(String(slash), /登龙/);
+	});
+	it('shows boss card defenses on top of trained stats without applying permanent training twice', () => {
+		const p = mon('Mew', {boosts: {}, isActive: () => true, side: {active: []},
+			rogueAbilityInfo: {abilities: [], active: false, training: {atk: .08, def: .04}, mentor: {defense: 40, damage: 40, speed: 20}}});
+		const server = {speciesForme: 'Mew', stats: {atk: 108, def: 104, spa: 108, spd: 104, spe: 100}, baseAbility: '', item: ''};
+		const ownTips = Object.create(tips); ownTips.battle = {...battle, abilityActive: () => false, mySide: {sideConditions: {}}};
+		const value = ownTips.calculateModifiedStats(p, server);
+		assert.equal(value.atk, 108); assert.equal(value.def, 146); assert.equal(value.spd, 146); assert.equal(value.spe, 120);
+	});
+	it('retains Technician for a low-power move even when a blessing raises its displayed power above 60', () => {
+		const Value = vm.runInContext('ModifiableValue', context);
+		const ownBattle = {...battle, sides: [], abilityActive: () => false, mySide: {sideConditions: {}}};
+		const ownTips = Object.create(tips); ownTips.battle = ownBattle;
+		const p = mon('Mew', {boosts: {}, isActive: () => true, side: {active: [], foe: {active: []}},
+			effectiveAbility: () => 'Technician', rogueAbilityInfo: {abilities: [], active: true, moves: {
+				tackle: {power: [{source: '天下武功，唯快不破', factor: 2}], damage: []},
+			}}});
+		const server = {speciesForme: 'Mew', item: '', baseAbility: 'Technician', stats: {atk: 10, def: 10, spa: 10, spd: 10, spe: 10}};
+		const power = ownTips.getMoveBasePower(dex.moves.get('tackle'), 'Normal', new Value(ownBattle, p, server));
+		assert.equal(power.value, 120); assert.match(String(power), /Technician/);
+	});
+	it('includes extra ability stat modifiers, suppression and held-item stacking', () => {
+		const raw = {atk: 18, def: 23, spa: 19, spd: 18, spe: 18};
+		const p = mon('Jangmo-o', {boosts: {}, side: {active: []}, isActive: () => true,
+			rogueAbilityInfo: {abilities: ['roguegreatmage'], active: true}});
+		const server = {speciesForme: 'Jangmo-o', stats: raw, baseAbility: 'bulletproof', item: '', rogueAbilityInfo: p.rogueAbilityInfo};
+		const ownTips = Object.create(tips);
+		ownTips.battle = {...battle, abilityActive: () => false, mySide: {sideConditions: {}}};
+		assert.equal(ownTips.calculateModifiedStats(p, server).spa, 38);
+		assert.equal(ownTips.calculateModifiedStats(p, {...server, item: 'choicespecs'}).spa, 57);
+		p.rogueAbilityInfo = {...p.rogueAbilityInfo, active: false};
+		assert.equal(ownTips.calculateModifiedStats(p, server).spa, 19);
+	});
+	it('uses the same move-power tooltip for granted and native Sharpness', () => {
+		const Value = vm.runInContext('ModifiableValue', context);
+		const ownBattle = {...battle, sides: [], abilityActive: () => false, mySide: {sideConditions: {}}};
+		const ownTips = Object.create(tips); ownTips.battle = ownBattle;
+		const p = mon('Bulbasaur', {boosts: {}, isActive: () => true, side: {active: [], foe: {active: []}},
+			effectiveAbility: () => 'Overgrow', rogueAbilityInfo: {abilities: ['sharpness'], active: true}});
+		const server = {speciesForme: 'Bulbasaur', item: '', baseAbility: 'Overgrow',
+			stats: {atk: 10, def: 10, spa: 10, spd: 10, spe: 10}, rogueAbilityInfo: p.rogueAbilityInfo};
+		const move = dex.moves.get('Slash');
+		const boosted = ownTips.getMoveBasePower(move, move.type, new Value(ownBattle, p, server));
+		assert.equal(boosted.value, 105); assert.match(String(boosted), /Sharpness/);
+		p.rogueAbilityInfo = {...p.rogueAbilityInfo, active: false};
+		assert.equal(ownTips.getMoveBasePower(move, move.type, new Value(ownBattle, p, server)).value, 70);
+	});
 	it('shows Zapdos at 184 / 236 / 299 / 328', () => {
 		const p = mon('Zapdos');
 		const [min, max] = tips.getSpeedRange(p);

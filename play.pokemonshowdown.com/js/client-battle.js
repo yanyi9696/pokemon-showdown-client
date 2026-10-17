@@ -323,6 +323,7 @@
 					// is a player
 					this.$controls.html('<p>' + this.getTimerHTML() + '<button class="button" name="skipTurn"><i class="fa fa-step-forward"></i><br />Skip turn</button> <button class="button" name="goToEnd"><i class="fa fa-fast-forward"></i><br />Skip to end</button></p>');
 				}
+				this.updateRogueEscape();
 				return;
 
 			}
@@ -395,6 +396,11 @@
 		},
 		updateControlsForPlayer: function () {
 			this.callbackWaiting = true;
+			if (this.fantasyRogue && this.fantasyRogue.preview) {
+				this.$controls.html('<p><strong>【同行训练家 - ' + (this.fantasyRogue.preview === 'sada' ? '奥琳 AI' : '弗图 AI') + '】正在预演战斗</strong></p><p>预演结束后可以决定是否接受获胜结果。</p>');
+				this.updateRogueEscape();
+				return;
+			}
 			var king = this.request && this.request.fantasyRogue && this.request.fantasyRogue.dragonKing;
 			if (king && king.pending) {
 				this.$controls.html(this.dragonKingControls(king));
@@ -402,6 +408,7 @@
 					this.dragonKingPrompt = king.token;
 					app.addPopup(RogueDragonKingPopup, { room: this, king: king });
 				}
+				this.updateRogueEscape();
 				return;
 			}
 
@@ -512,22 +519,28 @@
 				this.updateWaitControls();
 				break;
 			}
-			if (this.fantasyRogue && this.fantasyRogue.userid === app.user.get('userid') &&
-				this.fantasyRogue.canRetreat !== false && !this.battleEnded && this.request) {
+			this.updateRogueEscape();
+		},
+		updateRogueEscape: function () {
+			if (this.fantasyRogue && this.fantasyRogue.userid === app.user.get('userid') && !this.battleEnded && !this.battle.ended) {
 				this.$controls.find('.rogue-retreat').remove();
-				this.$controls.append('<div class="rogue-retreat"><button class="button" name="retreatRogue">撤退</button>' +
+				this.$controls.append('<div class="rogue-retreat"><button class="button" name="retreatRogue">逃跑</button>' +
 					'<small>返回场外；伤害、PP 和道具消耗保留。</small></div>');
 			}
 		},
 		rogueDefeatHTML: function () {
 			var result = this.fantasyRogueDefeat;
+			if (result.postgame) return '<div class="rogue-defeat" role="status"><strong>神之挑战结束</strong>' +
+				'<p>200 层通关成果与通关卡已保留，全队保持挑战前的恢复状态。本次挑战未获得额外点数。</p>' +
+				'<p>点击“返回冒险”，继续阅读结局。</p></div>';
 			var html = '<div class="rogue-defeat" role="status"><strong>本场战败 · 第 ' + Number(result.floor) + ' 层</strong>' +
 				(result.memoryRestored ? '<p>你已回到旅游摊位。原队伍的 HP、PP、异常状态和道具已恢复到战前状态，保留实际经验与捕捉结果。</p>' :
+				result.emergencyRecovery && result.emergencyRecovery.paid ? '<p>本场不发放胜利奖励；已消耗的道具不会返还。</p>' :
 				'<p>队伍保持战败时的状态；HP、PP、异常状态和道具消耗已保存，本场不发放胜利奖励。</p>');
 			if (result.memoryRestored) {
 				html += '<p>本次幻境已经结束。返回冒险，安置新伙伴并阅读事件结尾。</p>';
 			} else if (result.eventClosed) {
-				html += '<p>本次事件已经结束，无需重打。返回冒险后可安置已捕获的伙伴；复活至少一名伙伴后继续前进。</p>';
+				html += '<p>本次事件已经结束，无需重打。返回冒险后可安置已捕获的伙伴；有能行动的伙伴即可继续前进。</p>';
 			} else if (result.shopClosed) {
 				html += '<p>零元购挑战已经结束，本层商店关闭。返回冒险后可安置已捕获的伙伴，再继续下一层。</p>';
 			} else if (result.retryFloor) {
@@ -537,14 +550,17 @@
 				if (result.noHealing) {
 					html += '<p>本层为连续挑战，禁止途中治疗，请用仍可战斗的成员继续。</p>';
 				} else {
-					html += '<p>返回后可用道具复活和治疗；全队濒死且没有可用复活道具时，可自选支付 <b>' + Number(result.emergencyCost) +
-						' 金币</b>急救全队，金币不会自动扣除。</p>';
+						html += '<p>返回后可用道具复活和治疗；全队倒下且没有复活道具时，余额足够会自动支付 <b>' + Number(result.emergencyCost) +
+							' 金币</b>急救；余额不足则保留倒下状态。</p>';
 				}
 			}
+			if (result.emergencyRecovery) html += '<p><strong>' + (result.emergencyRecovery.paid ?
+				'已自动支付 ' + Number(result.emergencyRecovery.cost) + ' 金币，恢复全队。' :
+				'急救需要 ' + Number(result.emergencyRecovery.cost) + ' 金币，余额不足，尚未扣款或复活。') + '</strong></p>';
 			return html + '<p>查看完战斗结果后，点击“返回冒险”离开。</p></div>';
 		},
 		retreatRogue: function () {
-			if (!this.fantasyRogue || this.fantasyRogue.canRetreat === false || this.fantasyRogue.userid !== app.user.get('userid') || this.battleEnded) return;
+			if (!this.fantasyRogue || this.fantasyRogue.userid !== app.user.get('userid') || this.battleEnded) return;
 			this.send('/fantasyrogue retreat');
 		},
 		timerInterval: 0,
@@ -925,15 +941,16 @@
 		},
 		dragonKingControls: function (king) {
 			var species = globals.translations && globals.translations[king.species] || king.species;
+			var options = king.options || ['longzhihuxi', 'drizzle'];
 			return '<div class="pad rogue-dragon-choice"><h3>龙王的工作 · 继任</h3><p>' + BattleLog.escapeHTML(species) +
 				'接任本场龙王。选择一个额外特性后继续，不消耗回合。</p><p>' +
-				'<button class="button" name="chooseDragonKing" value="longzhihuxi">龙之呼吸</button> ' +
-				'<button class="button" name="chooseDragonKing" value="drizzle">降雨</button></p>' +
+				options.map(function (id) { return '<button class="button" name="chooseDragonKing" value="' + id + '">' +
+					(id === 'drizzle' ? '降雨' : '龙之呼吸') + '</button>'; }).join(' ') + '</p>' +
 				'<p>龙之呼吸：一般招式变为龙系，每次登场首次招式自降能力无效。<br />降雨：登场时开启下雨天气。</p></div>';
 		},
 		chooseDragonKing: function (ability, token) {
 			var king = this.request && this.request.fantasyRogue && this.request.fantasyRogue.dragonKing;
-			if (!king || !king.pending || typeof token === 'number' && token !== king.token || ['longzhihuxi', 'drizzle'].indexOf(ability) < 0) return;
+			if (!king || !king.pending || typeof token === 'number' && token !== king.token || (king.options || ['longzhihuxi', 'drizzle']).indexOf(ability) < 0) return;
 			this.send('/choose rogueking ' + ability + ' ' + king.token + '|' + this.request.rqid);
 		},
 		chooseRogueBall: function (id) {
@@ -1340,6 +1357,7 @@
 			this.send('/timer ' + setting);
 		},
 		forfeit: function () {
+			if (this.fantasyRogue) { this.retreatRogue(); return; }
 			this.send('/forfeit');
 		},
 		saveReplay: function () {
@@ -1710,7 +1728,10 @@
 		type: 'semimodal',
 		initialize: function (data) {
 			this.room = data.room; this.token = data.king.token;
-			this.$el.html(this.room.dragonKingControls(data.king));
+			this.$el.html(this.room.dragonKingControls(data.king) + '<p><button class="button" name="retreatRogue">逃跑</button></p>');
+		},
+		retreatRogue: function () {
+			this.room.retreatRogue(); this.close();
 		},
 		chooseDragonKing: function (ability) {
 			this.room.chooseDragonKing(ability, this.token);
@@ -1722,8 +1743,9 @@
 		initialize: function (data) {
 			this.room = data.room;
 			this.gameType = data.gameType;
-			if (this.gameType === 'battle' && this.room.fantasyRogue && this.room.fantasyRogue.canRetreat === false) {
-				this.$el.html('<p>本次事件对战不能撤退或投降，请完成战斗。</p><p><button class="button autofocus" name="close">返回战斗</button></p>');
+			if (this.gameType === 'battle' && this.room.fantasyRogue) {
+				this.$el.html('<form><p>逃跑后回到当前战斗的准备界面。HP、PP、异常状态和道具消耗保留，需要自行使用道具恢复。本场叠层恢复至开战前。</p>' +
+					'<p><button type="submit" class="button">逃跑</button> <button type="button" class="button autofocus" name="close">继续战斗</button></p></form>');
 				return;
 			}
 			var buf = '<form><p>';
@@ -1764,7 +1786,9 @@
 			});
 		},
 		submit: function (data) {
-			if (this.room.fantasyRogue && this.room.fantasyRogue.canRetreat === false) return;
+			if (this.gameType === 'battle' && this.room.fantasyRogue) {
+				this.room.retreatRogue(); this.close(); return;
+			}
 			this.room.send('/forfeit');
 			if (this.gameType === 'battle') this.room.battle.forfeitPending = true;
 			if (this.$('input[name=closeroom]')[0].checked) {

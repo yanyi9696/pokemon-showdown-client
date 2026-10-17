@@ -1337,7 +1337,7 @@ var translations = {
     "Tun Du": "吞毒",
     "Feng Ya": "风压",
     "Long Zhi Hu Xi": "龙之呼吸",
-    "Bian Huan Zi You": "变幻自由",
+    "Bian Huan Zi You": "变换自由",
     "Quan Li Da Mo": "全力达摩",
     "Wei Chong Ni Tai": "伪虫拟态",
     "Sha Mo Zhi Sheng": "沙漠之声",
@@ -8786,6 +8786,74 @@ var regex_tcdnetsamswt = new RegExp(/The command "(.+)" does not exist. To send 
 var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message again to confirm. If you are using (.+), use (.+) instead./);
 // ==========================================================
 
+// Rogue uses explicit data contexts: menu labels such as Disable/Refresh are not move names.
+function translateRogueName(value, kind) {
+    if (!value) return value;
+    value = String(value).trim();
+    const moveNames = {Psychic: '精神强念', Metronome: '挥指', Refresh: '焕然一新', Disable: '定身法'};
+    if (kind === 'move' && moveNames[value]) return moveNames[value];
+    const fixed = {'Black Augurite': '黑奇石', blackaugurite: '黑奇石', 'Rogue Great Mage': '大法师',
+        'Wo-Chien-Fantasy': '幻想古简蜗', 'Urshifu-Rapid-Strike-Fantasy': '幻想武道熊师（乱击流）',
+        'Urshifu-G-Mega-Fantasy': '幻想超巨进化武道熊师（爆击流）',
+        'Urshifu-Rapid-Strike-G-Mega-Fantasy': '幻想超巨进化武道熊师（瞬击流）',
+        'Urshifu-Rapid-Strike-2-Fantasy': '幻想武道熊师（环击流）'};
+    if (fixed[value]) return fixed[value];
+    if (translations[value]) return translations[value].replace(/\(Gen (\d+)\)/g, '（第 $1 世代）').replace(/Mega进化/gi, '超级进化');
+    if (/[\u3400-\u9fff]/.test(value)) return value.replace(/幻想mega/gi, '幻想超级进化').replace(/Mega进化/gi, '超级进化');
+    if (/^TR\d\d$/.test(value)) return '招式记录' + value.slice(2);
+    if (/-Fantasy$/.test(value)) return '幻想' + translateRogueName(value.slice(0, -8), kind);
+    let match = value.match(/^(.+)-G-Mega$/);
+    if (match) return '超巨进化' + translateRogueName(match[1], kind);
+    match = value.match(/^(.+)-Mega(?:-([XYZ]))?$/);
+    if (match) return '超级' + translateRogueName(match[1], kind) + (match[2] || '');
+    const forms = {Alola: '阿罗拉的样子', Galar: '伽勒尔的样子', Hisui: '洗翠的样子',
+        Sunshine: '晴天形态', Zen: '达摩模式', Summer: '夏天的样子', Autumn: '秋天的样子', Winter: '冬天的样子',
+        Bond: '牵绊形态', Ash: '小智版', Eternal: '永恒之花', Blade: '刀剑形态', Totem: '霸主',
+        Busted: '现形的样子', Original: '原始颜色', 'Low-Key': '低调的样子', 'Rapid-Strike': '连击流',
+        Dada: '阿爸', Curly: '上弓姿势', Droopy: '下垂姿势', Stretchy: '平挺姿势', M: '雄性', F: '雌性',
+        Dusk: '黄昏的样子', Legend: '传说', Antique: '真品', Artisan: '高档货', Masterpiece: '高档货'};
+    const suffix = Object.keys(forms).concat(['Bug', 'Dark', 'Dragon', 'Electric', 'Fairy', 'Fighting', 'Fire', 'Flying',
+        'Ghost', 'Grass', 'Ground', 'Ice', 'Poison', 'Psychic', 'Rock', 'Steel', 'Water']).find(part => value.endsWith('-' + part));
+    if (suffix) return translateRogueName(value.slice(0, -suffix.length - 1), kind) + '（' + (forms[suffix] || translations[suffix] + '属性') + '）';
+    match = value.match(/^Galarian (.+)$/);
+    if (match) return translateRogueName(match[1]) + '（伽勒尔的样子）';
+    match = value.match(/^If held by a (.+), this item allows it to Mega Evolve in battle\.$/);
+    if (match) return '由【' + translateRogueName(match[1]) + '】携带后，可在战斗中超级进化。';
+    match = value.match(/^Evolves (.+) into (.+) when (used|traded)\.$/);
+    if (match) return (match[3] === 'used' ? '使用后，使【' : '携带并通信交换后，使【') + translateRogueName(match[1]) + '】进化为【' + translateRogueName(match[2]) + '】。';
+    match = value.match(/^Can be revived into (.+)\.$/);
+    if (match) return '可以复原为【' + translateRogueName(match[1]) + '】。';
+    match = value.match(/^Holder's Multi-Attack is (.+) type\.$/);
+    if (match) return '携带者的【多属性攻击】变为' + translateRogueName(match[1]) + '属性。';
+    match = value.match(/^Holder's (.+)-type attacks have 1.2x power\.(?: Judgment is (.+) type\.)?$/);
+    if (match) return '携带者的' + translateRogueName(match[1]) + '属性招式威力提升 20%。' + (match[2] ? '【制裁光砾】变为' + translateRogueName(match[2]) + '属性。' : '');
+    match = value.match(/^Teaches certain Pokemon the move (.+)\. One use\.$/);
+    if (match) return '让能够学习的宝可梦学会【' + translateRogueName(match[1], 'move') + '】。使用一次后消失。';
+    return value;
+}
+Object.assign(translations, {
+    "This Pokemon's attacks have a 30% chance of badly poisoning.": '攻击时有 30% 的概率使目标陷入剧毒。',
+    "+ 20 power for each of the user's stat boosts.": '使用者每提升一级能力，招式威力增加 20。',
+    'A Poke Ball that makes it easier to catch wild Pokémon while they\'re asleep.': '更容易捕捉处于睡眠状态的野生宝可梦。',
+    'Placeholder if caught in Poke Ball not in current game.': '用于显示来自其他游戏的特殊精灵球。',
+    'Always 160 power. Ignores Abilities.': '威力固定为 160，无视目标的特性。'
+});
+Object.entries({
+    'Foes: slp or psn or par.': '使对手随机陷入睡眠、中毒或麻痹。',
+    'Foes: -1/6 HP, 4 turns.': '使对手受到持续 4 回合、每回合最大 HP 的 1/6 的伤害。',
+    'Foes: bound 4-5 turns.': '束缚对手 4～5 回合。', 'Allies: Crit Ratio +1.': '提高我方击中要害的概率。',
+    'Foes: infatuated.': '使对手着迷。', 'Foes: last move -2 PP.': '令对手最后使用的招式减少 2 PP。',
+    'Allies: +1/6 max HP.': '回复我方最大 HP 的 1/6。', 'Foes: -2 Speed.': '使对手速度降低两级。',
+    'Foes: confused.': '使对手混乱。', 'Starts Gravity.': '开启重力。', 'Foes: poisoned.': '使对手中毒。',
+    'Foes: Tormented.': '使对手不能连续使用相同的招式。', 'Bypasses Max Guard.': '可穿透极巨防壁。',
+    '50% restores Berries.': '有 50% 的概率回收已使用的树果。', 'Allies: Aurora Veil.': '为我方展开极光幕。',
+    'Target: 50% Yawn.': '有 50% 的概率使目标在下一回合结束时睡眠。', 'Foes: Steel hazard.': '在对方场地布下钢刺。',
+    'Foes: Stealth Rock.': '在对方场地布下隐形岩。', 'Foes: psn or par.': '使对手随机中毒或麻痹。',
+    'Allies: status cured.': '治愈我方异常状态。', 'Foes: -1 evasiveness.': '使对手闪避率降低一级。',
+    'Foes: trapped.': '使对手无法替换。', 'Foes: paralyzed.': '使对手麻痹。',
+    'Ends Terrain, hazards.': '清除场地状态和场上障碍。'
+}).forEach(function (entry) { translations['Base move affects power. ' + entry[0]] = '威力取决于原招式。' + entry[1]; });
+
 (function() {
     // 1. 读取本地存储中的语言设置，如果没有设置，则默认开启汉化 ('zh')
     const currentLang = localStorage.getItem('ps_china_lang') || 'zh';
@@ -8832,6 +8900,12 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
         var tmp = originalStr.trim();
         if (translations[tmp])
             return translations[tmp];
+        // Rogue notifications already contain Chinese, so translate the species before the language guard.
+        if (/成功捕捉了[^！]+！/.test(originalStr)) {
+            return originalStr.replace(/成功捕捉了([^！]+)！/g, function (match, species) {
+                return '成功捕捉了' + trans_from_dict(species) + '！';
+            });
+        }
         if (originalStr.match(regex_chn))
             return originalStr;
         // ==================== 宝石余威增幅汉化 ====================

@@ -3,7 +3,7 @@ const fs = require('fs');
 const vm = require('vm');
 const {EventEmitter} = require('events');
 
-function client(startScreen = false) {
+function client(startScreen = false, localized = false) {
 	const sent = [], joined = [];
 	let userid = 'rogueplayer';
 	const context = {
@@ -12,6 +12,7 @@ function client(startScreen = false) {
 		}}}, Popup: {extend: popup => popup},
 		BattleLog: {escapeHTML: text => String(text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')},
 		Dex: {
+			resolveAvatar: id => 'sprites/trainers/' + id + '.png',
 			getPokemonIcon: () => '', getItemIcon: () => '', getTeambuilderSprite: () => '',
 			getTypeIcon: type => '<img alt="' + type + '" />',
 			getCategoryIcon: category => '<img alt="' + category + '" />',
@@ -31,6 +32,10 @@ function client(startScreen = false) {
 		}),
 		setTimeout: () => 1, clearTimeout: () => {},
 	};
+	if (localized) {
+		const translator = fs.readFileSync(require.resolve('../play.pokemonshowdown.com/js/ps-china-translator.js'), 'utf8');
+		vm.runInNewContext(translator.slice(0, translator.indexOf('(function() {')), context);
+	}
 	vm.runInNewContext(fs.readFileSync(require.resolve('../play.pokemonshowdown.com/js/client-fantasy-rogue.js'), 'utf8'), context);
 	const room = Object.create(context.FantasyRogueRoom);
 	room.id = 'fantasyrogue';
@@ -62,6 +67,177 @@ function state() {
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
 describe('Fantasy Rogue start menu and codex', () => {
+	it('scrolls the actual shop section and renders permanent gains below the stat table', () => {
+		const c = client(), data = adventure(); data.run.growth = {offense: 400, defense: 300, experience: 0};
+		c.room.receiveState(data);
+		assert(c.html.indexOf('能力与努力值') < c.html.indexOf('局外能力加成'));
+		assert(c.html.indexOf('局外能力加成') < c.html.indexOf('本局训练'));
+		let targetOptions;
+		c.room.$ = selector => selector === '[data-shop-category="2"]' ? [{scrollIntoView(options) { targetOptions = options; }}] : [];
+		c.room.jumpShopGroup('2'); assert.equal(targetOptions.block, 'start');
+		assert.equal(targetOptions.behavior, 'smooth');
+		targetOptions = undefined; c.room.jumpShopGroup('bad'); assert.equal(targetOptions, undefined);
+	});
+	it('uses Chinese custom species, move names, evolution items and short ability descriptions', () => {
+		const c = client(false, true), data = adventure();
+		for (const [name, kind, expected] of [['Pidgeot-Fantasy', '', '幻想大比鸟'], ['Bian Huan Zi You', '', '变换自由'],
+			['Protean', '', '变幻自如'], ['Disable', 'move', '定身法'], ['Psychic', 'move', '精神强念'],
+			['Refresh', 'move', '焕然一新'], ['Metronome', 'move', '挥指'], ['blackaugurite', '', '黑奇石']]) {
+			assert.equal(c.translateRogueName(name, kind), expected);
+		}
+		c.Dex.abilities.get = id => ({name: 'Bian Huan Zi You', shortDesc: '自身属性变为即将使用的招式的属性', desc: 'An untranslated long description.'});
+		data.run.team[0].extraAbilities = ['bianhuanziyou']; data.run.team[0].set.species = 'Pidgeot-Fantasy'; c.room.receiveState(data);
+		assert(c.html.includes('幻想大比鸟'));
+		const popup = Object.create(c.RogueExtraAbilitiesPopup); let html;
+		popup.$el = {addClass() {}, html(value) {html = value;}}; popup.initialize({member: data.run.team[0]});
+		assert(html.includes('变换自由')); assert(html.includes('自身属性变为')); assert(!html.includes('untranslated'));
+	});
+	it('offers category jumps and validates bulk buying before sending one command', () => {
+		const c = client(), data = adventure('rest'); data.run.money = 1000;
+		data.items.push({id: 'expcandyxs', name: '经验糖果 XS', kind: 'candy', amount: 100, price: 80, shopFloor: 1, remaining: 9});
+		c.room.receiveState(data);
+		assert(c.html.includes('name="jumpShopGroup"')); assert(c.html.includes('data-shop-category="5"'));
+		assert(c.html.includes('name="buyItems"')); const sent = c.sent.length; c.room.buyItems('expcandyxs');
+		const popup = Object.create(c.app.lastPopup.type), controls = {'input[name=buyCount]': 1};
+		popup.$el = {html() {}}; popup.close = () => {};
+		popup.$ = selector => ({val(value) {if (value !== undefined) controls[selector] = value; return controls[selector];},
+			text(value) {controls[selector] = value;}, prop(name, value) {controls[selector + ':' + name] = value;}});
+		popup.initialize(c.app.lastPopup.data); assert.equal(popup.maximum, 9);
+		controls['input[name=buyCount]'] = 10; popup.confirmBuy(); assert.equal(c.sent.length, sent);
+		popup.chooseCount('5'); assert(controls['.rogue-buy-preview'].includes('合计 400 金币'));
+		popup.confirmBuy(); const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(command.action, 'buy'); assert.equal(command.count, 5); assert.equal(command.value, 'expcandyxs');
+		const after = c.sent.length; data.account.revision++; popup.confirmBuy(); assert.equal(c.sent.length, after);
+		assert(c.app.lastPopup.data.text.includes('库存已更新'));
+	});
+	it('adds ten to the selected candy quantity rather than replacing it with ten', () => {
+		const c = client(), popup = Object.create(c.RogueCandyPopup), controls = {'input[name=candyCount]': 7};
+		popup.maximum = 25; popup.updatePreview = () => {};
+		popup.$ = selector => ({val(value) {if (value !== undefined) controls[selector] = value; return controls[selector];}});
+		popup.addTen(); assert.equal(controls['input[name=candyCount]'], 17);
+		popup.addTen(); assert.equal(controls['input[name=candyCount]'], 25);
+	});
+	it('keeps fishing reel control in the meter group before the progress line', () => {
+		const c = client(); const html = c.room.renderFishing({key: 'fish', fishing: {hits: 2}}, false);
+		assert(html.indexOf('rogue-fishing-controls') < html.indexOf('name="fishingTap"'));
+		assert(html.indexOf('name="fishingTap"') < html.indexOf('rogue-fishing-progress'));
+		assert.equal((html.match(/name="fishingTap"/g) || []).length, 1);
+	});
+	it('shows reward demonstrations and illustrated training targets without submitting the reward before target selection', () => {
+		const c = client(), data = adventure('reward'), mon = data.run.team[0];
+		data.run.rewardScene = {key: 'reward-key', name: '画册还差一页', avatar: 'artist', quality: '旅途补给',
+			paragraphs: ['看看【草】属性的伙伴吧。<script>'], type: 'Grass', demonstrations: [{member: mon.id, move: ''}],
+			baseText: '另附金币和补给。', choices: [{id: 'experience', name: '经验糖果', text: '100 经验'},
+				{id: 'offense', name: '输出训练', text: '本局双攻 +4%', targets: [{member: mon.id, amount: 400}]}]};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('name="showRewardPartner"')); assert(c.room.html.includes('rogue-reward-npc'));
+		assert(!c.room.html.includes('<script>')); assert(!c.room.html.includes('领取本层奖励并继续'));
+		const sent = c.sent.length; c.room.chooseReward('offense'); assert.equal(c.sent.length, sent);
+		assert(c.room.html.includes('name="trainRewardPartner"')); assert(c.room.html.includes('输出训练 +4%'));
+		c.room.trainRewardPartner(mon.id);
+		const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'rewardchoice'); assert.equal(request.value, 'offense'); assert.equal(request.member, mon.id);
+	});
+	it('shows permanent training services and accumulated growth without HP payments or shop challenges', () => {
+		const c = client(), data = adventure('rest');
+		data.run.node = {kind: 'trade', name: '训练营', trade: {kind: 'growth', stock: [], purchases: 0}};
+		data.run.spirit = {id: 'yveltal'};
+		data.run.blessings = {owned: [{id: 'shopraid', family: 'shopraid', name: '零元购'}], pending: [], shards: 0};
+		data.run.growth = {offense: 800, defense: 400, experience: 500, personal: [{species: 'Bulbasaur', offense: 400}]};
+		data.run.growthOffers = [{id: 'offense', name: '输出训练', text: '全队双攻 +4%', price: 1600, amount: 400, remaining: 1}];
+		c.room.receiveState(data);
+		assert(c.room.html.includes('value="buygrowth:offense" disabled'));
+		assert(!c.room.html.includes('name="challengeShop"')); assert(!c.room.html.includes('血量支付：'));
+		assert(c.panel.html.includes('双攻 +8%')); assert(c.panel.html.includes('个人训练：双攻 +4%'));
+		assert(c.panel.html.includes('不会带到下一局'));
+	});
+	it('shows first-account instructions once before story entry and acknowledges without starting a run', () => {
+		const c = client(true), data = state(), popups = [];
+		c.app.curRoom = c.room; c.app.addPopup = (type, detail) => popups.push({type, detail});
+		data.account.needsOnboarding = true; c.room.receiveState(data); c.room.receiveState(data);
+		c.room.enterGame(); assert.equal(c.room.screen, 'home'); assert.equal(popups.length, 1);
+		const popup = Object.create(popups[0].type); let html;
+		popup.$el = {addClass() {}, html: value => {html = value;}}; popup.close = () => {};
+		popup.initialize(popups[0].detail);
+		for (const text of ['祝福与塔灵', '属性转', '藏宝袋与工具箱', '额外特性', '金币不足', '逃跑不会自动治疗']) assert(html.includes(text), text);
+		popup.acknowledge(); assert.equal(JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length)).action, 'onboarding');
+		data.account.needsOnboarding = false; data.account.revision++;
+		c.room.receiveState(data); c.room.enterGame(); assert.equal(c.room.screen, 'game'); assert.equal(popups.length, 1);
+	});
+	it('uses illustrated partner cards for blessing targets and event member choices', () => {
+		const c = client(), data = adventure('blessing'), mon = data.run.team[0];
+		c.Dex.getTeambuilderSprite = () => 'background-image:url(sprites/gen5/bulbasaur.png)';
+		data.run.blessings = {owned: [], pending: [{id: 'target', kind: 'target', title: '大力士？大法师！', options: [{id: mon.id, name: mon.set.species}]}], shards: 0};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('rogue-member-choice')); assert(c.room.html.includes('sprites/gen5/bulbasaur.png'));
+		assert(c.room.html.includes('name="chooseBlessingReward" value="' + mon.id + '"'));
+		data.run.phase = 'event'; data.run.blessings.pending = [];
+		data.run.event = {title: '教学', stage: 'choice', paragraphs: [], options: [{id: 'member:' + encodeURIComponent(mon.id), name: mon.set.species, text: '选择伙伴'}]};
+		c.room.receiveState(data); assert(c.room.html.includes('class="button rogue-member-choice" name="chooseEvent"'));
+	});
+	it('puts extra abilities beside the native one and opens all effects without editing them', () => {
+		const c = client(), data = adventure('ready'), mon = data.run.team[0];
+		mon.extraAbilities = ['roguegreatmage']; c.room.receiveState(data);
+		assert(c.html.includes('rogue-ability-line')); assert(c.html.includes('＋roguegreatmage'));
+		assert(!c.html.includes('额外特性：roguegreatmage'));
+		mon.extraAbilities.push('regenerator'); c.room.receiveState(data); assert(c.html.includes('>＋…</button>'));
+		c.room.showExtraAbilities(mon.id); const popup = Object.create(c.app.lastPopup.type); let html;
+		popup.$el = {addClass() {}, html: value => { html = value; }}; popup.initialize(c.app.lastPopup.data);
+		assert(html.includes('特攻变为原来的 2 倍')); assert(html.includes('regenerator')); assert(html.includes('特性效果'));
+		assert(!html.includes('name="chooseAbility"'));
+	});
+	it('only shows insight progress inside the owned insight blessing', () => {
+		const c = client(), data = adventure('ready'), mon = data.run.team[0]; mon.insight = {points: 42, gain: 3};
+		data.run.blessings = {owned: [], pending: [], shards: 0, teraShards: {}}; c.room.receiveState(data);
+		assert(!c.html.includes('生死领悟'));
+		data.run.blessings.owned.push({id: 'insight', family: 'insight', name: '濒死悟道', tier: 'prismatic', text: '积累领悟。'});
+		c.room.receiveState(data); assert(c.panel.html.includes('生死领悟 42 / 100'));
+		assert(c.panel.html.indexOf('生死领悟') < c.panel.html.indexOf('宝可梦队伍'));
+		assert(c.panel.html.includes('data-rogue-key="blessing-insight"'));
+	});
+	it('shows a separate removable emblem slot alongside the held item and submits its own action', () => {
+		const c = client(), data = adventure('ready'), mon = data.run.team[0];
+		mon.set.item = 'oranberry'; mon.emblem = 'rogueemblemfire';
+		data.items.push({id: 'rogueemblemfire', name: '火属性转', kind: 'emblem', icon: 'firegem'});
+		data.run.bag.rogueemblemfire = 1; c.room.receiveState(data);
+		assert(c.html.includes('rogue-equipment-slots')); assert(c.html.includes('火属性转'));
+		assert(c.html.includes('橙橙果')); assert(c.html.includes('value="emblems"'));
+		c.room.editSection('emblems');
+		assert(c.html.includes('取下属性转')); assert(c.html.includes('不占携带道具位'));
+		assert(c.html.includes('name="equipEmblem" value="rogueemblemfire"'));
+		assert(!c.html.includes('name="useItem" value="rogueemblemfire"'));
+		c.room.equipEmblem('');
+		const command = JSON.parse(c.sent[c.sent.length - 1].slice('/fantasyrogue action '.length));
+		assert.equal(command.action, 'equipemblem'); assert.equal(command.member, mon.id); assert.equal(command.value, '');
+	});
+	it('does not mix emblems into the ordinary held-item picker', () => {
+		const c = client(), data = adventure('ready');
+		data.items.push({id: 'rogueemblemwater', name: '水属性转', kind: 'emblem'}); data.run.bag.rogueemblemwater = 1;
+		c.room.receiveState(data); c.room.editSection('items');
+		assert(!c.html.includes('name="equipItem" value="rogueemblemwater"'));
+		assert(c.html.includes('name="openEmblems"')); assert(c.html.includes('name="equipItem" value="oranberry"'));
+	});
+	it('only offers dragon-king abilities absent from the recipient, including the already-has-both case', () => {
+		const c = client(), data = adventure('ready'), mon = data.run.team[0];
+		data.run.blessings = {owned: [], pending: [], completed: [], levels: 0, shards: 0,
+			dragonKing: {member: mon.id, species: mon.set.species, total: 732, options: ['longzhihuxi']}};
+		c.room.receiveState(data);
+		assert(!c.html.includes('name="chooseDragonKing" value="drizzle"'));
+		c.room.chooseDragonKing('drizzle'); assert.equal(c.sent.length, 0);
+		data.run.blessings.dragonKing.options = []; c.room.receiveState(data);
+		assert(c.html.includes('已具备两种特性，无需重复赋予')); assert(!c.html.includes('name="chooseDragonKing"'));
+	});
+	it('renders an announced trainer and all six team members outside the dialogue text', () => {
+		const c = client(), data = adventure('story');
+		data.story = {stage: 'restguide', scene: 'arena', title: '对手预告', speaker: '黑袍老人', text: '下一层的对手。',
+			key: 'rest:1', index: 1, total: 3, canSkip: true,
+			roster: {name: '道馆 · 小刚', avatar: 'brock', pokemon: ['Onix', 'Geodude', 'Rhyhorn', 'Golem', 'Kabutops', 'Aerodactyl']}};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('sprites/trainers/brock.png'));
+		assert.equal((c.room.html.match(/class="rogue-roster-member"/g) || []).length, 6);
+		assert(c.room.html.includes('Aerodactyl</span>'));
+		assert(c.room.html.includes('name="storyNext"'));
+	});
 	it('shows the outside king on the party tabs and sends an ability choice for that member', () => {
 		const c = client(), data = adventure('ready'), mon = data.run.team[0];
 		data.run.blessings = {owned: [], pending: [], completed: [], levels: 0, shards: 0,
@@ -80,6 +256,55 @@ describe('Fantasy Rogue start menu and codex', () => {
 		assert.equal(c.app.lastPopup.data.action, 'use'); assert.equal(c.app.lastPopup.data.details.member, mon.id);
 		mon.tonics = {wine: true, cephalosporin: true, poison: true}; c.room.receiveState(data);
 		assert(c.html.includes('value="roguewine" disabled')); assert(c.html.includes('毒招威力 ×1.5'));
+	});
+	it('previews batch candy levels, caps quantities and sends one atomic use command', () => {
+		const c = client(), data = adventure('rest'), mon = data.run.team[0];
+		data.items.push({id: 'expcandyxs', name: '经验糖果 XS', kind: 'candy', amount: 100});
+		data.run.bag.expcandyxs = 8;
+		mon.experienceProgress = {current: 0, needed: 91, total: 125, levels: Array.from({length: 100}, (_, i) => (i + 1) ** 3)};
+		c.room.receiveState(data); const sent = c.sent.length; c.room.useItem('expcandyxs');
+		assert.equal(c.sent.length, sent);
+		const popup = Object.create(c.app.lastPopup.type), controls = {'input[name=candyCount]': 1}; let html;
+		popup.$el = {html: value => {html = value;}}; popup.close = () => {};
+		popup.$ = selector => ({val(value) {if (value !== undefined) controls[selector] = value; return controls[selector];},
+			text(value) {controls[selector] = value;}, prop(name, value) {controls[selector + ':' + name] = value;}});
+		popup.initialize(c.app.lastPopup.data); assert(html.includes('使用数量')); assert.equal(popup.maximum, 8);
+		popup.chooseCount('5'); assert(controls['.rogue-candy-preview'].includes('Lv.5 → Lv.8'));
+		assert(controls['.rogue-candy-preview'].includes('经验 +500'));
+		assert(controls['.rogue-candy-preview'].includes('距下一级 104'));
+		controls['input[name=candyCount]'] = 1.5; popup.updatePreview();
+		assert(controls['button[name=confirmCandy]:disabled']); popup.confirmCandy(); assert.equal(c.sent.length, sent);
+		popup.chooseCount('10'); assert.equal(controls['input[name=candyCount]'], 8);
+		popup.chooseCount('5'); popup.confirmCandy();
+		const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(command.count, 5); assert.equal(command.action, 'use'); assert.equal(command.member, mon.id);
+	});
+	it('keeps surplus candy at the level cap and refuses a preview after account or save changes', () => {
+		const c = client(), data = adventure('rest'), mon = data.run.team[0];
+		data.items.push({id: 'expcandyxs', name: '经验糖果 XS', kind: 'candy', amount: 100});
+		data.run.bag.expcandyxs = 20; mon.set.level = 99;
+		mon.experienceProgress = {total: 999950, levels: Array.from({length: 100}, (_, i) => (i + 1) ** 3)};
+		c.room.receiveState(data); c.room.useItem('expcandyxs');
+		const popup = Object.create(c.app.lastPopup.type);
+		popup.$el = {html() {}}; popup.close = () => {};
+		popup.$ = () => ({val: () => 1, text() {}, prop() {}});
+		popup.initialize(c.app.lastPopup.data); assert.equal(popup.maximum, 1);
+		assert.equal(popup.preview(1).level, 100); assert.equal(popup.preview(1).gained, 50);
+		const sent = c.sent.length; data.account.revision++; popup.confirmCandy();
+		assert.equal(c.sent.length, sent); assert(c.app.lastPopup.data.text.includes('已更新'));
+		c.setUser('different'); popup.confirmCandy(); assert.equal(c.sent.length, sent);
+	});
+	it('shows limited rest candy and a compact preparation summary, including sold-out and insufficient funds', () => {
+		const c = client(), data = adventure('rest'); data.run.floor = 9; data.run.node.kind = 'rest';
+		data.run.emergencyCost = 2300; data.run.team[0].hp = 0;
+		data.items.push({id: 'revive', name: '活力碎片', kind: 'revive', amount: .5},
+			{id: 'expcandyxs', name: '经验糖果 XS', kind: 'candy', amount: 100, price: 80, shopFloor: 9, remaining: 4});
+		data.run.bag.revive = 2; c.room.receiveState(data);
+		assert(c.html.includes('限量经验糖果')); assert(c.html.includes('金币购买 · 剩余 4'));
+		assert(c.html.includes('倒下伙伴 <b>1 / 1</b>')); assert(c.html.includes('复活道具 <b>2</b>'));
+		assert(c.html.includes('全队急救 <b>2300</b> 金币（余额不足）'));
+		data.items.at(-1).remaining = 0; c.room.receiveState(data);
+		assert(c.html.includes('value="buy:expcandyxs" disabled')); assert(c.html.includes('本店已售罄'));
 	});
 	it('opens a PP target picker before consuming single-move Ether', () => {
 		const c = client(), data = adventure('rest');
@@ -109,7 +334,7 @@ describe('Fantasy Rogue start menu and codex', () => {
 		const c = client(), data = adventure('choose');
 		data.run.choices = [{id: 'trade', name: '招式学习机商店', kind: 'trade', encounters: 0, reward: {money: 0, items: {}}}];
 		c.room.receiveState(data);
-		assert(c.html.includes('class="rogue-route-description">每种商品限购一件'));
+		assert(c.html.includes('class="rogue-route-description">商品数量有限'));
 	});
 
 	it('only enables medicines matching a partner status, including stacked secondary statuses', () => {
@@ -126,10 +351,10 @@ describe('Fantasy Rogue start menu and codex', () => {
 		c.room.receiveState(data);
 		assert(c.html.includes('value="awakening" disabled')); assert(!c.html.includes('value="antidote" disabled'));
 	});
-	it('hides the adventure-screen retreat action for locked event battles', () => {
+	it('keeps the adventure-screen escape action even for legacy locked event battles', () => {
 		const c = client(), data = adventure('battle'); data.run.canRetreat = false;
 		c.room.receiveState(data);
-		assert(!c.room.html.includes('value="retreat"')); assert(c.room.html.includes('本次事件对战不能撤退'));
+		assert(c.room.html.includes('value="retreat"')); assert(!c.room.html.includes('本次事件对战不能撤退'));
 	});
 	it('separates custom and enhanced content, uses a shared cup symbol, and matches blessing-family icons', () => {
 		const c = client(true); c.room.receiveState(state()); c.room.openCodex('guide');
@@ -185,9 +410,10 @@ describe('Fantasy Rogue start menu and codex', () => {
 		const c = client(), data = adventure('rest');
 		data.run.node = {kind: 'trade', name: '薄荷商店', trade: {kind: 'mint'}, reward: {money: 0, items: {}}};
 		data.items = [{id: 'roguemintmodest', name: 'Modest薄荷', kind: 'mint', price: 500, shopFloor: 1, description: '特攻提高'}];
+		data.run.node.trade.stock = data.items.map(item => ({...item, remaining: 1}));
 		data.shopItems = ['roguemintmodest']; c.room.receiveState(data);
 		assert(c.room.html.includes('欢迎来到薄荷商店！'));
-		assert(c.room.html.includes('金币购买 · 限购 1'));
+		assert(c.room.html.includes('金币购买 · 剩余 1'));
 		assert(!c.room.html.includes('恢复存活伙伴'));
 		assert(c.room.html.startsWith('<div class="rogue-game-layout"><div class="pad rogue-game-content">'));
 		assert(c.room.html.includes('</div><footer class="rogue-abandon"'));
@@ -215,13 +441,28 @@ describe('Fantasy Rogue start menu and codex', () => {
 		const c = client(true); c.room.receiveState(state()); c.room.openCodex('blessings');
 		assert.equal(c.sent[0], '/cmd fantasyroguecodex blessings');
 		c.room.receiveCodex({userid: 'rogueplayer', section: 'blessings', entries: [
-			{id: 'a', name: '已选祝福', tier: 'gold', unlocked: true, text: '完整效果：伤害提升 20%。'},
-			{id: 'b', name: '未选祝福', tier: 'prismatic', unlocked: false, text: '？？？'},
+			{id: 'a', name: '已选祝福', tier: 'gold', floors: [1], unlocked: true, text: '完整效果：伤害提升 20%。'},
+			{id: 'b', name: '未选祝福', tier: 'prismatic', floors: [100, 150], unlocked: false, text: '？？？'},
 		]});
 		assert(c.room.html.includes('完整效果：伤害提升 20%。'));
+		assert(c.room.html.includes('class="rogue-blessing-restriction">仅第 1 层出现</small>'));
+		assert(c.room.html.includes('仅第 100、150 层出现</small>'));
 		assert(c.room.html.includes('tier-prismatic is-locked')); assert(c.room.html.includes('？？？'));
 		c.room.filterCodex('unlocked'); assert(!c.room.html.includes('未选祝福'));
 		c.room.filterCodex('prismatic'); assert(!c.room.html.includes('已选祝福'));
+	});
+	it('shows all four blessing versions and safely emphasizes named Pokemon terms', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('blessings');
+		const entries = [1, 50, 100, 150].map((floor, i) => ({id: 'money:' + floor, family: 'money',
+			name: '来财，来' + '+'.repeat(i), tier: 'silver', floors: [floor], unlocked: true, text: '获得 ' + (i + 1) * 4000 + ' 金币。'}));
+		entries.push({id: 'test', name: '词汇', tier: 'gold', unlocked: true, text: '获得【皮卡丘】，学会【十万伏特】。<script>alert(1)</script>'});
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'blessings', entries});
+		for (const e of entries) assert(c.room.html.includes(e.name));
+		assert(c.room.html.includes('按名称拼音首字母排列'));
+		assert(c.room.html.includes('<strong class="rogue-term">【皮卡丘】</strong>'));
+		assert(c.room.html.includes('<strong class="rogue-term">【十万伏特】</strong>'));
+		assert(!c.room.html.includes('<script>')); assert(c.room.html.includes('&lt;script>'));
+		assert(c.room.html.includes('仅第 150 层出现'));
 	});
 	it('reads event choices without submitting any gameplay commands or showing battle logs', () => {
 		const c = client(true), data = adventure(); c.room.receiveState(data); c.room.openCodex('events');
@@ -249,6 +490,42 @@ describe('Fantasy Rogue start menu and codex', () => {
 	});
 });
 describe('Fantasy Rogue story and clear-card controls', () => {
+	it('offers only battle or preparation after the final boss line, with a guarded battle command', () => {
+		const c = client(), data = adventure('story');
+		data.story = {stage: 'bossintro', scene: 'summit', title: '最初的来意', speaker: '超梦',
+			text: '可你还记得，自己为何而来吗？', pokemon: 'Mewtwo-Fantasy',
+			key: 'run:bossintro:200:boss:0:summit:mewtwo:2', index: 2, total: 3, canSkip: true, battleReady: true};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('战前 / 最初的来意'));
+		assert(c.room.html.includes('开始吧')); assert(c.room.html.includes('再让我准备一下'));
+		assert(!c.room.html.includes('name="storySkip"'));
+		assert(c.room.html.includes('class="rogue-story-dialogue" disabled'));
+		c.room.storyBattle(); c.room.storyBattle();
+		assert.equal(c.sent.length, 1);
+		const command = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.equal(command.action, 'battle'); assert.equal(command.value, data.story.key);
+	});
+	it('keeps the trainer portrait and scene when paging into battle controls', () => {
+		const c = client(), data = adventure('story');
+		data.story = {stage: 'bossintro', scene: 'arena', title: '战前', speaker: '小刚', avatar: 'brock',
+			text: '第一句', encounter: '20:boss:0:gym:brock', key: 'first', index: 0, total: 2, canSkip: true};
+		c.room.receiveState(data); assert(c.html.includes('sprites/trainers/brock.png'));
+		const nodes = {};
+		for (const name of ['.rogue-story-scene', '.rogue-story-chapter', '.rogue-story-actions', 'strong', 'span', 'small']) nodes[name] = {};
+		nodes['.rogue-story-dialogue'] = {setAttribute() {}, querySelector: key => nodes[key]};
+		const section = {dataset: {story: c.room.storySignature(data.story)}, setAttribute() {}, querySelector: key => nodes[key]};
+		c.room.$el[0] = {querySelector: () => section};
+		c.room.$el.html = () => { throw new Error('Must retain the trainer scene while paging'); };
+		const next = structuredClone(data); next.account.revision++;
+		Object.assign(next.story, {index: 1, key: 'last', text: '准备好了吗？', battleReady: true});
+		c.room.receiveState(next, true);
+		assert.equal(nodes.span.innerHTML, '准备好了吗？'); assert(nodes['.rogue-story-dialogue'].disabled);
+		assert(nodes['.rogue-story-actions'].innerHTML.includes('再让我准备一下'));
+		assert(!nodes['.rogue-story-actions'].innerHTML.includes('storySkip'));
+		c.room.storyNext();
+		assert(c.sent[0].includes('"action":"storynext"')); assert(!c.sent[0].includes('"action":"battle"'));
+		assert.notEqual(c.room.storySignature(next.story), c.room.storySignature({...next.story, encounter: '40:boss:0:gym:brock'}));
+	});
 	it('continues the server page, blocks duplicate clicks, and hides starter controls while reading', () => {
 		const c = client(), data = state();
 		data.story = {stage: 'opening', scene: 'chamber', title: '醒来', text: '你在塔里吗？', key: 'opening:0', index: 0, total: 8, canSkip: false};
@@ -281,7 +558,7 @@ describe('Fantasy Rogue story and clear-card controls', () => {
 		const next = structuredClone(data); next.account.revision++;
 		Object.assign(next.story, {index: 1, key: 'opening:1', text: '第二句', scene: 'letter'});
 		c.room.receiveAction({userid: data.userid, id: command.id, ok: true, state: next});
-		assert.equal(nodes.span.textContent, '第二句');
+		assert.equal(nodes.span.innerHTML, '第二句');
 		assert.equal(nodes['.rogue-story-scene'].className, 'rogue-story-scene scene-letter');
 		assert.equal(nodes['.rogue-story-dialogue'].disabled, false);
 		c.room.render(true); assert.equal(nodes.small.textContent, '轻点继续 ▷ · 2/8');
@@ -375,6 +652,41 @@ function adventure(phase = 'choose') {
 	return data;
 }
 describe('Fantasy Rogue event display and spectator playback', () => {
+	it('renders companion portraits, contextual advice and only the consulted recommendation', () => {
+		const c = client(), data = adventure('event');
+		data.run.companions = [{id: 'bea', name: '彩豆', preferences: 3, canConsult: true,
+			message: '一起训练吧。', abilityOptions: ['guts'], member: {species: 'Machop'}}];
+		data.run.event = {key: 'companion-event', stage: 'choice', title: '挑战', paragraphs: [],
+			options: [{id: 'fight', name: '接受挑战', text: ''}, {id: 'leave', name: '暂不参与', text: ''}]};
+		c.room.receiveState(data);
+		assert(c.panel.html.includes('sprites/rogue-companions/bea.png'));
+		assert(c.panel.html.includes('你想听听我的建议吗？'));
+		assert(!c.room.html.includes('彩豆推荐'));
+		c.room.companionAction('bea|advice');
+		const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'companion'); assert.equal(request.member, 'bea'); assert.equal(request.value, 'advice');
+		data.account.revision++; data.run.companions[0].recommended = 'fight'; c.room.pending = null;
+		c.room.receiveState(data);
+		assert(c.room.html.includes('接受挑战（彩豆推荐）')); assert(!c.room.html.includes('暂不参与（彩豆推荐）'));
+	});
+	it('uses distinct AI portraits and offers acceptance only for successful previews', () => {
+		const c = client(), data = adventure('ready');
+		data.run.blessings = {owned: [{family: 'companionai', id: 'companionai', name: '乐园防卫程序', text: ''}], pending: [], shards: 0};
+		c.room.receiveState(data);
+		for (const id of ['sada', 'turo']) assert(c.panel.html.includes('sprites/rogue-companions/' + id + '.png'));
+		data.run.preview = {trainer: 'sada', stage: 'result', won: true}; c.room.receiveState(data);
+		assert(c.room.html.includes('previewresult:accept')); assert(c.room.html.includes('previewresult:personal'));
+		assert(!c.room.html.includes('进入第 1'));
+		data.run.preview.won = false; c.room.receiveState(data);
+		assert(!c.room.html.includes('previewresult:accept')); assert(c.room.html.includes('previewresult:personal'));
+	});
+	it('emphasizes important dialogue safely without exposing HTML', () => {
+		const c = client(), data = adventure('event');
+		data.run.event = {title: '提醒', stage: 'choice', paragraphs: ['挑战【幻想精英】前准备好 300 金币。<img src=x onerror=alert(1)>'], options: []};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('<strong>【幻想精英】</strong>')); assert(c.room.html.includes('<strong>300 金币</strong>'));
+		assert(c.room.html.includes('&lt;img')); assert(!c.room.html.includes('<img src=x'));
+	});
 	it('localizes a move picker, retains the event key and sends only the selected move', () => {
 		const c = client(), data = adventure('event');
 		Object.assign(c.translations, {Bulbasaur: '妙蛙种子', 'Grass Pledge': '草之誓约', Grass: '草', Special: '特殊'});
@@ -471,11 +783,28 @@ describe('Fantasy Rogue blessing controls', () => {
 	}
 	it('shows phase-specific level costs and independently submits refreshes', () => {
 		const {c} = ready();
-		assert(c.room.html.includes('黄金命运')); assert(c.room.html.includes('额外 +10 级')); assert(c.room.html.includes('额外 +20 级'));
+		assert(c.room.html.includes('黄金命运')); assert(c.room.html.includes('固定首领 +15 级')); assert(c.room.html.includes('普通遭遇 +10 级'));
 		assert(c.room.html.includes('刷新 1 次'));
 		c.room.refreshBlessing('0');
 		const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
 		assert.equal(request.action, 'blessingrefresh'); assert.equal(request.slot, 0);
+	});
+	it('explains immediate attribute upgrades, paid checkpoint costs and the final card step', () => {
+		const {c, data} = ready();
+		delete data.run.blessings.round;
+		data.run.blessings.evolutionCosts = [50, 100];
+		data.run.blessings.stage = {kind: 'direction', options: [{id: 'stats', name: '数值进化'}]};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('随后立即选择一次强化'));
+		assert(c.room.html.includes('本轮已按一份棱彩祝福'));
+		c.room.chooseBlessingUpgrade('stats');
+		const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'blessing'); assert.equal(request.value, 'stats');
+		data.run.floor = 200;
+		data.run.blessings.stage = {kind: 'upgrade', options: [{id: 'stat:hp', name: 'HP +15%'}]};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('完成最后一次强化后保存通关卡'));
+		assert(!c.room.html.includes('本轮已按一份棱彩祝福'));
 	});
 	it('selects a whole blessing card first and grants only on a second activation', () => {
 		const {c, data} = ready();
@@ -506,16 +835,26 @@ describe('Fantasy Rogue blessing controls', () => {
 		data.run.blessings.round.options = ['silver', 'gold', 'prismatic'].map((tier, index) => ({
 			id: ['bond', 'smallfinal', 'psychic'][index], name: tier, text: '完整说明', tier, refreshes: 1,
 		}));
-		for (const floor of [50, 100, 150]) {
+		for (const floor of [1, 50, 100, 150]) {
 			data.run.floor = floor;
 			c.room.receiveState(data);
 			const cards = [...c.room.html.matchAll(/<article class="rogue-blessing-option rogue-blessing-(\w+)">([\s\S]*?)<\/article>/g)];
 			assert.deepEqual(cards.map(card => card[1]), ['silver', 'gold', 'prismatic']);
 			assert(cards[0][2].includes('对手不额外加级'));
-			assert(cards[1][2].includes('对手等级 +' + floor / 10));
-			assert(cards[2][2].includes('对手等级 +' + floor / 5));
+			const stage = Math.floor(floor / 50);
+			assert(cards[1][2].includes('固定首领 +' + (stage + 1) * 5 + ' 级 · 普通遭遇 +' + stage * 5 + ' 级'));
+			assert(cards[2][2].includes('固定首领 +' + (stage + 1) * 10 + ' 级 · 普通遭遇 +' + stage * 10 + ' 级'));
 			assert(cards.every(card => card[2].includes('刷新 1 次')));
 		}
+	});
+	it('shows opening progress and uses the costs supplied by the server', () => {
+		const {c, data} = ready();
+		data.run.floor = 1; data.run.blessings.beforeAdventure = true;
+		data.run.blessings.round.options[0].levelCost = {normal: 0, boss: 5};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('启程祝福 · 第一层开战前'));
+		assert(c.room.html.includes('固定首领 +5 级 · 普通遭遇 +0 级'));
+		assert(!c.room.html.includes('+0.1'));
 	});
 	it('refreshes without granting and requires selecting the replacement card again', () => {
 		const {c, data} = ready();
@@ -759,7 +1098,7 @@ describe('Fantasy Rogue client', () => {
 		assert.equal(c.sent.length, 1);
 		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
 		assert.equal(request.action, 'ability'); assert.equal(request.member, data.run.team[0].id);
-		assert(c.room.html.includes('正在保存操作')); assert(c.panel.html.includes('正在保存操作'));
+		assert(!c.room.html.includes('正在保存操作')); assert(!c.panel.html.includes('正在保存操作'));
 	});
 	it('clears the side panel after an account switch rather than displaying the previous party', () => {
 		const c = client(); c.room.receiveState(adventure());
@@ -780,6 +1119,21 @@ describe('Fantasy Rogue client', () => {
 		c.room.receiveState(run); assert.equal(c.app.lastPopup.type, c.RogueSpiritPopup);
 		assert(c.html.includes('name="showSpirit"')); assert(!c.html.includes('原生对战 · 捕捉伙伴'));
 		delete c.app.lastPopup; c.room.receiveState(run); assert(!c.app.lastPopup);
+	});
+	it('offers only cleared spirits remotely and sends the manual choice with the starting party', () => {
+		const c = client(), data = state();
+		data.configured = true; data.starters = [{id: 'bulbasaur', species: 'Bulbasaur', available: true}];
+		data.account.spiritUnlocked = true;
+		data.selectableSpirits = [{id: 'kyogre', name: '盖欧卡的降雨'}];
+		c.room.useSpirit = true; c.room.selectedSpirit = 'kyogre'; c.room.receiveState(data);
+		assert(c.html.includes('name="selectedSpirit"'));
+		assert(c.html.includes('随机抽取（包含未通关塔灵）'));
+		assert(c.html.includes('value="kyogre" selected'));
+		assert(!c.html.includes('name="testSpirit"'));
+		c.room.selectedStarters = ['bulbasaur']; c.room.startAdventure();
+		const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(request.selectedSpirit, 'kyogre'); assert.equal(request.useSpirit, true);
+		assert.equal(request.testSpirit, undefined);
 	});
 	it('offers HP purchases for all shop categories and disables them at the shared limit', () => {
 		const c = client(), data = adventure('rest');
@@ -811,6 +1165,8 @@ describe('Fantasy Rogue client', () => {
 		c.room.receiveState(data);
 		assert(c.html.indexOf('宝可梦中心商店') < c.html.indexOf('宝可梦队伍'));
 		assert(c.html.includes('value="buy:healthfeather"'));
+		assert(c.html.includes('<section class="rogue-shop-group"'));
+		assert(!c.html.includes('<details class="rogue-shop-group"'));
 		assert(!c.html.includes('value="buy:protein"'));
 		assert(!c.html.includes('value="buy:expcandyxs"'));
 		assert(!c.html.includes('value="useItem:tinymushroom"'));
@@ -996,6 +1352,27 @@ describe('Fantasy Rogue client', () => {
 		assert.equal((c.html.match(/花费 1 点提升/g) || []).length, 6);
 		assert(c.html.includes('从下一次冒险生效'));
 	});
+	it('shows independently increasing stat costs and blocks unaffordable upgrades', () => {
+		const c = client(), data = state(); data.account.points = 4;
+		data.account.boosts.hp = 4; data.account.boosts.spe = 10;
+		c.room.receiveState(data);
+		assert(c.html.includes('value="upgrade:hp" disabled'));
+		assert(c.html.includes('花费 5 点提升'));
+		assert(!c.html.includes('value="upgrade:atk" disabled'));
+		assert(!c.html.includes('value="upgrade:spe"'));
+	});
+	it('offers the optional challenge after saving the clear and submits a single decision', () => {
+		const c = client(), data = state();
+		data.run = {phase: 'postgame', postgame: 'offer', floor: 200, team: [], bag: {}, boosts: data.account.boosts};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('通关卡已保存'));
+		assert(c.room.html.includes('value="godchallenge:accept"'));
+		assert(c.room.html.includes('value="godchallenge:decline"'));
+		assert(!c.room.html.includes('name="askAbandon"'));
+		c.room.act('godchallenge:accept');
+		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'godchallenge'); assert.equal(request.value, 'accept');
+	});
 	it('sends only an action and revision, blocks double clicks, and retries the identical request', () => {
 		const c = client(); c.room.receiveState(state());
 		c.room.act('upgrade:hp'); c.room.act('upgrade:atk');
@@ -1075,9 +1452,9 @@ describe('Fantasy Rogue client', () => {
 	it('puts floor actions and itemized rewards above boosts, and shows the money balance in the bag', () => {
 		const c = client(); c.room.receiveState(adventure());
 		const html = c.html;
-		assert(html.indexOf('选择本层路线') < html.indexOf('本局永久加成'));
+		assert(html.indexOf('选择本层路线') < html.indexOf('局外能力加成'));
 		assert(html.includes('已到账 · 第 8 层') && html.includes('+246') && html.includes('×1'));
-		assert(html.includes('+162'));
+		assert(!html.includes('+162'));
 		assert(html.indexOf('>321<') > html.indexOf('背包</h3>'));
 		assert.equal((html.match(/>321</g) || []).length, 1);
 		assert(html.includes('rogue-item-potion') && html.includes('精灵球') && html.includes('橙橙果'));
@@ -1097,11 +1474,11 @@ describe('Fantasy Rogue client', () => {
 		const c = client(); const data = adventure('settlement');
 		data.run.pendingMoves = [{member: data.run.team[0].id, move: 'vinewhip'}];
 		c.room.receiveState(data);
-		assert(c.html.includes('+1200') && c.html.includes('成长点 <strong>+1') && c.html.includes('×3'));
+		assert(!c.html.includes('+1200') && !c.html.includes('本场胜利／捕捉成功可获得'));
 		for (const text of ['alt="Grass"', 'alt="Physical"', '威力', '命中率', '100%', 'PP', '攻击目标造成伤害']) {
 			assert(c.html.includes(text), text);
 		}
-		assert(c.html.indexOf('学习招式') < c.html.indexOf('本局永久加成'));
+		assert(c.html.indexOf('学习招式') < c.html.indexOf('局外能力加成'));
 		assert(c.html.includes('<small>PP</small>25'));
 	});
 	it('offers only learned moves, displays hidden ability labels and keeps EVs locked without an event', () => {
@@ -1110,6 +1487,9 @@ describe('Fantasy Rogue client', () => {
 		assert(!c.html.includes('name="ev-hp"'));
 		c.room.editSection('moves:1');
 		assert(c.html.includes('vinewhip') && c.html.includes('4/25'));
+		assert(c.html.includes('class="rogue-move-picker"'));
+		assert(c.html.includes('data-rogue-key="moves:run:1:member:0"'));
+		assert(c.html.includes('aria-label="可更换招式，列表内上下滚动"'));
 		c.room.chooseMove('vinewhip');
 		let request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
 		assert.equal(request.action, 'setmove');
@@ -1165,7 +1545,7 @@ describe('Fantasy Rogue client', () => {
 		const c = client(); const data = adventure('ready');
 		data.run.node.noHealing = true; data.run.healingLocked = true;
 		c.room.receiveState(data);
-		assert(c.html.includes('禁止场外治疗和急救'));
+		assert(c.html.includes('连续挑战期间限制场外治疗'));
 		assert(c.html.includes('value="potion" disabled'));
 		data.run.phase = 'failed'; data.run.recovery = 'defeat'; c.room.receiveState(data);
 		assert(c.html.includes('免费重试整层'));
@@ -1191,6 +1571,14 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 				append: html => { room.html += html; }, prepend: html => { room.html = html + room.html; }}});
 		return {room, sent, joined, app: context.app, context};
 	}
+	it('uses filtered succession choices in battle and refuses a stale duplicate ability click', () => {
+		const c = battleClient(), king = {member: 'next', species: 'Dragonite', token: 4, pending: true, options: ['longzhihuxi']};
+		c.room.request = {rqid: 9, fantasyRogue: {dragonKing: king}};
+		const html = c.room.dragonKingControls(king);
+		assert(html.includes('value="longzhihuxi"')); assert(!html.includes('value="drizzle"'));
+		c.room.chooseDragonKing('drizzle'); assert.equal(c.sent.length, 0);
+		c.room.chooseDragonKing('longzhihuxi'); assert.deepEqual(c.sent, ['/choose rogueking longzhihuxi 4|9']);
+	});
 	it('prompts once per king succession, keeps fallback controls and rejects stale popup clicks', () => {
 		const c = battleClient(), popups = [];
 		c.context.translations = {Dratini: '迷你龙'};
@@ -1199,6 +1587,7 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 		c.room.updateControlsForPlayer(); c.room.updateControlsForPlayer();
 		assert.equal(popups.length, 1); assert(c.room.html.includes('龙王的工作 · 继任')); assert(c.room.html.includes('name="chooseDragonKing"'));
 		assert(c.room.html.includes('迷你龙接任本场龙王'));
+		assert(c.room.html.includes('name="retreatRogue"'));
 		c.room.chooseDragonKing('drizzle', {}); assert.deepEqual(c.sent, ['/choose rogueking drizzle 2|8']);
 		c.room.chooseDragonKing('drizzle', 1); assert.equal(c.sent.length, 1);
 		const popup = Object.create(popups[0].type); popup.$el = {html() {}}; popup.close = () => {};
@@ -1227,15 +1616,15 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 		assert(!c.room.html.includes('name="retreatRogue"'));
 		c.room.retreatRogue(); assert.equal(c.sent.length, 1);
 	});
-	it('omits event retreat and blocks the native forfeit popup while the encounter remains playable', () => {
+	it('keeps event escape and routes the native forfeit popup through the same escape action', () => {
 		const c = battleClient(); c.room.fantasyRogue.canRetreat = false;
-		c.room.updateControlsForPlayer(); assert(!c.room.html.includes('name="retreatRogue"'));
-		c.room.retreatRogue(); assert.equal(c.sent.length, 0);
+		c.room.updateControlsForPlayer(); assert(c.room.html.includes('name="retreatRogue"'));
+		c.room.retreatRogue(); assert.equal(c.sent.length, 1);
 		const popup = Object.create(c.context.ForfeitPopup);
 		popup.$el = {html: html => { popup.html = html; }};
 		popup.initialize({room: c.room, gameType: 'battle'});
-		assert(popup.html.includes('不能撤退或投降')); assert(!popup.html.includes('type="submit"'));
-		popup.submit({}); assert.equal(c.sent.length, 0);
+		assert(popup.html.includes('道具消耗保留')); assert(popup.html.includes('type="submit"'));
+		popup.close = () => {}; popup.submit({}); assert.deepEqual(c.sent, ['/fantasyrogue retreat', '/fantasyrogue retreat']);
 	});
 	it('shows overflowing psychic charge during trainer battles and spends a normal action', () => {
 		const c = battleClient();
@@ -1265,6 +1654,13 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 		assert(!c.room.html.includes('消耗已保存'));
 		assert(!c.room.html.includes('复活至少一名伙伴'));
 	});
+	it('preserves the clear after a god-challenge loss and offers the ending instead of a retry', () => {
+		const c = battleClient(); c.room.battle.ended = true; c.room.battle.atQueueEnd = true;
+		c.room.add('|fantasyroguedefeat|' + JSON.stringify({floor: 200, postgame: true}));
+		assert(c.room.html.includes('200 层通关成果与通关卡已保留'));
+		assert(!c.room.html.includes('消耗已保存'));
+		assert(!c.room.html.includes('免费重试'));
+	});
 	it('plays the final turn before showing defeat consequences and waits for manual return', () => {
 		const c = battleClient();
 		const defeat = {floor: 21, encounter: 3, encounters: 3, retryFloor: false, noHealing: false, emergencyCost: 5000};
@@ -1277,7 +1673,7 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 		assert(!c.room.closed); assert(!c.room.html.includes('本场战败'));
 		c.room.battle.ended = true; c.room.battle.atQueueEnd = true; c.room.updateControls();
 		assert(c.room.html.includes('本场战败')); assert(c.room.html.includes('3 / 3'));
-		assert(c.room.html.includes('5000')); assert(c.room.html.includes('不会自动扣除'));
+		assert(c.room.html.includes('5000')); assert(c.room.html.includes('余额足够会自动支付'));
 		assert(c.room.html.includes('HP、PP')); assert(!c.room.html.includes('需重试整层'));
 		assert(!c.room.closed); assert.deepEqual(c.joined, []);
 		c.room.closeAndRematch(); assert(c.room.closed); assert.deepEqual(c.joined, ['fantasyrogue']);

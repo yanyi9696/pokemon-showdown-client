@@ -79,6 +79,8 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	slot = 0;
 
 	fainted = false;
+	rogueCapturedBall?: string;
+	rogueAbilityInfo?: ServerPokemon['rogueAbilityInfo'];
 	hp = 0;
 	maxhp = 1000;
 	level = 100;
@@ -553,6 +555,8 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	}
 	reset() {
 		this.clearVolatile();
+		delete this.rogueCapturedBall;
+		delete this.rogueAbilityInfo;
 		this.hp = this.maxhp;
 		this.fainted = false;
 		this.status = '';
@@ -1010,6 +1014,12 @@ export interface PokemonHealth {
 	fainted?: boolean;
 }
 export interface ServerPokemon extends PokemonDetails, PokemonHealth {
+	rogueAbilityInfo?: { abilities: string[], active: boolean, abilitySources?: Record<string, string>,
+		stats?: Record<'atk' | 'def' | 'spa' | 'spd' | 'spe', number>, maxhp?: number, statSources?: string[],
+		moves?: Record<string, { power: { source: string, factor?: number, add?: number }[], damage: string[],
+			types?: Record<string, { source: string, factor?: number, add?: number }[]> }>,
+		training?: Partial<Record<'atk' | 'def' | 'spa' | 'spd' | 'spe', number>>,
+		mentor?: { name: string, text: string, damage: number, defense: number, speed: number } };
 	ident: string;
 	details: string;
 	condition: string;
@@ -3351,10 +3361,23 @@ export class Battle {
 			this.log(args, kwArgs);
 			break;
 		}
+		case '-rogueinfo': {
+			const poke = this.getPokemon(args[1]);
+			if (poke) {
+				try { poke.rogueAbilityInfo = JSON.parse(args[2]); } catch { /* Ignore malformed replay metadata. */ }
+				this.scene.updateStatbar(poke);
+			}
+			break;
+		}
 		case '-roguecapture': {
 			const poke = this.getPokemon(args[1]);
 			if (poke) this.scene.rogueCaptureAnim(poke, toID(args[2]), args[3] === 'success',
 				Math.max(0, Math.min(3, Number(args[4]) || 0)), args[5] === 'critical');
+			if (poke && args[3] === 'success') {
+				poke.rogueCapturedBall = toID(args[2]);
+				poke.fainted = true;
+				poke.hp = 0;
+			}
 			break;
 		}
 		case '-anim': {

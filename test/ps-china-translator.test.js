@@ -6,6 +6,20 @@ const source = fs.readFileSync(require.resolve('../play.pokemonshowdown.com/js/p
 const heading = 'Your team was rejected for the following reasons:';
 const chineseHeading = '您的队伍未通过校验，原因如下：';
 
+describe('Rogue vocabulary contexts', () => {
+	it('localizes form suffixes and descriptions without confusing UI labels with moves', () => {
+		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
+		const name = context.translateRogueName;
+		for (const input of ['Pidgeot-Mega-Fantasy', 'Urshifu-Rapid-Strike-G-Mega-Fantasy', 'Tatsugiri-Curly-Mega',
+			'Black Augurite', 'Base move affects power. Foes: slp or psn or par.',
+			' + 20 power for each of the user\'s stat boosts.', 'Evolves Galarian Slowpoke into Galarian Slowbro when used.',
+			'Teaches certain Pokemon the move Psychic. One use.']) assert(!/[A-Za-z]{3}/.test(name(input)), input);
+		assert.equal(name('Metronome', 'move'), '挥指'); assert.equal(name('Metronome', 'item'), '节拍器');
+		assert.equal(name('Psychic'), '超能力'); assert.equal(name('Psychic', 'move'), '精神强念');
+		assert.equal(name('Disable', 'move'), '定身法'); assert.equal(name('Refresh', 'move'), '焕然一新');
+	});
+});
+
 function element(tagName, className = '', parent = null) {
 	const node = {
 		nodeType: 1, tagName, parentNode: parent, parentElement: parent, childNodes: [],

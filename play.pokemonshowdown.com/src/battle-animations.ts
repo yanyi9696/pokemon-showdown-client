@@ -345,7 +345,8 @@ export class BattleScene implements BattleSceneStub {
 			`<span style="display:block;position:absolute;width:24px;height:24px;left:50%;top:50%;margin:-12px;` +
 			`image-rendering:pixelated;transform:scale(1.5);${icon}"></span></div>` },
 		{ x: origin?.x || -80, y: (origin?.y || 0) + 35, z: origin?.z || 0 }, this);
-		this.$fx.append(ballSprite.$el);
+		// Keep a successful capture on the field through the result screen.
+		(success ? this.$sprites[+target.isFrontSprite] : this.$fx).append(ballSprite.$el);
 		ballSprite.delay(start).anim({ x: target.x, y: target.y + 20, z: target.z, time: ms(hit) }, 'ballistic2');
 		const landing = { x: target.x, y: target.y - 35, z: target.z };
 		ballSprite.delay(ms(absorb)).anim({ ...landing, time: ms(drop) }, 'accel').delay(ms(140));
@@ -386,7 +387,7 @@ export class BattleScene implements BattleSceneStub {
 						scale: 0.35, opacity: 0, time: ms(240) }, 'linear');
 				this.waitFor(star.$el);
 			}
-			ballSprite.delay(ms(500)).anim({ ...landing, opacity: 0, time: ms(160) });
+			ballSprite.delay(ms(500));
 		} else {
 			ballSprite.anim({ ...landing, opacity: 0, scale: 1.8, time: ms(150) });
 			target.delay(ms(release - hit - absorb)).anim({ x: target.x, y: target.y, z: target.z,
@@ -2263,6 +2264,17 @@ export class PokemonSprite extends Sprite {
 	}
 	reset(pokemon: Pokemon) {
 		this.clearEffects();
+		if (pokemon.rogueCapturedBall && pokemon.side.active.includes(pokemon)) {
+			this.$el?.remove();
+			this.$statbar?.remove(); this.$statbar = null;
+			const group = this.scene.$sprites[+this.isFrontSprite];
+			group.find('.rogue-capture-ball').remove();
+			const ball = new Sprite({w: 24, h: 24, rawHTML: '<div class="rogue-capture-ball" style="position:absolute;pointer-events:none">' +
+				'<span style="display:block;width:24px;height:24px;image-rendering:pixelated;transform:scale(1.5);' +
+				Dex.getItemIcon(pokemon.rogueCapturedBall) + '"></span></div>'}, {x: this.x, y: this.y - 35, z: this.z}, this.scene);
+			group.append(ball.$el);
+			return;
+		}
 
 		if (pokemon.volatiles.formechange || pokemon.volatiles.dynamax || pokemon.volatiles.terastallize) {
 			if (!this.oldsp) this.oldsp = this.sp;
@@ -2422,6 +2434,7 @@ export class PokemonSprite extends Sprite {
 		}
 	}
 	animSummon(pokemon: Pokemon, slot: number, instant?: boolean) {
+		this.scene.$sprites[+this.isFrontSprite].find('.rogue-capture-ball').remove();
 		if (!this.scene.animating) return;
 		this.scene.$sprites[+this.isFrontSprite].append(this.$el);
 		this.recalculatePos(slot);
@@ -2945,6 +2958,7 @@ export class PokemonSprite extends Sprite {
 
 	updateStatbar(pokemon: Pokemon, updatePrevhp?: boolean, updateHp?: boolean) {
 		if (!this.scene.animating) return;
+		if (pokemon.rogueCapturedBall) { this.$statbar?.hide(); return; }
 		if (!pokemon.isActive()) {
 			if (this.$statbar) this.$statbar.hide();
 			return;
@@ -2976,6 +2990,11 @@ export class PokemonSprite extends Sprite {
 			else $prevhp.addClass('prevhp-yellow prevhp-red');
 		}
 		let status = '';
+		const rogueInfo = pokemon.rogueAbilityInfo;
+		if (rogueInfo?.mentor) status += '<span class="good" title="' + BattleLog.escapeHTML(rogueInfo.mentor.text) + '">首领卡</span> ';
+		if (rogueInfo?.training && Object.values(rogueInfo.training).some(Boolean)) {
+			status += '<span class="good" title="鼠标移到宝可梦上查看本局永久增幅">永久增幅</span> ';
+		}
 
 		// =========== 自定义 FANTASY 标识 - 开始 ===========
 		// 我们检查 fantasystats 状态，这个状态对双方都可见
