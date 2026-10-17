@@ -373,6 +373,12 @@ License: GPLv2
 	max-width: 80px;
 	max-height: 80px;
 }
+.trainersprite.rogue-commander {
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+	filter: drop-shadow(0 0 4px #bc93ee);
+}
 .turn {
 	position: absolute;
 	display: block;

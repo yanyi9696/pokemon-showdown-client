@@ -8797,6 +8797,9 @@ function translateRogueName(value, kind) {
         'Urshifu-G-Mega-Fantasy': '幻想超巨进化武道熊师（爆击流）',
         'Urshifu-Rapid-Strike-G-Mega-Fantasy': '幻想超巨进化武道熊师（瞬击流）',
         'Urshifu-Rapid-Strike-2-Fantasy': '幻想武道熊师（环击流）'};
+    const fantasyMega = value.match(/^(.+?)-Mega(?:-([XYZ]))?-Fantasy$/);
+    if (fantasyMega && !fantasyMega[1].endsWith('-G')) return '幻想' + translateRogueName(fantasyMega[1], kind) + '-超级进化' + (fantasyMega[2] || '');
+    if (/^幻想超级(?!进化)/.test(value)) return value.replace(/^幻想超级(.+?)([XYZ])?$/, '幻想$1-超级进化$2');
     if (fixed[value]) return fixed[value];
     if (translations[value]) return translations[value].replace(/\(Gen (\d+)\)/g, '（第 $1 世代）').replace(/Mega进化/gi, '超级进化');
     if (/[\u3400-\u9fff]/.test(value)) return value.replace(/幻想mega/gi, '幻想超级进化').replace(/Mega进化/gi, '超级进化');
@@ -8831,6 +8834,11 @@ function translateRogueName(value, kind) {
     if (match) return '让能够学习的宝可梦学会【' + translateRogueName(match[1], 'move') + '】。使用一次后消失。';
     return value;
 }
+// Use the same Fantasy Mega form order in battles, validation and Rogue menus.
+Object.keys(translations).forEach(function (name) {
+    const mega = name.match(/^(.+?)-Mega(?:-([XYZ]))?-Fantasy$/);
+    if (mega && !mega[1].endsWith('-G')) translations[name] = translateRogueName(name);
+});
 Object.assign(translations, {
     "This Pokemon's attacks have a 30% chance of badly poisoning.": '攻击时有 30% 的概率使目标陷入剧毒。',
     "+ 20 power for each of the user's stat boosts.": '使用者每提升一级能力，招式威力增加 20。',
@@ -12292,6 +12300,7 @@ Object.entries({
 
     // 您重写并优化的宝可梦名字拆分翻译逻辑
     function translatePokemonName(name) {
+        if (/^(.+?)-Mega(?:-[XYZ])?-Fantasy$/.test(name) && !name.includes('-G-Mega')) return translateRogueName(name);
         // 1. 最高优先级：特殊保护机制与特判 (必须放在查字典之前！)
         // 这样无论你的字典里混进了什么脏数据，都会被这里的强制规则覆盖
         if (name.includes("Wo-Chien-Fantasy")) { name = name.replace("Wo-Chien-Fantasy", "古简蜗-幻想"); }

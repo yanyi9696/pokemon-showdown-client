@@ -806,7 +806,7 @@ export class BattleScene implements BattleSceneStub {
 		}
 		return (
 			`<div class="trainer trainer-${posStr}"${faded}><strong>${BattleLog.escapeHTML(side.name)}</strong>` +
-			`<div class="trainersprite"${ratinghtml} style="background-image:url(${Dex.resolveAvatar(side.avatar)})">` +
+			`<div class="trainersprite${side.avatar === '#rogue-mewtwo' ? ' rogue-commander' : ''}"${ratinghtml} style="background-image:url(${Dex.resolveAvatar(side.avatar)});${side.avatar === '#rogue-mewtwo' && side.active.some(mon => mon?.speciesForme.startsWith('Mewtwo')) ? 'visibility:hidden' : ''}">` +
 			`</div>${badgehtml}${pokemonhtml}</div>`
 		);
 	}

@@ -385,6 +385,7 @@ export const Dex = new class implements ModdedDex {
 	}
 
 	resolveAvatar(avatar: string): string {
+		if (avatar === '#rogue-mewtwo') return Dex.resourcePrefix + 'sprites/gen5/mewtwo.png';
 		if (window.BattleAvatarNumbers && avatar in BattleAvatarNumbers) {
 			avatar = BattleAvatarNumbers[avatar];
 		}

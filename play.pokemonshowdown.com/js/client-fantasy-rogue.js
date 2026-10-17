@@ -1237,6 +1237,10 @@
 			var html = '<article class="rogue-event"><h3>' + escape(event.title) + '</h3><div class="rogue-event-text">' +
 				(event.paragraphs || []).map(function (line) { return '<p>' + dialogueText(line) + '</p>'; }).join('') + '</div>';
 			if (event.fishing && event.stage === 'choice') return html + this.renderFishing(event, busy) + '</article>';
+			if (event.auction) html += '<section class="rogue-auction-board"><h4>本场拍品</h4><p>' + dialogueText(event.auction.catalog) +
+				'</p><div class="rogue-auction-budgets">' + event.auction.npcs.map(function (npc) {
+					return '<div><strong>' + escape(npc.name) + '</strong><span>剩余预算 <b>' + Number(npc.budget) + '</b> 金币</span></div>';
+				}).join('') + '</div></section>';
 			if (event.preview) {
 				var preview = event.preview;
 				html += '<div class="rogue-event-preview"><strong>' + escape(localName(preview.before)) + ' → ' + escape(localName(preview.after)) + '</strong>' +
@@ -1362,8 +1366,10 @@
 				html += '</div>';
 				if (!(run.choices || []).length) html += '<p>本层内容等待配置，存档已保留。</p>';
 			} else if (run.phase === 'ready') {
+				if (run.node && run.node.wildPack) html += '<p class="rogue-area-notice"><strong>连续野生对战 · ' + run.node.wildPack + ' 只</strong> · 捕捉或击倒后继续迎战下一只。</p>';
+				if (run.node && run.node.environment) html += '<p class="rogue-area-notice">区域环境：<strong>' + escape(run.node.environment.name) + '</strong> · 开战后持续 5 回合。</p>';
 				if (run.event) html += this.renderEvent(run, busy) + '<p class="rogue-caption">可先调整队伍。' + (run.event.memoryBattle ?
-					'幻境结束后恢复原队伍与背包的战前状态，保留捕捉与实际经验。' : '战败后事件结束，保留损耗，不发胜利奖励。') +
+					'幻境结束后恢复原队伍与背包的战前状态，保留捕捉与实际经验。' : run.event.id === 'exclusiveclue' ? '袭击结束后可继续寻找线索，战败保留损耗。' : '战败后事件结束，保留损耗，不发胜利奖励。') +
 				'逃跑保留损耗，本场叠层恢复至开战前，可整理队伍后再挑战本场。' + '</p>';
 				if (run.node && run.node.rocket && !run.node.rocket.cleared) html += '<p><strong>火箭队袭击！</strong>击败后开放商店，并获得 <b>' + run.node.rocket.reward + ' 金币</b>。</p>';
 				if (run.node && run.node.bonusEncounter) html += '<p><strong>额外遭遇</strong> · 发现了区域名单之外的宝可梦！</p>';

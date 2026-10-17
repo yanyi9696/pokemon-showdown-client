@@ -886,3 +886,10 @@
 .rogue-companion-speech { background:#eaf4fd; border:1px solid #c1d4e4; border-radius:8px; padding:7px 9px; font-size:15px; line-height:1.5; margin:6px 0; }
 .rogue-companion-choice { background:#f4f8ff; border:1px solid #9db6cb; border-radius:8px; padding:10px; }
 .rogue-companion-pick { display:grid; justify-items:center; padding:8px 20px; }
+
+.rogue-auction-board {padding: 12px; border: 1px solid #c8b07b; border-radius: 10px; background: #fff9e9;}
+.rogue-auction-board h4 {margin: 0 0 6px;}
+.rogue-auction-budgets {display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px;}
+.rogue-auction-budgets > div {padding: 8px; background: #ffffffb8; border-radius: 6px;}
+.rogue-auction-budgets span {display: block; margin-top: 4px;}
+.rogue-area-notice {padding: 10px; background: #edf7ff; border-left: 4px solid #578ba8;}

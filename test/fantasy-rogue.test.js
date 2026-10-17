@@ -652,6 +652,25 @@ function adventure(phase = 'choose') {
 	return data;
 }
 describe('Fantasy Rogue event display and spectator playback', () => {
+	it('renders auction budgets, lots and legal tutor choices using normal event commands', () => {
+		const c = client(false, true), data = adventure('event');
+		data.run.event = {id: 'auction', title: '落槌之前', key: 'auction-key', stage: 'choice',
+			paragraphs: ['交替出价，落槌付款。'], auction: {catalog: '1. 【Light Ball】', npcs: [{name: '行商', budget: 6500}]},
+			options: [{id: 'bid', name: '加价到 3000 金币。', text: '', disabled: false}]};
+		c.room.receiveState(data);
+		assert(c.html.includes('电气球') && c.html.includes('剩余预算') && c.html.includes('6500'));
+		assert(c.html.includes('rogue-auction-board'));
+		data.run.event = {id: 'fantasytutor', title: '幻想招式教学', key: 'tutor-key', stage: 'choice', paragraphs: [], options: [],
+			picker: {label: '选择幻想招式', options: [{id: 'fantasymove:huanshenbu', name: 'Huan Shen Bu', text: '10 幻想碎片', disabled: false}]}};
+		c.room.receiveState(data); c.room.controls['select[name=eventMove]'] = 'fantasymove:huanshenbu';
+		assert(c.html.includes('10 幻想碎片')); assert(c.html.includes('确认学习'));
+	});
+	it('explains continuous wild battles and the saved five-turn environment before entry', () => {
+		const c = client(), data = adventure('ready'); data.run.encounter = 0; data.run.encounters = 1;
+		data.run.node = {kind: 'wild', name: '电厂', wildPack: 4, environment: {name: '电气场地'}, reward: {money: 0, items: {}}};
+		c.room.receiveState(data); assert(c.html.includes('连续野生对战 · 4 只'));
+		assert(c.html.includes('电气场地') && c.html.includes('持续 5 回合'));
+	});
 	it('renders companion portraits, contextual advice and only the consulted recommendation', () => {
 		const c = client(), data = adventure('event');
 		data.run.companions = [{id: 'bea', name: '彩豆', preferences: 3, canConsult: true,
@@ -1653,6 +1672,14 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 		assert(c.room.html.includes('保留实际经验与捕捉结果'));
 		assert(!c.room.html.includes('消耗已保存'));
 		assert(!c.room.html.includes('复活至少一名伙伴'));
+	});
+	it('keeps the clue search open after an ambush defeat and preserves resource losses', () => {
+		const c = battleClient(); c.room.battle.ended = true; c.room.battle.atQueueEnd = true;
+		c.room.add('|fantasyroguedefeat|' + JSON.stringify({floor: 81, eventContinues: true}));
+		assert(c.room.html.includes('继续寻找线索'));
+		assert(c.room.html.includes('消耗已保存'));
+		assert(!c.room.html.includes('事件已经结束'));
+		assert(!c.room.html.includes('下次仍挑战'));
 	});
 	it('preserves the clear after a god-challenge loss and offers the ending instead of a retry', () => {
 		const c = battleClient(); c.room.battle.ended = true; c.room.battle.atQueueEnd = true;

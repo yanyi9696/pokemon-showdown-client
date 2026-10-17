@@ -7,6 +7,15 @@ const heading = 'Your team was rejected for the following reasons:';
 const chineseHeading = '您的队伍未通过校验，原因如下：';
 
 describe('Rogue vocabulary contexts', () => {
+	it('puts Fantasy Mega suffixes after the species and regional form', () => {
+		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
+		for (const [name, expected] of [['Slowbro-Galar-Mega-Fantasy', '幻想呆壳兽-伽勒尔-超级进化'],
+			['Pidgeot-Mega-Fantasy', '幻想大比鸟-超级进化'], ['Mewtwo-Mega-X-Fantasy', '幻想超梦-超级进化X'],
+			['幻想超级呆壳兽-伽勒尔', '幻想呆壳兽-伽勒尔-超级进化']]) {
+			assert.equal(context.translateRogueName(name), expected);
+		}
+		assert.equal(context.translateRogueName('Urshifu-G-Mega-Fantasy'), '幻想超巨进化武道熊师（爆击流）');
+	});
 	it('localizes form suffixes and descriptions without confusing UI labels with moves', () => {
 		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
 		const name = context.translateRogueName;
@@ -60,13 +69,13 @@ function client(message, language = 'zh', split = false) {
 describe('Chinese team validation popups', () => {
 	it('translates the screenshot as a single multiline message and keeps the G-Mega label working', () => {
 		const ui = client(`${heading}\n\n- Metagross-Mega-Fantasy can't learn Breaking Swipe.`);
-		assert.equal(ui.paragraph.textContent, `${chineseHeading}\n\n- 巨金怪-超级进化-幻想无法学习“广域破坏”。`);
+		assert.equal(ui.paragraph.textContent, `${chineseHeading}\n\n- 幻想巨金怪-超级进化无法学习“广域破坏”。`);
 		assert.equal(ui.popup.childNodes[1].textContent, '确认');
 		assert.equal(ui.label.nodeValue, '超巨进化');
 	});
 	for (const [reason, expected] of [
-		["Metagross-Mega-Fantasy can't learn Breaking Swipe.", '巨金怪-超级进化-幻想无法学习“广域破坏”。'],
-		["小铁块 (Metagross-Mega-Fantasy) can't learn Psychic.", '小铁块（巨金怪-超级进化-幻想）无法学习“精神强念”。'],
+		["Metagross-Mega-Fantasy can't learn Breaking Swipe.", '幻想巨金怪-超级进化无法学习“广域破坏”。'],
+		["小铁块 (Metagross-Mega-Fantasy) can't learn Psychic.", '小铁块（幻想巨金怪-超级进化）无法学习“精神强念”。'],
 		["Pikachu can't have Intimidate.", '皮卡丘不能拥有特性“威吓”。'],
 		["Pikachu can't have As One (Spectrier).", '皮卡丘不能拥有特性“人马一体 (灵幽马)”。'],
 		['Calyrex-Shadow is tagged ND AG, which is banned.', '蕾冠王-黑马属于被禁止的分类“ND AG”。'],
@@ -78,11 +87,11 @@ describe('Chinese team validation popups', () => {
 		['You may only bring up to 6 Pokémon (your team has 7).', '队伍最多允许6只宝可梦，当前有7只。'],
 		['Pikachu is not a Fantasy Pokémon.', '皮卡丘不是幻想宝可梦。'],
 		['Metagross-Fantasy with Metagrossite is not legal.', '巨金怪-幻想携带“巨金怪进化石”的配置不合法。'],
-		['Reason: Its Mega Evolution (Metagross-Mega-Fantasy) is banned in this tier.', '原因：其Mega进化形态（巨金怪-超级进化-幻想）在此分级中被禁止使用。'],
+		['Reason: Its Mega Evolution (Metagross-Mega-Fantasy) is banned in this tier.', '原因：其Mega进化形态（幻想巨金怪-超级进化）在此分级中被禁止使用。'],
 		['Reason: Its Mega Evolution (Urshifu-G-Mega-Fantasy) is banned in this tier.', '原因：其超巨进化形态（武道熊师-爆击流-超巨进化-幻想）在此分级中被禁止使用。'],
 		['Your team has 120 points, exceeding the 100-point limit.', '队伍总积分为120，超过了100分的上限。'],
 		['Breakdown: Metagross-Fantasy(OU) -> Metagross-Mega-Fantasy((Uber)) = 40, Pikachu-Fantasy(LC)=0 [+20 budget]',
-			'积分明细：巨金怪-幻想(OU) → 巨金怪-超级进化-幻想((Uber)) = 40、皮卡丘-幻想(LC)=0 [积分上限+20]'],
+			'积分明细：巨金怪-幻想(OU) → 幻想巨金怪-超级进化((Uber)) = 40、皮卡丘-幻想(LC)=0 [积分上限+20]'],
 		['Urshifu-G-Mega-Fantasy transforms in-battle with Ren Zhen Ou Da, please fix its moves.', '武道熊师-爆击流-超巨进化-幻想需要招式“认真殴打”才能在战斗中变为该形态，请修改配置。'],
 	]) {
 		it(`translates a separate reason node: ${reason}`, () => {

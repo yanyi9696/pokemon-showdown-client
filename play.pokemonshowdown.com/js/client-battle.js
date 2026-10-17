@@ -539,6 +539,8 @@
 				'<p>队伍保持战败时的状态；HP、PP、异常状态和道具消耗已保存，本场不发放胜利奖励。</p>');
 			if (result.memoryRestored) {
 				html += '<p>本次幻境已经结束。返回冒险，安置新伙伴并阅读事件结尾。</p>';
+			} else if (result.eventContinues) {
+				html += '<p>袭击已经结束，返回冒险后可整理伙伴并继续寻找线索。</p>';
 			} else if (result.eventClosed) {
 				html += '<p>本次事件已经结束，无需重打。返回冒险后可安置已捕获的伙伴；有能行动的伙伴即可继续前进。</p>';
 			} else if (result.shopClosed) {
