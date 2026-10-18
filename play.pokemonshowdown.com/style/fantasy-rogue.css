@@ -890,10 +890,6 @@
 .rogue-companion-portrait.smiling { background-position:100% 0; }
 .rogue-companion-portrait.chatting { animation-name:rogue-companion-chat; animation-timing-function:steps(1,end); animation-fill-mode:forwards; }
 @keyframes rogue-companion-chat { from { background-position:100% 0; } to { background-position:0 0; } }
-.rogue-companion-portrait.single-portrait { position:relative; background-image:var(--rogue-neutral); background-size:120px auto; background-position:center top; }
-.rogue-companion-portrait.single-portrait.smiling { background-image:var(--rogue-smile); }
-.rogue-companion-portrait.single-portrait.chatting { animation-name:rogue-companion-guzma-chat; }
-@keyframes rogue-companion-guzma-chat { from { background-image:var(--rogue-smile); } to { background-image:var(--rogue-neutral); } }
 .rogue-companion-copy { flex:1; min-width:0; }
 .rogue-companion-copy > strong, .rogue-companion-copy > small { display:block; }
 .rogue-companion-copy .button { margin:5px 4px 0 0; white-space:normal; }

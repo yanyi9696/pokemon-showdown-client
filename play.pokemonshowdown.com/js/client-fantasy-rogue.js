@@ -2,6 +2,7 @@
 	'use strict';
 	var escape = BattleLog.escapeHTML;
 	var globals = this;
+	var companionPortraits = {guzma: 'guzma-expressions', iris: 'iris-champion'};
 	// Update existing nodes in place: replacing the whole room briefly collapses its
 	// scroll range, drops focus and restarts every CSS animation on each response.
 	function stableHTML(room, html) {
@@ -643,9 +644,8 @@
 			if (!companions.length) return html;
 			return html + '<section class="rogue-companions" aria-label="同行训练家">' + companions.map(function (c) {
 				var chat = c.smile && c.smileUntil, seconds = chat ? Math.max(0, (c.smileUntil - Date.now()) / 1000) : 0;
-				var portrait = c.id === 'guzma' ? '--rogue-neutral:url(sprites/rogue-companions/guzma-neutral.png);--rogue-smile:url(sprites/rogue-companions/guzma-neutral.png);' :
-					'background-image:url(sprites/rogue-companions/' + c.id + '.png);';
-				var out = '<article class="rogue-companion"><button class="rogue-companion-portrait' + (c.id === 'guzma' ? ' single-portrait' : '') + (c.smile ? ' smiling' : '') + (chat ? ' chatting' : '') +
+				var portrait = 'background-image:url(sprites/rogue-companions/' + (companionPortraits[c.id] || c.id) + '.png);';
+				var out = '<article class="rogue-companion"><button class="rogue-companion-portrait' + (c.smile ? ' smiling' : '') + (chat ? ' chatting' : '') +
 					'" name="companionAction" value="' + c.id + '|chat" title="与' + escape(c.name) + '闲聊" aria-label="与' + escape(c.name) + '闲聊" style="' +
 					portrait + 'animation-duration:' + seconds + 's"' + (locked ? ' disabled' : '') + '></button><div class="rogue-companion-copy"><strong>' + escape(c.name) + '</strong>';
 				if (c.canConsult) out += button('companionAction', c.id + '|advice', '你想听听我的建议吗？', locked);
@@ -2081,7 +2081,7 @@
 					Object.keys(statNames).map(function (stat) { return statNames[stat] + ' ' + entry.stats[stat]; }).join(' · ') + '</p>' +
 					(entry.battleOnly ? '<p class="rogue-caption">战斗中触发的特殊形态' + (entry.requiredItem ? ' · ' + escape(localName(entry.requiredItem)) : '') + '</p>' : '');
 				if (section === 'blessings' && entry.family === 'prayer') body = body.replace(/<strong class="rogue-term">【Top Clear Mind】<\/strong>/g, '<button class="rogue-codex-link" name="jumpBlessing"><b>【Top Clear Mind】</b></button>');
-				if (entry.portrait) body = '<span class="rogue-companion-portrait codex-portrait' + (entry.portrait === 'guzma' ? ' single-portrait' : '') + '" style="background-image:url(sprites/rogue-companions/' + (entry.portrait === 'guzma' ? 'guzma-neutral' : entry.portrait) + '.png)"></span>' + body;
+				if (entry.portrait) body = '<span class="rogue-companion-portrait codex-portrait" style="background-image:url(sprites/rogue-companions/' + (companionPortraits[entry.portrait] || entry.portrait) + '.png)"></span>' + body;
 				return '<article data-codex-family="' + escape(entry.family || '') + '" class="rogue-codex-entry tier-' + (entry.tier || 'plain') + (entry.unlocked === false ? ' is-locked' : '') + '">' +
 					'<div class="rogue-codex-entry-top"><span>' + icon + '</span><small>' + (tier ? tier + '阶' : section === 'events' ? (entry.category === 'companion' ? '同行训练家' : kindNames[entry.category || 'event']) : '幻想杯') +
 					'</small>' + (entry.unlocked === false ? '<span class="rogue-codex-lock">' + fa('lock') + '未解锁</span>' : '') + '</div>' +
