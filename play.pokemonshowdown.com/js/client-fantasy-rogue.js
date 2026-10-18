@@ -147,7 +147,7 @@
 		}
 		return (routeParticles += '</span>');
 	}
-	var itemKinds = {ball: '精灵球', heal: '恢复道具', revive: '复活道具', cure: '状态恢复', ether: 'PP 恢复', candy: '经验糖果', evolution: '进化道具', held: '携带道具', emblem: '属性转 · 独立栏位', treasure: '贵重物品', effort: '基础点数', tonic: '祝福道具'};
+	var itemKinds = {ball: '精灵球', heal: '恢复道具', revive: '复活道具', cure: '状态恢复', ether: 'PP 恢复', candy: '经验糖果', evolution: '进化道具', held: '携带道具', emblem: '属性转 · 独立栏位', treasure: '贵重物品', effort: '基础点数', tonic: '祝福道具', crown: '个体值训练'};
 	var economyIcons = ['tinymushroom', 'balmmushroom', 'prettyfeather', 'stardust', 'starpiece', 'cometshard', 'pearl', 'bigpearl', 'pearlstring',
 		'antidote', 'burnheal', 'iceheal', 'awakening', 'paralyzeheal', 'healthfeather', 'musclefeather', 'resistfeather', 'geniusfeather', 'cleverfeather', 'swiftfeather'];
 	function dex() { return Dex.mod ? Dex.mod('gen9fantasy') : Dex; }
@@ -164,7 +164,7 @@
 			Dex.getItemIcon(typeof item.spritenum === 'number' ? item : dex().items.get(item.icon || item.id)) + '"></span> ' : fa('cube');
 	}
 	function button(name, value, label, disabled, icon) {
-		return '<button class="button" name="' + name + '" value="' + escape(value || '') + '"' +
+		return '<button class="button rogue-control" name="' + name + '" value="' + escape(value || '') + '"' +
 			(disabled ? ' disabled' : '') + '>' + (icon || '') + escape(label) + '</button> ';
 	}
 	function memberChoice(name, value, mon, disabled, caption) {
@@ -559,6 +559,14 @@
 							'><span class="rogue-companion-portrait" style="background-image:url(sprites/rogue-companions/' + entry[0] + '.png)"></span><b>' + entry[1] + '</b></button>';
 					}).join('') + '</div></div>';
 			}
+			if (run.blessings && run.blessings.owned.some(function (b) { return b.family === 'companionstreamer'; }) &&
+				!companions.some(function (c) { return c.id === 'iono' || c.id === 'canari'; })) {
+				html += '<div class="rogue-companion-choice"><strong>选择同行训练家</strong><div class="rogue-companions">' +
+					[['iono', '奇树'], ['canari', '卡娜莉']].map(function (entry) {
+						return '<button class="button rogue-companion-pick" name="companionAction" value="' + entry[0] + '|choosestreamer"' + (locked ? ' disabled' : '') +
+							'><span class="rogue-companion-portrait" style="background-image:url(sprites/rogue-companions/' + entry[0] + '.png)"></span><b>' + entry[1] + '</b></button>';
+					}).join('') + '</div></div>';
+			}
 			if (!companions.length) return html;
 			return html + '<section class="rogue-companions" aria-label="同行训练家">' + companions.map(function (c) {
 				var chat = c.smile && c.smileUntil, seconds = chat ? Math.max(0, (c.smileUntil - Date.now()) / 1000) : 0;
@@ -567,7 +575,7 @@
 					'sprites/rogue-companions/' + c.id + '.png);animation-duration:' + seconds + 's"' + (locked ? ' disabled' : '') + '></button><div class="rogue-companion-copy"><strong>' + escape(c.name) + '</strong>';
 				if (c.canConsult) out += button('companionAction', c.id + '|advice', '你想听听我的建议吗？', locked);
 				if (c.message) out += '<p class="rogue-companion-speech">' + escape(c.message) + '</p>';
-				if (c.id === 'bea' || c.id === 'acerola') out += '<small>心意 ' + Math.min(15, c.preferences) + ' / 15' + (c.rewarded ? ' · 已收到礼物' : '') + '</small>';
+				if (c.id === 'bea' || c.id === 'acerola' || c.id === 'iono' || c.id === 'canari') out += '<small>心意 ' + Math.min(15, c.preferences) + ' / 15' + (c.rewarded ? ' · 已收到礼物' : '') + '</small>';
 				(c.typeOptions || []).forEach(function (type) {
 					out += button('companionAction', c.id + '|type:' + type.id, localName(type.id) + ' · ' + (type.member ? localName(type.member) : '暂无伙伴'), locked || !type.member);
 				});
@@ -783,6 +791,9 @@
 			if (item && item.kind === 'candy') {
 				app.addPopup(globals.RogueCandyPopup, {room: this, member: mon, item: item});
 				return;
+			}
+			if (item && item.kind === 'crown') {
+				app.addPopup(globals.RogueCrownPopup, {room: this, member: mon, item: item}); return;
 			}
 			if (item && item.kind === 'tonic') {
 				app.addPopup(globals.RogueCardConfirmPopup, {room: this, action: 'use', details: {value: id, member: mon.id},
@@ -1619,6 +1630,7 @@
 						if (item.kind === 'revive') reason = target.hp ? '仅能复活濒死伙伴' : '';
 						if (item.kind === 'cure') reason = !target.hp ? '需先复活' : !canCure(item, target) ? '无对应异常状态' : '';
 						if (item.kind === 'ether') reason = !target.hp ? '需先复活' : !target.pp.some(function (slot) { return slot.pp < slot.maxpp; }) ? 'PP 已满' : '';
+						if (item.kind === 'crown') reason = Object.keys(statNames).every(function (stat) { return target.set.ivs[stat] >= 31; }) ? '个体值已满' : '';
 						if (item.kind === 'mint') reason = target.mintNature === item.nature ? '已生效' : '';
 						if (item.kind === 'tonic') reason = target.tonics && target.tonics[item.id.replace(/^rogue/, '')] ? '已生效' : '';
 						if (item.kind === 'machine') reason = (target.machineMoves || []).indexOf(item.move) < 0 ? '无法学习或已经掌握' : '';
@@ -1704,13 +1716,13 @@
 					(!this.state.shopItems || this.state.shopItems.indexOf(item.id) >= 0);
 			}, this);
 			var groups = [{name: '性格薄荷', kinds: ['mint']}, {name: '招式学习机', kinds: ['machine']}, {name: '精灵球与补给', kinds: ['ball', 'heal', 'revive', 'cure', 'ether']},
-				{name: '基础点数训练', kinds: ['effort']}, {name: '进化与携带道具', kinds: ['evolution', 'held']}, {name: run.node && run.node.kind === 'trade' ? '经验糖果' :
+				{name: '个体值与基础点数训练', kinds: ['effort', 'crown']}, {name: '对战影响道具', kinds: ['held'], category: '对战影响道具'}, {name: '进化与携带道具', kinds: ['evolution', 'held'], excludeCategory: '对战影响道具'}, {name: run.node && run.node.kind === 'trade' ? '经验糖果' :
 					run.spirit && run.spirit.id === 'meowth' ? '塔灵特供 · 经验糖果' : '限量经验糖果', kinds: ['candy']}];
 			html = html.replace('<!--shop-categories-->', '<nav class="rogue-shop-categories" aria-label="商品分类">' + groups.map(function (group, index) {
-				return stock.some(function (item) { return group.kinds.indexOf(item.kind) >= 0; }) ? button('jumpShopGroup', '' + index, group.name) : '';
+				return stock.some(function (item) { return group.kinds.indexOf(item.kind) >= 0 && (!group.category || item.category === group.category) && (!group.excludeCategory || item.category !== group.excludeCategory); }) ? button('jumpShopGroup', '' + index, group.name) : '';
 			}).join('') + '</nav>');
 			groups.forEach(function (group, index) {
-				var entries = stock.filter(function (item) { return group.kinds.indexOf(item.kind) >= 0; });
+				var entries = stock.filter(function (item) { return group.kinds.indexOf(item.kind) >= 0 && (!group.category || item.category === group.category) && (!group.excludeCategory || item.category !== group.excludeCategory); });
 				if (!entries.length) return;
 				html += '<section class="rogue-shop-group" data-shop-category="' + index + '" data-rogue-key="shop:' + index + '"><h4>' + group.name + ' · ' + entries.length +
 					' 种</h4><div class="rogue-inventory">';
@@ -2236,6 +2248,20 @@
 				this.close(); app.addPopup(globals.RogueNoticePopup, {text: '队伍或背包已更新，请重新选择糖果数量。'}); return;
 			}
 			room.submit('use', {value: this.data.item.id, member: this.data.member.id, count: preview.count});
+			this.close();
+		}
+	});
+	this.RogueCrownPopup = this.Popup.extend({
+		type: 'modal',
+		initialize: function (data) {
+			this.data = data; this.userid = app.user.get('userid');
+			var gold = data.item.id === 'goldbottlecap';
+			stableHTML(this, '<div class="rogue-crown-popup"><h3>为' + escape(localName(data.member.set.species)) + '使用【' + escape(data.item.name) + '】</h3><p>' + escape(data.item.description) + '</p>' +
+				(gold ? button('trainIV', 'all', '将六项个体值提升至 31', Object.keys(statNames).every(function (stat) { return data.member.set.ivs[stat] >= 31; })) :
+				Object.keys(statNames).map(function (stat, i) { return '<p>' + button('trainIV', '' + i, statNames[stat] + ' · ' + data.member.set.ivs[stat] + ' → 31', data.member.set.ivs[stat] >= 31) + '</p>'; }).join('')) + button('close', '', '取消') + '</div>');
+		},
+		trainIV: function (slot) {
+			if (app.user.get('userid') === this.userid) this.data.room.submit('use', {value: this.data.item.id, member: this.data.member.id, slot: slot === 'all' ? undefined : Number(slot)});
 			this.close();
 		}
 	});

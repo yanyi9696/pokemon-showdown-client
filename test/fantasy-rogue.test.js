@@ -321,6 +321,33 @@ describe('Fantasy Rogue start menu and codex', () => {
 		assert(c.sent[c.sent.length - 1].includes('"slot":0'));
 		assert(c.sent[c.sent.length - 1].includes('"value":"ether"'));
 	});
+	it('asks which IV to train and consumes no crown when dismissed', () => {
+		for (const id of ['bottlecap', 'goldbottlecap']) {
+			const c = client(), data = adventure('rest');
+			data.items.push({id, name: id === 'bottlecap' ? '银色王冠' : '金色王冠', kind: 'crown', description: '提升个体值。'});
+			data.run.bag[id] = 1; data.run.team[0].set.ivs.hp = 31;
+			c.room.receiveState(data); const sent = c.sent.length; c.room.useItem(id);
+			assert.equal(c.sent.length, sent);
+			const popup = Object.create(c.app.lastPopup.type); let html;
+			popup.$el = {html: value => {html = value;}}; popup.close = () => {};
+			popup.initialize(c.app.lastPopup.data); popup.close(); assert.equal(c.sent.length, sent);
+			assert(html.includes('rogue-control')); assert(html.includes('name="close"'));
+			if (id === 'bottlecap') assert(html.includes('value="0" disabled'));
+			popup.trainIV(id === 'bottlecap' ? '1' : 'all');
+			const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+			assert.equal(command.action, 'use'); assert.equal(command.value, id);
+			assert.equal(command.member, data.run.team[0].id);
+			assert.equal(command.slot, id === 'bottlecap' ? 1 : undefined);
+		}
+	});
+	it('shows battle goods separately from other held equipment', () => {
+		const c = client(), data = adventure('rest'); data.run.floor = 99;
+		data.items.push({id: 'metronome', name: '节拍器', kind: 'held', price: 5000, shopFloor: 99, category: '对战影响道具'});
+		c.room.receiveState(data);
+		assert(c.html.includes('对战影响道具 · 1 种'));
+		assert(c.html.includes('进化与携带道具 · 1 种'));
+		assert.equal((c.html.match(/value="buy:metronome"/g) || []).length, 1);
+	});
 	it('uses real medicine images and uniform system-status text', () => {
 		const c = client(), data = adventure('rest');
 		data.items = ['antidote', 'burnheal', 'iceheal', 'awakening', 'paralyzeheal'].map(id => ({id, name: id, kind: 'cure'}));
@@ -687,6 +714,22 @@ describe('Fantasy Rogue event display and spectator playback', () => {
 		data.account.revision++; data.run.companions[0].recommended = 'fight'; c.room.pending = null;
 		c.room.receiveState(data);
 		assert(c.room.html.includes('接受挑战（彩豆推荐）')); assert(!c.room.html.includes('暂不参与（彩豆推荐）'));
+	});
+	it('chooses either streamer and displays event recommendations with the preference counter', () => {
+		for (const id of ['iono', 'canari']) {
+			const c = client(), data = adventure('event'), name = id === 'iono' ? '奇树' : '卡娜莉';
+			data.run.blessings = {owned: [{family: 'companionstreamer', id: 'companionstreamer', name: '主播女孩重度依赖', text: ''}], pending: [], shards: 0};
+			data.run.event = {key: 'streamer-event', stage: 'choice', title: '足迹', paragraphs: [], options: [{id: 'investigate', name: '追寻足迹', text: ''}]};
+			c.room.receiveState(data);
+			for (const trainer of ['iono', 'canari']) assert(c.panel.html.includes('sprites/rogue-companions/' + trainer + '.png'));
+			c.room.companionAction(id + '|choosestreamer');
+			const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+			assert.equal(command.value, 'choosestreamer'); assert.equal(command.member, id);
+			data.account.revision++; c.room.pending = null;
+			data.run.companions = [{id, name, preferences: 6, recommended: 'investigate', canConsult: true, typeOptions: [], abilityOptions: []}];
+			c.room.receiveState(data);
+			assert(c.panel.html.includes('6 / 15')); assert(c.html.includes('追寻足迹（' + name + '推荐）'));
+		}
 	});
 	it('uses distinct AI portraits and offers acceptance only for successful previews', () => {
 		const c = client(), data = adventure('ready');

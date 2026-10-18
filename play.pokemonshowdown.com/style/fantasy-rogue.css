@@ -893,3 +893,30 @@
 .rogue-auction-budgets > div {padding: 8px; background: #ffffffb8; border-radius: 6px;}
 .rogue-auction-budgets span {display: block; margin-top: 4px;}
 .rogue-area-notice {padding: 10px; background: #edf7ff; border-left: 4px solid #578ba8;}
+
+/* Shared large action controls, including inventory, move lists and modal dialogs. */
+.button.rogue-control,
+.fantasyrogue .button:not(.rogue-member-choice):not(.rogue-companion-pick):not(.rogue-event-option),
+.rogue-retreat .button {
+	box-sizing: border-box; min-height: 44px; min-width: 44px; padding: 8px 14px;
+	border: 1px solid #82a6bf; border-radius: 9px; font-size: 14px; font-weight: 600; line-height: 1.4;
+	color: #284d65; background: linear-gradient(180deg, #fbfdff 0%, #e2eff8 100%);
+	box-shadow: 0 2px 3px #305c7620, inset 0 1px 0 #ffffff; text-shadow: none;
+	white-space: normal; overflow-wrap: anywhere; cursor: pointer;
+}
+.button.rogue-control:not(:disabled):hover,
+.fantasyrogue .button:not(:disabled):hover,
+.rogue-retreat .button:not(:disabled):hover { border-color: #5487aa; background-color: #dceefa; box-shadow: 0 2px 5px #305c7630; }
+.button.rogue-control:focus-visible,
+.fantasyrogue .button:focus-visible,
+.rogue-retreat .button:focus-visible { outline: 3px solid #4887b4; outline-offset: 2px; }
+.button.rogue-control:disabled,
+.fantasyrogue .button:disabled,
+.rogue-retreat .button:disabled { color: #73818a; border-color: #c2cdd5; background: #e9eef2; box-shadow: none; opacity: .65; cursor: default; }
+.fantasyrogue .rogue-item-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.fantasyrogue .rogue-shop .rogue-inventory { grid-template-columns: repeat(auto-fit, minmax(min(235px,100%),1fr)); }
+.fantasyrogue .rogue-equipped-moves .button:first-child { white-space: normal; }
+.fantasyrogue .rogue-choice-row > .button { max-width: 160px; }
+.rogue-crown-popup { min-width: 260px; max-width: 420px; }
+.rogue-crown-popup > p .button { width: 100%; text-align: left; }
+@media (prefers-reduced-motion: reduce) { .button.rogue-control { transition: none; } }
