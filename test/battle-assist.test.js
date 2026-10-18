@@ -29,6 +29,18 @@ function factor(move, target, source = mon('Mew')) {
 	return tips.getMoveEffectiveness(source, m, m.type, m.category, target);
 }
 describe('Battle effectiveness and four speed benchmarks', () => {
+	it('shows next-use stacked power with its source and the correct Technician threshold', () => {
+		const Value = vm.runInContext('ModifiableValue', context);
+		const ownBattle = {...battle, sides: [], abilityActive: () => false, mySide: {sideConditions: {}}};
+		const ownTips = Object.create(tips); ownTips.battle = ownBattle;
+		const p = mon('Mew', {boosts: {}, isActive: () => true, side: {active: [], foe: {active: []}}, effectiveAbility: () => 'Technician'});
+		for (const [native, expected] of [[40, 60], [80, 80], [160, 160]]) {
+			const server = {speciesForme: 'Mew', item: '', baseAbility: 'Technician', stats: {atk: 10, def: 10, spa: 10, spd: 10, spe: 10},
+				mechanicPowers: {furycutter: {power: native, source: '连斩·连续命中'}}};
+			const power = ownTips.getMoveBasePower(dex.moves.get('furycutter'), 'Bug', new Value(ownBattle, p, server));
+			assert.equal(power.value, expected); assert.match(String(power), /连斩·连续命中/);
+		}
+	});
 	it('shows railgun power and accuracy from the authoritative blessing payload', () => {
 		const Value = vm.runInContext('ModifiableValue', context);
 		const ownBattle = {...battle, sides: [], abilityActive: () => false, mySide: {sideConditions: {}}};

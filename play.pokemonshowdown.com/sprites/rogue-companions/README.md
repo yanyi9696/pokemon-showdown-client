@@ -40,3 +40,24 @@
 > Canari from Pokémon Legends: Z-A. Use the provided official reference for character identity and clothing. Turquoise-blue hair with a pale yellow zigzag forelock, short lightning-shaped side ponytails with red ties, golden eyes, tan skin, yellow cropped hoodie/top with black crossed straps. Both frames show the same waist-up character, front-facing; left neutral and right smiling.
 
 波琵、爱丽丝同样使用透明背景、两格等大的横向图集，左常态、右笑脸，同姿态同大小。波琵采用幼年四天王的钥匙挂饰与蓝色发型；爱丽丝明确采用初次登场时的浅黄粉色训练家服装，禁止冠军服饰。两张输出原图直接保存，未二次编辑。
+
+## 2026-10-18 雪山与采集扩展
+
+新增 `lysandre.png`、`olivia.png`、`grusha.png`、`rika.png`，均为两格透明背景图集，左常态、右笑脸。
+弗拉达利采用《传说 Z-A》时期形象，参考[官方人物介绍](https://www.pokemon.co.jp/ex/legends_z-a/ja/characters/260113_09/)；其余三位沿用各自原作造型。以下为实际生成提示词，输出原图直接保存。
+
+### lysandre
+
+> Use case: stylized-concept. Asset: a single horizontal two-frame companion portrait sprite sheet for a Pokemon Showdown fan game. Create waist-up F / Lysandre in his Pokemon Legends Z-A appearance faithfully using the supplied reference: grey spiky hair, white angular beard with orange accents, black coat with large grey fur collar and patched orange sleeves, weary blue eye. Two equal width cells side by side, same scale and pose: LEFT calm neutral, RIGHT a restrained warm smile. Center each waist-up bust within its half, no text, no borders, no objects cut into adjacent cell. Crisp clean 2D Pokemon character art on true transparent background. This is an adult character. Sheet approximately 2:1.
+
+### olivia
+
+> Use case: stylized-concept. Asset: a single horizontal two-frame waist-up companion portrait sprite sheet. Pokemon trainer Olivia (Alola island kahuna): adult brown-skinned woman with dark brown bob hair, pink crystal hair ornament, pink and black tropical outfit, crystal jewelry. Faithful character design. Two equal width cells side by side, identical scale and facing/pose: LEFT composed neutral expression, RIGHT friendly cheerful smile. Clean crisp 2D Pokemon character illustration, true transparent background, no text, no borders, no scenery, each bust fully contained in its own half. Approximately 2:1 sheet.
+
+### grusha
+
+> Use case: stylized-concept. Asset: a horizontal two-frame waist-up companion portrait sprite sheet for Pokemon trainer Grusha. Faithful design: adult male, cyan hair with long fringe covering one eye, orange scarf with Pokeball detail, dark blue winter jacket. Two equal cells side by side, matching scale and pose: LEFT quiet reserved neutral, RIGHT slight shy smile with eyes softened. Clean crisp 2D Pokemon character art, true transparent background, no text, no border, no scenery, no overlapping cells. Each bust centered within its own half. Approximately 2:1 sheet.
+
+### rika
+
+> Use case: stylized-concept. Asset: horizontal two-frame waist-up companion portrait sprite sheet of Pokemon trainer Rika from Paldea. Adult woman, green long ponytail, red eyes, white collared shirt with black tie, black gloves, suspenders. Faithful design. Two equal cells side by side, matching scale and pose: LEFT relaxed neutral, RIGHT confident friendly smile. Clean crisp 2D Pokemon character art, true transparent background, no text, no borders, no scenery. Each waist-up bust centered entirely within its half. Approximately 2:1 sheet.

@@ -927,3 +927,12 @@
 .rogue-crown-popup { min-width: 260px; max-width: 420px; }
 .rogue-crown-popup > p .button { width: 100%; text-align: left; }
 @media (prefers-reduced-motion: reduce) { .button.rogue-control { transition: none; } }
+
+.rogue-ski { max-width:600px; margin:12px auto; padding:10px; background:#f3f8fc; border:1px solid #90adbf; border-radius:12px; }
+.rogue-ski canvas { display:block; width:100%; height:auto; border-radius:8px; image-rendering:pixelated; }
+.rogue-ski-hud, .rogue-ski-controls { display:flex; justify-content:space-between; gap:12px; padding-top:8px; }
+.rogue-ski-controls .button { flex:1; }
+.rogue-codex-link { border:0; color:#4e6596; background:none; padding:0; font:inherit; cursor:pointer; text-decoration:underline; }
+.rogue-codex-link:focus-visible { outline:2px solid #4e6596; }
+.codex-portrait { float:right; margin:0 0 8px 10px; }
+.rogue-codex-search select { padding:7px; margin-right:5px; }

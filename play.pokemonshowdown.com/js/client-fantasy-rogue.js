@@ -303,7 +303,7 @@
 		events: {'change input[name=starter]': 'changeStarter', 'change input[name=useSpirit]': 'changeSpirit',
 			'change select[name=testSpirit]': 'changeSpirit', 'change select[name=selectedSpirit]': 'changeSpirit', 'change select[name=hpTarget]': 'changeHPTarget',
 			'change select[name=target]': 'changeItemTarget', 'keydown .rogue-start-deck': 'cardKey',
-			'keydown input[name=codexSearch]': 'codexSearchKey', 'input .rogue-event-allocation input': 'updateEventEVTotal'},
+			'keydown .rogue-ski': 'skiKey', 'input input[name=codexSearch]': 'codexSearchInput', 'change select[name=codexSearchMode]': 'codexSearchModeChanged', 'keydown input[name=codexSearch]': 'codexSearchKey', 'input .rogue-event-allocation input': 'updateEventEVTotal'},
 		initialize: function () {
 			this.$el.addClass('ps-room-light scrollable fantasyrogue');
 			this.state = null;
@@ -395,7 +395,7 @@
 			if (this.state.account.needsOnboarding) { this.maybeShowOnboarding(); return; }
 			this.screen = 'game'; this.openPartyOnLayout = true;
 			this.render(); app.updateLayout();
-			this.maybeShowSpirit(); this.startFishingClock(); this.maybeShowEvolution();
+			this.maybeShowSpirit(); this.startFishingClock(); this.startSkiClock(); this.maybeShowEvolution();
 		},
 		startMenu: function () { this.screen = 'home'; this.codexReplay = null; this.render(); this.scrollCodexTop(); },
 		maybeShowOnboarding: function () {
@@ -422,6 +422,15 @@
 			if (this.screen === data.section) this.render();
 		},
 		filterCodex: function (filter) { this.codexFilter = filter; this.codexPage = 0; this.render(); },
+		codexSearchInput: function (event) { this.codexQuery = event.currentTarget.value.trim(); if (!this.codexQuery) { this.codexPage = 0; this.render(); } },
+		codexSearchModeChanged: function (event) { this.codexSearchMode = event.currentTarget.value; this.searchCodex(); },
+		jumpBlessing: function () {
+			this.codexFilter = 'all'; this.codexQuery = '';
+			var entries = (this.codices.blessings || {}).entries || [];
+			var index = entries.findIndex(function (entry) { return entry.family === 'topclearmind'; });
+			if (index < 0) return; this.codexPage = Math.floor(index / 12); this.render();
+			var target = this.$('[data-codex-family=topclearmind]')[0]; if (target) target.scrollIntoView({block: 'center'});
+		},
 		searchCodex: function () { this.codexQuery = this.$el.find('input[name=codexSearch]').val().trim(); this.codexPage = 0; this.render(); },
 		codexSearchKey: function (event) { if (event.key === 'Enter') { event.preventDefault(); this.searchCodex(); } },
 		pageCodex: function (page) { this.codexPage = Math.max(0, Number(page) || 0); this.render(); this.scrollCodexTop(); },
@@ -477,7 +486,7 @@
 			}
 			if (app.curRoom === this && !storyOnly) app.updateLayout();
 			this.maybeShowSpirit();
-			this.startFishingClock(); this.maybeShowEvolution();
+			this.startFishingClock(); this.startSkiClock(); this.maybeShowEvolution();
 			if (this.visible || app.curRoom === this) this.maybeShowOnboarding();
 		},
 		receiveAction: function (result) {
@@ -568,6 +577,9 @@
 							'><span class="rogue-companion-portrait" style="background-image:url(sprites/rogue-companions/' + entry[0] + '.png)"></span><b>' + entry[1] + '</b></button>';
 					}).join('') + '</div></div>';
 			}
+			if (run.blessings && run.blessings.owned.some(function (b) { return b.family === 'companionwinter'; }) && !companions.some(function (c) { return c.id === 'grusha' || c.id === 'rika'; })) {
+				html += '<div class="rogue-companion-choice"><strong>选择同行训练家</strong><p>缺少对应属性伙伴时，额外特性将在之后赋予。</p><div class="rogue-companions">' + [['grusha', '古鲁夏'], ['rika', '辛俐']].map(function (entry) { return '<button class="button rogue-companion-pick" name="companionAction" value="' + entry[0] + '|choosewinter"' + (locked ? ' disabled' : '') + '><span class="rogue-companion-portrait" style="background-image:url(sprites/rogue-companions/' + entry[0] + '.png)"></span><b>' + entry[1] + '</b></button>'; }).join('') + '</div></div>';
+			}
 			if (!companions.length) return html;
 			return html + '<section class="rogue-companions" aria-label="同行训练家">' + companions.map(function (c) {
 				var chat = c.smile && c.smileUntil, seconds = chat ? Math.max(0, (c.smileUntil - Date.now()) / 1000) : 0;
@@ -576,7 +588,7 @@
 					'sprites/rogue-companions/' + c.id + '.png);animation-duration:' + seconds + 's"' + (locked ? ' disabled' : '') + '></button><div class="rogue-companion-copy"><strong>' + escape(c.name) + '</strong>';
 				if (c.canConsult) out += button('companionAction', c.id + '|advice', '你想听听我的建议吗？', locked);
 				if (c.message) out += '<p class="rogue-companion-speech">' + escape(c.message) + '</p>';
-				if (c.giftCounter) out += '<small>同行训练家的赠礼 · ' + (c.id === 'lana' ? '钓鱼 ' : '偏好 ') + Math.min(15, c.preferences) + ' / 15' + (c.rewarded ? ' · 已领取' : '') + '</small>';
+				if (c.giftCounter) out += '<small>同行训练家的赠礼 · ' + (c.id === 'lana' ? '钓鱼 ' : c.id === 'olivia' ? '赌石 ' : '偏好 ') + Math.min(15, c.preferences) + ' / 15' + (c.rewarded ? ' · 已领取' : '') + '</small>';
 				(c.typeOptions || []).forEach(function (type) {
 					out += button('companionAction', c.id + '|type:' + type.id, localName(type.id) + ' · ' + (type.member ? localName(type.member) : '暂无伙伴'), locked || !type.member);
 				});
@@ -769,6 +781,10 @@
 		buyWithHP: function (id) {
 			var buyer = this.state.run.team.find(function (mon) { return mon.id === this.hpTarget; }, this) || this.state.run.team[0];
 			this.submit('buyhp', {value: id, member: buyer.id});
+		},
+		treasureQuantity: function (value) {
+			var parts = value.split(':'), item = this.state.items.find(function (i) { return i.id === parts[1]; });
+			if (item) app.addPopup(globals.RogueTreasurePopup, {room: this, item: item, mode: parts[0], member: this.selectedPokemon()});
 		},
 		buyItems: function (id) {
 			var item = this.state.items.find(function (entry) { return entry.id === id; });
@@ -1182,17 +1198,19 @@
 		},
 		renderRunTraining: function (run) {
 			var growth = run.growth;
-			if (!growth || !(growth.offense || growth.defense || growth.experience || (growth.personal || []).length)) return '';
+			if (!growth || !(growth.offense || growth.defense || growth.experience || (growth.personal || []).length || (growth.mushrooms || []).length)) return '';
 			var summary = [];
 			if (growth.offense) summary.push('全队双攻 +' + (growth.offense / 100) + '%');
 			if (growth.defense) summary.push('全队双防 +' + (growth.defense / 100) + '%');
 			if (growth.experience) summary.push('战斗经验 +' + (growth.experience / 100) + '%');
 			if ((growth.personal || []).length) summary.push(growth.personal.length + ' 位伙伴完成个人训练');
+			if ((growth.mushrooms || []).length) summary.push(growth.mushrooms.length + ' 位伙伴获得蘑菇增幅');
 			return '<details class="rogue-run-training" data-rogue-key="run-training"><summary>' + fa('line-chart') +
 				'本局训练 · ' + summary.join(' · ') + '</summary><p>全队训练也对新加入的伙伴有效；经验糖果不受经验加成影响。个人训练与全队训练相加，升级、进化、超进化后仍然保留。</p>' +
 				(growth.personal || []).map(function (entry) { return '<p><strong>【' + escape(localName(entry.species)) + '】</strong>个人训练：双攻 +' +
 					((entry.offense || 0) / 100) + '%、双防 +' + ((entry.defense || 0) / 100) + '%</p>'; }).join('') +
-				'<p class="rogue-caption">本局累计上限：全队双攻、双防各 +120%，个人双攻、双防各 +60%，战斗经验 +40%。这些训练会记入通关卡，不会带到下一局。</p></details>';
+				(growth.mushrooms || []).map(function (entry) { return '<p><strong>【' + escape(localName(entry.species)) + '】</strong>合成大蘑菇：双攻 +' + Number((entry.offense / 100).toFixed(2)) + '%、双防 +' + Number((entry.defense / 100).toFixed(2)) + '%（独立叠加，收益逐渐降低，无硬性上限）</p>'; }).join('') +
+				'<p class="rogue-caption">常规训练上限：全队双攻、双防各 +120%，个人双攻、双防各 +60%，战斗经验 +40%。蘑菇增幅另计。这些训练会记入通关卡，不会带到下一局。</p></details>';
 		},
         maybeShowEvolution: function () {
             var run = this.state && this.state.run;
@@ -1242,12 +1260,53 @@
             }
             tick();
         },
+
+		renderSki: function (event, busy) {
+			return '<section class="rogue-ski" tabindex="0" aria-label="雪山速滑，左右方向键换道"><canvas width="540" height="300" aria-label="从人物后方观察雪道，躲避树木和岩石"></canvas><div class="rogue-ski-hud"><b class="rogue-ski-time">0.0 / 30 秒</b><span>左右换道 · 撞上障碍即结束</span></div><div class="rogue-ski-controls">' + button('skiMove', 'skileft', '← 向左', busy) + button('skiMove', 'skiright', '向右 →', busy) + '</div><p class="rogue-caption">点击雪道后可使用方向键。画面前方的障碍会逐渐变密。</p></section>';
+		},
+		skiKey: function (event) { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); if (!event.repeat) this.skiMove(event.key === 'ArrowLeft' ? 'skileft' : 'skiright'); } },
+		skiMove: function (choice) { if (!this.pending) this.chooseEvent(choice); },
+		startSkiClock: function () {
+			if (this.skiFrame) cancelAnimationFrame(this.skiFrame);
+			var self = this, run = this.state && this.state.run, event = run && run.event;
+			if (typeof requestAnimationFrame !== 'function' || this.screen !== 'game' || !event || !event.ski || event.stage !== 'choice') return;
+			var canvas = this.$('.rogue-ski canvas')[0]; if (!canvas || !canvas.getContext) return;
+			var ctx = canvas.getContext('2d'); if (!ctx) return;
+			var ski = event.ski, offset = ski.now - Date.now();
+			function tick() {
+				if (self.screen !== 'game' || !canvas.isConnected) return;
+				var elapsed = Math.min(30000, Date.now() + offset - ski.started), time = elapsed / 1000;
+				ctx.fillStyle = '#c9e2ef'; ctx.fillRect(0, 0, 540, 300);
+				ctx.fillStyle = '#f8fcff'; ctx.beginPath(); ctx.moveTo(55, 300); ctx.lineTo(210, 35); ctx.lineTo(330, 35); ctx.lineTo(485, 300); ctx.fill();
+				ctx.strokeStyle = '#b9d1df'; ctx.lineWidth = 2;
+				[250, 290].forEach(function (x, i) { ctx.beginPath(); ctx.moveTo(x, 35); ctx.lineTo(198 + i * 144, 300); ctx.stroke(); });
+				ctx.fillStyle = '#dceaf3'; ctx.beginPath(); ctx.moveTo(0, 70); ctx.lineTo(65, 5); ctx.lineTo(130, 70); ctx.lineTo(180, 20); ctx.lineTo(210, 60); ctx.lineTo(55, 300); ctx.lineTo(0, 300); ctx.fill();
+				ctx.beginPath(); ctx.moveTo(330, 60); ctx.lineTo(400, 5); ctx.lineTo(470, 60); ctx.lineTo(510, 10); ctx.lineTo(540, 55); ctx.lineTo(540, 300); ctx.lineTo(485, 300); ctx.fill();
+				ski.obstacles.forEach(function (o) {
+					var depth = 1 - (o.at - elapsed) / 3000; if (depth < 0 || depth > 1.15) return;
+					var y = 35 + depth * 215, x = 270 + (o.lane - 1) * (30 + depth * 115), scale = 0.3 + depth * 0.85;
+					ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale);
+					if (o.kind === 'tree') { ctx.fillStyle = '#795a48'; ctx.fillRect(-4, -10, 8, 22); ctx.fillStyle = '#43716a'; ctx.beginPath(); ctx.moveTo(0,-48); ctx.lineTo(-23,0); ctx.lineTo(23,0); ctx.fill(); ctx.fillStyle = '#f2f8fa'; ctx.beginPath();ctx.moveTo(0,-48);ctx.lineTo(-13,-22);ctx.lineTo(13,-22);ctx.fill(); }
+					else { ctx.fillStyle = '#748a9a'; ctx.beginPath();ctx.moveTo(-24,5);ctx.lineTo(-16,-20);ctx.lineTo(8,-27);ctx.lineTo(26,3);ctx.closePath();ctx.fill();ctx.fillStyle='#e8f1f6';ctx.fillRect(-13,-23,22,6); }
+					ctx.restore();
+				});
+				var x = 270 + (ski.lane - 1) * 145;
+				ctx.strokeStyle = '#27465e'; ctx.lineWidth = 5; ctx.beginPath();ctx.moveTo(x-13,240);ctx.lineTo(x-21,278);ctx.moveTo(x+13,240);ctx.lineTo(x+21,278);ctx.stroke();
+				ctx.fillStyle = '#315b86';ctx.fillRect(x-13,218,26,30);ctx.fillStyle='#c34f50';ctx.fillRect(x-16,204,32,18);ctx.fillStyle='#e7d1ac';ctx.fillRect(x-10,218,20,5);
+				ctx.fillStyle = '#e9f4fbe0'; for (var i=0;i<11;i++) {ctx.beginPath();ctx.arc(i*55,306+Math.sin(time*2+i)*7,22,0,Math.PI*2);ctx.fill();}
+				self.$('.rogue-ski-time').text(time.toFixed(1) + ' / 30 秒');
+				if (!self.pending && (!self.lastSkiPoll || Date.now() - self.lastSkiPoll > 700)) { self.lastSkiPoll = Date.now(); self.chooseEvent('skitick'); }
+				self.skiFrame = requestAnimationFrame(tick);
+			}
+			tick();
+		},
         renderEvent: function (run, busy) {
 			var event = run.event;
 			if (!event) return '';
 			var recommendations = function (id) { var names = (run.companions || []).filter(function (c) { return c.recommended === id; }).map(function (c) { return c.name; }); return names.length ? '（' + names.join('、') + '推荐）' : ''; };
 			var html = '<article class="rogue-event"><h3>' + escape(event.title) + '</h3><div class="rogue-event-text">' +
 				(event.paragraphs || []).map(function (line) { return '<p>' + dialogueText(line) + '</p>'; }).join('') + '</div>';
+			if (event.ski && event.stage === 'choice') return html + this.renderSki(event, busy) + '</article>';
 			if (event.fishing && event.stage === 'choice') return html + this.renderFishing(event, busy) + '</article>';
 			if (event.auction) html += '<section class="rogue-auction-board"><h4>本场拍品</h4><p>' + dialogueText(event.auction.catalog) +
 				'</p><div class="rogue-auction-budgets">' + event.auction.npcs.map(function (npc) {
@@ -1292,8 +1351,8 @@
 				if (allFainted) html += '<p>请先在右侧背包中复活至少一名伙伴，再继续前进。</p>';
 				if (run.canEmergency) html += button('act', 'emergency', '花费 ' + run.emergencyCost + ' 金币急救全队', busy || run.money < run.emergencyCost);
 			} else if (event.stage === 'choice') {
-				html += '<div class="rogue-event-options' + (event.options.some(function (option) { return /^(member|swap):/.test(option.id); }) ? ' rogue-member-choices' : '') + '">' + event.options.map(function (option) {
-					var parts = option.id.split(':'), member = /^(member|swap)$/.test(parts[0]) && run.team.find(function (entry) {
+				html += '<div class="rogue-event-options' + (event.options.some(function (option) { return /^(member|swap|show):/.test(option.id); }) ? ' rogue-member-choices' : '') + '">' + event.options.map(function (option) {
+					var parts = option.id.split(':'), member = /^(member|swap|show)$/.test(parts[0]) && run.team.find(function (entry) {
 						return entry.id === decodeURIComponent(parts[1]);
 					});
 					if (member) return memberChoice('chooseEvent', option.id, member, busy || option.disabled,
@@ -1654,7 +1713,7 @@
 				treasures.forEach(function (item) {
 					html += '<div class="rogue-item-card"><div class="rogue-item-heading">' + itemIcon(item) + '<strong>' + escape(item.name) +
 						'</strong><b>×' + run.bag[item.id] + '</b></div><p>每个 ' + item.sellPrice + ' 金币 · 合计 <b>' +
-						(run.bag[item.id] * item.sellPrice) + '</b></p></div>';
+						(run.bag[item.id] * item.sellPrice) + '</b></p>' + (run.blessings && run.blessings.owned.some(function (b) { return b.family === 'mushroomsynthesis'; }) && /mushroom$/.test(item.id) ? button('treasureQuantity', 'feed:' + item.id, '投喂蘑菇伙伴', busy || !editable(run)) : '') + '</div>';
 				});
 				html += '</div></div>';
 			}
@@ -1668,18 +1727,19 @@
 			});
 			var usable = editable(run) && !busy && !run.healingLocked;
 			var treasures = this.state.items.filter(function (item) { return item.kind === 'treasure' && run.bag[item.id] > 0; });
-			var total = treasures.reduce(function (sum, item) { return sum + run.bag[item.id] * item.sellPrice; }, 0);
+			var sellPrice = function (item) { return Math.floor(item.sellPrice * (run.node && run.node.trade && run.node.trade.kind === 'mushroom' && /mushroom$/.test(item.id) ? 1.25 : 1)); };
+			var total = treasures.reduce(function (sum, item) { return sum + run.bag[item.id] * sellPrice(item); }, 0);
 			var html = '<section class="rogue-shop rogue-floor" aria-label="商店"><h3>' + fa('shopping-cart') +
 				(run.node && run.node.kind === 'trade' ? escape(run.node.name) : '宝可梦中心商店') + '</h3><!--shop-categories--><span class="rogue-shop-balance">金币 <b>' + run.money + '</b></span>' +
 				'<div class="rogue-exchange"><strong>' + fa('diamond') + '战利品兑换</strong> ' +
 				(total ? '可兑换 <b>' + total + '</b> 金币 ' + button('act', 'sell:all', '全部兑换', !usable) : '<span class="rogue-caption">暂时没有贵重物品</span>');
 			if (treasures.length) {
 				html += '<details data-shop-group="exchange"' + (sections.exchange ? ' open' : '') +
-					'><summary>查看／按种类兑换</summary><div class="rogue-inventory">';
+					'><summary>明细 · 按品类兑换</summary><div class="rogue-inventory">';
 				treasures.forEach(function (item) {
 					html += '<div class="rogue-item-card"><div class="rogue-item-heading">' + itemIcon(item) + '<strong>' + escape(item.name) +
-						'</strong><b>×' + run.bag[item.id] + '</b></div><p>单价 ' + item.sellPrice + ' 金币</p>' +
-						button('act', 'sell:' + item.id, '兑换 +' + (run.bag[item.id] * item.sellPrice), !usable) + '</div>';
+						'</strong><b>×' + run.bag[item.id] + '</b></div><p>' + (/mushroom$/.test(item.id) ? '蘑菇' : /pearl/.test(item.id) ? '珍珠' : '其他战利品') + ' · 单价 ' + sellPrice(item) + ' 金币</p>' +
+						button('treasureQuantity', 'sell:' + item.id, '选择兑换数量', !usable) + button('act', 'sell:' + item.id, '兑换此类全部 +' + (run.bag[item.id] * sellPrice(item)), !usable) + '</div>';
 				});
 				html += '</div></details>';
 			}
@@ -1863,7 +1923,7 @@
 				html += '<p class="rogue-caption">以下为幻想形态与主要调整内容；形态、道具能否在爬塔中使用，还需满足相应获取和解锁条件。</p>';
 			} else {
 				filters = section === 'blessings' ? [['all', '全部'], ['silver', '白银'], ['gold', '黄金'], ['prismatic', '棱彩'], ['unlocked', '已解锁']] :
-					[['all', '全部'], ['event', '事件'], ['reward', '奖励'], ['encounter', '遭遇'], ['trade', '交易'], ['adventure', '奇遇'], ['unlocked', '已经历']];
+					[['all', '全部'], ['companion', '同行训练家'], ['event', '事件'], ['reward', '奖励'], ['encounter', '遭遇'], ['trade', '交易'], ['adventure', '奇遇'], ['unlocked', '已经历']];
 				entries = data.entries;
 				var unlocked = entries.filter(function (entry) { return entry.unlocked; }).length;
 					html += '<p class="rogue-codex-progress">' + (data.preview ? '可查看 ' : section === 'blessings' ? '已解锁 ' : '已经历 ') + '<b>' + unlocked + ' / ' + entries.length +
@@ -1890,10 +1950,10 @@
 							entry[0] + '" aria-pressed="' + (active === entry[0]) + '">' + entry[1] + '</button>';
 					}).join('') + '</nav>';
 			}
-			html += '<div class="rogue-codex-search"><label>按名称查找 <input type="search" name="codexSearch" value="' +
+			html += '<div class="rogue-codex-search"><label><select name="codexSearchMode"><option value="name">按名称</option><option value="content"' + (this.codexSearchMode === 'content' ? ' selected' : '') + '>按内容</option></select>查找 <input type="search" name="codexSearch" value="' +
 				escape(this.codexQuery) + '" placeholder="输入名称，按回车" /></label>' + button('searchCodex', '', '查找', false, fa('search')) + '</div>';
 			var entryKind = section === 'guide' && guideModule === 'moves' ? 'move' : '';
-			entries = entries.filter(function (entry) { return !query || (localName(entry.name, entryKind) + ' ' + entry.name).toLowerCase().indexOf(query) >= 0; });
+			entries = entries.filter(function (entry) { return !query || (localName(entry.name, entryKind) + ' ' + entry.name + (this.codexSearchMode === 'content' ? ' ' + localName(entry.text || '') : '')).toLowerCase().indexOf(query) >= 0; }, this);
 			var total = Math.max(1, Math.ceil(entries.length / 12)); this.codexPage = Math.min(this.codexPage, total - 1);
 			html += '<div class="rogue-codex-grid">' + entries.slice(this.codexPage * 12, (this.codexPage + 1) * 12).map(function (entry) {
 				var tier = {silver: '白银', gold: '黄金', prismatic: '棱彩'}[entry.tier];
@@ -1906,12 +1966,15 @@
 					entry.abilities.map(function (name) { return escape(localName(name)); }).join(' / ') + '</p><p class="rogue-caption">' +
 					Object.keys(statNames).map(function (stat) { return statNames[stat] + ' ' + entry.stats[stat]; }).join(' · ') + '</p>' +
 					(entry.battleOnly ? '<p class="rogue-caption">战斗中触发的特殊形态' + (entry.requiredItem ? ' · ' + escape(localName(entry.requiredItem)) : '') + '</p>' : '');
-				return '<article class="rogue-codex-entry tier-' + (entry.tier || 'plain') + (entry.unlocked === false ? ' is-locked' : '') + '">' +
-					'<div class="rogue-codex-entry-top"><span>' + icon + '</span><small>' + (tier ? tier + '阶' : section === 'events' ? kindNames[entry.category || 'event'] : '幻想杯') +
+				if (section === 'blessings' && entry.family === 'prayer') body = body.replace(/<strong class="rogue-term">【Top Clear Mind】<\/strong>/g, '<button class="rogue-codex-link" name="jumpBlessing"><b>【Top Clear Mind】</b></button>');
+				if (entry.portrait) body = '<span class="rogue-companion-portrait codex-portrait' + (entry.portrait === 'guzma' ? ' single-portrait' : '') + '" style="background-image:url(sprites/rogue-companions/' + entry.portrait + '.png)"></span>' + body;
+				return '<article data-codex-family="' + escape(entry.family || '') + '" class="rogue-codex-entry tier-' + (entry.tier || 'plain') + (entry.unlocked === false ? ' is-locked' : '') + '">' +
+					'<div class="rogue-codex-entry-top"><span>' + icon + '</span><small>' + (tier ? tier + '阶' : section === 'events' ? (entry.category === 'companion' ? '同行训练家' : kindNames[entry.category || 'event']) : '幻想杯') +
 					'</small>' + (entry.unlocked === false ? '<span class="rogue-codex-lock">' + fa('lock') + '未解锁</span>' : '') + '</div>' +
 					'<div class="rogue-codex-title"><h3>' + escape(localName(entry.name, entryKind)) + '</h3>' +
-					(section === 'blessings' && entry.floors && entry.floors.length ? '<small class="rogue-blessing-restriction">仅第 ' +
-						escape(entry.floors.join('、')) + ' 层出现</small>' : '') + '</div>' + body + (section === 'events' && entry.unlocked && entry.replay ?
+					(section === 'blessings' ? (entry.floors && entry.floors.length ? ['仅第 ' + entry.floors.join('、') + ' 层出现'] : []).concat(entry.availability || []).map(function (note) {
+						return '<small class="rogue-blessing-restriction">' + escape(note) + '</small>';
+					}).join('') : '') + '</div>' + body + (section === 'events' && entry.unlocked && entry.replay ?
 					button('readEvent', entry.id, '回顾这段见闻', false, fa('book')) : '') + '</article>';
 			}).join('') + '</div>';
 			if (!entries.length) html += '<p class="rogue-codex-empty">' +
@@ -2195,6 +2258,41 @@
 				this.close(); app.addPopup(globals.RogueNoticePopup, {text: '金币或商店库存已更新，请重新选择购买数量。'}); return;
 			}
 			room.submit('buy', {value: this.data.item.id, count: count}); this.close();
+		}
+	});
+
+	this.RogueTreasurePopup = this.Popup.extend({
+		type: 'modal',
+		events: {'input input[name=treasureCount]': 'updatePreview', 'change select[name=mushroomTarget]': 'updatePreview'},
+		initialize: function (data) {
+			this.data = data; this.userid = app.user.get('userid'); this.revision = data.room.state.account.revision;
+			this.maximum = data.room.state.run.bag[data.item.id] || 0;
+			var run = data.room.state.run;
+			var names = ['paras','parasect','shroomish','breloom','foongus','amoonguss','morelull','shiinotic','brutebonnet'];
+			this.members = run.team.filter(function (m) { return names.indexOf(toID(dex().species.get(m.set.species).baseSpecies.replace(/-Fantasy$/, ''))) >= 0; });
+			stableHTML(this, '<div class="rogue-candy-popup"><h3>' + (data.mode === 'feed' ? '投喂蘑菇伙伴' : '兑换战利品') + '</h3><p>' + itemIcon(data.item) + escape(data.item.name) + ' · 持有 ' + this.maximum + '</p>' +
+				(data.mode === 'feed' ? '<label>伙伴 <select name="mushroomTarget">' + this.members.map(function (m) { return '<option value="' + escape(m.id) + '"' + (data.member && data.member.id === m.id ? ' selected' : '') + '>' + escape(localName(m.set.species)) + '</option>'; }).join('') + '</select></label>' : '') +
+				'<p><label>数量 <input name="treasureCount" type="number" min="1" max="' + this.maximum + '" value="1" /></label></p><p>' + button('amount', '1', '1 个') + button('amount', '10', '10 个') + button('amount', 'max', '全部') + '</p><p class="rogue-treasure-preview"></p>' + button('confirm', '', '确认') + button('close', '', '取消') + '</div>');
+			this.updatePreview();
+		},
+		amount: function (value) { this.$('input[name=treasureCount]').val(value === 'max' ? this.maximum : Math.min(this.maximum, Number(value))); this.updatePreview(); },
+		updatePreview: function () {
+			var n = Number(this.$('input[name=treasureCount]').val()), valid = Number.isSafeInteger(n) && n > 0 && n <= this.maximum, text = '请输入有效数量。';
+			if (valid && this.data.mode === 'sell') { var run = this.data.room.state.run, premium = run.node && run.node.trade && run.node.trade.kind === 'mushroom' && /mushroom$/.test(this.data.item.id); text = '将获得 ' + n * Math.floor(this.data.item.sellPrice * (premium ? 1.25 : 1)) + ' 金币。'; }
+			if (valid && this.data.mode === 'feed') {
+				var id = this.$('select[name=mushroomTarget]').val(), mon = this.members.find(function (m) { return m.id === id; }); valid = !!mon;
+				if (mon) { var growth = mon.mushroomTraining || {}, total = (growth.offense || 0) + (growth.defense || 0), food = {tinymushroom:[20,1,'双攻'],bigmushroom:[100,1,'双防'],balmmushroom:[200,2,'双攻、双防']}[this.data.item.id];
+					var after = 2000 * (Math.pow(Math.pow(1 + total/2000, 1.5) + 1.5*n*food[0]*food[1]/2000, 2/3)-1);
+					text = '【合成大蘑菇】本局永久' + food[2] + ' +' + ((after-total)/food[1]/100).toFixed(2) + '%。仅此伙伴获得；增幅越高，后续投喂收益越低。';
+				} else text = '队伍中没有可投喂的蘑菇伙伴。';
+			}
+			this.$('.rogue-treasure-preview').text(text); this.$('button[name=confirm]').prop('disabled', !valid);
+		},
+		confirm: function () {
+			var room = this.data.room, n = Number(this.$('input[name=treasureCount]').val());
+			if (app.user.get('userid') !== this.userid || !room.state.account || room.state.account.revision !== this.revision) { this.close(); return; }
+			if (!Number.isSafeInteger(n) || n < 1 || n > this.maximum) return;
+			room.submit(this.data.mode === 'feed' ? 'feedmushroom' : 'sell', {value:this.data.item.id, count:n, member:this.$('select[name=mushroomTarget]').val()}); this.close();
 		}
 	});
 	this.RogueCandyPopup = this.Popup.extend({

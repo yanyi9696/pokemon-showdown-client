@@ -2461,6 +2461,11 @@ export class BattleTooltips {
 		const modifiedStats = this.calculateModifiedStats(pokemon, serverPokemon);
 
 		value.reset(move.basePower);
+		const mechanic = serverPokemon.mechanicPowers?.[move.id];
+		if (mechanic) {
+			value.value = mechanic.power;
+			value.comment.push(` （${BattleLog.escapeHTML(mechanic.source)}）`);
+		}
 
 		// =================================================================
 		// == 自制技能：源能释放 (Yuan Neng Shi Fang) 的动态威力显示 ==

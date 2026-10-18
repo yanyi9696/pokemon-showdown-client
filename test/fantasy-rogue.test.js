@@ -3,7 +3,7 @@ const fs = require('fs');
 const vm = require('vm');
 const {EventEmitter} = require('events');
 
-function client(startScreen = false, localized = false) {
+function client(startScreen = false, localized = false, runtime = {}) {
 	const sent = [], joined = [];
 	let userid = 'rogueplayer';
 	const context = {
@@ -31,6 +31,7 @@ function client(startScreen = false, localized = false) {
 			addPopup: (type, data) => { context.app.lastPopup = {type, data}; },
 		}),
 		setTimeout: () => 1, clearTimeout: () => {},
+		...runtime,
 	};
 	if (localized) {
 		const translator = fs.readFileSync(require.resolve('../play.pokemonshowdown.com/js/ps-china-translator.js'), 'utf8');
@@ -67,6 +68,21 @@ function state() {
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
 describe('Fantasy Rogue start menu and codex', () => {
+	it('shows prerequisites as title notes, clears searches immediately and links Top Clear Mind', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('blessings');
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'blessings', entries: [
+			{id: 'prayer', family: 'prayer', name: '聚集的祈愿', text: '完成后获得【Top Clear Mind】。', tier: 'gold', unlocked: true, floors: [1], availability: ['队伍需有对应伙伴']},
+			{id: 'topclearmind', family: 'topclearmind', name: 'Top Clear Mind', text: '先制度 +0.5', tier: 'prismatic', unlocked: true},
+		]});
+		assert(c.room.html.includes('<small class="rogue-blessing-restriction">队伍需有对应伙伴</small>'));
+		assert(c.room.html.includes('name="jumpBlessing"'));
+		c.room.codexQuery = '先制度'; c.room.codexSearchMode = 'content'; c.room.render();
+		assert(c.room.html.includes('Top Clear Mind')); assert(!c.room.html.includes('<h3>聚集的祈愿</h3>'));
+		c.room.codexSearchInput({currentTarget: {value: ''}});
+		assert.equal(c.room.codexQuery, ''); assert(c.room.html.includes('<h3>聚集的祈愿</h3>'));
+		c.room.codexQuery = '聚集'; c.room.codexFilter = 'gold'; c.room.jumpBlessing();
+		assert.equal(c.room.codexQuery, ''); assert.equal(c.room.codexFilter, 'all');
+	});
 	it('scrolls the actual shop section and renders permanent gains below the stat table', () => {
 		const c = client(), data = adventure(); data.run.growth = {offense: 400, defense: 300, experience: 0};
 		c.room.receiveState(data);
@@ -122,6 +138,23 @@ describe('Fantasy Rogue start menu and codex', () => {
 		assert(html.indexOf('rogue-fishing-controls') < html.indexOf('name="fishingTap"'));
 		assert(html.indexOf('name="fishingTap"') < html.indexOf('rogue-fishing-progress'));
 		assert.equal((html.match(/name="fishingTap"/g) || []).length, 1);
+	});
+	it('keeps the ski animation running while waiting for its authoritative progress response', () => {
+		const frames = [];
+		const c = client(false, false, {requestAnimationFrame: callback => {frames.push(callback); return frames.length;}, cancelAnimationFrame() {}});
+		const data = adventure('event');
+		data.run.event = {key: 'ski', stage: 'choice', ski: {started: Date.now(), now: Date.now(), lane: 1, obstacles: []}};
+		c.room.state = data;
+		const canvas = {isConnected: true, getContext: () => new Proxy({}, {get: () => () => {}})};
+		const normalSelector = c.room.$;
+		c.room.$ = selector => selector === '.rogue-ski canvas' ? [canvas] : normalSelector(selector);
+		const actions = [];
+		c.room.chooseEvent = choice => {actions.push(choice); c.room.pending = {action: 'event'};};
+		c.room.startSkiClock();
+		assert.deepEqual(actions, ['skitick']);
+		assert.equal(frames.length, 1, 'The pending request must not freeze the animation');
+		frames.shift()(); assert.equal(actions.length, 1); assert.equal(frames.length, 1);
+		canvas.isConnected = false; frames.shift()(); assert.equal(frames.length, 0);
 	});
 	it('shows reward demonstrations and illustrated training targets without submitting the reward before target selection', () => {
 		const c = client(), data = adventure('reward'), mon = data.run.team[0];

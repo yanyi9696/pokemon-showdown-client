@@ -1014,6 +1014,7 @@ export interface PokemonHealth {
 	fainted?: boolean;
 }
 export interface ServerPokemon extends PokemonDetails, PokemonHealth {
+	mechanicPowers?: Record<string, { power: number, source: string }>;
 	rogueAbilityInfo?: { abilities: string[], active: boolean, abilitySources?: Record<string, string>,
 		stats?: Record<'atk' | 'def' | 'spa' | 'spd' | 'spe', number>, maxhp?: number, statSources?: string[],
 		rulebreaker?: boolean,
