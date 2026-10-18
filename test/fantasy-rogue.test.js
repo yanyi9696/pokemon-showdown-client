@@ -68,6 +68,19 @@ function state() {
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
 describe('Fantasy Rogue start menu and codex', () => {
+	it('sorts translated guide and event names by pinyin before pagination without mutating source entries', () => {
+		const c = client(false, true); c.room.screen = 'guide'; c.room.codexFilter = 'items';
+		const entries = [{id: 'x', name: '伤药', text: ''}, {id: 'z', name: '安抚之铃', text: ''}, {id: 'a', name: '木炭', text: ''}];
+		c.room.codices.guide = {guide: {intro: [], modules: {items: entries}}};
+		const html = c.room.renderCodex();
+		assert(html.indexOf('<h3>安抚之铃') < html.indexOf('<h3>木炭'));
+		assert(html.indexOf('<h3>木炭') < html.indexOf('<h3>伤药'));
+		assert.equal(entries[0].name, '伤药');
+		c.room.screen = 'events'; c.room.codexFilter = 'all';
+		c.room.codices.events = {entries: entries.map(e => ({...e, unlocked: true, category: 'event'}))};
+		const events = c.room.renderCodex();
+		assert(events.indexOf('<h3>安抚之铃') < events.indexOf('<h3>伤药'));
+	});
 	it('shows prerequisites as title notes, clears searches immediately and links Top Clear Mind', () => {
 		const c = client(true); c.room.receiveState(state()); c.room.openCodex('blessings');
 		c.room.receiveCodex({userid: 'rogueplayer', section: 'blessings', entries: [
@@ -107,6 +120,35 @@ describe('Fantasy Rogue start menu and codex', () => {
 		const popup = Object.create(c.RogueExtraAbilitiesPopup); let html;
 		popup.$el = {addClass() {}, html(value) {html = value;}}; popup.initialize({member: data.run.team[0]});
 		assert(html.includes('变换自由')); assert(html.includes('自身属性变为')); assert(!html.includes('untranslated'));
+	});
+	it('renders Compound V allocation and sends only a complete six-stat budget', () => {
+		const c = client(false, false, {$: element => ({closest: () => ({find: () => ({text: value => {element.final = value;}})})})});
+		const data = adventure('blessing'), mon = data.run.team[0];
+		const baseStats = {hp: 60, atk: 95, def: 80, spa: 60, spd: 80, spe: 30};
+		const reward = {id: 'compound', kind: 'compound', title: '五号化合物·金', options: [],
+			compound: {stage: 'allocate', member: mon.id, final: 'Parasect', points: 120, baseStats}};
+		data.run.blessings = {owned: [], pending: [reward], shards: 0}; c.room.receiveState(data);
+		assert(c.room.html.includes('rogue-compound-allocation')); assert(c.room.html.includes('剩余可分配：120 点'));
+		assert.equal((c.room.html.match(/name="compound-/g) || []).length, 6);
+		const inputs = Object.keys(baseStats).map(stat => ({name: 'compound-' + stat, value: stat === 'atk' ? '119' : '0'}));
+		c.room.controls['.rogue-compound-allocation input'] = inputs;
+		const sent = c.sent.length; c.room.applyCompound(); assert.equal(c.sent.length, sent);
+		inputs[1].value = '120'; c.room.applyCompound();
+		const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(command.action, 'blessingreward'); assert.equal(command.value, 'allocate'); assert.equal(command.evs.atk, 120);
+		assert.equal(inputs[1].final, 215);
+	});
+	it('shows full-price recycling for supplies and confirms before selling the whole bag', () => {
+		const c = client(), data = adventure('rest');
+		data.run.node = {kind: 'trade', name: '原价回收摊位', trade: {kind: 'buyback', stock: [], purchases: 0}};
+		data.run.bag = {potion: 3}; data.items = [{id: 'potion', name: '伤药', kind: 'heal', price: 250, recyclePrice: 250}];
+		c.room.receiveState(data);
+		assert(c.room.html.includes('背包物品原价回收')); assert(c.room.html.includes('单价 250 金币'));
+		assert(c.room.html.includes('data-shop-group="exchange" open'));
+		assert(!c.room.html.includes('name="buyItems"')); assert(!c.room.html.includes('name="challengeShop"'));
+		const sent = c.sent.length; c.room.act('sell:all'); assert.equal(c.sent.length, sent);
+		assert(c.app.lastPopup.data.text.includes('750 金币')); assert(c.app.lastPopup.data.text.includes('恢复道具'));
+		assert.equal(c.app.lastPopup.data.action, 'sell');
 	});
 	it('offers category jumps and validates bulk buying before sending one command', () => {
 		const c = client(), data = adventure('rest'); data.run.money = 1000;
@@ -182,7 +224,7 @@ describe('Fantasy Rogue start menu and codex', () => {
 		assert(c.room.html.includes('value="buygrowth:offense" disabled'));
 		assert(!c.room.html.includes('name="challengeShop"')); assert(!c.room.html.includes('血量支付：'));
 		assert(c.panel.html.includes('双攻 +8%')); assert(c.panel.html.includes('个人训练：双攻 +4%'));
-		assert(c.panel.html.includes('不会带到下一局'));
+		assert(c.panel.html.includes('所有增幅随通关卡保留'));
 	});
 	it('shows first-account instructions once before story entry and acknowledges without starting a run', () => {
 		const c = client(true), data = state(), popups = [];
@@ -670,6 +712,20 @@ describe('Fantasy Rogue story and clear-card controls', () => {
 		c.setUser('differentplayer'); popup.confirmCard(); assert.equal(c.sent.length, count);
 		c.setUser('rogueplayer'); popup.confirmCard();
 		assert.equal(JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length)).action, 'deletecard');
+	});
+	it('shows faithful archived comparisons, effect sources and additional abilities in public cards', () => {
+		const c = client(), room = gallery(c), data = adventure(), mon = structuredClone(data.run.team[0]);
+		const baseline = {hp: 100, atk: 50, def: 40, spa: 60, spd: 40, spe: 70};
+		const detail = {baseline, final: {...baseline, atk: 100}, delta: {...baseline, atk: 50}, percent: {...baseline, atk: 100},
+			types: ['Grass'], sources: [{name: '个人永久训练', text: '双攻 +50%'}],
+			extraAbilities: [{id: 'hugepower', source: '已获得的额外特性'}]};
+		const card = {id: 'clear', owner: 'someone', name: '测试', completedAt: 1, contentVersion: 'test',
+			snapshot: {team: [mon], boosts: data.run.boosts, blessings: [{id: 'hpgrowth', name: '越打命越硬', text: 'HP 提升', floor: 1}],
+				memberDetails: {[mon.id]: detail}, blessingEffects: {owned: []}}};
+		room.receiveGallery({userid: 'rogueplayer', account: {revision: 1}, own: [], cards: [card], invitations: [], offset: 0, rulesVersion: 'current'});
+		for (const text of ['增幅前', '常驻最终值', '增加值', '增幅比例', '个人永久训练', '额外特性', '越打命越硬', '+100%', '<b>100</b>']) assert(room.html.includes(text), text);
+		delete card.snapshot.memberDetails;
+		room.render(); assert(room.html.includes('旧卡未记录增幅前数值'));
 	});
 	it('enters a duel only after an acknowledgement for the signed-in player', () => {
 		const c = client(), room = gallery(c); room.chosen = 'myarchive';

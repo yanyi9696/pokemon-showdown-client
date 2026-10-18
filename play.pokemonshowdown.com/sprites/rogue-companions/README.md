@@ -1,8 +1,8 @@
 # 同行训练家半身立绘
 
-2026-10-18 使用 Codex 内置图像生成工具制作的宝可梦同人素材，非官方原图；古兹马使用下文单独注明来源的官方立绘。
+2026-10-18 使用 Codex 内置图像生成工具制作的宝可梦同人素材，非官方原图。旧古兹马官方立绘保留来源记录，当前界面改用生成的常态图。
 
-除 `guzma.png` 外，每张 PNG 为透明背景的两帧横向图集，1774 × 887：左侧常态，右侧笑脸。两帧使用相同服装、姿态、镜头与人物比例。客户端通过 `background-position` 切换表情，按 120 × 120 显示单帧。
+除 `guzma.png` 与 `guzma-neutral.png` 外，每张 PNG 为透明背景的两帧横向图集，1774 × 887：左侧常态，右侧笑脸。两帧使用相同服装、姿态、镜头与人物比例。客户端通过 `background-position` 切换表情，按 120 × 120 显示单帧。`guzma-neutral.png` 是 1123 × 1367 的透明单幅半身图，按宽 120 像素等比显示上半身。
 
 共同制作要求：宝可梦游戏风格的清晰赛璐璐上色，腰部以上，同一角色两种表情，平视镜头，透明背景；不含文字、标志、场景或额外角色。
 
@@ -18,10 +18,19 @@
 | poppy.png | 波琵 | 深蓝头发、浅色连衣裙、钥匙挂饰；幼小、活泼，认可时开朗微笑 |
 | iris.png | 爱丽丝 | 原版训练家造型：紫色长发、浅黄粉色服装，不使用冠军礼服或皇冠 |
 | guzma.png | 古兹马 | 官方原图：白发、黄色眼镜、黑色外衣、白色内搭；客户端裁切显示上半身 |
+| guzma-neutral.png | 古兹马 | 生成的常态图：白发、黄色眼镜、黑白便装、金色项链；当前游戏与图鉴使用 |
 
 生成的同人图集不是官方原画的裁切。卡娜莉的外观以[宝可梦官方角色介绍](https://www.pokemon.co.jp/ex/legends_z-a/sc/characters/251106_01/)为参考；官方中文名为“卡娜莉”。
 
-古兹马来源：[官方角色页](https://www.pokemon.co.jp/ex/sun_moon/character/10.html)的[人物立绘](https://www.pokemon.co.jp/ex/sun_moon/common/images/character/10/portrait.png)。该 PNG 原样保存，CSS 显示上半身。图像生成服务未能生成两帧表情，因此古兹马当前通过金色描边、认可标记与台词表现认可；闲聊 6 秒后恢复，听从建议的认可在下一事件恢复。他没有独立笑脸帧，此限制明确保留。
+旧古兹马素材来源：[官方角色页](https://www.pokemon.co.jp/ex/sun_moon/character/10.html)的[人物立绘](https://www.pokemon.co.jp/ex/sun_moon/common/images/character/10/portrait.png)。该 PNG 原样保留，当前不再用作表情图，以免与生成常态图画风不同。
+
+古兹马当前没有独立笑脸帧：常态与认可状态均使用 `guzma-neutral.png`，以对话反馈认可。闲聊状态 6 秒后恢复，听从建议的状态在下一事件恢复。基于常态图与用户笑脸参考图的两次编辑，图像服务均在输出阶段返回 `moderation_blocked`（请求 db6118b0-3869-47c0-818a-611e7187e5d3、0c888336-42fc-44fc-a6e6-d4146f5e7255），没有把失败结果或官方图冒充新生成的微笑图。
+
+### guzma-neutral 实际生成提示词
+
+内置 imagegen，透明背景。输入一为用户提供的官方便装图，输入二只参考中性表情与视角，不采用铠甲。输出原图直接保存，未二次编辑。
+
+> Use case: stylized-concept. Asset: a single neutral-state waist-up companion portrait for a Pokemon Showdown fan game. Create Guzma, the adult Pokemon trainer, as a clean 2D cel-shaded character portrait with a true transparent background. Input image 1 is the identity and clothing reference: white spiky hair, yellow sunglasses on his forehead, black casual jacket with white zigzag trim, white shirt, gold necklace. Preserve that casual outfit and recognisable face. Input image 2 is only a reference for the calm serious facial expression and slight three-quarter viewing angle; do not use its armor, period costume, scenery or frame. Relaxed neutral closed mouth, no smile, attentive eyes, shoulders natural. Single character from head to waist, entire hair and shoulders visible, centered, readable at 120 pixels, matching the straightforward illustration style of image 1. No lettering, watermark, decorative border or other characters.
 
 ## 2026-10-18 新增图集的提示词
 
