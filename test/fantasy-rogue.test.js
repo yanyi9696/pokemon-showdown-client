@@ -719,16 +719,16 @@ describe('Fantasy Rogue event display and spectator playback', () => {
 		for (const id of ['iono', 'canari']) {
 			const c = client(), data = adventure('event'), name = id === 'iono' ? '奇树' : '卡娜莉';
 			data.run.blessings = {owned: [{family: 'companionstreamer', id: 'companionstreamer', name: '主播女孩重度依赖', text: ''}], pending: [], shards: 0};
-			data.run.event = {key: 'streamer-event', stage: 'choice', title: '足迹', paragraphs: [], options: [{id: 'investigate', name: '追寻足迹', text: ''}]};
+			data.run.event = {key: 'streamer-event', stage: 'choice', title: '挑战', paragraphs: [], options: [{id: 'fight', name: '接受挑战', text: ''}]};
 			c.room.receiveState(data);
 			for (const trainer of ['iono', 'canari']) assert(c.panel.html.includes('sprites/rogue-companions/' + trainer + '.png'));
 			c.room.companionAction(id + '|choosestreamer');
 			const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
 			assert.equal(command.value, 'choosestreamer'); assert.equal(command.member, id);
 			data.account.revision++; c.room.pending = null;
-			data.run.companions = [{id, name, preferences: 6, recommended: 'investigate', canConsult: true, typeOptions: [], abilityOptions: []}];
+			data.run.companions = [{id, name, preferences: 6, giftCounter: true, recommended: 'fight', canConsult: true, typeOptions: [], abilityOptions: []}];
 			c.room.receiveState(data);
-			assert(c.panel.html.includes('6 / 15')); assert(c.html.includes('追寻足迹（' + name + '推荐）'));
+			assert(c.panel.html.includes('同行训练家的赠礼 · 偏好 6 / 15')); assert(c.html.includes('接受挑战（' + name + '推荐）'));
 		}
 	});
 	it('uses distinct AI portraits and offers acceptance only for successful previews', () => {

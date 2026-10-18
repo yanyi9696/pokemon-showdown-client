@@ -118,7 +118,8 @@
 			medic: 'medkit', insight: 'sun-o', inheritmoves: 'share-alt', entrance: 'star', meltan: 'cubes', swords: 'gavel',
 			execute: 'crosshairs', hpgrowth: 'heartbeat', regis: 'university', sound: 'volume-up', multihit: 'forward',
 			hoopa: 'magic', typelink: 'link', typeevolution: 'diamond', psychic: 'superpowers',
-			dragonking: 'trophy', wine: 'glass', cephalosporin: 'medkit', shopraid: 'shopping-bag', renewable: 'recycle',
+			dragonking: 'trophy', companionpoppy: 'flask', companionguzma: 'bug', railgun: 'bolt', rulebreaker: 'gavel',
+			wine: 'glass', cephalosporin: 'medkit', shopraid: 'shopping-bag', renewable: 'recycle',
 			mousefamily: 'bolt', eeveefamily: 'paw', duck: 'question-circle', ascent: 'arrow-up', restinball: 'bed',
 			lifepower: 'tint', rocketcatch: 'crosshairs', arsenal: 'exchange', capturebonus: 'money', speedpower: 'fast-forward',
 			fantasysix: 'cubes', hero: 'shield', powerchoice: 'hand-rock-o', reservemega: 'diamond', reservegmega: 'expand',
@@ -570,12 +571,12 @@
 			if (!companions.length) return html;
 			return html + '<section class="rogue-companions" aria-label="同行训练家">' + companions.map(function (c) {
 				var chat = c.smile && c.smileUntil, seconds = chat ? Math.max(0, (c.smileUntil - Date.now()) / 1000) : 0;
-				var out = '<article class="rogue-companion"><button class="rogue-companion-portrait' + (c.smile ? ' smiling' : '') + (chat ? ' chatting' : '') +
+				var out = '<article class="rogue-companion"><button class="rogue-companion-portrait' + (c.id === 'guzma' ? ' single-portrait' : '') + (c.smile ? ' smiling' : '') + (chat ? ' chatting' : '') +
 					'" name="companionAction" value="' + c.id + '|chat" title="与' + escape(c.name) + '闲聊" aria-label="与' + escape(c.name) + '闲聊" style="background-image:url(' +
 					'sprites/rogue-companions/' + c.id + '.png);animation-duration:' + seconds + 's"' + (locked ? ' disabled' : '') + '></button><div class="rogue-companion-copy"><strong>' + escape(c.name) + '</strong>';
 				if (c.canConsult) out += button('companionAction', c.id + '|advice', '你想听听我的建议吗？', locked);
 				if (c.message) out += '<p class="rogue-companion-speech">' + escape(c.message) + '</p>';
-				if (c.id === 'bea' || c.id === 'acerola' || c.id === 'iono' || c.id === 'canari') out += '<small>心意 ' + Math.min(15, c.preferences) + ' / 15' + (c.rewarded ? ' · 已收到礼物' : '') + '</small>';
+				if (c.giftCounter) out += '<small>同行训练家的赠礼 · ' + (c.id === 'lana' ? '钓鱼 ' : '偏好 ') + Math.min(15, c.preferences) + ' / 15' + (c.rewarded ? ' · 已领取' : '') + '</small>';
 				(c.typeOptions || []).forEach(function (type) {
 					out += button('companionAction', c.id + '|type:' + type.id, localName(type.id) + ' · ' + (type.member ? localName(type.member) : '暂无伙伴'), locked || !type.member);
 				});

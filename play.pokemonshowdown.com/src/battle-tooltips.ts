@@ -562,6 +562,9 @@ export class BattleTooltips {
 		let item = this.battle.dex.items.get(serverPokemon.item);
 
 		let value = new ModifiableValue(this.battle, pokemon, serverPokemon);
+		const blessingMove = (pokemon.isActive?.() ? pokemon.rogueAbilityInfo || serverPokemon.rogueAbilityInfo :
+			serverPokemon.rogueAbilityInfo)?.moves?.[move.id];
+		if (blessingMove?.name) move = new Move(move.id, '', { ...move, name: blessingMove.name });
 		let [moveType, category] = this.getMoveType(move, value, gmaxMove || isZOrMax === 'maxmove');
 		let categoryDiff = move.category !== category;
 
@@ -2079,8 +2082,9 @@ export class BattleTooltips {
 		const inverse = this.battle.rules['Inverse Mod'];
 		const targetTypes = target.getTypeList();
 		const sourceAbility = source.effectiveAbility(serverSource);
+		const rulebreaker = !!(source.rogueAbilityInfo || serverSource?.rogueAbilityInfo)?.rulebreaker;
 		// Mold Breaker doesn't ignore _everything_, but it sure ignores everything that affects effectiveness
-		const ignoreAbility = hardcoreMode || [
+		const ignoreAbility = hardcoreMode || rulebreaker || [
 			'Mold Breaker', 'Teravolt', 'Turboblaze',
 		].includes(sourceAbility) || ['sunsteelstrike', 'moongeistbeam', 'photongeyser', 'lightthatburnsthesky',
 			'searingsunrazesmash', 'menacingmoonrazemaelstrom'].includes(move.id);
@@ -2135,6 +2139,7 @@ export class BattleTooltips {
 
 			// regular type effectiveness
 			if (tType.damageTaken?.[attackType] === 3) {
+				if (rulebreaker) continue;
 				if (target.item === 'Ring Target') continue;
 				if (targetType === 'Ghost' && (sourceAbility === "Scrappy" || sourceAbility === "Mind's Eye")) continue;
 				if (targetType === 'Ghost' && (target.volatiles['foresight'] || target.volatiles['odorsleuth'])) continue;
@@ -2157,7 +2162,7 @@ export class BattleTooltips {
 				factor *= 2;
 			} else {
 				let typeFactor = [1, 2, 0.5, 0][tType.damageTaken?.[attackType] || 0] ?? 1;
-				if (targetType === 'Flying' && this.battle.weather === 'deltastream' && typeFactor > 1) typeFactor = 1;
+				if (!rulebreaker && targetType === 'Flying' && this.battle.weather === 'deltastream' && typeFactor > 1) typeFactor = 1;
 				if (toID(targetAbility) === 'yuanhaiyangliu' && category !== 'Status' &&
 					['raindance', 'primordialsea'].includes(this.battle.weather) && typeFactor > 1) typeFactor = 1;
 				factor *= typeFactor;
@@ -2166,7 +2171,7 @@ export class BattleTooltips {
 		}
 
 		// Air Balloon etc. Levitate is already handled but there are a few that aren't
-		if (category !== 'Status' && attackType === 'Ground' && factor &&
+		if (!rulebreaker && category !== 'Status' && attackType === 'Ground' && factor &&
 			!target.isGrounded() && move.id !== 'thousandarrows') {
 			// isGrounded() still sees Levitate even when this move bypasses the ability.
 			const onlyIgnoredLevitate = ignoreAbility && target.effectiveAbility() === 'Levitate' &&
@@ -2257,6 +2262,12 @@ export class BattleTooltips {
 	// Gets the current accuracy for a move.
 	getMoveAccuracy(move: Dex.Move, value: ModifiableValue, target?: Pokemon) {
 		value.reset(move.accuracy === true ? 0 : move.accuracy, true);
+		const info = value.pokemon?.isActive?.() ? value.pokemon.rogueAbilityInfo || value.serverPokemon.rogueAbilityInfo : value.serverPokemon.rogueAbilityInfo;
+		const modifier = info?.moves?.[move.id];
+		if (typeof move.accuracy === 'number' && modifier?.accuracyFactor) {
+			move = new Move(move.id, '', {...move, accuracy: move.accuracy * modifier.accuracyFactor});
+			value.modify(modifier.accuracyFactor, `【${BattleLog.escapeHTML(modifier.accuracySource || '')}】`);
+		}
 
 		let pokemon = value.pokemon;
 		// Sure-hit accuracy
@@ -2384,13 +2395,13 @@ export class BattleTooltips {
 		value.set(move.accuracy as number);
 
 		if (move.id === 'hurricane' || move.id === 'thunder') {
-            if (value.tryAbility('Mega Sol')) value.set(50, 'Mega Sol');
-            if (value.tryWeather('Sunny Day')) value.set(50, 'Sunny Day');
-            if (value.tryWeather('Desolate Land')) value.set(50, 'Desolate Land');
-            
-            // 雨天/超级雨水特性使命中变为必中（true）
-            if (value.tryAbility('Chao Ji Yu Shui')) value.set(true as any, 'Chao Ji Yu Shui');
-        }
+			if (!info?.rulebreaker) {
+				if (value.tryAbility('Mega Sol')) value.set(50, 'Mega Sol');
+				if (value.tryWeather('Sunny Day')) value.set(50, 'Sunny Day');
+				if (value.tryWeather('Desolate Land')) value.set(50, 'Desolate Land');
+			}
+			if (value.tryAbility('Chao Ji Yu Shui')) { value.set(0, 'Chao Ji Yu Shui'); return value; }
+		}
 
 		// Chained modifiers round down on 0.5
 		let accuracyAfterChain = (value.value * chain) / 4096;
@@ -2398,7 +2409,7 @@ export class BattleTooltips {
 		value.set(accuracyAfterChain);
 
 		// Unlike for Atk, Def, etc. accuracy and evasion boosts are applied after modifiers
-		if (pokemon?.boosts.accuracy) {
+		if (pokemon?.boosts.accuracy && !(info?.rulebreaker && pokemon.boosts.accuracy < 0)) {
 			if (pokemon.boosts.accuracy > 0) {
 				value.set(Math.floor(value.value * (pokemon.boosts.accuracy + 3) / 3));
 			} else {

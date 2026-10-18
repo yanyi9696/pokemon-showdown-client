@@ -1016,7 +1016,9 @@ export interface PokemonHealth {
 export interface ServerPokemon extends PokemonDetails, PokemonHealth {
 	rogueAbilityInfo?: { abilities: string[], active: boolean, abilitySources?: Record<string, string>,
 		stats?: Record<'atk' | 'def' | 'spa' | 'spd' | 'spe', number>, maxhp?: number, statSources?: string[],
+		rulebreaker?: boolean,
 		moves?: Record<string, { power: { source: string, factor?: number, add?: number }[], damage: string[],
+			name?: string, accuracyFactor?: number, accuracySource?: string,
 			types?: Record<string, { source: string, factor?: number, add?: number }[]> }>,
 		training?: Partial<Record<'atk' | 'def' | 'spa' | 'spd' | 'spe', number>>,
 		mentor?: { name: string, text: string, damage: number, defense: number, speed: number } };

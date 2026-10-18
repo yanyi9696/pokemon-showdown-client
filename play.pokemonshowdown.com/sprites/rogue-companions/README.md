@@ -1,8 +1,8 @@
 # 同行训练家半身立绘
 
-2026-10-18 使用 Codex 内置图像生成工具制作的宝可梦同人素材，非官方原图。
+2026-10-18 使用 Codex 内置图像生成工具制作的宝可梦同人素材，非官方原图；古兹马使用下文单独注明来源的官方立绘。
 
-每张 PNG 为透明背景的两帧横向图集，1774 × 887：左侧常态，右侧笑脸。两帧使用相同服装、姿态、镜头与人物比例。客户端通过 `background-position` 切换表情，按 120 × 120 显示单帧。
+除 `guzma.png` 外，每张 PNG 为透明背景的两帧横向图集，1774 × 887：左侧常态，右侧笑脸。两帧使用相同服装、姿态、镜头与人物比例。客户端通过 `background-position` 切换表情，按 120 × 120 显示单帧。
 
 共同制作要求：宝可梦游戏风格的清晰赛璐璐上色，腰部以上，同一角色两种表情，平视镜头，透明背景；不含文字、标志、场景或额外角色。
 
@@ -15,8 +15,13 @@
 | turo.png | 弗图 AI | 棕色短发、短胡须、白色研究服、紫色未来风内搭，细微青色 AI 光泽 |
 | iono.png | 奇树 | 粉蓝双色长发、小磁怪发饰、宽大黄黑外套；左侧自然专注，右侧开心微笑 |
 | canari.png | 卡娜莉 | 青蓝头发、淡黄锯齿额发、红色发圈、金色眼睛、黄色短款外套与黑色交叉系带；左侧自然，右侧笑脸 |
+| poppy.png | 波琵 | 深蓝头发、浅色连衣裙、钥匙挂饰；幼小、活泼，认可时开朗微笑 |
+| iris.png | 爱丽丝 | 原版训练家造型：紫色长发、浅黄粉色服装，不使用冠军礼服或皇冠 |
+| guzma.png | 古兹马 | 官方原图：白发、黄色眼镜、黑色外衣、白色内搭；客户端裁切显示上半身 |
 
-立绘均为生成的同人图集，不是官方原画的裁切。卡娜莉的外观以[宝可梦官方角色介绍](https://www.pokemon.co.jp/ex/legends_z-a/sc/characters/251106_01/)为参考；官方中文名为“卡娜莉”。
+生成的同人图集不是官方原画的裁切。卡娜莉的外观以[宝可梦官方角色介绍](https://www.pokemon.co.jp/ex/legends_z-a/sc/characters/251106_01/)为参考；官方中文名为“卡娜莉”。
+
+古兹马来源：[官方角色页](https://www.pokemon.co.jp/ex/sun_moon/character/10.html)的[人物立绘](https://www.pokemon.co.jp/ex/sun_moon/common/images/character/10/portrait.png)。该 PNG 原样保存，CSS 显示上半身。图像生成服务未能生成两帧表情，因此古兹马当前通过金色描边、认可标记与台词表现认可；闲聊 6 秒后恢复，听从建议的认可在下一事件恢复。他没有独立笑脸帧，此限制明确保留。
 
 ## 2026-10-18 新增图集的提示词
 
@@ -33,3 +38,5 @@
 卡娜莉附加提示词：
 
 > Canari from Pokémon Legends: Z-A. Use the provided official reference for character identity and clothing. Turquoise-blue hair with a pale yellow zigzag forelock, short lightning-shaped side ponytails with red ties, golden eyes, tan skin, yellow cropped hoodie/top with black crossed straps. Both frames show the same waist-up character, front-facing; left neutral and right smiling.
+
+波琵、爱丽丝同样使用透明背景、两格等大的横向图集，左常态、右笑脸，同姿态同大小。波琵采用幼年四天王的钥匙挂饰与蓝色发型；爱丽丝明确采用初次登场时的浅黄粉色训练家服装，禁止冠军服饰。两张输出原图直接保存，未二次编辑。

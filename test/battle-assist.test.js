@@ -29,6 +29,31 @@ function factor(move, target, source = mon('Mew')) {
 	return tips.getMoveEffectiveness(source, m, m.type, m.category, target);
 }
 describe('Battle effectiveness and four speed benchmarks', () => {
+	it('shows railgun power and accuracy from the authoritative blessing payload', () => {
+		const Value = vm.runInContext('ModifiableValue', context);
+		const ownBattle = {...battle, sides: [], abilityActive: () => false, mySide: {sideConditions: {}}};
+		const ownTips = Object.create(tips); ownTips.battle = ownBattle;
+		const info = {abilities: [], active: true, moves: {zapcannon: {name: '超电磁炮', damage: [], power: [{source: '某科学超电磁炮', factor: 2}], accuracyFactor: 2, accuracySource: '某科学超电磁炮'}}};
+		const p = mon('Magnemite', {boosts: {}, isActive: () => true, side: {active: [], foe: {active: []}}, rogueAbilityInfo: info});
+		const server = {speciesForme: 'Magnemite', item: '', baseAbility: '', rogueAbilityInfo: info, stats: {atk: 10, def: 10, spa: 10, spd: 10, spe: 10}};
+		const power = ownTips.getMoveBasePower(dex.moves.get('zapcannon'), 'Electric', new Value(ownBattle, p, server));
+		const accuracy = ownTips.getMoveAccuracy(dex.moves.get('zapcannon'), new Value(ownBattle, p, server));
+		assert.equal(power.value, 240); assert.equal(accuracy.value, 100);
+		assert.match(String(power), /某科学超电磁炮/); assert.match(String(accuracy), /某科学超电磁炮/);
+	});
+	it('shows rulebreaker bypassing type immunity, and preserves beneficial rain accuracy', () => {
+		const source = mon('Mew', {rogueAbilityInfo: {rulebreaker: true}});
+		assert.equal(factor('Earthquake', mon('Zapdos'), source), 2);
+		assert.equal(factor('Tackle', mon('Gengar'), source), 1);
+		const Value = vm.runInContext('ModifiableValue', context);
+		const ownBattle = {...battle, sides: [], weather: 'sunnyday'};
+		const ownTips = Object.create(tips); ownTips.battle = ownBattle;
+		const p = mon('Mew', {boosts: {accuracy: -6}, isActive: () => true, side: {active: []}, rogueAbilityInfo: {rulebreaker: true}});
+		const server = {speciesForme: 'Mew', item: '', baseAbility: ''};
+		assert.equal(ownTips.getMoveAccuracy(dex.moves.get('thunder'), new Value(ownBattle, p, server)).value, 70);
+		ownBattle.weather = 'raindance';
+		assert.equal(ownTips.getMoveAccuracy(dex.moves.get('thunder'), new Value(ownBattle, p, server)).value, 0);
+	});
 	it('uses authoritative six-stat values without reapplying ability, training or boss modifiers', () => {
 		const final = {atk: 371, def: 244, spa: 123, spd: 188, spe: 477};
 		const p = mon('Mew', {isActive: () => true, rogueAbilityInfo: {abilities: ['hugepower'], active: true, stats: final}});
