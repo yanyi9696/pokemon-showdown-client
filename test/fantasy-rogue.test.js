@@ -100,6 +100,20 @@ describe('Fantasy Rogue start menu and codex', () => {
 		assert(c.room.html.includes('<h3>彩豆</h3>'));
 		c.room.selectCodexCollection('regions'); assert(!c.room.html.includes('<h3>彩豆</h3>'));
 	});
+	it('filters all portrait trainers by identity and keeps shared identities in each matching section', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('events');
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'events', entries: [
+			{id: 'companion:bea', name: '彩豆', category: 'companion', portrait: 'bea', roles: ['companion', 'gym'], unlocked: true},
+			{id: 'companion:lacey', name: '紫芋', category: 'companion', portrait: 'lacey', roles: ['companion', 'elitefour'], unlocked: true},
+			{id: 'trainer:maxie', name: '赤焰松', category: 'trainer', portrait: 'maxie', roles: ['antagonist'], unlocked: true},
+		]});
+		c.room.selectCodexCollection('companions');
+		for (const role of ['companion', 'gym', 'elitefour', 'champion', 'antagonist', 'other']) assert(c.room.html.includes('value="' + role + '"'));
+		assert(c.room.html.includes('rogue-dialogue/lacey.png?v=20261019b'));
+		assert(c.room.html.includes('rogue-dialogue/maxie.png'));
+		c.room.filterCodex('gym'); assert(c.room.html.includes('<h3>彩豆</h3>')); assert(!c.room.html.includes('<h3>紫芋</h3>'));
+		c.room.filterCodex('companion'); assert(c.room.html.includes('<h3>紫芋</h3>')); assert(!c.room.html.includes('<h3>赤焰松</h3>'));
+	});
 	it('shows prerequisites as title notes, clears searches immediately and links Top Clear Mind', () => {
 		const c = client(true); c.room.receiveState(state()); c.room.openCodex('blessings');
 		c.room.receiveCodex({userid: 'rogueplayer', section: 'blessings', entries: [
@@ -857,6 +871,20 @@ describe('Fantasy Rogue event display and spectator playback', () => {
 		data.account.revision++; data.run.companions[0].recommended = 'fight'; c.room.pending = null;
 		c.room.receiveState(data);
 		assert(c.room.html.includes('接受挑战（彩豆推荐）')); assert(!c.room.html.includes('暂不参与（彩豆推荐）'));
+	});
+	it('offers both band trainers and exposes deferred gift and extra-Z assignment controls', () => {
+		const c = client(), data = adventure('ready');
+		data.run.blessings = {owned: [{family: 'companionband', id: 'companionband', name: '少女乐队的呐喊', text: ''}], pending: [], shards: 0};
+		data.run.companions = []; c.room.receiveState(data);
+		for (const id of ['marnie', 'roxie']) assert(c.panel.html.includes('value="' + id + '|chooseband"'));
+		data.account.revision++;
+		data.run.companions = [{id: 'marnie', name: '玛俐', zMove: {name: '熙熙攘攘我们的城市', type: 'Dark', category: 'Special', base: 'snarl'}, zCandidates: [{id: 'darkmon', species: 'Umbreon'}]}];
+		c.room.receiveState(data); assert(c.panel.html.includes('value="marnie|z:darkmon"')); assert(c.panel.html.includes('逃跑返还'));
+		data.account.revision++;
+		data.run.companions = [{id: 'acerola', name: '阿塞罗拉', giftCounter: true, giftPending: true, preferences: 15,
+			giftOptions: [{id: 'spelltag', name: '诅咒之符'}, {id: 'silkscarf', name: '丝绸围巾'}]}];
+		c.room.receiveState(data);
+		for (const item of ['spelltag', 'silkscarf']) assert(c.panel.html.includes('value="acerola|gift:' + item + '"'));
 	});
 	it('chooses either streamer and displays event recommendations with the preference counter', () => {
 		for (const id of ['iono', 'canari']) {
@@ -1810,6 +1838,17 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 		const html = c.room.rogueBallControls();
 		for (const text of ['12.35%', '100%', '低于 0.01%', 'role="tooltip"', '含会心捕捉']) assert(html.includes(text), text);
 		c.room.request.fantasyRogue.catchable = false; assert.equal(c.room.rogueBallControls(), '');
+	});
+	it('offers an independent companion Z during trainer or PVP battles and sends the chosen target', () => {
+		const c = battleClient();
+		c.room.request.fantasyRogue = {catchable: false, companionZ: [{move: 'roguecitydark', name: '熙熙攘攘我们的城市', target: 'normal', source: '【同行训练家 - 玛俐】', category: 'Special'}]};
+		c.room.battle.farSide = {active: [{name: '甲'}, {name: '乙'}]}; c.room.choice = {choices: []};
+		c.room.endChoice = () => { c.room.finishedChoice = true; };
+		const html = c.room.rogueBallControls();
+		assert(html.includes('move|roguecitydark|0')); assert(html.includes('威力 <b>185</b>')); assert(html.includes('同行训练家 - 玛俐'));
+		c.room.chooseRogueCompanionZ('2'); assert.equal(c.room.choice.choices[0], 'roguecompanionz 2'); assert(c.room.finishedChoice);
+		c.room.choice.choices = []; c.room.request.fantasyRogue.companionZ = [null];
+		c.room.chooseRogueCompanionZ('1'); assert.equal(c.room.choice.choices.length, 0);
 	});
 	it('renders and sends retreat only for the campaign owner, including while waiting on a turn', () => {
 		const c = battleClient(); c.room.updateControlsForPlayer();

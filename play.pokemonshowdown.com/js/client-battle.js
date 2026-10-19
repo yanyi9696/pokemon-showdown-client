@@ -932,7 +932,16 @@
 				'<button class="button" name="chooseRoguePsychic"' + (rogue.psychic < 100 ? ' disabled' : '') + '>释放灵能 · 一击必杀</button></div>' : '';
 			if (rogue.eeveeZ && rogue.eeveeZ[this.choice && this.choice.choices ? this.choice.choices.length : 0]) psychic +=
 				'<div class="rogue-psychic"><button class="button" name="chooseRogueEeveeZ">九彩升华齐聚顶 · 家族额外 Z</button><p>本成员每场一次，占用行动，五项能力各提升 2 级。</p></div>';
+			var zSlot = this.choice && this.choice.choices ? this.choice.choices.length : 0;
+			var extraZ = rogue.companionZ && rogue.companionZ[zSlot];
+			if (extraZ) {
+				var zTargets = extraZ.target === 'normal' ? this.battle.farSide.active.map(function (p, i) { return {pokemon: p, loc: i + 1}; }).filter(function (p) { return p.pokemon && !p.pokemon.fainted; }) : [{loc: 1}];
+				psychic += '<div class="rogue-psychic"><p><strong>' + BattleLog.escapeHTML(extraZ.source) + '</strong></p>' + zTargets.map(function (target) {
+					return '<button class="button has-tooltip" name="chooseRogueCompanionZ" value="' + target.loc + '" data-tooltip="move|' + extraZ.move + '|' + zSlot + '">' + BattleLog.escapeHTML(extraZ.name) + (zTargets.length > 1 ? ' → ' + BattleLog.escapeHTML(target.pokemon.name) : '') + ' · 额外 Z</button>';
+				}).join(' ') + '<p>威力 <b>185</b> · ' + (extraZ.category === 'Physical' ? '群攻物理' : '声音特殊') + ' · 命中后五项能力各 +1。独立次数，不消耗常规 Z。</p></div>';
+			}
 			if (!rogue.catchable) return psychic;
+
 			return psychic + '<div class="rogue-balls"><p>投球占用本次行动；失败后对方仍会出招。</p>' + rogue.balls.map(function (ball) {
 				var chance = ball.chance;
 				var percent = typeof chance !== 'number' ? '暂不可捕捉' : chance === 1 ? '100%' : chance === 0 ? '0%' :
@@ -967,6 +976,12 @@
 		chooseRoguePsychic: function () {
 			if (!this.choice || !this.request || !this.request.fantasyRogue || !(this.request.fantasyRogue.psychic >= 100)) return;
 			this.choice.choices.push('roguepsychic 1');
+			this.endChoice();
+		},
+		chooseRogueCompanionZ: function (target) {
+			var slot = this.choice && this.choice.choices.length;
+			if (!this.choice || !this.request || !this.request.fantasyRogue || !this.request.fantasyRogue.companionZ || !this.request.fantasyRogue.companionZ[slot]) return;
+			this.choice.choices.push('roguecompanionz ' + (Number(target) || 1));
 			this.endChoice();
 		},
 		chooseRogueEeveeZ: function () {

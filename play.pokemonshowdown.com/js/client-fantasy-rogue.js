@@ -3,9 +3,19 @@
 	var escape = BattleLog.escapeHTML;
 	var globals = this;
 	var companionPortraits = {guzma: 'guzma-expressions', iris: 'iris-champion'};
-	var dialogueSheets = ['jenny', 'sabrina', 'flannery', 'roxie', 'viola', 'nessa', 'larry', 'lorelei', 'lance', 'lacey', 'steven',
+	var dialogueSheets = ['maxie', 'marnie', 'kahili', 'liko', 'jenny', 'sabrina', 'flannery', 'roxie', 'viola', 'nessa', 'larry', 'lorelei', 'lance', 'lacey', 'steven',
 		'giovanni', 'archer', 'cyrus', 'ghetsis', 'piers', 'charm', 'clover', 'coin', 'giacomo', 'rocket', 'magma', 'galactic', 'plasma', 'flare', 'skull', 'yell', 'teamstar'];
 	var dialogueCompanions = ['bea', 'acerola', 'iono', 'rika', 'guzma', 'lysandre', 'iris', 'poppy', 'lana', 'olivia', 'grusha', 'canari', 'sada', 'turo'];
+	function portraitFile(id) {
+		if (dialogueCompanions.indexOf(id) >= 0) return 'sprites/rogue-companions/' + (companionPortraits[id] || id) + '.png';
+		if (dialogueSheets.indexOf(id) >= 0) return 'sprites/rogue-dialogue/' + id + '.png' + (id === 'lacey' ? '?v=20261019b' : '');
+		return '';
+	}
+	function recommendedLabel(run, id) {
+		var names = (run.companions || []).filter(function (c) { return c.recommended === id; }).map(function (c) { return c.name; });
+		return names.length ? '（' + names.join('、') + '推荐）' : '';
+	}
+
 	// Update existing nodes in place: replacing the whole room briefly collapses its
 	// scroll range, drops focus and restarts every CSS animation on each response.
 	function stableHTML(room, html) {
@@ -655,16 +665,32 @@
 			if (run.blessings && run.blessings.owned.some(function (b) { return b.family === 'companionwinter'; }) && !companions.some(function (c) { return c.id === 'grusha' || c.id === 'rika'; })) {
 				html += '<div class="rogue-companion-choice"><strong>选择同行训练家</strong><p>缺少对应属性伙伴时，额外特性将在之后赋予。</p><div class="rogue-companions">' + [['grusha', '古鲁夏'], ['rika', '辛俐']].map(function (entry) { return '<button class="button rogue-companion-pick" name="companionAction" value="' + entry[0] + '|choosewinter"' + (locked ? ' disabled' : '') + '><span class="rogue-companion-portrait" style="background-image:url(sprites/rogue-companions/' + entry[0] + '.png)"></span><b>' + entry[1] + '</b></button>'; }).join('') + '</div></div>';
 			}
+			if (run.blessings && run.blessings.owned.some(function (b) { return b.family === 'companionband'; }) && !companions.some(function (c) { return c.id === 'marnie' || c.id === 'roxie'; })) {
+				html += '<div class="rogue-companion-choice"><strong>选择同行训练家</strong><p>缺少对应属性伙伴时，额外特性将在之后赋予。</p><div class="rogue-companions">' + [['marnie', '玛俐'], ['roxie', '霍米加']].map(function (entry) {
+					return '<button class="button rogue-companion-pick" name="companionAction" value="' + entry[0] + '|chooseband"' + (locked ? ' disabled' : '') + '><span class="rogue-companion-portrait" style="background-image:url(' + portraitFile(entry[0]) + ')"></span><b>' + entry[1] + '</b></button>';
+				}).join('') + '</div></div>';
+			}
 			if (!companions.length) return html;
 			return html + '<section class="rogue-companions" aria-label="同行训练家">' + companions.map(function (c) {
 				var chat = c.smile && c.smileUntil, seconds = chat ? Math.max(0, (c.smileUntil - Date.now()) / 1000) : 0;
-				var portrait = 'background-image:url(sprites/rogue-companions/' + (companionPortraits[c.id] || c.id) + '.png);';
+				var portrait = 'background-image:url(' + portraitFile(c.id) + ');';
 				var out = '<article class="rogue-companion"><button class="rogue-companion-portrait' + (c.smile ? ' smiling' : '') + (chat ? ' chatting' : '') +
 					'" name="companionAction" value="' + c.id + '|chat" title="与' + escape(c.name) + '闲聊" aria-label="与' + escape(c.name) + '闲聊" style="' +
 					portrait + 'animation-duration:' + seconds + 's"' + (locked ? ' disabled' : '') + '></button><div class="rogue-companion-copy"><strong>' + escape(c.name) + '</strong>';
 				if (c.canConsult) out += button('companionAction', c.id + '|advice', '你想听听我的建议吗？', locked);
 				if (c.message) out += '<p class="rogue-companion-speech">' + escape(c.message) + '</p>';
-				if (c.giftCounter) out += '<small>同行训练家的赠礼 · ' + (c.id === 'lana' ? '钓鱼 ' : c.id === 'olivia' ? '赌石 ' : '偏好 ') + Math.min(15, c.preferences) + ' / 15' + (c.rewarded ? ' · 已领取' : '') + '</small>';
+				if (c.giftCounter) out += '<small>同行训练家的赠礼 · ' + (c.id === 'lana' ? '钓鱼 ' : c.id === 'olivia' ? '赌石 ' : '偏好 ') + Math.min(15, c.preferences) + ' / 15' + (c.rewarded ? ' · 已领取' : c.giftPending ? ' · 待选择赠礼' : '') + '</small>';
+				(c.giftOptions || []).forEach(function (gift) { out += button('companionAction', c.id + '|gift:' + gift.id, '领取【' + gift.name + '】', locked); });
+				if (c.zMove) {
+					out += '<p class="rogue-caption">额外 Z【' + escape(c.zMove.name) + '】 · 威力 <b>185</b> · ' + escape(localName(c.zMove.type)) + '系' + (c.zMove.category === 'Physical' ? '群攻物理' : '声音特殊') + '。命中后五项能力各 +1；本局一次，逃跑返还。</p>';
+					if (c.zGrant) {
+						var assigned = (run.team || []).find(function (p) { return p.id === c.zGrant.member; });
+						out += '<p>已指定：' + escape(assigned ? localName(assigned.species || assigned.set && assigned.set.species) : '暂不在队伍中的伙伴') + ' · <b>' + (c.zGrant.spent ? '本局已使用' : '本局尚可使用一次') + '</b></p>';
+					} else {
+						(c.zCandidates || []).forEach(function (p) { out += button('companionAction', c.id + '|z:' + p.id, '为【' + localName(p.species) + '】解锁额外 Z', locked); });
+						if (!(c.zCandidates || []).length) out += '<p class="rogue-caption">等待一名对应属性且已装备【' + escape(localName(Dex.moves.get(c.zMove.base).name, 'move')) + '】的伙伴。</p>';
+					}
+				}
 				(c.typeOptions || []).forEach(function (type) {
 					out += button('companionAction', c.id + '|type:' + type.id, localName(type.id) + ' · ' + (type.member ? localName(type.member) : '暂无伙伴'), locked || !type.member);
 				});
@@ -822,12 +848,11 @@
 						Dex.getTeambuilderSprite({species: name}) + '"></div><span>' + escape(localName(name)) + '</span></div>'; }).join('') + '</div></div>';
 			}
 			if (story.portrait) {
-				var id = story.portrait, file = dialogueCompanions.indexOf(id) >= 0 ? 'rogue-companions/' + (companionPortraits[id] || id) :
-					dialogueSheets.indexOf(id) >= 0 ? 'rogue-dialogue/' + id : '';
+				var id = story.portrait, file = portraitFile(id);
 				var actor = '<div role="img" aria-label="' + escape(story.speaker || story.title) + '" class="rogue-dialogue-actor side-' +
 					(story.side === 'left' ? 'left' : 'right') + (story.expression === 'approval' ? ' is-approval' : '') +
 					'"';
-				if (file) return actor + ' style="background-image:url(sprites/' + file + '.png)"></div>';
+				if (file) return actor + ' style="background-image:url(' + file + ')"></div>';
 				return actor + '>' + (story.pokemon ? '<div class="rogue-story-pokemon" aria-hidden="true" style="' +
 					Dex.getTeambuilderSprite({species: story.pokemon}) + '"></div>' :
 					'<img class="rogue-story-trainer" alt="" src="' + escape(Dex.resolveAvatar(story.avatar || id)) + '" />') + '</div>';
@@ -1329,7 +1354,7 @@
 				}
 				html += '<h4>挑选一份奖励</h4><div class="rogue-reward-options">' + scene.choices.map(function (option) {
 					return '<button class="button rogue-event-option" name="chooseReward" value="' + escape(option.id) + '"' +
-						(busy || option.disabled ? ' disabled' : '') + '><strong>' + escape(option.name) + '</strong><small>' + escape(option.text) + '</small></button>';
+						(busy || option.disabled ? ' disabled' : '') + '><strong>' + escape(option.name + recommendedLabel(run, option.id)) + '</strong><small>' + escape(option.text) + '</small></button>';
 				}).join('') + '</div><p class="rogue-caption">' + escape(scene.baseText) + '</p>';
 			}
 			return html + '</article>';
@@ -1564,7 +1589,7 @@
 					var selected = this.selectedRoute === node.id;
 					html += '<button type="button" name="chooseRoute" value="' + escape(node.id) + '" class="rogue-route rogue-route-' + routeTone(node.kind) +
 						(selected ? ' is-selected' : '') + '" aria-pressed="' + selected + '"' + (busy ? ' disabled' : '') + '>' + routeVortex() + routeEmblem(node.kind) +
-						'<strong>' + escape(node.name) + '</strong><small>' + escape(kindNames[node.kind] || node.kind) +
+						'<strong>' + escape(node.name + recommendedLabel(run, node.id)) + '</strong><small>' + escape(kindNames[node.kind] || node.kind) +
 						(node.biome ? ' · Lv.' + (node.biome.level + (run.blessings ? run.blessings.levels : 0)) +
 							(run.blessings && run.blessings.levels ? '（含祝福 +' + run.blessings.levels + '）' : '') + ' · ' + (node.biome.tier * 20) + '～' +
 							(node.biome.tier * 20 + 20) + ' 档宝可梦池' : '') +
@@ -2065,20 +2090,20 @@
 			} else {
 				var people = section === 'events' && this.codexCollection === 'companions';
 				if (section === 'events') html += '<nav class="rogue-codex-collections" aria-label="事件图鉴分册">' +
-					[['regions', 'map-signs', '区域事件', '事件 · 奖励 · 遭遇 · 交易 · 奇遇'], ['companions', 'users', '同行训练家', '人物 · 偏好 · 同行训练家的赠礼']].map(function (entry) {
+					[['regions', 'map-signs', '区域事件', '事件 · 奖励 · 遭遇 · 交易 · 奇遇'], ['companions', 'users', '训练家图鉴', '同行 · 道馆 · 天王与冠军 · 反派 · 其他人物']].map(function (entry) {
 						var selected = (people ? 'companions' : 'regions') === entry[0];
 						return '<button class="button' + (selected ? ' is-active' : '') + '" name="selectCodexCollection" value="' + entry[0] +
 							'" aria-pressed="' + selected + '">' + fa(entry[1]) + '<span><strong>' + entry[2] + '</strong><small>' + entry[3] + '</small></span></button>';
 					}).join('') + '</nav>';
 				filters = section === 'blessings' ? [['all', '全部'], ['silver', '白银'], ['gold', '黄金'], ['prismatic', '棱彩'], ['unlocked', '已解锁']] :
-					people ? [['all', '全部人物']] :
+					people ? [['all', '全部人物'], ['companion', '同行训练家'], ['gym', '道馆馆主'], ['elitefour', '天王'], ['champion', '冠军'], ['antagonist', '反派人物'], ['other', '其他人物']] :
 					[['all', '全部区域'], ['event', '事件'], ['reward', '奖励'], ['encounter', '遭遇'], ['trade', '交易'], ['adventure', '奇遇'], ['unlocked', '已经历']];
-				entries = section === 'events' ? data.entries.filter(function (entry) { return (entry.category === 'companion') === people; }) : data.entries;
+				entries = section === 'events' ? data.entries.filter(function (entry) { return (['companion', 'trainer'].indexOf(entry.category) >= 0) === people; }) : data.entries;
 				var unlocked = entries.filter(function (entry) { return entry.unlocked; }).length;
 					html += '<p class="rogue-codex-progress">' + (data.preview || people ? '可查看 ' : section === 'blessings' ? '已解锁 ' : '已经历 ') + '<b>' + unlocked + ' / ' + entries.length +
-						'</b><span>' + (section === 'blessings' ? '按名称拼音首字母排列。+／++／+++ 分别对应第 50／100／150 层版本，获得过的祝福可查看全部版本。' : people ? '了解同行训练家的偏好，以及旅途中可能收到的赠礼。' : '进入过的区域事件会收入图鉴，可以重读文字分支。') + '</span></p>';
+						'</b><span>' + (section === 'blessings' ? '按名称拼音首字母排列。+／++／+++ 分别对应第 50／100／150 层版本，获得过的祝福可查看全部版本。' : people ? '收录拥有立绘的人物；同一角色可按不同身份查看。同行条目列出偏好与赠礼。' : '进入过的区域事件会收入图鉴，可以重读文字分支。') + '</span></p>';
 				var filter = this.codexFilter;
-				entries = entries.filter(function (entry) { return filter === 'all' || (filter === 'unlocked' ? entry.unlocked : (section === 'events' ? entry.category || 'event' : entry.tier) === filter); });
+				entries = entries.filter(function (entry) { return filter === 'all' || (filter === 'unlocked' ? entry.unlocked : (people ? (entry.roles || [entry.category]).indexOf(filter) >= 0 : (section === 'events' ? entry.category || 'event' : entry.tier) === filter)); });
 			}
 			var active = this.codexFilter, query = this.codexQuery.toLowerCase();
 			var itemSection = section === 'guide' && ['items', 'exclusive', 'special'].indexOf(active) >= 0;
@@ -2121,9 +2146,12 @@
 					Object.keys(statNames).map(function (stat) { return statNames[stat] + ' ' + entry.stats[stat]; }).join(' · ') + '</p>' +
 					(entry.battleOnly ? '<p class="rogue-caption">战斗中触发的特殊形态' + (entry.requiredItem ? ' · ' + escape(localName(entry.requiredItem)) : '') + '</p>' : '');
 				if (section === 'blessings' && entry.family === 'prayer') body = body.replace(/<strong class="rogue-term">【Top Clear Mind】<\/strong>/g, '<button class="rogue-codex-link" name="jumpBlessing"><b>【Top Clear Mind】</b></button>');
-				if (entry.portrait) body = '<span class="rogue-companion-portrait codex-portrait" style="background-image:url(sprites/rogue-companions/' + (companionPortraits[entry.portrait] || entry.portrait) + '.png)"></span>' + body;
+				if (entry.portrait) {
+					var file = portraitFile(entry.portrait);
+					body = (file ? '<span class="rogue-companion-portrait codex-portrait" style="background-image:url(' + file + ')"></span>' : entry.portrait === 'mewtwo' ? '<div role="img" aria-label="幻想超梦" style="' + Dex.getTeambuilderSprite({species: 'Mewtwo-Fantasy'}) + '"></div>' : '<img class="rogue-codex-native-portrait" src="' + escape(Dex.resolveAvatar(entry.portrait)) + '" alt="' + escape(entry.name) + '" />') + body;
+				}
 				return '<article data-codex-family="' + escape(entry.family || '') + '" class="rogue-codex-entry tier-' + (entry.tier || 'plain') + (entry.unlocked === false ? ' is-locked' : '') + '">' +
-					'<div class="rogue-codex-entry-top"><span>' + icon + '</span><small>' + (tier ? tier + '阶' : section === 'events' ? (entry.category === 'companion' ? '同行训练家' : kindNames[entry.category || 'event']) : '幻想杯') +
+					'<div class="rogue-codex-entry-top"><span>' + icon + '</span><small>' + (tier ? tier + '阶' : section === 'events' ? (['companion', 'trainer'].indexOf(entry.category) >= 0 ? '训练家' : kindNames[entry.category || 'event']) : '幻想杯') +
 					'</small>' + (entry.unlocked === false ? '<span class="rogue-codex-lock">' + fa('lock') + '未解锁</span>' : '') + '</div>' +
 					'<div class="rogue-codex-title"><h3>' + escape(localName(entry.name, entryKind)) + '</h3>' +
 					(section === 'blessings' ? (entry.floors && entry.floors.length ? ['仅第 ' + entry.floors.join('、') + ' 层出现'] : []).concat(entry.availability || []).map(function (note) {

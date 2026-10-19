@@ -50,11 +50,6 @@
     "output": "exec-abb3cfa8-d858-4c55-8482-bc81cee9a508.png"
   },
   {
-    "id": "lacey",
-    "prompt": "Create a transparent PNG 2D anime dialogue character expression sheet. Subject: Lacey, the Pokémon Blueberry Elite Four member, pink bob haircut with dark X shaped hair clips, white and blue academy school jacket, proper tidy uniform, youthful kind face. Exactly two waist-up illustrations of the same character side by side on a wide 2:1 canvas. Equal square cells, left neutral, right gently smiling in recognition of a worthy challenger. Identical pose, scale, clothing, face shape and colors; only facial expression changes. Crisp dark outlines, restrained cel shading, consistent game illustration finish, fully clothed, generous transparent margin around hair and arms, no text or borders.",
-    "output": "exec-9c3ded4a-9978-42cd-a46d-e85550887185.png"
-  },
-  {
     "id": "giovanni",
     "prompt": "Create a transparent PNG 2D anime game dialogue expression sheet of Giovanni from Pokémon, middle-aged man with short slick dark hair, angular face, dark business suit with a small red R emblem, pale shirt. Controlled stern expression on the left, subtle respectful smirk on the right. Exactly two waist-up illustrations side by side in a wide 2:1 canvas, two equal square cells. Identical pose, scale, clothing, face shape, colors and crisp dark outlines in both; only the expression changes. Clean cel shading and fully clothed character game illustration. Each figure fits within its cell with transparent margins, no text, labels, border or background.",
     "output": "exec-ccabeb07-eb95-4697-9008-36135c926ec2.png"
@@ -138,5 +133,47 @@
     "id": "teamstar",
     "prompt": "Transparent PNG 2D anime game dialogue expression sheet of a male Team Star grunt from Pokémon Scarlet and Violet, white motorcycle-style helmet with a yellow star, orange sunglasses, white collared school shirt with dark tie, orange backpack, dark gloves. Exactly two matching waist-up portraits side by side in a wide 2:1 canvas with equal square cells. Left neutral stern, right sheepish embarrassed recognition after a battle or reprimand. Identical pose, scale, clothing, head position, outline and colors; only expression changes. Fully clothed, clean dark line art, restrained cel shading, transparent margin around each figure. No scenery, text or labels.",
     "output": "exec-6e921f19-84db-4c43-acb6-1d1e3360cfe4.png"
+  },
+  {
+    "id": "lacey",
+    "output": "exec-c25e91b5-712b-4f98-807c-7130a0b5ff18.png",
+    "tool": "image_gen",
+    "date": "2026-10-19",
+    "specification": "Reference-guided replacement: pink bob, gold eyes, thick eyebrows, gold-and-green hair clips, pink coat, white collar and red gloves.",
+    "layout": "Transparent two-cell sheet: neutral left, approval right; matching pose, palette and linework.",
+    "reference": "codex-clipboard-1b2723f9-ee10-4f48-871f-95568ec5e0ea.png"
+  },
+  {
+    "id": "marnie",
+    "output": "exec-796c4b57-dcef-409a-aa1d-960a1cad654c.png",
+    "tool": "image_gen",
+    "date": "2026-10-19",
+    "specification": "Named Marnie character, black jacket and pink dress, reserved neutral and approving expressions.",
+    "layout": "Transparent two-cell sheet: neutral left, approval right; matching pose, palette and linework."
+  },
+  {
+    "id": "kahili",
+    "output": "exec-e7388e63-b951-48e5-a04e-68eb30cb0e2e.png",
+    "tool": "image_gen",
+    "date": "2026-10-19",
+    "specification": "Named Kahili character, pale blue hair, blue golf polo and visor, feather sleeve accents.",
+    "layout": "Transparent two-cell sheet: neutral left, approval right; matching pose, palette and linework.",
+    "designReference": "https://bulbapedia.bulbagarden.net/wiki/Kahili"
+  },
+  {
+    "id": "liko",
+    "output": "exec-0c30966e-95e1-45a5-9070-cdd55a14d08c.png",
+    "tool": "image_gen",
+    "date": "2026-10-19",
+    "specification": "Named Liko character, blue hair and jacket, fully clothed waist-up dialogue portraits.",
+    "layout": "Transparent two-cell sheet: neutral left, approval right; matching pose, palette and linework."
+  },
+  {
+    "id": "maxie",
+    "output": "exec-f301f900-a060-45ae-9c90-f8770df405ca.png",
+    "tool": "image_gen",
+    "date": "2026-10-19",
+    "specification": "Named Maxie character, angular face, red hair, glasses and team uniform.",
+    "layout": "Transparent two-cell sheet: neutral left, approval right; matching pose, palette and linework."
   }
 ]

@@ -21,6 +21,9 @@
 var translations = {
     "Rogue Psychic Burst": "灵能百分百",
     "Rogue Evoboost": "九彩升华齐聚顶",
+    "Rogue City Dark": "熙熙攘攘我们的城市",
+    "Rogue City Poison": "熙熙攘攘我们的城市",
+    "Rogue Flawless": "致以无瑕之人",
     "Rogue Great Mage": "大法师",
     "Rogue Ascent": "登龙",
     "Rogue Emblem Bug": "虫属性转", "Rogue Emblem Dark": "恶属性转",

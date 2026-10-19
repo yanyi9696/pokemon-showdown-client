@@ -700,6 +700,7 @@ export class BattleTooltips {
 		}
 
 		text += `<p>Accuracy: ${accuracy}</p>`;
+		if (blessingMove?.source) text += `<p><strong>${BattleLog.escapeHTML(blessingMove.source)}</strong> · 额外 Z：命中后五项能力各 +1，不消耗常规 Z 次数。</p>`;
 		if (zEffect) text += `<p>Z-Effect: ${zEffect}</p>`;
 
 		if (this.battle.hardcoreMode) {
