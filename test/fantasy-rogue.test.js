@@ -68,6 +68,40 @@ function state() {
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
 describe('Fantasy Rogue start menu and codex', () => {
+	it('marks the selected category in all three codices and in nested guide filters', () => {
+		const c = client(true); c.room.receiveState(state());
+		c.room.codices.guide = {guide: {intro: [], modules: {items: [], moves: [], abilities: [], pokemon: []}}};
+		c.room.codices.blessings = {entries: []}; c.room.codices.events = {entries: []};
+		for (const [screen, filter, expected] of [
+			['guide', 'pokemon', ['幻想宝可梦']], ['guide', 'exclusive', ['道具', '专属道具']],
+			['guide', 'movesenhanced', ['招式', '原版招式增强']], ['blessings', 'gold', ['黄金']],
+			['events', 'trade', ['交易']],
+		]) {
+			c.room.screen = screen; c.room.codexFilter = filter;
+			const html = c.room.renderCodex();
+			const active = [...html.matchAll(/<button[^>]*class="button is-active"[^>]*name="filterCodex"[^>]*>([^<]+)<\/button>/g)];
+			assert.deepEqual(active.map(match => match[1]), expected);
+			assert(active.every(match => match[0].includes('aria-pressed="true"')));
+		}
+		c.room.codexCollection = 'companions'; c.room.codexFilter = 'gym';
+		const html = c.room.renderCodex();
+		assert.match(html, /class="button is-active"[^>]*value="companions"[^>]*aria-pressed="true"/);
+		assert.match(html, /class="button is-active"[^>]*aria-pressed="true"[^>]*value="gym"/);
+	});
+	it('shows encountered status without exposing locked trainer descriptions', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('events');
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'events', entries: [
+			{id: 'trainer:brock', name: '小刚', category: 'trainer', portrait: 'brock', roles: ['gym'], unlocked: false, text: '？？？'},
+			{id: 'trainer:mewtwo', name: '幻想超梦', category: 'trainer', portrait: 'mewtwo', roles: ['other'], unlocked: true, text: '塔顶的对手'},
+		]});
+		c.room.selectCodexCollection('companions');
+		assert(c.room.html.includes('已遇见 <b>1 / 2</b>'));
+		assert(c.room.html.includes('尚未遇见')); assert(c.room.html.includes('已遇见过'));
+		assert(c.room.html.includes('rogue-dialogue/brock.png'));
+		assert(c.room.html.includes('class="rogue-codex-single-portrait" src="sprites/rogue-dialogue/mewtwo-official.png"'));
+		c.room.codexSearchMode = 'content'; c.room.codexQuery = '道馆';
+		assert(!c.room.renderCodex().includes('<h3>小刚</h3>'));
+	});
 	it('sorts translated guide and event names by pinyin before pagination without mutating source entries', () => {
 		const c = client(false, true); c.room.screen = 'guide'; c.room.codexFilter = 'items';
 		const entries = [{id: 'x', name: '伤药', text: ''}, {id: 'z', name: '安抚之铃', text: ''}, {id: 'a', name: '木炭', text: ''}];
@@ -633,8 +667,14 @@ describe('Fantasy Rogue story and clear-card controls', () => {
 		assert.equal(c.room.storyArtKey(page), c.room.storyArtKey({...page, expression: 'approval'}));
 		assert.notEqual(c.room.storyArtKey(page), c.room.storyArtKey({...page, portrait: 'guzma', side: 'left'}));
 		assert(c.room.storyArt({...page, portrait: 'guzma', side: 'left'}).includes('rogue-companions/guzma-expressions.png'));
-		assert(c.room.storyArt({...page, portrait: 'brock', avatar: 'brock'}).includes('sprites/trainers/brock.png'));
-		assert(!c.room.storyArt({...page, portrait: 'brock'}).includes('rogue-dialogue/brock.png'));
+		assert(c.room.storyArt({...page, portrait: 'brock', avatar: 'brock'}).includes('rogue-dialogue/brock.png'));
+		assert(!c.room.storyArt({...page, portrait: 'brock'}).includes('sprites/trainers/brock.png'));
+		assert(c.room.storyArt({...page, portrait: 'kahili'}).includes('kahili.png?v=20261019-blue'));
+		for (const expression of ['neutral', 'approval']) {
+			const art = c.room.storyArt({...page, portrait: 'mewtwo', pokemon: 'Mewtwo-Fantasy', expression});
+			assert(art.includes('class="rogue-dialogue-single"')); assert(art.includes('mewtwo-official.png'));
+			assert(!art.includes('background-image'));
+		}
 		assert.notEqual(c.room.storySignature(page), c.room.storySignature({...page, performance: 'conversation2'}));
 	});
 	it('automatically shows terminal failure once and returns home only after its acknowledged command', () => {

@@ -64,6 +64,7 @@
 .fantasyrogue .rogue-story-scene:has(.rogue-dialogue-actor) { height: clamp(280px, 37vh, 390px); }
 .fantasyrogue .rogue-dialogue-actor { position: absolute; top: 0; width: auto; max-width: 100%; aspect-ratio: 1; height: 100%; background-repeat: no-repeat; background-size: 200% 100%; background-position: left center; filter: drop-shadow(0 5px 12px #08172266); }
 .fantasyrogue .rogue-dialogue-actor.is-approval { background-position: right center; }
+.fantasyrogue .rogue-dialogue-single { width: 100%; height: 100%; object-fit: contain; }
 .fantasyrogue .rogue-dialogue-actor.side-right { left: 98%; transform: translateX(-100%); animation: rogue-actor-right .42s ease-out both; }
 .fantasyrogue .rogue-dialogue-actor.side-left { left: 2%; transform: translateX(0); animation: rogue-actor-left .42s ease-out both; }
 .fantasyrogue .rogue-story-scene:has(.rogue-dialogue-actor) .rogue-story-chapter { max-width: 42%; line-height: 1.6; text-shadow: 0 2px 4px #000; }
@@ -940,6 +941,15 @@
 .button.rogue-control:disabled,
 .fantasyrogue .button:disabled,
 .rogue-retreat .button:disabled { color: #73818a; border-color: #c2cdd5; background: #e9eef2; box-shadow: none; opacity: .65; cursor: default; }
+/* Keep every codex's active category above the shared large-button theme, including hover. */
+.fantasyrogue .rogue-codex .rogue-codex-filters .button.is-active[aria-pressed="true"],
+.fantasyrogue .rogue-codex .rogue-codex-collections .button.is-active[aria-pressed="true"] {
+	color: #fff; border-color: #103858; background: linear-gradient(180deg, #205a88, #123c63);
+	box-shadow: 0 2px 4px #133b6840, inset 0 1px 0 #ffffff30;
+}
+.fantasyrogue .rogue-codex .button.is-active[aria-pressed="true"] small { color: #e4f1ff; }
+.fantasyrogue .rogue-codex-seen { margin-left: auto; color: #246345; font-size: 12px; }
+.fantasyrogue .rogue-codex-single-portrait { float: right; width: 120px; max-width: 40%; height: 140px; object-fit: contain; margin: 0 0 8px 10px; }
 .fantasyrogue .rogue-item-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .fantasyrogue .rogue-shop .rogue-inventory { grid-template-columns: repeat(auto-fit, minmax(min(235px,100%),1fr)); }
 .fantasyrogue .rogue-equipped-moves .button:first-child { white-space: normal; }

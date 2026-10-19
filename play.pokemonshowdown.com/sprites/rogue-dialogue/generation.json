@@ -175,5 +175,14 @@
     "date": "2026-10-19",
     "specification": "Named Maxie character, angular face, red hair, glasses and team uniform.",
     "layout": "Transparent two-cell sheet: neutral left, approval right; matching pose, palette and linework."
+  },
+  {
+    "id": "brock",
+    "output": "exec-acea7208-3264-4665-99d2-52b49be1da65.png",
+    "tool": "image_gen",
+    "date": "2026-10-19",
+    "specification": "Brock fan illustration based on both supplied references: tan skin, narrow closed eyes, spiky brown hair, charcoal utility vest with orange collar and trim over a green shirt. Hands on hips; neutral and warm approving expressions; consistent outline and restrained cel shading.",
+    "layout": "Transparent 2:1 sheet with equal square cells, neutral left and approval right. Identical waist-up pose, scale, clothing and silhouette.",
+    "references": ["codex-clipboard-1f3fd452-cb4d-4d2e-bf6e-486f73a6d7c7.png", "codex-clipboard-2504e7a7-c9db-4baf-8bcf-f13770aea98f.png"]
   }
 ]

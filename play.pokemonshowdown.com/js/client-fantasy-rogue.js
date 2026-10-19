@@ -3,12 +3,14 @@
 	var escape = BattleLog.escapeHTML;
 	var globals = this;
 	var companionPortraits = {guzma: 'guzma-expressions', iris: 'iris-champion'};
-	var dialogueSheets = ['maxie', 'marnie', 'kahili', 'liko', 'jenny', 'sabrina', 'flannery', 'roxie', 'viola', 'nessa', 'larry', 'lorelei', 'lance', 'lacey', 'steven',
+	var dialogueSheets = ['brock', 'maxie', 'marnie', 'kahili', 'liko', 'jenny', 'sabrina', 'flannery', 'roxie', 'viola', 'nessa', 'larry', 'lorelei', 'lance', 'lacey', 'steven',
 		'giovanni', 'archer', 'cyrus', 'ghetsis', 'piers', 'charm', 'clover', 'coin', 'giacomo', 'rocket', 'magma', 'galactic', 'plasma', 'flare', 'skull', 'yell', 'teamstar'];
 	var dialogueCompanions = ['bea', 'acerola', 'iono', 'rika', 'guzma', 'lysandre', 'iris', 'poppy', 'lana', 'olivia', 'grusha', 'canari', 'sada', 'turo'];
+	var singlePortraits = {mewtwo: 'sprites/rogue-dialogue/mewtwo-official.png'};
+	var portraitVersions = {lacey: '20261019b', kahili: '20261019-blue'};
 	function portraitFile(id) {
 		if (dialogueCompanions.indexOf(id) >= 0) return 'sprites/rogue-companions/' + (companionPortraits[id] || id) + '.png';
-		if (dialogueSheets.indexOf(id) >= 0) return 'sprites/rogue-dialogue/' + id + '.png' + (id === 'lacey' ? '?v=20261019b' : '');
+		if (dialogueSheets.indexOf(id) >= 0) return 'sprites/rogue-dialogue/' + id + '.png' + (portraitVersions[id] ? '?v=' + portraitVersions[id] : '');
 		return '';
 	}
 	function recommendedLabel(run, id) {
@@ -852,6 +854,7 @@
 				var actor = '<div role="img" aria-label="' + escape(story.speaker || story.title) + '" class="rogue-dialogue-actor side-' +
 					(story.side === 'left' ? 'left' : 'right') + (story.expression === 'approval' ? ' is-approval' : '') +
 					'"';
+				if (singlePortraits[id]) return actor + '><img class="rogue-dialogue-single" alt="" src="' + singlePortraits[id] + '" /></div>';
 				if (file) return actor + ' style="background-image:url(' + file + ')"></div>';
 				return actor + '>' + (story.pokemon ? '<div class="rogue-story-pokemon" aria-hidden="true" style="' +
 					Dex.getTeambuilderSprite({species: story.pokemon}) + '"></div>' :
@@ -2100,8 +2103,8 @@
 					[['all', '全部区域'], ['event', '事件'], ['reward', '奖励'], ['encounter', '遭遇'], ['trade', '交易'], ['adventure', '奇遇'], ['unlocked', '已经历']];
 				entries = section === 'events' ? data.entries.filter(function (entry) { return (['companion', 'trainer'].indexOf(entry.category) >= 0) === people; }) : data.entries;
 				var unlocked = entries.filter(function (entry) { return entry.unlocked; }).length;
-					html += '<p class="rogue-codex-progress">' + (data.preview || people ? '可查看 ' : section === 'blessings' ? '已解锁 ' : '已经历 ') + '<b>' + unlocked + ' / ' + entries.length +
-						'</b><span>' + (section === 'blessings' ? '按名称拼音首字母排列。+／++／+++ 分别对应第 50／100／150 层版本，获得过的祝福可查看全部版本。' : people ? '收录拥有立绘的人物；同一角色可按不同身份查看。同行条目列出偏好与赠礼。' : '进入过的区域事件会收入图鉴，可以重读文字分支。') + '</span></p>';
+				html += '<p class="rogue-codex-progress">' + (people ? '已遇见 ' : data.preview ? '可查看 ' : section === 'blessings' ? '已解锁 ' : '已经历 ') + '<b>' + unlocked + ' / ' + entries.length +
+					'</b><span>' + (section === 'blessings' ? '按名称拼音首字母排列。+／++／+++ 分别对应第 50／100／150 层版本，获得过的祝福可查看全部版本。' : people ? '收录拥有立绘的人物；同一角色可按不同身份查看。遇见后解锁完整介绍，同行条目列出偏好与赠礼。' : '进入过的区域事件会收入图鉴，可以重读文字分支。') + '</span></p>';
 				var filter = this.codexFilter;
 				entries = entries.filter(function (entry) { return filter === 'all' || (filter === 'unlocked' ? entry.unlocked : (people ? (entry.roles || [entry.category]).indexOf(filter) >= 0 : (section === 'events' ? entry.category || 'event' : entry.tier) === filter)); });
 			}
@@ -2148,11 +2151,12 @@
 				if (section === 'blessings' && entry.family === 'prayer') body = body.replace(/<strong class="rogue-term">【Top Clear Mind】<\/strong>/g, '<button class="rogue-codex-link" name="jumpBlessing"><b>【Top Clear Mind】</b></button>');
 				if (entry.portrait) {
 					var file = portraitFile(entry.portrait);
-					body = (file ? '<span class="rogue-companion-portrait codex-portrait" style="background-image:url(' + file + ')"></span>' : entry.portrait === 'mewtwo' ? '<div role="img" aria-label="幻想超梦" style="' + Dex.getTeambuilderSprite({species: 'Mewtwo-Fantasy'}) + '"></div>' : '<img class="rogue-codex-native-portrait" src="' + escape(Dex.resolveAvatar(entry.portrait)) + '" alt="' + escape(entry.name) + '" />') + body;
+					body = (singlePortraits[entry.portrait] ? '<img class="rogue-codex-single-portrait" src="' + singlePortraits[entry.portrait] + '" alt="' + escape(entry.name) + '" />' : file ? '<span class="rogue-companion-portrait codex-portrait" style="background-image:url(' + file + ')"></span>' : '<img class="rogue-codex-native-portrait" src="' + escape(Dex.resolveAvatar(entry.portrait)) + '" alt="' + escape(entry.name) + '" />') + body;
 				}
+				var trainerEntry = section === 'events' && ['companion', 'trainer'].indexOf(entry.category) >= 0;
 				return '<article data-codex-family="' + escape(entry.family || '') + '" class="rogue-codex-entry tier-' + (entry.tier || 'plain') + (entry.unlocked === false ? ' is-locked' : '') + '">' +
 					'<div class="rogue-codex-entry-top"><span>' + icon + '</span><small>' + (tier ? tier + '阶' : section === 'events' ? (['companion', 'trainer'].indexOf(entry.category) >= 0 ? '训练家' : kindNames[entry.category || 'event']) : '幻想杯') +
-					'</small>' + (entry.unlocked === false ? '<span class="rogue-codex-lock">' + fa('lock') + '未解锁</span>' : '') + '</div>' +
+					'</small>' + (entry.unlocked === false ? '<span class="rogue-codex-lock">' + fa('lock') + (trainerEntry ? '尚未遇见' : '未解锁') + '</span>' : trainerEntry ? '<span class="rogue-codex-seen">' + fa('check') + '已遇见过</span>' : '') + '</div>' +
 					'<div class="rogue-codex-title"><h3>' + escape(localName(entry.name, entryKind)) + '</h3>' +
 					(section === 'blessings' ? (entry.floors && entry.floors.length ? ['仅第 ' + entry.floors.join('、') + ' 层出现'] : []).concat(entry.availability || []).map(function (note) {
 						return '<small class="rogue-blessing-restriction">' + escape(note) + '</small>';
