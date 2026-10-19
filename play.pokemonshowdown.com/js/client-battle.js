@@ -931,7 +931,7 @@
 				'%</strong> · 达到 100% 可消耗全部灵能，发动一击必杀，占用本次行动。</p>' +
 				'<button class="button" name="chooseRoguePsychic"' + (rogue.psychic < 100 ? ' disabled' : '') + '>释放灵能 · 一击必杀</button></div>' : '';
 			if (rogue.eeveeZ && rogue.eeveeZ[this.choice && this.choice.choices ? this.choice.choices.length : 0]) psychic +=
-				'<div class="rogue-psychic"><button class="button" name="chooseRogueEeveeZ">九彩升华齐聚顶 · 家族额外 Z</button><p>本成员每场一次，占用行动，五项能力各提升 2 级。</p></div>';
+				'<div class="rogue-psychic"><button class="button" name="chooseRogueEeveeZ">九彩升华齐聚顶 · 额外使用</button><p>本成员每场一次，不占行动。点击后继续选择本回合招式；五项能力各提升 2 级。</p></div>';
 			var zSlot = this.choice && this.choice.choices ? this.choice.choices.length : 0;
 			var extraZ = rogue.companionZ && rogue.companionZ[zSlot];
 			if (extraZ) {
@@ -987,8 +987,8 @@
 		chooseRogueEeveeZ: function () {
 			if (!this.choice || !this.request || !this.request.fantasyRogue || !this.request.fantasyRogue.eeveeZ ||
 				!this.request.fantasyRogue.eeveeZ[this.choice.choices.length]) return;
-			this.choice.choices.push('rogueeeveez');
-			this.endChoice();
+			this.choice.rogueEeveeZ = !this.choice.rogueEeveeZ;
+			this.$('button[name=chooseRogueEeveeZ]').text(this.choice.rogueEeveeZ ? '已选中 · 请继续选择本回合招式（再点取消）' : '九彩升华齐聚顶 · 额外使用');
 		},
 		displayParty: function (switchables, trapped) {
 			var party = '';
@@ -1491,7 +1491,8 @@
 				var choosableTargets = { normal: 1, any: 1, adjacentAlly: 1, adjacentAllyOrSelf: 1, adjacentFoe: 1 };
 				if (this.battle.gameType === 'freeforall') delete choosableTargets['adjacentAllyOrSelf'];
 
-				this.choice.choices.push('move ' + pos + (isMega ? ' mega' : '') + (isMegaX ? ' megax' : isMegaY ? ' megay' : '') + (isZMove ? ' zmove' : '') + (isUltraBurst || isAuraBurst ? ' ultra' : '') + (isDynamax ? ' dynamax' : '') + (isTerastal ? ' terastallize' : ''));
+				this.choice.choices.push((this.choice.rogueEeveeZ ? 'rogueeeveez ' : '') + 'move ' + pos + (isMega ? ' mega' : '') + (isMegaX ? ' megax' : isMegaY ? ' megay' : '') + (isZMove ? ' zmove' : '') + (isUltraBurst || isAuraBurst ? ' ultra' : '') + (isDynamax ? ' dynamax' : '') + (isTerastal ? ' terastallize' : ''));
+				this.choice.rogueEeveeZ = false;
 				if (nearActive.length > 1 && target in choosableTargets) {
 					this.choice.type = 'movetarget';
 					this.choice.moveTarget = target;

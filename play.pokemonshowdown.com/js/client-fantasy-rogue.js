@@ -3,7 +3,7 @@
 	var escape = BattleLog.escapeHTML;
 	var globals = this;
 	var companionPortraits = {guzma: 'guzma-expressions', iris: 'iris-champion'};
-	var dialogueSheets = ['brock', 'maxie', 'marnie', 'kahili', 'liko', 'jenny', 'sabrina', 'flannery', 'roxie', 'viola', 'nessa', 'larry', 'lorelei', 'lance', 'lacey', 'steven',
+	var dialogueSheets = ['n', 'lillie', 'korrina', 'nemona', 'blue', 'gladion', 'bede', 'silver', 'brock', 'maxie', 'marnie', 'kahili', 'liko', 'jenny', 'sabrina', 'flannery', 'roxie', 'viola', 'nessa', 'larry', 'lorelei', 'lance', 'lacey', 'steven',
 		'giovanni', 'archer', 'cyrus', 'ghetsis', 'piers', 'charm', 'clover', 'coin', 'giacomo', 'rocket', 'magma', 'galactic', 'plasma', 'flare', 'skull', 'yell', 'teamstar'];
 	var dialogueCompanions = ['bea', 'acerola', 'iono', 'rika', 'guzma', 'lysandre', 'iris', 'poppy', 'lana', 'olivia', 'grusha', 'canari', 'sada', 'turo'];
 	var singlePortraits = {mewtwo: 'sprites/rogue-dialogue/mewtwo-official.png'};
@@ -164,7 +164,7 @@
 		}
 		return (routeParticles += '</span>');
 	}
-	var itemKinds = {ball: '精灵球', heal: '恢复道具', revive: '复活道具', cure: '状态恢复', ether: 'PP 恢复', candy: '经验糖果', evolution: '进化道具', held: '携带道具', emblem: '属性转 · 独立栏位', treasure: '贵重物品', effort: '基础点数', tonic: '祝福道具', crown: '个体值训练'};
+	var itemKinds = {ability: '特性调整', ball: '精灵球', heal: '恢复道具', revive: '复活道具', cure: '状态恢复', ether: 'PP 恢复', candy: '经验糖果', evolution: '进化道具', held: '携带道具', emblem: '属性转 · 独立栏位', treasure: '贵重物品', effort: '基础点数', tonic: '祝福道具', crown: '个体值训练'};
 	var economyIcons = ['tinymushroom', 'balmmushroom', 'prettyfeather', 'stardust', 'starpiece', 'cometshard', 'pearl', 'bigpearl', 'pearlstring',
 		'antidote', 'burnheal', 'iceheal', 'awakening', 'paralyzeheal', 'healthfeather', 'musclefeather', 'resistfeather', 'geniusfeather', 'cleverfeather', 'swiftfeather'];
 	function dex() { return Dex.mod ? Dex.mod('gen9fantasy') : Dex; }
@@ -289,6 +289,7 @@
 			return id === 'roguegreatmage' ? '特攻变为原来的 2 倍。' : localName(ability.shortDesc || ability.desc || '暂无特性说明');
 		}
 		function memberHTML(mon) {
+			if (mon.egg) return '<section class="rogue-clear-details"><h4>宝可梦蛋</h4><p>通关时尚未孵化，保留旅途记录，不参与通关卡对战。</p></section>';
 			var detail = snap.memberDetails && snap.memberDetails[mon.id];
 			var html = '<section class="rogue-clear-details"><h4>' + escape(localName(mon.set.species)) + (mon.set.shiny ? ' ★ 异色' : '') +
 				' · Lv.' + mon.set.level + ' · ' + (mon.stars || 1) + ' 星</h4><p>性格：' + escape(localName(mon.set.nature || '')) +
@@ -354,6 +355,8 @@
 					(owned && owned.progress !== undefined ? '<p>累计进度：' + owned.progress + (owned.completed ? ' · 已完成' : '') + '</p>' : '') + '</details>';
 			}).join('') : '<p>未选择祝福</p>');
 		var effects = snap.blessingEffects || {};
+		if (snap.rival) html += '<p>劲敌旅程：【' + escape(snap.rival.name) + '】 · 完成 ' + snap.rival.completed +
+			'/8 段奇遇 · 熟悉度 ' + snap.rival.affection + (snap.rival.permanent ? ' · 永久同行' : '') + '</p>';
 		if (effects.psychic !== undefined) html += '<p>灵能积蓄：' + effects.psychic + '%</p>';
 		if (effects.evolution) {
 			var evo = effects.evolution;
@@ -671,9 +674,13 @@
 				html += '<div class="rogue-companion-choice"><strong>选择同行训练家</strong><p>缺少对应属性伙伴时，额外特性将在之后赋予。</p><div class="rogue-companions">' + [['grusha', '古鲁夏'], ['rika', '辛俐']].map(function (entry) { return '<button class="button rogue-companion-pick" name="companionAction" value="' + entry[0] + '|choosewinter"' + (locked ? ' disabled' : '') + '><span class="rogue-companion-portrait" style="background-image:url(sprites/rogue-companions/' + entry[0] + '.png)"></span><b>' + entry[1] + '</b></button>'; }).join('') + '</div></div>';
 			}
 			if (run.blessings && run.blessings.owned.some(function (b) { return b.family === 'companionband'; }) && !companions.some(function (c) { return c.id === 'marnie' || c.id === 'roxie'; })) {
-				html += '<div class="rogue-companion-choice"><strong>选择同行训练家</strong><p>缺少对应属性伙伴时，额外特性将在之后赋予。</p><div class="rogue-companions">' + [['marnie', '玛俐'], ['roxie', '霍米加']].map(function (entry) {
+				html += '<div class="rogue-companion-choice"><strong>选择同行训练家</strong><p>缺少对应属性伙伴时，额外特性将在之后赋予。</p><div class="rogue-companions">' + [['marnie', '玛俐'], ['roxie', '霍米加']].filter(function (entry) { return !run.rival || run.rival.id !== entry[0]; }).map(function (entry) {
 					return '<button class="button rogue-companion-pick" name="companionAction" value="' + entry[0] + '|chooseband"' + (locked ? ' disabled' : '') + '><span class="rogue-companion-portrait" style="background-image:url(' + portraitFile(entry[0]) + ')"></span><b>' + entry[1] + '</b></button>';
 				}).join('') + '</div></div>';
+			}
+			if (run.rivalCompanion) {
+				var rival = run.rivalCompanion, art = portraitFile(rival.id);
+				html += '<article class="rogue-companion rogue-rival-companion">' + (art ? '<span class="rogue-companion-portrait" style="background-image:url(' + art + ')"></span>' : '<img class="rogue-rival-native" src="' + escape(Dex.resolveAvatar(rival.id)) + '" alt="" />') + '<div class="rogue-companion-copy"><strong>' + escape(rival.name) + ' · 劲敌</strong><small>' + escape(rival.text) + ' · 熟悉度 ' + rival.affection + '</small><p>' + escape(rival.message) + '</p></div></article>';
 			}
 			if (!companions.length) return html;
 			return html + '<section class="rogue-companions" aria-label="同行训练家">' + companions.map(function (c) {
@@ -1146,7 +1153,8 @@
 					html += this.renderCompound(run, reward, busy);
 				} else if (reward.pokemon) {
 					var mon = reward.pokemon;
-					html += '<div class="rogue-blessing-gift"><span class="picon" style="' + Dex.getPokemonIcon(mon.set.species) + '"></span><strong>' +
+					if (mon.egg) html += '<p>宝可梦蛋 · 再前进 <b>' + mon.remainingFloors + '</b> 层孵化。孵化前占用队伍位置，不能出战或使用道具。</p>';
+					else html += '<div class="rogue-blessing-gift"><span class="picon" style="' + Dex.getPokemonIcon(mon.set.species) + '"></span><strong>' +
 					escape(localName(mon.set.species)) + '</strong> · Lv.' + mon.set.level + ' · ' + '★'.repeat(mon.stars || 1) + (mon.set.shiny ? ' · 闪光' : '') +
 						'<p>' + escape(localName(mon.set.nature)) + ' · ' + escape(localName(mon.set.ability)) + ' · ' + escape(mon.set.gender || '无性别') + '</p><p>个体值：' +
 						Object.keys(statNames).map(function (key) { return statNames[key] + ' ' + mon.set.ivs[key]; }).join(' / ') + '</p><p>能力值：' +
@@ -1512,6 +1520,8 @@
 			var recommendations = function (id) { var names = (run.companions || []).filter(function (c) { return c.recommended === id; }).map(function (c) { return c.name; }); return names.length ? '（' + names.join('、') + '推荐）' : ''; };
 			var html = '<article class="rogue-event"><h3>' + escape(event.title) + '</h3><div class="rogue-event-text">' +
 				(event.paragraphs || []).map(function (line) { return '<p>' + dialogueText(line) + '</p>'; }).join('') + '</div>';
+			if (event.rivalPortrait) { var rivalArt = portraitFile(event.rivalPortrait); html += rivalArt ? '<span class="rogue-companion-portrait rogue-event-rival' + (event.rivalApproval ? ' smiling' : '') + '" style="background-image:url(' + rivalArt + ')"></span>' : '<img class="rogue-rival-native" src="' + escape(Dex.resolveAvatar(event.rivalPortrait)) + '" alt="劲敌" />'; }
+			if (event.silhouette) html += '<div class="rogue-quiz-silhouette" aria-label="宝可梦剪影" style="' + Dex.getTeambuilderSprite({species: event.silhouette}) + '"></div>';
 			if (event.ski && event.stage === 'choice') return html + this.renderSki(event, busy) + '</article>';
 			if (event.fishing && event.stage === 'choice') return html + this.renderFishing(event, busy) + '</article>';
 			if (event.auction) html += '<section class="rogue-auction-board"><h4>本场拍品</h4><p>' + dialogueText(event.auction.catalog) +
@@ -1733,7 +1743,7 @@
 					'<span class="picon" style="' + Dex.getPokemonIcon(member.set.species) + '"></span><span>' + escape(localName(member.set.species)) +
 					(run.blessings && run.blessings.dragonKing && run.blessings.dragonKing.member === member.id ? ' <em class="rogue-king-mark" title="队伍龙王">♛</em>' : '') +
 					((member.evolutionDetails || []).some(function (evo) { return evo.ready; }) ? '<em class="rogue-evolution-mark" title="已满足进化条件">可进化 ↑</em>' : '') +
-					'</span><small>Lv.' + member.set.level + ' · ' + (member.hp ? 'HP ' + member.hp + '/' + member.maxhp : '已倒下') + '</small></button>';
+					'</span><small>' + (member.egg ? '距孵化 ' + member.remainingFloors + ' 层' : 'Lv.' + member.set.level + ' · ' + (member.hp ? 'HP ' + member.hp + '/' + member.maxhp : '已倒下')) + '</small></button>';
 			});
 			html += '</div><div class="rogue-member-toolbar"><span><strong>' + escape(localName(mon.set.species)) + '</strong>' +
 				((mon.evolutionDetails || []).some(function (evo) { return evo.ready; }) ?
@@ -1741,6 +1751,7 @@
 					(locked || run.healingLocked ? ' disabled' : '') + '>↑ 可进化</button>' : '') + '</span><span>' +
 				button('moveMember', '-1', '前移', locked || run.team[0] === mon, fa('arrow-left')) +
 				button('moveMember', '1', '后移', locked || run.team[run.team.length - 1] === mon, fa('arrow-right')) + '</span></div>';
+			if (mon.egg) return html + '<div class="rogue-floor"><h4>宝可梦蛋</h4><p>蛋里偶尔传来轻轻的响声。再前进 <b>' + mon.remainingFloors + '</b> 层，就能与新伙伴相见。</p></div></section>';
 			html += '<div class="rogue-member-sheet"><div class="rogue-identity">' +
 				'<div class="rogue-sprite-frame"><div class="rogue-sprite" role="img" aria-label="' + escape(localName(mon.set.species)) + '" style="' +
 				(typeof Dex.getTeambuilderSprite === 'function' ? Dex.getTeambuilderSprite(mon.set) : '') + '"></div></div>' +
@@ -1891,8 +1902,8 @@
 				html += '<div class="rogue-item-card"><div class="rogue-item-heading">' + itemIcon(item) + '<strong>' + escape(localName(item.name)) +
 					'</strong><b>×' + run.bag[item.id] + '</b></div><small>' + escape(item.category || (item.kind === 'mint' ? '性格薄荷' : item.kind === 'machine' ? '招式学习机' : itemKinds[item.kind])) + '</small><p>' + escape(itemDescription(item)) + '</p>';
 				if (['ball', 'evolution', 'held', 'emblem'].indexOf(item.kind) < 0) {
-					var reason = !target ? '请选择目标' : '';
-					if (target) {
+					var reason = !target ? '请选择目标' : target.egg ? '蛋尚未孵化' : '';
+					if (target && !target.egg) {
 						if (item.kind === 'heal') reason = !target.hp ? '需先复活' : target.hp >= target.maxhp ? 'HP 已满' : '';
 						if (item.kind === 'revive') reason = target.hp ? '仅能复活濒死伙伴' : '';
 						if (item.kind === 'cure') reason = !target.hp ? '需先复活' : !canCure(item, target) ? '无对应异常状态' : '';
@@ -1900,13 +1911,14 @@
 						if (item.kind === 'crown') reason = Object.keys(statNames).every(function (stat) { return target.set.ivs[stat] >= 31; }) ? '个体值已满' : '';
 						if (item.kind === 'mint') reason = target.mintNature === item.nature ? '已生效' : '';
 						if (item.kind === 'tonic') reason = target.tonics && target.tonics[item.id.replace(/^rogue/, '')] ? '已生效' : '';
+						if (item.kind === 'ability') reason = target.abilityChanges && target.abilityChanges[item.id] ? '' : '没有可变更的特性';
 						if (item.kind === 'machine') reason = (target.machineMoves || []).indexOf(item.move) < 0 ? '无法学习或已经掌握' : '';
 						if (item.kind === 'candy') reason = !target.hp ? '需先复活' : target.fixedLevel || target.set.level >= 100 ? '无法获得经验' : '';
 						if (item.kind === 'effort') reason = target.set.evs[item.stat] >= 252 || Object.keys(statNames).reduce(function (sum, stat) {
 							return sum + (target.set.evs[stat] || 0);
 						}, 0) >= 510 ? '基础点数已达上限' : '';
 					}
-					html += button('useItem', item.id, reason || '使用', !usable || !!reason);
+					html += button('useItem', item.id, reason || (item.kind === 'ability' ? '变更为' + localName(target.abilityChanges[item.id]) : '使用'), !usable || !!reason);
 				}
 				if (item.kind === 'held') html += button('openHeldItems', '', '在队伍中装备', !run.team.length);
 				if (item.kind === 'emblem') html += button('openEmblems', '', '赋予属性转', !run.team.length);
@@ -2061,7 +2073,7 @@
 		},
 		renderGrowth: function (account, run, busy) {
 			var ongoing = run && run.phase !== 'complete';
-			var html = '<h3>' + fa('star') + '局外成长 · 余额 ' + account.points + ' 点</h3><p>每战胜一次塔内首领 获得 1 点；神之挑战胜利额外获得 20 点。购买后从下一次冒险生效。</p>';
+			var html = '<h3>' + fa('star') + '局外成长 · 余额 ' + account.points + ' 点</h3><p>新玩家首次建档获赠 20 点。每战胜一次塔内首领 获得 1 点；神之挑战胜利额外获得 20 点。购买后从下一次冒险生效。</p>';
 			if (ongoing) {
 				html += '<p class="infobox">' + fa('lock') + '当前冒险进行中，结束或放弃本局后开放加点和初始栏位购买。</p>';
 			} else {
@@ -2139,7 +2151,7 @@
 							'" aria-pressed="' + selected + '">' + fa(entry[1]) + '<span><strong>' + entry[2] + '</strong><small>' + entry[3] + '</small></span></button>';
 					}).join('') + '</nav>';
 				filters = section === 'blessings' ? [['all', '全部'], ['silver', '白银'], ['gold', '黄金'], ['prismatic', '棱彩'], ['unlocked', '已解锁']] :
-					people ? [['all', '全部人物'], ['companion', '同行训练家'], ['gym', '道馆馆主'], ['elitefour', '天王'], ['champion', '冠军'], ['antagonist', '反派人物'], ['other', '其他人物']] :
+					people ? [['all', '全部人物'], ['companion', '同行训练家'], ['rival', '劲敌'], ['gym', '道馆馆主'], ['elitefour', '天王'], ['champion', '冠军'], ['antagonist', '反派人物'], ['other', '其他人物']] :
 					[['all', '全部区域'], ['event', '事件'], ['reward', '奖励'], ['encounter', '遭遇'], ['trade', '交易'], ['adventure', '奇遇'], ['unlocked', '已经历']];
 				entries = section === 'events' ? data.entries.filter(function (entry) { return (['companion', 'trainer'].indexOf(entry.category) >= 0) === people; }) : data.entries;
 				var unlocked = entries.filter(function (entry) { return entry.unlocked; }).length;

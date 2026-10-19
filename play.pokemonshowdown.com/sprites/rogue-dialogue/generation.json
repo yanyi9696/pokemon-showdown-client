@@ -190,5 +190,69 @@
       "codex-clipboard-1f3fd452-cb4d-4d2e-bf6e-486f73a6d7c7.png",
       "codex-clipboard-2504e7a7-c9db-4baf-8bcf-f13770aea98f.png"
     ]
+  },
+  {
+    "id": "lillie",
+    "output": "exec-2e551f84-3d80-456b-9c92-65f1380c673f.png",
+    "tool": "image_gen",
+    "date": "2026-10-20",
+    "specification": "Lillie rival dialogue portrait, clean cel shaded anime rendering matched to the existing Marnie sheet.",
+    "layout": "Two equal transparent cells: neutral left, warm approving smile right; identical waist-up framing, pose, clothing and silhouette."
+  },
+  {
+    "id": "korrina",
+    "output": "exec-4da64090-360a-4917-9887-9ee288623e0b.png",
+    "tool": "image_gen",
+    "date": "2026-10-20",
+    "specification": "Korrina rival dialogue portrait, clean cel shaded anime rendering matched to the existing Marnie sheet.",
+    "layout": "Two equal transparent cells: neutral left, warm approving smile right; identical waist-up framing, pose, clothing and silhouette."
+  },
+  {
+    "id": "nemona",
+    "output": "exec-611f017b-2e50-40d9-8a36-668696d8aed6.png",
+    "tool": "image_gen",
+    "date": "2026-10-20",
+    "specification": "Nemona rival dialogue portrait, clean cel shaded anime rendering matched to the existing Marnie sheet.",
+    "layout": "Two equal transparent cells: neutral left, warm approving smile right; identical waist-up framing, pose, clothing and silhouette."
+  },
+  {
+    "id": "blue",
+    "output": "exec-2ef2fa5e-11be-48a9-ada5-fd55a314cd58.png",
+    "tool": "image_gen",
+    "date": "2026-10-20",
+    "specification": "Blue rival dialogue portrait, clean cel shaded anime rendering matched to the existing Marnie sheet.",
+    "layout": "Two equal transparent cells: neutral left, warm approving smile right; identical waist-up framing, pose, clothing and silhouette."
+  },
+  {
+    "id": "gladion",
+    "output": "exec-c777e918-cc81-4966-8071-759837077e69.png",
+    "tool": "image_gen",
+    "date": "2026-10-20",
+    "specification": "Gladion rival dialogue portrait, clean cel shaded anime rendering matched to the existing Marnie sheet.",
+    "layout": "Two equal transparent cells: neutral left, warm approving smile right; identical waist-up framing, pose, clothing and silhouette."
+  },
+  {
+    "id": "bede",
+    "output": "exec-473d4a9e-35c4-4070-9e7d-7bf26e2d02c6.png",
+    "tool": "image_gen",
+    "date": "2026-10-20",
+    "specification": "Bede rival dialogue portrait, clean cel shaded anime rendering matched to the existing Marnie sheet.",
+    "layout": "Two equal transparent cells: neutral left, warm approving smile right; identical waist-up framing, pose, clothing and silhouette."
+  },
+  {
+    "id": "silver",
+    "output": "exec-ebe4ef76-4c80-4d17-ae47-2c87503e80fa.png",
+    "tool": "image_gen",
+    "date": "2026-10-20",
+    "specification": "Silver rival dialogue portrait, clean cel shaded anime rendering matched to the existing Marnie sheet.",
+    "layout": "Two equal transparent cells: neutral left, warm approving smile right; identical waist-up framing, pose, clothing and silhouette."
+  },
+  {
+    "id": "n",
+    "output": "exec-06e5242f-1bb6-44ad-8360-7e737aabc530.png",
+    "tool": "image_gen",
+    "date": "2026-10-20",
+    "specification": "N rival dialogue portrait, pale green hair, black and white cap, white shirt and geometric necklace, clean cel shaded anime rendering matched to the existing Marnie sheet.",
+    "layout": "Two equal transparent cells: neutral left, warm approving smile right; identical waist-up framing, pose, clothing and silhouette."
   }
 ]

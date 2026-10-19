@@ -976,6 +976,8 @@
 .fantasyrogue .rogue-item-card > .button { grid-column: 1 / -1; grid-row: auto; justify-self: end; max-width: 100%; }
 .fantasyrogue .rogue-item-heading > strong { min-width: 0; overflow-wrap: anywhere; }
 .fantasyrogue .rogue-item-card { grid-template-columns: minmax(0, 1fr); }
+.fantasyrogue .rogue-bag .rogue-item-card { display: flex; flex-direction: column; }
+.fantasyrogue .rogue-bag .rogue-item-card > .button { margin-top: auto; align-self: flex-end; }
 .fantasyrogue .rogue-codex-grid { gap: 8px; }
 .fantasyrogue .rogue-codex-entry { padding: 10px 12px; min-height: 0; }
 .fantasyrogue .rogue-codex-entry h3 { font-size: 15px; margin: 5px 0; }
@@ -1028,3 +1030,8 @@
 .fantasyrogue .rogue-story-dialogue small { margin-top: 6px; }
 
 .rogue-beta-entry[hidden] { display: none !important; }
+
+.rogue-quiz-silhouette { width: 180px; height: 160px; margin: 8px auto; background-repeat: no-repeat; background-position: center; filter: brightness(0); }
+
+.rogue-rival-native { max-width: 100px; height: 130px; object-fit: contain; }
+.rogue-event-rival { float: right; }

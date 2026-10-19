@@ -9,3 +9,5 @@ Companion trainers reuse their existing paired assets in `../rogue-companions/`.
 Generation specifications and output provenance: `generation.json`. Generated artwork is a project illustration based on the named Pokémon characters; it is not official artwork.
 
 Viola was revised on 2026-10-19 with the native image editor using the existing pair and three user-supplied references. Both expressions now share the swept-back rounded hair silhouette and inward-curled front locks, with matching pose, camera and linework.
+
+On 2026-10-20, eight matching neutral/approval sheets were generated for the rival storyline: Lillie, Korrina, Nemona, Blue, Gladion, Bede, N and Silver. They use the existing Marnie sheet as a rendering reference, with equal transparent cells and consistent waist-up pose and clothing across expressions. Marnie and Lana reuse their existing companion sheets. These assets are loaded only when their character is displayed.

@@ -946,11 +946,14 @@ export class BattleTooltips {
 
 		const rogueInfo = isActive ? clientPokemon?.rogueAbilityInfo || serverPokemon?.rogueAbilityInfo : serverPokemon?.rogueAbilityInfo;
 		if (rogueInfo?.abilities.length) {
+			const translate = (globalThis as typeof globalThis & {
+				translateRogueName?: (value: string, kind?: string) => string,
+			}).translateRogueName || ((value: string) => value);
 			text += '<div class="tooltip-section"><p><small>额外特性' + (rogueInfo.active ? '' : '（暂时失效）') + '：</small></p>';
 			for (const id of rogueInfo.abilities) {
 				const ability = this.battle.dex.abilities.get(id);
-				text += '<p><strong>' + BattleLog.escapeHTML(id === 'roguegreatmage' ? '大法师' : ability.name) + '</strong>：' +
-					BattleLog.escapeHTML(id === 'roguegreatmage' ? '特攻变为原来的 2 倍。' : ability.shortDesc || ability.desc || '') + '</p>';
+				text += '<p><strong>' + BattleLog.escapeHTML(id === 'roguegreatmage' ? '大法师' : translate(ability.name, 'ability')) + '</strong>：' +
+					BattleLog.escapeHTML(id === 'roguegreatmage' ? '特攻变为原来的 2 倍。' : translate(ability.shortDesc || ability.desc || '')) + '</p>';
 				if (rogueInfo.abilitySources?.[id]) text += '<p><small>' + BattleLog.escapeHTML(rogueInfo.abilitySources[id]) + '</small></p>';
 			}
 			text += '</div>';
