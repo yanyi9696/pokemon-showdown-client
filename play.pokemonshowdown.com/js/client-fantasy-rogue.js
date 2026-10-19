@@ -3,6 +3,9 @@
 	var escape = BattleLog.escapeHTML;
 	var globals = this;
 	var companionPortraits = {guzma: 'guzma-expressions', iris: 'iris-champion'};
+	var dialogueSheets = ['jenny', 'sabrina', 'flannery', 'roxie', 'viola', 'nessa', 'larry', 'lorelei', 'lance', 'lacey', 'steven',
+		'giovanni', 'archer', 'cyrus', 'ghetsis', 'piers', 'charm', 'clover', 'coin', 'giacomo', 'rocket', 'magma', 'galactic', 'plasma', 'flare', 'skull', 'yell', 'teamstar'];
+	var dialogueCompanions = ['bea', 'acerola', 'iono', 'rika', 'guzma', 'lysandre', 'iris', 'poppy', 'lana', 'olivia', 'grusha', 'canari', 'sada', 'turo'];
 	// Update existing nodes in place: replacing the whole room briefly collapses its
 	// scroll range, drops focus and restarts every CSS animation on each response.
 	function stableHTML(room, html) {
@@ -462,6 +465,7 @@
 		openCodex: function (section) {
 			if (['guide', 'blessings', 'events'].indexOf(section) < 0) return;
 			this.screen = section; this.codexFilter = section === 'guide' ? 'items' : 'all';
+			this.codexCollection = 'regions';
 			this.codexQuery = ''; this.codexPage = 0; this.codexReplay = null;
 			this.loadCodex(section); this.render(); this.scrollCodexTop();
 		},
@@ -476,6 +480,11 @@
 			if (this.screen === data.section) this.render();
 		},
 		filterCodex: function (filter) { this.codexFilter = filter; this.codexPage = 0; this.render(); },
+		selectCodexCollection: function (collection) {
+			if (['regions', 'companions'].indexOf(collection) < 0) return;
+			this.codexCollection = collection; this.codexFilter = 'all'; this.codexPage = 0;
+			this.codexReplay = null; this.render();
+		},
 		codexSearchInput: function (event) { this.codexQuery = event.currentTarget.value.trim(); if (!this.codexQuery) { this.codexPage = 0; this.render(); } },
 		codexSearchModeChanged: function (event) { this.codexSearchMode = event.currentTarget.value; this.searchCodex(); },
 		jumpBlessing: function () {
@@ -540,6 +549,10 @@
 			}
 			if (app.curRoom === this && !storyOnly) app.updateLayout();
 			this.maybeShowSpirit();
+			if (incoming && incoming.phase === 'defeated' && incoming.failure && this.failurePopupKey !== incoming.failure.key) {
+				this.failurePopupKey = incoming.failure.key;
+				app.addPopup(globals.RogueFailurePopup, {room: this, failure: incoming.failure, runid: incoming.id});
+			}
 			this.startFishingClock(); this.startSkiClock(); this.maybeShowEvolution();
 			if (this.visible || app.curRoom === this) this.maybeShowOnboarding();
 		},
@@ -551,6 +564,7 @@
 			clearTimeout(this.timer);
 			this.pending = null;
 			this.error = result.ok ? '' : result.message;
+			if (result.ok && action === 'ackfailure') this.screen = 'home';
 			if (result.state) this.receiveState(result.state, action === 'storynext' || action === 'storyskip');
 			else this.refresh();
 			if (result.ok && action === 'battle' && result.state.run && result.state.run.roomid) app.joinRoom(result.state.run.roomid);
@@ -725,6 +739,10 @@
 			this.submit('start', details);
 		},
 		storyNext: function () { if (this.state.story) this.submit('storynext', {value: this.state.story.key}); },
+		acknowledgeFailure: function (key) {
+			var run = this.state && this.state.run;
+			if (run && run.phase === 'defeated' && run.failure && run.failure.key === key) this.submit('ackfailure', {value: key});
+		},
 		storySkip: function () { if (this.state.story) this.submit('storyskip', {value: this.state.story.key}); },
 		storyBattle: function () {
 			var story = this.state.story;
@@ -732,7 +750,7 @@
 		},
 		storyChapter: function (story) {
 			return story.stage === 'restguide' ? '休整' : story.stage === 'leaguebriefing' ? '接下来的挑战' : story.stage === 'bossintro' ? '战前' : story.stage === 'gymgift' ? '途中' :
-				story.stage === 'ending' ? '终章' : story.stage === 'godinvite' ? '通关之后' : '序章';
+				story.stage === 'interlude' ? '旅途对话' : story.stage === 'ending' ? '终章' : story.stage === 'godinvite' ? '通关之后' : '序章';
 		},
 		storyHint: function (story) {
 			return (story.battleReady ? '请选择下方操作' : '轻点继续 ▷') + ' · ' + (story.index + 1) + '/' + story.total;
@@ -770,11 +788,13 @@
 			section.querySelector('.rogue-story-scene').className = 'rogue-story-scene scene-' + story.scene;
 			section.querySelector('.rogue-story-chapter').textContent = this.storyChapter(story) + ' / ' + story.title;
 			var art = section.querySelector('.rogue-story-art');
-			var artKey = JSON.stringify(story.roster || null);
+			var artKey = this.storyArtKey(story);
 			if (art && art.dataset.roster !== artKey) {
 				art.innerHTML = this.storyArt(story);
 				art.dataset.roster = artKey;
 			}
+			var actor = art && art.querySelector('.rogue-dialogue-actor');
+			if (actor) actor.classList.toggle('is-approval', story.expression === 'approval');
 			var dialogue = section.querySelector('.rogue-story-dialogue');
 			dialogue.disabled = busy || !!story.battleReady;
 			dialogue.setAttribute('aria-busy', String(busy));
@@ -789,8 +809,9 @@
 		},
 		storySignature: function (story) {
 			return [this.state.userid, this.state.run && this.state.run.id || '', story.stage, !!story.canSkip,
-				story.encounter || '', story.avatar || '', story.pokemon || ''].join(':');
+				story.encounter || '', story.performance || '', story.stage === 'interlude' ? '' : story.avatar || '', story.pokemon || ''].join(':');
 		},
+		storyArtKey: function (story) { return JSON.stringify([story.roster || null, story.portrait || '', story.side || 'right']); },
 		storyArt: function (story) {
 			if (story.roster) {
 				var roster = story.roster;
@@ -799,6 +820,17 @@
 					'<strong>' + escape(localName(roster.name)) + '</strong></div><div class="rogue-roster-members">' +
 					roster.pokemon.map(function (name) { return '<div class="rogue-roster-member"><div aria-hidden="true" style="' +
 						Dex.getTeambuilderSprite({species: name}) + '"></div><span>' + escape(localName(name)) + '</span></div>'; }).join('') + '</div></div>';
+			}
+			if (story.portrait) {
+				var id = story.portrait, file = dialogueCompanions.indexOf(id) >= 0 ? 'rogue-companions/' + (companionPortraits[id] || id) :
+					dialogueSheets.indexOf(id) >= 0 ? 'rogue-dialogue/' + id : '';
+				var actor = '<div role="img" aria-label="' + escape(story.speaker || story.title) + '" class="rogue-dialogue-actor side-' +
+					(story.side === 'left' ? 'left' : 'right') + (story.expression === 'approval' ? ' is-approval' : '') +
+					'"';
+				if (file) return actor + ' style="background-image:url(sprites/' + file + '.png)"></div>';
+				return actor + '>' + (story.pokemon ? '<div class="rogue-story-pokemon" aria-hidden="true" style="' +
+					Dex.getTeambuilderSprite({species: story.pokemon}) + '"></div>' :
+					'<img class="rogue-story-trainer" alt="" src="' + escape(Dex.resolveAvatar(story.avatar || id)) + '" />') + '</div>';
 			}
 			var spirit = this.state.run && this.state.run.spirit;
 			if (story.pokemon) return '<div class="rogue-story-pokemon" aria-hidden="true" style="' + Dex.getTeambuilderSprite({species: story.pokemon}) + '"></div>';
@@ -818,7 +850,7 @@
 				return html;
 			}
 			var spirit = this.state.run && this.state.run.spirit;
-			var art = '<div class="rogue-story-art" data-roster="' + escape(JSON.stringify(story.roster || null)) + '">' + this.storyArt(story) + '</div>';
+			var art = '<div class="rogue-story-art" data-roster="' + escape(this.storyArtKey(story)) + '">' + this.storyArt(story) + '</div>';
 			return '<section class="rogue-story" data-story="' + escape(this.storySignature(story)) + '" aria-label="' + escape(story.title) + '"><div class="rogue-story-scene scene-' + story.scene + '">' +
 				'<span class="rogue-story-chapter">' + this.storyChapter(story) + ' / ' + escape(story.title) + '</span>' +
 				'<div class="rogue-story-window"></div><div class="rogue-story-letter">求救信</div><div class="rogue-story-figure"></div>' +
@@ -2031,12 +2063,20 @@
 				}, this);
 				html += '<p class="rogue-caption">以下为幻想形态与主要调整内容；形态、道具能否在爬塔中使用，还需满足相应获取和解锁条件。</p>';
 			} else {
+				var people = section === 'events' && this.codexCollection === 'companions';
+				if (section === 'events') html += '<nav class="rogue-codex-collections" aria-label="事件图鉴分册">' +
+					[['regions', 'map-signs', '区域事件', '事件 · 奖励 · 遭遇 · 交易 · 奇遇'], ['companions', 'users', '同行训练家', '人物 · 偏好 · 同行训练家的赠礼']].map(function (entry) {
+						var selected = (people ? 'companions' : 'regions') === entry[0];
+						return '<button class="button' + (selected ? ' is-active' : '') + '" name="selectCodexCollection" value="' + entry[0] +
+							'" aria-pressed="' + selected + '">' + fa(entry[1]) + '<span><strong>' + entry[2] + '</strong><small>' + entry[3] + '</small></span></button>';
+					}).join('') + '</nav>';
 				filters = section === 'blessings' ? [['all', '全部'], ['silver', '白银'], ['gold', '黄金'], ['prismatic', '棱彩'], ['unlocked', '已解锁']] :
-					[['all', '全部'], ['companion', '同行训练家'], ['event', '事件'], ['reward', '奖励'], ['encounter', '遭遇'], ['trade', '交易'], ['adventure', '奇遇'], ['unlocked', '已经历']];
-				entries = data.entries;
+					people ? [['all', '全部人物']] :
+					[['all', '全部区域'], ['event', '事件'], ['reward', '奖励'], ['encounter', '遭遇'], ['trade', '交易'], ['adventure', '奇遇'], ['unlocked', '已经历']];
+				entries = section === 'events' ? data.entries.filter(function (entry) { return (entry.category === 'companion') === people; }) : data.entries;
 				var unlocked = entries.filter(function (entry) { return entry.unlocked; }).length;
-					html += '<p class="rogue-codex-progress">' + (data.preview ? '可查看 ' : section === 'blessings' ? '已解锁 ' : '已经历 ') + '<b>' + unlocked + ' / ' + entries.length +
-						'</b><span>' + (section === 'blessings' ? '按名称拼音首字母排列。+／++／+++ 分别对应第 50／100／150 层版本，获得过的祝福可查看全部版本。' : '进入过的事件会收入图鉴，可以重读文字分支。') + '</span></p>';
+					html += '<p class="rogue-codex-progress">' + (data.preview || people ? '可查看 ' : section === 'blessings' ? '已解锁 ' : '已经历 ') + '<b>' + unlocked + ' / ' + entries.length +
+						'</b><span>' + (section === 'blessings' ? '按名称拼音首字母排列。+／++／+++ 分别对应第 50／100／150 层版本，获得过的祝福可查看全部版本。' : people ? '了解同行训练家的偏好，以及旅途中可能收到的赠礼。' : '进入过的区域事件会收入图鉴，可以重读文字分支。') + '</span></p>';
 				var filter = this.codexFilter;
 				entries = entries.filter(function (entry) { return filter === 'all' || (filter === 'unlocked' ? entry.unlocked : (section === 'events' ? entry.category || 'event' : entry.tier) === filter); });
 			}
@@ -2120,6 +2160,11 @@
 			if (state.message) html += '<p class="infobox">' + escape(state.message) + '</p>';
 			if (!state.account) { stableHTML(this, html + '</div>'); return; }
 			var account = state.account, run = state.run;
+			if (run && run.phase === 'defeated' && run.failure) {
+				stableHTML(this, html + '<section class="rogue-failure" role="alert"><h3>爬塔已无法推进</h3><p>本局止步于第 <b>' +
+					Number(run.failure.floor) + '</b> 层。</p><p>' + escape(run.failure.reason) + '</p>' +
+					button('acknowledgeFailure', run.failure.key, '确认，返回起始界面', busy) + '</section></div>'); return;
+			}
 			if (state.story) { stableHTML(this, html + this.renderStory(state.story, busy) + '</div>'); return; }
 			if (state.storyEnabled && run && run.phase === 'complete') {
 				if (run.postgame === 'won') html += '<p class="infobox">神之挑战成功！额外获得 20 点局外成长点数。</p>';
@@ -2495,6 +2540,21 @@
 	this.RogueNoticePopup = this.Popup.extend({
 		initialize: function (data) {
 			stableHTML(this, '<p role="alert">' + escape(data.text) + '</p>' + button('close', '', '知道了'));
+		}
+	});
+	this.RogueFailurePopup = this.Popup.extend({
+		type: 'modal',
+		initialize: function (data) {
+			this.data = data; this.userid = app.user.get('userid');
+			stableHTML(this, '<h3>爬塔已无法推进</h3><p>本局止步于第 <b>' + Number(data.failure.floor) + '</b> 层。</p><p>' +
+				escape(data.failure.reason) + '</p>' + button('confirmFailure', '', '确认，返回起始界面'));
+		},
+		confirmFailure: function () {
+			if (app.user.get('userid') === this.userid && this.data.room.state.run && this.data.room.state.run.id === this.data.runid) {
+				this.data.room.acknowledgeFailure(this.data.failure.key);
+				app.joinRoom('fantasyrogue');
+			}
+			this.close();
 		}
 	});
 	this.RogueCardConfirmPopup = this.Popup.extend({

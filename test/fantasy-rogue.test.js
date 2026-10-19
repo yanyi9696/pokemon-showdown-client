@@ -81,6 +81,25 @@ describe('Fantasy Rogue start menu and codex', () => {
 		const events = c.room.renderCodex();
 		assert(events.indexOf('<h3>安抚之铃') < events.indexOf('<h3>伤药'));
 	});
+	it('keeps regional events and companion people in separate codex collections', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('events');
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'events', entries: [
+			{id: 'forest', name: '斗蛐蛐', category: 'event', unlocked: true, text: '观察伙伴'},
+			{id: 'reward:test', name: '旅途补给', category: 'reward', unlocked: false, text: '？？？'},
+			{id: 'companion:bea', name: '彩豆', category: 'companion', unlocked: true, text: '偏好战斗'},
+		]});
+		assert(c.room.html.includes('<h3>斗蛐蛐</h3>')); assert(!c.room.html.includes('<h3>彩豆</h3>'));
+		assert(c.room.html.includes('<b>1 / 2</b>'));
+		c.room.codexFilter = 'reward'; c.room.codexPage = 3;
+		c.room.selectCodexCollection('companions');
+		assert.equal(c.room.codexFilter, 'all'); assert.equal(c.room.codexPage, 0);
+		assert(c.room.html.includes('<h3>彩豆</h3>')); assert(!c.room.html.includes('<h3>斗蛐蛐</h3>'));
+		assert(!c.room.html.includes('name="filterCodex" value="reward"'));
+		assert(c.room.html.includes('<b>1 / 1</b>'));
+		c.room.codexQuery = '战斗'; c.room.codexSearchMode = 'content'; c.room.render();
+		assert(c.room.html.includes('<h3>彩豆</h3>'));
+		c.room.selectCodexCollection('regions'); assert(!c.room.html.includes('<h3>彩豆</h3>'));
+	});
 	it('shows prerequisites as title notes, clears searches immediately and links Top Clear Mind', () => {
 		const c = client(true); c.room.receiveState(state()); c.room.openCodex('blessings');
 		c.room.receiveCodex({userid: 'rogueplayer', section: 'blessings', entries: [
@@ -592,6 +611,41 @@ describe('Fantasy Rogue start menu and codex', () => {
 	});
 });
 describe('Fantasy Rogue story and clear-card controls', () => {
+	it('uses paired portraits with stable scene identity while changing expressions and speakers', () => {
+		const c = client(), data = adventure('story'); c.room.receiveState(data);
+		const page = {stage: 'interlude', performance: 'conversation1', scene: 'arena', portrait: 'jenny', speaker: '君莎', side: 'right', expression: 'neutral'};
+		assert(c.room.storyArt(page).includes('rogue-dialogue/jenny.png'));
+		assert(c.room.storyArt({...page, expression: 'approval'}).includes('is-approval'));
+		assert.equal(c.room.storyArtKey(page), c.room.storyArtKey({...page, expression: 'approval'}));
+		assert.notEqual(c.room.storyArtKey(page), c.room.storyArtKey({...page, portrait: 'guzma', side: 'left'}));
+		assert(c.room.storyArt({...page, portrait: 'guzma', side: 'left'}).includes('rogue-companions/guzma-expressions.png'));
+		assert(c.room.storyArt({...page, portrait: 'brock', avatar: 'brock'}).includes('sprites/trainers/brock.png'));
+		assert(!c.room.storyArt({...page, portrait: 'brock'}).includes('rogue-dialogue/brock.png'));
+		assert.notEqual(c.room.storySignature(page), c.room.storySignature({...page, performance: 'conversation2'}));
+	});
+	it('automatically shows terminal failure once and returns home only after its acknowledged command', () => {
+		const c = client(), data = adventure('defeated');
+		data.run.failure = {key: 'failed1', title: '爬塔已无法推进', reason: '无恢复途径'};
+		c.room.receiveState(data); assert.equal(c.app.lastPopup.type, c.RogueFailurePopup);
+		const popupData = c.app.lastPopup.data; delete c.app.lastPopup;
+		c.room.receiveState(data); assert(!c.app.lastPopup);
+		c.room.acknowledgeFailure('stale'); assert.equal(c.sent.length, 0);
+		const popup = Object.create(c.RogueFailurePopup); popup.$el = {html() {}}; popup.close = () => {};
+		popup.initialize(popupData); popup.confirmFailure();
+		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'ackfailure'); assert.equal(request.value, 'failed1');
+		assert.equal(c.room.screen, 'game');
+		const result = state(); result.account.revision = data.account.revision + 1;
+		c.room.receiveAction({userid: data.userid, id: request.id, ok: true, state: result});
+		assert.equal(c.room.screen, 'home'); assert(!c.room.state.run);
+	});
+	it('does not acknowledge a failure modal after switching accounts or adventures', () => {
+		const c = client(), data = adventure('defeated');
+		data.run.failure = {key: 'failed1', title: '失败', reason: '无恢复途径'}; c.room.receiveState(data);
+		const popup = Object.create(c.RogueFailurePopup); popup.$el = {html() {}}; popup.close = () => {};
+		popup.initialize(c.app.lastPopup.data); c.setUser('another'); popup.confirmFailure();
+		assert.equal(c.sent.length, 0);
+	});
 	it('offers only battle or preparation after the final boss line, with a guarded battle command', () => {
 		const c = client(), data = adventure('story');
 		data.story = {stage: 'bossintro', scene: 'summit', title: '最初的来意', speaker: '超梦',

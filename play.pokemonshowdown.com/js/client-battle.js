@@ -530,6 +530,8 @@
 		},
 		rogueDefeatHTML: function () {
 			var result = this.fantasyRogueDefeat;
+			if (result.failedRun) return '<div class="rogue-defeat" role="alert"><strong>爬塔已无法推进</strong><p>全队倒下，当前没有可用的复活手段，金币不足以急救。本局失败；已获得的解锁与局外成长点会保留。</p><p>返回冒险确认结算后，可以重新出发。</p></div>';
+			if (result.companionRescue) return '<div class="rogue-defeat" role="status"><strong>切磋结束，伙伴已恢复健康</strong><p>同行训练家恢复了全队 HP、PP 与异常状态。此次挑战未获胜，不发放通关奖励；之后可以接受再次切磋，获胜补领。</p><p>返回冒险，继续与同伴的对话。</p></div>';
 			if (result.postgame) return '<div class="rogue-defeat" role="status"><strong>神之挑战结束</strong>' +
 				'<p>200 层通关成果与通关卡已保留，全队保持挑战前的恢复状态。本次挑战未获得额外点数。</p>' +
 				'<p>点击“返回冒险”，继续阅读结局。</p></div>';
@@ -539,6 +541,8 @@
 				'<p>队伍保持战败时的状态；HP、PP、异常状态和道具消耗已保存，本场不发放胜利奖励。</p>');
 			if (result.memoryRestored) {
 				html += '<p>本次幻境已经结束。返回冒险，安置新伙伴并阅读事件结尾。</p>';
+			} else if (result.eventRetry) {
+				html += '<p>当前遭遇尚未结束，返回冒险整理队伍后，继续挑战本场对手。</p>';
 			} else if (result.eventContinues) {
 				html += '<p>袭击已经结束，返回冒险后可整理伙伴并继续寻找线索。</p>';
 			} else if (result.eventClosed) {
