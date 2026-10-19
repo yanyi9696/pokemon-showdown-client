@@ -7,7 +7,7 @@
 		'giovanni', 'archer', 'cyrus', 'ghetsis', 'piers', 'charm', 'clover', 'coin', 'giacomo', 'rocket', 'magma', 'galactic', 'plasma', 'flare', 'skull', 'yell', 'teamstar'];
 	var dialogueCompanions = ['bea', 'acerola', 'iono', 'rika', 'guzma', 'lysandre', 'iris', 'poppy', 'lana', 'olivia', 'grusha', 'canari', 'sada', 'turo'];
 	var singlePortraits = {mewtwo: 'sprites/rogue-dialogue/mewtwo-official.png'};
-	var portraitVersions = {lacey: '20261019b', kahili: '20261019-blue'};
+	var portraitVersions = {lacey: '20261019b', kahili: '20261019-blue', viola: '20261019-curls'};
 	function portraitFile(id) {
 		if (dialogueCompanions.indexOf(id) >= 0) return 'sprites/rogue-companions/' + (companionPortraits[id] || id) + '.png';
 		if (dialogueSheets.indexOf(id) >= 0) return 'sprites/rogue-dialogue/' + id + '.png' + (portraitVersions[id] ? '?v=' + portraitVersions[id] : '');
@@ -388,6 +388,7 @@
 			this.openPartyOnLayout = true;
 			this.listenTo(app, 'response:fantasyrogue', this.receiveState);
 			this.listenTo(app, 'response:fantasyrogueaction', this.receiveAction);
+			this.listenTo(app, 'response:fantasyrogueski', this.receiveSki);
 			this.listenTo(app, 'response:fantasyroguecodex', this.receiveCodex);
 			this.listenTo(app, 'init:socketopened', this.refresh);
 			this.listenTo(app, 'init:socketclosed', this.disconnected);
@@ -427,11 +428,12 @@
 			return roots.find(selector);
 		},
 		leave: function () {
-			clearTimeout(this.timer); this.stopListening();
+			clearTimeout(this.timer); clearTimeout(this.skiTimer); this.skiPending = null; this.skiQueue = []; this.stopListening();
 			if (app.rooms.fantasyrogueparty) app.removeRoom('fantasyrogueparty');
 		},
 		joinRoom: function (id) { app.joinRoom(id); },
 		identityChanged: function () {
+			clearTimeout(this.skiTimer); this.skiPending = null; this.skiQueue = [];
 			this.screen = 'home'; this.codices = {}; this.codexReplay = null; this.codexQuery = ''; this.codexPage = 0;
 			this.evolutionPreview = null;
 			this.starterBuilds = {};
@@ -440,6 +442,7 @@
 			this.selectedMember = null; this.itemTarget = null; this.state = null; this.pending = null; this.error = ''; this.refresh();
 		},
 		disconnected: function () {
+			clearTimeout(this.skiTimer); this.skiPending = null; this.skiQueue = [];
 			this.evolutionPreview = null;
 			clearTimeout(this.timer);
 			this.pending = null;
@@ -598,7 +601,7 @@
 			}
 		},
 		submit: function (action, details) {
-			if (this.pending || !this.state || !this.state.account) return;
+			if (this.pending || this.skiPending || !this.state || !this.state.account) return;
 			if (!app.socket || app.socket.readyState !== 1) { this.disconnected(); return; }
 			var command = Object.assign({
 				id: Date.now().toString(36) + '-' + Math.random().toString(36).slice(2),
@@ -694,12 +697,12 @@
 					}
 				}
 				(c.typeOptions || []).forEach(function (type) {
-					out += button('companionAction', c.id + '|type:' + type.id, localName(type.id) + ' · ' + (type.member ? localName(type.member) : '暂无伙伴'), locked || !type.member);
+					out += button('companionAction', c.id + '|type:' + type.id, localName(type.id) + ' · ' + (type.member ? localName(type.member) : '暂无伙伴'), locked || c.type === type.id);
 				});
 				if (c.member) out += '<p class="rogue-caption">指导伙伴：【' + escape(localName(c.member.species)) + '】' +
 					(c.ability ? ' · 额外特性【' + escape(localName(Dex.abilities.get(c.ability).name, 'ability')) + '】' : '') + '</p>';
 				(c.abilityOptions || []).forEach(function (id) {
-					out += button('companionAction', c.id + '|ability:' + id, '赋予【' + localName(Dex.abilities.get(id).name, 'ability') + '】', locked);
+					out += button('companionAction', c.id + '|ability:' + id, (c.ability === id ? '已选【' : '改为【') + localName(Dex.abilities.get(id).name, 'ability') + '】', locked || c.ability === id);
 				});
 				return out + '</div></article>';
 			}).join('') + '</section>';
@@ -948,7 +951,7 @@
 		changeItemTarget: function (event) { this.selectMember(event.currentTarget.value); },
 		chooseDragonKing: function (ability) {
 			var king = this.state.run.blessings && this.state.run.blessings.dragonKing;
-			if (king && !king.ability && (!king.options || king.options.indexOf(ability) >= 0)) this.submit('dragonking', {member: king.member, value: ability});
+			if (king && (!king.options || king.options.indexOf(ability) >= 0)) this.submit('dragonking', {member: king.member, value: ability});
 		},
 		renderDragonKing: function (run, busy) {
 			var king = run.blessings && run.blessings.dragonKing;
@@ -957,8 +960,8 @@
 			var options = king.options || ['longzhihuxi', 'drizzle'];
 			return '<div class="rogue-keepsake rogue-dragon-king"><strong>' + fa('trophy') + '龙王 · ' + escape(localName(king.species)) +
 				'</strong><p>六项常驻能力合计 ' + king.total + ' · ' + (king.ability ? '额外特性：' + (king.ability === 'drizzle' ? '降雨' : '龙之呼吸') : options.length ? '请选择额外特性' : '已具备两种特性，无需重复赋予') +
-				'</p>' + (!king.ability ? options.map(function (id) { return button('chooseDragonKing', id, id === 'drizzle' ? '降雨' : '龙之呼吸', locked); }).join(' ') : '') +
-				'<p class="rogue-caption">其余伙伴战斗经验 +30%。战斗中倒下会由剩余最强龙系临时继任；战后恢复队伍龙王。</p></div>';
+				'</p>' + options.map(function (id) { return button('chooseDragonKing', id, id === 'drizzle' ? '降雨' : '龙之呼吸', locked || king.ability === id); }).join(' ') +
+				'<p class="rogue-caption">其余龙系伙伴战斗经验 +30%。额外特性可在战斗外随时更换。战斗中倒下会由剩余最强龙系临时继任；战后恢复队伍龙王。</p></div>';
 		},
 		learnMove: function (slot) {
 			var move = this.state.run.pendingMoves[0];
@@ -1428,10 +1431,47 @@
         },
 
 		renderSki: function (event, busy) {
-			return '<section class="rogue-ski" tabindex="0" aria-label="雪山速滑，左右方向键换道"><canvas width="540" height="300" aria-label="从人物后方观察雪道，躲避树木和岩石"></canvas><div class="rogue-ski-hud"><b class="rogue-ski-time">0.0 / 30 秒</b><span>左右换道 · 撞上障碍即结束</span></div><div class="rogue-ski-controls">' + button('skiMove', 'skileft', '← 向左', busy) + button('skiMove', 'skiright', '向右 →', busy) + '</div><p class="rogue-caption">点击雪道后可使用方向键。画面前方的障碍会逐渐变密。</p></section>';
+			return '<section class="rogue-ski" tabindex="0" aria-label="雪山速滑，左右方向键换道"><canvas width="540" height="300" aria-label="从人物后方观察雪道，躲避树木和岩石"></canvas><div class="rogue-ski-hud"><b class="rogue-ski-time">0.0 / 15 秒</b><span>左右换道 · 撞上障碍即结束</span></div><div class="rogue-ski-controls">' + button('skiMove', 'skileft', '← 向左', busy) + button('skiMove', 'skiright', '向右 →', busy) + '</div><p class="rogue-caption">点击雪道后可使用方向键。画面前方的障碍会逐渐变密。</p></section>';
 		},
 		skiKey: function (event) { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); if (!event.repeat) this.skiMove(event.key === 'ArrowLeft' ? 'skileft' : 'skiright'); } },
-		skiMove: function (choice) { if (!this.pending) this.chooseEvent(choice); },
+		skiMove: function (choice) {
+			var event = this.state && this.state.run && this.state.run.event;
+			if (!event || !event.ski || event.stage !== 'choice' || this.pending) return;
+			this.skiQueue = this.skiQueue || [];
+			if (choice === 'skitick' && (this.skiPending || this.skiQueue.length)) return;
+			this.skiQueue.push(choice);
+			this.flushSki();
+		},
+		flushSki: function () {
+			if (this.skiPending || !this.skiQueue || !this.skiQueue.length) return;
+			var event = this.state.run.event;
+			this.skiPending = {id: Date.now().toString(36) + '-' + Math.random().toString(36).slice(2),
+				revision: this.state.account.revision, action: 'event', member: event.key, value: this.skiQueue.shift()};
+			this.sendSki();
+		},
+		sendSki: function () {
+			if (!this.skiPending || !app.socket || app.socket.readyState !== 1) return;
+			app.send('/fantasyrogue ski ' + JSON.stringify(this.skiPending));
+			clearTimeout(this.skiTimer);
+			var self = this;
+			this.skiTimer = setTimeout(function () { self.sendSki(); }, 1500);
+		},
+		receiveSki: function (result) {
+			if (result.userid !== app.user.get('userid') || !this.skiPending || result.id !== this.skiPending.id) return;
+			clearTimeout(this.skiTimer); this.skiPending = null;
+			if (!result.ok || !result.event || result.event.stage !== 'choice' || !result.event.ski ||
+				!this.state.run || this.state.run.event.key !== result.event.key) {
+				this.skiQueue = []; if (!result.ok) this.error = result.message; this.refresh(); return;
+			}
+			this.state.account.revision = result.revision;
+			Object.assign(this.state.run.event.ski, result.event.ski);
+			this.flushSki();
+		},
+		skiDisplayLane: function (lane) {
+			var inputs = (this.skiPending ? [this.skiPending.value] : []).concat(this.skiQueue || []);
+			inputs.forEach(function (input) { if (input !== 'skitick') lane = Math.max(0, Math.min(2, lane + (input === 'skileft' ? -1 : 1))); });
+			return lane;
+		},
 		startSkiClock: function () {
 			if (this.skiFrame) cancelAnimationFrame(this.skiFrame);
 			var self = this, run = this.state && this.state.run, event = run && run.event;
@@ -1441,7 +1481,7 @@
 			var ski = event.ski, offset = ski.now - Date.now();
 			function tick() {
 				if (self.screen !== 'game' || !canvas.isConnected) return;
-				var elapsed = Math.min(30000, Date.now() + offset - ski.started), time = elapsed / 1000;
+				var elapsed = Math.min(ski.duration || 15000, Date.now() + offset - ski.started), time = elapsed / 1000;
 				ctx.fillStyle = '#c9e2ef'; ctx.fillRect(0, 0, 540, 300);
 				ctx.fillStyle = '#f8fcff'; ctx.beginPath(); ctx.moveTo(55, 300); ctx.lineTo(210, 35); ctx.lineTo(330, 35); ctx.lineTo(485, 300); ctx.fill();
 				ctx.strokeStyle = '#b9d1df'; ctx.lineWidth = 2;
@@ -1456,12 +1496,12 @@
 					else { ctx.fillStyle = '#748a9a'; ctx.beginPath();ctx.moveTo(-24,5);ctx.lineTo(-16,-20);ctx.lineTo(8,-27);ctx.lineTo(26,3);ctx.closePath();ctx.fill();ctx.fillStyle='#e8f1f6';ctx.fillRect(-13,-23,22,6); }
 					ctx.restore();
 				});
-				var x = 270 + (ski.lane - 1) * 145;
+				var x = 270 + (self.skiDisplayLane(ski.lane) - 1) * 145;
 				ctx.strokeStyle = '#27465e'; ctx.lineWidth = 5; ctx.beginPath();ctx.moveTo(x-13,240);ctx.lineTo(x-21,278);ctx.moveTo(x+13,240);ctx.lineTo(x+21,278);ctx.stroke();
 				ctx.fillStyle = '#315b86';ctx.fillRect(x-13,218,26,30);ctx.fillStyle='#c34f50';ctx.fillRect(x-16,204,32,18);ctx.fillStyle='#e7d1ac';ctx.fillRect(x-10,218,20,5);
 				ctx.fillStyle = '#e9f4fbe0'; for (var i=0;i<11;i++) {ctx.beginPath();ctx.arc(i*55,306+Math.sin(time*2+i)*7,22,0,Math.PI*2);ctx.fill();}
-				self.$('.rogue-ski-time').text(time.toFixed(1) + ' / 30 秒');
-				if (!self.pending && (!self.lastSkiPoll || Date.now() - self.lastSkiPoll > 700)) { self.lastSkiPoll = Date.now(); self.chooseEvent('skitick'); }
+				self.$('.rogue-ski-time').text(time.toFixed(1) + ' / 15 秒');
+				if (!self.pending && (!self.lastSkiPoll || Date.now() - self.lastSkiPoll > 700)) { self.lastSkiPoll = Date.now(); self.skiMove('skitick'); }
 				self.skiFrame = requestAnimationFrame(tick);
 			}
 			tick();
@@ -1732,7 +1772,7 @@
 				var move = mon.set.moves[i] && dex().moves.get(mon.set.moves[i]);
 				var pp = (mon.pp || [])[i];
 				html += '<div' + (panel === 'moves' && slot === i ? ' class="selected"' : '') + '>' +
-					button('editSection', 'moves:' + i, move ? localName(move.name, 'move') + (pp ? ' ' + pp.pp + '/' + pp.maxpp : '') : '空招式位', i > mon.set.moves.length) +
+					('<button class="button rogue-equipped-move" name="editSection" value="moves:' + i + '"' + (move ? ' data-type="' + escape(move.type) + '"' : '') + (i > mon.set.moves.length ? ' disabled' : '') + '>' + (move ? '<strong>' + escape(localName(move.name, 'move')) + '</strong><small>' + escape(localName(move.type)) + ' · 威力 ' + (move.category === 'Status' ? '—' : move.basePower || '变化') + ' · 命中 ' + (move.accuracy === true ? '必中' : move.accuracy + '%') + ' · PP ' + (pp ? pp.pp + '/' + pp.maxpp : '—') + '</small>' : '空招式位') + '</button>') +
 					(i > 0 && move ? button('moveSlotUp', String(i), '↑', locked) : '') + '</div>';
 			}
 			html += '</div><button class="rogue-stat-summary" name="editSection" value="stats"><strong>能力 / 努力值</strong>';
@@ -1997,11 +2037,11 @@
 
 			if (run) {
 				html += this.renderBlessings(run, busy);
-				html += this.renderCompanions(run, busy);
 				if (run.eventBuff && run.eventBuff.battles > 0) html += '<div class="rogue-keepsake"><strong>' + fa('leaf') + '奇异活力 · 剩余 ' +
 					Number(run.eventBuff.battles) + ' 场</strong><p>全队造成伤害 +20%，受到伤害 −10%；后来加入的伙伴同样生效。每次开战消耗一场，旁观不消耗。</p></div>';
 				if (run.startCard) html += '<div class="rogue-keepsake rogue-preference"><strong>' + fa('clone') + escape(run.startCard.name) +
 					'</strong><p>' + escape(run.startCard.text) + '</p></div>';
+				html += this.renderCompanions(run, busy);
 				html += '<p class="rogue-tera rogue-system-status">' + fa(run.teraUnlocked ? 'diamond' : 'lock') + '太晶化：' +
 					(run.teraUnlocked ? '本局已解锁，每场战斗限用一次。' : '未解锁，可通过预定祝福或第 100 层馆主赠礼解锁。') + '</p>' +
 					'<p class="rogue-system-status">超进化：' + (run.megaUnlocked ? '已解锁' : '未解锁') + ' · 超巨进化：' + (run.gmegaUnlocked ? '已解锁' : '未解锁') + ' · Z 招式：' + (run.zUnlocked ? '已解锁' : '未解锁') +
@@ -2171,6 +2211,11 @@
 		},
 		render: function (storyOnly) {
 			var state = this.state;
+			if (state && state.enabled === false) {
+				stableHTML(this, '<div class="pad"><h2>当前账号未开放此功能</h2><p>' + escape(state.message || '请使用获准的内测账号登录。') + '</p>' + button('joinRoom', '', '返回首页') + '</div>');
+				if (app.rooms.fantasyrogueparty) app.rooms.fantasyrogueparty.$el.html('');
+				return;
+			}
 			var busy = !!this.pending || !app.socket || app.socket.readyState !== 1;
 			if (this.screen === 'game' && storyOnly === true && state && this.updateStory(state.story, busy)) return;
 			this.storyHadError = !!this.error;

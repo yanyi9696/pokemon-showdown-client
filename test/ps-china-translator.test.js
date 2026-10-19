@@ -11,10 +11,10 @@ describe('Rogue vocabulary contexts', () => {
 		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
 		for (const [name, expected] of [['Slowbro-Galar-Mega-Fantasy', '幻想呆壳兽-伽勒尔-超级进化'],
 			['Pidgeot-Mega-Fantasy', '幻想大比鸟-超级进化'], ['Mewtwo-Mega-X-Fantasy', '幻想超梦-超级进化X'],
-			['幻想超级呆壳兽-伽勒尔', '幻想呆壳兽-伽勒尔-超级进化']]) {
+			['幻想超级呆壳兽-伽勒尔', '幻想呆壳兽-伽勒尔-超级进化'], ['Shadow Lugia-Fantasy', '幻想黑暗洛奇亚'], ['Lurantis-Totem-Fantasy', '幻想兰螳花-霸主'], ['Drednaw-G-Mega-Fantasy', '幻想暴噬龟-超巨进化']]) {
 			assert.equal(context.translateRogueName(name), expected);
 		}
-		assert.equal(context.translateRogueName('Urshifu-G-Mega-Fantasy'), '幻想超巨进化武道熊师（爆击流）');
+		assert.equal(context.translateRogueName('Urshifu-G-Mega-Fantasy'), '幻想武道熊师-爆击流-超巨进化');
 	});
 	it('localizes form suffixes and descriptions without confusing UI labels with moves', () => {
 		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);

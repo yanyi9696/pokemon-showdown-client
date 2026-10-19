@@ -258,7 +258,7 @@ describe('Fantasy Rogue start menu and codex', () => {
 		const normalSelector = c.room.$;
 		c.room.$ = selector => selector === '.rogue-ski canvas' ? [canvas] : normalSelector(selector);
 		const actions = [];
-		c.room.chooseEvent = choice => {actions.push(choice); c.room.pending = {action: 'event'};};
+		c.room.skiMove = choice => {actions.push(choice); c.room.pending = {action: 'event'};};
 		c.room.startSkiClock();
 		assert.deepEqual(actions, ['skitick']);
 		assert.equal(frames.length, 1, 'The pending request must not freeze the animation');
@@ -1991,4 +1991,31 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 		spectator.room.add('|fantasyroguedefeat|{}');
 		assert(!spectator.room.fantasyRogueDefeat); assert(!spectator.room.closed);
 	});
+});
+
+
+describe('Compact tower controls and live ski input', () => {
+ it('queues rapid direction presses without a cooldown and reconciles authoritative lanes', () => {
+  const c = client(), data = adventure('event');
+  data.run.event = {key: 'ski-input', stage: 'choice', ski: {lane: 1, started: Date.now(), now: Date.now(), duration: 15000, obstacles: []}};
+  c.room.state = data;
+  c.room.skiMove('skileft'); c.room.skiMove('skiright'); c.room.skiMove('skiright');
+  assert.equal(c.sent.length, 1); assert.equal(c.room.skiDisplayLane(1), 2);
+  const request = JSON.parse(c.sent[0].slice('/fantasyrogue ski '.length));
+  c.room.receiveSki({userid: data.userid, id: request.id, ok: true, revision: 2, event: {...data.run.event, ski: {...data.run.event.ski, lane: 0}}});
+  assert.equal(c.sent.length, 2); assert.equal(c.room.skiDisplayLane(0), 2);
+  assert.equal(JSON.parse(c.sent[1].slice('/fantasyrogue ski '.length)).revision, 2);
+  assert(!c.room.pending); assert(!c.room.renderSki(data.run.event, false).includes('disabled'));
+  c.room.receiveSki({userid: data.userid, id: c.room.skiPending.id, ok: true, revision: 3, event: {key: 'ski-input', stage: 'result'}});
+  assert.equal(c.room.skiQueue.length, 0); assert.equal(c.sent.at(-1), '/cmd fantasyrogue');
+ });
+ it('shows type, power, accuracy and current/max PP on compact move buttons', () => {
+  const c = client(), data = adventure('ready'); c.room.receiveState(data);
+  assert(c.panel.html.includes('rogue-equipped-move')); assert(c.panel.html.includes('data-type="Grass"'));
+  assert(c.panel.html.includes('威力 45')); assert(c.panel.html.includes('命中 100%')); assert(c.panel.html.includes('PP '));
+ });
+ it('does not show the game or codex after a denied direct link', () => {
+  const c = client(true); c.room.receiveState({...state(), enabled: false, account: null, message: '需要内测权限'});
+  assert(c.room.html.includes('当前账号未开放')); assert(!c.room.html.includes('事件图鉴'));
+ });
 });

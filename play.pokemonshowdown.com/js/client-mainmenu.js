@@ -55,7 +55,7 @@
 			buf += '<div class="menugroup">';
 			buf += '<p><button class="button mainmenu2" name="joinRoom" value="teambuilder">Teambuilder</button></p>';
 			buf += '<p><button class="button mainmenu1" name="joinRoom" value="fantasyai">AI 挑战</button></p>';
-			buf += '<p><button class="button mainmenu-rogue" name="joinRoom" value="fantasyrogue">幻想杯肉鸽</button></p>';
+			buf += '<p class="rogue-beta-entry" hidden><button class="button mainmenu-rogue" name="joinRoom" value="fantasyrogue">幻想杯肉鸽</button></p>';
 			buf += '<p><button class="button mainmenu3" name="joinRoom" value="ladder">Ladder</button></p>';
 			buf += '<p><button class="button mainmenu4" name="send" value="/smogtours">Tournaments</button></p>';
 			buf += '</div>';
@@ -65,6 +65,19 @@
 			buf += '<p><button class="button mainmenu6 onlineonly disabled" name="send" value="/friends">Friends</button></p></div>';
 
 			this.$('.mainmenu').html(buf);
+			this.listenTo(app, 'response:fantasyrogueaccess', function (result) {
+				if (!result || result.userid !== app.user.get('userid')) return;
+				app.fantasyRogueAccess = result.enabled === true;
+				this.$('.rogue-beta-entry').prop('hidden', !app.fantasyRogueAccess);
+			});
+			var requestRogueAccess = function () {
+				app.fantasyRogueAccess = false;
+				this.$('.rogue-beta-entry').prop('hidden', true);
+				if (app.socket && app.socket.readyState === 1) app.send('/cmd fantasyrogueaccess');
+			};
+			this.listenTo(app.user, 'change:userid change:named', requestRogueAccess);
+			this.listenTo(app, 'init:socketopened init:choosename', requestRogueAccess);
+			requestRogueAccess.call(this);
 
 			// right menu
 			if (document.location.hostname === Config.routes.client) {

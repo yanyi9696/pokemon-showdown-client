@@ -8795,6 +8795,17 @@ function translateRogueName(value, kind) {
     value = String(value).trim();
     const moveNames = {Psychic: '精神强念', Metronome: '挥指', Refresh: '焕然一新', Disable: '定身法'};
     if (kind === 'move' && moveNames[value]) return moveNames[value];
+    const specialForms = {'Urshifu-G-Mega-Fantasy': '幻想武道熊师-爆击流-超巨进化', 'Urshifu-Rapid-Strike-G-Mega-Fantasy': '幻想武道熊师-瞬击流-超巨进化'};
+    if (specialForms[value]) return specialForms[value];
+    if (/-Fantasy$/.test(value)) {
+        const base = value.slice(0, -8);
+        const form = base.match(/^(.+?)-(G-Mega|Mega(?:-[XYZ])?|Totem)$/);
+        if (form) return '幻想' + translateRogueName(form[1], kind) + '-' +
+            (form[2] === 'Totem' ? '霸主' : form[2] === 'G-Mega' ? '超巨进化' : '超级进化' + form[2].slice(4).replace('-', ''));
+        if (base === 'Shadow Lugia') return '幻想黑暗洛奇亚';
+    }
+    if (/^幻想(霸主|超巨进化)/.test(value)) return value.replace(/^幻想(霸主|超巨进化)(.+)$/, '幻想$2-$1');
+    if (value === '黑暗洛奇亚-幻想') return '幻想黑暗洛奇亚';
     const fixed = {'Black Augurite': '黑奇石', blackaugurite: '黑奇石', 'Rogue Great Mage': '大法师',
         'Wo-Chien-Fantasy': '幻想古简蜗', 'Urshifu-Rapid-Strike-Fantasy': '幻想武道熊师（乱击流）',
         'Urshifu-G-Mega-Fantasy': '幻想超巨进化武道熊师（爆击流）',

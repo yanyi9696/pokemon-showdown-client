@@ -37,7 +37,10 @@
   {
     "id": "viola",
     "prompt": "Create a transparent PNG 2D anime dialogue character expression sheet. Subject: Viola, the Pokémon bug gym leader, short blond hair with a green hair ornament, white collared photographer shirt and camera on a neck strap, perceptive friendly eyes. Exactly two waist-up illustrations of the same character side by side on a wide 2:1 canvas. Equal square cells, left neutral, right gently smiling in recognition of a worthy challenger. Identical pose, scale, clothing, face shape and colors; only facial expression changes. Crisp dark outlines, restrained cel shading, consistent game illustration finish, fully clothed, generous transparent margin around hair and arms, no text or borders.",
-    "output": "exec-2e91850a-47eb-4569-a940-518201bbedd2.png"
+    "output": "exec-50021a25-629e-4af0-88b3-d255b95a2e4f.png",
+    "previousOutput": "exec-2e91850a-47eb-4569-a940-518201bbedd2.png",
+    "updated": "2026-10-19",
+    "revision": "Native image edit using the existing paired portrait and three user-provided hairstyle references: swept-back rounded blonde hair, two long face-framing locks curling inward at the ends, green eyes, white sleeveless top, green wristbands and camera; matching neutral and approval cells on a transparent canvas."
   },
   {
     "id": "lorelei",
@@ -183,6 +186,9 @@
     "date": "2026-10-19",
     "specification": "Brock fan illustration based on both supplied references: tan skin, narrow closed eyes, spiky brown hair, charcoal utility vest with orange collar and trim over a green shirt. Hands on hips; neutral and warm approving expressions; consistent outline and restrained cel shading.",
     "layout": "Transparent 2:1 sheet with equal square cells, neutral left and approval right. Identical waist-up pose, scale, clothing and silhouette.",
-    "references": ["codex-clipboard-1f3fd452-cb4d-4d2e-bf6e-486f73a6d7c7.png", "codex-clipboard-2504e7a7-c9db-4baf-8bcf-f13770aea98f.png"]
+    "references": [
+      "codex-clipboard-1f3fd452-cb4d-4d2e-bf6e-486f73a6d7c7.png",
+      "codex-clipboard-2504e7a7-c9db-4baf-8bcf-f13770aea98f.png"
+    ]
   }
 ]
