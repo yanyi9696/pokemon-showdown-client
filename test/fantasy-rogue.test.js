@@ -72,7 +72,7 @@ describe('Fantasy Rogue start menu and codex', () => {
 		const c = client(true), data = state(), popups = [];
 		data.codexSchema = 2;
 		data.account.needsOnboarding = true;
-		data.beginnerGuide = [{title: '两个同行名额', text: '累计 15 次偏好选择领取赠礼。<script>'}];
+		data.beginnerGuide = [{title: '两个同行名额', text: '累计 **15 次偏好选择**领取赠礼。**<script>**'}];
 		c.app.curRoom = c.room; c.app.addPopup = (type, detail) => popups.push({type, detail});
 		c.room.receiveState(data); c.room.enterGame();
 		const popup = Object.create(popups[0].type); let html;
@@ -80,11 +80,14 @@ describe('Fantasy Rogue start menu and codex', () => {
 		popup.initialize(popups[0].detail);
 		assert(html.includes('两个同行名额')); assert(html.includes('15 次'));
 		assert(!html.includes('<script>'));
+		assert(html.includes('<strong>15 次偏好选择</strong>'));
+		assert(html.includes('<strong>&lt;script></strong>'));
 		c.room.openCodex('guide');
 		c.room.receiveCodex({userid: 'rogueplayer', codexSchema: 2, section: 'guide',
 			guide: {intro: [], beginner: data.beginnerGuide, modules: {}}});
 		c.room.filterCodex('beginner');
 		assert(c.room.html.includes('两个同行名额')); assert(!c.room.html.includes('<script>'));
+		assert(c.room.html.includes('<strong>15 次偏好选择</strong>'));
 		assert(!c.room.html.includes('仍在提供旧版图鉴'));
 		c.room.receiveCodex({userid: 'rogueplayer', section: 'guide', guide: {intro: [], modules: {}}});
 		assert(c.room.html.includes('仍在提供旧版图鉴'));
@@ -912,6 +915,28 @@ function adventure(phase = 'choose') {
 	return data;
 }
 describe('Fantasy Rogue event display and spectator playback', () => {
+	it('contains paired and native rival portraits alongside event text before all event controls', () => {
+		const c = client(), data = adventure('ready');
+		for (const portrait of ['silver', 'unknowntrainer']) {
+			data.run.event = {title: '初次切磋', paragraphs: ['来对战吧。'], rivalPortrait: portrait, stage: 'battle'};
+			const html = c.room.renderEvent(data.run, false);
+			assert(html.includes('rogue-event-intro has-portrait'));
+			assert.match(html, /<div class="rogue-event-text">[\s\S]*<\/div><(?:span|img)[\s\S]*<\/div><\/article>$/);
+		}
+	});
+	it('makes region types the main heading while retaining biome details and escaped subtitles', () => {
+		const c = client(), data = adventure();
+		data.run.choices = [
+			{id: 'wild', name: '天空之柱<test>', kind: 'wild', biome: {level: 3, tier: 0}},
+			{id: 'elite', name: '精英挑战', kind: 'elite'},
+			{id: 'adventure', name: '旅途中的相遇', kind: 'adventure'},
+			{id: 'encounter', name: '治安协助', kind: 'encounter'},
+		];
+		c.room.receiveState(data);
+		for (const type of ['战斗', '精英', '奇遇', '遭遇']) assert(c.room.html.includes('class="rogue-route-type">' + type + '</strong>'));
+		assert(c.room.html.includes('class="rogue-route-subtitle">天空之柱&lt;test></span><small>Lv.3'));
+		assert(c.room.html.includes('rogue-route-orange')); assert(c.room.html.includes('rogue-route-rose'));
+	});
 	it('renders auction budgets, lots and legal tutor choices using normal event commands', () => {
 		const c = client(false, true), data = adventure('event');
 		data.run.event = {id: 'auction', title: '落槌之前', key: 'auction-key', stage: 'choice',
@@ -1782,6 +1807,35 @@ describe('Fantasy Rogue client', () => {
 		assert.equal(request.action, 'learn'); assert.equal(request.member, 'run:floor:catch');
 		assert.equal(request.value, '0'); assert(!('team' in request));
 	});
+	it('scrolls to each newly pending move once and waits until the learning panel is visible', () => {
+		let reduced = false;
+		const c = client(false, false, {matchMedia: () => ({matches: reduced})}), data = adventure('ready'), calls = [];
+		data.run.id = 'scroll-test';
+		const root = {scrollTop: 650, clientHeight: 500, getBoundingClientRect: () => ({top: 10}),
+			querySelector: () => c.room.html.includes('class="rogue-pending-move"') ? {
+				getBoundingClientRect: () => ({top: 210 - root.scrollTop}),
+			} : null,
+			scrollTo: options => {calls.push(options); root.scrollTop = options.top;}};
+		c.room.$el[0] = root;
+		const pending = move => [{member: data.run.team[0].id, move}];
+		data.run.pendingMoves = pending('vinewhip'); c.room.receiveState(data);
+		assert.equal(calls.length, 1); assert.equal(calls[0].top, 184); assert.equal(calls[0].behavior, 'smooth');
+		assert(c.room.html.includes('学习到了新的招式，请先确认'));
+		c.room.render(); c.room.receiveState(data); assert.equal(calls.length, 1);
+		data.run.pendingMoves = pending('growl'); c.room.receiveState(data); assert.equal(calls.length, 2);
+		data.run.pendingMoves = []; c.room.receiveState(data);
+		reduced = true; data.run.pendingMoves = pending('growl'); c.room.receiveState(data);
+		assert.equal(calls.length, 3); assert.equal(calls[2].behavior, 'auto');
+		c.room.screen = 'home'; data.run.pendingMoves = pending('tackle'); c.room.receiveState(data);
+		assert.equal(calls.length, 3);
+		c.room.screen = 'game'; root.clientHeight = 0; c.room.render(); assert.equal(calls.length, 3);
+		root.clientHeight = 500; c.room.revealPendingMove(); assert.equal(calls.length, 4);
+		data.run.pendingMoves = pending('cut'); root.clientHeight = 0;
+		c.app.curRoom = c.panel; let focused;
+		c.app.focusRoom = id => {focused = id; c.app.curRoom = c.room; root.clientHeight = 500; c.room.revealPendingMove();};
+		c.room.receiveState(data);
+		assert.equal(focused, 'fantasyrogue'); assert.equal(calls.length, 5);
+	});
 	it('preserves the full colon-containing member id when replacing a captured party member', () => {
 		const c = client(); c.room.receiveState(state());
 		c.room.replaceMember('run:15:elite:0');
@@ -1839,6 +1893,22 @@ describe('Fantasy Rogue client', () => {
 		c.room.chooseAbility('chlorophyll');
 		request = JSON.parse(c.sent[1].slice('/fantasyrogue action '.length));
 		assert.equal(request.action, 'ability');
+	});
+	it('puts equipped moves first in slot order, includes the fifth slot and preserves learned PP data', () => {
+		const c = client(), data = adventure(), mon = data.run.team[0];
+		data.run.moveSlots = 5;
+		mon.set.moves = ['growl', 'tackle', 'vinewhip', 'cut', 'surf'];
+		mon.moveMemory.unshift({id: 'cut', pp: 3, maxpp: 30});
+		mon.moveMemory.push({id: 'razorleaf', pp: 6, maxpp: 25});
+		mon.blessingMoves = ['surf']; mon.blessingPP = [{id: 'surf', pp: 1, maxpp: 15}];
+		const before = JSON.stringify(mon);
+		c.room.receiveState(data); c.room.editSection('moves:2');
+		const rows = [...c.panel.html.matchAll(/class="rogue-choice-row( is-equipped)?" data-rogue-key="move:([^"]+)"/g)];
+		assert.deepEqual(rows.map(row => row[2]), ['growl', 'tackle', 'vinewhip', 'cut', 'surf', 'razorleaf']);
+		assert(rows.slice(0, 5).every(row => row[1])); assert(!rows[5][1]);
+		for (let i = 1; i <= 5; i++) assert(c.panel.html.includes('title="已装备 · 第 ' + i + ' 位">' + i + '</span>'));
+		assert(c.panel.html.includes('1/15')); assert(c.panel.html.includes('4/25'));
+		assert.equal(JSON.stringify(mon), before);
 	});
 	it('sends stable party and move ordering, and exposes one-time event EV inputs only when granted', () => {
 		const c = client(); const data = adventure();

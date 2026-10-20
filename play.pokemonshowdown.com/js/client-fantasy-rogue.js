@@ -39,8 +39,11 @@
 	}
 	function beginnerGuideHTML(sections) {
 		return (sections || []).map(function (section) {
-			return '<section><h3>' + escape(section.title) + '</h3><p>' + escape(section.text) + '</p></section>';
+			return '<section><h3>' + escape(section.title) + '</h3><p>' + guideText(section.text) + '</p></section>';
 		}).join('');
+	}
+	function guideText(text) {
+		return escape(text || '').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 	}
 	function croppedMewtwo(className) {
 		return '<span role="img" aria-label="超梦上半身立绘" class="rogue-mewtwo-bust ' + className +
@@ -157,8 +160,10 @@
 	}
 	var kindNames = {wild: '野生战斗', battle: '战斗', elite: '精英', encounter: '遭遇', trainer: '训练家', rest: '休整',
 		boss: '首领', gym: '道馆', event: '事件', reward: '奖励', shop: '商店', trade: '交易', adventure: '奇遇', fog: '未知区域'};
+	var routeNames = {wild: '战斗', trainer: '战斗', shop: '交易'};
 	function routeTone(kind) {
 		if (kind === 'rest') return 'green';
+		if (kind === 'elite') return 'orange';
 		if (kind === 'adventure' || kind === 'fog') return 'rose';
 		if (['event', 'reward', 'shop', 'trade'].indexOf(kind) >= 0) return 'blue';
 		return 'red';
@@ -456,6 +461,7 @@
 			var entering = !this.visible;
 			this.visible = true;
 			Room.prototype.show.apply(this, arguments);
+			this.revealPendingMove();
 			if (entering) this.refresh();
 		},
 		hide: function () { this.visible = false; Room.prototype.hide.apply(this, arguments); },
@@ -489,6 +495,7 @@
 			clearTimeout(this.skiTimer); this.skiPending = null; this.skiQueue = [];
 			this.screen = 'home'; this.codices = {}; this.codexReplay = null; this.codexQuery = ''; this.codexPage = 0;
 			this.evolutionPreview = null;
+			this.revealedMove = null;
 			this.starterBuilds = {};
 			this.useSpirit = false; this.testSpirit = ''; this.selectedSpirit = ''; this.hpTarget = null; this.spiritPopupRun = null;
 			this.selectedStarters = []; this.selectedRoute = null; this.selectedBlessing = null;
@@ -598,6 +605,7 @@
 			if (codexChanged) { this.codices = {}; this.codexReplay = null; }
 			var previous = this.state && this.state.run;
 			var incoming = state.run;
+			if (!incoming || !(incoming.pendingMoves || []).length) this.revealedMove = null;
 			if (incoming && (!previous || previous.id !== incoming.id)) this.openPartyOnLayout = true;
 			if (!previous || !incoming || previous.id !== incoming.id || previous.floor !== incoming.floor ||
 				previous.phase !== incoming.phase || this.state.account.revision !== state.account.revision) {
@@ -1620,9 +1628,10 @@
 			var event = run.event;
 			if (!event) return '';
 			var recommendations = function (id) { var names = (run.companions || []).concat(run.socialCompanions || []).filter(function (c) { return c.recommended === id; }).map(function (c) { return c.name; }); return names.length ? '（' + names.join('、') + '推荐）' : ''; };
-			var html = '<article class="rogue-event"><h3>' + escape(event.title) + '</h3><div class="rogue-event-text">' +
+			var html = '<article class="rogue-event"><h3>' + escape(event.title) + '</h3><div class="rogue-event-intro' + (event.rivalPortrait ? ' has-portrait' : '') + '"><div class="rogue-event-text">' +
 				(event.paragraphs || []).map(function (line) { return '<p>' + dialogueText(line) + '</p>'; }).join('') + '</div>';
 			if (event.rivalPortrait) { var rivalArt = portraitFile(event.rivalPortrait); html += rivalArt ? '<span class="rogue-companion-portrait rogue-event-rival' + (event.rivalApproval ? ' smiling' : '') + '" style="' + portraitStyle(event.rivalPortrait) + '"></span>' : '<img class="rogue-rival-native" src="' + escape(Dex.resolveAvatar(event.rivalPortrait)) + '" alt="劲敌" />'; }
+			html += '</div>';
 			if (event.silhouette) html += '<div class="rogue-quiz-silhouette" aria-label="宝可梦剪影" style="' + Dex.getTeambuilderSprite({species: event.silhouette}) + '"></div>';
 			if (event.ski && event.stage === 'choice') return html + this.renderSki(event, busy) + '</article>';
 			if (event.fishing && event.stage === 'choice') return html + this.renderFishing(event, busy) + '</article>';
@@ -1717,13 +1726,13 @@
 				var pending = run.pendingMoves[0];
 				var learner = run.team.filter(function (mon) { return mon.id === pending.member; })[0];
 				if (learner) {
-					html += '<h3>学习招式 · ' + escape(localName(learner.set.species)) + '</h3>' +
+					html += '<section class="rogue-pending-move" role="region" aria-label="学习到了新的招式需要确认"><h3>学习招式 · ' + escape(localName(learner.set.species)) + '</h3><p><strong>学习到了新的招式，请先确认是否装备。</strong></p>' +
 						'<div class="rogue-new-move">' + moveRow(pending.move) + '</div><p>选择替换位置。替换下来的招式会保留在可更换列表中。</p>';
 					learner.set.moves.forEach(function (move, i) {
 						html += '<div class="rogue-choice-row">' + moveRow(move, learner.pp[i]) +
 							button('learnMove', String(i), '替换此招式', busy) + '</div>';
 					});
-					html += '<p>' + button('learnMove', 'skip', '暂不装备，保留在可更换列表', busy) + '</p>';
+					html += '<p>' + button('learnMove', 'skip', '暂不装备，保留在可更换列表', busy) + '</p></section>';
 				}
 			}
 			busy = busy || !!run.pendingCapture || !!(run.pendingMoves || []).length;
@@ -1744,8 +1753,8 @@
 					var selected = this.selectedRoute === node.id;
 					html += '<button type="button" name="chooseRoute" value="' + escape(node.id) + '" class="rogue-route rogue-route-' + routeTone(node.kind) +
 						(selected ? ' is-selected' : '') + '" aria-pressed="' + selected + '"' + (busy ? ' disabled' : '') + '>' + routeVortex() + routeEmblem(node.kind) +
-						'<strong>' + escape(node.name + recommendedLabel(run, node.id)) + '</strong><small>' + escape(kindNames[node.kind] || node.kind) +
-						(node.biome ? ' · Lv.' + (node.biome.level + (run.blessings ? run.blessings.levels : 0)) +
+						'<strong class="rogue-route-type">' + escape(routeNames[node.kind] || kindNames[node.kind] || node.kind) + '</strong><span class="rogue-route-subtitle">' + escape(node.name + recommendedLabel(run, node.id)) + '</span><small>' +
+						(node.biome ? 'Lv.' + (node.biome.level + (run.blessings ? run.blessings.levels : 0)) +
 							(run.blessings && run.blessings.levels ? '（含祝福 +' + run.blessings.levels + '）' : '') + ' · ' + (node.biome.tier * 20) + '～' +
 							(node.biome.tier * 20 + 20) + ' 档宝可梦池' : '') +
 						'</small><span class="rogue-caption">' + (node.fogged ? '路线与收益被迷雾遮蔽' : node.wildLoot ? '本层战利品 · 每场结束入包' : node.kind === 'trade' ? '选购专门商品 · 可以直接离开' : node.kind === 'event' ? '进入后揭晓事件，选择会影响收益与风险' : '整层完成奖励') + '</span>' +
@@ -1906,12 +1915,20 @@
 			if (panel === 'moves') {
 				html += '<h4>可更换招式 · 第 ' + (slot + 1) + ' 个位置</h4><p class="rogue-caption">已学与替换下来的招式都会保留；更换保留剩余 PP。</p>';
 				html += '<div class="rogue-move-picker" data-rogue-key="moves:' + escape(mon.id) + '" tabindex="0" role="region" aria-label="可更换招式，列表内上下滚动">';
-				var learnedMoves = mon.moveMemory || mon.pp;
-				learnedMoves.concat((mon.blessingPP || []).filter(function (move) {
+				var learnedMoves = mon.moveMemory || mon.pp || [];
+				var equippedIds = mon.set.moves.map(idOf);
+				var availableMoves = learnedMoves.concat((mon.blessingPP || []).filter(function (move) {
 					return (mon.blessingMoves || []).indexOf(move.id) >= 0 && !learnedMoves.some(function (known) { return known.id === move.id; });
+				}));
+				// Keep equipped moves in slot order without changing the server's learned-move memory.
+				equippedIds.map(function (id, index) {
+					return availableMoves.find(function (move) { return move.id === id; }) || (mon.pp || [])[index];
+				}).filter(Boolean).concat(availableMoves.filter(function (move) {
+					return equippedIds.indexOf(move.id) < 0;
 				})).forEach(function (move) {
-					var equipped = mon.set.moves.map(idOf).indexOf(move.id);
-					html += '<div class="rogue-choice-row" data-rogue-key="move:' + escape(move.id) + '">' + moveRow(move.id, move) +
+					var equipped = equippedIds.indexOf(move.id);
+					html += '<div class="rogue-choice-row' + (equipped >= 0 ? ' is-equipped' : '') + '" data-rogue-key="move:' + escape(move.id) + '">' +
+						(equipped >= 0 ? '<span class="rogue-move-slot" title="已装备 · 第 ' + (equipped + 1) + ' 位">' + (equipped + 1) + '</span>' : '') + moveRow(move.id, move) +
 						button('chooseMove', move.id, equipped === slot ? '已装备' : equipped >= 0 ? '交换到此位置' : '装备此招式',
 							locked || equipped === slot || (equipped >= 0 && slot === mon.set.moves.length)) + '</div>';
 				});
@@ -2233,7 +2250,7 @@
 			}
 			var filters, entries, guideModule = this.codexFilter.replace(/enhanced$/, '');
 			if (section === 'guide') {
-				html += '<div class="rogue-guide-intro">' + data.guide.intro.slice(0, 2).map(function (entry) {
+				if (this.codexFilter !== 'beginner') html += '<div class="rogue-guide-intro">' + data.guide.intro.slice(0, 2).map(function (entry) {
 					return '<article><h3>' + escape(entry.title) + '</h3><p>' + escape(entry.text) + '</p></article>';
 				}).join('') + '</div><details class="rogue-guide-rules"><summary>出发前，了解这些基础规则</summary>' +
 					data.guide.intro.slice(2).map(function (entry) { return '<h4>' + escape(entry.title) + '</h4><p>' + escape(entry.text) + '</p>'; }).join('') + '</details>';
@@ -2247,7 +2264,7 @@
 				if (guideModule === 'moves' || guideModule === 'abilities') entries = entries.filter(function (entry) {
 					return (entry.origin || 'fantasy') === (/enhanced$/.test(this.codexFilter) ? 'enhanced' : 'fantasy');
 				}, this);
-				html += '<p class="rogue-caption">以下为幻想形态与主要调整内容；形态、道具能否在爬塔中使用，还需满足相应获取和解锁条件。</p>';
+				if (this.codexFilter !== 'beginner') html += '<p class="rogue-caption">以下为幻想形态与主要调整内容；形态、道具能否在爬塔中使用，还需满足相应获取和解锁条件。</p>';
 			} else {
 				var people = section === 'events' && this.codexCollection === 'companions';
 				if (section === 'events') html += '<nav class="rogue-codex-collections" aria-label="事件图鉴分册">' +
@@ -2299,7 +2316,7 @@
 				var tier = {silver: '白银', gold: '黄金', prismatic: '棱彩'}[entry.tier];
 				var icon = section === 'guide' ? (active === 'pokemon' ? '<span class="picon" style="' + Dex.getPokemonIcon(entry.name) + '"></span>' :
 					['items', 'exclusive'].indexOf(active) >= 0 ? itemIcon(entry) : fa('trophy')) : fa(section === 'events' ? 'map-signs' : blessingIcon(entry));
-				var body = '<p class="rogue-codex-effect">' + (section === 'blessings' ? blessingText(entry.text) : escape(eventText(localName(entry.text || '')))) + '</p>';
+				var body = '<p class="rogue-codex-effect">' + (section === 'blessings' ? blessingText(entry.text) : section === 'guide' && active === 'beginner' ? guideText(entry.text) : escape(eventText(localName(entry.text || '')))) + '</p>';
 				if (section === 'guide' && guideModule === 'moves') body = '<p class="rogue-caption">' + typeIcons([entry.type]) + ' · ' + escape(localName(entry.category)) +
 					' · 威力 ' + (entry.power || '—') + ' · 命中 ' + (entry.accuracy === true ? '必中' : entry.accuracy + '%') + ' · PP ' + entry.pp + '</p>' + body;
 				if (section === 'guide' && active === 'pokemon') body = '<p>' + typeIcons(entry.types) + '</p><p>特性：' +
@@ -2326,6 +2343,25 @@
 			return html + '<div class="rogue-codex-pagination">' + button('pageCodex', String(this.codexPage - 1), '上一页', this.codexPage === 0) +
 				'<span>第 ' + (this.codexPage + 1) + ' / ' + total + ' 页 · ' + entries.length + ' 项</span>' +
 				button('pageCodex', String(this.codexPage + 1), '下一页', this.codexPage + 1 >= total) + '</div></section>';
+		},
+		revealPendingMove: function () {
+			var run = this.state && this.state.run, pending = run && (run.pendingMoves || [])[0];
+			if (!pending) { this.revealedMove = null; return; }
+			var key = JSON.stringify([run.id, pending.member, pending.move]);
+			if (this.screen !== 'game' || key === this.revealedMove) return;
+			var root = this.$el && this.$el[0], prompt = root && root.querySelector('.rogue-pending-move');
+			if (!prompt) return; // Dialogue or another prompt may still cover the learning controls.
+			// On narrow screens the party tab can hide the learning prompt in the main room.
+			if (!root.clientHeight && !this.revealingMove && app.curRoom === app.rooms.fantasyrogueparty && app.focusRoom) {
+				this.revealingMove = true;
+				try { app.focusRoom(this.id); } finally { this.revealingMove = false; }
+			}
+			if (!root.clientHeight || key === this.revealedMove) return;
+			this.revealedMove = key;
+			var top = Math.max(0, root.scrollTop + prompt.getBoundingClientRect().top - root.getBoundingClientRect().top - 16);
+			var reducedMotion = globals.matchMedia && globals.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			if (root.scrollTo) root.scrollTo({top: top, behavior: reducedMotion ? 'auto' : 'smooth'});
+			else root.scrollTop = top;
 		},
 		render: function (storyOnly) {
 			var state = this.state;
@@ -2415,6 +2451,7 @@
 				html = html.replace('<div class="pad">', '<div class="rogue-game-layout"><div class="pad rogue-game-content">');
 				stableHTML(this, html + '</div>' + footer + '</div>');
 			} else stableHTML(this, html + '</div>');
+			this.revealPendingMove();
 		},
 		renderPendingClear: function (pending, cards, busy) {
 			if ((cards || []).length < 3) return '<div class="rogue-keepsake"><h4>保存本次通关卡</h4><p>收藏中已有空位，可直接收下本次记录。</p>' +
