@@ -160,10 +160,9 @@
 	}
 	var kindNames = {wild: '野生战斗', battle: '战斗', elite: '精英', encounter: '遭遇', trainer: '训练家', rest: '休整',
 		boss: '首领', gym: '道馆', event: '事件', reward: '奖励', shop: '商店', trade: '交易', adventure: '奇遇', fog: '未知区域'};
-	var routeNames = {wild: '战斗', trainer: '战斗', shop: '交易'};
+	var routeNames = {wild: '战斗', trainer: '遭遇', shop: '交易'};
 	function routeTone(kind) {
 		if (kind === 'rest') return 'green';
-		if (kind === 'elite') return 'orange';
 		if (kind === 'adventure' || kind === 'fog') return 'rose';
 		if (['event', 'reward', 'shop', 'trade'].indexOf(kind) >= 0) return 'blue';
 		return 'red';
@@ -227,25 +226,47 @@
 	function fa(name) { return '<i class="fa fa-' + name + '" aria-hidden="true"></i> '; }
 	function itemIcon(item) {
 		if (item.kind === 'mint' || item.kind === 'machine') return fa(item.kind === 'mint' ? 'leaf' : 'circle-o');
-		if (economyIcons.indexOf(item.id) >= 0) return '<img class="rogue-loot-icon" src="sprites/fantasy-rogue/' + item.id + '.png" alt="" /> ';
-		var frame = item.id.indexOf('expcandy') === 0 ? 'candy' : item.id === 'linkingcord' ? 'cord' :
+		var id = item.icon || item.id;
+		var special = {
+			abilitycapsule: '<g transform="rotate(-35 16 16)"><rect x="5" y="9" width="22" height="14" rx="7" fill="#63b1ec"/><path d="M16 9h4a7 7 0 0 1 0 14h-4Z" fill="#f1b4cf"/><path d="M9 12h4" stroke="white" stroke-width="2"/></g>',
+			abilitypatch: '<path d="m7 3 19 4-1 21-21-4Z" fill="#e7ecfb"/><path d="m9 7 13 2-1 14-13-2Z" fill="#eec24e"/><path d="m12 10 7 1-1 8-7-1Z" fill="#fff5c5"/>',
+			bottlecap: '<path d="m16 2 4 3 5 1 1 5 4 5-4 4-1 5-5 1-4 4-4-4-5-1-1-5-4-4 4-5 1-5 5-1Z" fill="#c0d0df"/><circle cx="16" cy="16" r="8" fill="#edf5ff"/>',
+			goldbottlecap: '<path d="m16 2 4 3 5 1 1 5 4 5-4 4-1 5-5 1-4 4-4-4-5-1-1-5-4-4 4-5 1-5 5-1Z" fill="#e0a12e"/><circle cx="16" cy="16" r="8" fill="#ffe38b"/>',
+			maxrevive: '<path d="m16 2 4 9 10 5-10 4-4 10-5-10-9-4 9-5Z" fill="#edb83c"/><path d="m16 8 3 8-3 8-3-8Z" fill="#fff4aa"/>'
+		};
+		if (special[id]) return '<svg class="rogue-loot-icon" viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="#506781" stroke-width="1.2">' + special[id] + '</svg> ';
+		if (economyIcons.indexOf(id) >= 0) return '<img class="rogue-loot-icon" src="sprites/fantasy-rogue/' + id + '.png" alt="" /> ';
+		var frame = id.indexOf('expcandy') === 0 ? 'candy' : id === 'linkingcord' ? 'cord' :
 			['potion', 'superpotion', 'hyperpotion', 'revive', 'fullheal', 'elixir', 'ether', 'blackaugurite',
-				'bigmushroom', 'nugget', 'bignugget', 'hpup', 'protein', 'iron', 'calcium', 'zinc', 'carbos'].indexOf(item.id) >= 0 ? item.id : '';
+				'bigmushroom', 'nugget', 'bignugget', 'hpup', 'protein', 'iron', 'calcium', 'zinc', 'carbos'].indexOf(id) >= 0 ? id : '';
 		if (frame) return '<span class="rogue-item rogue-item-' + frame + '" aria-hidden="true"></span> ';
-		return typeof Dex.getItemIcon === 'function' ? '<span class="itemicon" aria-hidden="true" style="' +
-			Dex.getItemIcon(typeof item.spritenum === 'number' ? item : dex().items.get(item.icon || item.id)) + '"></span> ' : fa('cube');
+		var sprite = typeof item.spritenum === 'number' ? item : dex().items.get(id);
+		return sprite.spritenum > 0 && typeof Dex.getItemIcon === 'function' ? '<span class="itemicon" aria-hidden="true" style="' +
+			Dex.getItemIcon(sprite) + '"></span> ' : fa({ball: 'circle', emblem: 'diamond', evolution: 'diamond', tonic: 'flask', treasure: 'diamond', crown: 'certificate', held: 'cube'}[item.kind] || 'medkit');
 	}
 	function button(name, value, label, disabled, icon) {
 		return '<button class="button rogue-control" name="' + name + '" value="' + escape(value || '') + '"' +
 			(disabled ? ' disabled' : '') + '>' + (icon || '') + escape(label) + '</button> ';
 	}
 	function memberChoice(name, value, mon, disabled, caption) {
-		var status = mon.hp ? Object.keys(mon.statuses || {}).map(localName).join(' / ') || localName(mon.status || '状态正常') : '已倒下';
 		return '<button class="button rogue-member-choice" name="' + name + '" value="' + escape(value) + '"' +
 			(disabled ? ' disabled' : '') + '><span class="rogue-member-art" aria-hidden="true" style="' +
 			(typeof Dex.getTeambuilderSprite === 'function' ? Dex.getTeambuilderSprite(mon.set) : '') + '"></span>' +
 			'<strong>' + escape(localName(mon.set.species)) + '</strong><span>Lv.' + mon.set.level + ' · HP ' + mon.hp + '/' + mon.maxhp +
-			'</span><small>' + escape(status) + '</small>' + (caption ? '<small>' + escape(caption) + '</small>' : '') + '</button>';
+			'</span><small>' + statusBadges(mon) + '</small>' + (caption ? '<small>' + escape(caption) + '</small>' : '') + '</button>';
+	}
+	function statusBadges(mon) {
+		var ids = mon.hp ? Object.keys(mon.statuses || {}).concat(mon.status || []).filter(function (id, index, values) {
+			return id && values.indexOf(id) === index;
+		}) : ['fnt'];
+		if (!ids.length) return '状态正常';
+		return ids.map(function (id) {
+			var key = id === 'frostbite' ? 'fst' : id;
+			var names = {par: '麻痹', brn: '灼伤', psn: '中毒', tox: '剧毒', slp: '睡眠', frz: '冰冻', fst: '冻伤', fnt: '已倒下'};
+			return '<span class="rogue-status-badge status-' + (names[key] ? key : 'unknown') + '">' +
+				'<span class="rogue-status-spark" aria-hidden="true">' + ({par: 'ϟ', brn: '♨', psn: '·', tox: '·', slp: 'z', frz: '❄', fst: '❄'}[key] || '') + '</span>' +
+				escape(names[key] || localName(id)) + '</span>';
+		}).join(' ');
 	}
 	function extraAbilityIds(mon) {
 		return (mon.extraAbilities || []).map(idOf).filter(function (id, index, ids) {
@@ -1690,6 +1711,23 @@
 			}
 			return html + '</article>';
 		},
+		renderPendingMove: function (run, busy) {
+			var html = '';
+			if ((run.pendingMoves || []).length) {
+				var pending = run.pendingMoves[0];
+				var learner = run.team.filter(function (mon) { return mon.id === pending.member; })[0];
+				if (learner) {
+					html += '<section class="rogue-pending-move" role="region" aria-label="学习到了新的招式需要确认"><h3>学习招式 · ' + escape(localName(learner.set.species)) + '</h3><p><strong>学习到了新的招式，请先确认是否装备。</strong></p>' +
+						'<div class="rogue-new-move">' + moveRow(pending.move) + '</div><p>选择替换位置。替换下来的招式会保留在可更换列表中。</p>';
+					learner.set.moves.forEach(function (move, i) {
+						html += '<div class="rogue-choice-row">' + moveRow(move, learner.pp[i]) +
+							button('learnMove', String(i), '替换此招式', busy) + '</div>';
+					});
+					html += '<p>' + button('learnMove', 'skip', '暂不装备，保留在可更换列表', busy) + '</p></section>';
+				}
+			}
+			return html;
+		},
 		renderFloor: function (run, busy) {
 			var html = '<section class="rogue-floor" aria-label="本层操作">';
 			if (run.preview && run.preview.stage === 'result') {
@@ -1722,19 +1760,6 @@
 				html += '</p><div class="rogue-member-choices">' + run.team.map(function (mon) { return memberChoice('replaceMember', mon.id, mon, busy, '替换这位伙伴'); }).join('') + '</div>';
 				html += '<div class="rogue-partner-actions">' + button('replaceMember', 'release', '放生', busy) + '</div>';
 			}
-			if ((run.pendingMoves || []).length) {
-				var pending = run.pendingMoves[0];
-				var learner = run.team.filter(function (mon) { return mon.id === pending.member; })[0];
-				if (learner) {
-					html += '<section class="rogue-pending-move" role="region" aria-label="学习到了新的招式需要确认"><h3>学习招式 · ' + escape(localName(learner.set.species)) + '</h3><p><strong>学习到了新的招式，请先确认是否装备。</strong></p>' +
-						'<div class="rogue-new-move">' + moveRow(pending.move) + '</div><p>选择替换位置。替换下来的招式会保留在可更换列表中。</p>';
-					learner.set.moves.forEach(function (move, i) {
-						html += '<div class="rogue-choice-row">' + moveRow(move, learner.pp[i]) +
-							button('learnMove', String(i), '替换此招式', busy) + '</div>';
-					});
-					html += '<p>' + button('learnMove', 'skip', '暂不装备，保留在可更换列表', busy) + '</p></section>';
-				}
-			}
 			busy = busy || !!run.pendingCapture || !!(run.pendingMoves || []).length;
 			if (run.phase === 'intro') {
 				html += '<h3>本局塔灵 · ' + escape(run.spirit.name) + '</h3><p>' + escape(run.spirit.text) + '</p>';
@@ -1753,7 +1778,7 @@
 					var selected = this.selectedRoute === node.id;
 					html += '<button type="button" name="chooseRoute" value="' + escape(node.id) + '" class="rogue-route rogue-route-' + routeTone(node.kind) +
 						(selected ? ' is-selected' : '') + '" aria-pressed="' + selected + '"' + (busy ? ' disabled' : '') + '>' + routeVortex() + routeEmblem(node.kind) +
-						'<strong class="rogue-route-type">' + escape(routeNames[node.kind] || kindNames[node.kind] || node.kind) + '</strong><span class="rogue-route-subtitle">' + escape(node.name + recommendedLabel(run, node.id)) + '</span><small>' +
+						'<strong class="rogue-route-type">' + escape(routeNames[node.kind] || kindNames[node.kind] || node.kind) + '</strong><span class="rogue-route-subtitle">' + escape((node.kind === 'trainer' ? '与人对战' : node.name) + recommendedLabel(run, node.id)) + '</span><small>' +
 						(node.biome ? 'Lv.' + (node.biome.level + (run.blessings ? run.blessings.levels : 0)) +
 							(run.blessings && run.blessings.levels ? '（含祝福 +' + run.blessings.levels + '）' : '') + ' · ' + (node.biome.tier * 20) + '～' +
 							(node.biome.tier * 20 + 20) + ' 档宝可梦池' : '') +
@@ -1869,7 +1894,7 @@
 				'<div>' + typeIcons(mon.types || species.types) + '</div>' + (mon.stars > 1 || run.spirit && run.spirit.id === 'zygarde' ? '<b class="rogue-stars">' + '★'.repeat(mon.stars || 1) + '</b>' : '') +
 				'<strong>HP ' + mon.hp + ' / ' + mon.maxhp + '</strong>' +
 				'<meter min="0" max="' + mon.maxhp + '" value="' + mon.hp + '" aria-label="生命值"></meter>' +
-				'<small>' + (mon.hp ? (Object.keys(mon.statuses || {}).length ? Object.keys(mon.statuses).map(function (id) { return escape(localName(id)); }).join(' / ') : escape(localName(mon.status || '状态正常'))) : '已倒下') + '</small></div>';
+				'<small>' + statusBadges(mon) + '</small></div>';
 			var exp = mon.experienceProgress;
 			var ability = dex().abilities ? dex().abilities.get(mon.set.ability || '') : {name: mon.set.ability || ''};
 			var item = this.state.items.filter(function (entry) { return entry.id === idOf(mon.set.item); })[0];
@@ -2238,9 +2263,14 @@
 			if (data.preview) html += '<p class="rogue-caption">本地测试：全部条目完整展示，不改变存档的实际解锁记录。</p>';
 			if (section === 'events' && this.codexReplay) {
 				var replay = this.codexReplay, history = this.codexReplayHistory, page = replay.pages[history[history.length - 1]];
+				var replayPortrait = page.portrait || replay.portrait;
+				var replayArt = replayPortrait ? '<div class="rogue-reading-portrait">' +
+					(portraitFile(replayPortrait) ? '<span class="rogue-companion-portrait" style="' + portraitStyle(replayPortrait) + '"></span>' :
+					'<img alt="" src="' + escape(Dex.resolveAvatar(replayPortrait)) + '" />') + '</div>' : '';
 				return html + button('closeEventReplay', '', '返回事件列表', false, fa('arrow-left')) +
 					'<article class="rogue-event-reading"><span class="rogue-caption">文字回顾 · 可探索不同分支</span><h3>' + escape(replay.title) + '</h3>' +
 					'<p class="rogue-reading-note">不消耗资源、不发放奖励，不影响当前冒险。奖励数量随实际冒险楼层变化。</p>' +
+					replayArt +
 					page.text.map(function (paragraph) { return '<p>' + escape(paragraph) + '</p>'; }).join('') +
 					(page.battleSkipped ? '<p class="rogue-reading-skip">' + fa('forward') + '战斗画面已跳过，可继续查看结果。</p>' : '') +
 					'<div class="rogue-reading-options">' + page.options.map(function (option) {
@@ -2308,7 +2338,11 @@
 			entries = entries.filter(function (entry) { return !query || (localName(entry.name, entryKind) + ' ' + entry.name + (this.codexSearchMode === 'content' ? ' ' + localName(entry.text || '') : '')).toLowerCase().indexOf(query) >= 0; }, this);
 			if (section !== 'blessings' && this.codexFilter !== 'beginner') {
 				var collator = new Intl.Collator('zh-CN-u-co-pinyin', {sensitivity: 'base', ignorePunctuation: true, numeric: true});
-				entries.sort(function (a, b) { return collator.compare(localName(a.name, entryKind), localName(b.name, entryKind)) || collator.compare(a.id, b.id); });
+				entries.sort(function (a, b) {
+					var ar = /^rival:([^:]+):(\d+)$/.exec(a.id), br = /^rival:([^:]+):(\d+)$/.exec(b.id);
+					if (ar && br) return collator.compare(a.name.split('·')[0], b.name.split('·')[0]) || Number(ar[2]) - Number(br[2]);
+					return collator.compare(localName(a.name, entryKind), localName(b.name, entryKind)) || collator.compare(a.id, b.id);
+				});
 				html += '<p class="rogue-caption">按中文名称拼音首字母排列。</p>';
 			}
 			var total = Math.max(1, Math.ceil(entries.length / 12)); this.codexPage = Math.min(this.codexPage, total - 1);
@@ -2358,10 +2392,9 @@
 			}
 			if (!root.clientHeight || key === this.revealedMove) return;
 			this.revealedMove = key;
-			var top = Math.max(0, root.scrollTop + prompt.getBoundingClientRect().top - root.getBoundingClientRect().top - 16);
-			var reducedMotion = globals.matchMedia && globals.matchMedia('(prefers-reduced-motion: reduce)').matches;
-			if (root.scrollTo) root.scrollTo({top: top, behavior: reducedMotion ? 'auto' : 'smooth'});
-			else root.scrollTop = top;
+			// Commit immediately: a saved-state render can cancel a smooth scroll midway.
+			if (root.scrollTo) root.scrollTo({top: 0, behavior: 'instant'});
+			root.scrollTop = 0;
 		},
 		render: function (storyOnly) {
 			var state = this.state;
@@ -2376,6 +2409,7 @@
 			var html = '<div class="pad"><p>' + button('joinRoom', '', '返回首页') + button('refresh', '', '刷新存档') + button('openParty', '', '队伍及背包', false, fa('suitcase')) +
 				button('joinRoom', 'fantasyroguegallery', '通关卡展示', false, fa('clone')) +
 				(this.screen !== 'home' ? button('startMenu', '', '开始页', false, fa('compass')) : '') + '</p>' +
+				(this.screen === 'game' && state && state.run && !state.story && !state.run.companionInvitation ? this.renderPendingMove(state.run, busy) : '') +
 				'<h2>幻想杯肉鸽</h2>' + (state && state.run && state.run.spirit ? '<p class="rogue-spirit-badge">' +
 				button('showSpirit', '', state.run.spirit.name, false, '<span class="picon" style="' + Dex.getPokemonIcon(state.run.spirit.species) + '"></span>') +
 				'<span class="rogue-caption">点击查看本局效果</span></p>' : '<p>原生对战 · 捕捉伙伴 · 逐层成长</p>');

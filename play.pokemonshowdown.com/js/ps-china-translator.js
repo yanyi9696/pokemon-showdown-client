@@ -6993,7 +6993,7 @@ var translations = {
     "Burn": "灼伤",
     "Facade + status": "异常状态",
     "Terrain boost": "场地",
-    "Acrobatics + no item": "没有道具",
+    "Acrobatics + no item": "杂技（未携带道具）",
     "Terrain Pulse boost": "大地波动",
     "Expanding Force + Psychic Terrain boost": "精神场地",
     "Rising Voltage + Electric Terrain boost": "电气场地",
@@ -8573,10 +8573,6 @@ var regex_toanchored_roots = new RegExp(/^The opposing (.+?) is anchored in plac
 var regex_anchored_roots = new RegExp(/^(.+?) is anchored in place with its roots!$/);
 var regex_toUltra_Burst = new RegExp(/^The opposing (.+?) regained its true power through Ultra Burst!$/);
 var regex_Ultra_Burst = new RegExp(/^(.+?) regained its true power through Ultra Burst!$/);
-var regex_from4 = new RegExp(/\(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\)$/);
-var regex_from3 = new RegExp(/\(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\)$/);
-var regex_from2 = new RegExp(/\(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\) \(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\)$/);
-var regex_from = new RegExp(/\(([0-9.]+?)× from ([A-z0-9,'.+ ’:-]+?)\)$/);
 var regex_toProtective_Pads = new RegExp(/^The opposing (.+?) protected itself with its Protective Pads!$/);
 var regex_Protective_Pads = new RegExp(/^(.+?) protected itself with its Protective Pads!$/);
 var regex_toAbility_Shield = new RegExp(/^The opposing (.+?)'s Ability is protected by the effects of its Ability Shield!$/);
@@ -8877,6 +8873,19 @@ Object.entries({
     'Ends Terrain, hazards.': '清除场地状态和场上障碍。'
 }).forEach(function (entry) { translations['Base move affects power. ' + entry[0]] = '威力取决于原招式。' + entry[1]; });
 
+// Native power/accuracy comments may mix official names and Chinese blessing names.
+// Translate each source independently; a fifth effect or a non-Latin name must not block the line.
+function translateBattleModifiers(value) {
+    var result = value.replace(/\(([\d.]+)(?:×|&times;) from ([^()]*(?:\([^()]*\)[^()]*)*)\)/g, function (_, factor, source) {
+        var name = translateRogueName(source.trim()).replace(/^求雨$/, '下雨').replace(/^始源之海$/, '大雨').replace(/^终结之地$/, '大日照');
+        return '（因' + name + '而×' + factor + '）';
+    }).replace(/\(([^()]*) suppressed by ([^()]*)\)/g, function (_, effect, source) {
+        return '（' + translateRogueName(effect) + '受到' + translateRogueName(source) + '抑制）';
+    });
+    if (result !== value) return result.replace(/can't miss/g, '必中').replace(/(\d+(?:\.\d+)?%?) to (?=\d)/g, '$1～');
+    return value;
+}
+
 (function() {
     // 1. 读取本地存储中的语言设置，如果没有设置，则默认开启汉化 ('zh')
     const currentLang = localStorage.getItem('ps_china_lang') || 'zh';
@@ -8920,6 +8929,8 @@ Object.entries({
 
     // ==========================================================
         var t = function (originalStr) {
+        var modifiers = translateBattleModifiers(originalStr);
+        if (modifiers !== originalStr) return modifiers;
         var tmp = originalStr.trim();
         if (translations[tmp])
             return translations[tmp];
@@ -11628,34 +11639,6 @@ Object.entries({
         }
         if (originalStr.match(regex_Ultra_Burst)) {
             return  trans_from_dict(RegExp.$1) + "通过究极爆发现出了新的样子！";
-        }
-        if (originalStr.match(regex_from4)) {
-            if (translations[RegExp.$8]) {
-                originalStr = originalStr.replace(regex_from4, "");
-                originalStr +=  "(因" + translations[RegExp.$2] + "而×" + RegExp.$1 + ") " + "(因" + translations[RegExp.$4] + "而×" + RegExp.$3 + ") " + "(因" + translations[RegExp.$6] + "而×" + RegExp.$5 + ") "+ "(因" + translations[RegExp.$8] + "而×" + RegExp.$7 + ")";
-            }
-            return originalStr.replace("因求雨而×", "因下雨而×").replace("因始源之海而×", "因大雨而×").replace("因终结之地而×", "因大日照而×");
-        }
-        if (originalStr.match(regex_from3)) {
-            if (translations[RegExp.$6]) {
-                originalStr = originalStr.replace(regex_from3, "");
-                originalStr +=  "(因" + translations[RegExp.$2] + "而×" + RegExp.$1 + ") " + "(因" + translations[RegExp.$4] + "而×" + RegExp.$3 + ") " + "(因" + translations[RegExp.$6] + "而×" + RegExp.$5 + ")";
-            }
-            return originalStr.replace("因求雨而×", "因下雨而×").replace("因始源之海而×", "因大雨而×").replace("因终结之地而×", "因大日照而×");
-        }
-        if (originalStr.match(regex_from2)) {
-            if (translations[RegExp.$4]) {
-                originalStr = originalStr.replace(regex_from2, "");
-                originalStr +=  "(因" + translations[RegExp.$2] + "而×" + RegExp.$1 + ") " + "(因" + translations[RegExp.$4] + "而×" + RegExp.$3 + ")";
-            }
-            return originalStr.replace("因求雨而×", "因下雨而×").replace("因始源之海而×", "因大雨而×").replace("因终结之地而×", "因大日照而×");
-        }
-        if (originalStr.match(regex_from)) {
-            if (translations[RegExp.$2]) {
-                originalStr = originalStr.replace(regex_from, "");
-                originalStr +=  "(因" + translations[RegExp.$2].replace("求雨", "下雨").replace("始源之海", "大雨").replace("终结之地", "大日照") + "而×" + RegExp.$1 + ")";
-            }
-            return originalStr;
         }
         if (originalStr.match(regex_toProtective_Pads)) {
             return  "对手的" + trans_from_dict(RegExp.$1) + "因部位护具而保护了自身！";

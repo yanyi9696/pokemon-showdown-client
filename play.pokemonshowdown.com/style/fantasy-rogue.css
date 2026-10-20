@@ -201,13 +201,13 @@
 .fantasyrogue .is-locked .rogue-codex-effect { letter-spacing: .2em; padding: 8px 0; }
 .fantasyrogue .rogue-codex-pagination { display: flex; justify-content: center; gap: 14px; align-items: center; margin-top: 22px; font-size: 12px; }
 .fantasyrogue .rogue-codex-empty { text-align: center; padding: 32px 0; }
-.fantasyrogue .rogue-event-reading { background: #f5faffef; padding: 24px; margin-top: 12px; border: 1px solid #aec6d5; border-radius: 10px; }
-.fantasyrogue .rogue-event-reading > p { margin: 20px 0; line-height: 2; font-size: 18px; }
+.fantasyrogue .rogue-event-reading { background: #f5faffef; padding: 14px; margin-top: 10px; border: 1px solid #aec6d5; border-radius: 10px; }
+.fantasyrogue .rogue-event-reading > p { margin: 9px 0; line-height: 1.65; font-size: 15px; }
 .fantasyrogue .rogue-event-reading .rogue-reading-note { font-size: 12px; color: #637988; padding-bottom: 14px; border-bottom: 1px solid #cedde7; }
 .fantasyrogue .rogue-reading-skip { color: #59718a; font-size: 13px; }
-.fantasyrogue .rogue-reading-options { display: grid; gap: 10px; margin: 24px 0; }
+.fantasyrogue .rogue-reading-options { display: grid; gap: 6px; margin: 12px 0; }
 .fantasyrogue .rogue-reading-options .button { padding: 12px 16px; text-align: left; white-space: normal; font-size: 14px; }
-.fantasyrogue .rogue-event-reading footer { border-top: 1px solid #cedde7; padding-top: 18px; }
+.fantasyrogue .rogue-event-reading footer { border-top: 1px solid #cedde7; padding-top: 10px; }
 @media (max-height: 800px) {
 	.fantasyrogue .rogue-start-menu { margin-top: 10px; padding-top: 8px; padding-bottom: 8px; }
 	.fantasyrogue .rogue-start-heading { margin-bottom: 18px; }
@@ -289,7 +289,6 @@
 .fantasyrogue .rogue-route-blue { --route-color: 76, 109, 197; --route-light: 174, 222, 255; --route-dark: 29, 60, 123; }
 .fantasyrogue .rogue-route-green { --route-color: 46, 136, 108; --route-light: 174, 246, 197; --route-dark: 24, 86, 66; }
 .fantasyrogue .rogue-routes .rogue-route-red { --route-color: 181, 48, 25; --route-light: 246, 170, 124; --route-dark: 130, 35, 17; }
-.fantasyrogue .rogue-routes .rogue-route-orange { --route-color: 195, 77, 0; --route-light: 255, 190, 93; --route-dark: 139, 51, 0; }
 .fantasyrogue .rogue-route-rose { --route-color: 177, 28, 115; --route-light: 248, 145, 205; --route-dark: 125, 16, 82; }
 .fantasyrogue .rogue-routes .rogue-route::before { background: rgba(var(--route-color), .85); }
 .fantasyrogue .rogue-routes .rogue-route.is-selected::before,
@@ -1071,3 +1070,19 @@
 .rogue-resource > small { color: #526d83; }
 .rogue-robe-info { margin: 3px 0; font-size: 13px; }
 .rogue-companion-copy .rogue-resource { margin-top: 5px; }
+
+.rogue-status-badge { display: inline-flex; align-items: center; position: relative; gap: 3px; padding: 1px 6px; margin: 2px 0; border: 1px solid #fff; border-radius: 4px; box-shadow: 0 0 0 1px #8393a7; font: 700 12px/1.35 sans-serif; color: #fff; background: #677386; white-space: nowrap; }
+.rogue-status-badge.status-par { background: #f6cc43; color: #563c00; }
+.rogue-status-badge.status-brn { background: #b8361e; }
+.rogue-status-badge.status-psn, .rogue-status-badge.status-tox { background: #8848a0; }
+.rogue-status-badge.status-slp { background: #506a8d; }
+.rogue-status-badge.status-frz, .rogue-status-badge.status-fst { background: #bbebf3; color: #154b62; }
+.rogue-status-badge.status-fnt { background: #666; }
+.rogue-status-spark { font-size: 13px; line-height: 1; opacity: .85; }
+.rogue-reading-portrait { float: right; margin: 0 0 8px 12px; width: clamp(72px, 24%, 144px); }
+.rogue-reading-portrait > span, .rogue-reading-portrait > img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; }
+.fantasyrogue .rogue-event-reading { display: flow-root; }
+.rogue-reading-options { clear: both; }
+.status-par .rogue-status-spark { animation: rogue-status-flicker 1.6s steps(2, end) infinite; }
+@keyframes rogue-status-flicker { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .status-par .rogue-status-spark { animation: none; } }

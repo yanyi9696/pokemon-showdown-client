@@ -7,6 +7,18 @@ const heading = 'Your team was rejected for the following reasons:';
 const chineseHeading = '您的队伍未通过校验，原因如下：';
 
 describe('Rogue vocabulary contexts', () => {
+	it('translates every mixed-language modifier independently, including more than four sources and suppression', () => {
+		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
+		const input = '143 (2× from Acrobatics + no item) (1.3× from 【登龙】)';
+		assert.equal(context.translateBattleModifiers(input), '143 （因杂技（未携带道具）而×2） （因【登龙】而×1.3）');
+		assert.equal(client(input).paragraph.textContent, context.translateBattleModifiers(input));
+		const many = '60 to 90' + ' (1.2× from Technician)'.repeat(6);
+		const output = context.translateBattleModifiers(many);
+		assert.equal((output.match(/技术高手/g) || []).length, 6); assert(!output.includes('from')); assert(output.startsWith('60～90'));
+		assert.equal(context.translateBattleModifiers("can't miss (Life Orb suppressed by Magic Room)"), '必中 （生命宝珠受到魔法空间抑制）');
+		assert.equal(client(input, 'en').paragraph.textContent, input);
+		assert.equal(context.translateBattleModifiers('Player from Kanto'), 'Player from Kanto');
+	});
 	it('puts Fantasy Mega suffixes after the species and regional form', () => {
 		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
 		for (const [name, expected] of [['Slowbro-Galar-Mega-Fantasy', '幻想呆壳兽-伽勒尔-超级进化'],

@@ -140,6 +140,21 @@ describe('Fantasy Rogue start menu and codex', () => {
 		c.room.codexSearchMode = 'content'; c.room.codexQuery = '道馆';
 		assert(!c.room.renderCodex().includes('<h3>小刚</h3>'));
 	});
+	it('groups every rival chapter from one to eight and keeps the rival portrait in replay pages', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('events');
+		const entries = [8, 4, 7, 1, 5, 2, 6, 3].map(chapter => ({id: 'rival:marnie:' + chapter,
+			name: '与玛俐的相遇·其' + '一二三四五六七八'[chapter - 1], portrait: 'marnie', category: 'adventure', unlocked: true, text: '故事'}));
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'events', entries}); c.room.codexFilter = 'adventure';
+		const html = c.room.renderCodex();
+		let previous = -1;
+		for (let chapter = 1; chapter <= 8; chapter++) {
+			const position = html.indexOf('<h3>与玛俐的相遇·其' + '一二三四五六七八'[chapter - 1]);
+			assert(position > previous); previous = position;
+		}
+		c.room.codexReplay = {title: '与玛俐的相遇·其一', pages: {start: {portrait: 'marnie', text: ['我叫玛俐。'], options: []}}};
+		c.room.codexReplayHistory = ['start'];
+		assert(c.room.renderCodex().includes('rogue-reading-portrait'));
+	});
 	it('sorts translated guide and event names by pinyin before pagination without mutating source entries', () => {
 		const c = client(false, true); c.room.screen = 'guide'; c.room.codexFilter = 'items';
 		const entries = [{id: 'x', name: '伤药', text: ''}, {id: 'z', name: '安抚之铃', text: ''}, {id: 'a', name: '木炭', text: ''}];
@@ -536,6 +551,29 @@ describe('Fantasy Rogue start menu and codex', () => {
 		for (const item of data.items) assert(c.html.includes('sprites/fantasy-rogue/' + item.id + '.png'));
 		assert(c.html.includes('rogue-tera rogue-system-status'));
 		assert(c.html.includes('class="rogue-system-status">超进化：'));
+	});
+	it('draws patch, capsule, crowns and Max Revive icons instead of the missing-item question mark', () => {
+		const c = client(), data = adventure('ready');
+		data.items = ['abilitypatch', 'abilitycapsule', 'bottlecap', 'goldbottlecap', 'maxrevive'].map(id => ({id, name: id, kind: 'crown'}));
+		data.items.push({id: 'roguecephalosporin', icon: 'fullheal', name: '头孢', kind: 'tonic'});
+		data.items.forEach(item => { data.run.bag[item.id] = 1; }); c.room.receiveState(data);
+		const html = c.room.renderBag(data.run, false);
+		assert.equal((html.match(/<svg class="rogue-loot-icon"/g) || []).length, 5);
+		assert(html.includes('rogue-item-fullheal')); assert(!html.includes('class="itemicon"'));
+	});
+	it('uses compact readable badges for every primary and stacked status without duplicating them', () => {
+		const c = client(), data = adventure('ready');
+		for (const status of ['par', 'brn', 'psn', 'tox', 'slp', 'frz', 'fst']) {
+			data.run.team[0].status = status; data.run.team[0].statuses = {[status]: {}};
+			c.room.receiveState(data);
+			assert(c.room.renderParty().includes('rogue-status-badge status-' + status));
+		}
+		data.run.team[0].status = 'par'; data.run.team[0].statuses = {par: {}, brn: {}};
+		c.room.receiveState(data); const html = c.room.renderParty();
+		assert.equal((html.match(/rogue-status-badge status-par/g) || []).length, 1);
+		assert(html.includes('status-brn')); assert(html.includes('aria-hidden="true">ϟ'));
+		data.run.team[0].hp = 0; c.room.receiveState(data);
+		assert(c.room.renderParty().includes('status-fnt')); assert(!c.room.renderParty().includes('status-par'));
 	});
 	it('spans trade-route description across the card instead of the icon column', () => {
 		const c = client(), data = adventure('choose');
@@ -935,7 +973,8 @@ describe('Fantasy Rogue event display and spectator playback', () => {
 		c.room.receiveState(data);
 		for (const type of ['战斗', '精英', '奇遇', '遭遇']) assert(c.room.html.includes('class="rogue-route-type">' + type + '</strong>'));
 		assert(c.room.html.includes('class="rogue-route-subtitle">天空之柱&lt;test></span><small>Lv.3'));
-		assert(c.room.html.includes('rogue-route-orange')); assert(c.room.html.includes('rogue-route-rose'));
+		assert(!c.room.html.includes('rogue-route-orange')); assert(c.room.html.includes('rogue-route-rose'));
+		assert.equal((c.room.html.match(/rogue-route-red/g) || []).length, 3);
 	});
 	it('renders auction budgets, lots and legal tutor choices using normal event commands', () => {
 		const c = client(false, true), data = adventure('event');
@@ -1819,13 +1858,14 @@ describe('Fantasy Rogue client', () => {
 		c.room.$el[0] = root;
 		const pending = move => [{member: data.run.team[0].id, move}];
 		data.run.pendingMoves = pending('vinewhip'); c.room.receiveState(data);
-		assert.equal(calls.length, 1); assert.equal(calls[0].top, 184); assert.equal(calls[0].behavior, 'smooth');
+		assert.equal(calls.length, 1); assert.equal(calls[0].top, 0); assert.equal(calls[0].behavior, 'instant');
 		assert(c.room.html.includes('学习到了新的招式，请先确认'));
+		assert(c.room.html.indexOf('class="rogue-pending-move"') < c.room.html.indexOf('<h2>幻想杯肉鸽'));
 		c.room.render(); c.room.receiveState(data); assert.equal(calls.length, 1);
 		data.run.pendingMoves = pending('growl'); c.room.receiveState(data); assert.equal(calls.length, 2);
 		data.run.pendingMoves = []; c.room.receiveState(data);
 		reduced = true; data.run.pendingMoves = pending('growl'); c.room.receiveState(data);
-		assert.equal(calls.length, 3); assert.equal(calls[2].behavior, 'auto');
+		assert.equal(calls.length, 3); assert.equal(calls[2].top, 0); assert.equal(calls[2].behavior, 'instant');
 		c.room.screen = 'home'; data.run.pendingMoves = pending('tackle'); c.room.receiveState(data);
 		assert.equal(calls.length, 3);
 		c.room.screen = 'game'; root.clientHeight = 0; c.room.render(); assert.equal(calls.length, 3);
