@@ -254,5 +254,105 @@
     "date": "2026-10-20",
     "specification": "N rival dialogue portrait, pale green hair, black and white cap, white shirt and geometric necklace, clean cel shaded anime rendering matched to the existing Marnie sheet.",
     "layout": "Two equal transparent cells: neutral left, warm approving smile right; identical waist-up framing, pose, clothing and silhouette."
+  },
+  {
+    "id": "marnie",
+    "date": "2026-10-20",
+    "revision": "rivals-v2",
+    "tool": "image_gen",
+    "output": "exec-047379aa-52e2-4d34-b83b-cabeae19f70c.png",
+    "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/marnie.png",
+    "specification": "rivals-20261020.json#marnie",
+    "layout": "Two equal transparent cells: normal left, approval right. Character-specific pose shared by both expressions."
+  },
+  {
+    "id": "lana",
+    "date": "2026-10-20",
+    "revision": "rivals-v2",
+    "tool": "image_gen",
+    "output": "exec-b50d887d-cfb0-495a-a3b6-cf8836fe641e.png",
+    "assetPath": "play.pokemonshowdown.com/sprites/rogue-companions/lana.png",
+    "specification": "rivals-20261020.json#lana",
+    "layout": "Two equal transparent cells: normal left, approval right. Character-specific pose shared by both expressions."
+  },
+  {
+    "id": "lillie",
+    "date": "2026-10-20",
+    "revision": "rivals-v2",
+    "tool": "image_gen",
+    "output": "exec-1e8b3603-299e-4dc9-943e-f47af5621d94.png",
+    "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/lillie.png",
+    "specification": "rivals-20261020.json#lillie",
+    "layout": "Two equal transparent cells: normal left, approval right. Character-specific pose shared by both expressions."
+  },
+  {
+    "id": "korrina",
+    "date": "2026-10-20",
+    "revision": "rivals-v2",
+    "tool": "image_gen",
+    "output": "exec-a1ea2978-b907-4fc9-8258-79bd78f59f25.png",
+    "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/korrina.png",
+    "specification": "rivals-20261020.json#korrina",
+    "layout": "Two equal transparent cells: normal left, approval right. Character-specific pose shared by both expressions."
+  },
+  {
+    "id": "nemona",
+    "date": "2026-10-20",
+    "revision": "rivals-v2",
+    "tool": "image_gen",
+    "output": "exec-d7246f93-ff01-4948-bb15-3c13e1f7ca69.png",
+    "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/nemona.png",
+    "specification": "rivals-20261020.json#nemona",
+    "layout": "Two equal transparent cells: normal left, approval right. Character-specific pose shared by both expressions."
+  },
+  {
+    "id": "blue",
+    "date": "2026-10-20",
+    "revision": "rivals-v2",
+    "tool": "image_gen",
+    "output": "exec-922a94a9-ba6e-4407-85bc-c115d6f7e012.png",
+    "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/blue.png",
+    "specification": "rivals-20261020.json#blue",
+    "layout": "Two equal transparent cells: normal left, approval right. Character-specific pose shared by both expressions."
+  },
+  {
+    "id": "gladion",
+    "date": "2026-10-20",
+    "revision": "rivals-v2",
+    "tool": "image_gen",
+    "output": "exec-f735b203-942a-4fb5-9e68-d97f9090085c.png",
+    "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/gladion.png",
+    "specification": "rivals-20261020.json#gladion",
+    "layout": "Two equal transparent cells: normal left, approval right. Character-specific pose shared by both expressions."
+  },
+  {
+    "id": "bede",
+    "date": "2026-10-20",
+    "revision": "rivals-v2",
+    "tool": "image_gen",
+    "output": "exec-ab2479c4-d6d1-44f4-a581-53f83731cb4d.png",
+    "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/bede.png",
+    "specification": "rivals-20261020.json#bede",
+    "layout": "Two equal transparent cells: normal left, approval right. Character-specific pose shared by both expressions."
+  },
+  {
+    "id": "n",
+    "date": "2026-10-20",
+    "revision": "rivals-v2",
+    "tool": "image_gen",
+    "output": "exec-e350c8b7-39e7-4858-9050-3054f57cd92f.png",
+    "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/n.png",
+    "specification": "rivals-20261020.json#n",
+    "layout": "Two equal transparent cells: normal left, approval right. Character-specific pose shared by both expressions."
+  },
+  {
+    "id": "silver",
+    "date": "2026-10-20",
+    "revision": "rivals-v2",
+    "tool": "image_gen",
+    "output": "exec-af24aa12-e5fb-4e7c-8605-661f3b46cb65.png",
+    "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/silver.png",
+    "specification": "rivals-20261020.json#silver",
+    "layout": "Two equal transparent cells: normal left, approval right. Character-specific pose shared by both expressions."
   }
 ]

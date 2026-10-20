@@ -1,0 +1,241 @@
+{
+  "date": "2026-10-20",
+  "tool": "image_gen",
+  "purpose": "Redraw all ten rivals with distinct personality-driven poses; retain two expression frames per character.",
+  "entries": [
+    {
+      "id": "marnie",
+      "name": "玛俐",
+      "folder": "rogue-dialogue",
+      "source": "https://www.pokemon.co.jp/ex/sword_shield/character/190807_02.html",
+      "imageSource": "https://www.pokemon.co.jp/ex/sword_shield/assets/character/character_190807_02.png",
+      "direction": "冷静好胜，略带不善表达的羞涩；侧身松握外套翻领，另一手插口袋；认可时嘴角轻扬。",
+      "referencePath": "F:\\fantasy\\portrait-work\\rivals-20261020\\marnie-official.png",
+      "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/marnie.png",
+      "prompt": "Use case: stylized-concept. Create new Pokemon fan-art for a web game's rival dialogue portraits. Use the supplied official illustration only to identify this character's face, hairstyle, clothing and characteristic accessories; redraw the character in the specified new pose. Crisp confident dark ink outlines, clean two-tone cel shading, restrained small highlights, natural Pokemon anime proportions (not chibi, not an enormous childlike head), no painterly texture or photorealism. Production layout: one transparent 2:1 PNG containing exactly TWO equal SQUARE cells, left NORMAL and right APPROVAL, with no visible divider or labels. Each is a complete head-to-waist portrait, upright at the same scale, with the full head, hair and all hands safely inside its own half, at least 5 percent transparent margin above and on both sides. Bottom is a clean waist crop near the bottom of each cell. Same body pose, costume, silhouette, eye placement and camera angle in the two cells; only the facial expression changes. The two portraits must NOT be mirrored. Keep facial features readable at 132px, hands anatomically coherent. Background is truly transparent; no scenery, other people, Pokemon, decorative sparkles, text, logos or watermark. Subject: Marnie from Pokemon Sword and Shield, original black biker jacket over pink dress, black choker with silver pendant, black angular twin-tail hair with pink ties, turquoise eyes. Character-specific silhouette: body turned a little three-quarter to the viewer's left, shoulders relaxed, one hand lightly pinching her jacket lapel near the collarbone, the other tucked casually into the opposite jacket pocket, weight subtly shifted. Quiet self-possession and hidden competitive spirit rather than shy hands clasped in front. LEFT: composed unsmiling closed mouth, direct watchful eyes, a slightly questioning eyebrow. RIGHT: a small slightly awkward but sincere closed-mouth smile, gentler eyes; still restrained, no big grin or blushing idol pose. Preserve the official angular fringe and side undercut.",
+      "output": "exec-047379aa-52e2-4d34-b83b-cabeae19f70c.png",
+      "dimensions": {
+        "width": 1774,
+        "height": 887
+      },
+      "cacheVersion": "20261020-rivals-v2",
+      "displayBackgroundX": [
+        0,
+        100
+      ],
+      "sha256": "a6694faf399b61c315e0ac5a3d90c01e0d53083ea63741f2caa48cfe056d6e8a"
+    },
+    {
+      "id": "lana",
+      "name": "水莲",
+      "folder": "rogue-companions",
+      "source": "https://www.pokemon.co.jp/ex/sun_moon/character/05.html",
+      "imageSource": "https://www.pokemon.co.jp/ex/sun_moon/common/images/character/05/portrait.png",
+      "direction": "安静可靠，带一点一本正经的幽默；双手照看钓竿与卷线器，微侧头；认可时温和而略显得意。",
+      "referencePath": "F:\\fantasy\\portrait-work\\rivals-20261020\\lana-official.png",
+      "assetPath": "play.pokemonshowdown.com/sprites/rogue-companions/lana.png",
+      "prompt": "Use case: stylized-concept. Create new Pokemon fan-art for a web game's rival dialogue portraits. Use the supplied official illustration only to identify this character's face, hairstyle, clothing and characteristic accessories; redraw the character in the specified new pose. Crisp confident dark ink outlines, clean two-tone cel shading, restrained small highlights, natural Pokemon anime proportions (not chibi, not an enormous childlike head), no painterly texture or photorealism. Production layout: one transparent 2:1 PNG containing exactly TWO equal SQUARE cells, left NORMAL and right APPROVAL, with no visible divider or labels. Each is a complete head-to-waist portrait, upright at the same scale, with the full head, hair and all hands safely inside its own half, at least 5 percent transparent margin above and on both sides. Bottom is a clean waist crop near the bottom of each cell. Same body pose, costume, silhouette, eye placement and camera angle in the two cells; only the facial expression changes. The two portraits must NOT be mirrored. Keep facial features readable at 132px, hands anatomically coherent. Background is truly transparent; no scenery, other people, Pokemon, decorative sparkles, text, logos or watermark. Subject: Lana from Pokemon Sun and Moon. Blue pointed bob, tan lattice hair ornament, blue eyes, white sleeveless sailor top with blue collar and necktie, blue fishing trousers at the waist. Use her canonical youthful proportions, no aging-up. Character-specific pose: chest in a gentle three-quarter turn to viewer's right, elbows low and relaxed, one hand holding the grip of her fishing rod just below chest height and the other resting on the small reel. A SHORT upper section of the slender rod runs diagonally beside her shoulder, contained inside the frame; no giant rod across her face. Head slightly inclined as if listening patiently. LEFT: attentive calm deadpan closed-mouth face, steady eyes. RIGHT: subtle playful knowing closed-mouth smile with softened eyes, the quiet satisfaction of an experienced fisher. This is an ordinary friendly game portrait.",
+      "output": "exec-b50d887d-cfb0-495a-a3b6-cf8836fe641e.png",
+      "dimensions": {
+        "width": 1774,
+        "height": 887
+      },
+      "cacheVersion": "20261020-rivals-v2",
+      "displayBackgroundX": [
+        0,
+        100
+      ],
+      "sha256": "b5a1634efb926ac229f2fd3b272f8a24940ed1a63ac66a85b39a3925f00fea63"
+    },
+    {
+      "id": "lillie",
+      "name": "莉莉艾",
+      "folder": "rogue-dialogue",
+      "source": "https://www.pokemon-card.com/ex/sv9/index.html",
+      "imageSource": "https://www.pokemon-card.com/ex/sv9/assets/images/trpoke-2-img-1.png",
+      "direction": "采用旅行服与高马尾；双手扶住背包肩带，表现温柔又努力鼓起勇气。",
+      "referencePath": "F:\\fantasy\\portrait-work\\rivals-20261020\\lillie-official.png",
+      "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/lillie.png",
+      "prompt": "Use case: stylized-concept. Create new Pokemon fan-art for a web game's rival dialogue portraits. Use the supplied official illustration only to identify this character's face, hairstyle, clothing and characteristic accessories; redraw the character in the specified new pose. Crisp confident dark ink outlines, clean two-tone cel shading, restrained small highlights, natural Pokemon anime proportions (not chibi, not an enormous childlike head), no painterly texture or photorealism. Production layout: one transparent 2:1 PNG containing exactly TWO equal SQUARE cells, left NORMAL and right APPROVAL, with no visible divider or labels. Each is a complete head-to-waist portrait, upright at the same scale, with the full head, hair and all hands safely inside its own half, at least 5 percent transparent margin above and on both sides. Bottom is a clean waist crop near the bottom of each cell. Same body pose, costume, silhouette, eye placement and camera angle in the two cells; only the facial expression changes. The two portraits must NOT be mirrored. Keep facial features readable at 132px, hands anatomically coherent. Background is truly transparent; no scenery, other people, Pokemon, decorative sparkles, text, logos or watermark. Subject: Lillie in her Z-powered travel outfit from Pokemon Sun and Moon / Ultra Sun and Moon, as shown in the reference. Pale blonde hair in a high ponytail with braided base, straight bangs and face-framing sections, bright green eyes, modest short-sleeved white travel blouse with broad pale-blue sailor collar, pink backpack. The official blouse has a small central collar opening and NO large schoolgirl chest bow. Character-specific pose: upright but slightly angled toward viewer's left; one hand gently holds a backpack shoulder strap, the other makes a small determined encouraging fist in front of the upper chest, shoulders a touch tucked but chin lifted. Convey a gentle thoughtful girl finding courage, not a sultry model or aggressive fighter. LEFT: earnest attentive closed mouth, a hint of nervous resolve in the brows. RIGHT: warm relieved open smile, still gentle, bright eyes. Both hands clearly visible and different from a generic hands-clasped pose.",
+      "output": "exec-1e8b3603-299e-4dc9-943e-f47af5621d94.png",
+      "dimensions": {
+        "width": 1774,
+        "height": 887
+      },
+      "cacheVersion": "20261020-rivals-v2",
+      "displayBackgroundX": [
+        2.2,
+        100
+      ],
+      "sha256": "964fee09cda2fab49c2fefb8031eaeea19e7ded298d9cf91dc56392793029041"
+    },
+    {
+      "id": "korrina",
+      "name": "可尔尼",
+      "folder": "rogue-dialogue",
+      "source": "https://pokemonmasters-game.com/en-US/buddies",
+      "imageSource": "https://www.pokexperto.net/3ds/pokemonxy/personajes/corelia.png",
+      "direction": "运动员式蓄势姿态，身体前倾，一拳抬起、一手调整超级手套，笑容爽朗。",
+      "referencePath": "F:\\fantasy\\portrait-work\\rivals-20261020\\korrina-official.png",
+      "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/korrina.png",
+      "prompt": "Use case: stylized-concept. Create new Pokemon fan-art for a web game's rival dialogue portraits. Use the supplied official illustration only to identify this character's face, hairstyle, clothing and characteristic accessories; redraw the character in the specified new pose. Crisp confident dark ink outlines, clean two-tone cel shading, restrained small highlights, natural Pokemon anime proportions (not chibi, not an enormous childlike head), no painterly texture or photorealism. Production layout: one transparent 2:1 PNG containing exactly TWO equal SQUARE cells, left NORMAL and right APPROVAL, with no visible divider or labels. Each is a complete head-to-waist portrait, upright at the same scale, with the full head, hair and all hands safely inside its own half, at least 5 percent transparent margin above and on both sides. Bottom is a clean waist crop near the bottom of each cell. Same body pose, costume, silhouette, eye placement and camera angle in the two cells; only the facial expression changes. The two portraits must NOT be mirrored. Keep facial features readable at 132px, hands anatomically coherent. Background is truly transparent; no scenery, other people, Pokemon, decorative sparkles, text, logos or watermark. Subject: Korrina from Pokemon X and Y, ORIGINAL XY costume, white helmet with red markings, very long cream-blonde ponytail, blue-grey eyes, white and red sleeveless athletic tunic. Character-specific pose: energetic compact skater/fighter stance seen from waist up, torso leaning forward slightly with a lively diagonal shoulder line, left forearm raised diagonally across chest showing the Mega Glove's round stone, right hand adjusting the glove cuff. Her ponytail sweeps outward behind her within the cell. Show athletic confidence and springy movement, not a demure stationary pose. LEFT: focused ready-for-action eyes and confident closed mouth. RIGHT: broad cheerful open-mouth grin with bright eyes, delighted by a good match. Maintain same helmet, hands, glove and body pose in both frames; keep all fingertips visible.",
+      "output": "exec-a1ea2978-b907-4fc9-8258-79bd78f59f25.png",
+      "dimensions": {
+        "width": 1774,
+        "height": 887
+      },
+      "cacheVersion": "20261020-rivals-v2",
+      "framingEdit": {
+        "input": "exec-091ec4bd-fc6f-403b-b3c2-5a9bfcce25bb.png",
+        "prompt": "Edit the provided two-frame transparent Pokemon fan-art sprite sheet for production framing only. Preserve the existing drawing style, character identity, colors, clothes, distinctive pose and two different facial expressions. Keep a transparent 2:1 sheet containing TWO equal square cells: LEFT normal, RIGHT approval. Reframe each figure at roughly 85 percent of its current size; the maximum width of ALL visible parts, including hair and hands, must fit in the central 84 percent of EACH square cell. Leave 8 percent completely empty transparent margin on the left AND right of EACH cell and 6 percent above the highest hair tip. Do not fill the sheet edge to edge. Center each full silhouette horizontally in its own square at exactly the same relative position. Match scale, head position, eye height and body contours between both cells; only facial expression changes. Crop at the hips below both fully visible hands. No body part, hand, hair or accessory may cross the midpoint or outer edges. No lettering, extra objects, divider, border, background or contact shadow. This is a layout refinement, not a new costume or pose. Korrina's huge ponytail currently crosses the center boundary and is cropped at the right edge. Fit each entire ponytail safely into its own cell. Preserve the athletic glove-adjusting stance, helmet, hands, outfit, focused normal expression and cheerful approving expression."
+      },
+      "displayBackgroundX": [
+        4.12,
+        97.75
+      ],
+      "sha256": "1a53d624631c6c2737f8e5ac95b35b59ae643cf966f79b801e4c0e66b0bdb44e"
+    },
+    {
+      "id": "nemona",
+      "name": "妮莫",
+      "folder": "rogue-dialogue",
+      "source": "https://www.pokemon.co.jp/ex/sv/ja/character/220601_02/",
+      "imageSource": "https://www.pokemon.co.jp/ex/sv/assets/img/character/220601_02/visual.png",
+      "direction": "开朗热爱对战；微向前探身，护臂手托球发出邀请，另一手叉腰；认可时兴奋大笑。",
+      "referencePath": "F:\\fantasy\\portrait-work\\rivals-20261020\\nemona-official.png",
+      "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/nemona.png",
+      "prompt": "Use case: stylized-concept. Create new Pokemon fan-art for a web game's rival dialogue portraits. Use the supplied official illustration only to identify this character's face, hairstyle, clothing and characteristic accessories; redraw the character in the specified new pose. Crisp confident dark ink outlines, clean two-tone cel shading, restrained small highlights, natural Pokemon anime proportions (not chibi, not an enormous childlike head), no painterly texture or photorealism. Production layout: one transparent 2:1 PNG containing exactly TWO equal SQUARE cells, left NORMAL and right APPROVAL, with no visible divider or labels. Each is a complete head-to-waist portrait, upright at the same scale, with the full head, hair and all hands safely inside its own half, at least 5 percent transparent margin above and on both sides. Bottom is a clean waist crop near the bottom of each cell. Same body pose, costume, silhouette, eye placement and camera angle in the two cells; only the facial expression changes. The two portraits must NOT be mirrored. Keep facial features readable at 132px, hands anatomically coherent. Background is truly transparent; no scenery, other people, Pokemon, decorative sparkles, text, logos or watermark. Subject: Nemona from Pokemon Scarlet, recognizable tan complexion, amber eyes, black high ponytail with green front lock, white short-sleeved collared academy shirt, orange tie, orange shorts visible at waist, dark shoulder bag strap, RED AND BLACK supportive brace covering her RIGHT forearm. Character-specific pose: friendly eager forward lean, right braced elbow bent and right palm holding a red-and-white Poke Ball forward at chest height (moderate foreshortening), other hand confidently on her hip. Upright energetic ponytail, shoulders open. Convey accomplished friendly athlete and excited battle mentor. LEFT: alert expectant expression with a small confident smile, raised brows, ready to ask for a battle. RIGHT: exuberant delighted open smile, sparkling but natural eyes, clear recognition of a worthy opponent. Do not make both expressions a generic placid little smile.",
+      "output": "exec-d7246f93-ff01-4948-bb15-3c13e1f7ca69.png",
+      "dimensions": {
+        "width": 1774,
+        "height": 887
+      },
+      "cacheVersion": "20261020-rivals-v2",
+      "displayBackgroundX": [
+        0,
+        100
+      ],
+      "sha256": "8c18f07eb0fce44ffd65b30302837add58b40e21737cb220d3f99835c3cf288b"
+    },
+    {
+      "id": "blue",
+      "name": "青绿",
+      "folder": "rogue-dialogue",
+      "source": "https://bulbapedia.bulbagarden.net/wiki/Blue_(game)",
+      "imageSource": "https://archives.bulbagarden.net/media/upload/d/db/FireRed_LeafGreen_Blue.png",
+      "direction": "自信的劲敌气势；略扬下巴，一臂环胸、另一手在肩旁举球；认可时带竞争意味地挑起嘴角。",
+      "referencePath": "F:\\fantasy\\portrait-work\\rivals-20261020\\blue-official.png",
+      "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/blue.png",
+      "prompt": "Use case: stylized-concept. Create new Pokemon fan-art for a web game's rival dialogue portraits. Use the supplied official illustration only to identify this character's face, hairstyle, clothing and characteristic accessories; redraw the character in the specified new pose. Crisp confident dark ink outlines, clean two-tone cel shading, restrained small highlights, natural Pokemon anime proportions (not chibi, not an enormous childlike head), no painterly texture or photorealism. Production layout: one transparent 2:1 PNG containing exactly TWO equal SQUARE cells, left NORMAL and right APPROVAL, with no visible divider or labels. Each is a complete head-to-waist portrait, upright at the same scale, with the full head, hair and all hands safely inside its own half, at least 5 percent transparent margin above and on both sides. Bottom is a clean waist crop near the bottom of each cell. Same body pose, costume, silhouette, eye placement and camera angle in the two cells; only the facial expression changes. The two portraits must NOT be mirrored. Keep facial features readable at 132px, hands anatomically coherent. Background is truly transparent; no scenery, other people, Pokemon, decorative sparkles, text, logos or watermark. Subject: Blue, the Pokemon rival in his FireRed / LeafGreen black short-sleeved collared shirt and purple trousers, spiky brown-orange hair and purple wristbands. Do not depict the anime Gary costume. Character-specific pose: three-quarter torso angled to viewer's right, chin slightly raised, one forearm resting horizontally across the lower chest while the other elbow rests lightly on it, holding a Poke Ball beside his shoulder. Confident relaxed posture, sharp narrow eyes and distinct stronger angular face, not a round-faced timid child. LEFT: appraising competitive gaze with one eyebrow lifted and a restrained self-assured half smirk. RIGHT: clearly amused approving grin, brows relaxing but keeping his proud rival attitude. Hands and Poke Ball fully contained within each cell.",
+      "output": "exec-922a94a9-ba6e-4407-85bc-c115d6f7e012.png",
+      "dimensions": {
+        "width": 1774,
+        "height": 887
+      },
+      "cacheVersion": "20261020-rivals-v2",
+      "displayBackgroundX": [
+        12.46,
+        100
+      ],
+      "sha256": "e85ef7c05bc24dddd8e420d6fa649af530049970efdbcdfa8665fd13999af0c1"
+    },
+    {
+      "id": "gladion",
+      "name": "格拉吉欧",
+      "folder": "rogue-dialogue",
+      "source": "https://www.pokemon.co.jp/ex/sun_moon/character/13.html",
+      "imageSource": "https://www.pokemon.co.jp/ex/sun_moon/common/images/character/13/portrait.png",
+      "direction": "寡言、警戒而重视伙伴；一手握住另一侧手腕，身形收拢，认可时只是缓和目光和轻微笑意。",
+      "referencePath": "F:\\fantasy\\portrait-work\\rivals-20261020\\gladion-official.png",
+      "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/gladion.png",
+      "prompt": "Use case: stylized-concept. Create new Pokemon fan-art for a web game's rival dialogue portraits. Use the supplied official illustration only to identify this character's face, hairstyle, clothing and characteristic accessories; redraw the character in the specified new pose. Crisp confident dark ink outlines, clean two-tone cel shading, restrained small highlights, natural Pokemon anime proportions (not chibi, not an enormous childlike head), no painterly texture or photorealism. Production layout: one transparent 2:1 PNG containing exactly TWO equal SQUARE cells, left NORMAL and right APPROVAL, with no visible divider or labels. Each is a complete head-to-waist portrait, upright at the same scale, with the full head, hair and all hands safely inside its own half, at least 5 percent transparent margin above and on both sides. Bottom is a clean waist crop near the bottom of each cell. Same body pose, costume, silhouette, eye placement and camera angle in the two cells; only the facial expression changes. The two portraits must NOT be mirrored. Keep facial features readable at 132px, hands anatomically coherent. Background is truly transparent; no scenery, other people, Pokemon, decorative sparkles, text, logos or watermark. Subject: Gladion from Pokemon Sun and Moon. Pale blond heavy angular fringe covers one eye, close-shaved side, green visible eye, ear studs, black torn hoodie with angular red/white chest mark and orange-red belt pouch. Character-specific pose: body angled to viewer's left, shoulders slightly tense, one forearm raised diagonally with loosely curled hand close to the chest, opposite hand gripping that wrist lower down, conveying guarded concentration and restraint. Keep the full visible eye unobstructed and use sharp face lines. LEFT: serious closed mouth, intense level gaze, controlled rather than angry shouting. RIGHT: the smallest one-corner approving smile, softened visible eye and relaxed brow, subtle trust from a normally taciturn rival. No broad cheerful grin, blush or coy idol styling.",
+      "output": "exec-f735b203-942a-4fb5-9e68-d97f9090085c.png",
+      "dimensions": {
+        "width": 1774,
+        "height": 887
+      },
+      "cacheVersion": "20261020-rivals-v2",
+      "displayBackgroundX": [
+        4.17,
+        100
+      ],
+      "sha256": "4e222553946dd65d873f4e7975ac6ddf99bddeec0d48ef1e66c3ed134dfa24a0"
+    },
+    {
+      "id": "bede",
+      "name": "彼特",
+      "folder": "rogue-dialogue",
+      "source": "https://www.pokemon.co.jp/ex/sword_shield/character/190807_01.html",
+      "imageSource": "https://www.pokemon.co.jp/ex/sword_shield/assets/character/character_190807_01.png",
+      "direction": "保持卷发、高领长外套与骄傲神态；侧过肩打量对手，一手轻抬作评判手势，另一手背在身后。",
+      "referencePath": "F:\\fantasy\\portrait-work\\rivals-20261020\\bede-official.png",
+      "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/bede.png",
+      "prompt": "Use case: stylized-concept. Create new Pokemon fan-art for a web game's rival dialogue portraits. Use the supplied official illustration only to identify this character's face, hairstyle, clothing and characteristic accessories; redraw the character in the specified new pose. Crisp confident dark ink outlines, clean two-tone cel shading, restrained small highlights, natural Pokemon anime proportions (not chibi, not an enormous childlike head), no painterly texture or photorealism. Production layout: one transparent 2:1 PNG containing exactly TWO equal SQUARE cells, left NORMAL and right APPROVAL, with no visible divider or labels. Each is a complete head-to-waist portrait, upright at the same scale, with the full head, hair and all hands safely inside its own half, at least 5 percent transparent margin above and on both sides. Bottom is a clean waist crop near the bottom of each cell. Same body pose, costume, silhouette, eye placement and camera angle in the two cells; only the facial expression changes. The two portraits must NOT be mirrored. Keep facial features readable at 132px, hands anatomically coherent. Background is truly transparent; no scenery, other people, Pokemon, decorative sparkles, text, logos or watermark. Subject: Bede from Pokemon Sword and Shield in his ORIGINAL purple high-collared long coat, pale voluminous curly hair, violet eyes, gold wrist accessory. This is the proud young male rival, not an elderly woman and not his later pink gym uniform. Character-specific pose: torso in a pronounced three-quarter turn, looking back toward the viewer over his nearer shoulder, chin slightly up; nearer hand raised at chest height, palm up with fingers lightly curled in an elegant 'well then?' evaluative gesture, other arm behind his back. Distinct curly hair silhouette. LEFT: skeptical narrowed eyes, closed mouth, dignified confident appraisal. RIGHT: a small satisfied and grudgingly respectful smile, still proud and composed rather than suddenly sweet. Preserve lean youthful proportions, no generic huge sparkling eyes.",
+      "output": "exec-ab2479c4-d6d1-44f4-a581-53f83731cb4d.png",
+      "dimensions": {
+        "width": 1774,
+        "height": 887
+      },
+      "cacheVersion": "20261020-rivals-v2",
+      "displayBackgroundX": [
+        0,
+        100
+      ],
+      "sha256": "54eb4702dee4f2380165e20c439a758423ddc0de40f717ac733788f673ed2a80"
+    },
+    {
+      "id": "n",
+      "name": "N",
+      "folder": "rogue-dialogue",
+      "source": "https://bulbapedia.bulbagarden.net/wiki/N",
+      "imageSource": "https://archives.bulbagarden.net/media/upload/9/9e/Black_White_N.png",
+      "direction": "沉静、思辨且愿意倾听；轻俯身摊开一只手，另一手放在胸前；认可时是舒展而温和的笑。",
+      "referencePath": "F:\\fantasy\\portrait-work\\rivals-20261020\\n-official.png",
+      "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/n.png",
+      "prompt": "Use case: stylized-concept. Create new Pokemon fan-art for a web game's rival dialogue portraits. Use the supplied official illustration only to identify this character's face, hairstyle, clothing and characteristic accessories; redraw the character in the specified new pose. Crisp confident dark ink outlines, clean two-tone cel shading, restrained small highlights, natural Pokemon anime proportions (not chibi, not an enormous childlike head), no painterly texture or photorealism. Production layout: one transparent 2:1 PNG containing exactly TWO equal SQUARE cells, left NORMAL and right APPROVAL, with no visible divider or labels. Each is a complete head-to-waist portrait, upright at the same scale, with the full head, hair and all hands safely inside its own half, at least 5 percent transparent margin above and on both sides. Bottom is a clean waist crop near the bottom of each cell. Same body pose, costume, silhouette, eye placement and camera angle in the two cells; only the facial expression changes. The two portraits must NOT be mirrored. Keep facial features readable at 132px, hands anatomically coherent. Background is truly transparent; no scenery, other people, Pokemon, decorative sparkles, text, logos or watermark. Subject: N from Pokemon Black and White. Young adult male with long layered sage-green hair tied in a low ponytail, black-and-white cap, white casual SHIRT over black high-neck undershirt (not a lab coat), planet-shaped pendant, geometric wrist bracelets, cube charm on chain at beige trouser waist. Character-specific pose: long relaxed torso in a mild three-quarter turn to viewer's right, leaning slightly closer as if listening to a Pokemon offscreen; one arm extends at waist-to-chest height with open upward palm, the other hand rests lightly over his chest beside the pendant. Calm thoughtful eyes, elongated face and natural mature anime proportions; NOT a childlike round face. LEFT: contemplative serious but gentle expression, lips slightly parted in thought. RIGHT: quiet open-hearted closed-mouth smile, softer eyes as understanding dawns. Avoid theatrical villain grin or generic symmetrical hands clasped.",
+      "output": "exec-e350c8b7-39e7-4858-9050-3054f57cd92f.png",
+      "dimensions": {
+        "width": 1774,
+        "height": 887
+      },
+      "cacheVersion": "20261020-rivals-v2",
+      "framingEdit": {
+        "input": "exec-146dcac9-a491-4d57-a8cf-038fd0b3184f.png",
+        "prompt": "Edit the provided two-frame transparent Pokemon fan-art sprite sheet for production framing only. Preserve the existing drawing style, character identity, colors, clothes, distinctive pose and two different facial expressions. Keep a transparent 2:1 sheet containing TWO equal square cells: LEFT normal, RIGHT approval. Reframe each figure at roughly 85 percent of its current size; the maximum width of ALL visible parts, including hair and hands, must fit in the central 84 percent of EACH square cell. Leave 8 percent completely empty transparent margin on the left AND right of EACH cell and 6 percent above the highest hair tip. Do not fill the sheet edge to edge. Center each full silhouette horizontally in its own square at exactly the same relative position. Match scale, head position, eye height and body contours between both cells; only facial expression changes. Crop at the hips below both fully visible hands. No body part, hand, hair or accessory may cross the midpoint or outer edges. No lettering, extra objects, divider, border, background or contact shadow. This is a layout refinement, not a new costume or pose. N's long green hair currently bleeds from the left half into the right half and is cut off at the right image edge. Reframe both complete hair silhouettes safely inside their respective cells. Preserve the thoughtful listening pose, extended open hand, long face, cap, shirt and necklace."
+      },
+      "displayBackgroundX": [
+        -0.96,
+        94.87
+      ],
+      "sha256": "93bc9a003756aa0e20e081b21e1bcfcc441a0a2c5edaf7ea2acbec5637b0db57"
+    },
+    {
+      "id": "silver",
+      "name": "银",
+      "folder": "rogue-dialogue",
+      "source": "https://bulbapedia.bulbagarden.net/wiki/Silver_(game)",
+      "imageSource": "https://storage.moegirl.org.cn/moegirl/commons/b/b2/%E5%B0%8F%E9%93%B6_HGSS.png",
+      "direction": "冷峻倔强、好胜而疏离；身体侧转、低持精灵球，另一手插口袋；认可时含蓄释怀。",
+      "referencePath": "F:\\fantasy\\portrait-work\\rivals-20261020\\silver-official.png",
+      "assetPath": "play.pokemonshowdown.com/sprites/rogue-dialogue/silver.png",
+      "prompt": "Use case: stylized-concept. Create new Pokemon fan-art for a web game's rival dialogue portraits. Use the supplied official illustration only to identify this character's face, hairstyle, clothing and characteristic accessories; redraw the character in the specified new pose. Crisp confident dark ink outlines, clean two-tone cel shading, restrained small highlights, natural Pokemon anime proportions (not chibi, not an enormous childlike head), no painterly texture or photorealism. Production layout: one transparent 2:1 PNG containing exactly TWO equal SQUARE cells, left NORMAL and right APPROVAL, with no visible divider or labels. Each is a complete head-to-waist portrait, upright at the same scale, with the full head, hair and all hands safely inside its own half, at least 5 percent transparent margin above and on both sides. Bottom is a clean waist crop near the bottom of each cell. Same body pose, costume, silhouette, eye placement and camera angle in the two cells; only the facial expression changes. The two portraits must NOT be mirrored. Keep facial features readable at 132px, hands anatomically coherent. Background is truly transparent; no scenery, other people, Pokemon, decorative sparkles, text, logos or watermark. Subject: Silver from Pokemon HeartGold and SoulSilver. Shoulder-length vivid red hair with pointed swept fringe and outward neck tufts, grey eyes, dark indigo high-collared zip jacket with red piping and cuffs, purple trousers. Character-specific pose: body distinctly side-on toward viewer's left while face turns back to meet the viewer, one hand in jacket pocket, the other holding a red-and-white Poke Ball firmly and LOW beside his waist; slight forward shoulder, tense angular line. Ball and hand must remain above the waist crop. Keep his sharp serious features rather than giving him Blue's cocky raised-ball pose. LEFT: stern focused gaze, lowered brows, closed flat mouth. RIGHT: restrained slight half-smile of hard-won respect, a softened brow without losing his aloof resolve. No broad happy grin, no bashful pose.",
+      "output": "exec-af24aa12-e5fb-4e7c-8605-661f3b46cb65.png",
+      "dimensions": {
+        "width": 1774,
+        "height": 887
+      },
+      "cacheVersion": "20261020-rivals-v2",
+      "displayBackgroundX": [
+        3.72,
+        100
+      ],
+      "sha256": "8a01e37966b750a91878abda309f515d7832a1046053a1cefd4c7284ffd9085b"
+    }
+  ],
+  "validation": {
+    "imageFiles": "All 10 PNGs are 1774 x 887 RGBA with transparent backgrounds and separate normal/approval frames.",
+    "framing": "No opaque neighboring-frame pixels enter either viewport after CSS alignment; horizontal silhouette-center mismatch is below 0.03 source pixels.",
+    "review": "All final sheets visually inspected. Browser preview was unavailable because the browser tool blocks local file URLs.",
+    "client": "146 existing Fantasy Rogue client tests passed. Build completed; optional news refresh skipped because PHP is unavailable."
+  }
+}

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>幻想杯肉鸽 · 劲敌立绘预览</title>
+<link rel="stylesheet" href="../../style/fantasy-rogue.css">
+<style>
+* { box-sizing:border-box; }
+body { margin:0; background:#e7eff3; color:#243c4e; font:15px/1.6 system-ui,"Microsoft YaHei",sans-serif; }
+main { max-width:1240px; margin:0 auto; padding:24px; }
+h1 { margin:0 0 6px; font-size:26px; }
+.intro { margin:0 0 14px; color:#506b7b; }
+.toolbar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+.toolbar button { padding:7px 15px; border:1px solid #819eb2; border-radius:7px; background:#f7fcff; color:#28516a; cursor:pointer; font:inherit; }
+.toolbar button[aria-pressed="true"] { background:#285675; color:white; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+.card { min-width:0; border:1px solid #adc1cf; border-top:4px solid #4b7894; border-radius:9px; background:#f7fbfd; padding:14px; }
+.card h2 { margin:0; font-size:19px; }
+.portrait { width:100%; height:auto; max-width:260px; aspect-ratio:1; margin:8px auto 0; border-radius:0; }
+.portrait:focus-visible { outline:2px solid #537e9b; outline-offset:3px; }
+.expression { text-align:center; margin:0; font-size:12px; color:#5f788a; }
+.direction { font-size:14px; min-height:3.2em; margin:8px 0; }
+footer { display:flex; justify-content:space-between; gap:8px; border-top:1px solid #d6e2e9; padding-top:8px; font-size:12px; }
+a { color:#27698b; text-underline-offset:3px; }
+.notes { margin-top:18px; font-size:13px; color:#526d7e; }
+body.dark { background:#172735; color:#e1edf4; }
+body.dark .card { background:#2c4253; border-color:#647e90; }
+body.dark .intro, body.dark .expression, body.dark .notes { color:#b6cbd8; }
+body.dark a { color:#a5d6f0; }
+@media(max-width:540px) { main { padding:14px; } .grid { grid-template-columns:1fr; } h1 { font-size:22px; } }
+</style>
+</head>
+<body>
+<main>
+<h1>幻想杯肉鸽 · 十位劲敌</h1>
+<p class="intro">每位劲敌都有独立动作设计。点击立绘切换常态／认可，也可统一切换，查看表情与画风。</p>
+<div class="toolbar">
+<button type="button" data-mode="normal" aria-pressed="true">全部常态</button>
+<button type="button" data-mode="approval" aria-pressed="false">全部认可</button>
+<button type="button" id="background" aria-pressed="false">深色背景</button>
+</div>
+<section class="grid" aria-label="十位劲敌立绘">
+<article class="card">
+<h2>玛俐</h2>
+<button class="rogue-companion-portrait portrait" style="background-image:url(marnie.png?v=20261020-rivals-v2);--rogue-portrait-normal-x:0%;--rogue-portrait-approval-x:100%;" aria-label="玛俐，点击切换表情" aria-pressed="false"></button>
+<p class="expression">常态</p>
+<p class="direction">轻握衣领、另一手插袋，冷静好胜，认可时含蓄微笑。</p>
+<footer><a href="https://www.pokemon.co.jp/ex/sword_shield/character/190807_02.html" target="_blank" rel="noopener">人物参考</a><a href="marnie.png?v=20261020-rivals-v2" target="_blank" rel="noopener">完整双帧图</a></footer>
+</article>
+<article class="card">
+<h2>水莲</h2>
+<button class="rogue-companion-portrait portrait" style="background-image:url(../rogue-companions/lana.png?v=20261020-rivals-v2);--rogue-portrait-normal-x:0%;--rogue-portrait-approval-x:100%;" aria-label="水莲，点击切换表情" aria-pressed="false"></button>
+<p class="expression">常态</p>
+<p class="direction">双手照看钓竿与卷线器，安静可靠，带一点得意。</p>
+<footer><a href="https://www.pokemon.co.jp/ex/sun_moon/character/05.html" target="_blank" rel="noopener">人物参考</a><a href="../rogue-companions/lana.png?v=20261020-rivals-v2" target="_blank" rel="noopener">完整双帧图</a></footer>
+</article>
+<article class="card">
+<h2>莉莉艾</h2>
+<button class="rogue-companion-portrait portrait" style="background-image:url(lillie.png?v=20261020-rivals-v2);--rogue-portrait-normal-x:2.2%;--rogue-portrait-approval-x:100%;" aria-label="莉莉艾，点击切换表情" aria-pressed="false"></button>
+<p class="expression">常态</p>
+<p class="direction">扶住背包肩带，温柔而努力鼓起勇气。</p>
+<footer><a href="https://www.pokemon-card.com/ex/sv9/index.html" target="_blank" rel="noopener">人物参考</a><a href="lillie.png?v=20261020-rivals-v2" target="_blank" rel="noopener">完整双帧图</a></footer>
+</article>
+<article class="card">
+<h2>可尔尼</h2>
+<button class="rogue-companion-portrait portrait" style="background-image:url(korrina.png?v=20261020-rivals-v2);--rogue-portrait-normal-x:4.12%;--rogue-portrait-approval-x:97.75%;" aria-label="可尔尼，点击切换表情" aria-pressed="false"></button>
+<p class="expression">常态</p>
+<p class="direction">调整超级手套，微向前倾，展现运动员的活力。</p>
+<footer><a href="https://pokemonmasters-game.com/en-US/buddies" target="_blank" rel="noopener">人物参考</a><a href="korrina.png?v=20261020-rivals-v2" target="_blank" rel="noopener">完整双帧图</a></footer>
+</article>
+<article class="card">
+<h2>妮莫</h2>
+<button class="rogue-companion-portrait portrait" style="background-image:url(nemona.png?v=20261020-rivals-v2);--rogue-portrait-normal-x:0%;--rogue-portrait-approval-x:100%;" aria-label="妮莫，点击切换表情" aria-pressed="false"></button>
+<p class="expression">常态</p>
+<p class="direction">主动向你递出精灵球，兴奋地邀请下一场对战。</p>
+<footer><a href="https://www.pokemon.co.jp/ex/sv/ja/character/220601_02/" target="_blank" rel="noopener">人物参考</a><a href="nemona.png?v=20261020-rivals-v2" target="_blank" rel="noopener">完整双帧图</a></footer>
+</article>
+<article class="card">
+<h2>青绿</h2>
+<button class="rogue-companion-portrait portrait" style="background-image:url(blue.png?v=20261020-rivals-v2);--rogue-portrait-normal-x:12.46%;--rogue-portrait-approval-x:100%;" aria-label="青绿，点击切换表情" aria-pressed="false"></button>
+<p class="expression">常态</p>
+<p class="direction">抱臂举球、略扬下巴，保留骄傲劲敌的竞争感。</p>
+<footer><a href="https://bulbapedia.bulbagarden.net/wiki/Blue_(game)" target="_blank" rel="noopener">人物参考</a><a href="blue.png?v=20261020-rivals-v2" target="_blank" rel="noopener">完整双帧图</a></footer>
+</article>
+<article class="card">
+<h2>格拉吉欧</h2>
+<button class="rogue-companion-portrait portrait" style="background-image:url(gladion.png?v=20261020-rivals-v2);--rogue-portrait-normal-x:4.17%;--rogue-portrait-approval-x:100%;" aria-label="格拉吉欧，点击切换表情" aria-pressed="false"></button>
+<p class="expression">常态</p>
+<p class="direction">握住手腕、收拢身形，戒备逐渐变为信任。</p>
+<footer><a href="https://www.pokemon.co.jp/ex/sun_moon/character/13.html" target="_blank" rel="noopener">人物参考</a><a href="gladion.png?v=20261020-rivals-v2" target="_blank" rel="noopener">完整双帧图</a></footer>
+</article>
+<article class="card">
+<h2>彼特</h2>
+<button class="rogue-companion-portrait portrait" style="background-image:url(bede.png?v=20261020-rivals-v2);--rogue-portrait-normal-x:0%;--rogue-portrait-approval-x:100%;" aria-label="彼特，点击切换表情" aria-pressed="false"></button>
+<p class="expression">常态</p>
+<p class="direction">侧过肩打量对手，轻抬手作评判，认可仍带傲气。</p>
+<footer><a href="https://www.pokemon.co.jp/ex/sword_shield/character/190807_01.html" target="_blank" rel="noopener">人物参考</a><a href="bede.png?v=20261020-rivals-v2" target="_blank" rel="noopener">完整双帧图</a></footer>
+</article>
+<article class="card">
+<h2>N</h2>
+<button class="rogue-companion-portrait portrait" style="background-image:url(n.png?v=20261020-rivals-v2);--rogue-portrait-normal-x:-0.96%;--rogue-portrait-approval-x:94.87%;" aria-label="N，点击切换表情" aria-pressed="false"></button>
+<p class="expression">常态</p>
+<p class="direction">摊开一只手、另一手放在胸前，沉静倾听与理解。</p>
+<footer><a href="https://bulbapedia.bulbagarden.net/wiki/N" target="_blank" rel="noopener">人物参考</a><a href="n.png?v=20261020-rivals-v2" target="_blank" rel="noopener">完整双帧图</a></footer>
+</article>
+<article class="card">
+<h2>银</h2>
+<button class="rogue-companion-portrait portrait" style="background-image:url(silver.png?v=20261020-rivals-v2);--rogue-portrait-normal-x:3.72%;--rogue-portrait-approval-x:100%;" aria-label="银，点击切换表情" aria-pressed="false"></button>
+<p class="expression">常态</p>
+<p class="direction">侧转身体、低持精灵球，冷峻而倔强，含蓄释怀。</p>
+<footer><a href="https://bulbapedia.bulbagarden.net/wiki/Silver_(game)" target="_blank" rel="noopener">人物参考</a><a href="silver.png?v=20261020-rivals-v2" target="_blank" rel="noopener">完整双帧图</a></footer>
+</article>
+</section>
+<p class="notes">2026-10-20 重新绘制。参考链接与完整生成记录见 <a href="rivals-20261020.json">制作记录</a>。此页只供立绘预览，不读取或修改游戏存档。</p>
+</main>
+<script>
+function setExpression(portrait, approval) {
+ portrait.classList.toggle('smiling', approval);
+ portrait.setAttribute('aria-pressed', String(approval));
+ portrait.closest('.card').querySelector('.expression').textContent = approval ? '认可' : '常态';
+}
+document.querySelectorAll('.portrait').forEach(function (portrait) {
+ portrait.addEventListener('click', function () {
+  setExpression(portrait, !portrait.classList.contains('smiling'));
+  document.querySelectorAll('[data-mode]').forEach(function (b) { b.setAttribute('aria-pressed','false'); });
+ });
+});
+document.querySelectorAll('[data-mode]').forEach(function (button) {
+ button.addEventListener('click', function () {
+  document.querySelectorAll('.portrait').forEach(function (p) { setExpression(p, button.dataset.mode === 'approval'); });
+  document.querySelectorAll('[data-mode]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === button)); });
+ });
+});
+document.getElementById('background').addEventListener('click', function () {
+ this.setAttribute('aria-pressed', String(document.body.classList.toggle('dark')));
+});
+</script>
+</body>
+</html>

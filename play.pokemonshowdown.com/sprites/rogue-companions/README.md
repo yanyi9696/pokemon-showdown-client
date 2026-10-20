@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | bea.png | 彩豆 | 灰色短发、黑色发饰、深肤色，白黑橙色武道服；平时专注克制，认可时微笑 |
 | acerola.png | 阿塞罗拉 | 紫色头发、灰紫色补丁连衣裙；好奇活泼，笑脸亲切 |
-| lana.png | 水莲 | 蓝色短发、蓝白水手式服装；平时沉静，笑脸温和 |
+| lana.png | 水莲 | 蓝色短发、蓝白水手式服装；双手照看钓竿与卷线器，平时沉静，认可时温和而略带得意 |
 | sada.png | 奥琳 AI | 棕色波浪长发、白色研究服、橙色远古风内搭和牙饰，细微青色 AI 光泽 |
 | turo.png | 弗图 AI | 棕色短发、短胡须、白色研究服、紫色未来风内搭，细微青色 AI 光泽 |
 | iono.png | 奇树 | 粉蓝双色长发、小磁怪发饰、宽大黄黑外套；左侧自然专注，右侧开心微笑 |
@@ -65,6 +65,10 @@
 实际成功提示词：
 
 > Create a new fan-art companion portrait sheet of Iris in her Pokemon Champion outfit, using the supplied pictures as visual references. This is a new drawing of the existing fictional character. The first picture shows the current game's simple cel-shaded art style and paired expression layout. The second picture is the user's Champion costume reference. Draw her waist up, with rich brown skin, large deep-purple hair, the gold tiara with green gems, and a modest pink-and-white Champion dress with wide sleeves. Use simplified clean ink outlines and flat two-tone cel shading, slightly softer than the old asset. Straightforward friendly game character art; relaxed upright pose, arms at the sides. Make two equally sized square frames next to each other in one horizontal 2:1 transparent sprite sheet. The LEFT portrait has an attentive neutral closed-mouth expression. The RIGHT portrait has a bright friendly smile. Keep the same head shape, hair, costume, pose, proportions, colors, line thickness and lighting between frames. Show the full tiara and hair with small transparent margins, keep each bust entirely inside its half, and keep the head and shoulders at exactly the same coordinates relative to each half. Transparent background, no galaxy, no lettering, no divider, no border and no other figures.
+
+## 2026-10-20 劲敌立绘重绘
+
+水莲的 `lana.png` 已随十位劲敌重新生成。参考官方队长介绍与人物原画，采用照看钓竿的独立动作，两帧分别为沉静倾听与含蓄认可；仍与同行祝福共用同一图集。完整参考、提示词和输出记录见 [rivals-20261020.json](../rogue-dialogue/rivals-20261020.json)，[十位劲敌预览](../rogue-dialogue/rivals-preview.html)。客户端同时更新了图片版本，避免读取旧缓存。
 
 ## 2026-10-18 雪山与采集扩展
 

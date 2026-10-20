@@ -7,11 +7,27 @@
 		'giovanni', 'archer', 'cyrus', 'ghetsis', 'piers', 'charm', 'clover', 'coin', 'giacomo', 'rocket', 'magma', 'galactic', 'plasma', 'flare', 'skull', 'yell', 'teamstar'];
 	var dialogueCompanions = ['bea', 'acerola', 'iono', 'rika', 'guzma', 'lysandre', 'iris', 'poppy', 'lana', 'olivia', 'grusha', 'canari', 'sada', 'turo'];
 	var singlePortraits = {mewtwo: 'sprites/rogue-dialogue/mewtwo-official.png'};
-	var portraitVersions = {lacey: '20261019b', kahili: '20261019-blue', viola: '20261019-curls'};
+	var portraitVersions = {
+		lacey: '20261019b', kahili: '20261019-blue', viola: '20261019-curls',
+		marnie: '20261020-rivals-v2', lana: '20261020-rivals-v2', lillie: '20261020-rivals-v2',
+		korrina: '20261020-rivals-v2', nemona: '20261020-rivals-v2', blue: '20261020-rivals-v2',
+		gladion: '20261020-rivals-v2', bede: '20261020-rivals-v2', n: '20261020-rivals-v2', silver: '20261020-rivals-v2',
+	};
+	// Align the generated cells without repainting pixels or shifting the dialogue container.
+	var portraitPositions = {
+		lillie: [2.20, 100], korrina: [4.12, 97.75], blue: [12.46, 100],
+		gladion: [4.17, 100], n: [-0.96, 94.87], silver: [3.72, 100],
+	};
 	function portraitFile(id) {
-		if (dialogueCompanions.indexOf(id) >= 0) return 'sprites/rogue-companions/' + (companionPortraits[id] || id) + '.png';
-		if (dialogueSheets.indexOf(id) >= 0) return 'sprites/rogue-dialogue/' + id + '.png' + (portraitVersions[id] ? '?v=' + portraitVersions[id] : '');
+		var version = portraitVersions[id] ? '?v=' + portraitVersions[id] : '';
+		if (dialogueCompanions.indexOf(id) >= 0) return 'sprites/rogue-companions/' + (companionPortraits[id] || id) + '.png' + version;
+		if (dialogueSheets.indexOf(id) >= 0) return 'sprites/rogue-dialogue/' + id + '.png' + version;
 		return '';
+	}
+	function portraitStyle(id) {
+		var position = portraitPositions[id];
+		return 'background-image:url(' + portraitFile(id) + ');' + (position ?
+			'--rogue-portrait-normal-x:' + position[0] + '%;--rogue-portrait-approval-x:' + position[1] + '%;' : '');
 	}
 	function recommendedLabel(run, id) {
 		var names = (run.companions || []).filter(function (c) { return c.recommended === id; }).map(function (c) { return c.name; });
@@ -675,17 +691,17 @@
 			}
 			if (run.blessings && run.blessings.owned.some(function (b) { return b.family === 'companionband'; }) && !companions.some(function (c) { return c.id === 'marnie' || c.id === 'roxie'; })) {
 				html += '<div class="rogue-companion-choice"><strong>选择同行训练家</strong><p>缺少对应属性伙伴时，额外特性将在之后赋予。</p><div class="rogue-companions">' + [['marnie', '玛俐'], ['roxie', '霍米加']].filter(function (entry) { return !run.rival || run.rival.id !== entry[0]; }).map(function (entry) {
-					return '<button class="button rogue-companion-pick" name="companionAction" value="' + entry[0] + '|chooseband"' + (locked ? ' disabled' : '') + '><span class="rogue-companion-portrait" style="background-image:url(' + portraitFile(entry[0]) + ')"></span><b>' + entry[1] + '</b></button>';
+					return '<button class="button rogue-companion-pick" name="companionAction" value="' + entry[0] + '|chooseband"' + (locked ? ' disabled' : '') + '><span class="rogue-companion-portrait" style="' + portraitStyle(entry[0]) + '"></span><b>' + entry[1] + '</b></button>';
 				}).join('') + '</div></div>';
 			}
 			if (run.rivalCompanion) {
 				var rival = run.rivalCompanion, art = portraitFile(rival.id);
-				html += '<article class="rogue-companion rogue-rival-companion">' + (art ? '<span class="rogue-companion-portrait" style="background-image:url(' + art + ')"></span>' : '<img class="rogue-rival-native" src="' + escape(Dex.resolveAvatar(rival.id)) + '" alt="" />') + '<div class="rogue-companion-copy"><strong>' + escape(rival.name) + ' · 劲敌</strong><small>' + escape(rival.text) + ' · 熟悉度 ' + rival.affection + '</small><p>' + escape(rival.message) + '</p></div></article>';
+				html += '<article class="rogue-companion rogue-rival-companion">' + (art ? '<span class="rogue-companion-portrait" style="' + portraitStyle(rival.id) + '"></span>' : '<img class="rogue-rival-native" src="' + escape(Dex.resolveAvatar(rival.id)) + '" alt="" />') + '<div class="rogue-companion-copy"><strong>' + escape(rival.name) + ' · 劲敌</strong><small>' + escape(rival.text) + ' · 熟悉度 ' + rival.affection + '</small><p>' + escape(rival.message) + '</p></div></article>';
 			}
 			if (!companions.length) return html;
 			return html + '<section class="rogue-companions" aria-label="同行训练家">' + companions.map(function (c) {
 				var chat = c.smile && c.smileUntil, seconds = chat ? Math.max(0, (c.smileUntil - Date.now()) / 1000) : 0;
-				var portrait = 'background-image:url(' + portraitFile(c.id) + ');';
+				var portrait = portraitStyle(c.id);
 				var out = '<article class="rogue-companion"><button class="rogue-companion-portrait' + (c.smile ? ' smiling' : '') + (chat ? ' chatting' : '') +
 					'" name="companionAction" value="' + c.id + '|chat" title="与' + escape(c.name) + '闲聊" aria-label="与' + escape(c.name) + '闲聊" style="' +
 					portrait + 'animation-duration:' + seconds + 's"' + (locked ? ' disabled' : '') + '></button><div class="rogue-companion-copy"><strong>' + escape(c.name) + '</strong>';
@@ -865,7 +881,7 @@
 					(story.side === 'left' ? 'left' : 'right') + (story.expression === 'approval' ? ' is-approval' : '') +
 					'"';
 				if (singlePortraits[id]) return actor + '><img class="rogue-dialogue-single" alt="" src="' + singlePortraits[id] + '" /></div>';
-				if (file) return actor + ' style="background-image:url(' + file + ')"></div>';
+				if (file) return actor + ' style="' + portraitStyle(id) + '"></div>';
 				return actor + '>' + (story.pokemon ? '<div class="rogue-story-pokemon" aria-hidden="true" style="' +
 					Dex.getTeambuilderSprite({species: story.pokemon}) + '"></div>' :
 					'<img class="rogue-story-trainer" alt="" src="' + escape(Dex.resolveAvatar(story.avatar || id)) + '" />') + '</div>';
@@ -1520,7 +1536,7 @@
 			var recommendations = function (id) { var names = (run.companions || []).filter(function (c) { return c.recommended === id; }).map(function (c) { return c.name; }); return names.length ? '（' + names.join('、') + '推荐）' : ''; };
 			var html = '<article class="rogue-event"><h3>' + escape(event.title) + '</h3><div class="rogue-event-text">' +
 				(event.paragraphs || []).map(function (line) { return '<p>' + dialogueText(line) + '</p>'; }).join('') + '</div>';
-			if (event.rivalPortrait) { var rivalArt = portraitFile(event.rivalPortrait); html += rivalArt ? '<span class="rogue-companion-portrait rogue-event-rival' + (event.rivalApproval ? ' smiling' : '') + '" style="background-image:url(' + rivalArt + ')"></span>' : '<img class="rogue-rival-native" src="' + escape(Dex.resolveAvatar(event.rivalPortrait)) + '" alt="劲敌" />'; }
+			if (event.rivalPortrait) { var rivalArt = portraitFile(event.rivalPortrait); html += rivalArt ? '<span class="rogue-companion-portrait rogue-event-rival' + (event.rivalApproval ? ' smiling' : '') + '" style="' + portraitStyle(event.rivalPortrait) + '"></span>' : '<img class="rogue-rival-native" src="' + escape(Dex.resolveAvatar(event.rivalPortrait)) + '" alt="劲敌" />'; }
 			if (event.silhouette) html += '<div class="rogue-quiz-silhouette" aria-label="宝可梦剪影" style="' + Dex.getTeambuilderSprite({species: event.silhouette}) + '"></div>';
 			if (event.ski && event.stage === 'choice') return html + this.renderSki(event, busy) + '</article>';
 			if (event.fishing && event.stage === 'choice') return html + this.renderFishing(event, busy) + '</article>';
@@ -2203,7 +2219,7 @@
 				if (section === 'blessings' && entry.family === 'prayer') body = body.replace(/<strong class="rogue-term">【Top Clear Mind】<\/strong>/g, '<button class="rogue-codex-link" name="jumpBlessing"><b>【Top Clear Mind】</b></button>');
 				if (entry.portrait) {
 					var file = portraitFile(entry.portrait);
-					body = (singlePortraits[entry.portrait] ? '<img class="rogue-codex-single-portrait" src="' + singlePortraits[entry.portrait] + '" alt="' + escape(entry.name) + '" />' : file ? '<span class="rogue-companion-portrait codex-portrait" style="background-image:url(' + file + ')"></span>' : '<img class="rogue-codex-native-portrait" src="' + escape(Dex.resolveAvatar(entry.portrait)) + '" alt="' + escape(entry.name) + '" />') + body;
+					body = (singlePortraits[entry.portrait] ? '<img class="rogue-codex-single-portrait" src="' + singlePortraits[entry.portrait] + '" alt="' + escape(entry.name) + '" />' : file ? '<span class="rogue-companion-portrait codex-portrait" style="' + portraitStyle(entry.portrait) + '"></span>' : '<img class="rogue-codex-native-portrait" src="' + escape(Dex.resolveAvatar(entry.portrait)) + '" alt="' + escape(entry.name) + '" />') + body;
 				}
 				var trainerEntry = section === 'events' && ['companion', 'trainer'].indexOf(entry.category) >= 0;
 				return '<article data-codex-family="' + escape(entry.family || '') + '" class="rogue-codex-entry tier-' + (entry.tier || 'plain') + (entry.unlocked === false ? ' is-locked' : '') + '">' +
