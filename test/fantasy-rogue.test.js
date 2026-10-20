@@ -68,6 +68,27 @@ function state() {
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
 describe('Fantasy Rogue start menu and codex', () => {
+	it('uses the server guide for both first-play onboarding and the permanent codex', () => {
+		const c = client(true), data = state(), popups = [];
+		data.codexSchema = 2;
+		data.account.needsOnboarding = true;
+		data.beginnerGuide = [{title: '两个同行名额', text: '累计 15 次偏好选择领取赠礼。<script>'}];
+		c.app.curRoom = c.room; c.app.addPopup = (type, detail) => popups.push({type, detail});
+		c.room.receiveState(data); c.room.enterGame();
+		const popup = Object.create(popups[0].type); let html;
+		popup.$el = {addClass() {}, html: value => {html = value;}};
+		popup.initialize(popups[0].detail);
+		assert(html.includes('两个同行名额')); assert(html.includes('15 次'));
+		assert(!html.includes('<script>'));
+		c.room.openCodex('guide');
+		c.room.receiveCodex({userid: 'rogueplayer', codexSchema: 2, section: 'guide',
+			guide: {intro: [], beginner: data.beginnerGuide, modules: {}}});
+		c.room.filterCodex('beginner');
+		assert(c.room.html.includes('两个同行名额')); assert(!c.room.html.includes('<script>'));
+		assert(!c.room.html.includes('仍在提供旧版图鉴'));
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'guide', guide: {intro: [], modules: {}}});
+		assert(c.room.html.includes('仍在提供旧版图鉴'));
+	});
 	it('reloads open codices after a content update and ignores stale version responses', () => {
 		const c = client(true), first = state(); first.contentVersion = 'old'; c.room.receiveState(first);
 		c.room.openCodex('events');
@@ -111,7 +132,8 @@ describe('Fantasy Rogue start menu and codex', () => {
 		assert(c.room.html.includes('已遇见 <b>1 / 2</b>'));
 		assert(c.room.html.includes('尚未遇见')); assert(c.room.html.includes('已遇见过'));
 		assert(c.room.html.includes('rogue-dialogue/brock.png'));
-		assert(c.room.html.includes('class="rogue-codex-single-portrait" src="sprites/rogue-dialogue/mewtwo-official.png"'));
+		assert(c.room.html.includes('rogue-mewtwo-bust rogue-codex-single-portrait'));
+		assert(c.room.html.includes('mewtwo-official.png'));
 		c.room.codexSearchMode = 'content'; c.room.codexQuery = '道馆';
 		assert(!c.room.renderCodex().includes('<h3>小刚</h3>'));
 	});
@@ -685,8 +707,9 @@ describe('Fantasy Rogue story and clear-card controls', () => {
 		assert(c.room.storyArt({...page, portrait: 'kahili'}).includes('kahili.png?v=20261019-blue'));
 		for (const expression of ['neutral', 'approval']) {
 			const art = c.room.storyArt({...page, portrait: 'mewtwo', pokemon: 'Mewtwo-Fantasy', expression});
-			assert(art.includes('class="rogue-dialogue-single"')); assert(art.includes('mewtwo-official.png'));
-			assert(!art.includes('background-image'));
+			assert(art.includes('rogue-mewtwo-bust rogue-dialogue-single')); assert(art.includes('mewtwo-official.png'));
+			assert(art.includes('background-image'));
+			assert(!art.includes('<img'));
 		}
 		assert.notEqual(c.room.storySignature(page), c.room.storySignature({...page, performance: 'conversation2'}));
 	});
@@ -924,6 +947,35 @@ describe('Fantasy Rogue event display and spectator playback', () => {
 		data.account.revision++; data.run.companions[0].recommended = 'fight'; c.room.pending = null;
 		c.room.receiveState(data);
 		assert(c.room.html.includes('接受挑战（彩豆推荐）')); assert(!c.room.html.includes('暂不参与（彩豆推荐）'));
+	});
+	it('shows a shared-slot invitation and submits the saved invitation key', () => {
+		const c = client(), data = adventure('choose');
+		data.run.companionInvitation = {key: 'saved-invite', name: '丹瑜', roster: [
+			{id: 'kieran', name: '乌栗'}, {id: 'liko', name: '莉可'},
+		]};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('丹瑜希望与你同行'));
+		assert(c.room.html.includes('向莉可告别，接受邀请'));
+		assert(!c.room.html.includes('name="selectNode"'));
+		c.room.companionInviteAction('liko');
+		const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(command.action, 'companioninvite'); assert.equal(command.member, 'saved-invite');
+		assert.equal(command.value, 'liko');
+	});
+	it('keeps departed blessing selections and renders permanent social preferences separately from temporary rivals', () => {
+		const c = client(), data = adventure('event');
+		data.run.blessings = {owned: [{family: 'companionwinter', name: '冰属性男子与酷酷女同事'}], pending: []};
+		data.run.companions = []; data.run.selectedCompanions = ['grusha'];
+		data.run.socialCompanions = [{id: 'brock', name: '小刚', region: '关都', preference: 'pokemon',
+			areas: ['reward'], preferences: 7, canConsult: true, giftOptions: []}];
+		data.run.rivalCompanions = [{id: 'kieran', name: '乌栗', text: '结伴至第 66 层', affection: 8, message: '一起训练吧。'}];
+		c.room.receiveState(data);
+		assert(!c.panel.html.includes('choosewinter')); assert(c.panel.html.includes('小刚 · 常驻同行'));
+		assert(c.panel.html.includes('progress value="7" max="15"')); assert(c.panel.html.includes('乌栗 · 劲敌'));
+		assert(c.panel.html.includes('偏好关都相关、宝可梦选项'));
+		c.room.socialCompanionAction('brock|advice');
+		const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(command.action, 'socialcompanion'); assert.equal(command.member, 'brock');
 	});
 	it('offers both band trainers and exposes deferred gift and extra-Z assignment controls', () => {
 		const c = client(), data = adventure('ready');

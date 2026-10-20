@@ -34,8 +34,17 @@
 			'--rogue-portrait-normal-x:' + position[0] + '%;--rogue-portrait-approval-x:' + position[1] + '%;' : '');
 	}
 	function recommendedLabel(run, id) {
-		var names = (run.companions || []).filter(function (c) { return c.recommended === id; }).map(function (c) { return c.name; });
+		var names = (run.companions || []).concat(run.socialCompanions || []).filter(function (c) { return c.recommended === id; }).map(function (c) { return c.name; });
 		return names.length ? '（' + names.join('、') + '推荐）' : '';
+	}
+	function beginnerGuideHTML(sections) {
+		return (sections || []).map(function (section) {
+			return '<section><h3>' + escape(section.title) + '</h3><p>' + escape(section.text) + '</p></section>';
+		}).join('');
+	}
+	function croppedMewtwo(className) {
+		return '<span role="img" aria-label="超梦上半身立绘" class="rogue-mewtwo-bust ' + className +
+			'" style="background-image:url(' + singlePortraits.mewtwo + ')"></span>';
 	}
 	function resourceMeter(name, value, maximum, detail, unit) {
 		value = Math.max(0, Number(value) || 0); maximum = Math.max(1, maximum);
@@ -696,11 +705,28 @@
 			var parts = value.split('|');
 			this.submit('companion', {member: parts[0], value: parts[1]});
 		},
+		socialCompanionAction: function (value) {
+			var parts = value.split('|');
+			this.submit('socialcompanion', {member: parts[0], value: parts[1]});
+		},
+		companionInviteAction: function (value) {
+			var invite = this.state.run && this.state.run.companionInvitation;
+			if (invite) this.submit('companioninvite', {member: invite.key, value: value});
+		},
+		renderCompanionInvitation: function (invite, busy) {
+			return '<section class="rogue-companion-invitation" role="dialog" aria-label="同行邀请"><h3>' +
+				escape(invite.name) + '希望与你同行</h3><p>所有同行共用两个名额。告别保留已获得的永久奖励，暂停该人物的在队增益。</p>' +
+				(invite.roster.length >= 2 ? invite.roster.map(function (c) {
+					return button('companionInviteAction', c.id, '向' + c.name + '告别，接受邀请', busy);
+				}).join('') : button('companionInviteAction', 'accept', '接受同行', busy)) +
+				button('companionInviteAction', 'decline', '这次暂不同行', busy) + '</section>';
+		},
 		renderCompanions: function (run, busy) {
-			var companions = run.companions || [], locked = busy || run.phase === 'battle' || run.preview && run.preview.stage === 'result';
+			var companions = run.companions || [], selected = run.selectedCompanions || companions.map(function (c) { return c.id; });
+			var locked = busy || !!run.companionInvitation || run.phase === 'battle' || run.preview && run.preview.stage === 'result';
 			var html = '';
 			if (run.blessings && run.blessings.owned.some(function (b) { return b.family === 'companionai'; }) &&
-				!companions.some(function (c) { return c.id === 'sada' || c.id === 'turo'; })) {
+				!selected.some(function (id) { return id === 'sada' || id === 'turo'; })) {
 				html += '<div class="rogue-companion-choice"><strong>选择同行训练家</strong><div class="rogue-companions">' +
 					[['sada', '奥琳 AI'], ['turo', '弗图 AI']].map(function (entry) {
 						return '<button class="button rogue-companion-pick" name="companionAction" value="' + entry[0] + '|chooseai"' + (locked ? ' disabled' : '') +
@@ -708,24 +734,37 @@
 					}).join('') + '</div></div>';
 			}
 			if (run.blessings && run.blessings.owned.some(function (b) { return b.family === 'companionstreamer'; }) &&
-				!companions.some(function (c) { return c.id === 'iono' || c.id === 'canari'; })) {
+				!selected.some(function (id) { return id === 'iono' || id === 'canari'; })) {
 				html += '<div class="rogue-companion-choice"><strong>选择同行训练家</strong><div class="rogue-companions">' +
 					[['iono', '奇树'], ['canari', '卡娜莉']].map(function (entry) {
 						return '<button class="button rogue-companion-pick" name="companionAction" value="' + entry[0] + '|choosestreamer"' + (locked ? ' disabled' : '') +
 							'><span class="rogue-companion-portrait" style="background-image:url(sprites/rogue-companions/' + entry[0] + '.png)"></span><b>' + entry[1] + '</b></button>';
 					}).join('') + '</div></div>';
 			}
-			if (run.blessings && run.blessings.owned.some(function (b) { return b.family === 'companionwinter'; }) && !companions.some(function (c) { return c.id === 'grusha' || c.id === 'rika'; })) {
+			if (run.blessings && run.blessings.owned.some(function (b) { return b.family === 'companionwinter'; }) && !selected.some(function (id) { return id === 'grusha' || id === 'rika'; })) {
 				html += '<div class="rogue-companion-choice"><strong>选择同行训练家</strong><p>缺少对应属性伙伴时，额外特性将在之后赋予。</p><div class="rogue-companions">' + [['grusha', '古鲁夏'], ['rika', '辛俐']].map(function (entry) { return '<button class="button rogue-companion-pick" name="companionAction" value="' + entry[0] + '|choosewinter"' + (locked ? ' disabled' : '') + '><span class="rogue-companion-portrait" style="background-image:url(sprites/rogue-companions/' + entry[0] + '.png)"></span><b>' + entry[1] + '</b></button>'; }).join('') + '</div></div>';
 			}
-			if (run.blessings && run.blessings.owned.some(function (b) { return b.family === 'companionband'; }) && !companions.some(function (c) { return c.id === 'marnie' || c.id === 'roxie'; })) {
+			if (run.blessings && run.blessings.owned.some(function (b) { return b.family === 'companionband'; }) && !selected.some(function (id) { return id === 'marnie' || id === 'roxie'; })) {
 				html += '<div class="rogue-companion-choice"><strong>选择同行训练家</strong><p>缺少对应属性伙伴时，额外特性将在之后赋予。</p><div class="rogue-companions">' + [['marnie', '玛俐'], ['roxie', '霍米加']].filter(function (entry) { return !run.rival || run.rival.id !== entry[0]; }).map(function (entry) {
 					return '<button class="button rogue-companion-pick" name="companionAction" value="' + entry[0] + '|chooseband"' + (locked ? ' disabled' : '') + '><span class="rogue-companion-portrait" style="' + portraitStyle(entry[0]) + '"></span><b>' + entry[1] + '</b></button>';
 				}).join('') + '</div></div>';
 			}
 			(run.rivalCompanions || (run.rivalCompanion ? [run.rivalCompanion] : [])).forEach(function (rival) {
+				if ((run.socialCompanions || []).some(function (c) { return c.id === rival.id; })) return;
 				var art = portraitFile(rival.id);
 				html += '<article class="rogue-companion rogue-rival-companion">' + (art ? '<span class="rogue-companion-portrait" style="' + portraitStyle(rival.id) + '"></span>' : '<img class="rogue-rival-native" src="' + escape(Dex.resolveAvatar(rival.id)) + '" alt="" />') + '<div class="rogue-companion-copy"><strong>' + escape(rival.name) + ' · 劲敌</strong><small>' + escape(rival.text) + ' · 熟悉度 ' + rival.affection + '</small><p>' + escape(rival.message) + '</p></div></article>';
+			});
+			(run.socialCompanions || []).forEach(function (c) {
+				html += '<article class="rogue-companion"><span class="rogue-companion-portrait" style="' + portraitStyle(c.id) +
+					'"></span><div class="rogue-companion-copy"><strong>' + escape(c.name) + ' · 常驻同行</strong><small>偏好' +
+					escape(c.region) + '相关、' + ({battle: '战斗', reward: '奖励', pokemon: '宝可梦'}[c.preference] || '') +
+					'选项；喜欢' + escape((c.areas || []).map(function (id) { return kindNames[id] || id; }).join('、')) + '区域</small>' + button('socialCompanionAction', c.id + '|chat', '闲聊', locked) +
+					(c.canConsult ? button('socialCompanionAction', c.id + '|advice', '听听建议', locked) : '') +
+					(c.message ? '<p>' + escape(c.message) + '</p>' : '') +
+					resourceMeter('同行训练家的赠礼', Math.min(15, c.preferences), 15, c.rewarded ? '已领取' : '听从偏好次数') +
+					(c.giftOptions || []).map(function (gift) {
+						return button('socialCompanionAction', c.id + '|gift:' + gift.id, '领取【' + gift.name + '】', locked);
+					}).join('') + '</div></article>';
 			});
 			if (!companions.length) return html;
 			return html + '<section class="rogue-companions" aria-label="同行训练家">' + companions.map(function (c) {
@@ -910,6 +949,7 @@
 				var actor = '<div role="img" aria-label="' + escape(story.speaker || story.title) + '" class="rogue-dialogue-actor side-' +
 					(story.side === 'left' ? 'left' : 'right') + (story.expression === 'approval' ? ' is-approval' : '') +
 					'"';
+				if (id === 'mewtwo') return actor + '>' + croppedMewtwo('rogue-dialogue-single') + '</div>';
 				if (singlePortraits[id]) return actor + '><img class="rogue-dialogue-single" alt="" src="' + singlePortraits[id] + '" /></div>';
 				if (file) return actor + ' style="' + portraitStyle(id) + '"></div>';
 				return actor + '>' + (story.pokemon ? '<div class="rogue-story-pokemon" aria-hidden="true" style="' +
@@ -1579,7 +1619,7 @@
         renderEvent: function (run, busy) {
 			var event = run.event;
 			if (!event) return '';
-			var recommendations = function (id) { var names = (run.companions || []).filter(function (c) { return c.recommended === id; }).map(function (c) { return c.name; }); return names.length ? '（' + names.join('、') + '推荐）' : ''; };
+			var recommendations = function (id) { var names = (run.companions || []).concat(run.socialCompanions || []).filter(function (c) { return c.recommended === id; }).map(function (c) { return c.name; }); return names.length ? '（' + names.join('、') + '推荐）' : ''; };
 			var html = '<article class="rogue-event"><h3>' + escape(event.title) + '</h3><div class="rogue-event-text">' +
 				(event.paragraphs || []).map(function (line) { return '<p>' + dialogueText(line) + '</p>'; }).join('') + '</div>';
 			if (event.rivalPortrait) { var rivalArt = portraitFile(event.rivalPortrait); html += rivalArt ? '<span class="rogue-companion-portrait rogue-event-rival' + (event.rivalApproval ? ' smiling' : '') + '" style="' + portraitStyle(event.rivalPortrait) + '"></span>' : '<img class="rogue-rival-native" src="' + escape(Dex.resolveAvatar(event.rivalPortrait)) + '" alt="劲敌" />'; }
@@ -2177,6 +2217,7 @@
 			var html = '<section class="rogue-codex"><div class="rogue-codex-heading"><span class="rogue-caption">旅途手册 / ' + titles[section] +
 				'</span><h2>' + titles[section] + '</h2><button class="button rogue-codex-back" name="startMenu">' + fa('arrow-left') + '返回开始页</button></div>';
 			if (!data) return html + '<p>正在翻开图鉴…</p></section>';
+			if (data.codexSchema !== 2) html += '<p class="message-error" role="status">当前服务端仍在提供旧版图鉴。请更新并重启游戏服务，再刷新存档；仅刷新网页无法加载尚未运行的新内容。</p>';
 			if (data.preview) html += '<p class="rogue-caption">本地测试：全部条目完整展示，不改变存档的实际解锁记录。</p>';
 			if (section === 'events' && this.codexReplay) {
 				var replay = this.codexReplay, history = this.codexReplayHistory, page = replay.pages[history[history.length - 1]];
@@ -2196,10 +2237,13 @@
 					return '<article><h3>' + escape(entry.title) + '</h3><p>' + escape(entry.text) + '</p></article>';
 				}).join('') + '</div><details class="rogue-guide-rules"><summary>出发前，了解这些基础规则</summary>' +
 					data.guide.intro.slice(2).map(function (entry) { return '<h4>' + escape(entry.title) + '</h4><p>' + escape(entry.text) + '</p>'; }).join('') + '</details>';
-				filters = [['items', '道具'], ['moves', '招式'], ['abilities', '特性'], ['pokemon', '幻想宝可梦']];
+				filters = [['beginner', '新手攻略'], ['items', '道具'], ['moves', '招式'], ['abilities', '特性'], ['pokemon', '幻想宝可梦']];
 				entries = ['items', 'exclusive'].indexOf(this.codexFilter) >= 0 ? (data.guide.modules.items || []).filter(function (entry) {
 					return this.codexFilter === 'exclusive' ? entry.category === 'exclusive' : entry.category !== 'exclusive';
 				}, this) : this.codexFilter === 'special' ? data.guide.itemNotes || [] : data.guide.modules[guideModule] || [];
+				if (this.codexFilter === 'beginner') entries = (data.guide.beginner || []).map(function (entry, index) {
+					return {id: 'beginner:' + index, name: entry.title, text: entry.text};
+				});
 				if (guideModule === 'moves' || guideModule === 'abilities') entries = entries.filter(function (entry) {
 					return (entry.origin || 'fantasy') === (/enhanced$/.test(this.codexFilter) ? 'enhanced' : 'fantasy');
 				}, this);
@@ -2245,7 +2289,7 @@
 				escape(this.codexQuery) + '" placeholder="输入名称，按回车" /></label>' + button('searchCodex', '', '查找', false, fa('search')) + '</div>';
 			var entryKind = section === 'guide' && guideModule === 'moves' ? 'move' : '';
 			entries = entries.filter(function (entry) { return !query || (localName(entry.name, entryKind) + ' ' + entry.name + (this.codexSearchMode === 'content' ? ' ' + localName(entry.text || '') : '')).toLowerCase().indexOf(query) >= 0; }, this);
-			if (section !== 'blessings') {
+			if (section !== 'blessings' && this.codexFilter !== 'beginner') {
 				var collator = new Intl.Collator('zh-CN-u-co-pinyin', {sensitivity: 'base', ignorePunctuation: true, numeric: true});
 				entries.sort(function (a, b) { return collator.compare(localName(a.name, entryKind), localName(b.name, entryKind)) || collator.compare(a.id, b.id); });
 				html += '<p class="rogue-caption">按中文名称拼音首字母排列。</p>';
@@ -2265,7 +2309,7 @@
 				if (section === 'blessings' && entry.family === 'prayer') body = body.replace(/<strong class="rogue-term">【Top Clear Mind】<\/strong>/g, '<button class="rogue-codex-link" name="jumpBlessing"><b>【Top Clear Mind】</b></button>');
 				if (entry.portrait) {
 					var file = portraitFile(entry.portrait);
-					body = (singlePortraits[entry.portrait] ? '<img class="rogue-codex-single-portrait" src="' + singlePortraits[entry.portrait] + '" alt="' + escape(entry.name) + '" />' : file ? '<span class="rogue-companion-portrait codex-portrait" style="' + portraitStyle(entry.portrait) + '"></span>' : '<img class="rogue-codex-native-portrait" src="' + escape(Dex.resolveAvatar(entry.portrait)) + '" alt="' + escape(entry.name) + '" />') + body;
+					body = (entry.portrait === 'mewtwo' ? croppedMewtwo('rogue-codex-single-portrait') : singlePortraits[entry.portrait] ? '<img class="rogue-codex-single-portrait" src="' + singlePortraits[entry.portrait] + '" alt="' + escape(entry.name) + '" />' : file ? '<span class="rogue-companion-portrait codex-portrait" style="' + portraitStyle(entry.portrait) + '"></span>' : '<img class="rogue-codex-native-portrait" src="' + escape(Dex.resolveAvatar(entry.portrait)) + '" alt="' + escape(entry.name) + '" />') + body;
 				}
 				var trainerEntry = section === 'events' && ['companion', 'trainer'].indexOf(entry.category) >= 0;
 				return '<article data-codex-family="' + escape(entry.family || '') + '" class="rogue-codex-entry tier-' + (entry.tier || 'plain') + (entry.unlocked === false ? ' is-locked' : '') + '">' +
@@ -2278,7 +2322,7 @@
 					button('readEvent', entry.id, '回顾这段见闻', false, fa('book')) : '') + '</article>';
 			}).join('') + '</div>';
 			if (!entries.length) html += '<p class="rogue-codex-empty">' +
-				(section === 'events' && this.codexFilter === 'adventure' ? '奇遇内容正在制作中，当前版本尚未开放。' : '这里还没有符合条件的记录。') + '</p>';
+				'这里还没有符合条件的记录。' + '</p>';
 			return html + '<div class="rogue-codex-pagination">' + button('pageCodex', String(this.codexPage - 1), '上一页', this.codexPage === 0) +
 				'<span>第 ' + (this.codexPage + 1) + ' / ' + total + ' 页 · ' + entries.length + ' 项</span>' +
 				button('pageCodex', String(this.codexPage + 1), '下一页', this.codexPage + 1 >= total) + '</div></section>';
@@ -2317,6 +2361,9 @@
 					button('acknowledgeFailure', run.failure.key, '确认，返回起始界面', busy) + '</section></div>'); return;
 			}
 			if (state.story) { stableHTML(this, html + this.renderStory(state.story, busy) + '</div>'); return; }
+			if (run && run.companionInvitation) {
+				stableHTML(this, html + this.renderCompanionInvitation(run.companionInvitation, busy) + '</div>'); return;
+			}
 			if (state.storyEnabled && run && run.phase === 'complete') {
 				if (run.postgame === 'won') html += '<p class="infobox">神之挑战成功！额外获得 20 点局外成长点数。</p>';
 				html += '<h3>留在床头的卡片</h3><p>这次旅途已经留存。下一次醒来，会遇到什么呢？</p>';
@@ -2746,6 +2793,12 @@
 		initialize: function (data) {
 			this.room = data.room; this.userid = data.userid;
 			this.$el.addClass('rogue-onboarding');
+			if (this.room.state.beginnerGuide) {
+				this.$el.html('<h2>幻想杯肉鸽 · 新手攻略</h2><p>攻略会保留在开始页的「幻想杯图鉴 → 新手攻略」，随时可以回看。</p>' +
+					'<div class="rogue-onboarding-body">' + beginnerGuideHTML(this.room.state.beginnerGuide) +
+					'</div><p class="rogue-onboarding-actions">' + button('acknowledge', '', '读完了，开始旅途') + '</p>');
+				return;
+			}
 			this.$el.html('<h2>出发前的新手须知</h2><div class="rogue-onboarding-body">' +
 				'<h3>这趟旅途有什么特别？</h3><ul>' +
 				'<li><b>祝福与塔灵：</b>祝福能改变队伍的成长与打法；塔灵会带来整局特殊规则。先完成一次无塔灵通关，就能开启塔灵玩法。</li>' +
