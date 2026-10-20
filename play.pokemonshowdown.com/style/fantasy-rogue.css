@@ -1035,3 +1035,12 @@
 
 .rogue-rival-native { max-width: 100px; height: 130px; object-fit: contain; }
 .rogue-event-rival { float: right; }
+
+.rogue-resource-panel { display: grid; gap: 5px; margin: 7px 0; }
+.rogue-resource { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 9px; font-size: 13px; }
+.rogue-resource > strong { font-weight: 700; min-width: 4em; }
+.rogue-resource > progress { flex: 1 1 90px; min-width: 60px; max-width: 220px; height: 10px; accent-color: #347ca8; }
+.rogue-resource > b { min-width: 65px; font-variant-numeric: tabular-nums; }
+.rogue-resource > small { color: #526d83; }
+.rogue-robe-info { margin: 3px 0; font-size: 13px; }
+.rogue-companion-copy .rogue-resource { margin-top: 5px; }

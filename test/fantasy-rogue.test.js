@@ -68,6 +68,19 @@ function state() {
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
 describe('Fantasy Rogue start menu and codex', () => {
+	it('reloads open codices after a content update and ignores stale version responses', () => {
+		const c = client(true), first = state(); first.contentVersion = 'old'; c.room.receiveState(first);
+		c.room.openCodex('events');
+		c.room.receiveCodex({userid: 'rogueplayer', contentVersion: 'old', section: 'events', revision: 99, entries: []});
+		const next = {...first, contentVersion: 'new', account: {...first.account, revision: 2}};
+		c.room.receiveState(next); assert.equal(c.room.codices.events, undefined);
+		assert.equal(c.sent.at(-1), '/cmd fantasyroguecodex events');
+		c.room.receiveCodex({userid: 'rogueplayer', contentVersion: 'old', section: 'events', revision: 99, entries: []});
+		assert.equal(c.room.codices.events, undefined);
+		c.room.receiveCodex({userid: 'rogueplayer', contentVersion: 'new', section: 'events', revision: 2, entries: [{id: 'trainer:atticus', portrait: 'atticus', category: 'trainer', roles: ['antagonist'], name: '秋明', text: '', unlocked: true}]});
+		c.room.selectCodexCollection('companions');
+		assert(c.room.html.includes('atticus.png?v=20261020-reference-v2'));
+	});
 	it('marks the selected category in all three codices and in nested guide filters', () => {
 		const c = client(true); c.room.receiveState(state());
 		c.room.codices.guide = {guide: {intro: [], modules: {items: [], moves: [], abilities: [], pokemon: []}}};
@@ -939,7 +952,8 @@ describe('Fantasy Rogue event display and spectator playback', () => {
 			data.account.revision++; c.room.pending = null;
 			data.run.companions = [{id, name, preferences: 6, giftCounter: true, recommended: 'fight', canConsult: true, typeOptions: [], abilityOptions: []}];
 			c.room.receiveState(data);
-			assert(c.panel.html.includes('同行训练家的赠礼 · 偏好 6 / 15')); assert(c.html.includes('接受挑战（' + name + '推荐）'));
+			assert(c.panel.html.includes('<strong>同行训练家的赠礼</strong><progress value="6" max="15"'));
+			assert(c.panel.html.includes('<b>6 / 15</b>')); assert(c.html.includes('接受挑战（' + name + '推荐）'));
 		}
 	});
 	it('uses distinct AI portraits and offers acceptance only for successful previews', () => {
@@ -1844,6 +1858,21 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 				append: html => { room.html += html; }, prepend: html => { room.html = html + room.html; }}});
 		return {room, sent, joined, app: context.app, context};
 	}
+	it('preserves a selected blood boost through doubles target selection and shows its real cost', () => {
+		const c = battleClient(), room = c.room;
+		room.request.fantasyRogue = {catchable: false, blood: [{available: true, cost: 11, factor: 1.6}]};
+		const html = room.rogueBallControls();
+		assert(html.includes('消耗 11 HP')); assert(html.includes('伤害 +60%'));
+		room.choice = {choices: []}; room.battle.nearSide = {active: [{}, {}]};
+		room.tooltips = {hideTooltip() {}}; room.updateControlsForPlayer = () => {};
+		room.$ = selector => ({prop: () => selector === 'input[name=rogueBloodBoost]'});
+		room.endChoice = () => { room.finishedChoice = true; };
+		room.chooseMove('2', {getAttribute: () => 'normal'});
+		assert.equal(room.choice.type, 'movetarget'); assert(!room.finishedChoice);
+		room.chooseMoveTarget('1'); assert.equal(room.choice.choices[0], 'rogueblood move 2 1'); assert(room.finishedChoice);
+		room.choice.choices = []; room.request.fantasyRogue.blood[0].available = false;
+		assert(room.rogueBallControls().includes('name="rogueBloodBoost" disabled'));
+	});
 	it('uses filtered succession choices in battle and refuses a stale duplicate ability click', () => {
 		const c = battleClient(), king = {member: 'next', species: 'Dragonite', token: 4, pending: true, options: ['longzhihuxi']};
 		c.room.request = {rqid: 9, fantasyRogue: {dragonKing: king}};

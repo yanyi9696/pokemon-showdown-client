@@ -3,11 +3,15 @@
 	var escape = BattleLog.escapeHTML;
 	var globals = this;
 	var companionPortraits = {guzma: 'guzma-expressions', iris: 'iris-champion'};
-	var dialogueSheets = ['n', 'lillie', 'korrina', 'nemona', 'blue', 'gladion', 'bede', 'silver', 'brock', 'maxie', 'marnie', 'kahili', 'liko', 'jenny', 'sabrina', 'flannery', 'roxie', 'viola', 'nessa', 'larry', 'lorelei', 'lance', 'lacey', 'steven',
+	var dialogueSheets = ['mela', 'atticus', 'ortega', 'eri', 'kieran', 'penny', 'carmine', 'n', 'lillie', 'korrina', 'nemona', 'blue', 'gladion', 'bede', 'silver', 'brock', 'maxie', 'marnie', 'kahili', 'liko', 'jenny', 'sabrina', 'flannery', 'roxie', 'viola', 'nessa', 'larry', 'lorelei', 'lance', 'lacey', 'steven',
 		'giovanni', 'archer', 'cyrus', 'ghetsis', 'piers', 'charm', 'clover', 'coin', 'giacomo', 'rocket', 'magma', 'galactic', 'plasma', 'flare', 'skull', 'yell', 'teamstar'];
 	var dialogueCompanions = ['bea', 'acerola', 'iono', 'rika', 'guzma', 'lysandre', 'iris', 'poppy', 'lana', 'olivia', 'grusha', 'canari', 'sada', 'turo'];
-	var singlePortraits = {mewtwo: 'sprites/rogue-dialogue/mewtwo-official.png'};
+	var singlePortraits = {mewtwo: 'sprites/rogue-dialogue/mewtwo-official.png', aqua: Dex.resolveAvatar('aquagrunt'),
+		archie: Dex.resolveAvatar('archie-gen6'), hexmaniac: Dex.resolveAvatar('hexmaniac-gen6'),
+		cheerleader: Dex.resolveAvatar('backersf'), snowboarder: Dex.resolveAvatar('skier')};
 	var portraitVersions = {
+		giacomo: '20261020-reference-v2', mela: '20261020-reference-v2', atticus: '20261020-reference-v2', ortega: '20261020-reference-v2', eri: '20261020-reference-v2',
+		kieran: '20261020-new', penny: '20261020-new', carmine: '20261020-new',
 		lacey: '20261019b', kahili: '20261019-blue', viola: '20261019-curls',
 		marnie: '20261020-rivals-v2', lana: '20261020-rivals-v2', lillie: '20261020-rivals-v2',
 		korrina: '20261020-rivals-v2', nemona: '20261020-rivals-v2', blue: '20261020-rivals-v2',
@@ -32,6 +36,27 @@
 	function recommendedLabel(run, id) {
 		var names = (run.companions || []).filter(function (c) { return c.recommended === id; }).map(function (c) { return c.name; });
 		return names.length ? '（' + names.join('、') + '推荐）' : '';
+	}
+	function resourceMeter(name, value, maximum, detail, unit) {
+		value = Math.max(0, Number(value) || 0); maximum = Math.max(1, maximum);
+		unit = escape(unit || '');
+		return '<div class="rogue-resource"><strong>' + escape(name) + '</strong><progress value="' + Math.min(value, maximum) +
+			'" max="' + maximum + '" aria-label="' + escape(name) + '"></progress><b>' + Number(value.toFixed(2)) + unit + ' / ' + maximum + unit +
+			'</b>' + (detail ? '<small>' + escape(detail) + '</small>' : '') + '</div>';
+	}
+	function memberResources(run, mon) {
+		var owned = run.blessings && run.blessings.owned || [], html = '';
+		if (owned.some(function (b) { return b.family === 'insight'; })) {
+			var insight = mon.insight || {points: 0, gain: 1};
+			html += resourceMeter('生死领悟', insight.points, 100, '下次倒下获得 ' + insight.gain + ' 点');
+		}
+		if (owned.some(function (b) { return b.family === 'spiral' && b.target === mon.id; })) {
+			html += resourceMeter('螺旋力', mon.spiral, 1000, '物攻 +' + Number(((mon.spiral || 0) / 10).toFixed(2)) + '% · 250 点解锁每场首次致命伤保留 1 HP');
+		}
+		if (mon.bond !== undefined) html += resourceMeter('羁绊', mon.bond, 100);
+		if (mon.robeInfo) html += '<p class="rogue-robe-info"><strong>' + escape(mon.robeInfo.name) + ' · 双防耐久 ×' +
+			mon.robeInfo.durability.toFixed(2) + '</strong>（随当前 HP 实时变化，上限 ×6）</p>';
+		return html ? '<div class="rogue-resource-panel">' + html + '</div>' : '';
 	}
 
 	// Update existing nodes in place: replacing the whole room briefly collapses its
@@ -508,8 +533,9 @@
 		},
 		receiveCodex: function (data) {
 			if (!data || data.userid !== app.user.get('userid') || ['guide', 'blessings', 'events'].indexOf(data.section) < 0) return;
+			if (this.state && this.state.contentVersion && data.contentVersion && this.state.contentVersion !== data.contentVersion) return;
 			var old = this.codices[data.section];
-			if (old && old.revision > data.revision) return;
+			if (old && old.contentVersion === data.contentVersion && old.revision > data.revision) return;
 			this.codices[data.section] = data;
 			if (this.screen === data.section) this.render();
 		},
@@ -559,6 +585,8 @@
 			if (!state || state.userid !== app.user.get('userid')) return;
 			if (state.protocolVersion !== 1) { this.error = '请刷新客户端以更新肉鸽页面。'; this.render(); return; }
 			if (this.state && this.state.account && state.account && state.account.revision < this.state.account.revision) return;
+			var codexChanged = this.state && this.state.contentVersion !== state.contentVersion;
+			if (codexChanged) { this.codices = {}; this.codexReplay = null; }
 			var previous = this.state && this.state.run;
 			var incoming = state.run;
 			if (incoming && (!previous || previous.id !== incoming.id)) this.openPartyOnLayout = true;
@@ -568,6 +596,7 @@
 				this.selectedBlessing = null;
 			}
 			this.state = state;
+			if (codexChanged && ['guide', 'blessings', 'events'].indexOf(this.screen) >= 0) this.loadCodex(this.screen);
 			if (state.account && state.account.needsOnboarding && this.screen === 'game') this.screen = 'home';
 			if (this.$el[0] && this.$el[0].setAttribute) this.$el[0].setAttribute('aria-busy', this.pending ? 'true' : 'false');
 			this.normalizeStarters();
@@ -694,10 +723,10 @@
 					return '<button class="button rogue-companion-pick" name="companionAction" value="' + entry[0] + '|chooseband"' + (locked ? ' disabled' : '') + '><span class="rogue-companion-portrait" style="' + portraitStyle(entry[0]) + '"></span><b>' + entry[1] + '</b></button>';
 				}).join('') + '</div></div>';
 			}
-			if (run.rivalCompanion) {
-				var rival = run.rivalCompanion, art = portraitFile(rival.id);
+			(run.rivalCompanions || (run.rivalCompanion ? [run.rivalCompanion] : [])).forEach(function (rival) {
+				var art = portraitFile(rival.id);
 				html += '<article class="rogue-companion rogue-rival-companion">' + (art ? '<span class="rogue-companion-portrait" style="' + portraitStyle(rival.id) + '"></span>' : '<img class="rogue-rival-native" src="' + escape(Dex.resolveAvatar(rival.id)) + '" alt="" />') + '<div class="rogue-companion-copy"><strong>' + escape(rival.name) + ' · 劲敌</strong><small>' + escape(rival.text) + ' · 熟悉度 ' + rival.affection + '</small><p>' + escape(rival.message) + '</p></div></article>';
-			}
+			});
 			if (!companions.length) return html;
 			return html + '<section class="rogue-companions" aria-label="同行训练家">' + companions.map(function (c) {
 				var chat = c.smile && c.smileUntil, seconds = chat ? Math.max(0, (c.smileUntil - Date.now()) / 1000) : 0;
@@ -707,7 +736,8 @@
 					portrait + 'animation-duration:' + seconds + 's"' + (locked ? ' disabled' : '') + '></button><div class="rogue-companion-copy"><strong>' + escape(c.name) + '</strong>';
 				if (c.canConsult) out += button('companionAction', c.id + '|advice', '你想听听我的建议吗？', locked);
 				if (c.message) out += '<p class="rogue-companion-speech">' + escape(c.message) + '</p>';
-				if (c.giftCounter) out += '<small>同行训练家的赠礼 · ' + (c.id === 'lana' ? '钓鱼 ' : c.id === 'olivia' ? '赌石 ' : '偏好 ') + Math.min(15, c.preferences) + ' / 15' + (c.rewarded ? ' · 已领取' : c.giftPending ? ' · 待选择赠礼' : '') + '</small>';
+				if (c.giftCounter) out += resourceMeter('同行训练家的赠礼', Math.min(15, c.preferences), 15,
+					(c.id === 'lana' ? '钓鱼次数' : c.id === 'olivia' ? '赌石次数' : '听从偏好次数') + (c.rewarded ? ' · 已领取' : c.giftPending ? ' · 待选择赠礼' : ''));
 				(c.giftOptions || []).forEach(function (gift) { out += button('companionAction', c.id + '|gift:' + gift.id, '领取【' + gift.name + '】', locked); });
 				if (c.zMove) {
 					out += '<p class="rogue-caption">额外 Z【' + escape(c.zMove.name) + '】 · 威力 <b>185</b> · ' + escape(localName(c.zMove.type)) + '系' + (c.zMove.category === 'Physical' ? '群攻物理' : '声音特殊') + '。命中后五项能力各 +1；本局一次，逃跑返还。</p>';
@@ -1250,11 +1280,16 @@
 		renderBlessings: function (run, busy) {
 			var state = run.blessings;
 			if (!state) return '';
-			var html = '<section class="rogue-owned-blessings"><h3>' + fa('star') + '本局祝福</h3><p>幻想碎片 <strong>' + state.shards + '</strong> / 100';
-			if (state.candy || run.team.some(function (mon) { return idOf(mon.set.species) === 'meltan'; })) html += ' · 美录坦糖果 <strong>' + state.candy + '</strong> / 400';
-			if (state.owned.some(function (b) { return b.family === 'swords'; })) html += ' · 圣剑使用 <strong>' + state.swordUses + '</strong> 次';
-			if (state.owned.some(function (b) { return b.family === 'psychic'; })) html += ' · 灵能 <strong>' + Number((state.psychic || 0).toFixed(2)) + '%</strong>';
-			html += '</p><p class="rogue-caption">祝福累计加级：固定首领 +' + (state.bossLevels === undefined ? state.levels : state.bossLevels) +
+			var html = '<section class="rogue-owned-blessings"><h3>' + fa('star') + '本局祝福</h3><div class="rogue-resource-panel">' + resourceMeter('幻想碎片', state.shards, 100, '每次幻想化需 100 片，可继续积攒');
+			if (state.candy || run.team.some(function (mon) { return idOf(mon.set.species) === 'meltan'; })) html += resourceMeter('美录坦糖果', state.candy, 400);
+			if (state.owned.some(function (b) { return b.family === 'swords'; })) html += resourceMeter('圣剑使用', state.swordUses, ((state.swordRewards || []).length + 1) * 15, '达到目标可领取锋锐');
+			if (state.owned.some(function (b) { return b.family === 'psychic'; })) html += resourceMeter('灵能', state.psychic, 100, '', '%');
+			state.owned.forEach(function (entry) {
+				if (entry.progress !== undefined) html += resourceMeter(entry.name, entry.progress,
+					entry.family === 'starquest' ? entry.progress < 10 ? 10 : entry.progress < 90 ? 90 : 180 : 15,
+					entry.completed ? '已完成' : entry.family === 'starquest' ? '累计击倒数' : '累计区域数');
+			});
+			html += '</div><p class="rogue-caption">祝福累计加级：固定首领 +' + (state.bossLevels === undefined ? state.levels : state.bossLevels) +
 				' 级 · 普通遭遇 +' + state.levels + ' 级。祝福和任务进度会随存档保存。</p>';
 			if (!state.owned.length) html += '<p>第一层开战前，以及通关第 50、100、150 层后各选择一轮祝福，共四轮；基拉祈每轮可选两项。</p>';
 			state.owned.forEach(function (entry) {
@@ -1280,6 +1315,15 @@
 				html += '</ul>';
 			}
 			var locked = busy || !editable(run) || run.healingLocked;
+			if (state.owned.some(function (b) { return b.family === 'killlagirl'; })) {
+				var legendsReady = ['yveltal', 'reshiram'].every(function (id) { return run.team.some(function (mon) { return idOf(mon.set.species) === id; }); });
+				['godrobe', 'puregodrobe'].forEach(function (family) {
+					var robe = state.owned.find(function (b) { return b.family === family; });
+					if (robe) html += button('inheritRobe', family, (family === 'godrobe' ? '伊裴尔塔尔继承神衣鲜血' : '莱希拉姆继承神衣纯洁') +
+						(robe.target ? ' · 已继承' : ''), locked || !legendsReady || !!robe.target);
+				});
+				if (!legendsReady) html += '<p class="rogue-caption">两位传说伙伴同时入队后，可分别继承两件神衣。</p>';
+			}
 			(state.learning || []).forEach(function (entry) {
 				var mon = run.team.find(function (p) { return p.id === entry.member; });
 				if (mon) html += button('learnBlessingMove', mon.id, localName(mon.set.species) + ' · 学习一个招式', locked || !entry.moves.length);
@@ -1300,7 +1344,8 @@
 					localName(mon.set.species) + (mon.canReceiveSharpness === false ? ' · 已拥有锋锐' : ' · 领取锋锐'), locked || mon.canReceiveSharpness === false);
 			});
 			Object.keys(state.teraShards || {}).forEach(function (type) {
-				html += '<details><summary>' + escape(localName(type)) + '太晶碎片：' + state.teraShards[type] + '</summary><p>消耗 50 片，为以下伙伴更改太晶属性：</p>';
+				html += '<details><summary><strong>' + escape(localName(type)) + '太晶碎片</strong>：' + state.teraShards[type] + '</summary>' +
+					resourceMeter(localName(type) + '太晶碎片', state.teraShards[type], 50, '每次更改属性需 50 片，可继续积攒') + '<p>消耗 50 片，为以下伙伴更改太晶属性：</p>';
 				run.team.forEach(function (mon) {
 					html += button('changeTera', mon.id + ':' + type, localName(mon.set.species), locked || !run.teraUnlocked ||
 						state.teraShards[type] < 50 || mon.set.teraType === type);
@@ -1317,6 +1362,7 @@
 		},
 		learnBlessingMove: function (id) { app.addPopup(globals.RogueBlessingLearnPopup, {room: this, member: id}); },
 		exchangeShards: function (value) { this.submit('exchangeshards', {value: value}); },
+		inheritRobe: function (value) { this.submit('inheritrobe', {value: value}); },
 		chooseEvent: function (choice) {
 			var event = this.state && this.state.run && this.state.run.event;
 			if (!event) return;
@@ -1807,7 +1853,7 @@
 				html += '<span>' + statNames[stat] + '<b>' + ((mon.stats || {})[stat] || (stat === 'hp' ? mon.maxhp : '—')) +
 					'</b><small>' + ((mon.set.evs || {})[stat] || 0) + '</small></span>';
 			});
-			html += '</button></div>';
+			html += '</button></div>' + memberResources(run, mon);
 			var growth = [];
 			if (mon.tonics && mon.tonics.wine) growth.push('酒：每次登场混乱 · 每场首个实际招式威力 ×2');
 			if (mon.tonics && mon.tonics.cephalosporin) growth.push('头孢：免疫七种异常状态，不免疫混乱');

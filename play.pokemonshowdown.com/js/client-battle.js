@@ -930,6 +930,8 @@
 			var psychic = typeof rogue.psychic === 'number' ? '<div class="rogue-psychic"><p>灵能 <strong>' + Number(rogue.psychic.toFixed(2)) +
 				'%</strong> · 达到 100% 可消耗全部灵能，发动一击必杀，占用本次行动。</p>' +
 				'<button class="button" name="chooseRoguePsychic"' + (rogue.psychic < 100 ? ' disabled' : '') + '>释放灵能 · 一击必杀</button></div>' : '';
+			var blood = rogue.blood && rogue.blood[this.choice && this.choice.choices ? this.choice.choices.length : 0];
+			if (blood) psychic += '<label class="rogue-blood-choice"><input type="checkbox" name="rogueBloodBoost"' + (blood.available ? '' : ' disabled') + '> 神衣鲜血：消耗 ' + blood.cost + ' HP，本次伤害 +' + Math.round((blood.factor - 1) * 100) + '%</label>';
 			if (rogue.eeveeZ && rogue.eeveeZ[this.choice && this.choice.choices ? this.choice.choices.length : 0]) psychic +=
 				'<div class="rogue-psychic"><button class="button" name="chooseRogueEeveeZ">九彩升华齐聚顶 · 额外使用</button><p>本成员每场一次，不占行动。点击后继续选择本回合招式；五项能力各提升 2 级。</p></div>';
 			var zSlot = this.choice && this.choice.choices ? this.choice.choices.length : 0;
@@ -1491,7 +1493,7 @@
 				var choosableTargets = { normal: 1, any: 1, adjacentAlly: 1, adjacentAllyOrSelf: 1, adjacentFoe: 1 };
 				if (this.battle.gameType === 'freeforall') delete choosableTargets['adjacentAllyOrSelf'];
 
-				this.choice.choices.push((this.choice.rogueEeveeZ ? 'rogueeeveez ' : '') + 'move ' + pos + (isMega ? ' mega' : '') + (isMegaX ? ' megax' : isMegaY ? ' megay' : '') + (isZMove ? ' zmove' : '') + (isUltraBurst || isAuraBurst ? ' ultra' : '') + (isDynamax ? ' dynamax' : '') + (isTerastal ? ' terastallize' : ''));
+				this.choice.choices.push((this.$('input[name=rogueBloodBoost]').prop('checked') ? 'rogueblood ' : this.choice.rogueEeveeZ ? 'rogueeeveez ' : '') + 'move ' + pos + (isMega ? ' mega' : '') + (isMegaX ? ' megax' : isMegaY ? ' megay' : '') + (isZMove ? ' zmove' : '') + (isUltraBurst || isAuraBurst ? ' ultra' : '') + (isDynamax ? ' dynamax' : '') + (isTerastal ? ' terastallize' : ''));
 				this.choice.rogueEeveeZ = false;
 				if (nearActive.length > 1 && target in choosableTargets) {
 					this.choice.type = 'movetarget';
