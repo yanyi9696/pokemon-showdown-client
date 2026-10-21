@@ -68,6 +68,31 @@ function state() {
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
 describe('Fantasy Rogue start menu and codex', () => {
+	it('offers an ecology guide with anonymous black silhouettes and named caught pixel icons', () => {
+		const c = client(true), calls = []; c.room.receiveState(state()); c.room.openCodex('guide');
+		c.Dex.getPokemonIcon = name => {calls.push(name); return 'background-position:0 0;';};
+		c.room.receiveCodex({userid: 'rogueplayer', codexSchema: 2, section: 'guide', guide: {intro: [], modules: {biomes: [
+			{id: 'biome01', name: '绿茵森林', text: '在这里捕捉', pokemon: [{species: 'Caterpie', caught: false}, {species: 'Weedle', caught: true}], visitors: [{species: 'Paras', caught: false}]},
+		]}}});
+		c.room.filterCodex('biomes');
+		assert(c.room.html.includes('生态区域')); assert(c.room.html.includes('绿茵森林'));
+		assert(c.room.html.includes('生态池 · 已捕捉 1 / 2'));
+		assert(c.room.html.includes('rogue-biome-icon is-unknown'));
+		assert(!c.room.html.includes('Caterpie') && !c.room.html.includes('Paras'));
+		assert(c.room.html.includes('title="Weedle"') && c.room.html.includes('aria-label="Weedle"'));
+		assert.deepEqual(calls.slice(-3), ['Caterpie', 'Weedle', 'Paras']);
+		const css = fs.readFileSync(require.resolve('../play.pokemonshowdown.com/style/fantasy-rogue.css'), 'utf8');
+		assert(css.includes('.rogue-biome-icon.is-unknown .picon { filter: brightness(0); }'));
+	});
+	it('uses the matching local Leader Crest sprite in evolution-item cards', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('guide');
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'guide', guide: {intro: [], modules: {items: [
+			{id: 'leaderscrest', name: '头领凭证', kind: 'evolution', icon: 'leaderscrest', text: '使用后进化'},
+		]}}});
+		c.room.filterCodex('items');
+		assert(c.room.html.includes('sprites/fantasy-rogue/leaderscrest.png'));
+		assert(fs.statSync(require.resolve('../play.pokemonshowdown.com/sprites/fantasy-rogue/leaderscrest.png')).size > 100);
+	});
 	it('uses the server guide for both first-play onboarding and the permanent codex', () => {
 		const c = client(true), data = state(), popups = [];
 		data.codexSchema = 2;

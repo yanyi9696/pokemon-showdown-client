@@ -1108,3 +1108,27 @@
 .rogue-heading-region[data-kind="trainer"], .rogue-heading-region[data-kind="boss"] { color: #a13516; }
 .rogue-heading-region[data-kind="adventure"] { color: #b31a72; }
 .rogue-heading-region[data-kind="trade"] { color: #a27015; }
+.rogue-biome-icons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 3px;
+	margin: 8px 0;
+}
+.rogue-biome-icon {
+	display: inline-flex;
+	width: 40px;
+	height: 32px;
+	align-items: center;
+	justify-content: center;
+	border-radius: 5px;
+	background: rgba(255, 255, 255, .6);
+}
+.rogue-biome-icon .picon {
+	display: inline-block;
+	width: 40px;
+	height: 30px;
+	image-rendering: pixelated;
+}
+.rogue-biome-icon.is-unknown .picon { filter: brightness(0); }
+.rogue-biome-visitors { margin-top: 10px; }
+.rogue-biome-visitors summary { cursor: pointer; font-weight: 700; }

@@ -227,7 +227,7 @@
 	}
 	var itemKinds = {ability: '特性调整', ball: '精灵球', heal: '恢复道具', revive: '复活道具', cure: '状态恢复', ether: 'PP 恢复', candy: '经验糖果', evolution: '进化道具', held: '携带道具', emblem: '属性转 · 独立栏位', treasure: '贵重物品', effort: '基础点数', tonic: '祝福道具', crown: '个体值训练'};
 	var economyIcons = ['tinymushroom', 'balmmushroom', 'prettyfeather', 'stardust', 'starpiece', 'cometshard', 'pearl', 'bigpearl', 'pearlstring',
-		'antidote', 'burnheal', 'iceheal', 'awakening', 'paralyzeheal', 'healthfeather', 'musclefeather', 'resistfeather', 'geniusfeather', 'cleverfeather', 'swiftfeather'];
+		'antidote', 'burnheal', 'iceheal', 'awakening', 'paralyzeheal', 'healthfeather', 'musclefeather', 'resistfeather', 'geniusfeather', 'cleverfeather', 'swiftfeather', 'leaderscrest'];
 	function dex() { return Dex.mod ? Dex.mod('gen9fantasy') : Dex; }
 	function idOf(name) { return (name || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
 	function fa(name) { return '<i class="fa fa-' + name + '" aria-hidden="true"></i> '; }
@@ -2303,11 +2303,11 @@
 			}
 			var filters, entries, guideModule = this.codexFilter.replace(/enhanced$/, '');
 			if (section === 'guide') {
-				if (this.codexFilter !== 'beginner') html += '<div class="rogue-guide-intro">' + data.guide.intro.slice(0, 2).map(function (entry) {
+				if (['beginner', 'biomes'].indexOf(this.codexFilter) < 0) html += '<div class="rogue-guide-intro">' + data.guide.intro.slice(0, 2).map(function (entry) {
 					return '<article><h3>' + escape(entry.title) + '</h3><p>' + escape(entry.text) + '</p></article>';
 				}).join('') + '</div><details class="rogue-guide-rules"><summary>出发前，了解这些基础规则</summary>' +
 					data.guide.intro.slice(2).map(function (entry) { return '<h4>' + escape(entry.title) + '</h4><p>' + escape(entry.text) + '</p>'; }).join('') + '</details>';
-				filters = [['beginner', '新手攻略'], ['items', '道具'], ['moves', '招式'], ['abilities', '特性'], ['pokemon', '幻想宝可梦']];
+				filters = [['beginner', '新手攻略'], ['items', '道具'], ['moves', '招式'], ['abilities', '特性'], ['pokemon', '幻想宝可梦'], ['biomes', '生态区域']];
 				entries = ['items', 'exclusive'].indexOf(this.codexFilter) >= 0 ? (data.guide.modules.items || []).filter(function (entry) {
 					return this.codexFilter === 'exclusive' ? entry.category === 'exclusive' : entry.category !== 'exclusive';
 				}, this) : this.codexFilter === 'special' ? data.guide.itemNotes || [] : data.guide.modules[guideModule] || [];
@@ -2317,7 +2317,8 @@
 				if (guideModule === 'moves' || guideModule === 'abilities') entries = entries.filter(function (entry) {
 					return (entry.origin || 'fantasy') === (/enhanced$/.test(this.codexFilter) ? 'enhanced' : 'fantasy');
 				}, this);
-				if (this.codexFilter !== 'beginner') html += '<p class="rogue-caption">以下为幻想形态与主要调整内容；形态、道具能否在爬塔中使用，还需满足相应获取和解锁条件。</p>';
+				if (this.codexFilter === 'biomes') html += '<p class="rogue-caption">黑色剪影表示尚未在该生态捕捉；在其他生态捕捉不会点亮这里的图标。战斗与精英共用生态记录，出现过的生态在后续 5 层暂不刷新。</p>';
+				else if (this.codexFilter !== 'beginner') html += '<p class="rogue-caption">以下为幻想形态与主要调整内容；形态、道具能否在爬塔中使用，还需满足相应获取和解锁条件。</p>';
 			} else {
 				var people = section === 'events' && this.codexCollection === 'companions';
 				if (section === 'events') html += '<nav class="rogue-codex-collections" aria-label="事件图鉴分册">' +
@@ -2368,12 +2369,24 @@
 				});
 				html += '<p class="rogue-caption">按中文名称拼音首字母排列。</p>';
 			}
-			var total = Math.max(1, Math.ceil(entries.length / 12)); this.codexPage = Math.min(this.codexPage, total - 1);
-			html += '<div class="rogue-codex-grid">' + entries.slice(this.codexPage * 12, (this.codexPage + 1) * 12).map(function (entry) {
+			var pageSize = section === 'guide' && active === 'biomes' ? 4 : 12;
+			var total = Math.max(1, Math.ceil(entries.length / pageSize)); this.codexPage = Math.min(this.codexPage, total - 1);
+			html += '<div class="rogue-codex-grid">' + entries.slice(this.codexPage * pageSize, (this.codexPage + 1) * pageSize).map(function (entry) {
 				var tier = {silver: '白银', gold: '黄金', prismatic: '棱彩'}[entry.tier];
 				var icon = section === 'guide' ? (active === 'pokemon' ? '<span class="picon" style="' + Dex.getPokemonIcon(entry.name) + '"></span>' :
 					['items', 'exclusive'].indexOf(active) >= 0 ? itemIcon(entry) : fa('trophy')) : fa(section === 'events' ? 'map-signs' : blessingIcon(entry));
 				var body = '<p class="rogue-codex-effect">' + (section === 'blessings' ? blessingText(entry.text) : section === 'guide' && active === 'beginner' ? guideText(entry.text) : escape(eventText(localName(entry.text || '')))) + '</p>';
+				if (section === 'guide' && active === 'biomes') {
+					var ecologyIcons = function (list) {
+						return '<div class="rogue-biome-icons">' + list.map(function (mon) {
+							var label = mon.caught ? localName(mon.species) : '尚未在此捕捉';
+							return '<span class="rogue-biome-icon' + (mon.caught ? '' : ' is-unknown') + '" title="' + escape(label) + '" role="img" aria-label="' + escape(label) + '"><span class="picon" aria-hidden="true" style="' + Dex.getPokemonIcon(mon.species) + '"></span></span>';
+						}).join('') + '</div>';
+					};
+					var regional = entry.pokemon || [], visitors = entry.visitors || [];
+					body += '<p class="rogue-caption">生态池 · 已捕捉 ' + regional.filter(function (mon) { return mon.caught; }).length + ' / ' + regional.length + '</p>' + ecologyIcons(regional) +
+						'<details class="rogue-biome-visitors"><summary>稀有乱入与高层精英</summary><p class="rogue-caption">各生态都可能稀有遇见其他家族；第 161 层起，精英还有机会出现传说中的宝可梦。相关祝福也会吸引特定传说。</p>' + ecologyIcons(visitors) + '</details>';
+				}
 				if (section === 'guide' && guideModule === 'moves') body = '<p class="rogue-caption">' + typeIcons([entry.type]) + ' · ' + escape(localName(entry.category)) +
 					' · 威力 ' + (entry.power || '—') + ' · 命中 ' + (entry.accuracy === true ? '必中' : entry.accuracy + '%') + ' · PP ' + entry.pp + '</p>' + body;
 				if (section === 'guide' && active === 'pokemon') body = '<p>' + typeIcons(entry.types) + '</p><p>特性：' +

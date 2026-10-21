@@ -1,5 +1,9 @@
 # 幻想杯肉鸽道具图来源
 
+## 2026-10-21 头领凭证
+
+`leaderscrest.png` 使用 [PokeAPI/sprites 原始道具图](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/leaders-crest.png)，以原 PNG 保存，未重绘。已对照《朱／紫》的头领凭证图确认外观。美术版权归 Nintendo / Game Freak / Creatures；游戏运行时只读取本站文件。
+
 试玩版从 PokéRogue 道具图集显示 `rare_candy`（作为四种经验糖果的临时通用图标）、`linking_cord`，以及 PS 缺少的 `potion`、`super_potion`、`hyper_potion`、`revive`、`full_heal`、`elixir`。使用 CSS 图集坐标，不裁切、重绘或修改原 PNG；其他道具沿用 Showdown 图标。
 
 - 上游：[pagefaultgames/pokerogue-assets](https://github.com/pagefaultgames/pokerogue-assets)
