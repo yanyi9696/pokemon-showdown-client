@@ -1086,3 +1086,25 @@
 .status-par .rogue-status-spark { animation: rogue-status-flicker 1.6s steps(2, end) infinite; }
 @keyframes rogue-status-flicker { 50% { opacity: .35; } }
 @media (prefers-reduced-motion: reduce) { .status-par .rogue-status-spark { animation: none; } }
+.rogue-affection-gain {
+	position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+	white-space: nowrap; z-index: 3; padding: 4px 9px; border-radius: 12px;
+	background: #fff2fa; color: #a31b61; border: 1px solid #d46ca4;
+	font-size: 13px; font-weight: bold; pointer-events: none;
+	animation: rogue-affection-rise 1.8s ease-out both;
+}
+@keyframes rogue-affection-rise {
+	0% { opacity: 0; margin-top: 12px; }
+	15%, 65% { opacity: 1; }
+	100% { opacity: 0; margin-top: -6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.rogue-affection-gain { animation: rogue-affection-still 2s step-end both; }
+}
+@keyframes rogue-affection-still { to { opacity: 0; } }
+.rogue-floor-heading .rogue-floor-subtitle { color: #6c7f8d; font-size: .86em; font-weight: 500; }
+.rogue-heading-region { font-weight: 800; color: #214f8a; }
+.rogue-heading-region[data-kind="wild"], .rogue-heading-region[data-kind="elite"],
+.rogue-heading-region[data-kind="trainer"], .rogue-heading-region[data-kind="boss"] { color: #a13516; }
+.rogue-heading-region[data-kind="adventure"] { color: #b31a72; }
+.rogue-heading-region[data-kind="trade"] { color: #a27015; }

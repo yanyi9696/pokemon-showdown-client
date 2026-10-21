@@ -3136,7 +3136,7 @@ var translations = {
     "Fantasy Ring Target": "幻之标靶",
     "Fantasy Life Orb": "幻之生命宝珠",
     "Fantasy Sachet": "幻之香袋",
-    "Greninja-Ash Z": "智忍蛙Z",
+    "Greninja-Ash Z": "智蛙 Z",
     "Fantasy Scope Lens": "幻之焦点镜",
     "Fantasy Protector": "幻之护具",
     "Fantasy Syrupy Apple": "幻之蜜汁苹果",

@@ -953,6 +953,53 @@ function adventure(phase = 'choose') {
 	return data;
 }
 describe('Fantasy Rogue event display and spectator playback', () => {
+	it('welcomes a trained returning partner through the placement panel without calling it a new capture', () => {
+		const c = client(), data = adventure('settlement');
+		data.run.pendingCapture = {...data.run.team[0], id: 'returning'}; data.run.returningPartner = true;
+		c.room.receiveState(data);
+		assert(c.room.html.includes('迎接修行伙伴')); assert(c.room.html.includes('修行归来的'));
+		assert(!c.room.html.includes('捕捉解锁已保存')); assert(c.room.html.includes('告别这位伙伴'));
+	});
+	it('shows region, title and a lighter person subtitle in each active floor heading', () => {
+		const c = client(), data = adventure('event');
+		data.run.node = {kind: 'event', name: '旅途同行 · 露璃娜', reward: {money: 0, items: {}}};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('第 10 / 200 层 · <strong class="rogue-heading-region" data-kind="event">事件</strong> · 旅途同行 · <span class="rogue-floor-subtitle">露璃娜</span>'));
+	});
+	it('uses Chinese gender labels in party sheets and blessing gifts, preserving the internal gender IDs', () => {
+		for (const [gender, label] of [['M', '雄性'], ['F', '雌性'], ['N', '无性别']]) {
+			const c = client(), data = adventure(); data.run.team[0].set.gender = gender;
+			c.room.receiveState(data);
+			assert(c.html.includes('性别<br /><b>' + label + '</b>'));
+			data.run.blessings = {owned: [], pending: [{id: 'gift', kind: 'gift', title: '新伙伴', pokemon: data.run.team[0]}]};
+			assert(c.room.renderBlessingChoice(data.run, false).includes(' · ' + label + '</p>'));
+			assert.equal(data.run.team[0].set.gender, gender);
+		}
+	});
+	it('links both robe blessings from Kill la Girl and clears filters when following either link', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('blessings');
+		const entries = [{id: 'killlagirl', family: 'killlagirl', name: '斩服少女', tier: 'prismatic', unlocked: true,
+			text: '分别继承【神衣鲜血】与【神衣纯洁】。'}, ...Array.from({length: 12}, (_, i) => ({id: 'test' + i, family: 'test' + i, name: '测试' + i, text: '', tier: 'silver', unlocked: true})),
+			...['godrobe', 'puregodrobe'].map((id, i) => ({id, family: id, name: i ? '神衣纯洁' : '神衣鲜血', text: '', tier: 'prismatic', unlocked: true}))];
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'blessings', entries});
+		for (const family of ['godrobe', 'puregodrobe']) assert(c.room.html.includes('name="jumpBlessing" value="' + family + '"'));
+		for (const family of ['godrobe', 'puregodrobe']) {
+			c.room.codexQuery = '斩服少女'; c.room.codexFilter = 'gold'; c.room.jumpBlessing(family);
+			assert.equal(c.room.codexFilter, 'all'); assert.equal(c.room.codexQuery, ''); assert.equal(c.room.codexPage, 1);
+			assert(c.room.html.includes('data-codex-family="' + family + '"'));
+		}
+	});
+	it('shows affinity on portraits and animates each committed choice once', () => {
+		const c = client(); c.room.receiveState(adventure());
+		const story = {key: 'answer:1', scene: 'arena', title: '玛俐', portrait: 'marnie', affection: 8, affectionGain: 2};
+		const html = c.room.storyArt(story);
+		assert(html.includes('title="当前好感度：8"')); assert(html.includes('好感度 +2'));
+		assert(!c.room.storyArt(story).includes('好感度 +2'));
+		assert(c.room.storyArt({...story, key: 'answer:2', affection: 11, affectionGain: 3}).includes('好感度 +3'));
+		const run = adventure('event').run;
+		run.event = {title: '重逢', paragraphs: ['你好。'], options: [], rivalPortrait: 'marnie', affection: 11};
+		assert(c.room.renderEvent(run, false).includes('title="当前好感度：11"'));
+	});
 	it('contains paired and native rival portraits alongside event text before all event controls', () => {
 		const c = client(), data = adventure('ready');
 		for (const portrait of ['silver', 'unknowntrainer']) {

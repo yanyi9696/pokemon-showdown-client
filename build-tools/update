@@ -229,6 +229,15 @@ try {
 	}
 }
 
+// Keep the same local announcement in the hosted client when the optional PHP news cache is absent.
+if (news === '[failed to retrieve news]') {
+	const localNews = fs.readFileSync('play.pokemonshowdown.com/testclient.template.html', UTF8)
+		.match(/<div class="newsentry">([\s\S]*?)<\/div>/);
+	if (localNews) news = localNews[0];
+} else if (!news.includes('幻想杯肉鸽内容目前还在内测中！')) {
+	news = news.replace(/(<p>[^<]*聊天室里输入[\s\S]*?\/avatars[\s\S]*?<\/p>)/,
+		'$1<br /><p>幻想杯肉鸽内容目前还在内测中！</p>');
+}
 indexContents = indexContents.replace(/<!-- newsid -->/g, newsid);
 indexContents = indexContents.replace(/<!-- news -->/g, news);
 

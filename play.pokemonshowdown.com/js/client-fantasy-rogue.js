@@ -161,6 +161,13 @@
 	var kindNames = {wild: '野生战斗', battle: '战斗', elite: '精英', encounter: '遭遇', trainer: '训练家', rest: '休整',
 		boss: '首领', gym: '道馆', event: '事件', reward: '奖励', shop: '商店', trade: '交易', adventure: '奇遇', fog: '未知区域'};
 	var routeNames = {wild: '战斗', trainer: '遭遇', shop: '交易'};
+	function floorNodeHeading(node) {
+		if (!node) return '';
+		var parts = node.name.split(/\s+·\s+/);
+		return ' · <strong class="rogue-heading-region" data-kind="' + escape(node.kind) + '">' +
+			escape(routeNames[node.kind] || kindNames[node.kind] || node.kind) + '</strong> · ' + escape(parts.shift()) +
+			(parts.length ? ' · <span class="rogue-floor-subtitle">' + escape(parts.join(' · ')) + '</span>' : '');
+	}
 	function routeTone(kind) {
 		if (kind === 'rest') return 'green';
 		if (kind === 'adventure' || kind === 'fog') return 'rose';
@@ -584,12 +591,13 @@
 		},
 		codexSearchInput: function (event) { this.codexQuery = event.currentTarget.value.trim(); if (!this.codexQuery) { this.codexPage = 0; this.render(); } },
 		codexSearchModeChanged: function (event) { this.codexSearchMode = event.currentTarget.value; this.searchCodex(); },
-		jumpBlessing: function () {
+		jumpBlessing: function (family) {
+			family = ['topclearmind', 'godrobe', 'puregodrobe'].indexOf(family) >= 0 ? family : 'topclearmind';
 			this.codexFilter = 'all'; this.codexQuery = '';
 			var entries = (this.codices.blessings || {}).entries || [];
-			var index = entries.findIndex(function (entry) { return entry.family === 'topclearmind'; });
+			var index = entries.findIndex(function (entry) { return entry.family === family; });
 			if (index < 0) return; this.codexPage = Math.floor(index / 12); this.render();
-			var target = this.$('[data-codex-family=topclearmind]')[0]; if (target) target.scrollIntoView({block: 'center'});
+			var target = this.$('[data-codex-family=' + family + ']')[0]; if (target) target.scrollIntoView({block: 'center'});
 		},
 		searchCodex: function () { this.codexQuery = this.$el.find('input[name=codexSearch]').val().trim(); this.codexPage = 0; this.render(); },
 		codexSearchKey: function (event) { if (event.key === 'Enter') { event.preventDefault(); this.searchCodex(); } },
@@ -947,6 +955,11 @@
 			}
 			var actor = art && art.querySelector('.rogue-dialogue-actor');
 			if (actor) actor.classList.toggle('is-approval', story.expression === 'approval');
+			if (actor && story.affection !== undefined) {
+				actor.title = '当前好感度：' + story.affection;
+				var popup = this.affectionPopup(story);
+				if (popup && actor.insertAdjacentHTML) actor.insertAdjacentHTML('beforeend', popup);
+			}
 			var dialogue = section.querySelector('.rogue-story-dialogue');
 			dialogue.disabled = busy || !!story.battleReady;
 			dialogue.setAttribute('aria-busy', String(busy));
@@ -964,6 +977,11 @@
 				story.encounter || '', story.performance || '', story.stage === 'interlude' ? '' : story.avatar || '', story.pokemon || ''].join(':');
 		},
 		storyArtKey: function (story) { return JSON.stringify([story.roster || null, story.portrait || '', story.side || 'right']); },
+		affectionPopup: function (story) {
+			if (!story.affectionGain || this.affectionPopupKey === story.key) return '';
+			this.affectionPopupKey = story.key;
+			return '<span class="rogue-affection-gain" role="status">好感度 +' + Number(story.affectionGain) + '</span>';
+		},
 		storyArt: function (story) {
 			if (story.roster) {
 				var roster = story.roster;
@@ -975,13 +993,14 @@
 			}
 			if (story.portrait) {
 				var id = story.portrait, file = portraitFile(id);
+				var affinity = this.affectionPopup(story);
 				var actor = '<div role="img" aria-label="' + escape(story.speaker || story.title) + '" class="rogue-dialogue-actor side-' +
 					(story.side === 'left' ? 'left' : 'right') + (story.expression === 'approval' ? ' is-approval' : '') +
-					'"';
-				if (id === 'mewtwo') return actor + '>' + croppedMewtwo('rogue-dialogue-single') + '</div>';
-				if (singlePortraits[id]) return actor + '><img class="rogue-dialogue-single" alt="" src="' + singlePortraits[id] + '" /></div>';
-				if (file) return actor + ' style="' + portraitStyle(id) + '"></div>';
-				return actor + '>' + (story.pokemon ? '<div class="rogue-story-pokemon" aria-hidden="true" style="' +
+					'"' + (story.affection !== undefined ? ' title="当前好感度：' + Number(story.affection) + '"' : '');
+				if (id === 'mewtwo') return actor + '>' + affinity + croppedMewtwo('rogue-dialogue-single') + '</div>';
+				if (singlePortraits[id]) return actor + '>' + affinity + '<img class="rogue-dialogue-single" alt="" src="' + singlePortraits[id] + '" /></div>';
+				if (file) return actor + ' style="' + portraitStyle(id) + '">' + affinity + '</div>';
+				return actor + '>' + affinity + (story.pokemon ? '<div class="rogue-story-pokemon" aria-hidden="true" style="' +
 					Dex.getTeambuilderSprite({species: story.pokemon}) + '"></div>' :
 					'<img class="rogue-story-trainer" alt="" src="' + escape(Dex.resolveAvatar(story.avatar || id)) + '" />') + '</div>';
 			}
@@ -1271,7 +1290,7 @@
 					if (mon.egg) html += '<p>宝可梦蛋 · 再前进 <b>' + mon.remainingFloors + '</b> 层孵化。孵化前占用队伍位置，不能出战或使用道具。</p>';
 					else html += '<div class="rogue-blessing-gift"><span class="picon" style="' + Dex.getPokemonIcon(mon.set.species) + '"></span><strong>' +
 					escape(localName(mon.set.species)) + '</strong> · Lv.' + mon.set.level + ' · ' + '★'.repeat(mon.stars || 1) + (mon.set.shiny ? ' · 闪光' : '') +
-						'<p>' + escape(localName(mon.set.nature)) + ' · ' + escape(localName(mon.set.ability)) + ' · ' + escape(mon.set.gender || '无性别') + '</p><p>个体值：' +
+						'<p>' + escape(localName(mon.set.nature)) + ' · ' + escape(localName(mon.set.ability)) + ' · ' + escape({M: '雄性', F: '雌性'}[mon.set.gender] || '无性别') + '</p><p>个体值：' +
 						Object.keys(statNames).map(function (key) { return statNames[key] + ' ' + mon.set.ivs[key]; }).join(' / ') + '</p><p>能力值：' +
 						Object.keys(statNames).map(function (key) { return statNames[key] + ' ' + ((mon.stats || {})[key] || (key === 'hp' ? mon.maxhp : '—')); }).join(' / ') + '</p><p>' +
 						mon.set.moves.map(function (move) { return escape(localName(dex().moves.get(move).name, 'move')); }).join(' / ') + '</p></div>' +
@@ -1651,7 +1670,10 @@
 			var recommendations = function (id) { var names = (run.companions || []).concat(run.socialCompanions || []).filter(function (c) { return c.recommended === id; }).map(function (c) { return c.name; }); return names.length ? '（' + names.join('、') + '推荐）' : ''; };
 			var html = '<article class="rogue-event"><h3>' + escape(event.title) + '</h3><div class="rogue-event-intro' + (event.rivalPortrait ? ' has-portrait' : '') + '"><div class="rogue-event-text">' +
 				(event.paragraphs || []).map(function (line) { return '<p>' + dialogueText(line) + '</p>'; }).join('') + '</div>';
-			if (event.rivalPortrait) { var rivalArt = portraitFile(event.rivalPortrait); html += rivalArt ? '<span class="rogue-companion-portrait rogue-event-rival' + (event.rivalApproval ? ' smiling' : '') + '" style="' + portraitStyle(event.rivalPortrait) + '"></span>' : '<img class="rogue-rival-native" src="' + escape(Dex.resolveAvatar(event.rivalPortrait)) + '" alt="劲敌" />'; }
+			if (event.rivalPortrait) {
+				var rivalArt = portraitFile(event.rivalPortrait), affection = event.affection === undefined ? '' : ' title="当前好感度：' + Number(event.affection) + '"';
+				html += rivalArt ? '<span class="rogue-companion-portrait rogue-event-rival' + (event.rivalApproval ? ' smiling' : '') + '"' + affection + ' style="' + portraitStyle(event.rivalPortrait) + '"></span>' : '<img class="rogue-rival-native"' + affection + ' src="' + escape(Dex.resolveAvatar(event.rivalPortrait)) + '" alt="劲敌" />';
+			}
 			html += '</div>';
 			if (event.silhouette) html += '<div class="rogue-quiz-silhouette" aria-label="宝可梦剪影" style="' + Dex.getTeambuilderSprite({species: event.silhouette}) + '"></div>';
 			if (event.ski && event.stage === 'choice') return html + this.renderSki(event, busy) + '</article>';
@@ -1755,10 +1777,11 @@
 					loot(run.lastReward, this.state.items) + '</div>';
 			}
 			if (run.pendingCapture) {
-				html += '<h3>队伍已满 · 安置新伙伴</h3><p>' + (run.phase === 'intro' ? '塔灵赠送了 ' : '捕获了 ') + escape(localName(run.pendingCapture.set.species)) +
-					' Lv.' + run.pendingCapture.set.level + (run.phase === 'intro' ? '。等级固定为 40。' : '。捕捉解锁已保存。') + '</p><p>';
+				html += '<h3>队伍已满 · ' + (run.returningPartner ? '迎接修行伙伴' : '安置新伙伴') + '</h3><p>' +
+					(run.returningPartner ? '修行归来的 ' : run.phase === 'intro' ? '塔灵赠送了 ' : '捕获了 ') + escape(localName(run.pendingCapture.set.species)) +
+					' Lv.' + run.pendingCapture.set.level + (run.returningPartner ? '。请选择安置方式，再继续旅程。' : run.phase === 'intro' ? '。等级固定为 40。' : '。捕捉解锁已保存。') + '</p><p>';
 				html += '</p><div class="rogue-member-choices">' + run.team.map(function (mon) { return memberChoice('replaceMember', mon.id, mon, busy, '替换这位伙伴'); }).join('') + '</div>';
-				html += '<div class="rogue-partner-actions">' + button('replaceMember', 'release', '放生', busy) + '</div>';
+				html += '<div class="rogue-partner-actions">' + button('replaceMember', 'release', run.returningPartner ? '告别这位伙伴' : '放生', busy) + '</div>';
 			}
 			busy = busy || !!run.pendingCapture || !!(run.pendingMoves || []).length;
 			if (run.phase === 'intro') {
@@ -1902,7 +1925,7 @@
 			var nature = localName(mon.mintNature || mon.set.nature || '—');
 			var natureParts = nature.split(/\s*(?=[（(])/);
 			html += '<div class="rogue-member-details"><div class="rogue-details-line"><span>等级<br /><b>' + mon.set.level +
-				'</b></span><span>性别<br /><b>' + escape(mon.set.gender || '—') + '</b></span><span class="rogue-nature">性格<br /><b>' +
+				'</b></span><span>性别<br /><b>' + escape({M: '雄性', F: '雌性'}[mon.set.gender] || '无性别') + '</b></span><span class="rogue-nature">性格<br /><b>' +
 				escape(natureParts[0]) + (mon.mintNature ? '薄荷' : '') + '<span class="rogue-nature-effect" title="' +
 				escape(mon.mintNature ? '原性格：' + localName(mon.set.nature) + '（进化条件不变）' : '') + '">' + escape(natureParts.slice(1).join('')) + '</span></b></span></div>' +
 				'<p class="rogue-exp">' + (mon.fixedLevel ? '驻时伙伴 · 等级固定 ' + mon.fixedLevel : exp ? '经验：' + (exp.needed ? exp.current + ' / ' + exp.needed + '（下一级）' : '已达 100 级') : '经验：—') + '</p>' +
@@ -2357,7 +2380,12 @@
 					entry.abilities.map(function (name) { return escape(localName(name)); }).join(' / ') + '</p><p class="rogue-caption">' +
 					Object.keys(statNames).map(function (stat) { return statNames[stat] + ' ' + entry.stats[stat]; }).join(' · ') + '</p>' +
 					(entry.battleOnly ? '<p class="rogue-caption">战斗中触发的特殊形态' + (entry.requiredItem ? ' · ' + escape(localName(entry.requiredItem)) : '') + '</p>' : '');
-				if (section === 'blessings' && entry.family === 'prayer') body = body.replace(/<strong class="rogue-term">【Top Clear Mind】<\/strong>/g, '<button class="rogue-codex-link" name="jumpBlessing"><b>【Top Clear Mind】</b></button>');
+				if (section === 'blessings' && ['prayer', 'killlagirl'].indexOf(entry.family) >= 0) {
+					var links = entry.family === 'prayer' ? {'Top Clear Mind': 'topclearmind'} : {'神衣鲜血': 'godrobe', '神衣纯洁': 'puregodrobe'};
+					body = body.replace(/<strong class="rogue-term">【([^】]+)】<\/strong>/g, function (match, name) {
+						return links[name] ? '<button class="rogue-codex-link" name="jumpBlessing" value="' + links[name] + '"><b>【' + name + '】</b></button>' : match;
+					});
+				}
 				if (entry.portrait) {
 					var file = portraitFile(entry.portrait);
 					body = (entry.portrait === 'mewtwo' ? croppedMewtwo('rogue-codex-single-portrait') : singlePortraits[entry.portrait] ? '<img class="rogue-codex-single-portrait" src="' + singlePortraits[entry.portrait] + '" alt="' + escape(entry.name) + '" />' : file ? '<span class="rogue-companion-portrait codex-portrait" style="' + portraitStyle(entry.portrait) + '"></span>' : '<img class="rogue-codex-native-portrait" src="' + escape(Dex.resolveAvatar(entry.portrait)) + '" alt="' + escape(entry.name) + '" />') + body;
@@ -2445,7 +2473,7 @@
 				stableHTML(this, html + button('joinRoom', 'fantasyroguegallery', '前往通关卡展示') + '</div>'); return;
 			}
 			var ongoing = run && run.phase !== 'complete';
-			if (run) html += '<h3>' + (run.phase === 'intro' ? '启程之前' : '第 ' + run.floor + ' / 200 层') + (run.node ? ' · ' + escape(run.node.name) : '') +
+			if (run) html += '<h3 class="rogue-floor-heading">' + (run.phase === 'intro' ? '启程之前' : '第 ' + run.floor + ' / 200 层') + floorNodeHeading(run.node) +
 				(run.time ? '<span class="rogue-time rogue-time-' + escape(run.time.id || '') + '" title="白天两层 → 黄昏一层 → 夜晚两层 → 黎明一层，循环交替">' + fa(run.time.name === '夜晚' ? 'moon-o' : 'sun-o') + escape(run.time.name) + '</span>' : '') + '</h3>' +
 				this.renderFloor(run, busy) + this.renderShop(run, busy);
 			if (!ongoing) {
