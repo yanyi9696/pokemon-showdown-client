@@ -1816,6 +1816,7 @@ for (const mod of modNames)
 		}
 	}
 	for (const id in ModMovedex) {
+		ModMovedex[id].name = Dex.mod(mod).moves.get(id).name;
 		const move = Dex.mod(mod).moves.get(id);
 		if (move.desc) ModMovedex[id].desc = move.desc;
 		if (move.shortDesc) ModMovedex[id].shortDesc = move.shortDesc;
@@ -1826,6 +1827,7 @@ for (const mod of modNames)
 		if (item.shortDesc) ModItems[id].shortDesc = item.shortDesc;
 	}
 	for (const id in ModAbilities) {
+		ModAbilities[id].name = Dex.mod(mod).abilities.get(id).name;
 		const ability = Dex.mod(mod).abilities.get(id);
 		if (ability.desc) ModAbilities[id].desc = ability.desc;
 		if (ability.shortDesc) ModAbilities[id].shortDesc = ability.shortDesc;

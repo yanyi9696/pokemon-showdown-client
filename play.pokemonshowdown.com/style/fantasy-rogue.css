@@ -437,6 +437,13 @@
 .fantasyrogue .rogue-time-night { background: #e1e3ff; border-color: #7771b1; color: #3f3a77; }
 .fantasyrogue .rogue-time-dusk { background: #ffe3d2; border-color: #c08268; color: #89482c; }
 .fantasyrogue .rogue-time-dawn { background: #f7e2f2; border-color: #b784af; color: #7c4775; }
+.fantasyrogue .rogue-environment { background: #e1f1ef; border-color: #629b9b; color: #275e61; }
+.fantasyrogue .rogue-activity-track { position: relative; height: 26px; margin: 12px 4px 5px; border: 2px solid #6b899d; border-radius: 7px; background: #dfe9f1; overflow: hidden; }
+.fantasyrogue .rogue-activity-zone { position: absolute; left: 31.25%; width: 37.5%; height: 100%; background: #a1d9ba; border-inline: 2px solid #438568; box-sizing: border-box; }
+.fantasyrogue .rogue-activity-beat { position: absolute; left: 0; top: 0; width: 4px; height: 100%; background: #234b6a; box-shadow: 0 0 4px #fff; }
+.fantasyrogue .rogue-activity-time { margin: 3px 4px; font-weight: bold; font-variant-numeric: tabular-nums; }
+.fantasyrogue .rogue-cat-abilities > div { padding: 8px 0; border-top: 1px solid #b7cddd; }
+.fantasyrogue .rogue-cat-abilities .button { margin: 3px; font-size: 13px; }
 .fantasyrogue { overflow-anchor: none; scrollbar-gutter: stable; }
 .fantasyrogue .rogue-preference { padding: 7px 10px; margin: 8px 0; border-left-width: 3px; }
 .fantasyrogue .rogue-preference p { font-size: 12px; line-height: 1.5; margin: 4px 0 0; }

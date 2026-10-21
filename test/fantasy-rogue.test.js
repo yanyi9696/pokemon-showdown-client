@@ -30,7 +30,7 @@ function client(startScreen = false, localized = false, runtime = {}) {
 			socket: {readyState: 1}, send: message => sent.push(message), joinRoom: id => joined.push(id), updateLayout() {},
 			addPopup: (type, data) => { context.app.lastPopup = {type, data}; },
 		}),
-		setTimeout: () => 1, clearTimeout: () => {},
+		setTimeout: () => 1, clearTimeout: () => {}, setInterval: () => 1, clearInterval: () => {},
 		...runtime,
 	};
 	if (localized) {
@@ -69,12 +69,12 @@ function state() {
 }
 describe('Fantasy Rogue start menu and codex', () => {
 	it('offers an ecology guide with anonymous black silhouettes and named caught pixel icons', () => {
-		const c = client(true), calls = []; c.room.receiveState(state()); c.room.openCodex('guide');
+		const c = client(true), calls = []; c.room.receiveState(state()); c.room.openCodex('events');
 		c.Dex.getPokemonIcon = name => {calls.push(name); return 'background-position:0 0;';};
-		c.room.receiveCodex({userid: 'rogueplayer', codexSchema: 2, section: 'guide', guide: {intro: [], modules: {biomes: [
-			{id: 'biome01', name: '绿茵森林', text: '在这里捕捉', pokemon: [{species: 'Caterpie', caught: false}, {species: 'Weedle', caught: true}], visitors: [{species: 'Paras', caught: false}]},
-		]}}});
-		c.room.filterCodex('biomes');
+		c.room.receiveCodex({userid: 'rogueplayer', codexSchema: 3, section: 'events', entries: [
+			{id: 'biome01', category: 'ecology', unlocked: true, name: '绿茵森林', text: '在这里捕捉', pokemon: [{species: 'Caterpie', caught: false}, {species: 'Weedle', caught: true}], visitors: [{species: 'Paras', caught: false}]},
+		]});
+		c.room.filterCodex('ecology');
 		assert(c.room.html.includes('生态区域')); assert(c.room.html.includes('绿茵森林'));
 		assert(c.room.html.includes('生态池 · 已捕捉 1 / 2'));
 		assert(c.room.html.includes('rogue-biome-icon is-unknown'));
@@ -95,7 +95,7 @@ describe('Fantasy Rogue start menu and codex', () => {
 	});
 	it('uses the server guide for both first-play onboarding and the permanent codex', () => {
 		const c = client(true), data = state(), popups = [];
-		data.codexSchema = 2;
+		data.codexSchema = 3;
 		data.account.needsOnboarding = true;
 		data.beginnerGuide = [{title: '两个同行名额', text: '累计 **15 次偏好选择**领取赠礼。**<script>**'}];
 		c.app.curRoom = c.room; c.app.addPopup = (type, detail) => popups.push({type, detail});
@@ -108,14 +108,14 @@ describe('Fantasy Rogue start menu and codex', () => {
 		assert(html.includes('<strong>15 次偏好选择</strong>'));
 		assert(html.includes('<strong>&lt;script></strong>'));
 		c.room.openCodex('guide');
-		c.room.receiveCodex({userid: 'rogueplayer', codexSchema: 2, section: 'guide',
+		c.room.receiveCodex({userid: 'rogueplayer', codexSchema: 3, section: 'guide',
 			guide: {intro: [], beginner: data.beginnerGuide, modules: {}}});
 		c.room.filterCodex('beginner');
 		assert(c.room.html.includes('两个同行名额')); assert(!c.room.html.includes('<script>'));
 		assert(c.room.html.includes('<strong>15 次偏好选择</strong>'));
-		assert(!c.room.html.includes('仍在提供旧版图鉴'));
+		assert(!c.room.html.includes('图鉴与当前客户端的版本不一致'));
 		c.room.receiveCodex({userid: 'rogueplayer', section: 'guide', guide: {intro: [], modules: {}}});
-		assert(c.room.html.includes('仍在提供旧版图鉴'));
+		assert(c.room.html.includes('图鉴与当前客户端的版本不一致'));
 	});
 	it('reloads open codices after a content update and ignores stale version responses', () => {
 		const c = client(true), first = state(); first.contentVersion = 'old'; c.room.receiveState(first);
@@ -2281,4 +2281,48 @@ describe('Compact tower controls and live ski input', () => {
   const c = client(true); c.room.receiveState({...state(), enabled: false, account: null, message: '需要内测权限'});
   assert(c.room.html.includes('当前账号未开放')); assert(!c.room.html.includes('事件图鉴'));
  });
+});
+
+describe('October 21 expansion controls', () => {
+	it('shows per-floor weather beside time and displays genuine evolution progress meters', () => {
+		const c = client(), data = adventure('ready');
+		data.run.time = {id: 'night', name: '夜晚'};
+		data.run.floorEnvironment = {floor: 10, name: '下雨 · 精神场地', weather: 'raindance', terrain: 'psychicterrain'};
+		data.run.team[0].set.species = 'Primeape'; data.run.team[0].evolutionProgress = {moves: {ragefist: 12}};
+		c.room.receiveState(data); assert(c.room.html.includes('rogue-environment'));
+		assert(c.room.html.includes('下雨 · 精神场地')); assert(c.html.includes('value="12" max="20"'));
+		assert(c.html.includes('真实使用次数')); assert(c.html.includes('<strong>ragefist修行</strong>'));
+	});
+	it('renders two cat ability groups and sends a stable full member id without editing a team', () => {
+		const c = client(), data = adventure('ready'), id = data.run.team[0].id;
+		data.run.blessings = {owned: [{id: 'cats', family: 'cats', tier: 'prismatic', name: '尼古喵喵', text: ''}], pending: [], cats: [
+			{member: id, species: 'Meowth', selected: ['poisonheal', 'cutecharm'], groups: [
+				[{id: 'poisonheal', name: 'Poison Heal'}, {id: 'quickfeet', name: 'Quick Feet'}], [{id: 'cutecharm', name: 'Cute Charm+'}, {id: 'woju', name: '蜗居'}],
+			]},
+		]};
+		c.room.receiveState(data); assert(c.html.includes('第 1 组') && c.html.includes('第 2 组'));
+		c.room.chooseCatAbility(encodeURIComponent(id) + '|0:quickfeet');
+		const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(request.member, id); assert.equal(request.action, 'catability'); assert.equal(request.value, '0:quickfeet'); assert(!request.team);
+	});
+	it('keeps rhythm position on server time, uses the latest response key and cleans up on identity change', () => {
+		let tick, now = 900000; const cleared = [], styles = {};
+		const c = client(false, false, {Date: class extends Date {static now() {return now;}},
+			setInterval: callback => {tick = callback; return 17;}, clearInterval: id => cleared.push(id)});
+		const select = c.room.$; c.room.$ = selector => ({...select(selector), css: (key, value) => {styles[selector + ':' + key] = value;}});
+		const data = adventure('event'); data.run.node.kind = 'event';
+		data.run.event = {title: '舞台', key: 'beat-1', stage: 'choice', paragraphs: ['跟着拍子。'], options: [],
+			activity: {startedAt: 1000, now: 1100, period: 800, duration: 12000}};
+		c.room.receiveState(data); tick(); assert.equal(styles['.rogue-activity-beat:left'], '12.5%');
+		assert(c.room.html.includes('rogue-activity-zone'));
+		data.account.revision++; data.run.event.key = 'beat-2'; c.room.receiveState(data);
+		now += 12000; tick(); const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'event'); assert.equal(request.value, 'finish'); assert.equal(request.member, 'beat-2');
+		c.room.identityChanged(); assert(cleared.includes(17)); assert.equal(c.room.activityClock, null);
+	});
+	it('uses the matching Peat Block PNG rather than an unknown icon', () => {
+		const c = client(), data = adventure('ready'); data.items.push({id: 'peatblock', name: '泥炭块', kind: 'evolution'}); data.run.bag.peatblock = 1;
+		c.room.receiveState(data); assert(c.html.includes('sprites/fantasy-rogue/peatblock.png'));
+		assert(fs.statSync(require.resolve('../play.pokemonshowdown.com/sprites/fantasy-rogue/peatblock.png')).size > 100);
+	});
 });

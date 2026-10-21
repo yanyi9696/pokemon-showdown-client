@@ -536,7 +536,8 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 		) {
 			return '';
 		}
-		return ability.name;
+		// Effect calculations use canonical names; visible labels come from the dex.
+		return ability.name.replace(/[+🔄]+$/u, '');
 	}
 	getTypeList(serverPokemon?: ServerPokemon, preterastallized = false) {
 		const [types, addedType] = this.getTypes(serverPokemon, preterastallized);

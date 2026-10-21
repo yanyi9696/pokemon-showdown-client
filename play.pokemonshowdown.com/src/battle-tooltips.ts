@@ -66,7 +66,7 @@ class ModifiableValue {
 	tryAbility(abilityName: string) {
 		const rogueInfo = this.pokemon?.isActive?.() ?
 			this.pokemon.rogueAbilityInfo || this.serverPokemon.rogueAbilityInfo : this.serverPokemon.rogueAbilityInfo;
-		if (abilityName !== this.abilityName) {
+		if (toID(abilityName) !== toID(this.abilityName)) {
 			// Extra abilities participate in the native move power/type/accuracy
 			// tooltips as well as the Pokémon's own stat panel.
 			return !!rogueInfo?.active && rogueInfo.abilities.includes(toID(abilityName));
@@ -1661,7 +1661,7 @@ export class BattleTooltips {
 	ppUsed(move: Dex.Move, pokemon: Pokemon) {
 		for (let [moveName, ppUsed] of pokemon.moveTrack) {
 			if (moveName.startsWith('*')) moveName = moveName.substr(1);
-			if (move.name === moveName) return ppUsed;
+			if (move.id === toID(moveName)) return ppUsed;
 		}
 		return 0;
 	}

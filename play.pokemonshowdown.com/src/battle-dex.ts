@@ -650,7 +650,7 @@ export const Dex = new class implements ModdedDex {
 
 	hasAbility(species: Species, ability: string) {
 		for (const i in species.abilities) {
-			if (ability === species.abilities[i as '0']) return true;
+			if (toID(ability) === toID(species.abilities[i as '0'])) return true;
 		}
 		return false;
 	}

@@ -1,5 +1,9 @@
 # 幻想杯肉鸽道具图来源
 
+## 2026-10-21 泥炭块与力量系列
+
+`peatblock.png` 使用 [Serebii 道具图鉴原图](https://www.serebii.net/itemdex/sprites/peatblock.png)，对照[泥炭块图鉴](https://www.serebii.net/itemdex/peatblock.shtml)确认，以原 PNG 保存，未重绘。版权归 Nintendo / Game Freak / Creatures。六件力量系列沿用 Showdown 的原版道具图标：力量镜 359、护腕 357、护踝 354、腰带 356、负重 360、束带 355；幻之力量镜沿用力量镜图标。
+
 ## 2026-10-21 头领凭证
 
 `leaderscrest.png` 使用 [PokeAPI/sprites 原始道具图](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/leaders-crest.png)，以原 PNG 保存，未重绘。已对照《朱／紫》的头领凭证图确认外观。美术版权归 Nintendo / Game Freak / Creatures；游戏运行时只读取本站文件。

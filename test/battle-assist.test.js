@@ -29,6 +29,16 @@ function factor(move, target, source = mon('Mew')) {
 	return tips.getMoveEffectiveness(source, m, m.type, m.category, target);
 }
 describe('Battle effectiveness and four speed benchmarks', () => {
+	it('uses stable IDs for marked native abilities, learnt move PP and ability choices', () => {
+		const Value = vm.runInContext('ModifiableValue', context);
+		const p = mon('Mew', {effectiveAbility: () => 'Cute Charm'});
+		const value = new Value(battle, p, {ability: 'cutecharm', item: ''});
+		assert(value.tryAbility('Cute Charm'));
+		assert(value.tryAbility('Cute Charm+'));
+		assert(!value.tryAbility('Huge Power'));
+		assert.equal(tips.ppUsed(dex.moves.get('Recover'), {moveTrack: [['Recover', 3]]}), 3);
+		assert(context.Dex.hasAbility({abilities: {0: 'Cute Charm+'}}, 'Cute Charm'));
+	});
 	it('shows next-use stacked power with its source and the correct Technician threshold', () => {
 		const Value = vm.runInContext('ModifiableValue', context);
 		const ownBattle = {...battle, sides: [], abilityActive: () => false, mySide: {sideConditions: {}}};

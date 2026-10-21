@@ -23,7 +23,7 @@ var translations = {
     "Rogue Evoboost": "九彩升华齐聚顶",
     "Rogue City Dark": "熙熙攘攘我们的城市",
     "Rogue City Poison": "熙熙攘攘我们的城市",
-    "Rogue Flawless": "致以无瑕之人",
+    "Rogue Flawless": "致以，「无瑕之人」",
     "Rogue Great Mage": "大法师",
     "Heaven Piercing Drill": "突破天际的钻头",
     "Rogue Ascent": "登龙",
@@ -8790,6 +8790,10 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
 function translateRogueName(value, kind) {
     if (!value) return value;
     value = String(value).trim();
+    if (/[+🔄]$/u.test(value)) {
+        const plain = value.replace(/[+🔄]+$/u, '');
+        return translateRogueName(plain, kind) + value.slice(plain.length);
+    }
     const moveNames = {Psychic: '精神强念', Metronome: '挥指', Refresh: '焕然一新', Disable: '定身法'};
     if (kind === 'move' && moveNames[value]) return moveNames[value];
     const specialForms = {'Urshifu-G-Mega-Fantasy': '幻想武道熊师-爆击流-超巨进化', 'Urshifu-Rapid-Strike-G-Mega-Fantasy': '幻想武道熊师-瞬击流-超巨进化'};
@@ -12470,6 +12474,11 @@ function translateBattleModifiers(value) {
             let value = node.nodeValue;
             let trimmed = value.trim();
             if (!trimmed) return;
+            const marked = /^(.*?)([+🔄])$/u.exec(trimmed);
+            if (marked && translations[marked[1]]) {
+                node.nodeValue = value.replace(trimmed, translations[marked[1]] + marked[2]);
+                return;
+            }
 
             const popup = node.parentElement?.closest('.ps-popup');
             if (popup && (/Your team was rejected for the following reasons?:/.test(popup.textContent) ||
