@@ -60,6 +60,14 @@ branch or synchronize Git. Normal `node build full` retains its remote-cache
 workflow. `PS_SERVER_PATH` can also select the server for individual build tools;
 build the server first when running a data generator on its own.
 
+A full build always writes `play.pokemonshowdown.com/data/pokedex-mini.js` and
+`pokedex-mini-bw.js`. These are local sprite metadata, not downloaded images.
+Without optional animated sprite directories, the client keeps using its static
+PNG fallback. Deploy the generated `data/` directory with the rest of the web
+root; these generated files are intentionally not tracked by Git. To regenerate
+only these files, run `node build minidex --local-server ../pokemon-showdown`
+after building the selected server checkout.
+
 You can make and test client changes simply by building after each change,
 and opening `testclient.html`. This will allow you to test changes to the
 client without setting up your own login server.

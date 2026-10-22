@@ -88,17 +88,13 @@ function updateSizes() {
 };
 `;
 
+	fs.mkdirSync('data', { recursive: true });
 	fs.writeFileSync('data/pokedex-mini.js', buf);
 	fs.writeFileSync('data/pokedex-mini-bw.js', g5buf);
 }
 
-if (fs.existsSync('sprites/ani/')) {
-	updateSizes();
-	console.log('DONE');
-} else {
-	try {
-		fs.unlinkSync('data/pokedex-mini.js');
-		fs.unlinkSync('data/pokedex-mini-bw.js');
-	} catch {}
-	console.log('SKIPPED');
-}
+// Both files are client resources even without animated sprites. Number-only
+// entries let battle-dex use its existing static PNG fallback; BW assets may
+// also be installed independently of the XY animation directory.
+updateSizes();
+console.log('DONE');
