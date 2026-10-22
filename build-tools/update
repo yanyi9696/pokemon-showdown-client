@@ -236,8 +236,9 @@ if (news === '[failed to retrieve news]') {
 	if (localNews) news = localNews[0];
 } else if (!news.includes('幻想杯肉鸽内容目前还在内测中！')) {
 	news = news.replace(/(<p>[^<]*聊天室里输入[\s\S]*?\/avatars[\s\S]*?<\/p>)/,
-		'$1<br /><p>幻想杯肉鸽内容目前还在内测中！</p>');
+		'$1<p>幻想杯肉鸽内容目前还在内测中！</p>');
 }
+news = news.replace(/(<\/p>)\s*(?:<br\s*\/?>(?:\s*))+(?=<p>幻想杯肉鸽内容目前还在内测中！<\/p>)/g, '$1');
 indexContents = indexContents.replace(/<!-- newsid -->/g, newsid);
 indexContents = indexContents.replace(/<!-- news -->/g, news);
 

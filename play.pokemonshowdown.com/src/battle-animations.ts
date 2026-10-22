@@ -21,6 +21,8 @@ import { BattleNatures } from './battle-dex-data';
 import { BattleTooltips } from './battle-tooltips';
 import { BattleTextParser, type Args, type KWArgs } from './battle-text-parser';
 
+const ROGUE_GHIDORAH_FILTER = 'sepia(1) saturate(3.5) brightness(1.2) drop-shadow(0 0 7px #ffd24a)';
+
 /*
 
 Most of this file is: CC0 (public domain)
@@ -1881,6 +1883,8 @@ export class PokemonSprite extends Sprite {
 		roguebrn: ['烧伤', 'bad'],
 		roguepar: ['麻痹', 'bad'],
 		rogueslp: ['睡眠', 'bad'],
+		roguespindasleep: ['濒死睡眠', 'bad'],
+		rogueghidorah: ['王者基多拉', 'good'],
 		roguepsn: ['中毒', 'bad'],
 		roguetox: ['剧毒', 'bad'],
 		roguefst: ['冻伤', 'bad'],
@@ -2316,7 +2320,9 @@ export class PokemonSprite extends Sprite {
 		this.recalculatePos(pokemon.slot);
 		// =========== 注入：为幻想大岩蛇添加蓝色滤镜 ===========
 		// 这里的 getBaseSpecies() 修复了之前报错的问题
-		if (pokemon.speciesForme === 'Onix-Fantasy' || pokemon.getBaseSpecies().baseSpecies === 'Onix-Fantasy') {
+		if (pokemon.volatiles.rogueghidorah) {
+			this.$el.css({filter: ROGUE_GHIDORAH_FILTER, '-webkit-filter': ROGUE_GHIDORAH_FILTER});
+		} else if (pokemon.speciesForme === 'Onix-Fantasy' || pokemon.getBaseSpecies().baseSpecies === 'Onix-Fantasy') {
 			this.$el.css({
 				// sepia(1) 使灰色变黄，hue-rotate(190deg) 将黄转蓝，saturate(5) 加深蓝色，brightness(1.1) 保持亮度
 				'filter': 'sepia(1) hue-rotate(190deg) saturate(5) brightness(1.1) drop-shadow(0 0 5px rgba(0,191,255,0.8))',
@@ -2808,6 +2814,11 @@ export class PokemonSprite extends Sprite {
 		}
 	}
 	addEffect(id: ID, instant?: boolean) {
+		if (id === 'rogueghidorah') {
+			this.$el?.css({filter: ROGUE_GHIDORAH_FILTER, '-webkit-filter': ROGUE_GHIDORAH_FILTER});
+			this.effects[id] = [];
+			return;
+		}
 		if (id in this.effects) {
 			this.pokeEffect(id);
 			return;
@@ -2871,6 +2882,7 @@ export class PokemonSprite extends Sprite {
 	}
 
 	removeEffect(id: ID, instant?: boolean) {
+		if (id === 'rogueghidorah') this.$el?.css({filter: '', '-webkit-filter': ''});
 		if (id === 'formechange') this.removeTransform();
 		if (id === 'substitute') this.animSubFade(instant);
 		if (this.effects[id]) {

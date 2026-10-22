@@ -73,6 +73,18 @@
 		}
 		if (mon.robeInfo) html += '<p class="rogue-robe-info"><strong>' + escape(mon.robeInfo.name) + ' · 双防耐久 ×' +
 			mon.robeInfo.durability.toFixed(2) + '</strong>（随当前 HP 实时变化，上限 ×6）</p>';
+		if (owned.some(function (b) { return b.family === 'weighttraining'; })) {
+			var evs = Object.keys(mon.set.evs || {}).reduce(function (sum, stat) { return sum + mon.set.evs[stat]; }, 0);
+			var remainingEffort = Math.max(0, 510 - evs), trainingClaimed = run.blessings.weightTraining && run.blessings.weightTraining.claimed;
+			html += resourceMeter('负重训练 · 努力值', evs, 510, trainingClaimed ? '幻之力量镜已领取（每局一次）' : '还差 ' + remainingEffort + ' 点，获得幻之力量镜（每局一次）');
+			var powerStat = {powerweight: 'hp', powerbracer: 'atk', powerbelt: 'def', powerlens: 'spa', powerband: 'spd', poweranklet: 'spe'}[idOf(mon.set.item)];
+			if (powerStat) {
+				var expectedEffort = Math.max(0, Math.min(8, remainingEffort, 252 - (mon.set.evs && mon.set.evs[powerStat] || 0)));
+				html += '<p class="rogue-caption"><strong>力量道具训练中：对战速度减半。</strong>击倒结算时基础额外增加 ' + statNames[powerStat] + ' 努力值 8 点；当前上限下最多增加 ' + expectedEffort + ' 点（同行加成另算）。' +
+					(expectedEffort ? '挑战首领前可更换携带道具。' : '当前项目或总努力值已满，可更换携带道具。') + '</p>';
+			} else if (remainingEffort) html += '<p class="rogue-caption">装备力量道具后，击倒结算时基础额外获得对应努力值 8 点，受单项 252、总和 510 上限限制。</p>';
+		}
+		if (mon.campTraining) html += '<p><strong>训练营：</strong>' + Object.keys(mon.campTraining).map(function (stat) { return statNames[stat] + ' +' + mon.campTraining[stat] / 100 + '%'; }).join('、') + '</p>';
 		var evolution = mon.evolutionProgress || {}, species = idOf(mon.set.species);
 		var trainingMove = {primeape: 'ragefist', stantler: 'psyshieldbash', qwilfishhisui: 'barbbarrage'}[species];
 		if (trainingMove) html += resourceMeter(localName(dex().moves.get(trainingMove).name, 'move') + '修行', (evolution.moves || {})[trainingMove], 20, '真实使用次数；招式风格不限');
@@ -144,9 +156,27 @@
 		root.scrollTop = scroll; root.scrollLeft = left;
 	}
 	function blessingText(text) {
-		return escape(text || '').replace(/【([^】]+)】/g, '<strong class="rogue-term">【$1】</strong>');
+		return String(text || '').split(/(【[^】]+】)/g).map(function (part) {
+			return /^【[^】]+】$/.test(part) ? '<strong class="rogue-term">【' + escape(localName(part.slice(1, -1))) + '】</strong>' : escape(part);
+		}).join('');
+	}
+	var adjustmentNameCache;
+	function adjustedRogueName(value) {
+		var tables = [globals.Gen9fantasyMovedex, globals.Gen9fantasyAbilities];
+		if (!tables[0] || !tables[1] || !globals.translateRogueName) return value;
+		if (!adjustmentNameCache || adjustmentNameCache.tables[0] !== tables[0] || adjustmentNameCache.tables[1] !== tables[1]) {
+			var names = {};
+			tables.forEach(function (table, index) { Object.keys(table).forEach(function (id) {
+				var entry = dex()[index ? 'abilities' : 'moves'].get(id), plain = entry.name.replace(/[+🔄]+$/u, '');
+				var chinese = globals.translateRogueName(plain, index ? 'ability' : 'move');
+				names[plain] = entry.name; names[chinese] = chinese + entry.name.slice(plain.length);
+			}); });
+			adjustmentNameCache = {tables: tables, names: names};
+		}
+		return adjustmentNameCache.names[String(value).replace(/[+🔄]+$/u, '')] || value;
 	}
 	function localName(name, kind) {
+		name = adjustedRogueName(name);
 		var statuses = {par: '麻痹', brn: '烧伤', psn: '中毒', tox: '剧毒', slp: '睡眠', frz: '冰冻', fst: '冻伤', frostbite: '冻伤'};
 		if (statuses[name]) return statuses[name];
 		if (/薄荷$/.test(name)) return localName(name.slice(0, -2)).split(/[（(]/)[0].trim() + '薄荷';
@@ -325,12 +355,13 @@
 		if (item.kind === 'heal') return '恢复 ' + item.amount + ' HP，不复活倒下成员';
 		if (item.kind === 'revive') return '复活并恢复 ' + Math.round(item.amount * 100) + '% HP';
 		if (item.kind === 'cure') return '解除存活伙伴的异常状态';
-		if (item.kind === 'ether') return (item.singleMove ? '自选一个招式恢复 ' : '当前各招式恢复 ') + item.amount + ' PP';
+		if (item.kind === 'ether') return (item.singleMove ? '自选一个招式恢复 ' : '当前各招式恢复 ') + (item.amount >= 999 ? '全部' : item.amount) + ' PP';
 		if (item.kind === 'candy') return '增加 ' + item.amount + ' 经验';
 		return '在队伍面板选择符合条件的进化';
 	}
 	function editable(run) {
 		return ['choose', 'ready', 'rest', 'reward', 'event'].indexOf(run.phase) >= 0 &&
+			!(run.comeback && run.comeback.key) &&
 			!(run.preview && run.preview.stage === 'result') &&
 			!run.pendingCapture && !(run.pendingMoves || []).length;
 	}
@@ -859,12 +890,23 @@
 			if (!state || !state.account || (state.run && state.run.phase !== 'complete')) {
 				this.selectedStarters = []; this.starterBuilds = {}; return;
 			}
-			var available = (state.starters || []).filter(function (starter) { return starter.available; }).map(function (starter) { return starter.id; });
-			this.selectedStarters = this.selectedStarters.filter(function (id) { return available.indexOf(id) >= 0; }).slice(0, state.account.slots);
+			var available = (state.starters || []).filter(function (starter) { return starter.available; }), used = 0;
+			this.selectedStarters = this.selectedStarters.filter(function (id) {
+				var starter = available.find(function (s) { return s.id === id; });
+				if (!starter || used + (starter.slotCost || 1) > state.account.slots) return false;
+				used += starter.slotCost || 1; return true;
+			});
 			var self = this;
 			Object.keys(this.starterBuilds).forEach(function (id) {
 				if (self.selectedStarters.indexOf(id) < 0) delete self.starterBuilds[id];
 			});
+		},
+		starterSlotsUsed: function () {
+			var starters = this.state.starters || [];
+			return this.selectedStarters.reduce(function (sum, id) {
+				var starter = starters.find(function (s) { return s.id === id; });
+				return sum + (starter && starter.slotCost || 1);
+			}, 0);
 		},
 		changeStarter: function (event) {
 			if (!this.state || !this.state.account || this.pending) return;
@@ -872,7 +914,8 @@
 			var input = event.currentTarget;
 			var index = this.selectedStarters.indexOf(input.value);
 			var available = this.state.starters.some(function (starter) { return starter.id === input.value && starter.available; });
-			var added = input.checked && available && index < 0 && this.selectedStarters.length < this.state.account.slots;
+			var candidate = this.state.starters.find(function (s) { return s.id === input.value; });
+			var added = input.checked && available && index < 0 && this.starterSlotsUsed() + (candidate.slotCost || 1) <= this.state.account.slots;
 			if (added) {
 				this.selectedStarters.push(input.value);
 				var starter = this.state.starters.find(function (entry) { return entry.id === input.value; });
@@ -880,13 +923,14 @@
 					ivs: Object.assign({}, starterTraits(starter).ivs.max)};
 			}
 			if (!input.checked && index >= 0) this.selectedStarters.splice(index, 1);
-			var chosen = this.selectedStarters, full = chosen.length >= this.state.account.slots;
+			var chosen = this.selectedStarters, used = this.starterSlotsUsed(), remaining = this.state.account.slots - used, starters = this.state.starters;
 			this.$('input[name=starter]').each(function () {
 				this.checked = chosen.indexOf(this.value) >= 0;
-				this.disabled = full && !this.checked;
+				var starter = starters.find(function (s) { return s.id === this.value; }, this);
+				this.disabled = !this.checked && (starter && starter.slotCost || 1) > remaining;
 				this.parentElement.classList.toggle('is-disabled', this.disabled);
 			});
-			this.$('.rogue-starter-count').text('已选择 ' + chosen.length + ' / ' + this.state.account.slots + ' 只');
+			this.$('.rogue-starter-count').text('已选 ' + chosen.length + ' 只 · 已用 ' + used + ' / ' + this.state.account.slots + ' 个初始名额');
 			this.$('button[name=confirmStarters]').prop('disabled', !chosen.length || !this.state.configured);
 			this.render();
 		},
@@ -1006,8 +1050,8 @@
 				return '<div class="rogue-story-roster"><div class="rogue-roster-leader">' +
 					(roster.avatar ? '<img alt="' + escape(roster.name) + '" src="' + escape(Dex.resolveAvatar(roster.avatar)) + '" />' : '') +
 					'<strong>' + escape(localName(roster.name)) + '</strong></div><div class="rogue-roster-members">' +
-					roster.pokemon.map(function (name) { return '<div class="rogue-roster-member"><div aria-hidden="true" style="' +
-						Dex.getTeambuilderSprite({species: name}) + '"></div><span>' + escape(localName(name)) + '</span></div>'; }).join('') + '</div></div>';
+					roster.pokemon.map(function (name, index) { return '<div class="rogue-roster-member"><div aria-hidden="true" style="' +
+						Dex.getTeambuilderSprite({species: name}) + '"></div><span>' + escape(localName(name)) + (roster.levels ? ' · Lv.' + roster.levels[index] : '') + (index < (roster.escorts || 0) ? ' · 跟班' : '') + '</span></div>'; }).join('') + '</div></div>';
 			}
 			if (story.portrait) {
 				var id = story.portrait, file = portraitFile(id);
@@ -1323,13 +1367,13 @@
                     } else html += button('chooseBlessingReward', 'join', '加入队伍', busy) + button('chooseBlessingReward', 'release', '放生', busy);
                     html += '</div>';
 				} else {
-					html += '<p>请选择一项：</p><div class="' + (reward.kind === 'target' ? 'rogue-member-choices' : 'rogue-blessing-rewards') + '">';
+					html += '<p>请选择一项：</p><div class="' + (['target', 'solo'].indexOf(reward.kind) >= 0 ? 'rogue-member-choices' : 'rogue-blessing-rewards') + '">';
 					if (reward.options && reward.options.length > 16) {
 						html += '<select name="blessingRewardItem" aria-label="选择奖励道具">' + reward.options.map(function (option) {
 							return '<option value="' + escape(option.id) + '">' + escape(localName(option.name)) + '</option>';
 						}).join('') + '</select> ' + button('chooseLongBlessingReward', '', '确认领取', busy);
 					} else (reward.options || []).forEach(function (option) {
-						var member = reward.kind === 'target' && run.team.find(function (entry) { return entry.id === option.id; });
+						var member = ['target', 'solo'].indexOf(reward.kind) >= 0 && run.team.find(function (entry) { return entry.id === option.id; });
 						html += member ? memberChoice('chooseBlessingReward', option.id, member, busy, '选择这位伙伴') :
 							button('chooseBlessingReward', option.id, localName(option.name), busy);
 					});
@@ -1392,6 +1436,9 @@
 			if (state.owned.some(function (b) { return b.family === 'swords'; })) html += resourceMeter('圣剑使用', state.swordUses, ((state.swordRewards || []).length + 1) * 15, '达到目标可领取锋锐');
 			if (state.owned.some(function (b) { return b.family === 'psychic'; })) html += resourceMeter('灵能', state.psychic, 100, '', '%');
 			if (state.dogBoosts !== undefined) html += '<p><strong>汪汪队立大功：</strong>当前犬科伙伴登场随机提升 ' + state.dogBoosts + ' 项不同能力各 1 级。</p>';
+			if (state.shopping) html += resourceMeter('消费升级', state.shopping.progress, state.shopping.threshold, '累计消费 ' + state.shopping.total + ' 金币 · 达标返还全队经验');
+			if (state.lateBloom) html += '<p><strong>大器晚成：</strong>队内 ' + state.lateBloom.count + ' 个不同谱系 · ' +
+				Object.keys(state.lateBloom.stats).map(function (stat) { return statNames[stat] + ' +' + Math.round(state.lateBloom.stats[stat] * 100) + '%'; }).join('、') + '</p>';
 			if (state.owned.some(function (b) { return b.family === 'sound'; })) {
 				var sounds = equippedSoundCount(run);
 				html += '<p class="rogue-build-payoff"><strong>全队开麦：</strong>已装备声音招式 ' + sounds + ' 个，当前声音伤害 <b>+' + sounds * 5 + '%</b>。</p>';
@@ -1438,7 +1485,14 @@
 				(evo.extras || []).forEach(function (id) { html += '<li>' + escape(extraNames[id] || id) + '</li>'; });
 				html += '</ul>';
 			}
+			if (run.comeback && run.comeback.active) html += '<p class="infobox"><strong>再启程 · 剩余 ' + run.comeback.remaining + ' 层</strong><br />战斗经验 ×2；无战斗经验的楼层额外获得一级所需经验的 25%。' + (run.comeback.floorBuff ? '<br />本层伤害、双防 +25%。' : '') + '</p>';
 			var locked = busy || !editable(run) || run.healingLocked;
+			if (state.owned.some(function (b) { return b.family === 'potara'; })) {
+				var fused = run.team.find(function (m) { return m.fusion; });
+				if (fused) html += '<p><strong>融合伙伴：</strong>' + escape(localName(fused.fusion.first.set.species)) + ' × ' + escape(localName(fused.fusion.second.set.species)) + ' ' + button('unfuseMember', fused.id, '解除融合', locked) + '</p>';
+				else html += button('openFusion', '', '选择两位伙伴融合', locked || run.floor < (state.fusionReadyFloor || 0) || run.team.filter(function (m) { return !m.egg; }).length < 2) + (run.floor < state.fusionReadyFloor ? '<p>再前进 ' + (state.fusionReadyFloor - run.floor) + ' 层可融合。</p>' : '');
+			}
+
 			if (state.owned.some(function (b) { return b.family === 'killlagirl'; })) {
 				var legendsReady = ['yveltal', 'reshiram'].every(function (id) { return run.team.some(function (mon) { return idOf(mon.set.species) === id; }); });
 				['godrobe', 'puregodrobe'].forEach(function (family) {
@@ -1447,6 +1501,17 @@
 						(robe.target ? ' · 已继承' : ''), locked || !legendsReady || !!robe.target);
 				});
 				if (!legendsReady) html += '<p class="rogue-caption">两位传说伙伴同时入队后，可分别继承两件神衣。</p>';
+			}
+			(state.soundLearning || []).forEach(function (entry) {
+				var mon = run.team.find(function (p) { return p.id === entry.member; });
+				if (mon) html += button('learnSoundMove', mon.id, localName(mon.set.species) + ' · 领取声音招式', locked || !entry.moves.length);
+			});
+			if (run.coverage && run.coverage.remaining) {
+				html += '<p><strong>补盲研习：' + run.coverage.remaining + ' 次</strong> · 任选合法的非本系攻击招式，可留待之后使用。</p>';
+				(run.coverage.members || []).forEach(function (entry) {
+					var mon = run.team.find(function (p) { return p.id === entry.member; });
+					if (mon) html += button('learnCoverageMove', mon.id, localName(mon.set.species) + ' · 补盲研习', locked || !entry.moves.length);
+				});
 			}
 			(state.learning || []).forEach(function (entry) {
 				var mon = run.team.find(function (p) { return p.id === entry.member; });
@@ -1478,12 +1543,18 @@
 			});
 			return html + '</section>';
 		},
+		openFusion: function () { app.addPopup(globals.RogueFusionPopup, {room: this}); },
+		unfuseMember: function (id) { app.addPopup(globals.RogueCardConfirmPopup, {room: this, action: 'unfusion', details: {member: id}, text: '解除融合，恢复两位伙伴；第一位保留融合期间获得的经验。队伍已满时，需要安置第二位；已有箱子且有空位时会自动暂存。再次融合需要通关 10 层。'}); },
 		changeTera: function (value) {
 			var parts = value.split(':');
 			app.addPopup(globals.RogueCardConfirmPopup, {room: this, action: 'settera', title: '更改太晶属性',
 				text: '消耗 50 片' + localName(parts[1]) + '太晶碎片，为这位伙伴更改太晶属性？',
 				details: {member: parts[0], value: parts[1]}});
 		},
+		learnSoundMove: function (id) { app.addPopup(globals.RogueBlessingLearnPopup, {room: this, member: id, kind: 'sound'}); },
+		learnCoverageMove: function (id) { app.addPopup(globals.RogueBlessingLearnPopup, {room: this, member: id, kind: 'coverage'}); },
+		openTrainingCamp: function () { app.addPopup(globals.RogueTrainingCampPopup, {room: this}); },
+		comebackChoice: function (value) { var c = this.state.run && this.state.run.comeback; if (c && c.key) this.submit('comeback', {member: c.key, value: value}); },
 		learnBlessingMove: function (id) { app.addPopup(globals.RogueBlessingLearnPopup, {room: this, member: id}); },
 		exchangeShards: function (value) { this.submit('exchangeshards', {value: value}); },
 		inheritRobe: function (value) { this.submit('inheritrobe', {value: value}); },
@@ -2090,9 +2161,10 @@
 		renderBox: function (run, busy) {
 			if (!run.box) return '';
 			var locked = busy || !editable(run) || run.healingLocked;
-			var owned = run.team.concat(run.box);
+
+			var owned = run.team.concat(run.box), canMerge = run.spirit && run.spirit.id === 'zygarde';
 			var html = '<section class="rogue-box"><h3>' + fa('archive') + '宝可梦箱子 · ' + run.box.length + ' / 30</h3>' +
-				'<p class="rogue-caption">调换不恢复 HP、PP 或状态。升星需选定一位保留成员及两位消耗成员，消耗成员的道具会返还。</p>' +
+				'<p class="rogue-caption">调换不恢复 HP、PP 或状态。' + (canMerge ? '升星需选定一位保留成员及两位消耗成员，消耗成员的道具会返还。' : '') + '</p>' +
 				'<label>取出时：<select name="boxTarget"><option value="">加入队伍空位</option>' + run.team.map(function (mon) {
 					return '<option value="' + escape(mon.id) + '">交换 ' + escape(localName(mon.set.species)) + '</option>';
 				}).join('') + '</select></label><div class="rogue-inventory">';
@@ -2104,7 +2176,7 @@
 					' · Lv.' + mon.set.level + ' · HP ' + mon.hp + '/' + mon.maxhp + '</p>' +
 					'<div class="rogue-item-actions">' +
 					button('boxMember', mon.id, inTeam ? '存入箱子' : '取出／交换', locked || inTeam && (run.team.length <= 1 || run.box.length >= 30)) +
-					button('mergeMember', mon.id, '保留此伙伴并升星', locked || matches.length < 3 || mon.stars >= 4) + '</div></div>';
+					(canMerge ? button('mergeMember', mon.id, '保留此伙伴并升星', locked || matches.length < 3 || mon.stars >= 4 || mon.fusion) : '') + '</div></div>';
 			});
 			return html + '</div></section>';
 		},
@@ -2134,7 +2206,7 @@
 						if (item.kind === 'tonic') reason = target.tonics && target.tonics[item.id.replace(/^rogue/, '')] ? '已生效' : '';
 						if (item.kind === 'ability') reason = target.abilityChanges && target.abilityChanges[item.id] ? '' : '没有可变更的特性';
 						if (item.kind === 'machine') reason = (target.machineMoves || []).indexOf(item.move) < 0 ? '无法学习或已经掌握' : '';
-						if (item.kind === 'candy') reason = !target.hp ? '需先复活' : target.fixedLevel || target.set.level >= 100 ? '无法获得经验' : '';
+						if (item.kind === 'candy') reason = !target.hp ? '需先复活' : target.fixedLevel || !target.uncappedLevel && target.set.level >= 100 ? '无法获得经验' : '';
 						if (item.kind === 'effort') reason = target.set.evs[item.stat] >= 252 || Object.keys(statNames).reduce(function (sum, stat) {
 							return sum + (target.set.evs[stat] || 0);
 						}, 0) >= 510 ? '基础点数已达上限' : '';
@@ -2198,13 +2270,10 @@
 			}
 			var hpBuyer = run.team.find(function (mon) { return mon.id === this.hpTarget; }, this) || run.team[0];
 			if (run.node && run.node.trade && run.node.trade.kind === 'growth') {
-				html += '<p class="rogue-caption">训练效果本局永久保留，不占道具栏。每项训练名额有限，仅接受金币。</p><div class="rogue-inventory rogue-training-offers">';
-				(run.growthOffers || []).forEach(function (offer) {
-					html += '<div class="rogue-item-card"><h4>' + fa(offer.id === 'offense' ? 'bolt' : offer.id === 'defense' ? 'shield' : 'book') +
-						escape(offer.name) + '</h4><p>' + escape(offer.text) + '</p><small>剩余 ' + offer.remaining + ' 次 · ' + offer.price + ' 金币</small>' +
-						button('act', 'buygrowth:' + offer.id, offer.amount ? '报名训练' : '已达本局上限', !usable || !offer.remaining || !offer.amount || run.money < offer.price) + '</div>';
-				});
-				return html + '</div>' + this.renderRunTraining(run) + '</section>';
+				var finished = !(run.growthOffers || []).some(function (offer) { return offer.remaining; });
+				html += '<h4>一次集训，自选伙伴与项目</h4><p>选择训练员、参加的伙伴及攻击／防御／特攻／特防／速度项目。<strong>当场完成，伙伴不离队。</strong>项目与人数越多，总价越高；高档训练员每金币带来的提升更多。</p>';
+				(run.growthOffers || []).forEach(function (offer) { html += '<p><strong>' + escape(offer.name) + '</strong> · 每位伙伴每项 +' + offer.amount / 100 + '% · ' + offer.price + ' 金币</p>'; });
+				return html + button('openTrainingCamp', '', finished ? '本营地已完成训练' : '安排本次训练', !usable || finished) + '<p class="rogue-caption">每个营地只可确认一次。训练提升在本局持续，各项个人营地增幅最高 60%；不能训练蛋或融合中的伙伴。</p></section>';
 			}
 			if (run.blessings && run.blessings.owned.some(function (entry) { return entry.family === 'shopraid'; }) && !run.node.shopChallenge) {
 				html += '<p class="rogue-shop-challenge">' + button('challengeShop', '', '零元购 · 挑战店主', !usable || !run.team.some(function (mon) { return mon.hp > 0; }), fa('flag')) +
@@ -2523,6 +2592,13 @@
 					Number(run.failure.floor) + '</b> 层。</p><p>' + escape(run.failure.reason) + '</p>' +
 					button('acknowledgeFailure', run.failure.key, '确认，返回起始界面', busy) + '</section></div>'); return;
 			}
+			if (run && run.comeback && run.comeback.key) {
+				var c = run.comeback;
+				var elder = '<section class="rogue-floor rogue-comeback" role="dialog" aria-label="黑袍老人 · 再启程"><h3>黑袍老人 · 再启程</h3><div class="rogue-story-scene scene-stranger" style="height:220px;min-height:0"><div class="rogue-story-figure" style="top:65px;transform:scale(.65);transform-origin:top center" aria-label="黑袍老人"></div></div><p style="font-size:1.1em;line-height:1.9">' + escape(c.text) + '</p>';
+				if (c.choosing) elder += button('comebackChoice', 'no', '否，我还想靠自己和伙伴继续走下去。', busy) + button('comebackChoice', 'yes', '是，我需要重新找到前进的力量。', busy) + '<p class="rogue-caption">回答“否”保留机会；回答“是”将偏爱卡片换为一次性援助：本层伤害、双防 +25%，10 层经验加成。两者均不免费复活。</p>';
+				else elder += button('comebackChoice', c.answer ? 'continue' : 'next', c.answer ? '回到伙伴身边' : '继续对话', busy);
+				stableHTML(this, html + elder + '</section></div>'); this.$el.scrollTop(0); return;
+			}
 			if (state.story) { stableHTML(this, html + this.renderStory(state.story, busy) + '</div>'); return; }
 			if (run && run.companionInvitation) {
 				stableHTML(this, html + this.renderCompanionInvitation(run.companionInvitation, busy) + '</div>'); return;
@@ -2555,15 +2631,18 @@
 						(state.spirits || []).map(function (spirit) { return '<option value="' + escape(spirit.id) + '"' + (this.testSpirit === spirit.id ? ' selected' : '') + '>' +
 							escape(spirit.name) + '</option>'; }, this).join('') + '</select></label></p>';
 				} else html += '<p class="rogue-caption">无塔灵通关 200 层，可解锁“开启塔灵”。</p>';
-				html += '<p><strong class="rogue-starter-count" aria-live="polite">已选择 ' + this.selectedStarters.length +
-					' / ' + account.slots + ' 只</strong> · 选满后取消一个，才能更换伙伴。</p><div class="rogue-starters">';
+				html += '<p><strong class="rogue-starter-count" aria-live="polite">已选 ' + this.selectedStarters.length +
+					' 只 · 已用 ' + this.starterSlotsUsed() + ' / ' + account.slots + ' 个初始名额</strong></p>' +
+					'<p class="rogue-caption">普通伙伴占 1 格，传说宝可梦与幻之宝可梦占 4 格，一级神占 6 格。仅限制初始选择，旅途中仍可组成正常队伍。</p><div class="rogue-starters">';
 				var selectedStarters = this.selectedStarters;
+				var remainingSlots = account.slots - this.starterSlotsUsed();
 				var renderStarter = function (starter) {
 					var checked = selectedStarters.indexOf(starter.id) >= 0;
-					var disabled = busy || (!checked && selectedStarters.length >= account.slots);
+					var disabled = busy || (!checked && (starter.slotCost || 1) > remainingSlots);
 					html += '<label' + (disabled && !checked ? ' class="is-disabled"' : '') + '><input type="checkbox" name="starter" value="' +
 						escape(starter.id) + '"' + (checked ? ' checked' : '') + (disabled ? ' disabled' : '') + ' />' +
-						'<span class="picon" style="' + Dex.getPokemonIcon(starter.species) + '"></span>' + escape(localName(starter.species)) + '</label> ';
+						'<span class="picon" style="' + Dex.getPokemonIcon(starter.species) + '"></span>' + escape(localName(starter.species)) +
+						'<small> · ' + (starter.slotCost || 1) + ' 格</small></label> ';
 				};
 				state.starters.filter(function (starter) { return starter.available; }).forEach(renderStarter);
 				html += '</div>';
@@ -2817,6 +2896,62 @@
 			room.submit(this.data.mode === 'feed' ? 'feedmushroom' : 'sell', {value:this.data.item.id, count:n, member:this.$('select[name=mushroomTarget]').val()}); this.close();
 		}
 	});
+	this.RogueTrainingCampPopup = this.Popup.extend({
+		type: 'modal',
+		events: {'change input': 'updatePrice', 'change select': 'updatePrice'},
+		initialize: function (data) {
+			this.room = data.room; this.runid = this.room.state.run.id; this.revision = this.room.state.account.revision;
+			var run = this.room.state.run;
+			this.offers = run.growthOffers || []; this.members = run.team.filter(function (m) { return !m.egg && !m.fusion; });
+			var html = '<h3>训练营 · 安排一次集训</h3><p>当场完成，伙伴不离队。确认后，本营地不能追加训练。</p><label>训练员 <select name="campTier">' + this.offers.map(function (o) { return '<option value="' + o.id + '">' + escape(o.name) + ' · 每项 +' + o.amount / 100 + '% · 每位每项 ' + o.price + ' 金币</option>'; }).join('') + '</select></label>';
+			html += '<fieldset><legend>参加的伙伴</legend>' + this.members.map(function (m) { return '<label style="display:block;margin:6px"><input type="checkbox" name="campMember" value="' + escape(m.id) + '" />' + escape(localName(m.set.species)) + ' · Lv.' + m.set.level + '</label>'; }).join('') + '</fieldset><fieldset><legend>训练项目</legend>';
+			html += ['atk', 'def', 'spa', 'spd', 'spe'].map(function (stat) { return '<label style="display:inline-block;margin:6px"><input type="checkbox" name="campStat" value="' + stat + '" />' + statNames[stat] + '</label>'; }).join('') + '</fieldset><div class="camp-preview" aria-live="polite"></div>' + button('confirmTraining', '', '确认训练') + button('close', '', '暂不训练');
+			stableHTML(this, html); this.updatePrice();
+		},
+		selection: function () { return {value: this.$('select[name=campTier]').val(), trainingMembers: this.$('input[name=campMember]:checked').map(function () { return this.value; }).get(), trainingStats: this.$('input[name=campStat]:checked').map(function () { return this.value; }).get()}; },
+		updatePrice: function () {
+			var selection = this.selection(), tier = this.offers.find(function (o) { return o.id === selection.value; });
+			var members = this.members.filter(function (m) { return selection.trainingMembers.indexOf(m.id) >= 0; }), stats = selection.trainingStats;
+			var price = tier.price * members.length * stats.length, capped = members.some(function (m) { return stats.some(function (s) { return (m.campTraining && m.campTraining[s] || 0) >= 6000; }); });
+			this.$('button[name=confirmTraining]').prop('disabled', !tier.remaining || !members.length || !stats.length || capped || price > this.room.state.run.money);
+			this.$('.camp-preview').html('<p><strong>总价：' + price + ' 金币</strong> · 余额 ' + this.room.state.run.money + ' 金币</p>' + members.map(function (m) { return '<p>' + escape(localName(m.set.species)) + '：' + stats.map(function (s) { var before = m.campTraining && m.campTraining[s] || 0; return statNames[s] + ' +' + before / 100 + '% → +' + Math.min(6000, before + tier.amount) / 100 + '%'; }).join('、') + '</p>'; }).join('') + (capped ? '<p>有项目已达上限，请取消该项目或伙伴。</p>' : ''));
+		},
+		confirmTraining: function () {
+			if (this.room.state.run && this.room.state.run.id === this.runid && this.room.state.account.revision === this.revision) this.room.submit('buygrowth', this.selection());
+			this.close();
+		}
+	});
+	this.RogueFusionPopup = this.Popup.extend({
+		type: 'modal',
+		events: {'change select[name=fusionFirst]': 'updatePair', 'change select[name=fusionSecond]': 'updatePair', 'change input[name=fusionStat]': 'updateStats'},
+		initialize: function (data) {
+			this.room = data.room; this.runid = this.room.state.run.id; this.revision = this.room.state.account.revision;
+			this.members = this.room.state.run.team.filter(function (m) { return !m.egg; });
+			var options = this.members.map(function (m) { return '<option value="' + escape(m.id) + '">' + escape(localName(m.set.species)) + ' · Lv.' + m.set.level + '</option>'; }).join('');
+			stableHTML(this, '<h3>波塔拉耳环</h3><p><strong>第一位</strong>提供第一属性和你选定的三项种族值；<strong>第二位</strong>提供其余三项种族值与第二属性（单属性时取第一属性）。等级取较高者，努力值和个体值沿用第一位。</p><p>第一位 <select name="fusionFirst">' + options + '</select></p><p>第二位 <select name="fusionSecond">' + options + '</select></p><div class="fusion-preview"></div><p>融合后占一个名额，可使用双方完整招式池；暂停进化、幻想化及战斗形态变化。解除时恢复原数据，第一位保留融合期间获得的经验；再次融合需通关 10 层。</p>' + button('confirmFusion', '', '确认融合') + button('close', '', '取消'));
+			this.$('select[name=fusionSecond]').val(this.members[1] && this.members[1].id); this.updatePair();
+		},
+		updatePair: function () {
+			var aId = this.$('select[name=fusionFirst]').val(), bId = this.$('select[name=fusionSecond]').val();
+			var a = this.members.find(function (m) { return m.id === aId; }), b = this.members.find(function (m) { return m.id === bId; });
+			this.$('button[name=confirmFusion]').prop('disabled', !a || !b || a === b || !a.hp || !b.hp);
+			if (!a || !b || a === b) { this.$('.fusion-preview').html('<p>请选择两位不同的伙伴。</p>'); return; }
+			var abilities = Array.from(new Set((a.fusionAbilities || []).concat(b.fusionAbilities || [])));
+			this.$('.fusion-preview').html('<p>融合等级：<strong>' + Math.max(a.set.level, b.set.level) + '</strong></p><p>特性 <select name="fusionAbility">' + abilities.map(function (id) { return '<option value="' + escape(id) + '">' + escape(localName(dex().abilities.get(id).name)) + '</option>'; }).join('') + '</select></p><p>外观 <select name="fusionAppearance">' + [a, b].map(function (m) { return '<option value="' + escape(m.id) + '">' + escape(localName(m.set.species)) + '</option>'; }).join('') + '</select></p><fieldset class="fusion-stats"><legend>勾选由第一位提供的三项种族值</legend>' + ['hp', 'atk', 'def', 'spa', 'spd', 'spe'].map(function (stat, index) { return '<label style="display:inline-block;margin:6px"><input type="checkbox" name="fusionStat" value="' + stat + '"' + (index < 3 ? ' checked' : '') + ' />' + statNames[stat] + '</label>'; }).join('') + '</fieldset><p class="fusion-stat-preview"></p>');
+			this.updateStats();
+		},
+		updateStats: function () {
+			var selected = this.$('input[name=fusionStat]:checked').map(function () { return this.value; }).get();
+			var a = this.members.find(function (m) { return m.id === this.$('select[name=fusionFirst]').val(); }, this), b = this.members.find(function (m) { return m.id === this.$('select[name=fusionSecond]').val(); }, this);
+			this.$('button[name=confirmFusion]').prop('disabled', selected.length !== 3 || !a || !b || a === b || !a.hp || !b.hp);
+			if (!a || !b || a === b) return;
+			this.$('.fusion-stat-preview').text('已选 ' + selected.length + ' / 3 项。融合种族值：' + ['hp', 'atk', 'def', 'spa', 'spd', 'spe'].map(function (stat) { var source = selected.indexOf(stat) >= 0 ? a : b; return statNames[stat] + ' ' + dex().species.get(source.set.species).baseStats[stat] + '（' + localName(source.set.species) + '）'; }).join(' · '));
+		},
+		confirmFusion: function () {
+			if (this.room.state.run && this.room.state.run.id === this.runid && this.room.state.account.revision === this.revision) this.room.submit('fusion', {member: this.$('select[name=fusionFirst]').val(), value: this.$('select[name=fusionSecond]').val(), fusionStats: this.$('input[name=fusionStat]:checked').map(function () { return this.value; }).get(), fusionAbility: this.$('select[name=fusionAbility]').val(), appearance: this.$('select[name=fusionAppearance]').val()});
+			this.close();
+		}
+	});
 	this.RogueCandyPopup = this.Popup.extend({
 		type: 'modal',
 		events: {'input input[name=candyCount]': 'updatePreview'},
@@ -2825,7 +2960,7 @@
 			this.revision = data.room.state.account.revision;
 			var exp = data.member.experienceProgress, held = data.room.state.run.bag[data.item.id] || 0;
 			this.maximum = exp && exp.levels && data.member.hp && !data.member.fixedLevel ?
-				Math.max(0, Math.min(held, Math.ceil((exp.levels[99] - exp.total) / data.item.amount))) : 0;
+				Math.max(0, Math.min(held, Math.ceil((exp.levels[exp.levels.length - 1] - exp.total) / data.item.amount))) : 0;
 			if (!this.maximum) {
 				stableHTML(this, '<p>当前伙伴不能使用经验糖果，请刷新存档后检查等级与状态。</p>' + button('close', '', '关闭'));
 				return;
@@ -2835,21 +2970,21 @@
 				'<label>使用数量 <input name="candyCount" type="number" min="1" max="' + this.maximum + '" step="1" value="1" inputmode="numeric" /></label>' +
 				'<p class="rogue-candy-amounts">' + [1, 5, 10].map(function (n) { return button('chooseCount', '' + n, '' + n + ' 个'); }).join(' ') +
 				' ' + button('addTen', '', '数量 +10') + ' ' + button('chooseCount', 'max', '最多 ' + this.maximum + ' 个') + '</p>' +
-				'<p class="rogue-candy-preview" aria-live="polite"></p><p class="rogue-caption">达到 100 级即停止使用，多余糖果保留。</p>' +
+				'<p class="rogue-candy-preview" aria-live="polite"></p><p class="rogue-caption">' + (data.member.uncappedLevel ? '独行伙伴已解除 100 级限制。' : '达到 100 级即停止使用，多余糖果保留。') + '</p>' +
 				button('confirmCandy', '', '确认使用', false, fa('check')) + ' ' + button('close', '', '取消') + '</div>');
 			this.updatePreview();
 		},
 		preview: function (count) {
 			if (!Number.isSafeInteger(count) || count < 1 || count > this.maximum) return null;
 			var exp = this.data.member.experienceProgress, levels = exp.levels;
-			var total = Math.min(levels[99], exp.total + count * this.data.item.amount), level = 1;
-			while (level < 100 && total >= levels[level]) level++;
-			return {count: count, level: level, gained: total - exp.total, next: level === 100 ? 0 : levels[level] - total};
+			var total = Math.min(levels[levels.length - 1], exp.total + count * this.data.item.amount), level = 1;
+			while (level < levels.length && total >= levels[level]) level++;
+			return {count: count, level: level, gained: total - exp.total, next: level === levels.length ? 0 : levels[level] - total};
 		},
 		updatePreview: function () {
 			var preview = this.preview(Number(this.$('input[name=candyCount]').val()));
 			this.$('.rogue-candy-preview').text(preview ? 'Lv.' + this.data.member.set.level + ' → Lv.' + preview.level +
-				' · 经验 +' + preview.gained + (preview.level === 100 ? ' · 已达满级' : ' · 距下一级 ' + preview.next + ' 经验') :
+				' · 经验 +' + preview.gained + (!preview.next ? ' · 已达当前预览上限' : ' · 距下一级 ' + preview.next + ' 经验') :
 				'请输入 1～' + this.maximum + ' 的整数。');
 			this.$('button[name=confirmCandy]').prop('disabled', !preview);
 		},
@@ -3002,17 +3137,18 @@
 	});
 	this.RogueBlessingLearnPopup = this.Popup.extend({
 		initialize: function (data) {
-			this.room = data.room; this.member = data.member;
+			this.room = data.room; this.member = data.member; this.kind = data.kind;
 			this.runid = this.room.state.run.id;
-			var entry = (this.room.state.run.blessings.learning || []).find(function (e) { return e.member === data.member; });
-			var html = '<h3>选择一个新招式</h3><p>本局每只伙伴只能领取一次，可在学会后自由装备。</p><select name="learnMove">';
+			var run = this.room.state.run;
+			var entry = (this.kind === 'coverage' ? run.coverage.members : this.kind === 'sound' ? run.blessings.soundLearning : run.blessings.learning || []).find(function (e) { return e.member === data.member; });
+			var html = '<h3>' + (this.kind === 'coverage' ? '补盲研习' : this.kind === 'sound' ? '全队开麦 · 声音招式' : '选择一个新招式') + '</h3><p>' + (this.kind === 'coverage' ? '消耗一份研习，自选合法的非本系攻击招式。' : '本祝福每只伙伴可领取一次，后来入队者也可领取。') + '</p><select name="learnMove">';
 			(entry && entry.moves || []).forEach(function (id) { var move = dex().moves.get(id);
 				html += '<option value="' + escape(id) + '">' + escape(localName(move.name, 'move') + ' · ' + localName(move.type) + ' · ' + localName(move.category)) + '</option>';
 			});
 			stableHTML(this, html + '</select><p>' + button('confirmLearn', '', '确认学习') + button('close', '', '稍后再学') + '</p>');
 		},
 		confirmLearn: function () {
-			if (this.room.state.run && this.room.state.run.id === this.runid) this.room.submit('learnbonus', {member: this.member, value: this.$('select[name=learnMove]').val()});
+			if (this.room.state.run && this.room.state.run.id === this.runid) this.room.submit(this.kind === 'coverage' ? 'coverage' : 'learnbonus', {member: this.member, slot: this.kind === 'sound' ? 1 : 0, value: this.$('select[name=learnMove]').val()});
 			this.close();
 		}
 	});

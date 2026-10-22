@@ -46,7 +46,7 @@ function client(startScreen = false, localized = false, runtime = {}) {
 	panel.$el = {addClass() {}, html: html => { panel.html = html; }, scrollTop: () => 0};
 	context.app._addRoom = id => { context.app.rooms[id] = panel; return panel; };
 	context.app.updateSideRoom = id => { context.app.sideRoom = context.app.rooms[id]; };
-	room.$el = {addClass() {}, html: html => { room.html = html; }};
+	room.$el = {addClass() {}, html: html => { room.html = html; }, scrollTop: value => { if (value !== undefined) room.scroll = value; return room.scroll || 0; }};
 	room.controls = {};
 	room.$ = selector => ({
 		val() { return room.controls[selector]; },
@@ -68,6 +68,18 @@ function state() {
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
 describe('Fantasy Rogue start menu and codex', () => {
+	it('uses reviewed Fantasy suffixes in both names and embedded Chinese references', () => {
+		const c = client(true, true, {Gen9fantasyMovedex: {razorwind: {}}, Gen9fantasyAbilities: {cutecharm: {}, poisonpuppeteer: {}}});
+		c.Dex.moves.get = () => ({name: 'Razor Wind🔄'});
+		c.Dex.abilities.get = id => ({name: id === 'cutecharm' ? 'Cute Charm+' : 'Poison Puppeteer'});
+		c.room.receiveState(state()); c.room.openCodex('blessings');
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'blessings', entries: [
+			{id: 'test', family: 'test', tier: 'gold', unlocked: true, name: '文本测试', text: '【迷人之躯】【毒傀儡🔄】【旋风刀】【Cute Charm】'},
+		]});
+		assert(c.room.html.includes('【迷人之躯+】'));
+		assert(c.room.html.includes('【毒傀儡】')); assert(!c.room.html.includes('毒傀儡🔄'));
+		assert(c.room.html.includes('【旋风刀🔄】'));
+	});
 	it('offers an ecology guide with anonymous black silhouettes and named caught pixel icons', () => {
 		const c = client(true), calls = []; c.room.receiveState(state()); c.room.openCodex('events');
 		c.Dex.getPokemonIcon = name => {calls.push(name); return 'background-position:0 0;';};
@@ -366,10 +378,61 @@ describe('Fantasy Rogue start menu and codex', () => {
 		data.run.growth = {offense: 800, defense: 400, experience: 500, personal: [{species: 'Bulbasaur', offense: 400}]};
 		data.run.growthOffers = [{id: 'offense', name: '输出训练', text: '全队双攻 +4%', price: 1600, amount: 400, remaining: 1}];
 		c.room.receiveState(data);
-		assert(c.room.html.includes('value="buygrowth:offense" disabled'));
+		assert(c.room.html.includes('name="openTrainingCamp"'));
+		assert(c.room.html.includes('当场完成，伙伴不离队'));
+		assert(!c.room.html.includes('value="buygrowth:offense"'));
 		assert(!c.room.html.includes('name="challengeShop"')); assert(!c.room.html.includes('血量支付：'));
 		assert(c.panel.html.includes('双攻 +8%')); assert(c.panel.html.includes('个人训练：双攻 +4%'));
 		assert(c.panel.html.includes('所有增幅随通关卡保留'));
+	});
+	it('previews capped power-item effort gains and reads the server reward claim state', () => {
+		const c = client(), data = adventure('ready'), mon = data.run.team[0];
+		data.run.blessings = {owned: [{id: 'weighttraining', family: 'weighttraining', name: '负重训练'}], pending: [], shards: 0, weightTraining: {claimed: false}};
+		mon.set.evs = {hp: 252, atk: 0, def: 0, spa: 248, spd: 4, spe: 1}; mon.set.item = 'powerlens';
+		c.room.receiveState(data);
+		assert(c.panel.html.includes('还差 5 点')); assert(c.panel.html.includes('当前上限下最多增加 4 点'));
+		assert(c.panel.html.includes('对战速度减半'));
+		mon.set.evs.spa = 252; mon.set.evs.spe = 2; data.run.blessings.weightTraining.claimed = true;
+		c.room.receiveState(data);
+		assert(c.panel.html.includes('幻之力量镜已领取')); assert(c.panel.html.includes('当前上限下最多增加 0 点'));
+		assert(c.panel.html.includes('当前项目或总努力值已满'));
+	});
+	it('shows the elder before normal floor controls and preserves the choice semantics', () => {
+		const c = client(), data = adventure('ready'); c.room.scroll = 900;
+		data.run.comeback = {key: 'elder', text: '已经到达自己的极限了吗？', choosing: true};
+		c.room.receiveState(data);
+		assert.equal(c.room.scroll, 0); assert(c.room.html.includes('role="dialog"'));
+		assert(c.room.html.includes('回答“否”保留机会')); assert(c.room.html.includes('两者均不免费复活'));
+		assert(!c.room.html.includes('name="startBattle"'));
+		c.room.comebackChoice('no'); const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(command.action, 'comeback'); assert.equal(command.member, 'elder'); assert.equal(command.value, 'no');
+	});
+	it('quotes a batch training price and submits exactly the selected members and stats', () => {
+		const c = client(), data = adventure('rest'); data.run.money = 5000;
+		data.run.growthOffers = [{id: 'master', name: '王牌训练员', amount: 1500, price: 450, remaining: 1}];
+		c.room.receiveState(data); const popup = Object.create(c.RogueTrainingCampPopup), views = {};
+		popup.selection = () => ({value: 'master', trainingMembers: [data.run.team[0].id], trainingStats: ['spa', 'spe']});
+		popup.$el = {html: h => {views.html = h;}}; popup.close = () => {};
+		popup.$ = selector => ({html: h => {views[selector] = h;}, prop: (k, v) => {views[selector + k] = v;}});
+		popup.initialize({room: c.room});
+		assert(views['.camp-preview'].includes('总价：900 金币')); assert(views['.camp-preview'].includes('速度 +0% → +15%'));
+		assert.equal(views['button[name=confirmTraining]disabled'], false);
+		popup.confirmTraining(); const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(command.action, 'buygrowth'); assert.deepEqual(command.trainingStats, ['spa', 'spe']);
+		assert.deepEqual(command.trainingMembers, [data.run.team[0].id]);
+	});
+	it('keeps sound lessons and coverage lessons on their separate command paths', () => {
+		for (const kind of ['sound', 'coverage']) {
+			const c = client(), data = adventure('ready'), member = data.run.team[0].id;
+			data.run.blessings = {owned: [], pending: [], soundLearning: [{member, moves: ['round']}], shards: 0};
+			data.run.coverage = {remaining: 1, members: [{member, moves: ['round']}]};
+			c.room.receiveState(data); const popup = Object.create(c.RogueBlessingLearnPopup);
+			popup.$el = {html() {}}; popup.$ = () => ({val: () => 'round'}); popup.close = () => {};
+			popup.initialize({room: c.room, member, kind}); popup.confirmLearn();
+			const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+			assert.equal(command.action, kind === 'sound' ? 'learnbonus' : 'coverage');
+			assert.equal(command.slot, kind === 'sound' ? 1 : 0);
+		}
 	});
 	it('shows first-account instructions once before story entry and acknowledges without starting a run', () => {
 		const c = client(true), data = state(), popups = [];
@@ -576,6 +639,15 @@ describe('Fantasy Rogue start menu and codex', () => {
 		for (const item of data.items) assert(c.html.includes('sprites/fantasy-rogue/' + item.id + '.png'));
 		assert(c.html.includes('rogue-tera rogue-system-status'));
 		assert(c.html.includes('class="rogue-system-status">超进化：'));
+	});
+	it('shows full PP supplies with bottle icons and player-facing full-recovery wording', () => {
+		const c = client(), data = adventure('ready');
+		data.items = [{id: 'maxether', icon: 'ether', name: 'PP 单项全补剂', kind: 'ether', amount: 999, singleMove: true},
+			{id: 'maxelixir', icon: 'elixir', name: 'PP 多项全补剂', kind: 'ether', amount: 999}];
+		data.items.forEach(i => {data.run.bag[i.id] = 1;}); c.room.receiveState(data);
+		const html = c.room.renderBag(data.run, false);
+		assert(html.includes('自选一个招式恢复 全部 PP')); assert(html.includes('当前各招式恢复 全部 PP'));
+		assert(html.includes('rogue-item-ether')); assert(html.includes('rogue-item-elixir')); assert(!html.includes('999'));
 	});
 	it('draws patch, capsule, crowns and Max Revive icons instead of the missing-item question mark', () => {
 		const c = client(), data = adventure('ready');
@@ -1775,6 +1847,24 @@ describe('Fantasy Rogue client', () => {
 		c.room.startAdventure();
 		assert.deepEqual(JSON.parse(c.sent[0].slice('/fantasyrogue action '.length)).starters, ['bulbasaur', 'charmander']);
 	});
+	it('uses the starter slot budget for legendaries and preserves a valid selection after refresh', () => {
+		const c = client(), data = state(); data.configured = true; data.account.slots = 6;
+		data.starters = [{id: 'mew', species: 'Mew', slotCost: 4, available: true},
+			{id: 'mewtwo', species: 'Mewtwo', slotCost: 6, available: true},
+			{id: 'bulbasaur', species: 'Bulbasaur', slotCost: 1, available: true},
+			{id: 'charmander', species: 'Charmander', slotCost: 1, available: true}];
+		const inputs = data.starters.map(s => ({value: s.id, checked: false, disabled: false, parentElement: {classList: {toggle() {}}}}));
+		c.room.controls['input[name=starter]'] = inputs; c.room.receiveState(data);
+		for (const i of [0, 2, 3]) {inputs[i].checked = true; c.room.changeStarter({currentTarget: inputs[i]});}
+		assert.equal(c.room.starterSlotsUsed(), 6); assert.equal(c.room.selectedStarters.length, 3); assert(inputs[1].disabled);
+		c.room.receiveState(JSON.parse(JSON.stringify(data))); assert.equal(c.room.starterSlotsUsed(), 6);
+		assert(c.html.includes('已用 6 / 6 个初始名额'));
+		inputs[1].checked = true; c.room.changeStarter({currentTarget: inputs[1]}); assert.equal(inputs[1].checked, false);
+		for (const i of [0, 2, 3]) {inputs[i].checked = false; c.room.changeStarter({currentTarget: inputs[i]});}
+		inputs[1].checked = true; c.room.changeStarter({currentTarget: inputs[1]});
+		assert.equal(c.room.selectedStarters.join(), 'mewtwo'); assert.equal(c.room.starterSlotsUsed(), 6);
+		data.account.slots = 4; c.room.receiveState(data); assert.equal(c.room.selectedStarters.length, 0);
+	});
 	it('selects a route on first click, switches selection, and submits only on the second click', () => {
 		const c = client(); const data = adventure();
 		data.run.choices.push({id: 'reward', name: '奖励', kind: 'reward', reward: {money: 10, items: {}}});
@@ -2092,6 +2182,19 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 				append: html => { room.html += html; }, prepend: html => { room.html = html + room.html; }}});
 		return {room, sent, joined, app: context.app, context};
 	}
+	it('preserves the number choice through doubles target selection', () => {
+		const {room} = battleClient();
+		room.request.fantasyRogue = {catchable: false, number: {available: true, super: false, stats: ['atk', 'def', 'spa', 'spd', 'spe']}};
+		assert(room.rogueBallControls().includes('大数字'));
+		room.choice = {choices: []}; room.battle.nearSide = {active: [{}, {}]};
+		room.tooltips = {hideTooltip() {}}; room.updateControlsForPlayer = () => {};
+		room.$ = selector => ({prop: () => false, val: () => selector === 'select[name=rogueNumberStat]' ? 'atk' : ''});
+		room.endChoice = () => {};
+		room.chooseMove('2', {getAttribute: () => 'normal'}); room.chooseMoveTarget('1');
+		assert.equal(room.choice.choices[0], 'roguenumber atk move 2 1');
+		room.request.fantasyRogue.number.available = false;
+		assert(room.rogueBallControls().includes('name="rogueNumberStat" disabled'));
+	});
 	it('preserves a selected blood boost through doubles target selection and shows its real cost', () => {
 		const c = battleClient(), room = c.room;
 		room.request.fantasyRogue = {catchable: false, blood: [{available: true, cost: 11, factor: 1.6}]};

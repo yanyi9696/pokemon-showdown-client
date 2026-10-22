@@ -25,6 +25,7 @@ var translations = {
     "Rogue City Poison": "熙熙攘攘我们的城市",
     "Rogue Flawless": "致以，「无瑕之人」",
     "Rogue Great Mage": "大法师",
+    "Rogue Spinda Sleep": "濒死睡眠",
     "Heaven Piercing Drill": "突破天际的钻头",
     "Rogue Ascent": "登龙",
     "Rogue Emblem Bug": "虫属性转", "Rogue Emblem Dark": "恶属性转",
