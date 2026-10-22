@@ -50,6 +50,9 @@ try {
 var options = {cwd: __dirname, stdio: 'inherit'};
 var full = '';
 
+// Generated data is ignored by Git, so a fresh checkout has no output directory yet.
+fs.mkdirSync('play.pokemonshowdown.com/data', { recursive: true });
+
 switch (args[0] || '') {
 case 'full':
 	execSync(`node ./build-tools/build-indexes`, options);
