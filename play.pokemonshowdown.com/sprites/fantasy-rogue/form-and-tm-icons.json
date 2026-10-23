@@ -170,6 +170,21 @@
       "file": "kyurem-original-shiny.png",
       "source": "https://raw.githubusercontent.com/Nn-Exe/Pokemon-Hyper-Emerald-5.7-QoL/main/docs/sprites/front/1119s.png",
       "sha256": "313dae18f38926c65db95347c3835eb370a0c7bfba9126834fb5e9d75ac70142"
+    },
+    {
+      "file": "kyurem-original-back.png",
+      "source": "User-approved local pixel artwork, refinement v3 (2026-10-23), based on supplied Black/White Kyurem back references",
+      "sha256": "3d790a7bacdff8416731a2ac71ac23921b02b62bf137e4402100349a75bc4026"
+    },
+    {
+      "file": "kyurem-original-back-shiny.png",
+      "source": "Palette-only variant of approved back; colors mapped from the existing Hyper Emerald normal/shiny front pair",
+      "sha256": "bc75a3de777c610382758ce2a2dd4a27e500a5e8a356b2d29c966a57dc6d0b56"
+    },
+    {
+      "file": "kyurem-original-icon.png",
+      "source": "Local image_gen artwork from Kyurem normal front and Black/White party-icon references; Sprite Fusion Pixel Snapper cleanup (2026-10-23)",
+      "sha256": "b5c4061ab1f31968f638d7d73c984232bc42512764916811afcac5d609016891"
     }
   ]
 }

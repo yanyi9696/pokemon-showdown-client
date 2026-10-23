@@ -6,7 +6,11 @@
 
 `kyurem-original.png` 与闪光版本使用 [Hyper Emerald 5.7 公开图鉴的 Kyurem-WB](https://nn-exe.github.io/Pokemon-Hyper-Emerald-5.7-QoL/wiki/pokedex/kyurem-wb/) 正面图（仓库 `docs/sprites/front/1119.png` 与 `1119s.png`），不修改原 PNG。该页面的种族值为 125／170／100／170／100／95，与本次指定一致。素材归原作者所有，不宣称本项目原创；该资料未逐图列出绘师，不能仅凭相似外观将其归名给其他作品作者。
 
-背面素材尚未取得：当前战斗我方位置明确回退为同一正面图，未制作或冒用其他形态背面。后续取得匹配背面后应替换这一回退。用户提供的另一条线索“西班牙火箭队”作者发布帖将其 `Kyurem Incompleto` 署名为 [DestvoL](https://www.deviantart.com/destvol/art/Unova-Kyurem-GBA-Sprite-64x64-800466028)；本次未能读取该图片页，因此没有使用其未经核实的背面。
+`kyurem-original-back.png` 是用户于 2026-10-23 确认的 128×128 透明像素背面图：以用户提供的焰白／暗黑酋雷姆背面图和上述正面图为参考，经本地像素重绘、[Sprite Fusion Pixel Snapper](https://www.spritefusion.com/pixel-snapper) 公开 WASM 模块整理及逐像素修正完成。最终修正版保留连续蓝色管线，并采用深灰、蓝灰和暗红轮廓。接入时逐字节保留确认版本；它是本项目的衍生美术，不冒充改版原作者的背面素材。`kyurem-original-back-shiny.png` 只更换调色板，沿用现有普通／闪光正面图的颜色对应及相近材质的描边色，不改变轮廓或透明区域。
+
+`kyurem-original-icon.png` 是 40×30 透明队伍小图标。目前本地资源与上述公开素材库均未找到对应的专属小图标，因此使用内置 image_gen，以原版焰白／暗黑酋雷姆的队伍图标及本形态正面图为参考制作；再用 Pixel Snapper 公开 WASM 模块在本地规整像素、匹配 17 色调色板，以最近邻方式整理到原生图标尺寸。没有将新图标伪称为原作或改版原素材。肉鸽队伍栏、队伍编辑器及战斗队伍栏通过统一的图标接口使用它；小图标与原版一致不区分闪光，战斗左栏沿用现有 CSS 镜像。逐文件校验和同样见 `form-and-tm-icons.json`。
+
+Sprite Fusion 模块来源：[Hugo-Dz/spritefusion-pixel-snapper](https://github.com/Hugo-Dz/spritefusion-pixel-snapper)，处理过程不依赖在线服务；运行游戏时也不调用图片生成或处理服务。
 
 ## 2026-10-21 泥炭块与力量系列
 

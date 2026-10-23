@@ -898,11 +898,9 @@ export const Dex = new class implements ModdedDex {
 		const checkId = originalSpecies.id;
 
 		if (checkId === 'kyuremoriginal') {
-			// Hyper Emerald's public atlas contains front art only. Keep an explicit
-			// front fallback on the player side until its matching back art is available.
 			const prefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
-			spriteData.url = `${prefix}sprites/fantasy-rogue/kyurem-original${options.shiny ? '-shiny' : ''}.png`;
-			spriteData.isFrontSprite = true;
+			spriteData.url = `${prefix}sprites/fantasy-rogue/kyurem-original${isFront ? '' : '-back'}${options.shiny ? '-shiny' : ''}.png`;
+			spriteData.isFrontSprite = isFront;
 			spriteData.pixelated = true;
 			spriteData.w = 128;
 			spriteData.h = 128;
@@ -1194,6 +1192,13 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		if (!finalId) finalId = '0' as ID; // Default if ID determination failed
+		const faintedString = fainted ? ';opacity:.3;filter:grayscale(100%) brightness(.5)' : '';
+		if (finalId === 'kyuremoriginal') {
+			// The battle sidebar already mirrors its icons in CSS. Keep the native
+			// orientation here, and a plain background value for the teambuilder updater.
+			const url = `${iconSheetPrefix}sprites/fantasy-rogue/kyurem-original-icon.png`;
+			return `background:transparent url(${url}) no-repeat scroll center center${faintedString}`;
+		}
 
 		// ID for base sprite/data lookup (strip fantasy)
 		let lookupId = finalId;
@@ -1219,7 +1224,6 @@ export const Dex = new class implements ModdedDex {
 		// Generate CSS
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
-		let faintedString = (fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
 		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
 
 		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量进行“真·图层分离”

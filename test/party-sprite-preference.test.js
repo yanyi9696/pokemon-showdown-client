@@ -52,16 +52,54 @@ describe('Shared 2D party sprite preference', () => {
 		}
 		assert.match(context.Dex.getTeambuilderSprite({species: 'Absol-Mega-Z-Fantasy'}), /sprites\/gen5\/absol-megaz\.png/);
 	});
-	it('loads verified triple Kyurem art locally for party and both battle positions', () => {
+	it('uses the approved triple Kyurem rear sprite in battle while keeping front party art', () => {
 		for (const shiny of [false, true]) {
-			const filename = `sprites/fantasy-rogue/kyurem-original${shiny ? '-shiny' : ''}.png`;
-			assert.deepEqual(Object.values(imageSize(path.join(webRoot, filename))).slice(0, 2).sort(), [64, 64]);
-			assert(context.Dex.getTeambuilderSprite({species: 'Kyurem-Original', shiny}).includes(filename));
-			for (const front of [false, true]) {
-				const sprite = context.Dex.getSpriteData('Kyurem-Original', front, {gen: 9, mod: 'gen9fantasy', shiny});
-				assert.equal(sprite.url, './' + filename); assert(sprite.pixelated);
-				assert(sprite.isFrontSprite, 'the documented back fallback is explicitly front artwork');
+			for (const pixels of [false, true]) {
+				preferences.bwgfx = pixels;
+				const frontFile = `sprites/fantasy-rogue/kyurem-original${shiny ? '-shiny' : ''}.png`;
+				assert(context.Dex.getTeambuilderSprite({species: 'Kyurem-Original', shiny}).includes(frontFile));
+				for (const front of [false, true]) {
+					const filename = `sprites/fantasy-rogue/kyurem-original${front ? '' : '-back'}${shiny ? '-shiny' : ''}.png`;
+					const dimensions = imageSize(path.join(webRoot, filename));
+					assert.equal(dimensions.width, front ? 64 : 128);
+					assert.equal(dimensions.height, front ? 64 : 128);
+					const sprite = context.Dex.getSpriteData('Kyurem-Original', front, {gen: 9, mod: 'gen9fantasy', shiny});
+					assert.equal(sprite.url, './' + filename); assert(sprite.pixelated);
+					assert.equal(sprite.isFrontSprite, front);
+					assert.equal(sprite.w, 128); assert.equal(sprite.h, 128);
+				}
 			}
+		}
+	});
+	it('uses the dedicated menu icon in party, teambuilder and battle callers', () => {
+		const filename = 'sprites/fantasy-rogue/kyurem-original-icon.png';
+		const dimensions = imageSize(path.join(webRoot, filename));
+		assert.equal(dimensions.width, 40); assert.equal(dimensions.height, 30);
+		const normal = context.Dex.getPokemonIcon('Kyurem-Original');
+		assert(normal.includes(filename));
+		assert(!normal.slice('background:'.length).includes(';'), 'teambuilder assigns the background value directly');
+		for (const input of [{species: 'Kyurem-Original'}, {speciesForme: 'Kyurem-Original'},
+			{speciesForme: 'Kyurem', volatiles: {formechange: ['', 'Kyurem-Original']}}]) {
+			assert.equal(context.Dex.getPokemonIcon(input), normal);
+			assert.equal(context.Dex.getPokemonIcon(input, true), normal, 'sidebar CSS already mirrors the icon');
+		}
+		const fainted = context.Dex.getPokemonIcon({speciesForme: 'Kyurem-Original', fainted: true});
+		assert(fainted.includes(filename)); assert.match(fainted, /opacity:\.3;filter:grayscale/);
+		for (const species of ['Kyurem', 'Kyurem-Black', 'Kyurem-White', 'Ditto']) {
+			assert.match(context.Dex.getPokemonIcon(species), /pokemonicons-sheet\.png/);
+		}
+		assert.match(context.Dex.getPokemonIcon({speciesForme: 'Ditto',
+			volatiles: {formechange: ['', 'Kyurem-Original'], transform: ['Kyurem-Original']}}), /pokemonicons-sheet\.png/);
+	});
+	it('resolves custom rear art and icons using the configured resource prefix', () => {
+		context.Dex.iconSheetPrefix = '';
+		try {
+			const base = context.Dex.resourcePrefix + 'sprites/fantasy-rogue/';
+			assert.equal(context.Dex.getSpriteData('Kyurem-Original', false, {gen: 9, mod: 'gen9fantasy'}).url,
+				base + 'kyurem-original-back.png');
+			assert(context.Dex.getPokemonIcon('Kyurem-Original').includes(base + 'kyurem-original-icon.png'));
+		} finally {
+			context.Dex.iconSheetPrefix = './';
 		}
 	});
 	it('redraws both open party screens on the real settings checkbox handler', () => {
