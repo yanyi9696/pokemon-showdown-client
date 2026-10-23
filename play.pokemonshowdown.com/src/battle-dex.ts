@@ -897,7 +897,16 @@ export const Dex = new class implements ModdedDex {
 		// 获取宝可梦的纯小写ID
 		const checkId = originalSpecies.id;
 
-		if (checkId === 'shadowlugiafantasy') {
+		if (checkId === 'kyuremoriginal') {
+			// Hyper Emerald's public atlas contains front art only. Keep an explicit
+			// front fallback on the player side until its matching back art is available.
+			const prefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			spriteData.url = `${prefix}sprites/fantasy-rogue/kyurem-original${options.shiny ? '-shiny' : ''}.png`;
+			spriteData.isFrontSprite = true;
+			spriteData.pixelated = true;
+			spriteData.w = 128;
+			spriteData.h = 128;
+		} else if (checkId === 'shadowlugiafantasy') {
 			const facingDir = isFront ? 'gen5' : 'gen5-back';
 			const filename = 'shadowlugia-fantasy.png';
 			const customSpritePrefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
@@ -1296,7 +1305,7 @@ export const Dex = new class implements ModdedDex {
 
 		// Determine display generation based on preferences and species data
 		if (Dex.prefs('nopastgens')) gen = 6;
-		if (Dex.prefs('bwgfx') && gen > 5) gen = 5;
+		if (Dex.prefs('bwgfx') && (!gen || gen > 5)) gen = 5;
 
 		// Use the determined species (mod or base) for gen checks
 		let speciesForChecks = species;
@@ -1348,6 +1357,23 @@ export const Dex = new class implements ModdedDex {
 		const data = this.getTeambuilderSpriteData(pokemon, gen);
 		const shiny = (data.shiny ? '-shiny' : '');
 		const id = toID(pokemon.species);
+		if (id === 'kyuremoriginal') {
+			const prefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
+			return `background-image:url(${prefix}sprites/fantasy-rogue/kyurem-original${shiny}.png);background-position:center;background-repeat:no-repeat;image-rendering:pixelated`;
+		}
+		if (Dex.prefs('bwgfx')) {
+			const customPixels: { [id: string]: string } = {
+				shadowlugiafantasy: 'shadowlugia-fantasy', flygonmegafantasy: 'flygon-mega-fantasy',
+				swampertmegaxfantasy: 'swampert-mega-x-fantasy', steelixmegaxfantasy: 'steelix-mega-x-fantasy',
+				steelixmegazfantasy: 'steelix-mega-z-fantasy', slowbrogalarmegafantasy: 'slowbro-galar-mega-fantasy',
+				marowakalolatotemfantasy: 'marowak-alola-totem-fantasy', lurantistotemfantasy: 'lurantis-totem-fantasy',
+			};
+			const custom = customPixels[id];
+			const prefix = custom ? Dex.iconSheetPrefix || Dex.resourcePrefix :
+				teambuilderGen5Sprites[toID(data.spriteid)] ? 'https://play.pokemonshowdown.com/' : Dex.resourcePrefix;
+			const variant = id === 'shadowlugiafantasy' ? '' : shiny;
+			return `background-image:url(${prefix}${custom ? 'sprites/gen5' : data.spriteDir}${variant}/${custom || data.spriteid}.png);background-position:${data.x}px ${data.y}px;background-repeat:no-repeat;image-rendering:pixelated`;
+		}
 
 		// 拦截:大岩蛇-幻想形态
 		if (id === 'onixfantasy') {

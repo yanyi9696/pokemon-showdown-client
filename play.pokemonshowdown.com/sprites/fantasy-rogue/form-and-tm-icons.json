@@ -1,0 +1,175 @@
+{
+  "date": "2026-10-23",
+  "files": [
+    {
+      "file": "tm/bug.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "595baf8b9de963c7e339c31c94d978bf0993cb83bc2d6a9cdb7f6d8a742cbf21"
+    },
+    {
+      "file": "tm/dark.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "f2208eeac8dc377a850f13144831ae115ee93dcfca483f1a47c5622557a5305d"
+    },
+    {
+      "file": "tm/dragon.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "9b5f4083ae8c8b3a9a8c43293239e99f00122bcdb6d1484adc390b506ff18ed6"
+    },
+    {
+      "file": "tm/electric.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "d3f2ff0171fe5a83c97a1397fbb3aacb8dffba365c536f93b224673e85dfd20f"
+    },
+    {
+      "file": "tm/fairy.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "7c9a8af4e13aa47481feae80ebaebf1b63ce49e27655d69523a367c3cbdbbde9"
+    },
+    {
+      "file": "tm/fighting.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "10922817c7082ef048a3b8e738127b38eb370fb303b6b7a22099ab6f689482bc"
+    },
+    {
+      "file": "tm/fire.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "f3228124d5a2dbe523570acee8c49dc6575094e09d13949deda20f8aa4885a49"
+    },
+    {
+      "file": "tm/flying.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "fc4d5c34fa4f218ba6076f3d46c45b8e9a097fe337cd1afbc59ecf7beb3a4018"
+    },
+    {
+      "file": "tm/ghost.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "11e518a2671fd4424488f1a800090beb03f671d206a5ea30384b3b2c756b1500"
+    },
+    {
+      "file": "tm/grass.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "4b045e702197b1b17ec482b60f02c0c35ac01946b115599b6c2b454bc1ceaa3d"
+    },
+    {
+      "file": "tm/ground.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "4ad5cc24bd2ee573f90226beb9fd1ca9c510f28738dd33ced1f71895b01680a8"
+    },
+    {
+      "file": "tm/ice.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "9f4f6dfd6e061dcddc505caa32d1b8329b95be7fa3c54c93034eb1ad5cd6931b"
+    },
+    {
+      "file": "tm/normal.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "c8aa928bb6d5cd000623bb5fcfd03c5c96fd03500c529a41c6492efefe1ded4b"
+    },
+    {
+      "file": "tm/poison.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "50e3cf3a3dab8a349759a7bdfe28eb90c64914b2f022cceb138de089536dcdf3"
+    },
+    {
+      "file": "tm/psychic.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "558dc8078245959cae00c6d044ffcb39162d8d786d273fbdaf31d49cf0d46e96"
+    },
+    {
+      "file": "tm/rock.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "6da09fdea6cba1f295aa244937e2dc2f17895dd623d7462c77d84dd6facd95ff"
+    },
+    {
+      "file": "tm/steel.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "ba3bd8f9717dd8778dbee6e87c9937ab752e91f5cbb2d7b08d939db51edd43af"
+    },
+    {
+      "file": "tm/water.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "efee661dc54f05d677d10aa5b527e9fa5c0bdb6f1bcdd72d328efad768e25b11"
+    },
+    {
+      "file": "key-items/dna-splicers.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "732fb0cfb51cf6a95e98bb5dc330dce14b0ef323961629382fa8ce3a5b2c394d"
+    },
+    {
+      "file": "key-items/gracidea.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "cbc6fb821d29f17332b0b34d32f39d49d3f2c143a24c159ed0fed374daca0a20"
+    },
+    {
+      "file": "key-items/meteorite.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "ad03ecba514981add7689e454530dfabe75358f7aea7974962baf6acc82dead8"
+    },
+    {
+      "file": "key-items/n-lunarizer.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "19a85afa94a6819c078d74a71b06e1f67e084b5ea8da7ad6e04ea22da63970ab"
+    },
+    {
+      "file": "key-items/n-solarizer.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "8af75c8e1771f37847bec5dc33073182c6a1d402da34c0404149bc7e0598a4d5"
+    },
+    {
+      "file": "key-items/pink-nectar.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "709b3624824106d9850aaed31fae2285f1a5d3e565763acd489102f44515dfcb"
+    },
+    {
+      "file": "key-items/prison-bottle.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "3bdc4833aad21cae51fa905ce6d2509100172bb042961991b39dee854a1b4d1c"
+    },
+    {
+      "file": "key-items/purple-nectar.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "0aa0286eaf3b6bea22b7c695d5749c22f010b8b0cb87b42cc7c7ee4396510678"
+    },
+    {
+      "file": "key-items/red-nectar.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "f7575c51b1e6bd32492b926da1a8a68b311505d6941b4fd8d069d4c729ad5e08"
+    },
+    {
+      "file": "key-items/reins-of-unity.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "770daa5d3a7638464000eae4014c2c41f0c889c97cc75c4513f8326717b339f6"
+    },
+    {
+      "file": "key-items/reveal-glass.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "af3df0136ad04d8b9fe9509cf19c0c64db670a274e18f14dfe0ddc9094cf34a7"
+    },
+    {
+      "file": "key-items/rotom-catalog.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "d73c819f7a8376d6020b6d199529d190cf3fc302addf3c89375e9f950fe0415a"
+    },
+    {
+      "file": "key-items/yellow-nectar.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "4069d0cb7c9e98f3d8d691eeffb36e20a3336bcc18d4dc500c9ec0113c487caa"
+    },
+    {
+      "file": "key-items/zygarde-cube.png",
+      "source": "https://github.com/msikma/pokesprite",
+      "sha256": "8ee8d49b223e72761616ad1ae761e3abc01f5b9f1aab8ba2f69ed8d068d7146d"
+    },
+    {
+      "file": "kyurem-original.png",
+      "source": "https://raw.githubusercontent.com/Nn-Exe/Pokemon-Hyper-Emerald-5.7-QoL/main/docs/sprites/front/1119.png",
+      "sha256": "7815a6b41f3a75cb27cd682fa2af0757c56c47e6391d58cb961cb5564decf03f"
+    },
+    {
+      "file": "kyurem-original-shiny.png",
+      "source": "https://raw.githubusercontent.com/Nn-Exe/Pokemon-Hyper-Emerald-5.7-QoL/main/docs/sprites/front/1119s.png",
+      "sha256": "313dae18f38926c65db95347c3835eb370a0c7bfba9126834fb5e9d75ac70142"
+    }
+  ]
+}

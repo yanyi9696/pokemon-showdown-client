@@ -68,6 +68,39 @@ function state() {
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
 describe('Fantasy Rogue start menu and codex', () => {
+	it('starts with generation groups collapsed and filters starters by either type', () => {
+		const c = client(), data = state(); data.configured = true;
+		data.starters = [{id: 'bulbasaur', species: 'Bulbasaur', gen: 1, types: ['Grass', 'Poison'], available: true},
+			{id: 'ferroseed', species: 'Ferroseed', gen: 5, types: ['Grass', 'Steel'], available: true}];
+		c.room.receiveState(data);
+		assert(c.html.includes('<details data-rogue-key="starter-gen-1">'));
+		assert(c.html.includes('<details data-rogue-key="starter-gen-5">'));
+		c.room.filterStarterType({currentTarget: {value: 'Steel'}});
+		assert(c.html.includes('value="ferroseed"')); assert(!c.html.includes('value="bulbasaur"'));
+	});
+	it('groups all move origins in categories, then filters by type and shows priority', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('guide');
+		const move = {type: 'Normal', category: 'Physical', power: 40, accuracy: 100, pp: 30, priority: 1, groups: ['all', 'contact']};
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'guide', guide: {moveCategories: {all: '全部招式', contact: '接触类'}, modules: {
+			moves: [{...move, id: 'old', name: 'A Native', origin: 'original'}, {...move, id: 'new', name: 'Z Fantasy', origin: 'fantasy'},
+				{...move, id: 'water', name: 'Water', origin: 'original', type: 'Water'}]}}});
+		c.room.filterCodex('moves:contact');
+		assert(c.html.indexOf('<h3>Z Fantasy') < c.html.indexOf('<h3>A Native'));
+		assert(c.html.includes('先制度+1')); assert(c.html.includes('原版招式'));
+		c.room.filterCodexType({currentTarget: {value: 'Water'}});
+		assert(c.html.includes('<h3>Water')); assert(!c.html.includes('<h3>A Native'));
+	});
+	it('uses local type-colored TM discs and key-item icons in bag and codex', () => {
+		const c = client(), data = adventure('ready');
+		data.items.push({id: 'tmvinewhip', kind: 'machine', name: '藤鞭学习机', move: 'vinewhip'},
+			{id: 'dnasplicers', kind: 'forme', name: '基因之楔', icon: 'dna-splicers'});
+		data.run.bag.tmvinewhip = data.run.bag.dnasplicers = 1; c.room.receiveState(data);
+		assert(c.html.includes('sprites/fantasy-rogue/tm/grass.png'));
+		assert(c.html.includes('sprites/fantasy-rogue/key-items/dna-splicers.png'));
+		c.room.openCodex('guide');
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'guide', guide: {modules: {}, itemNotes: [data.items.at(-1)]}});
+		c.room.filterCodex('special'); assert(c.room.html.includes('sprites/fantasy-rogue/key-items/dna-splicers.png'));
+	});
 	it('uses reviewed Fantasy suffixes in both names and embedded Chinese references', () => {
 		const c = client(true, true, {Gen9fantasyMovedex: {razorwind: {}}, Gen9fantasyAbilities: {cutecharm: {}, poisonpuppeteer: {}}});
 		c.Dex.moves.get = () => ({name: 'Razor Wind🔄'});
@@ -2397,6 +2430,23 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 
 
 describe('Compact tower controls and live ski input', () => {
+ it('focuses the slope immediately after starting and responds to held arrow keys and A/D', () => {
+  let now = 1000, focused = 0, prevented = 0;
+  const frames = [], c = client(false, false, {Date: class extends Date {static now() {return now;}},
+   requestAnimationFrame: cb => {frames.push(cb); return frames.length;}, cancelAnimationFrame() {}});
+  const data = adventure('event');
+  data.run.event = {key: 'ski-focus', stage: 'choice', ski: {started: 1000, now: 1000, lane: 1, obstacles: []}};
+  c.room.state = data; c.app.curRoom = c.room;
+  const oldQuery = c.room.$;
+  c.room.$ = selector => selector === '.rogue-ski' ? [{focus() {focused++;}}] : selector === '.rogue-ski canvas' ?
+   [{isConnected: true, getContext: () => new Proxy({}, {get: () => () => {}})}] : oldQuery(selector);
+  c.room.startSkiClock(); assert.equal(focused, 1);
+  const moves = []; c.room.skiMove = value => moves.push(value);
+  const key = (value, repeat = false) => c.room.skiKey({key: value, repeat, preventDefault() {prevented++;}, stopPropagation() {}});
+  key('ArrowLeft'); now += 80; key('ArrowLeft', true); now += 80; key('ArrowLeft', true); key('D');
+  assert.deepEqual(moves, ['skileft', 'skileft', 'skiright']); assert.equal(prevented, 4);
+  c.app.curRoom = {}; c.room.startSkiClock(); assert.equal(focused, 1, 'Do not steal focus from another room');
+ });
  it('queues rapid direction presses without a cooldown and reconciles authoritative lanes', () => {
   const c = client(), data = adventure('event');
   data.run.event = {key: 'ski-input', stage: 'choice', ski: {lane: 1, started: Date.now(), now: Date.now(), duration: 15000, obstacles: []}};
@@ -2404,6 +2454,7 @@ describe('Compact tower controls and live ski input', () => {
   c.room.skiMove('skileft'); c.room.skiMove('skiright'); c.room.skiMove('skiright');
   assert.equal(c.sent.length, 1); assert.equal(c.room.skiDisplayLane(1), 2);
   const request = JSON.parse(c.sent[0].slice('/fantasyrogue ski '.length));
+  assert(Number.isFinite(request.skiAt));
   c.room.receiveSki({userid: data.userid, id: request.id, ok: true, revision: 2, event: {...data.run.event, ski: {...data.run.event.ski, lane: 0}}});
   assert.equal(c.sent.length, 2); assert.equal(c.room.skiDisplayLane(0), 2);
   assert.equal(JSON.parse(c.sent[1].slice('/fantasyrogue ski '.length)).revision, 2);

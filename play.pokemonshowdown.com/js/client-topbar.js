@@ -614,6 +614,9 @@
 			var bwgfx = !!e.currentTarget.checked;
 			Storage.prefs('bwgfx', bwgfx);
 			Dex.loadSpriteData(bwgfx || Dex.prefs('noanim') ? 'bw' : 'xy');
+			// Party art uses the same preference as battle sprites; update already-open views too.
+			if (app.rooms.teambuilder) app.rooms.teambuilder.update();
+			if (app.rooms.fantasyrogue) app.rooms.fantasyrogue.render();
 		},
 		setNopastgens: function (e) {
 			var nopastgens = !!e.currentTarget.checked;

@@ -1,5 +1,13 @@
 # 幻想杯肉鸽道具图来源
 
+## 2026-10-23 招式光碟、形态道具与三合一酋雷姆
+
+`tm/` 的十八属性光碟及 `key-items/` 的形态道具使用 [PokeSprite](https://github.com/msikma/pokesprite) 原始 PNG；道具美术版权归 Nintendo / Game Freak / Creatures，PokeSprite 的代码许可不改变原始素材版权。按招式实际属性选择光碟，不重绘或改色；形态道具按本名对应。逐文件 SHA-256 见 `form-and-tm-icons.json`。运行时均读取本地文件。
+
+`kyurem-original.png` 与闪光版本使用 [Hyper Emerald 5.7 公开图鉴的 Kyurem-WB](https://nn-exe.github.io/Pokemon-Hyper-Emerald-5.7-QoL/wiki/pokedex/kyurem-wb/) 正面图（仓库 `docs/sprites/front/1119.png` 与 `1119s.png`），不修改原 PNG。该页面的种族值为 125／170／100／170／100／95，与本次指定一致。素材归原作者所有，不宣称本项目原创；该资料未逐图列出绘师，不能仅凭相似外观将其归名给其他作品作者。
+
+背面素材尚未取得：当前战斗我方位置明确回退为同一正面图，未制作或冒用其他形态背面。后续取得匹配背面后应替换这一回退。用户提供的另一条线索“西班牙火箭队”作者发布帖将其 `Kyurem Incompleto` 署名为 [DestvoL](https://www.deviantart.com/destvol/art/Unova-Kyurem-GBA-Sprite-64x64-800466028)；本次未能读取该图片页，因此没有使用其未经核实的背面。
+
 ## 2026-10-21 泥炭块与力量系列
 
 `peatblock.png` 使用 [Serebii 道具图鉴原图](https://www.serebii.net/itemdex/sprites/peatblock.png)，对照[泥炭块图鉴](https://www.serebii.net/itemdex/peatblock.shtml)确认，以原 PNG 保存，未重绘。版权归 Nintendo / Game Freak / Creatures。六件力量系列沿用 Showdown 的原版道具图标：力量镜 359、护腕 357、护踝 354、腰带 356、负重 360、束带 355；幻之力量镜沿用力量镜图标。

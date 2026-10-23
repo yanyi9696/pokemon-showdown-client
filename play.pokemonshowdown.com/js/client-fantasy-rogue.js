@@ -198,6 +198,12 @@
 		return globals.translations && globals.translations[name] || name;
 	}
 	var statNames = {hp: 'HP', atk: '攻击', def: '防御', spa: '特攻', spd: '特防', spe: '速度'};
+	var typeNames = {Normal: '一般', Fire: '火', Water: '水', Grass: '草', Electric: '电', Ice: '冰', Fighting: '格斗', Poison: '毒', Ground: '地面', Flying: '飞行', Psychic: '超能力', Bug: '虫', Rock: '岩石', Ghost: '幽灵', Dragon: '龙', Dark: '恶', Steel: '钢', Fairy: '妖精'};
+	function typeFilter(name, selected) {
+		return '<label class="rogue-type-filter">按属性筛选 <select name="' + name + '"><option value="">全部属性</option>' +
+			Object.keys(typeNames).map(function (type) { return '<option value="' + type + '"' + (type === selected ? ' selected' : '') + '>' + typeNames[type] + '</option>'; }).join('') + '</select></label>';
+	}
+	function priorityText(priority) { return ' · 先制度' + (priority > 0 ? '+' : '') + (priority || 0); }
 	function starterTraits(starter) {
 		var base = {hp: 20, atk: 20, def: 20, spa: 20, spd: 20, spe: 20};
 		return Object.assign({natures: [], genders: [], abilities: [], moves: [], ivs: {min: base, max: base}}, starter.traits || {});
@@ -281,7 +287,12 @@
 	function idOf(name) { return (name || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
 	function fa(name) { return '<i class="fa fa-' + name + '" aria-hidden="true"></i> '; }
 	function itemIcon(item) {
-		if (item.kind === 'mint' || item.kind === 'machine') return fa(item.kind === 'mint' ? 'leaf' : 'circle-o');
+		if (item.kind === 'mint') return fa('leaf');
+		if (item.kind === 'forme') return '<img class="rogue-loot-icon pixelated" src="sprites/fantasy-rogue/key-items/' + escape(item.icon) + '.png" alt="" /> ';
+		if (item.kind === 'machine') {
+			var type = dex().moves.get(item.move || item.id.replace(/^tm/, '')).type;
+			return '<img class="rogue-loot-icon pixelated" src="sprites/fantasy-rogue/tm/' + (typeNames[type] ? type.toLowerCase() : 'normal') + '.png" alt="' + escape(typeNames[type] || '一般') + '属性招式学习机" /> ';
+		}
 		var id = item.icon || item.id;
 		var special = {
 			abilitycapsule: '<g transform="rotate(-35 16 16)"><rect x="5" y="9" width="22" height="14" rx="7" fill="#63b1ec"/><path d="M16 9h4a7 7 0 0 1 0 14h-4Z" fill="#f1b4cf"/><path d="M9 12h4" stroke="white" stroke-width="2"/></g>',
@@ -505,6 +516,7 @@
 	this.FantasyRogueRoom = this.Room.extend({
 		type: 'fantasyrogue', title: '幻想杯肉鸽', minWidth: 320, bestWidth: 960,
 		events: {'change input[name=starter]': 'changeStarter', 'change input[name=useSpirit]': 'changeSpirit',
+			'change select[name=starterType]': 'filterStarterType', 'change select[name=codexType]': 'filterCodexType',
 			'input .rogue-compound-allocation input': 'updateCompoundAllocation',
 			'change select[name=testSpirit]': 'changeSpirit', 'change select[name=selectedSpirit]': 'changeSpirit', 'change select[name=hpTarget]': 'changeHPTarget',
 			'change select[name=target]': 'changeItemTarget', 'keydown .rogue-start-deck': 'cardKey',
@@ -519,6 +531,7 @@
 			this.error = '';
 			this.selectedStarters = [];
 			this.starterBuilds = {};
+			this.starterType = ''; this.codexType = '';
 			this.selectedRoute = null;
 			this.selectedBlessing = null;
 			this.openPartyOnLayout = true;
@@ -636,6 +649,8 @@
 			if (this.screen === data.section) this.render();
 		},
 		filterCodex: function (filter) { this.codexFilter = filter; this.codexPage = 0; this.render(); },
+		filterCodexType: function (event) { this.codexType = event.currentTarget.value; this.codexPage = 0; this.render(); },
+		filterStarterType: function (event) { this.starterType = event.currentTarget.value; this.render(); },
 		selectCodexCollection: function (collection) {
 			if (['regions', 'companions'].indexOf(collection) < 0) return;
 			this.codexCollection = collection; this.codexFilter = 'all'; this.codexPage = 0;
@@ -1233,6 +1248,7 @@
 			this.submit('setmove', {member: this.selectedPokemon().id, slot: this.moveSlot || 0, value: id});
 		},
 		chooseAbility: function (id) { this.submit('ability', {member: this.selectedPokemon().id, value: id}); },
+		useFormItem: function (id) { this.submit('forme', {member: this.selectedPokemon().id, value: id}); },
 		equipItem: function (id) { this.submit('equip', {member: this.selectedPokemon().id, value: id}); },
 		equipEmblem: function (id) { this.submit('equipemblem', {member: this.selectedPokemon().id, value: id}); },
 		applyEVs: function () {
@@ -1699,22 +1715,30 @@
         },
 
 		renderSki: function (event, busy) {
-			return '<section class="rogue-ski" tabindex="0" aria-label="雪山速滑，左右方向键换道"><canvas width="540" height="300" aria-label="从人物后方观察雪道，躲避树木和岩石"></canvas><div class="rogue-ski-hud"><b class="rogue-ski-time">0.0 / 15 秒</b><span>左右换道 · 撞上障碍即结束</span></div><div class="rogue-ski-controls">' + button('skiMove', 'skileft', '← 向左', busy) + button('skiMove', 'skiright', '向右 →', busy) + '</div><p class="rogue-caption">点击雪道后可使用方向键。画面前方的障碍会逐渐变密。</p></section>';
+			return '<section class="rogue-ski" tabindex="0" aria-label="雪山速滑，左右方向键换道"><canvas width="540" height="300" aria-label="从人物后方观察雪道，躲避树木和岩石"></canvas><div class="rogue-ski-hud"><b class="rogue-ski-time">0.0 / 15 秒</b><span>左右换道 · 撞上障碍即结束</span></div><div class="rogue-ski-controls">' + button('skiMove', 'skileft', '← 向左', busy) + button('skiMove', 'skiright', '向右 →', busy) + '</div><p class="rogue-caption">使用 ← → 或 A / D 换道，也可点按下方按钮。</p><p class="rogue-ski-connection" role="status"></p></section>';
 		},
-		skiKey: function (event) { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); if (!event.repeat) this.skiMove(event.key === 'ArrowLeft' ? 'skileft' : 'skiright'); } },
+		skiKey: function (event) {
+			var key = event.key.toLowerCase();
+			if (['arrowleft', 'arrowright', 'a', 'd'].indexOf(key) < 0 || event.ctrlKey || event.altKey || event.metaKey) return;
+			event.preventDefault(); event.stopPropagation();
+			if (event.repeat && Date.now() - (this.lastSkiKey || 0) < 140) return;
+			this.lastSkiKey = Date.now(); this.skiMove(key === 'arrowleft' || key === 'a' ? 'skileft' : 'skiright');
+		},
 		skiMove: function (choice) {
 			var event = this.state && this.state.run && this.state.run.event;
 			if (!event || !event.ski || event.stage !== 'choice' || this.pending) return;
 			this.skiQueue = this.skiQueue || [];
 			if (choice === 'skitick' && (this.skiPending || this.skiQueue.length)) return;
-			this.skiQueue.push(choice);
+			this.skiQueue.push({value: choice, skiAt: Math.max(0, Date.now() + (this.skiClockOffset || 0) - event.ski.started)});
 			this.flushSki();
 		},
 		flushSki: function () {
 			if (this.skiPending || !this.skiQueue || !this.skiQueue.length) return;
 			var event = this.state.run.event;
+			var input = this.skiQueue.shift();
 			this.skiPending = {id: Date.now().toString(36) + '-' + Math.random().toString(36).slice(2),
-				revision: this.state.account.revision, action: 'event', member: event.key, value: this.skiQueue.shift()};
+				revision: this.state.account.revision, action: 'event', member: event.key, value: input.value, skiAt: input.skiAt};
+			this.skiSentAt = Date.now();
 			this.sendSki();
 		},
 		sendSki: function () {
@@ -1732,12 +1756,13 @@
 				this.skiQueue = []; if (!result.ok) this.error = result.message; this.refresh(); return;
 			}
 			this.state.account.revision = result.revision;
+			this.skiLatency = Date.now() - this.skiSentAt;
 			Object.assign(this.state.run.event.ski, result.event.ski);
 			this.flushSki();
 		},
 		skiDisplayLane: function (lane) {
-			var inputs = (this.skiPending ? [this.skiPending.value] : []).concat(this.skiQueue || []);
-			inputs.forEach(function (input) { if (input !== 'skitick') lane = Math.max(0, Math.min(2, lane + (input === 'skileft' ? -1 : 1))); });
+			var inputs = (this.skiPending ? [this.skiPending] : []).concat(this.skiQueue || []);
+			inputs.forEach(function (input) { if (input.value !== 'skitick') lane = Math.max(0, Math.min(2, lane + (input.value === 'skileft' ? -1 : 1))); });
 			return lane;
 		},
 		startSkiClock: function () {
@@ -1747,6 +1772,10 @@
 			var canvas = this.$('.rogue-ski canvas')[0]; if (!canvas || !canvas.getContext) return;
 			var ctx = canvas.getContext('2d'); if (!ctx) return;
 			var ski = event.ski, offset = ski.now - Date.now();
+			this.skiClockOffset = offset;
+			// The Start button is replaced by this canvas; otherwise keyboard focus falls back to the page.
+			var section = this.$('.rogue-ski')[0];
+			if (section && section.focus && (!app.curRoom || app.curRoom === this)) section.focus({preventScroll: true});
 			function tick() {
 				if (self.screen !== 'game' || !canvas.isConnected) return;
 				var elapsed = Math.min(ski.duration || 15000, Date.now() + offset - ski.started), time = elapsed / 1000;
@@ -1769,6 +1798,8 @@
 				ctx.fillStyle = '#315b86';ctx.fillRect(x-13,218,26,30);ctx.fillStyle='#c34f50';ctx.fillRect(x-16,204,32,18);ctx.fillStyle='#e7d1ac';ctx.fillRect(x-10,218,20,5);
 				ctx.fillStyle = '#e9f4fbe0'; for (var i=0;i<11;i++) {ctx.beginPath();ctx.arc(i*55,306+Math.sin(time*2+i)*7,22,0,Math.PI*2);ctx.fill();}
 				self.$('.rogue-ski-time').text(time.toFixed(1) + ' / 15 秒');
+				var waiting = self.skiPending && Date.now() - self.skiSentAt > 500;
+				self.$('.rogue-ski-connection').text(waiting || self.skiLatency > 500 ? '网络响应较慢，请尽量提前换道。' : '');
 				if (!self.pending && (!self.lastSkiPoll || Date.now() - self.lastSkiPoll > 700)) { self.lastSkiPoll = Date.now(); self.skiMove('skitick'); }
 				self.skiFrame = requestAnimationFrame(tick);
 			}
@@ -2082,10 +2113,21 @@
 			var growth = [];
 			if (mon.tonics && mon.tonics.wine) growth.push('酒：每次登场混乱 · 每场首个实际招式威力 ×2');
 			if (mon.tonics && mon.tonics.cephalosporin) growth.push('头孢：免疫七种异常状态，不免疫混乱');
-			if (mon.tonics && mon.tonics.wine && mon.tonics.cephalosporin) growth.push('组合效果：幽灵副属性' + (mon.tonics.poison ? ' · 毒招威力 ×1.5' : ''));
+			if (mon.tonics && mon.tonics.wine && mon.tonics.cephalosporin) growth.push('组合效果：追加幽灵属性' + (mon.tonics.poison ? ' · 毒招威力 ×1.5' : ''));
 			if (mon.bond !== undefined) growth.push('羁绊 ' + mon.bond + ' / 100');
 			if (mon.bonusHP) growth.push('永久 HP +' + mon.bonusHP);
 			if (growth.length) html += '<p class="rogue-caption rogue-permanent-growth">' + escape(growth.join(' · ')) + '</p>';
+			if (mon.formOptions && mon.formOptions.length) {
+				html += '<div class="rogue-form-options"><h4>专属道具 · 形态变化</h4>';
+				mon.formOptions.forEach(function (option) {
+					var item = this.state.items.find(function (entry) { return entry.id === option.item; });
+					var donor = option.donor && run.team.find(function (p) { return p.id === option.donor; });
+					html += '<p>' + (item ? itemIcon(item) + '【' + escape(item.name) + '】' : '') +
+						button('useFormItem', option.id, (option.id === 'separate' ? '解除合体 · ' : '变为 ') + localName(option.species) +
+							(donor ? '（与' + localName(donor.set.species) + '融合）' : ''), locked || !mon.hp) + '</p>';
+				}, this);
+				html += '</div>';
+			}
 			if (!editable(run)) html += '<p class="rogue-caption">当前可查看队伍，完成战斗及待处理结算后可调整。</p>';
 			html += '<div class="rogue-editor-options">';
 			if (panel === 'moves') {
@@ -2217,6 +2259,7 @@
 					html += button('useItem', item.id, reason || (item.kind === 'ability' ? '变更为' + localName(target.abilityChanges[item.id]) : '使用'), !usable || !!reason);
 				}
 				if (item.kind === 'held') html += button('openHeldItems', '', '在队伍中装备', !run.team.length);
+				if (item.kind === 'forme') html += '<small>选择对应伙伴后，在队伍的形态变化栏使用。</small>';
 				if (item.kind === 'emblem') html += button('openEmblems', '', '赋予属性转', !run.team.length);
 				html += '</div>';
 			});
@@ -2427,7 +2470,8 @@
 					}).join('') + (!page.options.length ? '<p>这段见闻到这里告一段落。</p>' : '') + '</div><footer>' +
 					button('replayEventBack', '', '返回上一段', history.length <= 1) + button('replayEventRestart', '', '从头回顾') + '</footer></article></section>';
 			}
-			var filters, entries, guideModule = this.codexFilter.replace(/enhanced$/, '');
+			var filters, entries, moveGroup = this.codexFilter.indexOf('moves:') === 0 ? this.codexFilter.slice(6) : '';
+			var guideModule = moveGroup ? 'moves' : this.codexFilter.replace(/enhanced$/, '');
 			if (section === 'guide') {
 				filters = [['beginner', '新手攻略'], ['items', '道具'], ['moves', '招式'], ['abilities', '特性'], ['pokemon', '幻想宝可梦']];
 				entries = ['items', 'exclusive'].indexOf(this.codexFilter) >= 0 ? (data.guide.modules.items || []).filter(function (entry) {
@@ -2437,8 +2481,10 @@
 					return {id: 'beginner:' + index, name: entry.title, text: entry.text};
 				});
 				if (guideModule === 'moves' || guideModule === 'abilities') entries = entries.filter(function (entry) {
+					if (moveGroup) return moveGroup === 'all' || (entry.groups || []).indexOf(moveGroup) >= 0;
 					return (entry.origin || 'fantasy') === (/enhanced$/.test(this.codexFilter) ? 'enhanced' : 'fantasy');
 				}, this);
+				if (guideModule === 'moves' && this.codexType) entries = entries.filter(function (entry) { return entry.type === this.codexType; }, this);
 				if (this.codexFilter === 'biomes') html += '<p class="rogue-caption">黑色剪影表示尚未在该生态捕捉；在其他生态捕捉不会点亮这里的图标。战斗与精英共用生态记录，出现过的生态在后续 5 层暂不刷新。</p>';
 				else if (this.codexFilter !== 'beginner') html += '<p class="rogue-caption">以下为幻想形态与主要调整内容；形态、道具能否在爬塔中使用，还需满足相应获取和解锁条件。</p>';
 			} else {
@@ -2462,7 +2508,7 @@
 			var active = this.codexFilter, query = this.codexQuery.toLowerCase();
 			var itemSection = section === 'guide' && ['items', 'exclusive', 'special'].indexOf(active) >= 0;
 			html += '<nav class="rogue-codex-filters" aria-label="图鉴分类">' + filters.map(function (entry) {
-				var selected = active === entry[0] || active === entry[0] + 'enhanced' || itemSection && entry[0] === 'items';
+				var selected = active === entry[0] || active === entry[0] + 'enhanced' || moveGroup && entry[0] === 'moves' || itemSection && entry[0] === 'items';
 				return '<button class="button' + (selected ? ' is-active' : '') + '" aria-pressed="' + selected +
 					'" name="filterCodex" value="' + entry[0] + '">' + entry[1] + '</button>';
 			}).join('') + '</nav>';
@@ -2473,10 +2519,11 @@
 				}).join('') + '</nav>';
 			if (section === 'guide' && ['moves', 'abilities'].indexOf(guideModule) >= 0) {
 				html += '<nav class="rogue-codex-filters" aria-label="内容来源">' +
-					[[guideModule, '幻想杯自制内容'], [guideModule + 'enhanced', guideModule === 'moves' ? '原版招式增强' : '原版特性增强']].map(function (entry) {
+					[[guideModule, '幻想杯自制内容'], [guideModule + 'enhanced', guideModule === 'moves' ? '原版招式增强' : '原版特性增强']].concat(guideModule === 'moves' ? Object.keys(data.guide.moveCategories || {}).map(function (id) { return ['moves:' + id, data.guide.moveCategories[id]]; }) : []).map(function (entry) {
 						return '<button class="button' + (active === entry[0] ? ' is-active' : '') + '" name="filterCodex" value="' +
 							entry[0] + '" aria-pressed="' + (active === entry[0]) + '">' + entry[1] + '</button>';
 					}).join('') + '</nav>';
+				if (guideModule === 'moves') html += typeFilter('codexType', this.codexType);
 			}
 			html += '<div class="rogue-codex-search"><label><select name="codexSearchMode"><option value="name">按名称</option><option value="content"' + (this.codexSearchMode === 'content' ? ' selected' : '') + '>按内容</option></select>查找 <input type="search" name="codexSearch" value="' +
 				escape(this.codexQuery) + '" placeholder="输入名称，按回车" /></label>' + button('searchCodex', '', '查找', false, fa('search')) + '</div>';
@@ -2485,6 +2532,7 @@
 			if (section !== 'blessings' && this.codexFilter !== 'beginner') {
 				var collator = new Intl.Collator('zh-CN-u-co-pinyin', {sensitivity: 'base', ignorePunctuation: true, numeric: true});
 				entries.sort(function (a, b) {
+					if (moveGroup && (a.origin === 'original') !== (b.origin === 'original')) return a.origin === 'original' ? 1 : -1;
 					var ar = /^rival:([^:]+):(\d+)$/.exec(a.id), br = /^rival:([^:]+):(\d+)$/.exec(b.id);
 					if (ar && br) return collator.compare(a.name.split('·')[0], b.name.split('·')[0]) || Number(ar[2]) - Number(br[2]);
 					return collator.compare(localName(a.name, entryKind), localName(b.name, entryKind)) || collator.compare(a.id, b.id);
@@ -2495,10 +2543,11 @@
 			if (active === 'ecology') html += '<p class="rogue-caption">黑色剪影表示尚未在该生态捕捉；其他地方的捕捉不会点亮这里。出现过的生态在后续 5 层暂不刷新。</p>';
 			var pageSize = section === 'events' && active === 'ecology' ? 4 : 12;
 			var total = Math.max(1, Math.ceil(entries.length / pageSize)); this.codexPage = Math.min(this.codexPage, total - 1);
+			var lastMoveOrigin = '';
 			html += '<div class="rogue-codex-grid">' + entries.slice(this.codexPage * pageSize, (this.codexPage + 1) * pageSize).map(function (entry) {
 				var tier = {silver: '白银', gold: '黄金', prismatic: '棱彩'}[entry.tier];
 				var icon = section === 'guide' ? (active === 'pokemon' ? '<span class="picon" style="' + Dex.getPokemonIcon(entry.name) + '"></span>' :
-					['items', 'exclusive'].indexOf(active) >= 0 ? itemIcon(entry) : fa('trophy')) : fa(section === 'events' ? 'map-signs' : blessingIcon(entry));
+					(['items', 'exclusive'].indexOf(active) >= 0 || active === 'special' && entry.icon) ? itemIcon(entry) : fa('trophy')) : fa(section === 'events' ? 'map-signs' : blessingIcon(entry));
 				var body = '<p class="rogue-codex-effect">' + (section === 'blessings' ? blessingText(entry.text) : section === 'guide' && active === 'beginner' ? guideText(entry.text) : escape(eventText(localName(entry.text || '')))) + '</p>';
 				if (entry.category === 'ecology') {
 					var ecologyIcons = function (list) {
@@ -2512,7 +2561,7 @@
 						'<details class="rogue-biome-visitors"><summary>稀有乱入与高层精英</summary><p class="rogue-caption">各生态都可能稀有遇见其他家族；第 161 层起，精英还有机会出现传说中的宝可梦。相关祝福也会吸引特定传说。</p>' + ecologyIcons(visitors) + '</details>';
 				}
 				if (section === 'guide' && guideModule === 'moves') body = '<p class="rogue-caption">' + typeIcons([entry.type]) + ' · ' + escape(localName(entry.category)) +
-					' · 威力 ' + (entry.power || '—') + ' · 命中 ' + (entry.accuracy === true ? '必中' : entry.accuracy + '%') + ' · PP ' + entry.pp + '</p>' + body;
+					' · 威力 ' + (entry.power || '—') + ' · 命中 ' + (entry.accuracy === true ? '必中' : entry.accuracy + '%') + ' · PP ' + entry.pp + priorityText(entry.priority) + '</p>' + body;
 				if (section === 'guide' && active === 'pokemon') body = '<p>' + typeIcons(entry.types) + '</p><p>特性：' +
 					entry.abilities.map(function (name) { return escape(localName(name)); }).join(' / ') + '</p><p class="rogue-caption">' +
 					Object.keys(statNames).map(function (stat) { return statNames[stat] + ' ' + entry.stats[stat]; }).join(' · ') + '</p>' +
@@ -2528,7 +2577,9 @@
 					body = (entry.portrait === 'mewtwo' ? croppedMewtwo('rogue-codex-single-portrait') : singlePortraits[entry.portrait] ? '<img class="rogue-codex-single-portrait" src="' + singlePortraits[entry.portrait] + '" alt="' + escape(entry.name) + '" />' : file ? '<span class="rogue-companion-portrait codex-portrait" style="' + portraitStyle(entry.portrait) + '"></span>' : '<img class="rogue-codex-native-portrait" src="' + escape(Dex.resolveAvatar(entry.portrait)) + '" alt="' + escape(entry.name) + '" />') + body;
 				}
 				var trainerEntry = section === 'events' && ['companion', 'trainer'].indexOf(entry.category) >= 0;
-				return '<article data-codex-family="' + escape(entry.family || '') + '" class="rogue-codex-entry tier-' + (entry.tier || 'plain') + (entry.unlocked === false ? ' is-locked' : '') + '">' +
+				var groupTitle = '', origin = entry.origin === 'original' ? '原版招式' : '幻想杯自制或调整过的招式';
+				if (moveGroup && lastMoveOrigin !== origin) { groupTitle = '<h3 class="rogue-move-group">' + origin + '</h3>'; lastMoveOrigin = origin; }
+				return groupTitle + '<article data-codex-family="' + escape(entry.family || '') + '" class="rogue-codex-entry tier-' + (entry.tier || 'plain') + (entry.unlocked === false ? ' is-locked' : '') + '">' +
 					'<div class="rogue-codex-entry-top"><span>' + icon + '</span><small>' + (tier ? tier + '阶' : section === 'events' ? (['companion', 'trainer'].indexOf(entry.category) >= 0 ? '训练家' : kindNames[entry.category || 'event']) : '幻想杯') +
 					'</small>' + (entry.unlocked === false ? '<span class="rogue-codex-lock">' + fa('lock') + (trainerEntry ? '尚未遇见' : '未解锁') + '</span>' : trainerEntry ? '<span class="rogue-codex-seen">' + fa('check') + '已遇见过</span>' : '') + '</div>' +
 					'<div class="rogue-codex-title"><h3>' + escape(localName(entry.name, entryKind)) + '</h3>' +
@@ -2636,7 +2687,7 @@
 				} else html += '<p class="rogue-caption">无塔灵通关 200 层，可解锁“开启塔灵”。</p>';
 				html += '<p><strong class="rogue-starter-count" aria-live="polite">已选 ' + this.selectedStarters.length +
 					' 只 · 已用 ' + this.starterSlotsUsed() + ' / ' + account.slots + ' 个初始名额</strong></p>' +
-					'<p class="rogue-caption">普通伙伴占 1 格，传说宝可梦与幻之宝可梦占 4 格，一级神占 6 格。仅限制初始选择，旅途中仍可组成正常队伍。</p><div class="rogue-starters">';
+					'<p class="rogue-caption">普通伙伴占 1 格，传说宝可梦与幻之宝可梦占 4 格，一级神占 6 格。仅限制初始选择，旅途中仍可组成正常队伍。</p>' + typeFilter('starterType', this.starterType) + '<div class="rogue-starter-generations">';
 				var selectedStarters = this.selectedStarters;
 				var remainingSlots = account.slots - this.starterSlotsUsed();
 				var renderStarter = function (starter) {
@@ -2647,7 +2698,18 @@
 						'<span class="picon" style="' + Dex.getPokemonIcon(starter.species) + '"></span>' + escape(localName(starter.species)) +
 						'<small> · ' + (starter.slotCost || 1) + ' 格</small></label> ';
 				};
-				state.starters.filter(function (starter) { return starter.available; }).forEach(renderStarter);
+				var generations = {}, starterType = this.starterType;
+				state.starters.filter(function (starter) {
+					return starter.available && (!starterType || (starter.types || dex().species.get(starter.species).types).indexOf(starterType) >= 0);
+				}).forEach(function (starter) {
+					var gen = starter.gen || dex().species.get(starter.species).gen || 9;
+					(generations[gen] || (generations[gen] = [])).push(starter);
+				});
+				Object.keys(generations).sort(function (a, b) { return Number(a) - Number(b); }).forEach(function (gen) {
+					html += '<details data-rogue-key="starter-gen-' + gen + '"><summary>第 ' + gen + ' 世代 · ' + generations[gen].length + ' 只</summary><div class="rogue-starters">';
+					generations[gen].forEach(renderStarter); html += '</div></details>';
+				});
+				if (!Object.keys(generations).length) html += '<p>还没有已解锁的该属性伙伴。</p>';
 				html += '</div>';
 				var counts = state.unlockRequirements || {ordinary: 1, special: 10};
 				html += '<div class="rogue-unlock-guide"><strong>如何解锁更多伙伴</strong><ul>' +

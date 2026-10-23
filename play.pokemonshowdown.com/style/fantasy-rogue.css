@@ -984,7 +984,9 @@
 .rogue-ski { max-width:600px; margin:12px auto; padding:10px; background:#f3f8fc; border:1px solid #90adbf; border-radius:12px; }
 .rogue-ski canvas { display:block; width:100%; height:auto; border-radius:8px; image-rendering:pixelated; }
 .rogue-ski-hud, .rogue-ski-controls { display:flex; justify-content:space-between; gap:12px; padding-top:8px; }
-.rogue-ski-controls .button { flex:1; }
+.rogue-ski-controls .button { flex:1; min-height:60px; font-size:20px; touch-action:manipulation; user-select:none; }
+.rogue-ski:focus-visible { outline:3px solid #4d94c2; outline-offset:2px; }
+.rogue-ski-connection { min-height:1.4em; margin:4px 0 0; color:#925400; font-size:13px; }
 .rogue-codex-link { border:0; color:#4e6596; background:none; padding:0; font:inherit; cursor:pointer; text-decoration:underline; }
 .rogue-codex-link:focus-visible { outline:2px solid #4e6596; }
 .codex-portrait { float:right; margin:0 0 8px 10px; }
@@ -1137,5 +1139,9 @@
 	image-rendering: pixelated;
 }
 .rogue-biome-icon.is-unknown .picon { filter: brightness(0); }
+.rogue-move-group { grid-column: 1 / -1; margin-bottom: 0; }
+.rogue-type-filter { display: block; margin: 12px 0; }
+.rogue-starter-generations > details { margin: 10px 0; padding: 10px; border: 1px solid #a3becf; border-radius: 8px; }
+.rogue-starter-generations > details > summary { cursor: pointer; font-weight: bold; }
 .rogue-biome-visitors { margin-top: 10px; }
 .rogue-biome-visitors summary { cursor: pointer; font-weight: 700; }
