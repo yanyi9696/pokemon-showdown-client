@@ -51,12 +51,19 @@
     },
     {
       "id": "ash",
-      "file": "../trainers/ash.png",
-      "source": "https://play.pokemonshowdown.com/sprites/trainers/ash.png",
-      "sha256": "530f2f63ae174bcd20695ad6b0f9e4ea5f13950b4aa1334d8947aa732c998dc0"
+      "file": "ash.png",
+      "tool": "Pillow and NumPy; no generative redraw",
+      "source": "User-supplied two-expression drawing",
+      "sourceSha256": "fe4cb6c042aaac0905f1b9264e09e3333b8859ba6cd49ffbde8051cca7a6fa1f",
+      "sha256": "8f7f9ed80bf986f379e39f2ff87ef16106eb0c131677a0b31cdf620e58996d1c",
+      "layout": "Two equal square cells, neutral left and approval right, transparent PNG",
+      "processing": "User-approved local Python: background-connected neutral mask, two silhouettes, one-pixel alpha edge decontamination; 6 transparent rows at top for equal square cells.",
+      "originalTrainerAvatar": {
+        "id": "ash",
+        "file": "../trainers/ash.png",
+        "source": "https://play.pokemonshowdown.com/sprites/trainers/ash.png",
+        "sha256": "530f2f63ae174bcd20695ad6b0f9e4ea5f13950b4aa1334d8947aa732c998dc0"
+      }
     }
-  ],
-  "pending": {
-    "ash": "Expression-sheet generation rejected by the image service three times (category: other), including flatter-style attempts. The local Showdown pixel avatar is used without claiming a generated portrait."
-  }
+  ]
 }

@@ -128,6 +128,55 @@ describe('Fantasy Rogue private ability playback', () => {
 	});
 });
 
+describe('Fantasy Rogue stacked status playback', () => {
+	let battle;
+	afterEach(() => battle?.destroy());
+	function create() {
+		battle = new Battle({debug: true, log: ['|player|p1|Player', '|player|p2|Foe', '|gen|9', '|start',
+			'|switch|p1a: Mew|Mew, L50|175/175', '|switch|p2a: Blissey|Blissey, L50|100/100', '|turn|1']});
+		return battle.p2.active[0];
+	}
+	it('keeps remaining paralysis visible after sleep ends without playing a new paralysis animation', () => {
+		const target = create();
+		battle.add('|-status|p2a: Blissey|par');
+		battle.add('|-status|p2a: Blissey|slp|[from] move: Sleep Powder');
+		battle.add('|-start|p2a: Blissey|roguepar|[silent]');
+		assert.equal(target.status, 'slp'); assert(target.volatiles.roguepar);
+		battle.add('|-curestatus|p2a: Blissey|slp|[msg]');
+		const animations = [];
+		battle.scene.runStatusAnim = (...args) => animations.push(args);
+		battle.scene.resultAnim = (...args) => animations.push(args);
+		let updates = 0; battle.scene.updateStatbar = () => { updates++; };
+		battle.add('|-status|p2a: Blissey|par|[silent]');
+		battle.add('|-end|p2a: Blissey|roguepar|[silent]');
+		assert.equal(target.status, 'par'); assert(!target.volatiles.roguepar);
+		assert(!target.volatiles.rogueslp);
+		assert.equal(animations.length, 0); assert(updates > 0);
+	});
+	it('does not restart toxic counters during a silent primary status restoration', () => {
+		const target = create();
+		battle.add('|-status|p2a: Blissey|tox');
+		target.statusData.toxicTurns = 4;
+		battle.add('|-status|p2a: Blissey|slp|[from] move: Sleep Powder');
+		battle.add('|-start|p2a: Blissey|roguetox|[silent]');
+		battle.add('|-curestatus|p2a: Blissey|slp|[msg]');
+		battle.add('|-status|p2a: Blissey|tox|[silent]');
+		battle.add('|-end|p2a: Blissey|roguetox|[silent]');
+		assert.equal(target.status, 'tox'); assert.equal(target.statusData.toxicTurns, 4);
+	});
+	it('restores the secondary sleep badge after switching out and back in', () => {
+		const target = create();
+		battle.add('|-status|p2a: Blissey|slp');
+		battle.add('|-status|p2a: Blissey|par');
+		battle.add('|-start|p2a: Blissey|rogueslp|[silent]');
+		battle.add('|switch|p2a: Magikarp|Magikarp, L50|100/100');
+		battle.add('|switch|p2a: Blissey|Blissey, L50|100/100 par');
+		battle.add('|-start|p2a: Blissey|rogueslp|[silent]');
+		assert.equal(battle.p2.active[0], target);
+		assert.equal(target.status, 'par'); assert(target.volatiles.rogueslp);
+	});
+});
+
 describe('Fantasy Pressure PP display', () => {
 	let battle;
 	afterEach(() => battle?.destroy());

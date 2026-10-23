@@ -897,14 +897,15 @@ describe('Fantasy Rogue start menu and codex', () => {
 describe('Fantasy Rogue story and clear-card controls', () => {
 	it('ships both expressions for every added gym leader and uses them in dialogue', () => {
 		const c = client();
-		for (const id of ['jasmine', 'winona', 'gardenia', 'candice', 'clair', 'clay', 'nanu', 'valerie', 'leon', 'cynthia', 'diantha']) {
+		for (const id of ['jasmine', 'winona', 'gardenia', 'candice', 'clair', 'clay', 'nanu', 'valerie', 'leon', 'cynthia', 'diantha', 'ash']) {
 			const png = fs.readFileSync(require.resolve('../play.pokemonshowdown.com/sprites/rogue-dialogue/' + id + '.png'));
 			assert.equal(png.subarray(1, 4).toString(), 'PNG');
 			assert.equal(png.readUInt32BE(16), 2 * png.readUInt32BE(20), id + ' paired square cells');
 			assert.equal(png[25], 6, id + ' RGBA transparency');
 			for (const expression of ['neutral', 'approval']) {
 				const art = c.room.storyArt({scene: 'arena', portrait: id, speaker: id, expression});
-				assert(art.includes('rogue-dialogue/' + id + '.png?v=' + (['leon', 'cynthia', 'diantha'].includes(id) ? '20261024' : '20261023')));
+				const version = id === 'ash' ? '20261024-cutout' : ['leon', 'cynthia', 'diantha'].includes(id) ? '20261024' : '20261023';
+				assert(art.includes('rogue-dialogue/' + id + '.png?v=' + version));
 				assert.equal(art.includes('is-approval'), expression === 'approval');
 			}
 		}
@@ -1298,12 +1299,20 @@ describe('Fantasy Rogue event display and spectator playback', () => {
 		c.room.receiveState(data);
 		for (const item of ['spelltag', 'silkscarf']) assert(c.panel.html.includes('value="acerola|gift:' + item + '"'));
 	});
-	it('shows a native avatar for a social companion without an expression sheet', () => {
+	it('uses the supplied paired Ash portrait for social companions', () => {
 		const c = client(), data = adventure('event');
 		data.run.socialCompanions = [{id: 'ash', name: '小智', region: '关都', preference: 'battle',
 			areas: ['wild'], preferences: 0, giftOptions: []}];
 		c.room.receiveState(data);
 		assert(c.panel.html.includes('小智 · 常驻同行'));
+		assert(c.panel.html.includes('rogue-dialogue/ash.png?v=20261024-cutout'));
+		assert(!c.panel.html.includes('class="rogue-rival-native"'));
+	});
+	it('shows a native avatar for a social companion without an expression sheet', () => {
+		const c = client(), data = adventure('event');
+		data.run.socialCompanions = [{id: 'unknowntrainer', name: '未收录训练家', region: '关都', preference: 'battle',
+			areas: ['wild'], preferences: 0, giftOptions: []}];
+		c.room.receiveState(data);
 		assert(c.panel.html.includes('class="rogue-rival-native"'));
 		assert(!c.panel.html.includes('background-image:url()'));
 	});

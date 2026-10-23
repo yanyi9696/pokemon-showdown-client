@@ -2252,6 +2252,11 @@ export class Battle {
 				ofpoke.item = effect.name;
 			}
 
+			// A stacked status becoming primary again is a state sync, not a new infliction.
+			if (kwArgs.silent) {
+				this.scene.updateStatbar(poke);
+				break;
+			}
 			switch (args[2]) {
 			case 'brn':
 				this.scene.resultAnim(poke, 'Burned', 'brn');
