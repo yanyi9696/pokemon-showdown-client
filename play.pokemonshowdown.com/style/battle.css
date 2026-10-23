@@ -738,6 +738,13 @@ License: GPLv2
 	width: 40px;
 	height: 30px;
 }
+/* Keep this custom drawing's native pixels instead of shrinking it to 30px. */
+.picon[style*="kyurem-original-icon.png"] {
+	height: 40px;
+}
+.trainer div.teamicons:has(.picon[style*="kyurem-original-icon.png"]) {
+	height: 40px;
+}
 .trainer .picon {
 	margin: 0 -4px;
 }

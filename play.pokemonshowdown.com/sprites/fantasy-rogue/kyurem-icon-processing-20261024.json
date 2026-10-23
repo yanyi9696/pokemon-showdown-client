@@ -1,0 +1,25 @@
+{
+  "source": "User-approved attachment, 2026-10-24",
+  "sourceSha256": "146a13f22c4e6f4cf3d287d6d1660c5ca2abdd96de32d05a15ccf87a2c02c7cf",
+  "tool": "https://www.spritefusion.com/pixel-snapper",
+  "workerSha256": "c9d904afbd7f5c710f8c4104b702a4dcacad4c1f15f19d4cc3bb7166465fc488",
+  "wasmSha256": "f8533cecd6eaa8dd45d489d77a9502ba90403bd14f6154c41900666cb656798d",
+  "gridStep": 27,
+  "colors": 40,
+  "outputGrid": [
+    54,
+    41
+  ],
+  "crop": [
+    9,
+    3,
+    47,
+    39
+  ],
+  "processing": "Public WASM locally, binary alpha and transparent crop/padding. No resizing of snapped pixels, no forced palette.",
+  "dimensions": [
+    40,
+    40
+  ],
+  "iconSha256": "614119d1df6e4700ca6b2e4f9c63d3bc3afcc2c2f74b377b1c026c9b154bc3be"
+}

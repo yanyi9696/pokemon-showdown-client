@@ -8,6 +8,12 @@ Companion trainers reuse their existing paired assets in `../rogue-companions/`.
 
 Generation specifications and output provenance: `generation.json`. Generated artwork is a project illustration based on the named Pokémon characters; it is not official artwork.
 
+## Champion expansion, 2026-10-24
+
+Leon, Cynthia and Diantha have new transparent two-expression sheets, generated with the built-in `image_gen` tool from character references and the existing Steven sheet as the layout reference. Exact prompts, source references and SHA-256 hashes are recorded in [champions-20261024.json](champions-20261024.json). Lance reuses his existing expression sheet for both Elite Four and champion scenes. The four newly added characters also have local Showdown battle avatars under `../trainers/`.
+
+Ash's generated expression sheet remains unfinished: three attempts, including a flatter cartoon style, were rejected by the image service with the category `other`. His local Showdown pixel avatar is displayed in dialogue, events, the codex and the travelling-companion panel. It is a fallback, not a generated portrait or a two-expression sheet.
+
 Viola was revised on 2026-10-19 with the native image editor using the existing pair and three user-supplied references. Both expressions now share the swept-back rounded hair silhouette and inward-curled front locks, with matching pose, camera and linework.
 
 ## Rival portrait revision, 2026-10-20

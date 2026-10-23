@@ -386,6 +386,9 @@ export const Dex = new class implements ModdedDex {
 
 	resolveAvatar(avatar: string): string {
 		if (avatar === '#rogue-mewtwo') return Dex.resourcePrefix + 'sprites/gen5/mewtwo.png';
+		if (['leon', 'cynthia', 'diantha', 'ash'].includes(avatar)) {
+			return (this.iconSheetPrefix || this.resourcePrefix) + `sprites/trainers/${avatar}.png`;
+		}
 		if (window.BattleAvatarNumbers && avatar in BattleAvatarNumbers) {
 			avatar = BattleAvatarNumbers[avatar];
 		}
@@ -1196,7 +1199,7 @@ export const Dex = new class implements ModdedDex {
 		if (finalId === 'kyuremoriginal') {
 			// The battle sidebar already mirrors its icons in CSS. Keep the native
 			// orientation here, and a plain background value for the teambuilder updater.
-			const url = `${iconSheetPrefix}sprites/fantasy-rogue/kyurem-original-icon.png`;
+			const url = `${iconSheetPrefix}sprites/fantasy-rogue/kyurem-original-icon.png?v=20261024`;
 			return `background:transparent url(${url}) no-repeat scroll center center${faintedString}`;
 		}
 

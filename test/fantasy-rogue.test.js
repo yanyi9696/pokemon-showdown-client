@@ -68,6 +68,36 @@ function state() {
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
 describe('Fantasy Rogue start menu and codex', () => {
+	it('shows and submits the captured shiny starter choice without granting a locked option', () => {
+		for (const unlocked of [false, true]) {
+			const c = client(), data = state(); data.configured = true;
+			data.starters = [{id: 'slugma', species: 'Slugma', available: true, traits: {shiny: unlocked}}];
+			c.room.receiveState(data); c.room.changeStarter({currentTarget: {value: 'slugma', checked: true}});
+			c.room.confirmStarters();
+			const popup = Object.create(c.RogueStarterPopup);
+			popup.$el = {addClass() {}, html: html => {popup.html = html;}};
+			popup.$ = () => ({text() {}}); popup.close = () => {};
+			popup.initialize(c.app.lastPopup.data);
+			assert.equal(popup.html.includes('name="shiny"'), unlocked);
+			const form = {nature: 'random', gender: 'random', ability: 'random', shiny: 'yes'};
+			for (const stat of ['hp', 'atk', 'def', 'spa', 'spd', 'spe']) form['iv-' + stat] = '20';
+			popup.submit(form);
+			if (!unlocked) {assert.equal(c.sent.length, 0); continue;}
+			const command = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+			assert.equal(command.starterBuilds.slugma.shiny, true);
+		}
+	});
+	it('translates species embedded in snack-war buttons, descriptions and results', () => {
+		const c = client(false, true), data = state();
+		data.run = {floor: 4, maxFloor: 200, phase: 'event', team: [], bag: {}, boosts: {}, money: 1000,
+			node: {kind: 'event', name: '粗点心战争', encounters: [], event: {id: 'snacks', stage: 'choice', key: 'test'}},
+			event: {title: '粗点心战争', stage: 'choice', key: 'test', paragraphs: ['【Popplio】开心地享用了点心。'],
+				options: ['Popplio', 'Munna', 'Dedenne'].map((name, i) => ({id: 'snack:' + i,
+					name: '送给【' + name + '】一份点心 · 92 金币', text: '与【' + name + '】更亲近。'}))}};
+		c.room.receiveState(data);
+		for (const name of ['球球海狮', '食梦梦', '咚咚鼠']) assert(c.html.includes('送给【' + name + '】'), name);
+		for (const name of ['Popplio', 'Munna', 'Dedenne']) assert(!c.html.includes(name), name);
+	});
 	it('starts with generation groups collapsed and filters starters by either type', () => {
 		const c = client(), data = state(); data.configured = true;
 		data.starters = [{id: 'bulbasaur', species: 'Bulbasaur', gen: 1, types: ['Grass', 'Poison'], available: true},
@@ -867,14 +897,14 @@ describe('Fantasy Rogue start menu and codex', () => {
 describe('Fantasy Rogue story and clear-card controls', () => {
 	it('ships both expressions for every added gym leader and uses them in dialogue', () => {
 		const c = client();
-		for (const id of ['jasmine', 'winona', 'gardenia', 'candice', 'clair', 'clay', 'nanu', 'valerie']) {
+		for (const id of ['jasmine', 'winona', 'gardenia', 'candice', 'clair', 'clay', 'nanu', 'valerie', 'leon', 'cynthia', 'diantha']) {
 			const png = fs.readFileSync(require.resolve('../play.pokemonshowdown.com/sprites/rogue-dialogue/' + id + '.png'));
 			assert.equal(png.subarray(1, 4).toString(), 'PNG');
 			assert.equal(png.readUInt32BE(16), 2 * png.readUInt32BE(20), id + ' paired square cells');
 			assert.equal(png[25], 6, id + ' RGBA transparency');
 			for (const expression of ['neutral', 'approval']) {
 				const art = c.room.storyArt({scene: 'arena', portrait: id, speaker: id, expression});
-				assert(art.includes('rogue-dialogue/' + id + '.png?v=20261023'));
+				assert(art.includes('rogue-dialogue/' + id + '.png?v=' + (['leon', 'cynthia', 'diantha'].includes(id) ? '20261024' : '20261023')));
 				assert.equal(art.includes('is-approval'), expression === 'approval');
 			}
 		}
@@ -1267,6 +1297,15 @@ describe('Fantasy Rogue event display and spectator playback', () => {
 			giftOptions: [{id: 'spelltag', name: '诅咒之符'}, {id: 'silkscarf', name: '丝绸围巾'}]}];
 		c.room.receiveState(data);
 		for (const item of ['spelltag', 'silkscarf']) assert(c.panel.html.includes('value="acerola|gift:' + item + '"'));
+	});
+	it('shows a native avatar for a social companion without an expression sheet', () => {
+		const c = client(), data = adventure('event');
+		data.run.socialCompanions = [{id: 'ash', name: '小智', region: '关都', preference: 'battle',
+			areas: ['wild'], preferences: 0, giftOptions: []}];
+		c.room.receiveState(data);
+		assert(c.panel.html.includes('小智 · 常驻同行'));
+		assert(c.panel.html.includes('class="rogue-rival-native"'));
+		assert(!c.panel.html.includes('background-image:url()'));
 	});
 	it('chooses either streamer and displays event recommendations with the preference counter', () => {
 		for (const id of ['iono', 'canari']) {

@@ -1,5 +1,9 @@
 # 幻想杯肉鸽道具图来源
 
+## 2026-10-24 合众酋雷姆小图标修订
+
+采用用户本次确认的图一，经 [Sprite Fusion Pixel Snapper](https://www.spritefusion.com/pixel-snapper) 公开 WASM 模块，以 27 像素网格、40 色自动配色处理。仅裁去透明留白并置于 40×40 透明画布；不再对网格二次缩小、不套用旧版 17 色色板。界面同步使用 40 像素高的图标框，保留每一原生像素。处理参数及源图、模块和结果的 SHA-256 见 `kyurem-icon-processing-20261024.json`。已经确认的背面图保持原样。
+
 ## 2026-10-23 招式光碟、形态道具与三合一酋雷姆
 
 `tm/` 的十八属性光碟及 `key-items/` 的形态道具使用 [PokeSprite](https://github.com/msikma/pokesprite) 原始 PNG；道具美术版权归 Nintendo / Game Freak / Creatures，PokeSprite 的代码许可不改变原始素材版权。按招式实际属性选择光碟，不重绘或改色；形态道具按本名对应。逐文件 SHA-256 见 `form-and-tm-icons.json`。运行时均读取本地文件。
@@ -8,7 +12,7 @@
 
 `kyurem-original-back.png` 是用户于 2026-10-23 确认的 128×128 透明像素背面图：以用户提供的焰白／暗黑酋雷姆背面图和上述正面图为参考，经本地像素重绘、[Sprite Fusion Pixel Snapper](https://www.spritefusion.com/pixel-snapper) 公开 WASM 模块整理及逐像素修正完成。最终修正版保留连续蓝色管线，并采用深灰、蓝灰和暗红轮廓。接入时逐字节保留确认版本；它是本项目的衍生美术，不冒充改版原作者的背面素材。`kyurem-original-back-shiny.png` 只更换调色板，沿用现有普通／闪光正面图的颜色对应及相近材质的描边色，不改变轮廓或透明区域。
 
-`kyurem-original-icon.png` 是 40×30 透明队伍小图标。目前本地资源与上述公开素材库均未找到对应的专属小图标，因此使用内置 image_gen，以原版焰白／暗黑酋雷姆的队伍图标及本形态正面图为参考制作；再用 Pixel Snapper 公开 WASM 模块在本地规整像素、匹配 17 色调色板，以最近邻方式整理到原生图标尺寸。没有将新图标伪称为原作或改版原素材。肉鸽队伍栏、队伍编辑器及战斗队伍栏通过统一的图标接口使用它；小图标与原版一致不区分闪光，战斗左栏沿用现有 CSS 镜像。逐文件校验和同样见 `form-and-tm-icons.json`。
+小图标最初于 2026-10-23 使用内置 image_gen、焰白／暗黑酋雷姆图标和本形态正面图制作。当时导出的 40×30、17 色版本已被上方 2026-10-24 的 40×40 版本替换。肉鸽队伍栏、队伍编辑器及战斗队伍栏通过统一的图标接口使用当前文件；小图标与原版一致不区分闪光，战斗左栏沿用现有 CSS 镜像。逐文件校验和见 `form-and-tm-icons.json`。
 
 Sprite Fusion 模块来源：[Hugo-Dz/spritefusion-pixel-snapper](https://github.com/Hugo-Dz/spritefusion-pixel-snapper)，处理过程不依赖在线服务；运行游戏时也不调用图片生成或处理服务。
 

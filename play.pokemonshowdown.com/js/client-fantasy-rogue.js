@@ -5,12 +5,13 @@
 	var companionPortraits = {guzma: 'guzma-expressions', iris: 'iris-champion'};
 	var dialogueSheets = ['mela', 'atticus', 'ortega', 'eri', 'kieran', 'penny', 'carmine', 'n', 'lillie', 'korrina', 'nemona', 'blue', 'gladion', 'bede', 'silver', 'brock', 'maxie', 'marnie', 'kahili', 'liko', 'jenny', 'sabrina', 'flannery', 'roxie', 'viola', 'nessa', 'larry', 'lorelei', 'lance', 'lacey', 'steven',
 		'giovanni', 'archer', 'cyrus', 'ghetsis', 'piers', 'charm', 'clover', 'coin', 'giacomo', 'rocket', 'magma', 'galactic', 'plasma', 'flare', 'skull', 'yell', 'teamstar',
-		'jasmine', 'winona', 'gardenia', 'candice', 'clair', 'clay', 'nanu', 'valerie'];
+		'jasmine', 'winona', 'gardenia', 'candice', 'clair', 'clay', 'nanu', 'valerie', 'leon', 'cynthia', 'diantha'];
 	var dialogueCompanions = ['bea', 'acerola', 'iono', 'rika', 'guzma', 'lysandre', 'iris', 'poppy', 'lana', 'olivia', 'grusha', 'canari', 'sada', 'turo'];
 	var singlePortraits = {mewtwo: 'sprites/rogue-dialogue/mewtwo-official.png', aqua: Dex.resolveAvatar('aquagrunt'),
 		archie: Dex.resolveAvatar('archie-gen6'), hexmaniac: Dex.resolveAvatar('hexmaniac-gen6'),
 		cheerleader: Dex.resolveAvatar('backersf'), snowboarder: Dex.resolveAvatar('skier')};
 	var portraitVersions = {
+		leon: '20261024', cynthia: '20261024', diantha: '20261024',
 		jasmine: '20261023', winona: '20261023', gardenia: '20261023', candice: '20261023',
 		clair: '20261023', clay: '20261023', nanu: '20261023', valerie: '20261023',
 		giacomo: '20261020-reference-v2', mela: '20261020-reference-v2', atticus: '20261020-reference-v2', ortega: '20261020-reference-v2', eri: '20261020-reference-v2',
@@ -415,7 +416,7 @@
 		return eventText(translated);
 	}
 	function eventText(text) {
-		return text.replace(/[A-Za-z][A-Za-z0-9'’. -]*/g, function (phrase) {
+		return text.replace(/[A-Za-z][A-Za-z0-9'’.:%♀♂ -]*/g, function (phrase) {
 			var name = phrase.trim();
 			return localName(name) + phrase.slice(name.length);
 		});
@@ -859,8 +860,10 @@
 				html += '<article class="rogue-companion rogue-rival-companion">' + (art ? '<span class="rogue-companion-portrait" style="' + portraitStyle(rival.id) + '"></span>' : '<img class="rogue-rival-native" src="' + escape(Dex.resolveAvatar(rival.id)) + '" alt="" />') + '<div class="rogue-companion-copy"><strong>' + escape(rival.name) + ' · 劲敌</strong><small>' + escape(rival.text) + ' · 熟悉度 ' + rival.affection + '</small><p>' + escape(rival.message) + '</p></div></article>';
 			});
 			(run.socialCompanions || []).forEach(function (c) {
-				html += '<article class="rogue-companion"><span class="rogue-companion-portrait" style="' + portraitStyle(c.id) +
-					'"></span><div class="rogue-companion-copy"><strong>' + escape(c.name) + ' · 常驻同行</strong><small>偏好' +
+				var art = portraitFile(c.id);
+				html += '<article class="rogue-companion">' + (art ? '<span class="rogue-companion-portrait" style="' + portraitStyle(c.id) +
+					'"></span>' : '<img class="rogue-rival-native" src="' + escape(Dex.resolveAvatar(c.id)) + '" alt="' + escape(c.name) + '" />') +
+					'<div class="rogue-companion-copy"><strong>' + escape(c.name) + ' · 常驻同行</strong><small>偏好' +
 					escape(c.region) + '相关、' + ({battle: '战斗', reward: '奖励', pokemon: '宝可梦'}[c.preference] || '') +
 					'选项；喜欢' + escape((c.areas || []).map(function (id) { return kindNames[id] || id; }).join('、')) + '区域</small>' + button('socialCompanionAction', c.id + '|chat', '闲聊', locked) +
 					(c.canConsult ? button('socialCompanionAction', c.id + '|advice', '听听建议', locked) : '') +
@@ -1644,7 +1647,7 @@
 				}
 				html += '<h4>挑选一份奖励</h4><div class="rogue-reward-options">' + scene.choices.map(function (option) {
 					return '<button class="button rogue-event-option" name="chooseReward" value="' + escape(option.id) + '"' +
-						(busy || option.disabled ? ' disabled' : '') + '><strong>' + escape(option.name + recommendedLabel(run, option.id)) + '</strong><small>' + escape(option.text) + '</small></button>';
+						(busy || option.disabled ? ' disabled' : '') + '><strong>' + escape(eventText(option.name) + recommendedLabel(run, option.id)) + '</strong><small>' + escape(eventText(option.text)) + '</small></button>';
 				}).join('') + '</div><p class="rogue-caption">' + escape(scene.baseText) + '</p>';
 			}
 			return html + '</article>';
@@ -1885,9 +1888,9 @@
 						return entry.id === decodeURIComponent(parts[1]);
 					});
 					if (member) return memberChoice('chooseEvent', option.id, member, busy || option.disabled,
-						(parts[0] === 'swap' ? localName(option.name) : eventText(option.text)) + recommendations(option.id));
+						(parts[0] === 'swap' ? eventText(option.name) : eventText(option.text)) + recommendations(option.id));
 					return '<button class="button rogue-event-option" name="chooseEvent" value="' + escape(option.id) + '"' +
-						(busy || option.disabled ? ' disabled' : '') + '><strong>' + escape(localName(option.name) + recommendations(option.id)) + '</strong><small>' + escape(eventText(option.text)) + '</small></button>';
+						(busy || option.disabled ? ' disabled' : '') + '><strong>' + escape(eventText(option.name) + recommendations(option.id)) + '</strong><small>' + escape(eventText(option.text)) + '</small></button>';
 				}).join('') + '</div>';
 			}
 			return html + '</article>';
@@ -3421,7 +3424,10 @@
 				html += '<option value="' + escape(ability.id) + '"' + (build.ability === ability.id ? ' selected' : '') + '>' +
 					escape(localName(ability.name)) + (ability.hidden ? '（隐藏特性）' : '') + '</option>';
 			});
-			html += '</select></label></p><p class="rogue-config-note">捕捉过的性格、性别和特性可指定；随机项在开始冒险时确定。</p>' +
+			html += '</select></label></p>';
+			if (traits.shiny) html += '<p><label>外观 <select name="shiny"><option value="no">普通</option>' +
+				'<option value="yes"' + (build.shiny ? ' selected' : '') + '>闪光 ★</option></select></label></p>';
+			html += '<p class="rogue-config-note">捕捉过的性格、性别和特性可指定；捕捉过闪光伙伴的谱系可选择闪光外观。随机项在开始冒险时确定。</p>' +
 				'<table><thead><tr><th>能力</th><th>个体值</th><th>已解锁范围</th></tr></thead><tbody>';
 			Object.keys(statNames).forEach(function (stat) {
 				html += '<tr><th><label for="rogue-iv-' + stat + '">' + statNames[stat] + '</label></th><td>' +
@@ -3449,7 +3455,9 @@
 			if (app.user.get('userid') !== this.userid || !starter || room.pending ||
 				room.selectedStarters.join(',') !== this.starters.join(',')) { this.close(); return false; }
 			var traits = starterTraits(starter), ivs = {};
+			var shiny = data.shiny === 'yes';
 			var valid = data.nature === 'random' || traits.natures.indexOf(data.nature) >= 0;
+			valid = valid && (!shiny || !!traits.shiny);
 			valid = valid && (data.gender === 'random' || traits.genders.indexOf(data.gender) >= 0 || (data.gender === 'N' && starter.gender === 'N'));
 			valid = valid && (data.ability === 'random' || ((traits.abilities || []).indexOf(data.ability) >= 0 &&
 				(starter.abilities || []).some(function (ability) { return ability.id === data.ability; })));
@@ -3458,7 +3466,7 @@
 				if (data['iv-' + stat] === '' || !Number.isInteger(ivs[stat]) || ivs[stat] < traits.ivs.min[stat] || ivs[stat] > traits.ivs.max[stat]) valid = false;
 			});
 			if (!valid) { this.$('.rogue-config-error').text('请选择已解锁的性格、性别、特性，以及范围内的整数个体值。'); return false; }
-			room.starterBuilds[id] = {nature: data.nature, gender: data.gender, ivs: ivs, ability: data.ability};
+			room.starterBuilds[id] = {nature: data.nature, gender: data.gender, ivs: ivs, ability: data.ability, shiny: shiny};
 			return true;
 		},
 		submit: function (data) {

@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-24",
+  "images": [
+    {
+      "id": "leon",
+      "file": "leon.png",
+      "tool": "image_gen",
+      "generatedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-e0faedb7-223a-4569-912d-d8a4499a828c.png",
+      "reference": "https://swordshield.pokemon.com/assets/img/articles/people_leon.png",
+      "sha256": "511d2930892d73286e650534c9cafee7d266be5e9eb4328caddc270202e3cf32",
+      "layout": "Two equal square cells, neutral left and approval right, transparent PNG",
+      "prompt": "Create a transparent PNG game dialogue portrait expression sheet. Input 1 defines the character identity and outfit. Input 2 defines clean cel shaded anime linework and layout only. Wide 2:1 canvas with TWO EQUAL SQUARE CELLS. Same waist-up pose repeated, LEFT attentive neutral expression, RIGHT warm approving smile. Whole head and hat, shoulders, hands contained inside each cell with 8 percent transparent margins at top and sides; only waist cropped. No lettering, background scene, extra characters or borders. Clear line art and restrained cel shadows, consistent with the reference game's portraits. Leon, Galar champion: long spiky purple hair, warm brown skin, amber eyes, black cap with gold crown motif, black sports shirt with sword crest, royal red cape with cream fur edging. Confident welcoming posture, one gloved hand near waist. His joyful competitive spirit, not arrogance."
+    },
+    {
+      "id": "cynthia",
+      "file": "cynthia.png",
+      "tool": "image_gen",
+      "generatedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-84e1d95c-8306-4ad4-ba48-58b47c3f650e.png",
+      "reference": "https://cdn.artofpkm.com/wyrtznnozgadh2xyacv07ibetj82",
+      "sha256": "f0a0f4d9ce474b16402b6098600a49b0662eb831b4eee5f29b94859137f4f697",
+      "layout": "Two equal square cells, neutral left and approval right, transparent PNG",
+      "prompt": "Create a transparent PNG game dialogue portrait expression sheet. Input 1 defines the character identity and outfit. Input 2 defines clean cel shaded anime linework and layout only. Wide 2:1 canvas with TWO EQUAL SQUARE CELLS. Same waist-up pose repeated, LEFT attentive neutral expression, RIGHT warm approving smile. Whole head, shoulders, hair and hands contained inside each cell with 8 percent transparent margins at top and sides; only waist cropped. No lettering, background scene, extra characters or borders. Clear line art and restrained cel shadows, consistent with the reference game's portraits. Cynthia, Sinnoh champion: extremely long pale blonde hair with a swept fringe partly covering one eye, paired black teardrop hair ornaments with yellow bands, tailored black coat with fluffy black fur collar and cuffs, gray teardrop ornaments on front. Graceful composed adult woman, one relaxed hand near waist, thoughtful kindness and quiet confidence."
+    },
+    {
+      "id": "diantha",
+      "file": "diantha.png",
+      "tool": "image_gen",
+      "generatedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-2bbee73c-f7cf-43a6-849c-645aacedbeec.png",
+      "reference": "https://img4.wikia.nocookie.net/__cb20131016131228/pokemon/images/c/c7/Diantha.png",
+      "sha256": "82d4d74ed9e99e8937a770463c0ca85912081120b44caa58788dc85a854f5ae1",
+      "layout": "Two equal square cells, neutral left and approval right, transparent PNG",
+      "prompt": "Create a transparent PNG game dialogue portrait expression sheet. Input 1 defines the character identity and outfit. Input 2 defines clean cel shaded anime linework and layout only. Wide 2:1 canvas with TWO EQUAL SQUARE CELLS. Same waist-up pose repeated, LEFT attentive neutral expression, RIGHT warm approving smile. Whole head, shoulders, hair and hands contained inside each cell with 8 percent transparent margins at top and sides; only waist cropped. No lettering, background scene, extra characters or borders. Clear line art and restrained cel shadows, consistent with the reference game's portraits. Diantha, Kalos champion and actress: short charcoal gray sculpted pixie-cut hair, blue eyes, white choker, elegant fitted white jacket with gold ring motifs and cuffs, sculptural white wing-shaped decoration behind shoulders, gold swan pendant with a small colorful keystone. Adult woman with poised gracious posture, one hand gently near pendant. Keep shoulders and wing decorations compact within each cell. White outfit must remain opaque against transparent background."
+    },
+    {
+      "id": "leon",
+      "file": "../trainers/leon.png",
+      "source": "https://play.pokemonshowdown.com/sprites/trainers/leon.png",
+      "sha256": "4f3b136f533d6876820cfd50591defb41c2fb95ce2bd39c95f394aa8c7e99090"
+    },
+    {
+      "id": "cynthia",
+      "file": "../trainers/cynthia.png",
+      "source": "https://play.pokemonshowdown.com/sprites/trainers/cynthia.png",
+      "sha256": "717578631bc6307769e551d3c88986eabf67991b771e4ccb4c2496d44ac620b8"
+    },
+    {
+      "id": "diantha",
+      "file": "../trainers/diantha.png",
+      "source": "https://play.pokemonshowdown.com/sprites/trainers/diantha.png",
+      "sha256": "ca8ba22e6f07a442dabb54596f7b29f8d79d1600dd8fe471c4526b561af027f7"
+    },
+    {
+      "id": "ash",
+      "file": "../trainers/ash.png",
+      "source": "https://play.pokemonshowdown.com/sprites/trainers/ash.png",
+      "sha256": "530f2f63ae174bcd20695ad6b0f9e4ea5f13950b4aa1334d8947aa732c998dc0"
+    }
+  ],
+  "pending": {
+    "ash": "Expression-sheet generation rejected by the image service three times (category: other), including flatter-style attempts. The local Showdown pixel avatar is used without claiming a generated portrait."
+  }
+}

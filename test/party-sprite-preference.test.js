@@ -74,7 +74,9 @@ describe('Shared 2D party sprite preference', () => {
 	it('uses the dedicated menu icon in party, teambuilder and battle callers', () => {
 		const filename = 'sprites/fantasy-rogue/kyurem-original-icon.png';
 		const dimensions = imageSize(path.join(webRoot, filename));
-		assert.equal(dimensions.width, 40); assert.equal(dimensions.height, 30);
+		assert.equal(dimensions.width, 40); assert.equal(dimensions.height, 40);
+		const css = fs.readFileSync(path.join(webRoot, 'style/battle.css'), 'utf8');
+		assert.match(css, /\.picon\[style\*="kyurem-original-icon\.png"\]\s*\{\s*height: 40px;/);
 		const normal = context.Dex.getPokemonIcon('Kyurem-Original');
 		assert(normal.includes(filename));
 		assert(!normal.slice('background:'.length).includes(';'), 'teambuilder assigns the background value directly');
@@ -100,6 +102,18 @@ describe('Shared 2D party sprite preference', () => {
 			assert(context.Dex.getPokemonIcon('Kyurem-Original').includes(base + 'kyurem-original-icon.png'));
 		} finally {
 			context.Dex.iconSheetPrefix = './';
+		}
+	});
+	it('ships and routes champion battle avatars locally', () => {
+		const manifest = JSON.parse(fs.readFileSync(path.join(webRoot, 'sprites/rogue-dialogue/champions-20261024.json')));
+		for (const asset of manifest.images) {
+			const bytes = fs.readFileSync(path.join(webRoot, 'sprites/rogue-dialogue', asset.file));
+			assert.equal(createHash('sha256').update(bytes).digest('hex'), asset.sha256);
+		}
+		for (const id of ['leon', 'cynthia', 'diantha', 'ash']) {
+			const url = context.Dex.resolveAvatar(id);
+			assert.equal(url, './sprites/trainers/' + id + '.png');
+			assert.equal(imageSize(path.join(webRoot, url)).type, 'png');
 		}
 	});
 	it('redraws both open party screens on the real settings checkbox handler', () => {
