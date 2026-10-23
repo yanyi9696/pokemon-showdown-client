@@ -832,6 +832,20 @@ describe('Fantasy Rogue start menu and codex', () => {
 	});
 });
 describe('Fantasy Rogue story and clear-card controls', () => {
+	it('ships both expressions for every added gym leader and uses them in dialogue', () => {
+		const c = client();
+		for (const id of ['jasmine', 'winona', 'gardenia', 'candice', 'clair', 'clay', 'nanu', 'valerie']) {
+			const png = fs.readFileSync(require.resolve('../play.pokemonshowdown.com/sprites/rogue-dialogue/' + id + '.png'));
+			assert.equal(png.subarray(1, 4).toString(), 'PNG');
+			assert.equal(png.readUInt32BE(16), 2 * png.readUInt32BE(20), id + ' paired square cells');
+			assert.equal(png[25], 6, id + ' RGBA transparency');
+			for (const expression of ['neutral', 'approval']) {
+				const art = c.room.storyArt({scene: 'arena', portrait: id, speaker: id, expression});
+				assert(art.includes('rogue-dialogue/' + id + '.png?v=20261023'));
+				assert.equal(art.includes('is-approval'), expression === 'approval');
+			}
+		}
+	});
 	it('uses paired portraits with stable scene identity while changing expressions and speakers', () => {
 		const c = client(), data = adventure('story'); c.room.receiveState(data);
 		const page = {stage: 'interlude', performance: 'conversation1', scene: 'arena', portrait: 'jenny', speaker: '君莎', side: 'right', expression: 'neutral'};
@@ -1050,6 +1064,28 @@ function adventure(phase = 'choose') {
 	return data;
 }
 describe('Fantasy Rogue event display and spectator playback', () => {
+	it('renders and submits both fragment reward choices after loading a saved event', () => {
+		for (const id of ['room', 'forest', 'bandits']) {
+			for (const choice of ['fragments', 'supplies']) {
+				const c = client(), data = adventure('event');
+				data.run.floor = 56;
+				data.run.node = {kind: 'event', name: '事件', reward: {money: 0, items: {}}};
+				data.run.event = {id, key: 'saved-reward', stage: 'fragments', title: '奖励选择',
+					paragraphs: ['门终于打开了。选一份，继续走吧。'], options: [
+						{id: 'fragments', name: '带走幻想碎片。', text: '幻想碎片 ×10', disabled: false},
+						{id: 'supplies', name: '带走工具箱和随附的小份碎片。', text: '', disabled: false},
+					]};
+				c.room.receiveState(data);
+				for (const value of ['fragments', 'supplies']) assert(c.room.html.includes('name="chooseEvent" value="' + value + '"'));
+				assert(!c.room.html.includes('整理完毕，继续前进'));
+				c.room.chooseEvent(choice);
+				const command = JSON.parse(c.sent[c.sent.length - 1].slice(c.sent[c.sent.length - 1].indexOf('{')));
+				assert.equal(command.action, 'event'); assert.equal(command.member, 'saved-reward'); assert.equal(command.value, choice);
+				const busy = c.room.renderEvent(data.run, true);
+				assert(busy.includes('value="fragments" disabled')); assert(busy.includes('value="supplies" disabled'));
+			}
+		}
+	});
 	it('welcomes a trained returning partner through the placement panel without calling it a new capture', () => {
 		const c = client(), data = adventure('settlement');
 		data.run.pendingCapture = {...data.run.team[0], id: 'returning'}; data.run.returningPartner = true;

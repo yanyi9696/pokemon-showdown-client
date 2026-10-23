@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-23",
+  "tool": "image_gen",
+  "layout": "Two equal square cells: neutral on left, approval on right. Transparent PNG.",
+  "note": "Jasmine and Gardenia were reinterpreted with original clothing and a painted style, as requested by the user.",
+  "images": [
+    {
+      "id": "jasmine",
+      "reference": "https://archives.bulbagarden.net/media/upload/b/b3/HeartGold_SoulSilver_Jasmine.png",
+      "characterNotes": "https://bulbapedia.bulbagarden.net/wiki/Jasmine",
+      "prompt": "Create an original character portrait sheet for a family-friendly independent fantasy creature-adventure game. An original gentle harbor caretaker and steel-creature trainer, a young adult woman with long warm ash-brown hair, upward side-tufts tied with small amber beads, a pale aqua high-neck blouse, white embroidered traveling jacket, orange bow and modest dark teal skirt. Quiet attentive eyes and a kind reserved demeanor. Hands gently clasped at her waist. The reference is inspiration for the general color palette and hair silhouette; reinterpret with the new clothing details specified here. Art style: delicate ink contours with softly painted watercolor-like shading, clean readable game portrait shapes, transparent background. A wide 2:1 canvas contains two EQUAL square cells, the same waist-up character pose in each cell: left thoughtful neutral face, right warm modest smile. Entire head, hair and both hands comfortably inside each square with at least 6 percent clear margins. No lettering or scene.",
+      "output": "jasmine.png",
+      "generatedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-57624af9-cd15-46e6-828a-6750ffd9cd5d.png",
+      "framingPrompt": "Edit this transparent two-cell game portrait sheet. Preserve the exact two illustrations, costumes, facial expressions, pose, linework and colors. Correct only framing: scale EACH portrait down to 82 percent inside its own equal square cell, centered horizontally and aligned to the bottom, leaving generous transparent space above the entire hair and hat. Restore any small hair or hat tip clipped at the top. Keep every finger inside its cell and a clean transparent central gutter. Maintain the 2:1 wide canvas and transparent background. Do not add any scenery, borders, lettering, new objects or new poses.",
+      "firstGeneratedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-f286ddf4-a9ff-4d38-9ed1-899f66ed2a6a.png"
+    },
+    {
+      "id": "winona",
+      "reference": "https://images.wikidexcdn.net/mwuploads/wikidex/thumb/e/e9/latest/20150111171130/Alana_ROZA.png/640px-Alana_ROZA.png",
+      "characterNotes": "https://bulbapedia.bulbagarden.net/wiki/Winona",
+      "prompt": "Create ONE game dialogue portrait expression-sheet asset. Reference image 1 defines the character's identity and exact costume; reference image 2 defines the existing game's clean cel-shaded line art and TWO-CELL layout, not its character. Use a transparent background. Wide landscape exactly 2:1 canvas, TWO EQUAL SQUARE CELLS in one horizontal row, same character twice, LEFT neutral conversation and RIGHT friendly approval. Each cell contains the same waist-up pose at the same scale and position, only the facial expression changes. Center each figure within its cell. Keep entire head, hat, hair, shoulders, arms and all visible fingers fully inside cell with clear transparent margins and a transparent central gutter; cut only at lower waist. Crisp confident anime outlines, restrained flat cel shadows, anatomically correct hands. No labels, no text, no frame, no scenery, no other characters. Winona / 娜琪 from Pokémon ORAS: lavender hair in long flowing ponytail, teal aerodynamic pilot helmet with yellow-green goggles on top and lavender wing ornaments, teal flight suit and long white gloves with swept wing cuffs. Poised elegant, one forearm slightly extended with open palm held near torso, not spread beyond cell. Left calmly focused, right restrained warm approving smile.",
+      "output": "winona.png",
+      "generatedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-548fd19b-fd13-41c0-85c4-90d93651ba12.png",
+      "framingPrompt": "Edit this transparent two-cell game portrait sheet. Preserve the exact two illustrations, costumes, facial expressions, pose, linework and colors. Correct only framing: scale EACH portrait down to 82 percent inside its own equal square cell, centered horizontally and aligned to the bottom, leaving generous transparent space above the entire hair and hat. Restore any small hair or hat tip clipped at the top. Keep every finger inside its cell and a clean transparent central gutter. Maintain the 2:1 wide canvas and transparent background. Do not add any scenery, borders, lettering, new objects or new poses.",
+      "firstGeneratedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-1a1f0d65-dc0e-4667-b3a3-87782b44d4a5.png"
+    },
+    {
+      "id": "gardenia",
+      "reference": "https://media.pokemoncentral.it/wiki/7/70/GardeniaDP.png",
+      "characterNotes": "https://bulbapedia.bulbagarden.net/wiki/Gardenia",
+      "prompt": "Create an original character portrait sheet for a family-friendly independent fantasy creature-adventure game. An original cheerful forest botanist and grass-creature trainer, a young adult woman with a chin-length auburn bob with a dark underlayer, moss-green short traveling cape fastened by a wooden leaf clasp, cream long-sleeve tunic, rust-orange belt pouch and forest-green trousers. Energetic, outdoorsy and welcoming. One hand lightly holding the cape clasp. The reference is inspiration for the general color palette and hair silhouette; reinterpret with the new clothing details specified here. Art style: delicate ink contours with softly painted watercolor-like shading, clean readable game portrait shapes, transparent background. A wide 2:1 canvas contains two EQUAL square cells, the same waist-up character pose in each cell: left thoughtful neutral face, right warm modest smile. Entire head, hair and both hands comfortably inside each square with at least 6 percent clear margins. No lettering or scene.",
+      "output": "gardenia.png",
+      "generatedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-3a2d8a5f-fc62-42e9-8ed4-2cf6284f3714.png",
+      "framingPrompt": "Edit this transparent two-cell game portrait sheet. Preserve the exact two illustrations, costumes, facial expressions, pose, linework and colors. Correct only framing: scale EACH portrait down to 82 percent inside its own equal square cell, centered horizontally and aligned to the bottom, leaving generous transparent space above the entire hair and hat. Restore any small hair or hat tip clipped at the top. Keep every finger inside its cell and a clean transparent central gutter. Maintain the 2:1 wide canvas and transparent background. Do not add any scenery, borders, lettering, new objects or new poses.",
+      "firstGeneratedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-b5eae408-6c8e-4097-9a60-c6cbeda385ae.png"
+    },
+    {
+      "id": "candice",
+      "reference": "https://archives.bulbagarden.net/media/upload/6/63/Candice_DP_Concept_Art.png",
+      "characterNotes": "https://bulbapedia.bulbagarden.net/wiki/Candice",
+      "prompt": "Create ONE game dialogue portrait expression-sheet asset. Reference image 1 defines the character's identity and exact costume; reference image 2 defines the existing game's clean cel-shaded line art and TWO-CELL layout, not its character. Use a transparent background. Wide landscape exactly 2:1 canvas, TWO EQUAL SQUARE CELLS in one horizontal row, same character twice, LEFT neutral conversation and RIGHT friendly approval. Each cell contains the same waist-up pose at the same scale and position, only the facial expression changes. Center each figure within its cell. Keep entire head, hat, hair, shoulders, arms and all visible fingers fully inside cell with clear transparent margins and a transparent central gutter; cut only at lower waist. Crisp confident anime outlines, restrained flat cel shadows, anatomically correct hands. No labels, no text, no frame, no scenery, no other characters. Candice / 小菘: dark twin braids with teal round hair clips, white collared blouse with big teal bow and folded sleeves, teal sweater tied at waist. Energetic friendly focused expression; one small encouraging fist held near shoulder and other hand at waist. Left determined attentive, right cheerful approving smile. Preserve original youthful proportions, ordinary game dialogue depiction.",
+      "output": "candice.png",
+      "generatedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-073fac31-c7d2-42f4-85bb-104ec2b4eb3c.png"
+    },
+    {
+      "id": "clair",
+      "reference": "https://archives.bulbagarden.net/media/upload/f/fe/HeartGold_SoulSilver_Clair.png",
+      "characterNotes": "https://bulbapedia.bulbagarden.net/wiki/Clair",
+      "prompt": "Create ONE game dialogue portrait expression-sheet asset. Reference image 1 defines the character's identity and exact costume; reference image 2 defines the existing game's clean cel-shaded line art and TWO-CELL layout, not its character. Use a transparent background. Wide landscape exactly 2:1 canvas, TWO EQUAL SQUARE CELLS in one horizontal row, same character twice, LEFT neutral conversation and RIGHT friendly approval. Each cell contains the same waist-up pose at the same scale and position, only the facial expression changes. Center each figure within its cell. Keep entire head, hat, hair, shoulders, arms and all visible fingers fully inside cell with clear transparent margins and a transparent central gutter; cut only at lower waist. Crisp confident anime outlines, restrained flat cel shadows, anatomically correct hands. No labels, no text, no frame, no scenery, no other characters. Clair / 小椿 from HeartGold SoulSilver: sky-blue high ponytail with gold tie and flared bangs, blue sleeveless battle jumpsuit, gold shoulder ornaments, black purple-lined cape, large pale blue orb at collar, blue gloves with black cuffs. Upright proud shoulders, arms loosely folded low, left stern composed, right small confident smile acknowledging a worthy trainer.",
+      "output": "clair.png",
+      "generatedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-e95e6ac9-b461-47e0-886d-1aa5334e3369.png"
+    },
+    {
+      "id": "clay",
+      "reference": "https://www.pngitem.com/pimgs/m/576-5768322_type-ground-pokemon-clay-gym-leader-hd-png.png",
+      "characterNotes": "https://bulbapedia.bulbagarden.net/wiki/Clay",
+      "prompt": "Create ONE game dialogue portrait expression-sheet asset. Reference image 1 defines the character's identity and exact costume; reference image 2 defines the existing game's clean cel-shaded line art and TWO-CELL layout, not its character. Use a transparent background. Wide landscape exactly 2:1 canvas, TWO EQUAL SQUARE CELLS in one horizontal row, same character twice, LEFT neutral conversation and RIGHT friendly approval. Each cell contains the same waist-up pose at the same scale and position, only the facial expression changes. Center each figure within its cell. Keep entire head, hat, hair, shoulders, arms and all visible fingers fully inside cell with clear transparent margins and a transparent central gutter; cut only at lower waist. Crisp confident anime outlines, restrained flat cel shadows, anatomically correct hands. No labels, no text, no frame, no scenery, no other characters. Clay / 菊老大: broad stocky middle-aged man with rectangular jaw and thick brown sideburns, white broad cowboy hat with teal-and-gold diamond emblem, russet shirt, teal necktie, brown fringed vest, gold wristwatch. One hand resting at belt, other adjusting hat brim, both fully inside. Left businesslike blunt, right pleased restrained grin, preserve stocky build.",
+      "output": "clay.png",
+      "generatedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-5d841ce8-7a32-4c40-ae6d-50199d86aa25.png"
+    },
+    {
+      "id": "nanu",
+      "reference": "https://archives.bulbagarden.net/media/upload/6/67/Sun_Moon_Nanu.png",
+      "characterNotes": "https://bulbapedia.bulbagarden.net/wiki/Nanu",
+      "prompt": "Draw a family-friendly Pokémon game dialogue portrait sheet of Nanu (默丹), using the attached official character reference for the hair, clothing and colors. Clean cel-shaded game illustration. Two equal square cells on one wide 2:1 transparent canvas, same modest waist-up pose: neutral expression on the left and a small friendly smile on the right. Keep the complete head and hands within each cell and leave generous transparent margins. Fully clothed, simple conversational pose, no text or background.",
+      "output": "nanu.png",
+      "generatedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-f561ee2a-a6ae-4b6f-a610-d032c9ced1a1.png"
+    },
+    {
+      "id": "valerie",
+      "reference": "https://archives.bulbagarden.net/media/upload/1/18/XY_Valerie.png",
+      "characterNotes": "https://bulbapedia.bulbagarden.net/wiki/Valerie",
+      "prompt": "Create ONE game dialogue portrait expression-sheet asset. Reference image 1 defines the character's identity and exact costume; reference image 2 defines the existing game's clean cel-shaded line art and TWO-CELL layout, not its character. Use a transparent background. Wide landscape exactly 2:1 canvas, TWO EQUAL SQUARE CELLS in one horizontal row, same character twice, LEFT neutral conversation and RIGHT friendly approval. Each cell contains the same waist-up pose at the same scale and position, only the facial expression changes. Center each figure within its cell. Keep entire head, hat, hair, shoulders, arms and all visible fingers fully inside cell with clear transparent margins and a transparent central gutter; cut only at lower waist. Crisp confident anime outlines, restrained flat cel shadows, anatomically correct hands. No labels, no text, no frame, no scenery, no other characters. Valerie / 玛绣: very long straight black hair, delicate dreamy face, large unusual dark eyes, lavender wing hair ornaments, pink-and-yellow butterfly-wing kimono sleeves with bold black spiral patterns, purple layered waist ruffles and yellow crisscross bodice. Both forearms folded gently inward near waist so patterned wide sleeves fit inside each cell. Left serene dreamy neutral, right subtle soft approving smile.",
+      "output": "valerie.png",
+      "generatedSource": "C:\\Users\\24481\\.codex\\generated_images\\01a0b785-11c1-7ff3-a08c-6acb9c47d84d\\exec-2dc878dd-8311-47ca-aae5-409f78141931.png"
+    }
+  ]
+}

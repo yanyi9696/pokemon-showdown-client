@@ -88,13 +88,13 @@ describe('Battle effectiveness and four speed benchmarks', () => {
 		const p = mon('Mew', {boosts: {}, isActive: () => true, side: {active: [], foe: {active: []}},
 			effectiveAbility: () => 'Punk Rock', rogueAbilityInfo: {abilities: [], active: true, moves: {
 				bugbuzz: {power: [{source: '林间大合唱', add: 10}], damage: ['【首领卡 · 同行之证】伤害 +55%']},
-				slash: {power: [{source: '登龙', factor: 1.3}], damage: []},
+				slash: {power: [{source: '登龙', factor: 1.2}], damage: []},
 			}}});
 		const server = {speciesForme: 'Mew', item: '', baseAbility: 'Punk Rock', stats: {atk: 10, def: 10, spa: 10, spd: 10, spe: 10}};
 		const buzz = ownTips.getMoveBasePower(dex.moves.get('bugbuzz'), 'Bug', new Value(ownBattle, p, server));
 		assert.equal(buzz.value, 130); assert.match(String(buzz), /林间大合唱/); assert.match(String(buzz), /伤害 \+55%/);
 		const slash = ownTips.getMoveBasePower(dex.moves.get('slash'), 'Normal', new Value(ownBattle, p, server));
-		assert.equal(slash.value, 91); assert.match(String(slash), /登龙/);
+		assert.equal(slash.value, 84); assert.match(String(slash), /登龙/);
 	});
 	it('shows boss card defenses on top of trained stats without applying permanent training twice', () => {
 		const p = mon('Mew', {boosts: {}, isActive: () => true, side: {active: []},

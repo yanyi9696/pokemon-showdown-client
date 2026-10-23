@@ -4,12 +4,15 @@
 	var globals = this;
 	var companionPortraits = {guzma: 'guzma-expressions', iris: 'iris-champion'};
 	var dialogueSheets = ['mela', 'atticus', 'ortega', 'eri', 'kieran', 'penny', 'carmine', 'n', 'lillie', 'korrina', 'nemona', 'blue', 'gladion', 'bede', 'silver', 'brock', 'maxie', 'marnie', 'kahili', 'liko', 'jenny', 'sabrina', 'flannery', 'roxie', 'viola', 'nessa', 'larry', 'lorelei', 'lance', 'lacey', 'steven',
-		'giovanni', 'archer', 'cyrus', 'ghetsis', 'piers', 'charm', 'clover', 'coin', 'giacomo', 'rocket', 'magma', 'galactic', 'plasma', 'flare', 'skull', 'yell', 'teamstar'];
+		'giovanni', 'archer', 'cyrus', 'ghetsis', 'piers', 'charm', 'clover', 'coin', 'giacomo', 'rocket', 'magma', 'galactic', 'plasma', 'flare', 'skull', 'yell', 'teamstar',
+		'jasmine', 'winona', 'gardenia', 'candice', 'clair', 'clay', 'nanu', 'valerie'];
 	var dialogueCompanions = ['bea', 'acerola', 'iono', 'rika', 'guzma', 'lysandre', 'iris', 'poppy', 'lana', 'olivia', 'grusha', 'canari', 'sada', 'turo'];
 	var singlePortraits = {mewtwo: 'sprites/rogue-dialogue/mewtwo-official.png', aqua: Dex.resolveAvatar('aquagrunt'),
 		archie: Dex.resolveAvatar('archie-gen6'), hexmaniac: Dex.resolveAvatar('hexmaniac-gen6'),
 		cheerleader: Dex.resolveAvatar('backersf'), snowboarder: Dex.resolveAvatar('skier')};
 	var portraitVersions = {
+		jasmine: '20261023', winona: '20261023', gardenia: '20261023', candice: '20261023',
+		clair: '20261023', clay: '20261023', nanu: '20261023', valerie: '20261023',
 		giacomo: '20261020-reference-v2', mela: '20261020-reference-v2', atticus: '20261020-reference-v2', ortega: '20261020-reference-v2', eri: '20261020-reference-v2',
 		kieran: '20261020-new', penny: '20261020-new', carmine: '20261020-new',
 		lacey: '20261019b', kahili: '20261019-blue', viola: '20261019-curls',
@@ -1845,7 +1848,7 @@
 				html += button('act', 'continue', '整理完毕，继续前进', busy || allFainted);
 				if (allFainted) html += '<p>请先在右侧背包中复活至少一名伙伴，再继续前进。</p>';
 				if (run.canEmergency) html += button('act', 'emergency', '花费 ' + run.emergencyCost + ' 金币急救全队', busy || run.money < run.emergencyCost);
-			} else if (event.stage === 'choice') {
+			} else if (event.stage === 'choice' || event.stage === 'fragments') {
 				html += '<div class="rogue-event-options' + (event.options.some(function (option) { return /^(member|swap|show):/.test(option.id); }) ? ' rogue-member-choices' : '') + '">' + event.options.map(function (option) {
 					var parts = option.id.split(':'), member = /^(member|swap|show)$/.test(parts[0]) && run.team.find(function (entry) {
 						return entry.id === decodeURIComponent(parts[1]);
