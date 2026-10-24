@@ -285,6 +285,11 @@ function toId() {
 				app.addPopupMessage("Usernames must contain at least one letter.");
 				return;
 			}
+			if (Storage.isLocalGuest()) {
+				// The local server still validates the name and refuses trusted accounts without authentication.
+				app.send('/trn ' + name);
+				return;
+			}
 
 			if (this.get('userid') !== userid) {
 				var self = this;
@@ -341,6 +346,14 @@ function toId() {
 				 * See `finishRename` above for a list of events this can emit.
 				 */
 				this.challstr = challstr;
+				if (Storage.isLocalGuest()) {
+					this.loaded = true;
+					this.set('registered', false);
+					var localName = Storage.prefs('localTestName');
+					if (typeof localName === 'string' && localName) this.rename(localName);
+					app.topbar.updateUserbar();
+					return;
+				}
 				var self = this;
 				$.post(this.getActionPHP(), {
 					act: 'upkeep',
@@ -369,15 +382,24 @@ function toId() {
 		 * Log out from the server (but remain connected as a guest).
 		 */
 		logout: function () {
-			$.post(this.getActionPHP(), {
-				act: 'logout',
-				userid: this.get('userid')
-			});
+			if (Storage.isLocalGuest()) {
+				Storage.prefs('localTestName', null);
+			} else {
+				$.post(this.getActionPHP(), {
+					act: 'logout',
+					userid: this.get('userid')
+				});
+			}
 			app.send('/logout');
 			app.trigger('init:socketclosed', "You have been logged out and disconnected.<br /><br />If you wanted to change your name while staying connected, use the 'Change Name' button or the '/nick' command.", false);
 			app.socket.close();
 		},
 		setPersistentName: function (name) {
+			if (Storage.isLocalGuest()) {
+				// Initial Guest updates and rejected renames must not erase the last accepted test nickname.
+				if (name) Storage.prefs('localTestName', name);
+				return;
+			}
 			if (location.host !== Config.routes.client) return;
 			$.cookie('showdown_username', (name !== undefined) ? name : this.get('name'), {
 				expires: 14
@@ -1134,7 +1156,7 @@ function toId() {
 				var named = !!+parts[2];
 
 				var userid = toUserid(parsed.name);
-				if (userid === this.user.get('userid') && parsed.name !== this.user.get('name')) {
+				if (!Storage.isLocalGuest() && userid === this.user.get('userid') && parsed.name !== this.user.get('name')) {
 					$.post(app.user.getActionPHP(), {
 						act: 'changeusername',
 						username: parsed.name

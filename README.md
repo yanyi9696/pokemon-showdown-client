@@ -116,6 +116,14 @@ node build-tools/showdex-assets.js
 
 ### Test keys
 
+For this project's Windows local development launcher, use
+`testclient.html?~~localhost:8000&localguest=1` from the local filesystem.
+The loopback server must enable `noguestsecurity`. Enter your existing local test
+nickname once; accepted nicknames are remembered for refreshes and reconnects.
+This mode does not load `testclient-key.js` or use official account credentials.
+It cannot authenticate trusted accounts and does not apply to hosted pages or
+remote servers. The normal authenticated test-client setup below is unchanged.
+
 For security reasons, browsers [don't let other websites control PS][5], so
 they can't screw with your account, but it does make it harder to log in on
 the test client.

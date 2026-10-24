@@ -35,6 +35,9 @@
 					}
 				}
 			})();
+			// Explicit opt-in for the Windows loopback development launcher. No account credentials.
+			Config.localGuest = location.protocol === 'file:' && !location.host &&
+				/^\?~~(?:localhost|127\.0\.0\.1):8000&localguest=1$/.test(location.search);
 		</script>
 		<!--[if lte IE 8]><script>
 			Config.oldie = true;
@@ -85,7 +88,11 @@
 		<script src="js/lib/jquery-cookie.js?"></script>
 		<script src="js/lib/autoresize.jquery.min.js?"></script>
 		<script src="js/battle-sound.js?"></script>
-		<script src="../config/testclient-key.js?"></script>
+		<script>
+			if (!Config.localGuest) {
+				document.write('<script src="../config/testclient-key.js?"><\/script>');
+			}
+		</script>
 		<script src="js/lib/html-css-sanitizer-minified.js?"></script>
 		<script src="js/lib/lodash.core.js?"></script>
 		<script src="js/lib/backbone.js?"></script>

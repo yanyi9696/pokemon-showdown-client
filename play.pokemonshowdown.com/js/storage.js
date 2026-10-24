@@ -509,9 +509,20 @@ Storage.postCrossOriginMessage = function (data) {
 
 // Test client
 
+Storage.isLocalGuest = function () {
+	var server = Config.server;
+	return !!(Config.testclient && Config.localGuest && location.protocol === 'file:' && !location.host &&
+		server && (server.host === 'localhost' || server.host === '127.0.0.1') && Number(server.port) === 8000);
+};
+
 Storage.initTestClient = function () {
 	Config.server = Config.server || Config.defaultserver;
 	Storage.whenTeamsLoaded.load();
+	if (Storage.isLocalGuest()) {
+		// Keep normal local teams/preferences, without loading a SID or installing the manual login proxy.
+		Storage.whenAppLoaded(function () { Storage.whenPrefsLoaded.load(); });
+		return;
+	}
 
 	var sid = null;
 	if (typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY === 'string') {
