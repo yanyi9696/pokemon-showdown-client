@@ -68,6 +68,42 @@ function state() {
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
 describe('Fantasy Rogue start menu and codex', () => {
+	it('selects numeric difficulty before departure and keeps spirit access separate for each tier', () => {
+		const c = client(), data = state();data.configured=true;
+		data.starters=[{id:'bulbasaur',species:'Bulbasaur',available:true}];
+		data.account.spiritUnlocked=true;
+		data.difficulties=[{id:0,name:'0 档',text:'基础',unlocked:true,spirit:true},
+			{id:1,name:'1 档',text:'进阶',rewards:'补给提前 4 层',unlocked:true,spirit:false},
+			{id:2,name:'2 档',text:'进阶',unlocked:false,spirit:false},
+			{id:'easy',name:'护符庇佑',text:'练习',unlocked:true,spirit:false}];
+		c.room.receiveState(data);assert(c.html.includes('name="useSpirit"'));assert(c.html.includes('value="2" disabled'));
+		c.room.useSpirit=true;c.room.changeDifficulty({currentTarget:{value:'1'}});
+		assert.equal(c.room.useSpirit,false);assert(!c.html.includes('name="useSpirit"'));assert(c.html.includes('补给提前 4 层'));
+		c.room.selectedStarters=['bulbasaur'];c.room.startAdventure();
+		const request=JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));assert.equal(request.difficulty,1);
+		assert.equal(request.useSpirit,false);
+	});
+	it('renders charm decisions and exact acquisition effects, and submits each distinct action', () => {
+		for(const [stage,method,action,value] of [['charm','chooseCharm','charm','accept'],['difficultyconfirm','confirmDifficulty','confirmdifficulty'],['difficultyconfirm','restartSetup','restartsetup']]) {
+			const c=client(),data=adventure('story');
+			data.story={stage,title:'准备出发',text:stage==='charm'?'它能帮你压一压对手的力量。':'本局个体值上限为 10。',
+				difficulty:'easy',difficultyLabel:'护符庇佑',charmText:'本局个体值上限为 10。'};
+			c.room.receiveState(data);assert(c.html.includes('old-charm.png'));assert(c.html.includes('个体值上限为 10'));
+			assert(!c.html.includes('name="storyNext"'));
+			c.room[method](value);const request=JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));assert.equal(request.action,action);
+			if(value)assert.equal(request.value,value);
+		}
+	});
+	it('shows the non-tradeable charm, exact current scales and advanced supplies in the bag', () => {
+		const c=client(),data=adventure('ready');data.run.difficulty='easy';data.run.difficultyLabel='护符庇佑';
+		data.run.difficultyScales={player:0.9,opponent:0.65};data.run.charm={name:'古代护符',description:'不获得局外点数。'};
+		c.room.receiveState(data);assert(c.html.includes('我方 90.0%'));assert(c.html.includes('对手 65.0%'));
+		assert(c.html.includes('本局护符 · 不占携带道具位'));assert(!c.html.includes('value="use:oldcharm"'));assert(!c.html.includes('value="sell:oldcharm"'));
+		const png=fs.readFileSync(require.resolve('../play.pokemonshowdown.com/sprites/fantasy-rogue/key-items/old-charm.png'));
+		assert.equal(png.readUInt32BE(16),32);assert.equal(png.readUInt32BE(20),32);
+		data.run.difficulty=5;data.run.difficultyLabel='5 档';delete data.run.charm;data.run.difficultyRewards='道馆首胜额外碎片 ×10';
+		c.room.receiveState(data);assert(c.html.includes('本档培养补给'));assert(c.html.includes('道馆首胜额外碎片 ×10'));
+	});
 	it('shows and submits the captured shiny starter choice without granting a locked option', () => {
 		for (const unlocked of [false, true]) {
 			const c = client(), data = state(); data.configured = true;
@@ -1086,6 +1122,9 @@ describe('Fantasy Rogue story and clear-card controls', () => {
 		for (const text of ['增幅前', '常驻最终值', '增加值', '增幅比例', '个人永久训练', '额外特性', '越打命越硬', '+100%', '<b>100</b>']) assert(room.html.includes(text), text);
 		delete card.snapshot.memberDetails;
 		room.render(); assert(room.html.includes('旧卡未记录增幅前数值'));
+		assert(room.html.includes('历史 0 档'));
+		card.snapshot.difficulty='easy';card.snapshot.difficultyLabel='护符庇佑';card.snapshot.difficultyScale=0.9;
+		room.render();assert(room.html.includes('护符庇佑'));assert(room.html.includes('old-charm.png'));
 	});
 	it('enters a duel only after an acknowledgement for the signed-in player', () => {
 		const c = client(), room = gallery(c); room.chosen = 'myarchive';

@@ -1145,3 +1145,9 @@
 .rogue-starter-generations > details > summary { cursor: pointer; font-weight: bold; }
 .rogue-biome-visitors { margin-top: 10px; }
 .rogue-biome-visitors summary { cursor: pointer; font-weight: 700; }
+
+.rogue-difficulty-choice { margin: 14px 0; padding: 16px; border: 1px solid #9aafbb; border-radius: 10px; }
+.rogue-difficulty-choice select { max-width: 100%; min-height: 40px; }
+.rogue-difficulty-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 8px; border: 1px solid #9aafbb; }
+.rogue-difficulty-choice p { line-height: 1.8; }
+.rogue-charm { grid-column: 1 / -1; }

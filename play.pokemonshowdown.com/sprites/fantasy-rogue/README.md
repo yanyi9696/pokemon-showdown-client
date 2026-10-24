@@ -1,5 +1,9 @@
 # 幻想杯肉鸽道具图来源
 
+## 2026-10-24 护符庇佑
+
+`key-items/old-charm.png` 使用 PokéSprite 的古代护符原始 32×32 PNG，固定来源提交 `2eef97a534b000ccc9310f9924a859167cc7028d`。版权归 Nintendo / Game Freak / Creatures；仅作为本局护符和通关卡标记，运行时读取本地文件。来源和 SHA-256 已加入 `form-and-tm-icons.json`。
+
 ## 2026-10-24 合众酋雷姆小图标修订
 
 采用用户本次确认的图一，经 [Sprite Fusion Pixel Snapper](https://www.spritefusion.com/pixel-snapper) 公开 WASM 模块，以 27 像素网格、40 色自动配色处理。仅裁去透明留白并置于 40×40 透明画布；不再对网格二次缩小、不套用旧版 17 色色板。界面同步使用 40 像素高的图标框，保留每一原生像素。处理参数及源图、模块和结果的 SHA-256 见 `kyurem-icon-processing-20261024.json`。已经确认的背面图保持原样。

@@ -185,6 +185,11 @@
       "file": "kyurem-original-icon.png",
       "source": "User-approved image, 2026-10-24; Sprite Fusion Pixel Snapper public WASM; native 40x40 grid, no downsampling",
       "sha256": "614119d1df6e4700ca6b2e4f9c63d3bc3afcc2c2f74b377b1c026c9b154bc3be"
+    },
+    {
+      "file": "key-items/old-charm.png",
+      "source": "https://raw.githubusercontent.com/msikma/pokesprite/2eef97a534b000ccc9310f9924a859167cc7028d/items/key-item/old-charm.png",
+      "sha256": "4cb534a8836612cfa3fadbbc001042eed451d97608d9a66eb9196373b2a7f647"
     }
   ]
 }
