@@ -21,7 +21,13 @@
 				document.head.appendChild(scriptEl);
 			}
 			Config.testclient = true;
+			var localHTTP = Config.localDevelopment === true && location.origin === 'http://localhost:8080';
 			(function() {
+				if (localHTTP) {
+					// The local HTTP runtime supplies the target; query strings cannot redirect this profile.
+					Config.server = {id: 'localhost', host: '127.0.0.1', port: 8000, httpport: 8000};
+					return;
+				}
 				if (location.search !== '') {
 					var m = /\?~~(([^:\/]*)(:[0-9]*)?)/.exec(location.search);
 					if (m) {
@@ -36,8 +42,8 @@
 				}
 			})();
 			// Explicit opt-in for the Windows loopback development launcher. No account credentials.
-			Config.localGuest = location.protocol === 'file:' && !location.host &&
-				/^\?~~(?:localhost|127\.0\.0\.1):8000&localguest=1$/.test(location.search);
+			Config.localGuest = localHTTP || (location.protocol === 'file:' && !location.host &&
+				/^\?~~(?:localhost|127\.0\.0\.1):8000&localguest=1$/.test(location.search));
 		</script>
 		<!--[if lte IE 8]><script>
 			Config.oldie = true;

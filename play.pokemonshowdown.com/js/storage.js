@@ -511,7 +511,9 @@ Storage.postCrossOriginMessage = function (data) {
 
 Storage.isLocalGuest = function () {
 	var server = Config.server;
-	return !!(Config.testclient && Config.localGuest && location.protocol === 'file:' && !location.host &&
+	var localOrigin = (location.protocol === 'file:' && !location.host) ||
+		(Config.localDevelopment === true && location.origin === 'http://localhost:8080');
+	return !!(Config.testclient && Config.localGuest && localOrigin &&
 		server && (server.host === 'localhost' || server.host === '127.0.0.1') && Number(server.port) === 8000);
 };
 

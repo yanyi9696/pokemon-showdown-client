@@ -117,12 +117,16 @@ node build-tools/showdex-assets.js
 ### Test keys
 
 For this project's Windows local development launcher, use
-`testclient.html?~~localhost:8000&localguest=1` from the local filesystem.
-The loopback server must enable `noguestsecurity`. Enter your existing local test
+`http://localhost:8080/testclient.html#fantasyrogue` after running the updater.
+The managed runtime serves the current built client on loopback port 8080 and
+the battle server on port 8000. It supplies its own public local configuration;
+query parameters and filesystem URL handling are not needed. Enter your existing local test
 nickname once; accepted nicknames are remembered for refreshes and reconnects.
 This mode does not load `testclient-key.js` or use official account credentials.
-It cannot authenticate trusted accounts and does not apply to hosted pages or
-remote servers. The normal authenticated test-client setup below is unchanged.
+It cannot authenticate trusted accounts and does not apply to remote servers or
+other hosted pages. The server-side development preset is required for local Rogue
+access; client flags alone do not bypass the production beta whitelist.
+The normal authenticated test-client setup below is unchanged.
 
 For security reasons, browsers [don't let other websites control PS][5], so
 they can't screw with your account, but it does make it harder to log in on
