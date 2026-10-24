@@ -77,30 +77,50 @@ describe('Fantasy Rogue start menu and codex', () => {
 			{id:2,name:'2 档',text:'进阶',unlocked:false,spirit:false},
 			{id:'easy',name:'护符庇佑',text:'练习',unlocked:true,spirit:false}];
 		c.room.receiveState(data);assert(c.html.includes('name="useSpirit"'));assert(c.html.includes('value="2" disabled'));
-		c.room.useSpirit=true;c.room.changeDifficulty({currentTarget:{value:'1'}});
+		assert(!c.room.html.includes('select name="difficulty"')); assert(c.panel.html.includes('select name="difficulty"'));
+		assert(c.panel.html.includes('value="default" selected')); assert(!c.panel.html.includes('value="easy"'));
+		c.room.useSpirit=true;c.panel.changeDifficulty({currentTarget:{value:'1'}});
+		assert.equal(JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length)).action,'setdifficulty');
+		assert.equal(JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length)).value,'1');
+		c.room.pending=null; data.account.preferredDifficulty=1; data.account.revision++; c.room.receiveState(data);
 		assert.equal(c.room.useSpirit,false);assert(!c.html.includes('name="useSpirit"'));assert(c.html.includes('补给提前 4 层'));
 		c.room.selectedStarters=['bulbasaur'];c.room.startAdventure();
-		const request=JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));assert.equal(request.difficulty,1);
+		const request=JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));assert.equal(request.difficulty,undefined);
 		assert.equal(request.useSpirit,false);
 	});
 	it('renders charm decisions and exact acquisition effects, and submits each distinct action', () => {
-		for(const [stage,method,action,value] of [['charm','chooseCharm','charm','accept'],['difficultyconfirm','confirmDifficulty','confirmdifficulty'],['difficultyconfirm','restartSetup','restartsetup']]) {
+		for(const value of ['accept','decline']) {
 			const c=client(),data=adventure('story');
-			data.story={stage,title:'准备出发',text:stage==='charm'?'它能帮你压一压对手的力量。':'本局个体值上限为 10。',
-				difficulty:'easy',difficultyLabel:'护符庇佑',charmText:'本局个体值上限为 10。'};
-			c.room.receiveState(data);assert(c.html.includes('old-charm.png'));assert(c.html.includes('个体值上限为 10'));
+			data.story={stage:'charm',title:'临行前的护符',text:'它能帮你压一压对手的力量。',charmText:'本局个体值上限为 10。'};
+			c.room.receiveState(data);assert(c.html.includes('压一压对手'));assert(!c.html.includes('个体值上限为 10'));
 			assert(!c.html.includes('name="storyNext"'));
-			c.room[method](value);const request=JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));assert.equal(request.action,action);
-			if(value)assert.equal(request.value,value);
+			c.room.chooseCharm(value);const request=JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));assert.equal(request.action,'charm');
+			assert.equal(request.value,value);
 		}
+	});
+	it('opens the charm receipt once, resumes it on reload and guards acknowledgement across account changes', () => {
+		const c=client(),data=adventure('story');data.run.id='charm-receipt';data.story={stage:'charmeffect',title:'护符庇佑'};
+		data.run.charm={name:'替身护符',description:'本局个体值上限为 10。'};
+		c.room.receiveState(data);assert.equal(c.app.lastPopup.type,c.RogueCharmPopup);
+		const popup=Object.create(c.RogueCharmPopup);popup.$el={addClass(){},html(value){popup.html=value;}};popup.close=()=>{};
+		popup.initialize({room:c.room});assert(popup.html.includes('tempting-charm.webp'));assert(popup.html.includes('个体值上限为 10'));
+		assert(!c.html.includes('准备好了，出发'));assert(!c.html.includes('返回配置'));assert(!c.html.includes('name="confirmDifficulty"'));
+		c.app.lastPopup=null;c.room.receiveState(data);assert.equal(c.app.lastPopup,null);
+		const reload=client();reload.room.receiveState(data);assert.equal(reload.app.lastPopup.type,reload.RogueCharmPopup);
+		c.setUser('anotheruser');popup.acceptCharm();assert.equal(c.sent.length,0);
+		c.setUser('rogueplayer');popup.acceptCharm();assert.equal(JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length)).action,'charmack');
 	});
 	it('shows the non-tradeable charm, exact current scales and advanced supplies in the bag', () => {
 		const c=client(),data=adventure('ready');data.run.difficulty='easy';data.run.difficultyLabel='护符庇佑';
-		data.run.difficultyScales={player:0.9,opponent:0.65};data.run.charm={name:'古代护符',description:'不获得局外点数。'};
-		c.room.receiveState(data);assert(c.html.includes('我方 90.0%'));assert(c.html.includes('对手 65.0%'));
+		data.run.difficultyScales={player:0.9,opponent:0.65};data.run.charm={name:'替身护符',description:'不获得局外点数。'};
+		data.run.difficultyTest=true;
+		c.room.receiveState(data);c.room.showCharm();assert.equal(c.app.lastPopup.type,c.RogueCharmPopup);
+		const popup=Object.create(c.RogueCharmPopup);popup.$el={addClass(){},html(value){popup.html=value;}};popup.initialize({room:c.room});
+		assert(popup.html.includes('我方 90.0%'));assert(popup.html.includes('对手 65.0%'));
+		assert(!c.html.includes('本地测试（不解锁档位）'));assert(!c.panel.html.includes('select name="difficulty"'));assert(c.panel.html.includes('本局已锁定'));
 		assert(c.html.includes('本局护符 · 不占携带道具位'));assert(!c.html.includes('value="use:oldcharm"'));assert(!c.html.includes('value="sell:oldcharm"'));
-		const png=fs.readFileSync(require.resolve('../play.pokemonshowdown.com/sprites/fantasy-rogue/key-items/old-charm.png'));
-		assert.equal(png.readUInt32BE(16),32);assert.equal(png.readUInt32BE(20),32);
+		const size=require('image-size')(require.resolve('../play.pokemonshowdown.com/sprites/fantasy-rogue/key-items/tempting-charm.webp'));
+		assert.equal(size.width,128);assert.equal(size.height,128);
 		data.run.difficulty=5;data.run.difficultyLabel='5 档';delete data.run.charm;data.run.difficultyRewards='道馆首胜额外碎片 ×10';
 		c.room.receiveState(data);assert(c.html.includes('本档培养补给'));assert(c.html.includes('道馆首胜额外碎片 ×10'));
 	});
@@ -134,15 +154,20 @@ describe('Fantasy Rogue start menu and codex', () => {
 		for (const name of ['球球海狮', '食梦梦', '咚咚鼠']) assert(c.html.includes('送给【' + name + '】'), name);
 		for (const name of ['Popplio', 'Munna', 'Dedenne']) assert(!c.html.includes(name), name);
 	});
-	it('starts with generation groups collapsed and filters starters by either type', () => {
+	it('starts flat, groups on demand and preserves filtering in both layouts', () => {
 		const c = client(), data = state(); data.configured = true;
 		data.starters = [{id: 'bulbasaur', species: 'Bulbasaur', gen: 1, types: ['Grass', 'Poison'], available: true},
 			{id: 'ferroseed', species: 'Ferroseed', gen: 5, types: ['Grass', 'Steel'], available: true}];
 		c.room.receiveState(data);
+		assert(!c.html.includes('<details data-rogue-key="starter-gen-1">'));
+		c.room.setStarterLayout('generations');
 		assert(c.html.includes('<details data-rogue-key="starter-gen-1">'));
 		assert(c.html.includes('<details data-rogue-key="starter-gen-5">'));
 		c.room.filterStarterType({currentTarget: {value: 'Steel'}});
 		assert(c.html.includes('value="ferroseed"')); assert(!c.html.includes('value="bulbasaur"'));
+		c.room.setStarterLayout('flat');assert(!c.html.includes('<details data-rogue-key="starter-gen-5">'));
+		assert(c.html.includes('value="ferroseed"'));assert(!c.html.includes('value="bulbasaur"'));
+		c.room.filterStarterType({currentTarget:{value:''}});assert(c.html.includes('value="bulbasaur"'));
 	});
 	it('groups all move origins in categories, then filters by type and shows priority', () => {
 		const c = client(true); c.room.receiveState(state()); c.room.openCodex('guide');
@@ -1124,7 +1149,7 @@ describe('Fantasy Rogue story and clear-card controls', () => {
 		room.render(); assert(room.html.includes('旧卡未记录增幅前数值'));
 		assert(room.html.includes('历史 0 档'));
 		card.snapshot.difficulty='easy';card.snapshot.difficultyLabel='护符庇佑';card.snapshot.difficultyScale=0.9;
-		room.render();assert(room.html.includes('护符庇佑'));assert(room.html.includes('old-charm.png'));
+		room.render();assert(room.html.includes('护符庇佑'));assert(room.html.includes('tempting-charm.webp'));
 	});
 	it('enters a duel only after an acknowledgement for the signed-in player', () => {
 		const c = client(), room = gallery(c); room.chosen = 'myarchive';

@@ -1141,13 +1141,40 @@
 .rogue-biome-icon.is-unknown .picon { filter: brightness(0); }
 .rogue-move-group { grid-column: 1 / -1; margin-bottom: 0; }
 .rogue-type-filter { display: block; margin: 12px 0; }
-.rogue-starter-generations > details { margin: 10px 0; padding: 10px; border: 1px solid #a3becf; border-radius: 8px; }
-.rogue-starter-generations > details > summary { cursor: pointer; font-weight: bold; }
+.rogue-starter-generations > details { margin: 6px 0; padding: 6px 10px; border: 1px solid #abc4d3; border-radius: 8px; background: #f6fbff75; }
+.rogue-starter-generations > details > summary { cursor: pointer; font-size: 14px; font-weight: 600; line-height: 1.5; color: #37566b; }
+.rogue-starter-generations > details[open] > summary { margin-bottom: 6px; }
+.rogue-starter-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 14px 0 12px; }
+.rogue-starter-toolbar .rogue-type-filter { margin: 0; font-size: 14px; color: #395b73; }
+.rogue-starter-toolbar select, .rogue-difficulty-settings select { padding: 7px 28px 7px 10px; border: 1px solid #9bb9ce; border-radius: 8px; color: #284d69; background: #f8fcff; font: inherit; min-height: 36px; }
+.rogue-layout-switch { display: inline-flex; padding: 3px; gap: 3px; border: 1px solid #a4bdce; border-radius: 10px; background: #e1edf5b8; box-shadow: inset 0 1px 3px #60809a13; }
+.rogue-layout-switch button { border: 1px solid transparent; border-radius: 7px; padding: 6px 10px; color: #4a6e88; background: transparent; font: inherit; font-size: 13px; cursor: pointer; }
+.rogue-layout-switch button[aria-pressed=true] { border-color: #a4bed1; background: linear-gradient(#fff, #eaf5fc); color: #1c4d72; box-shadow: 0 2px 4px #2549661c; }
+.rogue-layout-switch button:hover { background: #f4faff; }
+.rogue-layout-switch button:focus-visible, .rogue-difficulty-settings select:focus-visible, .rogue-starter-toolbar select:focus-visible { outline: 2px solid #4786b1; outline-offset: 2px; }
 .rogue-biome-visitors { margin-top: 10px; }
 .rogue-biome-visitors summary { cursor: pointer; font-weight: 700; }
 
-.rogue-difficulty-choice { margin: 14px 0; padding: 16px; border: 1px solid #9aafbb; border-radius: 10px; }
-.rogue-difficulty-choice select { max-width: 100%; min-height: 40px; }
+.rogue-difficulty-settings { margin: 18px 0; padding: 16px 18px; border: 1px solid #a2bed0; border-radius: 12px; background: linear-gradient(125deg, #f7fcfff2, #e1eef7c9); box-shadow: 0 3px 10px #31577913, inset 0 1px 0 #fff; color: #2e5069; }
+.rogue-difficulty-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.rogue-difficulty-heading > label, .rogue-difficulty-heading > .rogue-difficulty-badge { margin-left: auto; font-size: 14px; }
+.rogue-difficulty-heading h4 { margin: 3px 0 0; font-size: 17px; }
+.rogue-difficulty-heading .rogue-caption { font-size: 12px; letter-spacing: .05em; }
+.rogue-difficulty-symbol { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #b7cedd; border-radius: 11px; background: linear-gradient(#fff, #d9eaf5); color: #44789b; font-size: 21px; }
+.rogue-difficulty-settings p { margin: 12px 0 0; font-size: 14px; line-height: 1.65; }
+.rogue-difficulty-settings .rogue-caption { color: #597489; }
+.rogue-difficulty-settings details { margin-top: 12px; font-size: 13px; }
+.rogue-difficulty-settings summary { cursor: pointer; }
 .rogue-difficulty-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 8px; border: 1px solid #9aafbb; }
-.rogue-difficulty-choice p { line-height: 1.8; }
 .rogue-charm { grid-column: 1 / -1; }
+.rogue-charm-icon { width: 32px; height: 32px; object-fit: contain; vertical-align: middle; }
+.rogue-charm-offer { max-width: 640px; margin: 20px auto; padding: 24px; border: 1px solid #aec5cf; border-radius: 12px; background: linear-gradient(150deg, #fcfbf2ef, #e8f3faed); box-shadow: 0 5px 20px #2c485a12; }
+.rogue-charm-offer h3 { margin: 6px 0 18px; }
+.rogue-charm-offer p { line-height: 1.9; }
+.rogue-charm-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.rogue-charm-received { margin: 20px 0; color: #536d7d; }
+.ps-popup.rogue-charm-popup { max-height: calc(100vh - 36px); overflow-y: auto; }
+.rogue-charm-popup .rogue-charm-art { height: 120px; display: grid; place-items: center; }
+.rogue-charm-popup .rogue-charm-art img { width: 128px; height: 128px; }
+.rogue-charm-popup .rogue-charm-scales { margin: 0 0 18px; padding: 10px; border: 1px solid #b5ccda; border-radius: 8px; background: #f8fcff99; font-size: 13px; }
+.rogue-charm-scales span, .rogue-charm-scales strong { display: block; margin: 3px; }

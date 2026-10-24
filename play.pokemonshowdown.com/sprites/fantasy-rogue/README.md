@@ -2,6 +2,8 @@
 
 ## 2026-10-24 护符庇佑
 
+`key-items/tempting-charm.webp` 替换界面上的旧护符图：使用《宝可梦传说 阿尔宙斯》的替身护符１（Tempting Charm R）原始 128×128 图标，由 [FrontierNav 道具资料页](https://frontiernav.net/wiki/pokemon-legends-arceus/entities/tempting-charm-r) 的公开图片提供，未重绘或放大。下载地址为 `https://frontiernav.net/files/user-content/pokemon-legends-arceus/Bh_s4la3B-D4BgEOMjmtjg.10116.png?size=256`，服务实际返回 WebP，按真实格式保存。SHA-256：`4361841f59762c74e5e5093b8355ab38f3943a01a9d0252fbd05b2006965c906`。美术版权归 Nintendo / Game Freak / Creatures；运行时使用本地资源，护符规则以肉鸽内说明为准。
+
 `key-items/old-charm.png` 使用 PokéSprite 的古代护符原始 32×32 PNG，固定来源提交 `2eef97a534b000ccc9310f9924a859167cc7028d`。版权归 Nintendo / Game Freak / Creatures；仅作为本局护符和通关卡标记，运行时读取本地文件。来源和 SHA-256 已加入 `form-and-tm-icons.json`。
 
 ## 2026-10-24 合众酋雷姆小图标修订
