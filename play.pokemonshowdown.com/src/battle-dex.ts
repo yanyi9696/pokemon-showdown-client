@@ -1538,11 +1538,16 @@ export const Dex = new class implements ModdedDex {
 		return `background:transparent url(${itemSheetUrl}) no-repeat scroll -${left}px -${top}px`;
 	}
 
+	getTypeIconURL(type: string) {
+		// A literal ??? filename cannot be checked out on Windows. Ship the original badge under a portable name.
+		if (type === '???') return `${Dex.iconSheetPrefix || Dex.resourcePrefix}sprites/types/Unknown.png`;
+		return `${Dex.resourcePrefix}sprites/types/${encodeURIComponent(type)}.png`;
+	}
+
 	getTypeIcon(type: string | null, b?: boolean) { // b is just for utilichart.js
 		type = this.types.get(type).name;
 		if (!type) type = '???';
-		let sanitizedType = type.replace(/\?/g, '%3f');
-		return `<img src="${Dex.resourcePrefix}sprites/types/${sanitizedType}.png" alt="${type}" height="14" width="32" class="pixelated${b ? ' b' : ''}" />`;
+		return `<img src="${this.getTypeIconURL(type)}" alt="${type}" height="14" width="32" class="pixelated${b ? ' b' : ''}" />`;
 	}
 
 	getCategoryIcon(category: string | null) {

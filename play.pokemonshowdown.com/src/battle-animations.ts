@@ -1491,7 +1491,7 @@ export class BattleScene implements BattleSceneStub {
 
 	typeAnim(pokemon: Pokemon, types: string) {
 		const result = BattleLog.escapeHTML(types).split('/').map(type =>
-			`<img src="${Dex.resourcePrefix}sprites/types/${encodeURIComponent(type)}.png" alt="${type}" class="pixelated" />`
+			`<img src="${Dex.getTypeIconURL(type)}" alt="${type}" class="pixelated" />`
 		).join(' ');
 		this.resultAnim(pokemon, result, 'neutral');
 	}
@@ -3039,16 +3039,16 @@ export class PokemonSprite extends Sprite {
 			status += '<span class="frz">FST</span> '; 
 		}
 		if (pokemon.terastallized) {
-			status += `<img src="${Dex.resourcePrefix}sprites/types/${encodeURIComponent(pokemon.terastallized)}.png" alt="${pokemon.terastallized}" class="pixelated" /> `;
+			status += `<img src="${Dex.getTypeIconURL(pokemon.terastallized)}" alt="${pokemon.terastallized}" class="pixelated" /> `;
 		} else if (pokemon.volatiles.typechange && pokemon.volatiles.typechange[1]) {
 			const types = pokemon.volatiles.typechange[1].split('/');
 			for (const type of types) {
-				status += '<img src="' + Dex.resourcePrefix + 'sprites/types/' + encodeURIComponent(type) + '.png" alt="' + type + '" class="pixelated" /> ';
+				status += '<img src="' + Dex.getTypeIconURL(type) + '" alt="' + type + '" class="pixelated" /> ';
 			}
 		}
 		if (pokemon.volatiles.typeadd) {
 			const type = pokemon.volatiles.typeadd[1];
-			status += '+<img src="' + Dex.resourcePrefix + 'sprites/types/' + type + '.png" alt="' + type + '" class="pixelated" /> ';
+			status += '+<img src="' + Dex.getTypeIconURL(type) + '" alt="' + type + '" class="pixelated" /> ';
 		}
 		if (pokemon.volatiles.fantasystats) {
 			const stats = pokemon.volatiles.fantasystats[1];
