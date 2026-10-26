@@ -24,7 +24,7 @@ describe('Shared 2D party sprite preference', () => {
 		const root = path.join(webRoot, 'sprites/fantasy-rogue');
 		const manifest = JSON.parse(fs.readFileSync(path.join(root, 'form-and-tm-icons.json'), 'utf8'));
 		assert.equal(manifest.files.filter(entry => entry.file.startsWith('tm/')).length, 18);
-		assert.equal(manifest.files.filter(entry => entry.file.startsWith('key-items/')).length, 14);
+		assert.equal(manifest.files.filter(entry => entry.file.startsWith('key-items/')).length, 15);
 		for (const entry of manifest.files) {
 			const filename = path.join(root, entry.file), bytes = fs.readFileSync(filename);
 			assert.equal(createHash('sha256').update(bytes).digest('hex'), entry.sha256, entry.file);

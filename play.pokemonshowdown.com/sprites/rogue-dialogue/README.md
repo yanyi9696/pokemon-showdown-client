@@ -1,5 +1,13 @@
 # Rogue dialogue portraits
 
+## Lusamine, 2026-10-26
+
+`lusamine.png` is the generated transparent two-expression half-body sheet now used by dialogue, companion panels, affection scenes and the codex: neutral on the left, a gentle smile on the right. It matches the existing trainer portrait style and uses the same expression renderer. The exact prompt, reference roles and SHA-256 hash are in [lusamine-20261026.json](lusamine-20261026.json). This is project artwork generated with the built-in image_gen tool, not official artwork.
+
+The retained appearance reference `lusamine-official.png` is the unmodified transparent illustration from the [official TV Tokyo Pokémon Sun & Moon character page](https://www.tv-tokyo.co.jp/anime/pokemon_sunmoon/chara/chara01/), obtained from `https://www.tv-tokyo.co.jp/anime/pokemon_sunmoon/images/chara/chara23.png`. Tower dialogue uses her animated-series characterization as a caring mother and Aether Foundation representative.
+
+Her separate local battle avatar, `../trainers/lusamine.png`, is the unmodified 80-pixel sprite from `https://play.pokemonshowdown.com/sprites/trainers/lusamine.png`, downloaded on the same date.
+
 Generated with the built-in image_gen tool on 2026-10-19 for the requested dialogue presentation. Each transparent PNG has two equal square cells: neutral on the left, approval on the right. Grunts use an embarrassed acknowledgement instead of a smile. CSS selects the cell without copying or repainting image pixels.
 
 Companion trainers reuse their existing paired assets in `../rogue-companions/`. The registry in `client-fantasy-rogue.js` includes only available images. Brock now has a matching neutral/approval pair based on the two user-provided references. Kahili uses only the light-blue golf outfit for both expressions; the shared URL is versioned to replace cached older artwork. Maxie has a generated pair. Lacey was replaced using the user-provided reference; Marnie, Kahili and Liko were added for the new companion blessings.

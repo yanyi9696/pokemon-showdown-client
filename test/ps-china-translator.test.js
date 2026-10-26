@@ -7,6 +7,32 @@ const heading = 'Your team was rejected for the following reasons:';
 const chineseHeading = '您的队伍未通过校验，原因如下：';
 
 describe('Rogue vocabulary contexts', () => {
+	it('translates battle tooltip move bullets with Fantasy markers and PP counters', () => {
+		for (const marker of ['', '+', '🔄']) for (const suffix of ['', ' (15/25)']) {
+			assert.equal(client('• Powder Snow' + marker + suffix).paragraph.textContent, '• 细雪' + marker + suffix);
+			assert.equal(client('• Psychic' + marker + suffix).paragraph.textContent, '• 精神强念' + marker + suffix);
+		}
+		assert.equal(client('• Powder Snow🔄', 'en').paragraph.textContent, '• Powder Snow🔄');
+	});
+	it('translates collapse recovery sources and Pokemon names without undefined text', () => {
+		assert.equal(client('The opposing Ralts restored HP using its Rogue Emergency!').paragraph.textContent,
+			'对手的拉鲁拉丝用应急恢复回复了体力！');
+		assert.equal(client('Ralts · 应急恢复：本场恢复机会已使用。').paragraph.textContent,
+			'拉鲁拉丝 · 应急恢复：本场恢复机会已使用。');
+		for (const rule of ['力量增幅', '生机充盈', '绝境坚守', '净化屏障', '物价上涨', '药效衰减']) {
+			assert.equal(client('Wynaut · ' + rule + '：效果已触发。').paragraph.textContent,
+				'小果然 · ' + rule + '：效果已触发。');
+		}
+		assert.equal(client('Wynaut · 净化屏障：屏障已消耗。', 'en').paragraph.textContent,
+			'Wynaut · 净化屏障：屏障已消耗。');
+	});
+	it('translates Sniper battle progress and saved completion notices without changing nicknames or English mode', () => {
+		for (const suffix of ['的要害射击训练：15／15。', '完成要害射击训练，射击类招式可无视 20% 防御与特防。']) {
+			assert.equal(client('【老练狙神】Inteleon' + suffix).paragraph.textContent, '【老练狙神】千面避役' + suffix);
+			assert.equal(client('【老练狙神】小伙伴' + suffix).paragraph.textContent, '【老练狙神】小伙伴' + suffix);
+			assert.equal(client('【老练狙神】Inteleon' + suffix, 'en').paragraph.textContent, '【老练狙神】Inteleon' + suffix);
+		}
+	});
 	it('translates every mixed-language modifier independently, including more than four sources and suppression', () => {
 		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
 		const input = '132 (2× from Acrobatics + no item) (1.2× from 【登龙】)';

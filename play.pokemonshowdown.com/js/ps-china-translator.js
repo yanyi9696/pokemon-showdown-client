@@ -19,6 +19,8 @@
 // @updateURL https://update.greasyfork.org/scripts/432623/PSChina%20Server%20Translation%20SV.meta.js
 // ==/UserScript==
 var translations = {
+    "Rogue Emergency": "应急恢复",
+    "rogueemergency": "应急恢复",
     "Rogue Psychic Burst": "灵能百分百",
     "Rogue Evoboost": "九彩升华齐聚顶",
     "Rogue City Dark": "熙熙攘攘我们的城市",
@@ -5865,7 +5867,7 @@ var translations = {
     "More power with more uses of Stockpile.": "能量积蓄得越多，威力越大",
     "Lowers the PP of the target's last move by 4.": "使目标最后使用的招式PP减少4点",
     "Target's foes' moves are redirected to it this turn.": "所有对手使用的作用范围为单体选择的招式都会攻向使用者",
-    "Hurts foes on switch-in. Factors Rock weakness.": "伤害交换出的站在地面上的对手，计算岩石属性相克",
+    "Hurts foes on switch-in. Factors Rock weakness.": "在对手场地布下隐形岩，对换入者造成按岩石属性相性计算的伤害",
     "10% chance to raise the user's Defense by 1.": "10%令使用者的防御上升1级",
     "Lowers Speed of grounded foes by 1 on switch-in.": "降低对手替换出的站在地面上的宝可梦的速度1级",
     "Raises user's Defense, Sp. Def by 1. Max 3 uses.": "提升使用者的1级防御和特防最多累积3次",
@@ -8949,6 +8951,16 @@ function translateBattleModifiers(value) {
                 return '成功捕捉了' + trans_from_dict(species) + '！';
             });
         }
+        if (/^.+? · (数值膨胀|特性超模|威力过量|回复泛滥|增益无度|打击溢面|机制恼人|异常失控|环境独霸|沉没成本|力量增幅|生机充盈|绝境坚守|净化屏障|物价上涨|药效衰减|侵蚀抵抗|属性适应|异常护盾|附着防护|应急恢复|能力整备|要害防护|环境适应|追加效应|强化警戒)：/.test(originalStr)) {
+            return originalStr.replace(/^(.+?)( · )/, function (match, species, separator) {
+                return translateRogueName(species) + separator;
+            });
+        }
+        if (/^【老练狙神】.+?(的要害射击训练：|完成要害射击训练)/.test(originalStr)) {
+            return originalStr.replace(/^(【老练狙神】)(.+?)(的要害射击训练：|完成要害射击训练)/, function (match, blessing, species, suffix) {
+                return blessing + translateRogueName(species) + suffix;
+            });
+        }
         if (originalStr.match(regex_chn))
             return originalStr;
         // ==================== 宝石余威增幅汉化 ====================
@@ -9442,10 +9454,10 @@ function translateBattleModifiers(value) {
             return  "恭喜恭喜！" + RegExp.$1 + "！";
         }
         if (originalStr.match(regex_tohpberry)) {
-            return  "对手的" + trans_from_dict(RegExp.$1) + "用" + translations[RegExp.$2] + "回复了体力！";
+            return  "对手的" + trans_from_dict(RegExp.$1) + "用" + trans_from_dict(RegExp.$2) + "回复了体力！";
         }
         if (originalStr.match(regex_hpberry)) {
-            return  trans_from_dict(RegExp.$1) + "用" + translations[RegExp.$2] + "回复了体力！";
+            return  trans_from_dict(RegExp.$1) + "用" + trans_from_dict(RegExp.$2) + "回复了体力！";
         }
         if (originalStr.match(regex_toaquaring)) {
             return   "对手的" + trans_from_dict(RegExp.$1) + "通过水环回复了体力！";
@@ -12479,6 +12491,16 @@ function translateBattleModifiers(value) {
             let value = node.nodeValue;
             let trimmed = value.trim();
             if (!trimmed) return;
+            // Move-list bullets can contain Fantasy change markers and PP counters.
+            // Translate the actual move name before the generic sentence matcher.
+            const bulletMove = /^(•\s*)(.+?)(\s+\(\d[^)]*\))?$/.exec(trimmed);
+            if (bulletMove) {
+                const moveName = translateRogueName(bulletMove[2], 'move');
+                if (moveName !== bulletMove[2]) {
+                    node.nodeValue = value.replace(trimmed, bulletMove[1] + moveName + (bulletMove[3] || ''));
+                    return;
+                }
+            }
             const marked = /^(.*?)([+🔄])$/u.exec(trimmed);
             if (marked && translations[marked[1]]) {
                 node.nodeValue = value.replace(trimmed, translations[marked[1]] + marked[2]);

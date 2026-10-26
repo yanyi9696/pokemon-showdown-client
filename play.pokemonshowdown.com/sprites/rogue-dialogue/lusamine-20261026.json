@@ -1,0 +1,13 @@
+{
+  "tool": "built-in image_gen",
+  "created": "2026-10-26",
+  "output": "lusamine.png",
+  "layout": "two equal square cells; neutral left; smile right",
+  "referenceRoles": {
+    "lusamine-official.png": "anime character appearance",
+    "lillie.png": "project drawing style and paired crop",
+    "diantha.png": "project drawing style and paired crop"
+  },
+  "prompt": "Use case: stylized-concept. Create one finished transparent 2:1 dialogue sprite sheet for a Pokémon fan game, showing Lusamine twice in two equal square cells, neutral on the left and a warm gentle smile on the right. Reference 1 is the canonical anime Lusamine costume/hair/identity source; references 2 and 3 are the project's existing paired half-body trainer portraits and define the exact drawing style, crop and two-cell layout. This is a new illustration of adult Lusamine, a caring and composed mother as in the Sun & Moon anime. Preserve her recognizable very long pale blonde hair swept across one eye, green visible eye, white sleeveless tunic with pale yellow lower accent, black-and-yellow diamond chest motif and black high collar. Draw waist-up, clean dark anime outlines, refined flat cel shading with restrained highlights, same polish as the trainer portraits. Pose: relaxed three-quarter stance looking toward viewer, one hand resting lightly near the waist, shoulders calm. The two cells must depict the SAME camera, scale, pose, hands, silhouette and outfit; only facial expression changes. Left: serene attentive neutral mouth, eyes open. Right: kind soft clearly visible smile, eyes gently softened, caring rather than villainous. Keep the whole head and side hair inside each square with breathing room, both bodies cut at the identical waist baseline. No other people, no text, no labels, no borders, no scenery, no ground shadow, no checkerboard pattern. Genuine transparent alpha background outside the characters. Do not copy Lillie's or Diantha's identity or outfit. Output one two-expression sprite sheet at 2:1 aspect ratio.",
+  "sha256": "2D60A22B17636CDF5D0E6EA35D754B15DC80108DC43ECBFDCBA7CFCB47062366"
+}

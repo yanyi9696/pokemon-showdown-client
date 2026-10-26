@@ -21,6 +21,7 @@ import { BattleNatures } from './battle-dex-data';
 import { BattleTooltips } from './battle-tooltips';
 import { BattleTextParser, type Args, type KWArgs } from './battle-text-parser';
 
+const ROGUE_BLOOD_FILTER = 'drop-shadow(0 0 3px rgba(5,13,35,.8)) drop-shadow(0 0 9px rgba(19,44,94,.62))';
 const ROGUE_GHIDORAH_FILTER = 'sepia(1) saturate(3.5) brightness(1.2) drop-shadow(0 0 7px #ffd24a)';
 
 /*
@@ -1885,6 +1886,7 @@ export class PokemonSprite extends Sprite {
 		rogueslp: ['睡眠', 'bad'],
 		roguespindasleep: ['濒死睡眠', 'bad'],
 		rogueghidorah: ['王者基多拉', 'good'],
+		roguebloodrobe: ['神衣：鲜血', 'good'],
 		roguepsn: ['中毒', 'bad'],
 		roguetox: ['剧毒', 'bad'],
 		roguefst: ['冻伤', 'bad'],
@@ -2320,9 +2322,8 @@ export class PokemonSprite extends Sprite {
 		this.recalculatePos(pokemon.slot);
 		// =========== 注入：为幻想大岩蛇添加蓝色滤镜 ===========
 		// 这里的 getBaseSpecies() 修复了之前报错的问题
-		if (pokemon.volatiles.rogueghidorah) {
-			this.$el.css({filter: ROGUE_GHIDORAH_FILTER, '-webkit-filter': ROGUE_GHIDORAH_FILTER});
-		} else if (pokemon.speciesForme === 'Onix-Fantasy' || pokemon.getBaseSpecies().baseSpecies === 'Onix-Fantasy') {
+		const aura = [pokemon.volatiles.rogueghidorah ? ROGUE_GHIDORAH_FILTER : '', pokemon.volatiles.roguebloodrobe ? ROGUE_BLOOD_FILTER : ''].filter(Boolean).join(' ');
+		if (aura) this.$el.css({filter: aura, '-webkit-filter': aura}); else if (pokemon.speciesForme === 'Onix-Fantasy' || pokemon.getBaseSpecies().baseSpecies === 'Onix-Fantasy') {
 			this.$el.css({
 				// sepia(1) 使灰色变黄，hue-rotate(190deg) 将黄转蓝，saturate(5) 加深蓝色，brightness(1.1) 保持亮度
 				'filter': 'sepia(1) hue-rotate(190deg) saturate(5) brightness(1.1) drop-shadow(0 0 5px rgba(0,191,255,0.8))',
@@ -2814,8 +2815,9 @@ export class PokemonSprite extends Sprite {
 		}
 	}
 	addEffect(id: ID, instant?: boolean) {
-		if (id === 'rogueghidorah') {
-			this.$el?.css({filter: ROGUE_GHIDORAH_FILTER, '-webkit-filter': ROGUE_GHIDORAH_FILTER});
+		if (id === 'rogueghidorah' || id === 'roguebloodrobe') {
+			const aura = [id === 'rogueghidorah' || this.effects.rogueghidorah ? ROGUE_GHIDORAH_FILTER : '', id === 'roguebloodrobe' || this.effects.roguebloodrobe ? ROGUE_BLOOD_FILTER : ''].filter(Boolean).join(' ');
+			this.$el?.css({filter: aura, '-webkit-filter': aura});
 			this.effects[id] = [];
 			return;
 		}
@@ -2882,7 +2884,11 @@ export class PokemonSprite extends Sprite {
 	}
 
 	removeEffect(id: ID, instant?: boolean) {
-		if (id === 'rogueghidorah') this.$el?.css({filter: '', '-webkit-filter': ''});
+		if (id === 'rogueghidorah' || id === 'roguebloodrobe') {
+			const other = id === 'rogueghidorah' ? 'roguebloodrobe' : 'rogueghidorah';
+			const aura = this.effects[other] ? (other === 'roguebloodrobe' ? ROGUE_BLOOD_FILTER : ROGUE_GHIDORAH_FILTER) : '';
+			this.$el?.css({filter: aura, '-webkit-filter': aura});
+		}
 		if (id === 'formechange') this.removeTransform();
 		if (id === 'substitute') this.animSubFade(instant);
 		if (this.effects[id]) {

@@ -1679,6 +1679,7 @@ function toId() {
 				'fantasyrogue': window.FantasyRogueRoom,
 				'fantasyrogueparty': window.FantasyRoguePartyRoom,
 				'fantasyroguegallery': window.FantasyRogueGalleryRoom,
+				'fantasyroguehistory': window.FantasyRogueHistoryRoom,
 				'rooms': RoomsRoom,
 				'battles': BattlesRoom,
 				'ladder': LadderRoom,
