@@ -9,7 +9,7 @@ function client(startScreen = false, localized = false, runtime = {}) {
 	const context = {
 		Room: {extend: room => room, prototype: {dispatchClickButton(e) {
 			this[e.currentTarget.name](e.currentTarget.value, e.currentTarget);
-		}}}, Popup: {extend: popup => popup},
+		}}}, Popup: {extend: popup => popup, prototype: {remove() { this.removed = true; }}},
 		BattleLog: {escapeHTML: text => String(text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')},
 		Dex: {
 			resolveAvatar: id => 'sprites/trainers/' + id + '.png',
@@ -25,10 +25,17 @@ function client(startScreen = false, localized = false, runtime = {}) {
 		},
 		translations: {'Deals damage.': '攻击目标造成伤害', 'Ability effect.': '特性效果', 'Held item effect.': '携带道具效果'},
 		app: Object.assign(new EventEmitter(), {
-			rooms: {},
+			rooms: {}, popups: [],
 			user: Object.assign(new EventEmitter(), {get: () => userid}),
 			socket: {readyState: 1}, send: message => sent.push(message), joinRoom: id => joined.push(id), updateLayout() {},
-			addPopup: (type, data) => { context.app.lastPopup = {type, data}; },
+			addPopup: (type, data) => {
+				context.app.lastPopup = {type, data};
+				if (type !== context.RogueLearnMovePopup) return;
+				const popup = Object.create(type);
+				popup.$el = {addClass() {}, html: html => { popup.html = html; }};
+				popup.initialize(data); context.app.popups.push(popup);
+				return popup;
+			},
 		}),
 		setTimeout: () => 1, clearTimeout: () => {}, setInterval: () => 1, clearInterval: () => {},
 		...runtime,
@@ -60,13 +67,40 @@ function client(startScreen = false, localized = false, runtime = {}) {
 	// Existing flow tests exercise a player who has already pressed the start button.
 	if (!startScreen) room.screen = 'game';
 	room.preparePanel();
-	return {...context, room, panel, get html() { return room.html + panel.html; }, sent, joined, setUser: id => { userid = id; }};
+	return {...context, room, panel, get html() { return room.html + panel.html + (room.pendingMovePopup?.html || ''); }, sent, joined, setUser: id => { userid = id; }};
 }
 function state() {
 	return {userid: 'rogueplayer', protocolVersion: 1, enabled: true, configured: false,
 		message: '正式队伍与数值等待配置', starters: [], items: [], run: null,
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
+
+describe('Fantasy Rogue current partner move types and localized eggs', () => {
+	it('updates Hidden Power from the actual IVs in equipped, available and learning moves', () => {
+		const c = client(false, true), data = adventure('ready'), mon = data.run.team[0];
+		const original = c.Dex.moves.get;
+		c.Dex.moves.get = id => ({...original(id), type: id === 'hiddenpowerice' ? 'Ice' : 'Normal'});
+		mon.set.moves = ['hiddenpower'];
+		mon.pp = [{id: 'hiddenpower', pp: 15, maxpp: 15}]; mon.set.ivs = {hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31};
+		mon.moveMemory = mon.pp;
+		data.run.pendingMoves = [{member: mon.id, move: 'hiddenpower'}];
+		c.room.receiveState(data); c.room.editSection('moves:0');
+		assert(c.panel.html.includes('恶 · 威力')); assert(c.panel.html.includes('alt="Dark"'));
+		assert(c.room.pendingMovePopup.html.includes('alt="Dark"'));
+		mon.set.ivs = {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}; c.room.receiveState(data);
+		assert(c.panel.html.includes('格斗 · 威力')); assert(c.room.pendingMovePopup.html.includes('alt="Fighting"'));
+		mon.set.hpType = 'Water'; c.room.receiveState(data); assert(c.panel.html.includes('水 · 威力'));
+		delete mon.set.hpType; mon.set.moves = ['hiddenpowerice']; c.room.receiveState(data);
+		assert(c.panel.html.includes('冰 · 威力'));
+	});
+	it('keeps Egg as the sprite identifier but presents 宝可梦蛋 to the player', () => {
+		const c = client(), data = adventure('ready');
+		data.run.team.push({...data.run.team[0], id: 'egg', egg: {hatch: 20}, remainingFloors: 5, set: {species: 'Egg', moves: [], level: 1}});
+		c.room.receiveState(data); c.room.selectMember('egg');
+		assert(c.panel.html.includes('宝可梦蛋')); assert(!c.panel.html.includes('>Egg<'));
+		assert(c.panel.html.includes('再前进 <b>5</b> 层'));
+	});
+});
 
 describe('Fantasy Rogue collapse echo panel', () => {
 	it('hides locked progression, renders exact prices and disables purchases during an adventure', () => {
@@ -1067,7 +1101,8 @@ describe('Fantasy Rogue start menu and codex', () => {
 		data.items.push({id: 'roguecephalosporin', icon: 'fullheal', name: '头孢', kind: 'tonic'});
 		data.items.forEach(item => { data.run.bag[item.id] = 1; }); c.room.receiveState(data);
 		const html = c.room.renderBag(data.run, false);
-		assert.equal((html.match(/<svg class="rogue-loot-icon"/g) || []).length, 5);
+		assert.equal((html.match(/<svg class="rogue-loot-icon"/g) || []).length, 3);
+		for (const id of ['bottlecap', 'goldbottlecap']) assert(html.includes('crowns/' + id + '.png'));
 		assert(html.includes('rogue-item-fullheal')); assert(!html.includes('class="itemicon"'));
 	});
 	it('uses compact readable badges for every primary and stacked status without duplicating them', () => {
@@ -2489,35 +2524,34 @@ describe('Fantasy Rogue client', () => {
 		assert.equal(request.action, 'learn'); assert.equal(request.member, 'run:floor:catch');
 		assert.equal(request.value, '0'); assert(!('team' in request));
 	});
-	it('scrolls to each newly pending move once and waits until the learning panel is visible', () => {
-		let reduced = false;
-		const c = client(false, false, {matchMedia: () => ({matches: reduced})}), data = adventure('ready'), calls = [];
-		data.run.id = 'scroll-test';
-		const root = {scrollTop: 650, clientHeight: 500, getBoundingClientRect: () => ({top: 10}),
-			querySelector: () => c.room.html.includes('class="rogue-pending-move"') ? {
-				getBoundingClientRect: () => ({top: 210 - root.scrollTop}),
-			} : null,
-			scrollTo: options => {calls.push(options); root.scrollTop = options.top;}};
-		c.room.$el[0] = root;
-		const pending = move => [{member: data.run.team[0].id, move}];
-		data.run.pendingMoves = pending('vinewhip'); c.room.receiveState(data);
-		assert.equal(calls.length, 1); assert.equal(calls[0].top, 0); assert.equal(calls[0].behavior, 'instant');
-		assert(c.room.html.includes('学习到了新的招式，请先确认'));
-		assert(c.room.html.indexOf('class="rogue-pending-move"') < c.room.html.indexOf('<h2>幻想杯肉鸽'));
-		c.room.render(); c.room.receiveState(data); assert.equal(calls.length, 1);
-		data.run.pendingMoves = pending('growl'); c.room.receiveState(data); assert.equal(calls.length, 2);
-		data.run.pendingMoves = []; c.room.receiveState(data);
-		reduced = true; data.run.pendingMoves = pending('growl'); c.room.receiveState(data);
-		assert.equal(calls.length, 3); assert.equal(calls[2].top, 0); assert.equal(calls[2].behavior, 'instant');
-		c.room.screen = 'home'; data.run.pendingMoves = pending('tackle'); c.room.receiveState(data);
-		assert.equal(calls.length, 3);
-		c.room.screen = 'game'; root.clientHeight = 0; c.room.render(); assert.equal(calls.length, 3);
-		root.clientHeight = 500; c.room.revealPendingMove(); assert.equal(calls.length, 4);
-		data.run.pendingMoves = pending('cut'); root.clientHeight = 0;
-		c.app.curRoom = c.panel; let focused;
-		c.app.focusRoom = id => {focused = id; c.app.curRoom = c.room; root.clientHeight = 500; c.room.revealPendingMove();};
+	it('queues a separate move modal, preserves both panes, and closes only after acknowledgement', () => {
+		const c = client(), data = adventure('ready'); data.run.id = 'modal-test';
+		c.room.receiveState(data); c.room.scroll = 650;
+		let rightScroll = 480;
+		c.panel.$el.scrollTop = value => { if (value !== undefined) rightScroll = value; return rightScroll; };
+		data.run.pendingMoves = [{member: data.run.team[0].id, move: 'vinewhip'}];
 		c.room.receiveState(data);
-		assert.equal(focused, 'fantasyrogue'); assert.equal(calls.length, 5);
+		const first = c.room.pendingMovePopup;
+		assert(first && first.html.includes('学习到了新的招式，请先确认'));
+		assert(!c.room.html.includes('class="rogue-pending-move"'));
+		assert.equal(c.room.scroll, 650); assert.equal(rightScroll, 480);
+		c.room.render(); assert.equal(c.room.pendingMovePopup, first); assert.equal(c.app.popups.length, 1);
+		first.learnMove('skip'); assert.equal(c.room.pendingMovePopup, first);
+		assert(first.html.includes(' disabled'));
+		c.room.receiveAction({userid: data.userid, id: c.room.pending.id, ok: false, message: '请重试', state: data});
+		assert.equal(c.room.pendingMovePopup, first); assert(first.html.includes('请重试'));
+		data.run.pendingMoves = [{member: data.run.team[0].id, move: 'growl'}]; c.room.receiveState(data);
+		assert(first.removed); assert.notEqual(c.room.pendingMovePopup, first);
+		const requests = c.sent.length; first.learnMove('0'); assert.equal(c.sent.length, requests, 'stale modal cannot act');
+		data.run.pendingMoves = []; c.room.receiveState(data);
+		assert(!c.room.pendingMovePopup); assert.equal(c.app.popups.length, 0);
+		const evolution = {type: 'modal'}; c.app.popups.push(evolution);
+		data.run.pendingMoves = [{member: data.run.team[0].id, move: 'tackle'}]; c.room.receiveState(data);
+		assert(!c.room.pendingMovePopup, 'wait for evolution animation');
+		c.app.popups = []; c.room.revealPendingMove(); assert(c.room.pendingMovePopup);
+		c.room.screen = 'home'; c.room.render(); assert(!c.room.pendingMovePopup);
+		c.room.screen = 'game'; c.room.render(); assert(c.room.pendingMovePopup);
+		c.setUser('someoneelse'); c.room.identityChanged(); assert(!c.room.pendingMovePopup);
 	});
 	it('preserves the full colon-containing member id when replacing a captured party member', () => {
 		const c = client(); c.room.receiveState(state());
@@ -2554,7 +2588,8 @@ describe('Fantasy Rogue client', () => {
 		for (const text of ['alt="Grass"', 'alt="Physical"', '威力', '命中率', '100%', 'PP', '攻击目标造成伤害']) {
 			assert(c.html.includes(text), text);
 		}
-		assert(c.html.indexOf('学习招式') < c.html.indexOf('局外能力加成'));
+		assert(c.room.pendingMovePopup.html.includes('学习招式'));
+		assert(!c.room.html.includes('学习招式'));
 		assert(c.html.includes('<small>PP</small>25'));
 	});
 	it('offers only learned moves, displays hidden ability labels and keeps EVs locked without an event', () => {

@@ -563,6 +563,9 @@
 .fantasyrogue .rogue-item-zinc { width: 16px; height: 24px; background-position: -181px -170px; }
 .fantasyrogue .rogue-item-carbos { width: 16px; height: 24px; background-position: -61px -169px; }
 .fantasyrogue .rogue-loot-icon { width: 24px; height: 24px; vertical-align: middle; image-rendering: pixelated; object-fit: contain; flex-shrink: 0; }
+.fantasyrogue .rogue-candy-icon { width: 32px; height: 32px; }
+.ps-popup.rogue-learn-move-popup { width: 780px; max-width: calc(100vw - 48px); max-height: calc(100vh - 72px); overflow-y: auto; }
+.rogue-learn-move-popup .rogue-pending-move { margin: 0; }
 .fantasyrogue .rogue-treasures { grid-column: 1 / -1; border-top: 1px solid #bdcedc; padding-top: 5px; }
 .fantasyrogue .rogue-treasures h4 { margin: 3px 0 6px; }
 .fantasyrogue .rogue-treasures h4 small { color: #5a6e80; font-weight: normal; margin-left: 8px; }

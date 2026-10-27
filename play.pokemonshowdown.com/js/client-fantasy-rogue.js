@@ -321,6 +321,7 @@
 		return adjustmentNameCache.names[String(value).replace(/[+🔄]+$/u, '')] || value;
 	}
 	function localName(name, kind) {
+		if (/^egg$/i.test(name)) return '宝可梦蛋';
 		name = adjustedRogueName(name);
 		var statuses = {par: '麻痹', brn: '烧伤', psn: '中毒', tox: '剧毒', slp: '睡眠', frz: '冰冻', fst: '冻伤', frostbite: '冻伤'};
 		if (statuses[name]) return statuses[name];
@@ -437,15 +438,14 @@
 			return '<img class="rogue-loot-icon pixelated" src="sprites/fantasy-rogue/tm/' + (typeNames[type] ? type.toLowerCase() : 'normal') + '.png" alt="' + escape(typeNames[type] || '一般') + '属性招式学习机" /> ';
 		}
 		var id = item.icon || item.id;
+		if (id === 'bottlecap' || id === 'goldbottlecap') return '<img class="rogue-loot-icon pixelated" src="sprites/fantasy-rogue/crowns/' + id + '.png" alt="' + escape(item.name) + '" /> ';
 		if (/^expcandy(xs|s|m|l|xl)$/.test(id) || id === 'rarecandy') {
-			return '<img class="rogue-loot-icon pixelated" src="sprites/fantasy-rogue/candy/' + id + '.png" alt="' + escape(item.name || '') + '" /> ';
+			return '<img class="rogue-loot-icon rogue-candy-icon pixelated" src="sprites/fantasy-rogue/candy/' + id + '.png" alt="' + escape(item.name || '') + '" /> ';
 		}
 		var special = {
+			maxrevive: '<path d="m16 2 4 9 10 5-10 4-4 10-5-10-9-4 9-5Z" fill="#edb83c"/><path d="m16 8 3 8-3 8-3-8Z" fill="#fff4aa"/>',
 			abilitycapsule: '<g transform="rotate(-35 16 16)"><rect x="5" y="9" width="22" height="14" rx="7" fill="#63b1ec"/><path d="M16 9h4a7 7 0 0 1 0 14h-4Z" fill="#f1b4cf"/><path d="M9 12h4" stroke="white" stroke-width="2"/></g>',
 			abilitypatch: '<path d="m7 3 19 4-1 21-21-4Z" fill="#e7ecfb"/><path d="m9 7 13 2-1 14-13-2Z" fill="#eec24e"/><path d="m12 10 7 1-1 8-7-1Z" fill="#fff5c5"/>',
-			bottlecap: '<path d="m16 2 4 3 5 1 1 5 4 5-4 4-1 5-5 1-4 4-4-4-5-1-1-5-4-4 4-5 1-5 5-1Z" fill="#c0d0df"/><circle cx="16" cy="16" r="8" fill="#edf5ff"/>',
-			goldbottlecap: '<path d="m16 2 4 3 5 1 1 5 4 5-4 4-1 5-5 1-4 4-4-4-5-1-1-5-4-4 4-5 1-5 5-1Z" fill="#e0a12e"/><circle cx="16" cy="16" r="8" fill="#ffe38b"/>',
-			maxrevive: '<path d="m16 2 4 9 10 5-10 4-4 10-5-10-9-4 9-5Z" fill="#edb83c"/><path d="m16 8 3 8-3 8-3-8Z" fill="#fff4aa"/>'
 		};
 		if (special[id]) return '<svg class="rogue-loot-icon" viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="#506781" stroke-width="1.2">' + special[id] + '</svg> ';
 		if (economyIcons.indexOf(id) >= 0) return '<img class="rogue-loot-icon" src="sprites/fantasy-rogue/' + id + '.png" alt="" /> ';
@@ -491,8 +491,18 @@
 			return Dex.getTypeIcon ? Dex.getTypeIcon(type) : escape(localName(type));
 		}).join(' ');
 	}
-	function moveRow(id, pp) {
+	function memberMove(id, mon) {
 		var move = dex().moves.get(id);
+		if (idOf(id).indexOf('hiddenpower') !== 0 || !mon) return move;
+		var ivs = mon.set.ivs || {}, bits = 0;
+		['hp', 'atk', 'def', 'spe', 'spa', 'spd'].forEach(function (stat, i) {
+			bits += ((ivs[stat] === undefined ? 31 : ivs[stat]) % 2) * Math.pow(2, i);
+		});
+		var types = ['Fighting', 'Flying', 'Poison', 'Ground', 'Rock', 'Bug', 'Ghost', 'Steel', 'Fire', 'Water', 'Grass', 'Electric', 'Psychic', 'Ice', 'Dragon', 'Dark'];
+		return Object.assign({}, move, {type: mon.set.hpType || (move.type !== 'Normal' ? move.type : types[Math.floor(bits * 15 / 63)])});
+	}
+	function moveRow(id, pp, mon) {
+		var move = memberMove(id, mon);
 		var maximum = move.pp;
 		return '<div class="rogue-move-row"><strong class="rogue-move-name">' + escape(localName(move.name, 'move')) + '</strong>' +
 			'<span class="rogue-move-icons">' + typeIcons([move.type || 'Normal']) + ' ' +
@@ -744,6 +754,7 @@
 			return roots.find(selector);
 		},
 		leave: function () {
+			this.screen = 'home'; this.revealPendingMove();
 			clearTimeout(this.timer); clearTimeout(this.skiTimer); this.skiPending = null; this.skiQueue = []; this.stopListening();
 			clearInterval(this.activityClock); this.activityClock = null;
 			if (app.rooms.fantasyrogueparty) app.removeRoom('fantasyrogueparty');
@@ -2138,9 +2149,9 @@
 				var learner = run.team.filter(function (mon) { return mon.id === pending.member; })[0];
 				if (learner) {
 					html += '<section class="rogue-pending-move" role="region" aria-label="学习到了新的招式需要确认"><h3>学习招式 · ' + escape(localName(learner.set.species)) + '</h3><p><strong>学习到了新的招式，请先确认是否装备。</strong></p>' +
-						'<div class="rogue-new-move">' + moveRow(pending.move) + '</div><p>选择替换位置。替换下来的招式会保留在可更换列表中。</p>';
+						'<div class="rogue-new-move">' + moveRow(pending.move, null, learner) + '</div><p>选择替换位置。替换下来的招式会保留在可更换列表中。</p>';
 					learner.set.moves.forEach(function (move, i) {
-						html += '<div class="rogue-choice-row">' + moveRow(move, learner.pp[i]) +
+						html += '<div class="rogue-choice-row">' + moveRow(move, learner.pp[i], learner) +
 							button('learnMove', String(i), '替换此招式', busy) + '</div>';
 					});
 					html += '<p>' + button('learnMove', 'skip', '暂不装备，保留在可更换列表', busy) + '</p></section>';
@@ -2342,7 +2353,7 @@
 			html += '</div></div>';
 			html += '<div class="rogue-equipped-moves"><label>招式 · 点击更换</label>';
 			for (var i = 0; i < (run.moveSlots || 4); i++) {
-				var move = mon.set.moves[i] && dex().moves.get(mon.set.moves[i]);
+				var move = mon.set.moves[i] && memberMove(mon.set.moves[i], mon);
 				var pp = (mon.pp || [])[i];
 				html += '<div' + (panel === 'moves' && slot === i ? ' class="selected"' : '') + '>' +
 					('<button class="button rogue-equipped-move" name="editSection" value="moves:' + i + '"' + (move ? ' data-type="' + escape(move.type) + '"' : '') + (i > mon.set.moves.length ? ' disabled' : '') + '>' + (move ? '<strong>' + escape(localName(move.name, 'move')) + '</strong><small>' + escape(localName(move.type)) + ' · 威力 ' + (move.category === 'Status' ? '—' : move.basePower || '变化') + ' · 命中 ' + (move.accuracy === true ? '必中' : move.accuracy + '%') + ' · PP ' + (pp ? pp.pp + '/' + pp.maxpp : '—') + '</small>' : '空招式位') + '</button>') +
@@ -2390,7 +2401,7 @@
 				})).forEach(function (move) {
 					var equipped = equippedIds.indexOf(move.id);
 					html += '<div class="rogue-choice-row' + (equipped >= 0 ? ' is-equipped' : '') + '" data-rogue-key="move:' + escape(move.id) + '">' +
-						(equipped >= 0 ? '<span class="rogue-move-slot" title="已装备 · 第 ' + (equipped + 1) + ' 位">' + (equipped + 1) + '</span>' : '') + moveRow(move.id, move) +
+						(equipped >= 0 ? '<span class="rogue-move-slot" title="已装备 · 第 ' + (equipped + 1) + ' 位">' + (equipped + 1) + '</span>' : '') + moveRow(move.id, move, mon) +
 						button('chooseMove', move.id, equipped === slot ? '已装备' : equipped >= 0 ? '交换到此位置' : '装备此招式',
 							locked || equipped === slot || (equipped >= 0 && slot === mon.set.moves.length)) + '</div>';
 				});
@@ -2892,25 +2903,29 @@
 				button('pageCodex', String(this.codexPage + 1), '下一页', this.codexPage + 1 >= total) + '</div></section>';
 		},
 		revealPendingMove: function () {
+			clearTimeout(this.movePopupTimer); this.movePopupTimer = null;
 			var run = this.state && this.state.run, pending = run && (run.pendingMoves || [])[0];
-			if (!pending) { this.revealedMove = null; return; }
-			var key = JSON.stringify([run.id, pending.member, pending.move]);
-			if (this.screen !== 'game' || key === this.revealedMove) return;
-			var root = this.$el && this.$el[0], prompt = root && root.querySelector('.rogue-pending-move');
-			if (!prompt) return; // Dialogue or another prompt may still cover the learning controls.
-			// On narrow screens the party tab can hide the learning prompt in the main room.
-			if (!root.clientHeight && !this.revealingMove && app.curRoom === app.rooms.fantasyrogueparty && app.focusRoom) {
-				this.revealingMove = true;
-				try { app.focusRoom(this.id); } finally { this.revealingMove = false; }
+			var key = pending && JSON.stringify([app.user.get('userid'), run.id, pending.member, pending.move]);
+			var waiting = this.screen !== 'game' || this.state && this.state.story || run && (run.companionInvitation || run.affectionScene);
+			var popup = this.pendingMovePopup;
+			if (popup && (!key || popup.key !== key || waiting)) {
+				var index = (app.popups || []).indexOf(popup);
+				if (index >= 0) app.popups.splice(index, 1);
+				popup.remove(); this.pendingMovePopup = null;
 			}
-			if (!root.clientHeight || key === this.revealedMove) return;
-			this.revealedMove = key;
-			// Commit immediately: a saved-state render can cancel a smooth scroll midway.
-			if (root.scrollTo) root.scrollTo({top: 0, behavior: 'instant'});
-			root.scrollTop = 0;
+			if (!pending || waiting) return;
+			if (this.pendingMovePopup) { this.pendingMovePopup.render(); return; }
+			// Let evolution and other modal scenes finish before showing the next decision.
+			if ((app.popups || []).some(function (p) { return p.type === 'modal'; })) {
+				var self = this;
+				this.movePopupTimer = setTimeout(function () { self.revealPendingMove(); }, 200);
+				return;
+			}
+			app.addPopup(globals.RogueLearnMovePopup, {room: this, key: key});
 		},
 		render: function (storyOnly) {
 			var state = this.state;
+			this.revealPendingMove();
 			if (state && state.enabled === false) {
 				stableHTML(this, '<div class="pad"><h2>当前账号未开放此功能</h2><p>' + escape(state.message || '请使用获准的内测账号登录。') + '</p>' + button('joinRoom', '', '返回首页') + '</div>');
 				if (app.rooms.fantasyrogueparty) app.rooms.fantasyrogueparty.$el.html('');
@@ -2923,7 +2938,6 @@
 				button('joinRoom', 'fantasyroguegallery', '通关卡展示', false, fa('clone')) +
 				button('joinRoom', 'fantasyroguehistory', '历史对局', false, fa('history')) +
 				(this.screen !== 'home' ? button('startMenu', '', '开始页', false, fa('compass')) : '') + '</p>' +
-				(this.screen === 'game' && state && state.run && !state.story && !state.run.companionInvitation ? this.renderPendingMove(state.run, busy) : '') +
 				'<h2>幻想杯肉鸽</h2>' + (state && state.run && (state.run.spirit || state.run.charm) ? '<p class="rogue-spirit-badge">' +
 				(state.run.spirit ? button('showSpirit', '', state.run.spirit.name, false, '<span class="picon" style="' + Dex.getPokemonIcon(state.run.spirit.species) + '"></span>') : '') +
 				(state.run.charm ? button('showCharm', '', '护符庇佑', false, charmIcon()) : '') +
@@ -3607,6 +3621,34 @@
         later: function () { this.close(); this.room.submit('evolutionnotice', {member: this.member}); }
     });
 
+	this.RogueLearnMovePopup = this.Popup.extend({
+		type: 'modal',
+		initialize: function (data) {
+			this.room = data.room; this.key = data.key;
+			this.room.pendingMovePopup = this;
+			this.$el.addClass('fantasyrogue rogue-learn-move-popup');
+			this.render();
+		},
+		render: function () {
+			var room = this.room;
+			stableHTML(this, (room.error ? '<p class="error">' + escape(room.error) + '</p>' : '') +
+				room.renderPendingMove(room.state.run, !!room.pending || !app.socket || app.socket.readyState !== 1));
+		},
+		learnMove: function (slot) {
+			var run = this.room.state && this.room.state.run, pending = run && (run.pendingMoves || [])[0];
+			if (!pending || this.key !== JSON.stringify([app.user.get('userid'), run.id, pending.member, pending.move])) return;
+			this.room.learnMove(slot);
+			// Keep the dialog until the server acknowledges; errors and retries remain actionable.
+			this.render();
+		},
+		remove: function () {
+			if (this.room.pendingMovePopup === this) this.room.pendingMovePopup = null;
+			var room = this.room;
+			clearTimeout(room.movePopupTimer);
+			room.movePopupTimer = setTimeout(function () { room.revealPendingMove(); }, 200);
+			return globals.Popup.prototype.remove.apply(this, arguments);
+		},
+	});
 	this.RogueEvolutionPopup = this.Popup.extend({
 		type: 'modal',
 		initialize: function (data) {

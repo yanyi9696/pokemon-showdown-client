@@ -1,0 +1,15 @@
+{
+  "note": "Unmodified core-series inventory sprites mirrored by PokeSprite. Artwork belongs to its original rights holders.",
+  "files": [
+    {
+      "file": "bottlecap.png",
+      "source": "https://raw.githubusercontent.com/msikma/pokesprite/master/items/other-item/bottle-cap.png",
+      "sha256": "8ef0a5ec0a0731778b3adc113f96e22ffdcda880708d3fa92b5d9333492f6d74"
+    },
+    {
+      "file": "goldbottlecap.png",
+      "source": "https://raw.githubusercontent.com/msikma/pokesprite/master/items/other-item/gold-bottle-cap.png",
+      "sha256": "17bc21dca2100df7cd9d5805094827e75f4ee5898962808efd902bb27c7281ff"
+    }
+  ]
+}

@@ -15,6 +15,7 @@ const species = {
 	bulbasaur: {id: 'bulbasaur', spriteid: 'bulbasaur', num: 1},
 };
 const fixtureDex = {toID, data: {Pokedex: species}, species: {get: id => species[id]}};
+const official = {pikachu: {front: {w: 50, h: 60}, back: {w: 55, h: 65}}};
 
 describe('Local mini Pokedex assets', () => {
 	let directory;
@@ -36,6 +37,7 @@ describe('Local mini Pokedex assets', () => {
 				if (name === 'path') return path;
 				if (name === 'image-size') return filename => imageSize(local(filename));
 				if (name === './server-source') return {serverPath: () => 'fixture-dex'};
+				if (name === './official-sprite-metadata.json') return {sprites: official};
 				if (name === 'fixture-dex') return {Dex: fixtureDex};
 				if (name === 'fs') return {
 					mkdirSync: (filename, options) => fs.mkdirSync(local(filename), options),
@@ -63,7 +65,7 @@ describe('Local mini Pokedex assets', () => {
 	it('creates both scripts in a fresh checkout without any animation directory', () => {
 		const {BattlePokemonSprites: xy, BattlePokemonSpritesBW: bw} = generate();
 		for (const table of [xy, bw]) {
-			assert.deepEqual(table.pikachu, {num: 25});
+			assert.deepEqual(table.pikachu, table === xy ? {...official.pikachu, num: 25} : {num: 25});
 			assert.deepEqual(table.bulbasaur, {num: 1});
 			assert.deepEqual(table.pikachurockstar, {num: 25});
 		}
@@ -75,7 +77,7 @@ describe('Local mini Pokedex assets', () => {
 		const {BattlePokemonSprites: xy, BattlePokemonSpritesBW: bw} = generate();
 		assert.deepEqual(bw.pikachu.front, {w: 21, h: 33});
 		assert.deepEqual(bw.pikachu.back, {w: 17, h: 29});
-		assert.equal(xy.pikachu.front, undefined);
+		assert.deepEqual(xy.pikachu.front, official.pikachu.front);
 	});
 	it('preserves dimensions, female and cosmetic variants without inventing missing GIFs', () => {
 		gif('ani/pikachu.gif', 25, 35);
@@ -86,7 +88,7 @@ describe('Local mini Pokedex assets', () => {
 		assert.deepEqual(xy.pikachu.front, {w: 25, h: 35});
 		assert.deepEqual(xy.pikachu.frontf, {w: 23, h: 37});
 		assert.deepEqual(xy.pikachu.backf, {w: 20, h: 30});
-		assert.equal(xy.pikachu.back, undefined);
+		assert.deepEqual(xy.pikachu.back, official.pikachu.back);
 		assert.deepEqual(xy.pikachurockstar.front, {w: 40, h: 45});
 		assert.deepEqual(xy.bulbasaur, {num: 1});
 	});
@@ -96,10 +98,10 @@ describe('Local mini Pokedex assets', () => {
 		fs.unlinkSync(path.join(directory, 'sprites/ani/pikachu.gif'));
 		fs.rmdirSync(path.join(directory, 'sprites/ani'));
 		const {BattlePokemonSprites: xy, BattlePokemonSpritesBW: bw} = generate();
-		assert.deepEqual(xy.pikachu, {num: 25});
+		assert.deepEqual(xy.pikachu, {...official.pikachu, num: 25});
 		assert.deepEqual(bw.pikachu, {num: 25});
 	});
-	it('uses the existing static PNG fallback and keeps lazy BW loading local', () => {
+	it('defaults to official 3D, honors the 2D toggle, and retains unsupported-animation fallback', () => {
 		const tables = generate();
 		const appended = [];
 		const context = vm.createContext({
@@ -119,7 +121,16 @@ describe('Local mini Pokedex assets', () => {
 		for (const file of ['js/battle-dex-data.js', 'data/pokedex.js', 'js/battle-dex.js']) {
 			vm.runInContext(fs.readFileSync(path.join(webRoot, file), 'utf8'), context);
 		}
+		let pixels = false;
+		context.Dex.prefs = key => key === 'bwgfx' && pixels;
+		for (const front of [true, false]) {
+			assert.match(context.Dex.getSpriteData('Pikachu', front, {gen: 9}).url, /\/sprites\/ani(?:-back)?\/pikachu\.gif$/);
+		}
+		pixels = true;
 		assert.match(context.Dex.getSpriteData('Pikachu', true, {gen: 9}).url, /\/sprites\/gen5\/pikachu\.png$/);
+		pixels = false;
+		assert.match(context.Dex.getSpriteData('Pikachu', true, {gen: 9}).url, /\/sprites\/ani\/pikachu\.gif$/);
+		assert.match(context.Dex.getSpriteData('Bulbasaur', true, {gen: 9}).url, /\/sprites\/gen5\/bulbasaur\.png$/);
 		context.Dex.loadSpriteData('bw');
 		assert.equal(appended[0].src, 'data/pokedex-mini-bw.js?buildhash');
 	});

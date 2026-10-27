@@ -5,6 +5,8 @@ const fs = require("fs");
 const path = require("path");
 process.chdir(path.resolve(__dirname, '../play.pokemonshowdown.com'));
 const imageSize = require('image-size');
+// The source checkout streams official animations; it need not contain every GIF.
+const officialSprites = require('./official-sprite-metadata.json').sprites;
 
 const { serverPath } = require('./server-source');
 const Dex = require(serverPath('dist/sim/dex')).Dex;
@@ -50,7 +52,7 @@ function updateSizes() {
 			const id = toID(spriteid);
 
 			{
-				const row = { num: species.num };
+				const row = { ...officialSprites[id], num: species.num };
 				const frontSize = sizeObj('sprites/ani/' + spriteid + '.gif');
 				if (frontSize) row.front = frontSize;
 				const frontSizeF = sizeObj('sprites/ani/' + spriteid + '-f.gif');
@@ -93,8 +95,7 @@ function updateSizes() {
 	fs.writeFileSync('data/pokedex-mini-bw.js', g5buf);
 }
 
-// Both files are client resources even without animated sprites. Number-only
-// entries let battle-dex use its existing static PNG fallback; BW assets may
-// also be installed independently of the XY animation directory.
+// Keep the official 3D metadata when local animations are absent. Local files
+// override dimensions; custom forms without official animations still fall back.
 updateSizes();
 console.log('DONE');
