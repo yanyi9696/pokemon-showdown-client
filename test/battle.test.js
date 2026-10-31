@@ -90,6 +90,34 @@ describe('Battle', () => {
 	});
 });
 
+describe('Fantasy Rogue boss health phase playback', () => {
+	for (const [species, kind, total, source] of [['Mewtwo', 'summit', 2, '第二阶段'], ['Arceus', 'arceus', 19, '神之挑战']]) {
+		it(`restores ${species} health after lethal damage, including old replay logs`, () => {
+			const battle = new Battle({debug: true, log: [
+				'|player|p1|Player', '|player|p2|Boss', '|gen|9', '|start',
+				'|switch|p1a: Mew|Mew, L100|300/300', `|switch|p2a: Boss|${species}, L130|100/100`, '|turn|1',
+			]});
+			const mon = battle.p2.active[0], reminders = [];
+			battle.scene.resultAnim = (pokemon, text) => reminders.push(text);
+			battle.add(`|-roguebossphase|p2a: Boss|${kind}|1|${total}`);
+			for (let phase = 2; phase <= total; phase++) {
+				battle.add('|-damage|p2a: Boss|0 fnt'); assert.equal(mon.hpWidth(100), 0);
+				battle.add(`|-heal|p2a: Boss|100/100|[from] ${source}`);
+				assert.equal(mon.fainted, false); assert.equal(mon.hpWidth(100), 100);
+				battle.add(`|-roguebossphase|p2a: Boss|${kind}|${phase}|${total}`);
+				assert.equal(mon.rogueBossPhase.phase, phase);
+				const count = reminders.length;
+				battle.add(`|-roguebossphase|p2a: Boss|${kind}|${phase}|${total}`);
+				assert.equal(reminders.length, count, 'duplicate phase metadata does not repeat the reminder');
+				battle.add('|-damage|p2a: Boss|54/100'); assert(mon.hpWidth(100) > 0);
+			}
+			battle.add('|-roguebossphase|p2a: Boss|arceus|99|19');
+			assert.equal(mon.rogueBossPhase.phase, total);
+			battle.destroy();
+		});
+	}
+});
+
 describe('Fantasy rogue capture playback', () => {
 	it('dispatches the server outcome before subsequent moves and victory', () => {
 		const battle = new Battle({debug: true, log: [

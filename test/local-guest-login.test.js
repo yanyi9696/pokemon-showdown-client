@@ -12,7 +12,10 @@ const storageSource = fs.readFileSync(path.join(root, 'js/storage.js'), 'utf8');
 
 function client(url = 'file:///F:/client/testclient.html?~~localhost:8000&localguest=1', prefs = {}, localDevelopment = false) {
 	const sent = [], requests = [], popups = [], loadedScripts = [];
+	const timers = new Map(); let timerId = 0;
 	const context = {
+		setTimeout(callback) { timers.set(++timerId, callback); return timerId; },
+		clearTimeout(id) { timers.delete(id); },
 		Config: {localDevelopment, routes: {client: 'play.pokemonshowdown.com'}, defaultserver: {host: 'localhost', port: 8000}},
 		location: new URL(url),
 		document: {write: script => loadedScripts.push(script)},
@@ -62,8 +65,48 @@ function client(url = 'file:///F:/client/testclient.html?~~localhost:8000&localg
 	user.trigger = () => {};
 	user.replaceList = {}; user.normalizeList = {};
 	context.app.user = user;
-	return {context, user, sent, requests, popups, prefs, loadedScripts};
+	return {context, user, sent, requests, popups, prefs, loadedScripts,
+		timeout() { const pending = [...timers.values()]; timers.clear(); pending.forEach(callback => callback()); }};
 }
+
+describe('Automatic login recovery', () => {
+	const remote = () => {
+		const c = client('https://example.invalid/testclient.html');
+		c.context.Config.server = {id: 'test-server', host: 'example.invalid', port: 443};
+		return c;
+	};
+	it('ends a stalled bridge request with a retry action and ignores its late callback', () => {
+		const c = remote(); c.user.receiveChallstr('challenge-a');
+		assert.equal(c.user.loaded, false); c.timeout();
+		assert.equal(c.user.loaded, true); assert.equal(c.user.get('loginState'), 'error');
+		c.user.retryLogin(); assert.equal(c.requests.length, 2);
+		c.requests[0][2](JSON.stringify({username: 'OldName', assertion: 'stale-assertion'}));
+		assert.deepEqual(c.sent, []);
+		c.requests[1][2](JSON.stringify({username: ''}));
+		assert.equal(c.user.get('loginState'), 'ready');
+	});
+	it('handles empty, malformed and incomplete authentication responses without sending a rename', () => {
+		for (const response of ['', '<html>Unavailable</html>', 'null', '{"username":"Player"}']) {
+			const c = remote(); c.user.receiveChallstr('challenge'); c.requests[0][2](response);
+			assert.equal(c.user.get('loginState'), 'error', response); assert.deepEqual(c.sent, []);
+		}
+	});
+	it('requires a server acknowledgement of the signed assertion and clears the watchdog afterwards', () => {
+		const c = remote(); c.user.receiveChallstr('challenge');
+		c.requests[0][2](JSON.stringify({username: 'TestPlayer', loggedin: true, assertion: 'synthetic-signed-assertion'}));
+		assert.equal(c.user.get('loginState'), 'pending');
+		assert.deepEqual(c.sent, ['/trn TestPlayer,0,synthetic-signed-assertion']);
+		c.context.app.receive('|updateuser| TestPlayer|1|1|{}'); c.timeout();
+		assert.equal(c.user.get('loginState'), 'ready'); assert.equal(c.user.loaded, true);
+	});
+	it('handles XHR failures and does not start overlapping retries', () => {
+		const c = remote(); let fail;
+		c.context.$.post = (...args) => { c.requests.push(args); return {fail(callback) { fail = callback; }}; };
+		c.user.receiveChallstr('challenge'); c.user.retryLogin(); assert.equal(c.requests.length, 1);
+		fail(); assert.equal(c.user.get('loginState'), 'error');
+		c.user.retryLogin(); assert.equal(c.requests.length, 2);
+	});
+});
 
 describe('Credential-free local test nickname login', () => {
 	it('persists accepted nicknames using the real preferences store across independent page contexts', () => {

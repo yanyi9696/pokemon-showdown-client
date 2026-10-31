@@ -1,5 +1,13 @@
 # Rogue dialogue portraits
 
+## Challenge trainers, 2026-10-30
+
+`ingo.png`, `emmet.png`, `palmer.png` and `riley.png` are transparent, 1774 × 887 two-expression half-body sheets: normal on the left, smile on the right. They are shared by challenge introductions, victory dialogue, travelling-companion panels and the trainer codex.
+
+The first generated designs were replaced after comparing official character references. Ingo and Emmet use their Black/White conductor uniforms and angular grey-haired designs; Palmer uses his Diamond/Pearl green coat, gold buttons and white turtleneck; Riley uses his official BDSP hat, hair, black lapels and gold ring ornament. Existing `clair.png` provided style/layout guidance. These are generated project illustrations, not official artwork.
+
+Exact built-in image_gen prompts, official reference URLs, source output names and SHA-256 hashes are recorded in [challenges-20261030.json](challenges-20261030.json). The client uses cache version `20261030-reference-v2` for all four. The reference downloads and superseded originals are not required runtime assets.
+
 ## Lusamine, 2026-10-26
 
 `lusamine.png` is the generated transparent two-expression half-body sheet now used by dialogue, companion panels, affection scenes and the codex: neutral on the left, a gentle smile on the right. It matches the existing trainer portrait style and uses the same expression renderer. The exact prompt, reference roles and SHA-256 hash are in [lusamine-20261026.json](lusamine-20261026.json). This is project artwork generated with the built-in image_gen tool, not official artwork.

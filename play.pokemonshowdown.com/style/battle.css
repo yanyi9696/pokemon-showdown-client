@@ -874,3 +874,9 @@ License: GPLv2
 	font-weight: bold; /* 字体加粗 */
 	margin-right: 2px; /* 右边距 */
 }
+.statbar.rogue-boss-next-bar .hpbar { background: linear-gradient(90deg, #b2dec980, #d5f4dd9c); }
+.statbar .rogue-boss-lives { display:inline-block; margin-left:6px; padding:1px 6px; border:1px solid #8dd8ae; border-radius:9px; background:#174b3d; color:#d9ffe8; font-size:12px; text-shadow:none; }
+.battle .result.roguephaseresult { width:300px; z-index:20; }
+.battle .result.roguephaseresult strong { display:block; padding:12px 10px; border:2px solid #f0d789; border-radius:10px; background:linear-gradient(135deg, #173d57, #254f69); box-shadow:0 3px 14px #132a56aa; color:#fff3c5; font-size:18px; line-height:1.4; text-align:center; }
+.battle .result.roguephaseresult small { display:block; margin-top:6px; font-size:12px; font-weight:normal; color:#deeff1; }
+.statbar .rogue-boss-stage { display:inline-block; margin-top:3px; padding:2px 7px; border-radius:5px; background:#183b4fe8; border:1px solid #9fbdb8; color:#edfaec; font-size:10px; line-height:1.3; text-shadow:none; }

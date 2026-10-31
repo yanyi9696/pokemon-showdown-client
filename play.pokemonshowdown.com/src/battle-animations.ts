@@ -1495,21 +1495,22 @@ export class BattleScene implements BattleSceneStub {
 		).join(' ');
 		this.resultAnim(pokemon, result, 'neutral');
 	}
-	resultAnim(pokemon: Pokemon, result: string, type: 'bad' | 'good' | 'neutral' | Dex.StatusName) {
+	resultAnim(pokemon: Pokemon, result: string, type: 'bad' | 'good' | 'neutral' | 'roguephase' | Dex.StatusName) {
 		if (!this.animating) return;
 		let $effect = $('<div class="result ' + type + 'result"><strong>' + result + '</strong></div>');
 		this.$fx.append($effect);
 		$effect.delay(this.timeOffset).css({
 			display: 'block',
 			opacity: 0,
-			top: pokemon.sprite.top - 5,
-			left: pokemon.sprite.left - 75,
+				top: type === 'roguephase' ? 110 : pokemon.sprite.top - 5,
+			left: type === 'roguephase' ? Math.max(10, Math.min(330, pokemon.sprite.left - 150)) : pokemon.sprite.left - 75,
 		}).animate({
 			opacity: 1,
 		}, 1);
+		if (type === 'roguephase') $effect.delay(1500);
 		$effect.animate({
 			opacity: 0,
-			top: pokemon.sprite.top - 65,
+			top: type === 'roguephase' ? 90 : pokemon.sprite.top - 65,
 		}, 1000, 'swing');
 		this.wait(this.acceleration < 2 ? 350 : 250);
 		pokemon.sprite.updateStatbar(pokemon);
@@ -2987,10 +2988,23 @@ export class PokemonSprite extends Sprite {
 			updatePrevhp = true;
 		}
 		let hpcolor;
+		const boss = pokemon.rogueBossPhase;
+		const remaining = boss ? boss.total - boss.phase + 1 : 1;
+		this.$statbar.toggleClass('rogue-boss-next-bar', boss?.kind === 'arceus' && remaining > 1);
+		this.$statbar.find('.rogue-boss-lives').remove();
+		this.$statbar.find('.rogue-boss-stage').remove();
+		if (boss) {
+			this.$statbar.append(`<div class="rogue-boss-stage" role="status">${boss.kind === 'summit' ? '塔顶决战' : '神之挑战'} · ` +
+				`${boss.phase === boss.total ? '最终阶段' : `第 ${boss.phase} / ${boss.total} 阶段`}</div>`);
+		}
+		if (boss?.kind === 'arceus' && remaining > 1) {
+			this.$statbar.find('> strong').append(`<span class="rogue-boss-lives" title="剩余 ${remaining} 条生命">×${remaining}</span>`);
+		}
 		if (updatePrevhp || updateHp) {
 			hpcolor = BattleScene.getHPColor(pokemon);
 			let w = pokemon.hpWidth(150);
 			let $hp = this.$statbar.find('.hp');
+			if (boss && updatePrevhp) $hp.stop(true, false);
 			$hp.css({
 				width: w,
 				'border-right-width': (w ? 1 : 0),

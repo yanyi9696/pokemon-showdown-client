@@ -1087,6 +1087,8 @@ export class BattleTooltips {
 		// Training is already included in serverPokemon.stats. Only the temporary card is added here.
 		if (rogueInfo?.mentor) {
 			const round = (n: number) => Math.ceil(n - 0.5);
+			stats.atk = round(stats.atk * (1 + (rogueInfo.mentor.offense || 0) / 100));
+			stats.spa = round(stats.spa * (1 + (rogueInfo.mentor.offense || 0) / 100));
 			stats.def = round(stats.def * (1 + rogueInfo.mentor.defense / 100));
 			stats.spd = round(stats.spd * (1 + rogueInfo.mentor.defense / 100));
 			stats.spe = round(stats.spe * (1 + rogueInfo.mentor.speed / 100));

@@ -1244,7 +1244,8 @@ export const Dex = new class implements ModdedDex {
 
 
 	// sprite in teambuilder
-	getTeambuilderSpriteData(pokemon: any, gen = 0): TeambuilderSpriteData {
+	getTeambuilderSpriteData(pokemon: any, gen = 0, pixel = false): TeambuilderSpriteData {
+		if (pixel) gen = 5;
 		let id = toID(pokemon.species);
 		let spriteid = pokemon.spriteid;
 		let species = Dex.species.get(pokemon.species);
@@ -1311,7 +1312,7 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		// Determine display generation based on preferences and species data
-		if (Dex.prefs('nopastgens')) gen = 6;
+		if (!pixel && Dex.prefs('nopastgens')) gen = 6;
 		if (Dex.prefs('bwgfx') && (!gen || gen > 5)) gen = 5;
 
 		// Use the determined species (mod or base) for gen checks
@@ -1359,16 +1360,16 @@ export const Dex = new class implements ModdedDex {
 		return spriteData;
 	}
 
-	getTeambuilderSprite(pokemon: any, gen = 0) {
+	getTeambuilderSprite(pokemon: any, gen = 0, pixel = false) {
 		if (!pokemon) return '';
-		const data = this.getTeambuilderSpriteData(pokemon, gen);
+		const data = this.getTeambuilderSpriteData(pokemon, gen, pixel);
 		const shiny = (data.shiny ? '-shiny' : '');
 		const id = toID(pokemon.species);
 		if (id === 'kyuremoriginal') {
 			const prefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			return `background-image:url(${prefix}sprites/fantasy-rogue/kyurem-original${shiny}.png);background-position:center;background-repeat:no-repeat;image-rendering:pixelated`;
 		}
-		if (Dex.prefs('bwgfx')) {
+		if (pixel || Dex.prefs('bwgfx')) {
 			const customPixels: { [id: string]: string } = {
 				shadowlugiafantasy: 'shadowlugia-fantasy', flygonmegafantasy: 'flygon-mega-fantasy',
 				swampertmegaxfantasy: 'swampert-mega-x-fantasy', steelixmegaxfantasy: 'steelix-mega-x-fantasy',

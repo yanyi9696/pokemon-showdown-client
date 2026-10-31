@@ -1,0 +1,34 @@
+Fantasy Rogue client — 2026-10-31 本地发布整理
+
+本轮客户端基线：431d4983eba5c0e1d597e6a416ba4e893e7bab44；最终 SHA 见交付报告。
+纳入秘闻/挑战/祝福交互、统一风格文案、属性转选择、战斗复活、首领阶段血条和提示、同行好感度、图鉴/收藏/殿堂留影、雷达图、登录等待处理及相关测试。
+开始页四个图鉴入口保持并排，祝福图鉴入口改为金色，返回开始页与点击展开按钮等大并放大；两种阅读布局保留。
+
+正式资源必须包含
+play.pokemonshowdown.com/sprites/rogue-dialogue 下 ingo.png、emmet.png、palmer.png、riley.png 以及 challenges-20261030.json、README.md。
+四张图为项目制作并参考官方形象的常态/微笑双表情资源，元数据记录尺寸、来源参考与 SHA-256，不是临时文件。
+mini-Pokedex 与其他 data/js 构建产物由 node build full --local-server <server 源码> 生成；生成文件不纳入源码提交，但部署网页目录必须带上它们。
+不提交或读取 testclient-key.js、数据库、真实配置、Cookie/SID、SSH 密钥、node_modules 或临时构建目录。
+
+验证结果
+- 完整 TypeScript --noEmit：通过。
+- full 构建使用本次隔离服务端源码，且独立 replay 构建通过。
+- 最终全量客户端测试：428 passing / 1 pending / 0 failing。
+- 唯一 pending 为既有 Text parser should process messages correctly，suite 与基线一致，无新增跳过项。
+- 52 项页面资源、两个 mini-Pokedex、13 张立绘、糖果/王冠/Unknown 图标等独立回环 HTTP 检查通过；Showdex 55 个版本化文件哈希通过。
+- 新增四张立绘的 PNG 尺寸、透明通道和元数据哈希通过。
+- git diff --check 通过。
+- 可选 PHP 新闻程序在 Windows 不可用，使用已有公告回退；离线文章索引警告保留，不属于游戏资源构建失败。
+- 本轮未重新操作 Edge 或验证线上登录速度，不把 HTTP/自动测试等同于浏览器/生产验收。
+
+ESLint / CI 限制
+原配置完整 ESLint 未通过：基线 1,123 errors / 55 warnings，最终 1,134 errors / 56 warnings。
+新增差异为括号空格、缩进、成员分隔与行长，不能统称历史问题；现代语法正确性补充扫描没有新增正确性诊断，Rogue 主脚本为零。
+npm test / 正式 CI 包含 ESLint，仍会受这些债务阻断。本次没有放宽规则或改写断言来通过检查。
+服务端完整验证、数据库兼容与旧 dist 结论见配套服务端 docs/releases/2026-10-31-final-local-audit.txt。
+
+提交边界
+只提交 codex/fantasy-rogue，不移动 fantasy/master，不连接或部署腾讯云。
+原 Windows 启动方式、localhost 8000/8080、普通本地测试昵称及存档保持。
+GitHub SSH 非交互认证失败，用户在 Windows PowerShell 手动正常推送；不强推、不改写历史。
+完整本地日志与源码哈希清单：F:\fantasy\release-final-20261031。

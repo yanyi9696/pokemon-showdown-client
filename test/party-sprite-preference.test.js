@@ -52,6 +52,18 @@ describe('Shared 2D party sprite preference', () => {
 		}
 		assert.match(context.Dex.getTeambuilderSprite({species: 'Absol-Mega-Z-Fantasy'}), /sprites\/gen5\/absol-megaz\.png/);
 	});
+	it('keeps Hall of Fame portraits in front pixels without changing battle preferences', () => {
+		preferences.bwgfx = false; preferences.nopastgens = true;
+		try {
+			for (const species of ['Swampert', 'Primarina', 'Gholdengo']) {
+				assert.match(context.Dex.getTeambuilderSprite({species}, 5, true), /sprites\/gen5\//);
+				assert.match(context.Dex.getTeambuilderSprite({species, shiny: true}, 5, true), /sprites\/gen5-shiny\//);
+				assert.match(context.Dex.getTeambuilderSprite({species}), /sprites\/home\//);
+			}
+			assert.match(context.Dex.getTeambuilderSprite({species: 'Flygon-Mega-Fantasy'}, 5, true), /sprites\/gen5\/flygon-mega-fantasy\.png/);
+			assert.equal(preferences.bwgfx, false); assert.equal(preferences.nopastgens, true);
+		} finally { preferences.nopastgens = false; }
+	});
 	it('uses the approved triple Kyurem rear sprite in battle while keeping front party art', () => {
 		for (const shiny of [false, true]) {
 			for (const pixels of [false, true]) {

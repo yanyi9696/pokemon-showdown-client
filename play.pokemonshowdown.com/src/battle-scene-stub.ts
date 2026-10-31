@@ -1,7 +1,7 @@
 import type { Pokemon, Side } from './battle';
 import type { ScenePos, PokemonSprite } from './battle-animations';
 import type { BattleLog } from './battle-log';
-import type { ID } from './battle-dex';
+import type { Dex, ID } from './battle-dex';
 import type { Args, KWArgs } from './battle-text-parser';
 
 export class BattleSceneStub {
@@ -40,7 +40,7 @@ export class BattleSceneStub {
 	resetBgm(): void { }
 	updateBgm(): void { }
 	resultAnim(
-		pokemon: Pokemon, result: string, type: "bad" | "good" | "neutral" | "par" | "psn" | "frz" | "fst" | "slp" | "brn"
+		pokemon: Pokemon, result: string, type: "bad" | "good" | "neutral" | "roguephase" | Dex.StatusName
 	): void { }
 	typeAnim(pokemon: Pokemon, types: string): void { }
 	resume(): void { }

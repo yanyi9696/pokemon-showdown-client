@@ -525,7 +525,7 @@
 			if (this.fantasyRogue && this.fantasyRogue.userid === app.user.get('userid') && !this.battleEnded && !this.battle.ended) {
 				this.$controls.find('.rogue-retreat').remove();
 				this.$controls.append('<div class="rogue-retreat"><button class="button" name="retreatRogue">逃跑</button>' +
-					'<small>返回场外；伤害、PP 和道具消耗保留。</small></div>');
+					'<small>' + (this.fantasyRogue.optionalChallenge ? '退出战斗后，可重试或逃离本层；本次无奖励；' : '返回场外；') + '伤害、PP 和道具消耗保留。</small></div>');
 			}
 		},
 		rogueDefeatHTML: function () {
@@ -948,6 +948,17 @@
 					return '<button class="button has-tooltip" name="chooseRogueCompanionZ" value="' + target.loc + '" data-tooltip="move|' + extraZ.move + '|' + zSlot + '">' + BattleLog.escapeHTML(extraZ.name) + (zTargets.length > 1 ? ' → ' + BattleLog.escapeHTML(target.pokemon.name) : '') + ' · 额外 Z</button>';
 				}).join(' ') + '<p>威力 <b>185</b> · ' + (extraZ.category === 'Physical' ? '群攻物理' : '声音特殊') + ' · 命中后五项能力各 +1。独立次数，不消耗常规 Z。</p></div>';
 			}
+			if (rogue.revival) {
+				var targets = rogue.revival.targets;
+				psychic += '<div class="rogue-revival"><p><strong>濒死悟道 · 复活伙伴</strong> · 使用道具占用本次行动</p>' +
+					(targets.length ? '<select name="rogueRevivalTarget" aria-label="复活目标">' + targets.map(function (mon) {
+						return '<option value="' + mon.slot + '">' + BattleLog.escapeHTML(globals.translations && globals.translations[mon.name] || mon.name) + '</option>';
+					}).join('') + '</select> ' : '<span>暂无无法战斗的伙伴</span> ') + rogue.revival.items.map(function (item) {
+						return '<button class="button" name="chooseRogueRevival" value="' + item.id + '"' +
+							(!targets.length || !item.count ? ' disabled' : '') + '><span class="itemicon" style="' + Dex.getItemIcon(item.id) + '"></span>' +
+							BattleLog.escapeHTML(item.name) + ' ×' + item.count + '</button>';
+					}).join(' ') + '</div>';
+			}
 			if (!rogue.catchable) return psychic;
 
 			return psychic + '<div class="rogue-balls"><p>投球占用本次行动；失败后对方仍会出招。</p>' + rogue.balls.map(function (ball) {
@@ -975,6 +986,14 @@
 			var king = this.request && this.request.fantasyRogue && this.request.fantasyRogue.dragonKing;
 			if (!king || !king.pending || typeof token === 'number' && token !== king.token || (king.options || ['longzhihuxi', 'drizzle']).indexOf(ability) < 0) return;
 			this.send('/choose rogueking ' + ability + ' ' + king.token + '|' + this.request.rqid);
+		},
+		chooseRogueRevival: function (id) {
+			var revival = this.request && this.request.fantasyRogue && this.request.fantasyRogue.revival;
+			var slot = Number(this.$('select[name=rogueRevivalTarget]').val());
+			if (!this.choice || !revival || !revival.targets.some(function (mon) { return mon.slot === slot; }) ||
+				!revival.items.some(function (item) { return item.id === id && item.count > 0; })) return;
+			this.choice.choices.push('roguerevive ' + id + ' ' + slot);
+			this.endChoice();
 		},
 		chooseRogueBall: function (id) {
 			if (!this.choice || !this.request || !this.request.fantasyRogue || !this.request.fantasyRogue.catchable) return;
@@ -1775,7 +1794,7 @@
 			this.room = data.room;
 			this.gameType = data.gameType;
 			if (this.gameType === 'battle' && this.room.fantasyRogue) {
-				this.$el.html('<form><p>逃跑后回到当前战斗的准备界面。HP、PP、异常状态和道具消耗保留，需要自行使用道具恢复。本场叠层恢复至开战前。</p>' +
+				this.$el.html('<form><p>' + (this.room.fantasyRogue.optionalChallenge ? '逃跑只退出本场战斗，不发奖励。你仍停留在挑战区域，之后可重试或选择逃离这一层。' : '逃跑后回到当前战斗的准备界面。') + 'HP、PP、异常状态和道具消耗保留，需要自行使用道具恢复。本场叠层恢复至开战前。</p>' +
 					'<p><button type="submit" class="button">逃跑</button> <button type="button" class="button autofocus" name="close">继续战斗</button></p></form>');
 				return;
 			}

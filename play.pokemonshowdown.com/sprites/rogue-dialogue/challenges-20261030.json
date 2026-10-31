@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-30",
+  "revision": "official-reference-v2",
+  "tool": "image_gen",
+  "mode": "built-in",
+  "official": false,
+  "notes": "Generated project illustrations guided by official character designs, not official illustrations. Two equal expression cells, normal on left and smile on right. Original generated files retained. Reference downloads are kept outside the game repository.",
+  "assets": [
+    {
+      "id": "ingo",
+      "width": 1774,
+      "height": 887,
+      "pixelFormat": "Format32bppArgb",
+      "cornerAlpha": 0,
+      "sha256": "d8e76a22458930185675f0ac07ab33ae45dcf9f3468f639ed0828f0a2c586257",
+      "file": "ingo.png",
+      "prompt": "制作《宝可梦》北尚（Ingo／ノボリ）的透明底游戏对话半身立绘双表情图。第一张参考是官方卡图，北尚是右边黑色制服的角色；第二张是官方角色设定稿；第三张仅参考双栏构图和绘画精度。请忠实还原北尚，不能画成普通列车员：瘦长棱角脸、灰色细眼、灰色尖长鬓发、下弯嘴型、深蓝黑色列车长帽、橙褐色帽带、白蓝椭圆帽徽、高耸领口、深色大衣上宽橙褐横条纹、银色圆纽扣、蓝紫领带和白手套。用宝可梦游戏插画的清晰线条、平涂柔和阴影。2:1横图由两个等大正方形格构成，左右均为同一角色、相同腰部以上姿势、相同衣服发型、相同缩放与位置；左侧正常严肃表情，右侧只是很轻微的认可微笑。手指轻触帽檐，手肘和帽子完整置于各自单格内，两格之间留透明空间。不要照搬卡片背景、文字、第二个人物或图框；不要改成洗翠服装；无文字，无背景，真正透明。",
+      "referenceRoles": [
+        {
+          "role": "Character appearance, official TCG illustration (dark-uniform man on the right)",
+          "page": "https://www.pokemon-card.com/card-search/details.php/card/35594",
+          "image": "https://www.pokemon-card.com/assets/images/card_images/large/SM8b/035594_T_NOBORITOKUDARI.jpg"
+        },
+        {
+          "role": "Official B/W character concept art archived by Bulbagarden",
+          "page": "https://archives.bulbagarden.net/wiki/File:Ingo_Emmet_concept_art.jpg",
+          "image": "https://archives.bulbagarden.net/media/upload/d/db/Ingo_Emmet_concept_art.jpg"
+        },
+        {
+          "role": "Existing project style and two-cell layout only",
+          "file": "clair.png"
+        }
+      ],
+      "generatedFile": "exec-8afdceeb-f7be-4672-b0ed-9990048b9dd2.png"
+    },
+    {
+      "id": "emmet",
+      "width": 1774,
+      "height": 887,
+      "pixelFormat": "Format32bppArgb",
+      "cornerAlpha": 0,
+      "sha256": "1c8f5717fb6c988e162a64311a332513425fc9a8fd8fc5516716d41a4b857599",
+      "file": "emmet.png",
+      "prompt": "为宝可梦同人游戏制作南厦（Emmet／クダリ）的透明背景半身对话立绘。第一张官方卡牌参考中左边白制服男子是南厦，第二张是官方人物设定，第三张小椿双图只参考画风和排版，不参考人物外观。严格保持南厦辨识点：狭长棱角脸、小灰眼、细长鼻子、灰色尖长鬓发、标志性的微笑，白色列车长帽带橙褐色帽带及白蓝铁路徽章，白色长外套巨大高三角翻领、橙褐色横条、大银圆扣、深蓝紫领带、白手套。不要泛化成普通帅哥。横向2:1画布，左右两个等宽方格，画同一人完全一致的腰以上姿势：一只戴手套的手在胸前自然示意。左图常态小幅微笑，右图更温暖的微笑，仅表情变化。帽顶、肩肘和手都完整留在各自格子内，顶端留余量，底部腰线齐平，人物互不重叠。清晰线稿、精细赛璐璐阴影，与小椿立绘精致度统一。真实透明alpha背景，无文字无标签无卡牌边框无其他人物。",
+      "referenceRoles": [
+        {
+          "role": "Character appearance, official TCG illustration (white-uniform man on the left)",
+          "page": "https://www.pokemon-card.com/card-search/details.php/card/35594",
+          "image": "https://www.pokemon-card.com/assets/images/card_images/large/SM8b/035594_T_NOBORITOKUDARI.jpg"
+        },
+        {
+          "role": "Official B/W character concept art archived by Bulbagarden",
+          "page": "https://archives.bulbagarden.net/wiki/File:Ingo_Emmet_concept_art.jpg",
+          "image": "https://archives.bulbagarden.net/media/upload/d/db/Ingo_Emmet_concept_art.jpg"
+        },
+        {
+          "role": "Existing project style and two-cell layout only",
+          "file": "clair.png"
+        }
+      ],
+      "generatedFile": "exec-5a27b860-6e25-4316-8cde-2e5459bdf0d0.png"
+    },
+    {
+      "id": "palmer",
+      "width": 1774,
+      "height": 887,
+      "pixelFormat": "Format32bppArgb",
+      "cornerAlpha": 0,
+      "sha256": "705120e2a327e9c065d656161b8952d82c6fb8a833b3a918987fdb4e40178b8f",
+      "file": "palmer.png",
+      "prompt": "为宝可梦同人游戏制作桄榔（Palmer／クロツグ）的透明背景半身对话立绘。第一张为官方钻石珍珠人物原画，第二张为官方卡牌外观参考，第三张小椿双图只参考画风排版。严格保持官方桄榔的成熟男性形象、夸张不对称放射形稻金色尖发、长尖鬓发、粗棱角眉、琥珀棕眼、细长尖鼻和自信气质；深森林绿双排扣长外套、巨大金色椭圆纽扣、宽领口，白色高领内衫、深灰手套，腰线可见金色腰带扣。请勿改成短发青年或黑色内衫。横向2:1画布，左右两个等宽方格，画同一人完全一致的腰以上姿势，轻松挺立，一只手自然在腰旁。左图沉着常态，右图自信温和微笑，仅表情变化。头发和手肘完整留在各自格子内，头顶留余量、底部腰线齐平，不重叠。清晰线稿、精细赛璐璐阴影，与小椿立绘统一。真实透明alpha背景，无文字无标签无边框无其他人物。",
+      "referenceRoles": [
+        {
+          "role": "Official Diamond/Pearl Ken Sugimori character art archived by Bulbagarden",
+          "page": "https://archives.bulbagarden.net/wiki/File:Diamond_Pearl_Palmer.png",
+          "image": "https://archives.bulbagarden.net/media/upload/7/72/Diamond_Pearl_Palmer.png"
+        },
+        {
+          "role": "Appearance cross-check, official TCG card",
+          "page": "https://www.pokemon-card.com/card-search/details.php/card/23245",
+          "image": "https://www.pokemon-card.com/assets/images/card_images/large/DPt3-B/023245_T_KUROTSUGUNOKOUKEN.jpg"
+        },
+        {
+          "role": "Existing project style and two-cell layout only",
+          "file": "clair.png"
+        }
+      ],
+      "generatedFile": "exec-575437bb-e3a6-4529-9c13-9d8ae91b1414.png"
+    },
+    {
+      "id": "riley",
+      "width": 1774,
+      "height": 887,
+      "pixelFormat": "Format32bppArgb",
+      "cornerAlpha": 0,
+      "sha256": "428459d712f8e38f2347af263aef8727ca4146ca89aad667aa14ca765ce942cd",
+      "file": "riley.png",
+      "prompt": "请修正第一张亚玄（Riley）双表情立绘的人物设计，让外观与第二张宝可梦官网的亚玄一致。第一张是需要修改的游戏立绘，第二张是官方外观参考。保留第一张左右两格、常态与微笑、透明背景和赛璐璐画风；按官方参考重画帽子为蓝色圆冠宽檐帽、右后方三根长尖帽檐，不是两根黑色尖角；头发改为短而直的蓝黑尖发、斜刘海越过一只眼睛，不是长卷发。领口改为黑翻领和黑高领内衫，金色饰物改为细长环与一个垂下的圆环，不是金色领带。手去掉黑手套，改为官方裸手扶帽姿势。两幅身体和衣着完全一致，仅表情不同。不要添加文字、边框或其他人物。完整帽顶与手肘留在各自格子内。",
+      "referenceRoles": [
+        {
+          "role": "Official BDSP character art; appearance reference",
+          "page": "https://www.pokemon.co.jp/ex/bdsp/ja/character/210928_02/",
+          "image": "https://www.pokemon.co.jp/ex/bdsp/assets/img/character/ill_character_07.png"
+        },
+        {
+          "role": "Edit target, superseded first-pass generated Riley sheet",
+          "generatedFile": "exec-53d08a93-aef9-4ff9-ae77-1eaf728391de.png"
+        }
+      ],
+      "generatedFile": "exec-4e5512c8-82f8-44b9-8583-937af6b174cf.png"
+    }
+  ]
+}

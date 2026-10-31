@@ -332,51 +332,59 @@ function toId() {
 			}), 'text');
 		},
 		challstr: '',
+		finishLoginUpkeep: function (error) {
+			clearTimeout(this.loginUpkeepTimer);
+			this.loginUpkeepTimer = null;
+			this.loginUpkeepGeneration = (this.loginUpkeepGeneration || 0) + 1;
+			this.loaded = true;
+			this.set({loginState: error ? 'error' : 'ready', loginError: error || ''});
+			app.topbar.updateUserbar();
+			app.trigger('login:state');
+		},
+		retryLogin: function () {
+			if (this.challstr && this.get('loginState') !== 'pending') this.receiveChallstr(this.challstr);
+		},
 		receiveChallstr: function (challstr) {
-			if (challstr) {
-				/**
-				 * Rename the user based on the `sid` and `showdown_username` cookies.
-				 * Specifically, if the user has a valid session, the user will be
-				 * renamed to the username associated with that session. If the user
-				 * does not have a valid session but does have a persistent username
-				 * (i.e. a `showdown_username` cookie), the user will be renamed to
-				 * that name; if that name is registered, the user will be required
-				 * to authenticate.
-				 *
-				 * See `finishRename` above for a list of events this can emit.
-				 */
-				this.challstr = challstr;
-				if (Storage.isLocalGuest()) {
-					this.loaded = true;
-					this.set('registered', false);
-					var localName = Storage.prefs('localTestName');
-					if (typeof localName === 'string' && localName) this.rename(localName);
-					app.topbar.updateUserbar();
-					return;
-				}
-				var self = this;
-				$.post(this.getActionPHP(), {
-					act: 'upkeep',
-					challstr: this.challstr
-				}, Storage.safeJSON(function (data) {
-					self.loaded = true;
-					if (!data.username) {
-						app.topbar.updateUserbar();
-						return;
-					}
-
-					// | , ; are not valid characters in names
-					data.username = data.username.replace(/[\|,;]+/g, '');
-
-					if (data.loggedin) {
-						self.set('registered', {
-							username: data.username,
-							userid: toUserid(data.username)
-						});
-					}
-					self.finishRename(data.username, data.assertion);
-				}), 'text');
+			if (!challstr) return;
+			this.challstr = challstr;
+			if (Storage.isLocalGuest()) {
+				this.set('registered', false);
+				this.finishLoginUpkeep();
+				var localName = Storage.prefs('localTestName');
+				if (typeof localName === 'string' && localName) this.rename(localName);
+				return;
 			}
+			clearTimeout(this.loginUpkeepTimer);
+			var self = this, generation = this.loginUpkeepGeneration = (this.loginUpkeepGeneration || 0) + 1;
+			this.loaded = false;
+			this.set({loginState: 'pending', loginError: ''});
+			app.topbar.updateUserbar();
+			app.trigger('login:state');
+			function fail() {
+				if (generation !== self.loginUpkeepGeneration) return;
+				self.finishLoginUpkeep('自动登录暂未完成，请重试登录。无需清除浏览器数据或重新注册。');
+			}
+			// Covers both XHR and the cross-domain storage bridge, whose $.post returns no jqXHR.
+			this.loginUpkeepTimer = setTimeout(fail, 15000);
+			try {
+				var request = $.post(this.getActionPHP(), {act: 'upkeep', challstr: challstr}, function (raw) {
+					if (generation !== self.loginUpkeepGeneration) return;
+					try {
+						if (typeof raw !== 'string' || !raw.trim()) throw new Error('Empty upkeep response');
+						Storage.safeJSON(function (data) {
+							if (!data || typeof data !== 'object') throw new Error('Invalid upkeep response');
+							if (!data.username) { self.finishLoginUpkeep(); return; }
+							if (typeof data.username !== 'string' || typeof data.assertion !== 'string') throw new Error('Invalid assertion response');
+							var name = data.username.replace(/[|,;]+/g, '');
+							if (data.loggedin) self.set('registered', {username: name, userid: toUserid(name)});
+							// Authentication prompts remain native. Signed assertions still require server acceptance.
+							if (!data.assertion || data.assertion.charAt(0) === ';' || /[\n\r]/.test(data.assertion)) self.finishLoginUpkeep();
+							self.finishRename(name, data.assertion);
+						})(raw);
+					} catch (e) { fail(); }
+				}, 'text');
+				if (request && typeof request.fail === 'function') request.fail(fail);
+			} catch (e) { fail(); }
 		},
 		/**
 		 * Log out from the server (but remain connected as a guest).
@@ -815,7 +823,7 @@ function toId() {
 					}
 					return new SockJS(
 						protocol + '://' + Config.server.host + ':' + Config.server.port + Config.sockjsprefix,
-						[], { timeout: 5 * 60 * 1000 }
+						[], { timeout: 15000 }
 					);
 				} catch (err) {
 					// The most common case this happens is if an HTTPS connection fails,
@@ -1185,6 +1193,7 @@ function toId() {
 				});
 				this.user.setPersistentName(named ? parsed.name : null);
 				if (named) {
+					this.user.finishLoginUpkeep();
 					this.trigger('init:choosename');
 				}
 				if (app.ignore[userid]) {
@@ -1194,6 +1203,7 @@ function toId() {
 				break;
 
 			case 'nametaken':
+				this.user.finishLoginUpkeep();
 				app.addPopup(LoginPopup, { name: parts[1] || '', error: parts[2] || '' });
 				break;
 
@@ -1814,12 +1824,12 @@ function toId() {
 		updateLayout: function () {
 			if (!this.curRoom) return; // can happen during initialization
 			if (this.curRoom.type === 'fantasyrogue') this.curRoom.preparePanel();
-			if (this.updateFantasyCalcdexLayout()) return;
+			if (!this.curRoom.rogueReadingWide && this.updateFantasyCalcdexLayout()) return;
 
 			// If we don't have any right rooms at all, just show the left
 			// room in full. Home is a left room, so we'll always have a
 			// left room.
-			if (!this.sideRoom || this.singlePanelMode) {
+			if (!this.sideRoom || this.singlePanelMode || this.curRoom.rogueReadingWide) {
 				this.curRoom.show('full');
 				if (this.curSideRoom) {
 					this.curSideRoom.hide();

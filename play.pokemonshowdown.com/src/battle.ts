@@ -81,6 +81,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	fainted = false;
 	rogueCapturedBall?: string;
 	rogueAbilityInfo?: ServerPokemon['rogueAbilityInfo'];
+	rogueBossPhase?: { kind: 'summit' | 'arceus', phase: number, total: number };
 	hp = 0;
 	maxhp = 1000;
 	level = 100;
@@ -558,6 +559,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 		this.clearVolatile();
 		delete this.rogueCapturedBall;
 		delete this.rogueAbilityInfo;
+		delete this.rogueBossPhase;
 		this.hp = this.maxhp;
 		this.fainted = false;
 		this.status = '';
@@ -1023,7 +1025,7 @@ export interface ServerPokemon extends PokemonDetails, PokemonHealth {
 			name?: string, source?: string, accuracyFactor?: number, accuracySource?: string,
 			types?: Record<string, { source: string, factor?: number, add?: number }[]> }>,
 		training?: Partial<Record<'atk' | 'def' | 'spa' | 'spd' | 'spe', number>>,
-		mentor?: { name: string, text: string, damage: number, defense: number, speed: number } };
+		mentor?: { name: string, text: string, offense?: number, defense: number, speed: number } };
 	ident: string;
 	details: string;
 	condition: string;
@@ -1858,9 +1860,14 @@ export class Battle {
 			break;
 		}
 		case '-heal': {
-			let poke = this.getPokemon(args[1], Dex.getEffect(kwArgs.from).id === 'revivalblessing')!;
+			let poke = this.getPokemon(args[1], ['revivalblessing', 'roguebagrevive'].includes(Dex.getEffect(kwArgs.from).id))!;
 			let damage = poke.healthParse(args[2], true, true);
 			if (damage === null) break;
+			// These phase revivals also appear in older replays without phase metadata.
+			if (poke.hp > 0 && ['第二阶段', '神之挑战'].includes(kwArgs.from)) {
+				poke.fainted = false;
+				this.scene.updateSidebar(poke.side);
+			}
 			let range = poke.getDamageRange(damage);
 
 			if (kwArgs.from) {
@@ -1888,6 +1895,7 @@ export class Battle {
 				case 'wish':
 					this.scene.runResidualAnim('wish' as ID, poke);
 					break;
+				case 'roguebagrevive':
 				case 'revivalblessing':
 					this.scene.runResidualAnim('wish' as ID, poke);
 					const { siden } = this.parsePokemonId(args[1]);
@@ -3368,6 +3376,21 @@ export class Battle {
 				break;
 			}
 			this.log(args, kwArgs);
+			break;
+		}
+		case '-roguebossphase': {
+			const poke = this.getPokemon(args[1]);
+			const kind = args[2], phase = Number(args[3]), total = Number(args[4]);
+			if (!poke || !['summit', 'arceus'].includes(kind) || !Number.isInteger(phase) ||
+				phase < 1 || phase > total || total !== (kind === 'arceus' ? 19 : 2)) break;
+			const previous = poke.rogueBossPhase;
+			poke.rogueBossPhase = {kind: kind as 'summit' | 'arceus', phase, total};
+			if (poke.hp > 0) poke.fainted = false;
+			this.scene.updateStatbar(poke, true, true);
+			if (phase > 1 && previous?.phase !== phase) {
+				this.scene.resultAnim(poke, (kind === 'summit' ? '第二阶段 · 全力觉醒！' :
+					phase === total ? '最终阶段 · 传说降临！' : `下一阶段 · 剩余 ${total - phase + 1} 条生命`) + '<small>首领已恢复 HP，新的阶段开始</small>', 'roguephase');
+			}
 			break;
 		}
 		case '-rogueinfo': {

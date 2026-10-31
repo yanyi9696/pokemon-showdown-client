@@ -29,6 +29,7 @@ var translations = {
     "Rogue Great Mage": "大法师",
     "Rogue Spinda Sleep": "濒死睡眠",
     "Heaven Piercing Drill": "突破天际的钻头",
+    "Fiery Golden Eyes": "火眼金睛",
     "Rogue Ascent": "登龙",
     "Rogue Emblem Bug": "虫属性转", "Rogue Emblem Dark": "恶属性转",
     "Rogue Emblem Dragon": "龙属性转", "Rogue Emblem Electric": "电属性转",
