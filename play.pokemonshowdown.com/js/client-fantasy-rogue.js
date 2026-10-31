@@ -1776,11 +1776,12 @@
 					var evolutionCost = (state.deferredLevels || []).find(function (cost) { return cost.floor === run.floor; });
 					html += '<p class="rogue-caption">本轮按一份棱彩祝福记录对手加级' + (evolutionCost ? '，从第 ' + evolutionCost.startsAt + ' 层生效' : '') + '，不会因选择方向或强化重复加级。</p>';
 				}
-				if (run.floor === 200) html += '<p class="rogue-caption">完成最后一次强化后保存通关卡。</p>';
-				html += '<div class="rogue-evolution-choices">';
+				if (state.evolutionBeforeBattle) html += '<p class="rogue-caption">已抵达第 ' + run.floor + ' 层，强化后再挑战本层首领。</p>';
+				else if (run.floor === 200) html += '<p class="rogue-caption">完成最后一次强化后保存通关卡。</p>';
+				html += '<div class="rogue-evolution-choices' + (state.stage.kind === 'upgrade' ? ' is-upgrade' : '') + '">';
 				var directions = {resistance: {icon: 'shield', text: '逐步改善队伍中该属性伙伴的抗性，减轻受到的属性克制。'},
 					moves: {icon: 'bolt', text: '提升本属性招式威力、扩大打击面，或解锁招式专属效果。'},
-					stats: {icon: 'line-chart', text: '每次从三项能力中选一项，让队伍中该属性伙伴的对应能力提升 15%。'}};
+					stats: {icon: 'line-chart', text: '每次从四项能力中选一项，让队伍中该属性伙伴的对应能力提升 15%。'}};
 				state.stage.options.forEach(function (option) {
 					var info = directions[option.id];
 					html += '<button type="button" name="chooseBlessingUpgrade" value="' + escape(option.id) + '" class="rogue-evolution-choice"' +
@@ -2600,11 +2601,13 @@
 					html += '</div>';
 				});
 			} else if (panel === 'items') {
-				html += '<h4>选择携带道具</h4><p class="rogue-caption">从背包取出，替换下来的道具回到背包。</p>' +
-					button('equipItem', '', '卸下当前道具', locked || !mon.set.item);
+				var evioliteLocked = idOf(mon.set.item) === 'eviolite' && run.blessings && run.blessings.owned.some(function (entry) { return entry.family === 'kid'; });
+				html += '<h4>选择携带道具</h4><p class="rogue-caption">' + (evioliteLocked ?
+					'【小鬼当家】：进化奇石已锁定，不能取下或更换；携带者不能进化为最终形态。' : '从背包取出，替换下来的道具回到背包。') + '</p>' +
+					button('equipItem', '', '卸下当前道具', locked || evioliteLocked || !mon.set.item);
 				this.state.items.filter(function (entry) { return entry.kind === 'held' && run.bag[entry.id] > 0; }).forEach(function (entry) {
 					html += '<div class="rogue-option"><strong>' + itemIcon(entry) + escape(localName(entry.name)) + ' ×' + run.bag[entry.id] +
-						'</strong><p>' + escape(itemDescription(entry)) + '</p>' + button('equipItem', entry.id, '携带', locked) + '</div>';
+						'</strong><p>' + escape(itemDescription(entry)) + '</p>' + button('equipItem', entry.id, '携带', locked || evioliteLocked) + '</div>';
 				});
 			} else {
 				html += this.renderStats(mon, locked) + '<div class="rogue-permanent-gains"><p class="rogue-boosts">局外能力加成：' +

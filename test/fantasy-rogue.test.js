@@ -1117,6 +1117,17 @@ describe('Fantasy Rogue start menu and codex', () => {
 		assert(!c.html.includes('name="equipItem" value="rogueemblemwater"'));
 		assert(c.html.includes('name="openEmblems"')); assert(c.html.includes('name="equipItem" value="oranberry"'));
 	});
+	it('explains and disables held-item replacement when Kid locks an Eviolite', () => {
+		const c = client(), data = adventure('ready');
+		data.run.team[0].set.item = 'Eviolite';
+		data.run.blessings = {owned: [{id: 'kid', family: 'kid', name: '小鬼当家', tier: 'silver', text: '进化奇石强化。'}], pending: [], shards: 0};
+		c.room.receiveState(data); c.room.editSection('items');
+		assert(c.html.includes('进化奇石已锁定，不能取下或更换'));
+		for (const button of c.html.match(/<button[^>]+name="equipItem"[^>]*>/g)) assert(button.includes('disabled'));
+		data.run.blessings.owned = []; c.room.receiveState(data);
+		assert(!c.html.includes('进化奇石已锁定'));
+		assert(!c.html.match(/<button[^>]+name="equipItem" value="oranberry"[^>]*>/)[0].includes('disabled'));
+	});
 	it('only offers dragon-king abilities absent from the recipient, including the already-has-both case', () => {
 		const c = client(), data = adventure('ready'), mon = data.run.team[0];
 		data.run.blessings = {owned: [], pending: [], completed: [], levels: 0, shards: 0,
@@ -2070,22 +2081,35 @@ describe('Fantasy Rogue blessing controls', () => {
 		const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
 		assert.equal(request.action, 'blessingrefresh'); assert.equal(request.slot, 0);
 	});
-	it('explains immediate attribute upgrades, paid checkpoint costs and the final card step', () => {
+	it('shows four pre-boss upgrades, retains three directions and submits the fourth choice', () => {
 		const {c, data} = ready();
 		delete data.run.blessings.round;
 		data.run.blessings.evolutionCosts = [50, 100];
+		data.run.blessings.evolutionBeforeBattle = true;
 		data.run.blessings.stage = {kind: 'direction', options: [{id: 'stats', name: '数值进化'}]};
 		c.room.receiveState(data);
 		assert(c.room.html.includes('随后立即选择一次强化'));
+		assert(c.room.html.includes('每次从四项能力中选一项'));
+		assert(!c.room.html.includes('rogue-evolution-choices is-upgrade'));
 		assert(c.room.html.includes('本轮按一份棱彩祝福'));
 		c.room.chooseBlessingUpgrade('stats');
 		const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
 		assert.equal(request.action, 'blessing'); assert.equal(request.value, 'stats');
 		data.run.floor = 200;
-		data.run.blessings.stage = {kind: 'upgrade', options: [{id: 'stat:hp', name: 'HP +15%'}]};
-		c.room.receiveState(data);
-		assert(c.room.html.includes('完成最后一次强化后保存通关卡'));
+		data.run.blessings.stage = {kind: 'upgrade', options: ['hp', 'atk', 'def', 'spe'].map(stat => ({id: 'stat:' + stat, name: stat + ' +15%'}))};
+		data.account.revision++;
+		c.room.receiveAction({userid: data.userid, id: request.id, ok: true, state: data});
+		assert(c.room.html.includes('已抵达第 200 层，强化后再挑战本层首领'));
+		assert(!c.room.html.includes('完成最后一次强化后保存通关卡'));
+		assert(c.room.html.includes('rogue-evolution-choices is-upgrade'));
+		assert.equal((c.room.html.match(/name="chooseBlessingUpgrade"/g) || []).length, 4);
 		assert(!c.room.html.includes('本轮按一份棱彩祝福'));
+		c.room.chooseBlessingUpgrade('stat:spe');
+		const fourth = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(fourth.value, 'stat:spe');
+		data.run.blessings.evolutionBeforeBattle = false;
+		c.room.receiveState(data);
+		assert(c.room.html.includes('完成最后一次强化后保存通关卡'), 'old post-clear saves keep their pending reward');
 	});
 	it('selects a whole blessing card first and grants only on a second activation', () => {
 		const {c, data} = ready();
