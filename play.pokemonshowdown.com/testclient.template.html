@@ -153,14 +153,13 @@
 
 		<script src="data/aliases.js?" async="async" onerror="loadRemoteData(this.src)"></script>
 
-		<script>
-			window.onload = () => {
-				window.app = new App();
-			}
-		</script>
-
 		<!-- 在这里引入私服内置汉化脚本 -->
 		<script src="js/ps-china-translator.js?"></script>
+		<script>
+			// Like the hosted client, connect once the required scripts are ready.
+			// Remote images and optional assets must not delay login until window.load.
+			window.app = new App();
+		</script>
 		<script src="showdex/main.js?" data-fantasy-showdex defer></script>
 
 	</body>

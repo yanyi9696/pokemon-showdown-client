@@ -872,6 +872,16 @@
 .fantasyrogue .rogue-item-ether { width: 18px; height: 24px; background-position: -85px -192px; }
 /* Compact party details without changing column widths between partners. */
 .fantasyrogue .rogue-system-status { font-size: 13px; line-height: 1.5; color: #4b6477; margin: 4px 0; }
+.rogue-systems { margin: 12px 0 16px; }
+.rogue-system-cards { display: flex; flex-wrap: wrap; gap: 7px; }
+.rogue-system-card { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid #b4bec7; border-top: 3px solid #8d9ba6; border-radius: 6px; background: #edf0f3; color: #5c6872; line-height: 1.2; }
+.rogue-system-card strong { font-size: 14px; }
+.rogue-system-card small { font-size: 11px; }
+.rogue-system-card > .fa { font-size: 12px; color: #82909c; }
+.rogue-system-card.is-unlocked { border-color: #7bb1bd; border-top-color: #428b9b; background: #e6f4f5; color: #285765; }
+.rogue-system-card.is-unlocked > .fa { color: #428b9b; }
+.dark .rogue-system-card { background: #333d46; border-color: #687680; color: #ccd4db; }
+.dark .rogue-system-card.is-unlocked { background: #25454c; border-color: #6aa7b4; color: #d7f1f3; }
 .fantasyrogue .rogue-team-tabs button { padding-top: 2px; padding-bottom: 2px; }
 .fantasyrogue .rogue-member-sheet { padding: 5px 6px; }
 .fantasyrogue .rogue-details-line { min-height: 46px; }

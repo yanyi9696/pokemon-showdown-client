@@ -971,7 +971,7 @@
 		},
 		receiveState: function (state, storyOnly) {
 			if (!state || state.userid !== app.user.get('userid')) return;
-			if (state.protocolVersion !== 1) { this.error = '请刷新客户端以更新肉鸽页面。'; this.render(); return; }
+			if (state.protocolVersion !== 1 && state.protocolVersion !== 2) { this.error = '请刷新客户端以更新肉鸽页面。'; this.render(); return; }
 			if (this.state && this.state.account && state.account && state.account.revision < this.state.account.revision) return;
 			var codexChanged = this.state && this.state.contentVersion !== state.contentVersion;
 			if (codexChanged) { this.codices = {}; this.codexReplay = null; }
@@ -1077,7 +1077,8 @@
 			} else this.render(story);
 		},
 		act: function (value) {
-			var parts = value.split(':');
+			var separator = value.indexOf(':');
+			var parts = separator < 0 ? [value] : [value.slice(0, separator), value.slice(separator + 1)];
 			var run = this.state.run;
 			if (parts[0] === 'sell' && run && run.node && run.node.trade && run.node.trade.kind === 'buyback') {
 				var sold = this.state.items.filter(function (item) { return (parts[1] === 'all' || item.id === parts[1]) && run.bag[item.id] > 0 && item.recyclePrice; });
@@ -2347,7 +2348,9 @@
 				html += '<div class="rogue-receipt" role="status">' + fa('diamond') + escape(noticeText(notice)) + '</div>';
 			});
 			if (run.lastReward && (run.lastReward.money || run.lastReward.points || Object.keys(run.lastReward.items || {}).length)) {
-				html += '<div class="rogue-receipt"><strong>' + fa('check-circle') + (run.lastReward.money < 0 ? '已结算' : '已到账') + ' · 第 ' + run.lastReward.floor + ' 层' +
+				html += '<div class="rogue-receipt"><strong>' + fa('check-circle') +
+					(run.lastReward.floor === run.floor - 1 ? '上一层' : run.lastReward.floor < run.floor ? '此前' : '') +
+					(run.lastReward.money < 0 ? '已结算' : '已到账') + ' · 第 ' + run.lastReward.floor + ' 层' +
 					(run.lastReward.encounter ? ' · 第 ' + run.lastReward.encounter + ' 场' : '') + '</strong>' +
 					loot(run.lastReward, this.state.items) + '</div>';
 			}
@@ -2813,6 +2816,19 @@
 			var panel = app.rooms && app.rooms.fantasyrogueparty;
 			if (panel) panel.render();
 		},
+		renderSystems: function (run) {
+			var systems = [
+				['太晶化', run.teraUnlocked, 'diamond'], ['超进化', run.megaUnlocked, 'bolt'],
+				['超巨进化', run.gmegaUnlocked, 'star'], ['Z 招式', run.zUnlocked, 'flash']
+			];
+			return '<section class="rogue-systems" aria-label="本局特殊系统"><div class="rogue-system-cards">' + systems.map(function (system) {
+				return '<span class="rogue-system-card ' + (system[1] ? 'is-unlocked' : 'is-locked') + '">' +
+					fa(system[1] ? system[2] : 'lock') + '<strong>' + system[0] + '</strong><small>' +
+					(system[1] ? '已解锁' : '未解锁') + '</small></span>';
+			}).join('') + '</div><p class="rogue-system-status">' +
+				(run.teraUnlocked ? '太晶化每场战斗限用一次。' : '太晶化可通过预定祝福或第 100 层馆主赠礼解锁。') +
+				'普通超级石与 Z 纯晶需先解锁对应系统，再携带使用。</p></section>';
+		},
 		renderParty: function () {
 			var state = this.state;
 			if (!state || !state.account) return '<p>请先在左侧打开幻想杯肉鸽，读取冒险存档。</p>';
@@ -2827,10 +2843,7 @@
 				if (run.startCard) html += '<div class="rogue-keepsake rogue-preference"><strong>' + fa('clone') + escape(run.startCard.name) +
 					'</strong><p>' + escape(run.startCard.text) + '</p></div>';
 				html += this.renderCompanions(run, busy) + this.renderTrainerBonds(run, busy);
-				html += '<p class="rogue-tera rogue-system-status">' + fa(run.teraUnlocked ? 'diamond' : 'lock') + '太晶化：' +
-					(run.teraUnlocked ? '本局已解锁，每场战斗限用一次。' : '未解锁，可通过预定祝福或第 100 层馆主赠礼解锁。') + '</p>' +
-					'<p class="rogue-system-status">超进化：' + (run.megaUnlocked ? '已解锁' : '未解锁') + ' · 超巨进化：' + (run.gmegaUnlocked ? '已解锁' : '未解锁') + ' · Z 招式：' + (run.zUnlocked ? '已解锁' : '未解锁') +
-					'。普通超级石与 Z 纯晶需先解锁系统，再携带使用。</p>' +
+				html += this.renderSystems(run) +
 					this.renderDragonKing(run, busy) + this.renderEditor(run, busy) + this.renderBox(run, busy) + this.renderBag(run, busy);
 				if (run.notices && run.notices.length) html += '<details class="rogue-notices"><summary>本次战斗的经验与成长明细</summary><ul>' +
 					run.notices.map(function (notice) { return '<li>' + dialogueText(noticeText(notice)) + '</li>'; }).join('') + '</ul></details>';
@@ -3020,7 +3033,7 @@
 				escape(this.codexQuery) + '" placeholder="输入名称，按回车" /></label>' + button('searchCodex', '', '查找', false, fa('search')) + '</div>';
 			var entryKind = section === 'guide' && guideModule === 'moves' ? 'move' : '';
 			entries = entries.filter(function (entry) { return !query || (localName(entry.name, entryKind) + ' ' + entry.name + (this.codexSearchMode === 'content' ? ' ' + localName(entry.text || '') : '')).toLowerCase().indexOf(query) >= 0; }, this);
-			if (section !== 'blessings' && this.codexFilter !== 'beginner') {
+			if (section !== 'blessings' && section !== 'stories' && this.codexFilter !== 'beginner') {
 				var collator = new Intl.Collator('zh-CN-u-co-pinyin', {sensitivity: 'base', ignorePunctuation: true, numeric: true});
 				entries.sort(function (a, b) {
 					if (moveGroup && (a.origin === 'original') !== (b.origin === 'original')) return a.origin === 'original' ? 1 : -1;
@@ -3030,6 +3043,7 @@
 				});
 				html += '<p class="rogue-caption">按中文名称拼音首字母排列。</p>';
 			}
+			if (section === 'stories') html += '<p class="rogue-caption">按秘闻解锁顺序排列。</p>';
 			if (section === 'events') entries.sort(function (a, b) { return Number(b.category === 'ecology') - Number(a.category === 'ecology'); });
 			if (active === 'ecology') html += '<p class="rogue-caption">黑色剪影表示尚未在该生态捕捉；其他地方的捕捉不会点亮这里。出现过的生态在后续 5 层暂不刷新。</p>';
 			var pageSize = section === 'events' && active === 'ecology' ? 4 : 12;

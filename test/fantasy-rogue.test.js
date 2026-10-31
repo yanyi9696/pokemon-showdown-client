@@ -76,6 +76,41 @@ function state() {
 }
 
 describe('Fantasy Rogue mainline presentation', () => {
+	it('updates the window dialogue in place into a required reply page and resumes after answering', () => {
+		const c = client(), data = adventure('story');
+		data.protocolVersion = 2;
+		data.story = {stage: 'mainline', scene: 'stranger', title: '窗边的天气', speaker: '黑袍老人', text: '肩上湿了。先擦一擦。',
+			key: 'window:1', performance: 'window', index: 1, total: 6, canSkip: true};
+		c.room.receiveState(data);
+		assert(!c.room.error);
+		const nodes = {};
+		for (const name of ['.rogue-story-scene', '.rogue-story-chapter', '.rogue-story-actions', 'strong', 'span', 'small']) nodes[name] = {};
+		nodes['.rogue-story-dialogue'] = {setAttribute() {}, querySelector: key => nodes[key]};
+		const section = {dataset: {story: c.room.storySignature(data.story)}, setAttribute() {}, querySelector: key => nodes[key]};
+		c.room.$el[0] = {querySelector: () => section};
+		const renderHTML = c.room.$el.html;
+		c.room.$el.html = () => { throw new Error('Keep the same story scene'); };
+		const choice = structuredClone(data); choice.account.revision++;
+		Object.assign(choice.story, {key: 'window:2', index: 2, speaker: '旁白', text: '你抬头看了看窗外。',
+			options: [{id: '0', label: '这雨什么时候会停？'}, {id: '1', label: '这里的天气总让我想起别的地方。'}]});
+		c.room.receiveState(choice, true);
+		assert(nodes['.rogue-story-dialogue'].disabled);
+		assert.equal(nodes.small.textContent, '请选择你的回应 · 3/6');
+		assert.equal((nodes['.rogue-story-actions'].innerHTML.match(/name="storyReply"/g) || []).length, 2);
+		assert(!nodes['.rogue-story-actions'].innerHTML.includes('storySkip'));
+		c.room.$el.html = renderHTML;
+		c.room.storyReply('1'); c.room.storyReply('1');
+		assert.equal(c.sent.length, 1);
+		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
+		assert.equal(request.value, 'window:2'); assert.equal(request.member, '1');
+		const reply = structuredClone(choice); reply.account.revision++;
+		delete reply.story.options;
+		Object.assign(reply.story, {key: 'window:3', index: 3, total: 9, text: '那应该是个值得记住的地方。'});
+		c.room.pending = null; c.room.receiveState(reply, true);
+		assert(!nodes['.rogue-story-dialogue'].disabled);
+		assert(!nodes['.rogue-story-actions'].innerHTML.includes('storyReply'));
+		assert.equal(nodes.small.textContent, '轻点继续 ▷ · 4/9');
+	});
 	it('shows emergency continuation without blocking existing mainline replies', () => {
 		const c = client(true), data = state();
 		data.continueOnly = true;
@@ -118,6 +153,18 @@ describe('Fantasy Rogue mainline presentation', () => {
 		c.room.readEvent('s0-1'); c.room.replayEventNext('p1'); assert(c.room.html.includes('灯亮着。'));
 		assert.equal(c.sent.length, before); assert.equal(c.joined.length, 0);
 	});
+	it('preserves the server unlock sequence instead of alphabetizing story titles', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCodex('stories');
+		c.room.receiveCodex({userid: 'rogueplayer', codexSchema: 5, section: 'stories', entries: [
+			{id: 'first', name: '最后一盏灯', unlocked: true, text: '第一段'},
+			{id: 'second', name: '爱与回忆', unlocked: true, text: '第二段'},
+			{id: 'third', name: '尚未拾起的记忆', unlocked: false, text: '继续旅程'},
+		]});
+		assert(c.room.html.indexOf('最后一盏灯') < c.room.html.indexOf('爱与回忆'));
+		assert(c.room.html.indexOf('爱与回忆') < c.room.html.indexOf('尚未拾起的记忆'));
+		assert(c.room.html.includes('按秘闻解锁顺序排列'));
+		assert(!c.room.html.includes('按中文名称拼音首字母排列'));
+	});
 	it('shows queued unlocks on entry once and waits while the final battle is still visible', () => {
 		const c = client(true), data = state();
 		data.account.unlockNotices = [{id: 'difficulty:1', title: '已解锁 1 档冒险', text: '通关与故事均已完成。'}];
@@ -148,6 +195,7 @@ describe('Fantasy Rogue mainline presentation', () => {
 describe('Fantasy Rogue optional challenge and voiced dialogue presentation', () => {
 	function challenge(stage) {
 		const data = adventure(stage === 'battle' ? 'ready' : 'event');
+		data.protocolVersion = 2;
 		data.run.challenge = {stage, name: '试车邀请', speaker: '北尚', hint: '留意黏黏网与换人。',
 			paragraphs: ['列车停靠。⌈与伙伴一起，出发吧。⌋'],
 			team: [{species: 'Pikachu', level: 26, ability: 'Static', item: 'Light Ball', moves: ['thunderbolt']}],
@@ -155,6 +203,20 @@ describe('Fantasy Rogue optional challenge and voiced dialogue presentation', ()
 				{id: 'training', name: '复盘特训', money: 0, items: {}, training: [{species: 'Bulbasaur', experience: 800, level: 28}]}]};
 		return data;
 	}
+	it('submits a complete star-prize identifier and marks earlier receipts separately', () => {
+		const c = client(), data = challenge('won');
+		data.run.floor = 16;
+		data.run.lastReward = {floor: 15, encounter: 1, money: 0, items: {potion: 1}};
+		const member = data.run.team[0].id;
+		data.run.challenge.prizes.push({id: 'star:' + member, name: '升星', money: 0, items: {},
+			star: {species: 'Bulbasaur', from: 1, to: 2}});
+		c.room.receiveState(data);
+		assert(c.html.includes('上一层已到账'));
+		assert(c.html.includes('value="challenge:star:' + member + '"'));
+		c.room.act('challenge:star:' + member);
+		const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'challenge'); assert.equal(request.value, 'star:' + member);
+	});
 	it('previews the roster and exact choices before accepting and explains the two-step retreat', () => {
 		const c = client(), data = challenge('offer'); c.room.receiveState(data);
 		assert(c.html.includes('Lv.26')); assert(c.html.includes('最多获得 800 经验，止于 Lv.28'));
@@ -306,8 +368,8 @@ describe('Fantasy Rogue start menu and codex', () => {
 		data.run.mentorOffer={floor:20,cards:[
 			{id:'attack',name:'破阵之证',offense:100,defense:40,speed:0},
 			{id:'guard',name:'坚守之证',offense:40,defense:120,speed:0},
-			{id:'speed',name:'疾风之证',offense:30,defense:30,speed:100},
-			{id:'balanced',name:'同行之证',offense:60,defense:60,speed:50},
+			{id:'speed',name:'疾风之证',offense:20,defense:20,speed:100},
+			{id:'balanced',name:'同行之证',offense:50,defense:50,speed:50},
 		]};
 		c.room.receiveState(data);
 		assert.equal((c.room.html.match(/name="chooseMentorCard"/g)||[]).length,4);
@@ -1289,14 +1351,16 @@ describe('Fantasy Rogue start menu and codex', () => {
 		assert(c.html.includes('进化与携带道具 · 1 种'));
 		assert.equal((c.html.match(/value="buy:metronome"/g) || []).length, 1);
 	});
-	it('uses real medicine images and uniform system-status text', () => {
+	it('uses real medicine images and compact locked system cards', () => {
 		const c = client(), data = adventure('rest');
 		data.items = ['antidote', 'burnheal', 'iceheal', 'awakening', 'paralyzeheal'].map(id => ({id, name: id, kind: 'cure'}));
 		data.items.forEach(item => { data.run.bag[item.id] = 1; });
 		c.room.receiveState(data);
 		for (const item of data.items) assert(c.html.includes('sprites/fantasy-rogue/' + item.id + '.png'));
-		assert(c.html.includes('rogue-tera rogue-system-status'));
-		assert(c.html.includes('class="rogue-system-status">超进化：'));
+		const systems = c.room.renderSystems(data.run);
+		assert.equal((systems.match(/rogue-system-card is-locked/g) || []).length, 4);
+		assert.equal((systems.match(/fa-lock/g) || []).length, 4);
+		for (const name of ['太晶化', '超进化', '超巨进化', 'Z 招式']) assert(systems.includes('<strong>' + name + '</strong>'));
 	});
 	it('shows full PP supplies with bottle icons and player-facing full-recovery wording', () => {
 		const c = client(), data = adventure('ready');
@@ -2846,11 +2910,12 @@ describe('Fantasy Rogue client', () => {
 	it('shows Tera locked for legacy and new adventures until the server grants the event unlock', () => {
 		const c = client(); const data = adventure();
 		c.room.receiveState(data);
-		assert(c.html.includes('未解锁，可通过预定祝福或第 100 层馆主赠礼解锁'));
+		assert.match(c.room.renderSystems(data.run), /rogue-system-card is-locked">[^]*?<strong>太晶化<\/strong><small>未解锁<\/small>/);
+		assert(c.html.includes('预定祝福或第 100 层馆主赠礼'));
 		data.run.teraUnlocked = true;
 		c.room.receiveState(data);
-		assert(c.html.includes('本局已解锁，每场战斗限用一次'));
-		assert(!c.html.includes('未解锁，可通过预定祝福或第 100 层馆主赠礼解锁'));
+		assert.match(c.room.renderSystems(data.run), /rogue-system-card is-unlocked">[^]*?<strong>太晶化<\/strong><small>已解锁<\/small>/);
+		assert(!c.html.includes('预定祝福或第 100 层馆主赠礼'));
 	});
 	it('displays Boss reward quantities, full move details and a localized short description during learning', () => {
 		const c = client(); const data = adventure('settlement');
