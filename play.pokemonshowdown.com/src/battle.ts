@@ -1025,7 +1025,7 @@ export interface ServerPokemon extends PokemonDetails, PokemonHealth {
 			name?: string, source?: string, accuracyFactor?: number, accuracySource?: string,
 			types?: Record<string, { source: string, factor?: number, add?: number }[]> }>,
 		training?: Partial<Record<'atk' | 'def' | 'spa' | 'spd' | 'spe', number>>,
-		mentor?: { name: string, text: string, offense?: number, defense: number, speed: number } };
+		mentor?: { name: string, text: string, offense?: number, defense: number, speed: number }, };
 	ident: string;
 	details: string;
 	condition: string;
@@ -3384,12 +3384,13 @@ export class Battle {
 			if (!poke || !['summit', 'arceus'].includes(kind) || !Number.isInteger(phase) ||
 				phase < 1 || phase > total || total !== (kind === 'arceus' ? 19 : 2)) break;
 			const previous = poke.rogueBossPhase;
-			poke.rogueBossPhase = {kind: kind as 'summit' | 'arceus', phase, total};
+			poke.rogueBossPhase = { kind: kind as 'summit' | 'arceus', phase, total };
 			if (poke.hp > 0) poke.fainted = false;
 			this.scene.updateStatbar(poke, true, true);
 			if (phase > 1 && previous?.phase !== phase) {
 				this.scene.resultAnim(poke, (kind === 'summit' ? '第二阶段 · 全力觉醒！' :
-					phase === total ? '最终阶段 · 传说降临！' : `下一阶段 · 剩余 ${total - phase + 1} 条生命`) + '<small>首领已恢复 HP，新的阶段开始</small>', 'roguephase');
+					phase === total ? '最终阶段 · 传说降临！' : `下一阶段 · 剩余 ${total - phase + 1} 条生命`) +
+					'<small>首领已恢复 HP，新的阶段开始</small>', 'roguephase');
 			}
 			break;
 		}

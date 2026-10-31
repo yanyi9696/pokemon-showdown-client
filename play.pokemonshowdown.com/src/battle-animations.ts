@@ -1502,7 +1502,7 @@ export class BattleScene implements BattleSceneStub {
 		$effect.delay(this.timeOffset).css({
 			display: 'block',
 			opacity: 0,
-				top: type === 'roguephase' ? 110 : pokemon.sprite.top - 5,
+			top: type === 'roguephase' ? 110 : pokemon.sprite.top - 5,
 			left: type === 'roguephase' ? Math.max(10, Math.min(330, pokemon.sprite.left - 150)) : pokemon.sprite.left - 75,
 		}).animate({
 			opacity: 1,

@@ -76,6 +76,22 @@ function state() {
 }
 
 describe('Fantasy Rogue mainline presentation', () => {
+	it('shows emergency continuation without blocking existing mainline replies', () => {
+		const c = client(true), data = state();
+		data.continueOnly = true;
+		c.room.receiveState(data);
+		assert(c.room.html.includes('暂不开放新冒险'));
+		assert(c.room.html.includes('name="enterGame" disabled'));
+		c.room.screen = 'game'; c.room.render();
+		assert(!c.room.html.includes('选择本次冒险的伙伴'));
+		const running = adventure('story');
+		running.continueOnly = true;
+		running.story = {stage: 'mainline', title: '灯下', speaker: '黑袍老人', text: '⌈还记得吗？⌋',
+			key: 'scene:2', index: 2, total: 8, options: [{id: '0', label: '记得'}]};
+		c.room.receiveState(running);
+		c.room.storyReply('0');
+		assert(c.sent.some(message => message.includes('mainlinechoice')));
+	});
 	it('requires an explicit reply, submits the current page key and escapes dialogue content', () => {
 		const c = client(), data = adventure('story');
 		data.story = {stage: 'mainline', scene: 'stranger', title: '灯下', speaker: '黑袍老人',

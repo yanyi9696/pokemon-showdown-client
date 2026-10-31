@@ -2916,7 +2916,7 @@
 			return '<section class="rogue-start-menu" aria-label="幻想杯肉鸽开始界面">' +
 				'<div class="rogue-start-heading"><span class="rogue-caption">一座塔，无数种可能</span><h2>你的幻想，从这里开始</h2>' +
 				'<p>与宝可梦同行，发现每次旅途的不一样。</p></div>' +
-				'<button class="rogue-start-primary" name="enterGame">' +
+				'<button class="rogue-start-primary" name="enterGame"' + (state && state.continueOnly && !run ? ' disabled' : '') + '>' +
 				'<span class="rogue-start-symbol" aria-hidden="true">' + fa('compass') + '</span><span><strong>开始你的幻想杯肉鸽之旅</strong><small>' +
 				escape(hint) + '</small></span><span class="rogue-start-arrow" aria-hidden="true">→</span></button>' +
 				'<div class="rogue-start-books">' + [
@@ -3137,6 +3137,9 @@
 				(state.run.charm ? button('showCharm', '', '护符庇佑', false, charmIcon()) : '') +
 				'<span class="rogue-caption">点击查看本局效果</span></p>' : '<p>原生对战 · 捕捉伙伴 · 逐层成长</p>');
 			if (this.error) html += '<p class="message-error">' + escape(this.error) + '</p>';
+			if (state && state.continueOnly) {
+				html += '<p class="infobox" role="status">暂不开放新冒险。已有冒险、剧情和奖励可继续处理，进度正常保存。</p>';
+			}
 			if (this.pending && this.error) html += '<p class="rogue-save-status">正在保存操作… ' + button('sendPending', '', '查询／重发同一请求') + '</p>';
 			this.updateParty();
 			if (this.screen !== 'game') {
@@ -3180,7 +3183,7 @@
 				}
 				html += state.pendingClear ? this.renderPendingClear(state.pendingClear, state.cards, busy) :
 					'<p>' + (card ? card.public ? '通关卡已公开，可在展示页管理。' : '通关卡已私下收藏，可在展示页主动公开。' :
-						'这次旅途已结束；本次通关卡未保留在收藏中。') + '</p>' + button('act', 'newstory', '开启新的篇章', busy);
+						'这次旅途已结束；本次通关卡未保留在收藏中。') + '</p>' + button('act', 'newstory', '开启新的篇章', busy || state.continueOnly);
 				stableHTML(this, html + button('joinRoom', 'fantasyroguegallery', '前往通关卡展示') + '</div>'); return;
 			}
 			var ongoing = run && run.phase !== 'complete';
@@ -3193,6 +3196,7 @@
 				(run.floorEnvironment && (run.floorEnvironment.weather || run.floorEnvironment.terrain) ? '<span class="rogue-time rogue-environment" title="本层固定的天气／场地，也用于特殊进化判断">' + fa('cloud') + escape(run.floorEnvironment.name) + '</span>' : '') + '</h3>' +
 				this.renderFloor(run, busy) + this.renderShop(run, busy);
 			if (!ongoing) {
+				if (state.continueOnly) { stableHTML(this, html + '</div>'); return; }
 				html += '<h3>选择本次冒险的伙伴</h3><p class="rogue-caption">先选好队伍，再依次配置每一只宝可梦。</p>';
 				var selectedDifficulty = account.preferredDifficulty;
 				var selectedTier = (state.difficulties || []).find(function (tier) { return tier.id === selectedDifficulty; });

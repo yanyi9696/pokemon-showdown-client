@@ -337,7 +337,7 @@ function toId() {
 			this.loginUpkeepTimer = null;
 			this.loginUpkeepGeneration = (this.loginUpkeepGeneration || 0) + 1;
 			this.loaded = true;
-			this.set({loginState: error ? 'error' : 'ready', loginError: error || ''});
+			this.set({ loginState: error ? 'error' : 'ready', loginError: error || '' });
 			app.topbar.updateUserbar();
 			app.trigger('login:state');
 		},
@@ -357,7 +357,7 @@ function toId() {
 			clearTimeout(this.loginUpkeepTimer);
 			var self = this, generation = this.loginUpkeepGeneration = (this.loginUpkeepGeneration || 0) + 1;
 			this.loaded = false;
-			this.set({loginState: 'pending', loginError: ''});
+			this.set({ loginState: 'pending', loginError: '' });
 			app.topbar.updateUserbar();
 			app.trigger('login:state');
 			function fail() {
@@ -367,7 +367,7 @@ function toId() {
 			// Covers both XHR and the cross-domain storage bridge, whose $.post returns no jqXHR.
 			this.loginUpkeepTimer = setTimeout(fail, 15000);
 			try {
-				var request = $.post(this.getActionPHP(), {act: 'upkeep', challstr: challstr}, function (raw) {
+				var request = $.post(this.getActionPHP(), { act: 'upkeep', challstr: challstr }, function (raw) {
 					if (generation !== self.loginUpkeepGeneration) return;
 					try {
 						if (typeof raw !== 'string' || !raw.trim()) throw new Error('Empty upkeep response');
@@ -376,7 +376,7 @@ function toId() {
 							if (!data.username) { self.finishLoginUpkeep(); return; }
 							if (typeof data.username !== 'string' || typeof data.assertion !== 'string') throw new Error('Invalid assertion response');
 							var name = data.username.replace(/[|,;]+/g, '');
-							if (data.loggedin) self.set('registered', {username: name, userid: toUserid(name)});
+							if (data.loggedin) self.set('registered', { username: name, userid: toUserid(name) });
 							// Authentication prompts remain native. Signed assertions still require server acceptance.
 							if (!data.assertion || data.assertion.charAt(0) === ';' || /[\n\r]/.test(data.assertion)) self.finishLoginUpkeep();
 							self.finishRename(name, data.assertion);
