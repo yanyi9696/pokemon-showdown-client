@@ -612,6 +612,11 @@
 	function charmIcon() {
 		return '<img class="rogue-charm-icon" src="sprites/fantasy-rogue/key-items/tempting-charm.webp" alt="替身护符" /> ';
 	}
+	function charmDescription(text) {
+		return String(text || '').split(/\n\s*\n/).map(function (paragraph) {
+			return '<p>' + dialogueText(paragraph) + '</p>';
+		}).join('');
+	}
 	function difficultyBadge(tier, label) {
 		return '<span class="rogue-difficulty-badge">' + (tier === 'easy' ? charmIcon() : '') + escape(label || '历史 0 档') + '</span>';
 	}
@@ -1440,7 +1445,9 @@
 		renderStory: function (story, busy) {
 			if (story.stage === 'charm') {
 				return '<section class="rogue-charm-offer"><span class="rogue-caption">黑袍老人</span><h3>' + escape(story.title) + '</h3><p>' +
-					dialogueText(story.text) + '</p><div class="rogue-charm-actions">' +
+					dialogueText(story.text) + '</p>' + (story.charmProgressNotice ?
+						'<aside class="rogue-charm-notice"><strong>简易档 · 跨局收益说明</strong>' +
+						charmDescription(story.charmProgressNotice) + '</aside>' : '') + '<div class="rogue-charm-actions">' +
 					button('chooseCharm', 'accept', '接过护符（难度降低，推荐新手选择）', busy || story.canAccept === false) +
 					button('chooseCharm', 'decline', '谢谢，我想自己试试', busy || story.canDecline === false) + '</div>' +
 					(story.canAccept === false || story.canDecline === false ? '<p class="rogue-caption">本次已开启塔灵，只能前往已解锁塔灵的档位。</p>' : '') + '</section>';
@@ -2672,7 +2679,7 @@
 						escape(localName(mon.set.species)) + ' · Lv.' + mon.set.level + ' · HP ' + mon.hp + '/' + mon.maxhp + '</option>';
 				}).join('') + '</select></label></p><div class="rogue-inventory">';
 			if (run.charm) html += '<div class="rogue-item-card rogue-charm"><div class="rogue-item-heading">' + charmIcon() +
-				'<strong>' + escape(run.charm.name) + '</strong></div><p>' + escape(run.charm.description) + '</p><small>本局护符 · 不占携带道具位</small>' +
+				'<strong>' + escape(run.charm.name) + '</strong></div>' + charmDescription(run.charm.description) + '<small>本局护符 · 不占携带道具位</small>' +
 				button('showCharm', '', '查看护符庇佑') + '</div>';
 			var held = this.state.items.filter(function (item) { return item.kind !== 'treasure' && run.bag[item.id] > 0; });
 			held.forEach(function (item) {
@@ -4000,7 +4007,7 @@
 			this.$el.addClass('rogue-spirit-popup rogue-charm-popup');
 			var received = this.room.state.story && this.room.state.story.stage === 'charmeffect';
 			stableHTML(this, '<div class="rogue-charm-art">' + charmIcon() + '</div><span class="rogue-caption">' +
-				(received ? '获得替身护符' : '本局护符') + '</span><h3>护符庇佑</h3><p>' + escape(run.charm.description) + '</p>' +
+				(received ? '获得替身护符' : '本局护符') + '</span><h3>护符庇佑</h3>' + charmDescription(run.charm.description) +
 				(run.difficultyScales ? '<div class="rogue-charm-scales"><span>当前第 ' + run.floor + ' 层</span><strong>我方 ' +
 					(run.difficultyScales.player * 100).toFixed(1) + '% · 对手 ' + (run.difficultyScales.opponent * 100).toFixed(1) + '%</strong></div>' : '') +
 				button('acceptCharm', '', received ? '收好护符 · 继续前行' : '收起', !!this.room.pending));

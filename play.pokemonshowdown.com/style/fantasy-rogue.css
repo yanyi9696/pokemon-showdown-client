@@ -1235,6 +1235,8 @@
 .rogue-charm-offer { max-width: 640px; margin: 20px auto; padding: 24px; border: 1px solid #aec5cf; border-radius: 12px; background: linear-gradient(150deg, #fcfbf2ef, #e8f3faed); box-shadow: 0 5px 20px #2c485a12; }
 .rogue-charm-offer h3 { margin: 6px 0 18px; }
 .rogue-charm-offer p { line-height: 1.9; }
+.rogue-charm-notice { padding: 12px 16px; border: 1px solid #c7b578; border-radius: 8px; color: #665020; background: #fff8e6; }
+.rogue-charm-offer .rogue-charm-notice p { margin: 6px 0 0; line-height: 1.65; font-size: 14px; }
 .rogue-charm-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
 .rogue-charm-received { margin: 20px 0; color: #536d7d; }
 .ps-popup.rogue-charm-popup { max-height: calc(100vh - 36px); overflow-y: auto; }

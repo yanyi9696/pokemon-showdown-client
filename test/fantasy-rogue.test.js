@@ -615,8 +615,11 @@ describe('Fantasy Rogue start menu and codex', () => {
 		for(const value of ['accept','decline']) {
 			const c=client(),data=adventure('story');
 			data.story={stage:'charm',title:'临行前的护符',text:'它能**帮你压一压对手的力量，也能让你避开那些太强的家伙**。',charmText:'本局个体值上限为 10。'};
+			data.story.charmProgressNotice = '**本局新学招式（包括学习机）不会跨局解锁**。已有解锁仍保留。';
 			c.room.receiveState(data);assert(c.html.includes('压一压对手'));assert(!c.html.includes('个体值上限为 10'));
 			assert(c.html.includes('<strong>帮你压一压对手的力量，也能让你避开那些太强的家伙</strong>'));
+			assert(c.html.includes('<strong>本局新学招式（包括学习机）不会跨局解锁</strong>'));
+			assert(c.html.indexOf('已有解锁仍保留') < c.html.indexOf('name="chooseCharm"'));
 			assert(c.html.includes('接过护符（难度降低，推荐新手选择）'));
 			assert(!c.html.includes('name="storyNext"'));
 			c.room.chooseCharm(value);const request=JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));assert.equal(request.action,'charm');
@@ -625,10 +628,12 @@ describe('Fantasy Rogue start menu and codex', () => {
 	});
 	it('opens the charm receipt once, resumes it on reload and guards acknowledgement across account changes', () => {
 		const c=client(),data=adventure('story');data.run.id='charm-receipt';data.story={stage:'charmeffect',title:'护符庇佑'};
-		data.run.charm={name:'替身护符',description:'本局个体值上限为 10。'};
+		data.run.charm={name:'替身护符',description:'本局个体值上限为 15。\n\n**不获得局外成长点数**。<img src=x onerror=alert(1)>'};
 		c.room.receiveState(data);assert.equal(c.app.lastPopup.type,c.RogueCharmPopup);
 		const popup=Object.create(c.RogueCharmPopup);popup.$el={addClass(){},html(value){popup.html=value;}};popup.close=()=>{};
-		popup.initialize({room:c.room});assert(popup.html.includes('tempting-charm.webp'));assert(popup.html.includes('个体值上限为 10'));
+		popup.initialize({room:c.room});assert(popup.html.includes('tempting-charm.webp'));assert(popup.html.includes('个体值上限为 15'));
+		assert(popup.html.includes('</p><p><strong>不获得局外成长点数</strong>'));
+		assert(!popup.html.includes('<img src=x')); assert(popup.html.includes('&lt;img'));
 		assert(!c.html.includes('准备好了，出发'));assert(!c.html.includes('返回配置'));assert(!c.html.includes('name="confirmDifficulty"'));
 		c.app.lastPopup=null;c.room.receiveState(data);assert.equal(c.app.lastPopup,null);
 		const reload=client();reload.room.receiveState(data);assert.equal(reload.app.lastPopup.type,reload.RogueCharmPopup);
@@ -637,13 +642,15 @@ describe('Fantasy Rogue start menu and codex', () => {
 	});
 	it('shows the non-tradeable charm, exact current scales and advanced supplies in the bag', () => {
 		const c=client(),data=adventure('ready');data.run.difficulty='easy';data.run.difficultyLabel='护符庇佑';
-		data.run.difficultyScales={player:0.9,opponent:0.65};data.run.charm={name:'替身护符',description:'不获得局外点数。'};
+		data.run.difficultyScales={player:0.9,opponent:0.65};data.run.charm={name:'替身护符',description:'**不获得局外成长点数**。\n\n**新学招式不会跨局解锁**。'};
 		data.run.difficultyTest=true;
 		c.room.receiveState(data);c.room.showCharm();assert.equal(c.app.lastPopup.type,c.RogueCharmPopup);
 		const popup=Object.create(c.RogueCharmPopup);popup.$el={addClass(){},html(value){popup.html=value;}};popup.initialize({room:c.room});
 		assert(popup.html.includes('我方 90.0%'));assert(popup.html.includes('对手 65.0%'));
 		assert(!c.html.includes('本地测试（不解锁档位）'));assert(!c.panel.html.includes('select name="difficulty"'));assert(c.panel.html.includes('本局已锁定'));
 		assert(c.html.includes('本局护符 · 不占携带道具位'));assert(!c.html.includes('value="use:oldcharm"'));assert(!c.html.includes('value="sell:oldcharm"'));
+		assert(c.html.includes('<strong>不获得局外成长点数</strong>'));
+		assert(c.html.includes('</p><p><strong>新学招式不会跨局解锁</strong>'));
 		const size=require('image-size')(require.resolve('../play.pokemonshowdown.com/sprites/fantasy-rogue/key-items/tempting-charm.webp'));
 		assert.equal(size.width,128);assert.equal(size.height,128);
 		data.run.difficulty=5;data.run.difficultyLabel='5 档';delete data.run.charm;data.run.difficultyRewards='道馆首胜额外碎片 ×10';
