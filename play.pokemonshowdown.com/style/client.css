@@ -2400,6 +2400,8 @@ a.ilink.yours {
 }
 .setchart-nickname {
 	position: absolute;
+	/* Keep the overlapping nickname tab above the isolated artwork panel. */
+	z-index: 1;
 	left: -4px;
 	top: 5px;
 	border: 1px solid #999999;
@@ -2411,6 +2413,8 @@ a.ilink.yours {
 	box-shadow: inset 1px 1px 0 rgba(255,255,255,.6);
 }
 .setchart {
+	position: relative;
+	isolation: isolate;
 	border: 1px solid #999999;
 	background: #DAE5F0 no-repeat scroll 10px 5px none;
 	border-radius: 5px;
@@ -2420,6 +2424,14 @@ a.ilink.yours {
 	margin-top: 8px;
 
 	box-shadow: inset 1px 1px 0 rgba(255,255,255,.6);
+}
+.setchart-sprite {
+	/* Match the old background positioning area, without filtering the panel. */
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	background: transparent none no-repeat scroll 10px 5px;
 }
 .setcol {
 	height: 127px;
@@ -2462,6 +2474,12 @@ a.ilink.yours {
 .setcell-sprite {
 	height: 82px;
 	padding: 1px;
+}
+.setchart-kyurem-original {
+	/* Enlarge only the artwork; retain the normal card and input positions. */
+	--teambuilder-art-size: 85px;
+	--teambuilder-art-x: 20px;
+	--teambuilder-art-y: 18px;
 }
 .setcell-pokemon {
 	margin-top: 0;

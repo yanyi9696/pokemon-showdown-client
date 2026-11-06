@@ -7,6 +7,74 @@ const heading = 'Your team was rejected for the following reasons:';
 const chineseHeading = '您的队伍未通过校验，原因如下：';
 
 describe('Rogue vocabulary contexts', () => {
+	it('covers playable generated Fantasy names, including saved move and ability IDs', () => {
+		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
+		const fantasy = require('../play.pokemonshowdown.com/data/gen9fantasy.js');
+		for (const [table, kind] of [['Gen9fantasyMovedex', 'move'], ['Gen9fantasyAbilities', 'ability'], ['Gen9fantasyItems', 'item'], ['Gen9fantasydex', 'pokemon']]) {
+			for (const [id, entry] of Object.entries(fantasy[table])) {
+				if (!entry.name || entry.isNonstandard === 'CAP' || kind === 'pokemon' && entry.num <= 0) continue;
+				const translated = context.translateRogueName(entry.name, kind);
+				assert(!/[A-Za-z]{2}/.test(translated.replace(/\b(?:AR|DD|HP|PP|QZ|II)\b/g, '')), `${kind}: ${entry.name} -> ${translated}`);
+				if (kind === 'move' || kind === 'ability') assert.equal(context.translateRogueName(id, kind), translated.replace(/[+🔄]+$/u, ''), id);
+			}
+		}
+	});
+	it('resolves canonical, unspaced and differently cased custom names, retaining move and item contexts', () => {
+		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
+		for (const name of ['Tian Lai Zhi Yin', 'tianlaizhiyin', 'TIANLAIZHIYIN']) assert.equal(context.translateRogueName(name, 'ability'), '天籁之音');
+		for (const name of ['He An Qin Shi', 'heianqinshi', 'Hei An Qin Shi']) assert.equal(context.translateRogueName(name), '黑暗侵蚀');
+		assert.equal(context.translateRogueName('dianshanxunji+', 'move'), '电闪迅击+');
+		assert.equal(context.translateRogueName('psychic', 'move'), '精神强念');
+		assert.equal(context.translateRogueName('metronome', 'item'), '节拍器');
+		assert.equal(context.translateRogueName('rogueuniversalpsychicz'), '万用霸主 Z（超能力）');
+		assert.equal(context.translateRogueName('A nickname from my friend'), 'A nickname from my friend');
+		assert.equal(client('tianlaizhiyin').paragraph.textContent, '天籁之音');
+		assert.equal(client('tianlaizhiyin', 'en').paragraph.textContent, 'tianlaizhiyin');
+		assert.equal(context.translations.tianlaizhiyin, '天籁之音');
+		assert.equal(client('获得【tianlaizhiyin】，招式【Dian Shan Xun Ji】。').paragraph.textContent, '获得【天籁之音】，招式【电闪迅击】。');
+	});
+	it('preserves user handles even when they match a game-name ID', () => {
+		const ui = client('tianlaizhiyin');
+		for (const className of ['username', 'usernametext']) {
+			const handle = element('STRONG', className, ui.popup);
+			text('tianlaizhiyin', handle);
+			ui.notify([{addedNodes: [handle]}]);
+			assert.equal(handle.textContent, 'tianlaizhiyin');
+		}
+		assert.equal(ui.paragraph.textContent, '天籁之音');
+	});
+	it('keeps numeric counters and rates intact instead of interpreting a form suffix as a name ID', () => {
+		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
+		assert.equal(context.translations['10'], undefined);
+		for (const value of ['10', '180', '0.1%']) {
+			assert.equal(context.translateRogueName(value), value);
+			assert.equal(client(value).paragraph.textContent, value);
+		}
+		assert.notEqual(context.translateRogueName('Porygon2'), 'Porygon2');
+		assert(context.translateRogueName('Zygarde-10%').includes('基格尔德'));
+	});
+	it('keeps candy sizes out of gender-form translation in names and observed DOM text', () => {
+		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
+		for (const size of ['XS', 'S', 'M', 'L', 'XL']) {
+			for (const input of ['expcandy' + size.toLowerCase(), 'Exp. Candy ' + size,
+				'Exp. Candy-' + size, '经验糖果-' + size, '经验糖果 ' + size]) {
+				assert.equal(context.translateRogueName(input, 'item'), '经验糖果 ' + size, input);
+				assert.equal(client(input).paragraph.textContent, '经验糖果 ' + size, input);
+			}
+		}
+		const label = '经验糖果 M（3000 经验）';
+		assert.equal(context.translateRogueName(label), label);
+		assert.equal(client(label).paragraph.textContent, label);
+		assert.equal(context.translateRogueName('M'), 'M');
+		assert.equal(context.translateRogueName('F'), 'F');
+		assert.equal(context.translations.m, undefined);
+		assert.equal(context.translations.f, undefined);
+		for (const form of ['Indeedee-M', 'Indeedee-F', 'Meowstic-M', 'Meowstic-F']) {
+			const translated = context.translateRogueName(form, 'pokemon');
+			assert(!translated.includes(form), form);
+			assert(!/[A-Z]/.test(translated), form);
+		}
+	});
 	it('translates battle tooltip move bullets with Fantasy markers and PP counters', () => {
 		for (const marker of ['', '+', '🔄']) for (const suffix of ['', ' (15/25)']) {
 			assert.equal(client('• Powder Snow' + marker + suffix).paragraph.textContent, '• 细雪' + marker + suffix);

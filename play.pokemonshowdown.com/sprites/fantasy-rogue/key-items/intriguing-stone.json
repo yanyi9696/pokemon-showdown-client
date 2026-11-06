@@ -1,0 +1,17 @@
+{
+  "item": "intriguingstone",
+  "name": "似珍石",
+  "index": 768,
+  "coordinate": [
+    0,
+    1152
+  ],
+  "slot": [
+    24,
+    24
+  ],
+  "source": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/intriguing-stone.png",
+  "sourceSHA256": "7b873257c2271ef8067e421c117456d83a8fc1e8ef126cf21bf3d34c151b641e",
+  "atlasSHA256": "215a81640bd1c82ec3d1cfa655436f5203658377b6d8225c62f325c14581a348",
+  "previousPixelsUnchanged": true
+}

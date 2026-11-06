@@ -1,6 +1,38 @@
 (function (exports, $) {
 	// this is a useful global
 	var teams;
+	var localizedChartNames = new WeakMap();
+	function chartDisplayName(value, kind) {
+		if (kind === "pokemon" && toID(value) === "kyuremoriginal") value = "Kyurem-Original-Fantasy";
+		if (!value || !exports.translateRogueName || typeof localStorage !== 'undefined' && localStorage.getItem('ps_china_lang') === 'en') return value;
+		return exports.translateRogueName(value, kind);
+	}
+	function chartCanonicalName(value, kind, dex, current) {
+		if (kind === "pokemon" && value === "酋雷姆-三合一") value = "幻想酋雷姆-三合一";
+		if (!/[\u3400-\u9fff]/.test(value || '')) return value;
+		var group = {pokemon: 'species', move: 'moves', ability: 'abilities', item: 'items'}[kind];
+		if (!group || !dex[group]) return value;
+		if (current && chartDisplayName(current, kind) === value) {
+			var selected = dex[group].get(current);
+			if (selected.exists) return selected.name;
+		}
+		var groups = localizedChartNames.get(dex);
+		if (!groups) localizedChartNames.set(dex, groups = {});
+		if (!groups[group]) {
+			groups[group] = Object.create(null);
+			var tables = {species: ['BattlePokedex', 'Gen9fantasydex'], moves: ['BattleMovedex', 'Gen9fantasyMovedex'],
+				abilities: ['BattleAbilities', 'Gen9fantasyAbilities'], items: ['BattleItems', 'Gen9fantasyItems']}[group];
+			var ids = Object.keys(exports[tables[0]] || {});
+			if (dex.modid && dex.modid.includes('gen9fantasy')) ids = ids.concat(Object.keys(exports[tables[1]] || {}));
+			ids.forEach(function (id) {
+				var entry = dex[group].get(id);
+				if (!entry.exists) return;
+				var display = chartDisplayName(entry.name, kind);
+				if (!groups[group][display]) groups[group][display] = entry.name;
+			});
+		}
+		return groups[group][value] || value;
+	}
 
 	exports.TeambuilderRoom = exports.Room.extend({
 		type: "teambuilder",
@@ -1819,9 +1851,9 @@
 				buf +=
 					'<div class="setmenu"><button name="importSet"><i class="fa fa-upload"></i>Import</button></div>';
 				buf +=
-					'<div class="setchart" style="background-image:url(' +
+					'<div class="setchart"><span class="setchart-sprite" aria-hidden="true" style="background-image:url(' +
 					Dex.resourcePrefix +
-					'sprites/gen5/0.png);"><div class="setcol setcol-icon"><div class="setcell-sprite"></div><div class="setcell setcell-pokemon"><label>' +
+					'sprites/gen5/0.png);"></span><div class="setcol setcol-icon"><div class="setcell-sprite"></div><div class="setcell setcell-pokemon"><label>' +
 					s_Pokemon +
 					'</label><input type="text" name="pokemon" class="textbox chartinput" value="" autocomplete="off" /></div></div></div>';
 				buf += "</li>";
@@ -1842,7 +1874,9 @@
 			if (s.length < 15) {
 				app.send("/ifget " + s);
 			}
-			buf += '<div class="setchart" style="' + s + ';">';
+			// Keep sprite filters off the opaque editor panel and its controls.
+			var artworkClass = ["kyuremoriginal", "kyuremoriginalfantasy"].includes(toID(set.species)) ? " setchart-kyurem-original" : "";
+			buf += '<div class="setchart' + artworkClass + '"><span class="setchart-sprite" aria-hidden="true" style="' + s + '"></span>';
 
 			// icon
 			buf += '<div class="setcol setcol-icon">';
@@ -1856,7 +1890,7 @@
 				'<div class="setcell setcell-pokemon"><label>' +
 				s_Pokemon +
 				'</label><input type="text" name="pokemon" class="textbox chartinput" value="' +
-				BattleLog.escapeHTML(set.species) +
+				BattleLog.escapeHTML(chartDisplayName(set.species, 'pokemon')) +
 				'" autocomplete="off" /></div></div>';
 
 			// details
@@ -1957,12 +1991,12 @@
 			if (renderItem)
 				buf +=
 					'<div class="setcell setcell-item"><label>Item</label><input type="text" name="item" class="textbox chartinput" value="' +
-					BattleLog.escapeHTML(set.item) +
+					BattleLog.escapeHTML(chartDisplayName(set.item, 'item')) +
 					'" autocomplete="off" /></div>';
 			if (renderAbility)
 				buf +=
 					'<div class="setcell setcell-ability"><label>Ability</label><input type="text" name="ability" class="textbox chartinput" value="' +
-					BattleLog.escapeHTML(set.ability) +
+					BattleLog.escapeHTML(chartDisplayName(set.ability, 'ability')) +
 					'" autocomplete="off" /></div>';
 			buf += "</div></div>";
 
@@ -1972,19 +2006,19 @@
 				'<div class="setcol setcol-moves"><div class="setcell"><label>Moves</label>';
 			buf +=
 				'<input type="text" name="move1" class="textbox chartinput" value="' +
-				BattleLog.escapeHTML(set.moves[0]) +
+				BattleLog.escapeHTML(chartDisplayName(set.moves[0], 'move')) +
 				'" autocomplete="off" /></div>';
 			buf +=
 				'<div class="setcell"><input type="text" name="move2" class="textbox chartinput" value="' +
-				BattleLog.escapeHTML(set.moves[1]) +
+				BattleLog.escapeHTML(chartDisplayName(set.moves[1], 'move')) +
 				'" autocomplete="off" /></div>';
 			buf +=
 				'<div class="setcell"><input type="text" name="move3" class="textbox chartinput" value="' +
-				BattleLog.escapeHTML(set.moves[2]) +
+				BattleLog.escapeHTML(chartDisplayName(set.moves[2], 'move')) +
 				'" autocomplete="off" /></div>';
 			buf +=
 				'<div class="setcell"><input type="text" name="move4" class="textbox chartinput" value="' +
-				BattleLog.escapeHTML(set.moves[3]) +
+				BattleLog.escapeHTML(chartDisplayName(set.moves[3], 'move')) +
 				'" autocomplete="off" /></div>';
 			buf += "</div>";
 
@@ -2791,7 +2825,8 @@
 			buf += '<div class="teambuilder-import-user-sets"></div>';
 			buf += "</div>";
 
-			this.$el.html('<div class="teamwrapper">' + buf + "</div>");
+			var artworkClass = ["kyuremoriginal", "kyuremoriginalfantasy"].includes(toID(this.curSet.species)) ? " teamwrapper-kyurem-original" : "";
+			this.$el.html('<div class="teamwrapper' + artworkClass + '">' + buf + "</div>");
 			if ($(window).width() < 640) this.show();
 			this.$chart = this.$(".teambuilder-results");
 			this.search = new BattleSearch(this.$chart, this.$chart);
@@ -2809,6 +2844,7 @@
 			this.$(".teamchart")
 				.first()
 				.html(this.renderSet(this.curSet, this.curSetLoc));
+			this.$(".teamwrapper").toggleClass("teamwrapper-kyurem-original", ["kyuremoriginal", "kyuremoriginalfantasy"].includes(toID(this.curSet.species)));
 		},
 		renderTeambar: function () {
 			var buf = "";
@@ -2879,12 +2915,11 @@
 			if (s.length < 15) {
 				app.send("/ifget " + s);
 			}
-			this.$(".setchart").attr("style", s);
+			this.$(".setchart-sprite").attr("style", s);
+			this.$(".setchart").toggleClass("setchart-kyurem-original", ["kyuremoriginal", "kyuremoriginalfantasy"].includes(toID(set.species)));
+			this.$(".teamwrapper").toggleClass("teamwrapper-kyurem-original", ["kyuremoriginal", "kyuremoriginalfantasy"].includes(toID(set.species)));
 
-			this.$(".pokemonicon-" + this.curSetLoc).css(
-				"background",
-				Dex.getPokemonIcon(set).substr(11)
-			);
+			this.$(".pokemonicon-" + this.curSetLoc).attr("style", Dex.getPokemonIcon(set));
 
 			var item = this.curTeam.dex.items.get(set.item);
 			if (item.id) {
@@ -3031,16 +3066,13 @@
 			}
 
 			var $inputEl = this.$("input[name=" + this.curChartName + "]");
-			var q = $inputEl.val();
+			var q = chartCanonicalName($inputEl.val(), type, this.curTeam.dex);
 
 			if (pokemonChanged || this.search.qName !== this.curChartName) {
 				var cur = {};
 				cur[toID(q)] = 1; // make sure selected one is first
 				if (type === "move") {
-					cur[toID(this.$("input[name=move1]").val())] = 1;
-					cur[toID(this.$("input[name=move2]").val())] = 1;
-					cur[toID(this.$("input[name=move3]").val())] = 1;
-					cur[toID(this.$("input[name=move4]").val())] = 1;
+					for (var slot = 0; slot < 4; slot++) cur[toID(this.curSet.moves[slot])] = 1;
 				}
 				if (type !== this.search.qType) {
 					this.$chart.scrollTop(0);
@@ -4384,10 +4416,10 @@
 					}
 				}
 				if (moves.length < this.curSet.moves.length) {
-					this.$("input[name=move1]").val(moves[0] || "");
-					this.$("input[name=move2]").val(moves[1] || "");
-					this.$("input[name=move3]").val(moves[2] || "");
-					this.$("input[name=move4]").val(moves[3] || "");
+					this.$("input[name=move1]").val(chartDisplayName(moves[0] || "", 'move'));
+					this.$("input[name=move2]").val(chartDisplayName(moves[1] || "", 'move'));
+					this.$("input[name=move3]").val(chartDisplayName(moves[2] || "", 'move'));
+					this.$("input[name=move4]").val(chartDisplayName(moves[3] || "", 'move'));
 					this.$(
 						"input[name=move" + Math.min(moves.length + 1, 4) + "]"
 					).focus();
@@ -4502,7 +4534,8 @@
 		chartChange: function (e, selectNext) {
 			var name = e.currentTarget.name;
 			if (this.curChartName !== name) return;
-			var value = e.currentTarget.value;
+			var current = /^move/.test(name) ? this.curSet.moves[Number(name.slice(4)) - 1] : this.curSet[name === 'pokemon' ? 'species' : name];
+			var value = chartCanonicalName(e.currentTarget.value, this.chartTypes[name], this.curTeam.dex, current);
 			var id = toID(value);
 			if (id in BattleAliases) id = toID(BattleAliases[id]);
 			var val = "";
@@ -4713,7 +4746,7 @@
 			var inputName = this.curChartName;
 			var input = this.$("input[name=" + inputName + "]");
 			if (this.chartSetCustom(input.val())) return;
-			input.val(val).removeClass("incomplete");
+			input.val(chartDisplayName(val, this.chartTypes[inputName])).removeClass("incomplete");
 			switch (inputName) {
 				case "pokemon":
 					this.setPokemon(val, selectNext);
@@ -5565,7 +5598,7 @@
 			this.room
 				.$("input[name=pokemon]")
 				.eq(this.chartIndex)
-				.val(this.curSet.species);
+				.val(chartDisplayName(this.curSet.species, 'pokemon'));
 			this.room.curTeam.team = Storage.packTeam(this.room.curSetList);
 			Storage.saveTeam(this.room.curTeam);
 		},

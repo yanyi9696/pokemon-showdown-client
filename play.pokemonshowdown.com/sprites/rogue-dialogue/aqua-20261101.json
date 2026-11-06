@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-11-01",
+  "mode": "built-in image_gen",
+  "referencePage": "https://www.pokemon.co.jp/ex/oras/character/04.html",
+  "referenceUse": "Official character designs used as inspiration for fan-game adaptations; generated costumes, poses and details differ from the official illustrations.",
+  "styleReference": "maxie.png",
+  "assets": {
+    "archie.png": "Sea-exploration captain with blue bandana, angular beard, navy expedition jacket and compass pendant.",
+    "aqua.png": "Sea-exploration crew member with navy bandana, blue-and-white striped shirt, expedition vest and dark gloves."
+  },
+  "layout": "Transparent 2:1 sheet with equal square cells: neutral on the left, smiling on the right."
+}

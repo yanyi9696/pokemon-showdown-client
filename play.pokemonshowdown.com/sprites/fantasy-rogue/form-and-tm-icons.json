@@ -183,8 +183,8 @@
     },
     {
       "file": "kyurem-original-icon.png",
-      "source": "User-approved image, 2026-10-24; Sprite Fusion Pixel Snapper public WASM; native 40x40 grid, no downsampling",
-      "sha256": "614119d1df6e4700ca6b2e4f9c63d3bc3afcc2c2f74b377b1c026c9b154bc3be"
+      "source": "User-provided replacement, 2026-11-03; original transparent PNG preserved; displayed proportionally in the standard 40x30 icon slot",
+      "sha256": "146a13f22c4e6f4cf3d287d6d1660c5ca2abdd96de32d05a15ccf87a2c02c7cf"
     },
     {
       "file": "key-items/old-charm.png",

@@ -18,6 +18,7 @@ export class BattleBGM {
 	 */
 	isPlaying = false;
 	isActuallyPlaying = false;
+	private playAttempt = 0;
 	/**
 	 * The sound should be rewound when it next plays.
 	 */
@@ -59,12 +60,21 @@ export class BattleBGM {
 		this.willRewind = false;
 		this.isActuallyPlaying = true;
 		this.sound.volume = BattleSound.bgmVolume / 100;
-		this.sound.play();
+		const attempt = ++this.playAttempt;
+		this.sound.play()?.catch(error => {
+			// A rejected old play() must not stop a later successful resume.
+			if (attempt !== this.playAttempt) return;
+			this.isActuallyPlaying = false;
+			clearTimeout(this.timer);
+			this.timer = undefined;
+			BattleSound.reportPlaybackError(this.url, error);
+		});
 		this.updateTime();
 	}
 	actuallyPause() {
 		if (!this.isActuallyPlaying) return;
 		this.isActuallyPlaying = false;
+		this.playAttempt++;
 		this.sound!.pause();
 		this.updateTime();
 	}
@@ -74,6 +84,7 @@ export class BattleBGM {
 	updateTime() {
 		clearTimeout(this.timer);
 		this.timer = undefined;
+		if (!this.isActuallyPlaying) return;
 		if (this !== BattleSound.currentBgm()) return;
 		if (!this.sound) return;
 
@@ -111,12 +122,21 @@ export const BattleSound = new class {
 	bgmVolume = 50;
 	muted = false;
 
+	getSoundURL(url: string) {
+		const location = window.document?.location;
+		// The Windows development client serves audio from its HTTP loopback proxy.
+		// Keep HTTPS for remote assets, including clients opened with file://.
+		const localHTTP = location?.protocol === 'http:' && location.host === Config.routes.client &&
+			['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+		return `${localHTTP ? 'http:' : 'https:'}//${Config.routes.client}/${url}`;
+	}
+
 	getSound(url: string) {
 		if (!window.HTMLAudioElement) return;
 		if (this.soundCache[url]) return this.soundCache[url];
 		try {
 			const sound = document.createElement('audio');
-			sound.src = 'https://' + Config.routes.client + '/' + url;
+			sound.src = this.getSoundURL(url);
 			sound.volume = this.effectVolume / 100;
 			this.soundCache[url] = sound;
 			return sound;
@@ -132,8 +152,14 @@ export const BattleSound = new class {
 		const effect = this.getSound(url);
 		if (effect) {
 			effect.volume = volume / 100;
-			effect.play();
+			effect.play()?.catch(error => this.reportPlaybackError(url, error));
 		}
+	}
+
+	reportPlaybackError(url: string, error: unknown) {
+		// Keep the resource and actual browser failure visible, including autoplay
+		// restrictions. Do not turn a failed sound into an unhandled rejection.
+		console.warn(`Audio playback failed: ${this.getSoundURL(url)}`, error);
 	}
 
 	/** loopstart and loopend are in milliseconds */

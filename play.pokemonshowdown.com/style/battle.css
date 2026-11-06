@@ -738,13 +738,6 @@ License: GPLv2
 	width: 40px;
 	height: 30px;
 }
-/* Keep this custom drawing's native pixels instead of shrinking it to 30px. */
-.picon[style*="kyurem-original-icon.png"] {
-	height: 40px;
-}
-.trainer div.teamicons:has(.picon[style*="kyurem-original-icon.png"]) {
-	height: 40px;
-}
 .trainer .picon {
 	margin: 0 -4px;
 }
@@ -880,3 +873,66 @@ License: GPLv2
 .battle .result.roguephaseresult strong { display:block; padding:12px 10px; border:2px solid #f0d789; border-radius:10px; background:linear-gradient(135deg, #173d57, #254f69); box-shadow:0 3px 14px #132a56aa; color:#fff3c5; font-size:18px; line-height:1.4; text-align:center; }
 .battle .result.roguephaseresult small { display:block; margin-top:6px; font-size:12px; font-weight:normal; color:#deeff1; }
 .statbar .rogue-boss-stage { display:inline-block; margin-top:3px; padding:2px 7px; border-radius:5px; background:#183b4fe8; border:1px solid #9fbdb8; color:#edfaec; font-size:10px; line-height:1.3; text-shadow:none; }
+.rogue-coop-preview-label { position:absolute; left:108px; max-width:420px; padding:2px 7px; border-radius:4px; color:#fff; background:#183644b8; font-size:11px; text-shadow:0 1px 2px #000; }
+.rogue-coop-preview-mon { position:absolute; width:84px; height:84px; border-radius:14px; }
+.rogue-coop-preview-mon > img { position:absolute; }
+.rogue-coop-preview-partner .rogue-coop-preview-mon { opacity:0.62; }
+.rogue-coop-preview-mon.is-selected { background:#d9f1ff24; box-shadow:inset 0 0 0 2px #8ed7ffc4; }
+.rogue-coop-preview-partner .rogue-coop-preview-mon.is-selected { opacity:0.8; }
+.rogue-coop-preview-order { position:absolute; top:0; right:1px; min-width:17px; border-radius:9px; background:#f5faff; color:#194565; text-align:center; font-size:12px; font-weight:bold; box-shadow:0 1px 3px #0008; }
+.rogue-coop-preview-order:empty { display:none; }
+.rogue-coop-preview-level { position:absolute; bottom:0; left:0; width:100%; color:white; text-align:center; font-size:10px; text-shadow:1px 1px #000,-1px -1px #000; }
+.rogue-coop-team-partner { padding:8px; margin-bottom:12px; border:1px solid #acbdc8; border-radius:6px; background:#eaf3f980; color:#4d6678; }
+.rogue-coop-team-partner .switchmenu { opacity:0.68; margin-top:5px; }
+.rogue-coop-team-choice { display:inline-block; vertical-align:middle; padding:4px 7px; margin:2px; border:1px solid #b8c4ca; border-radius:5px; background:#fff; }
+.rogue-coop-team-choice .picon { display:inline-block; vertical-align:middle; }
+.rogue-coop-team-choice.is-selected, .switchmenu button.rogue-coop-picked { background:#d9edfc; border-color:#6a9dbd; box-shadow:inset 0 0 0 1px #99bfd7; }
+.rogue-coop-team-controls > p { margin:9px 0; }
+.rogue-preview-shiny {
+	position: absolute; width: 64px; height: 66px; pointer-events: none;
+}
+.rogue-preview-shiny > img, .rogue-crate-stars > img {
+	position: absolute; width: 127px; height: 119px; left: 50%; top: 50%; opacity: 0;
+	filter: var(--star-filter);
+	animation-name: rogue-shiny-star-path, rogue-shiny-star-fade;
+	animation-duration: var(--star-duration);
+	/* Same quadratic deceleration and linear fade as the native entrance. */
+	animation-timing-function: cubic-bezier(.333333, .666667, .666667, 1), linear;
+	animation-delay: var(--star-delay);
+	animation-iteration-count: 1;
+	animation-fill-mode: forwards;
+}
+.rogue-crate-stars > img {
+	animation-name: rogue-crate-star-path, rogue-crate-star-fade;
+	animation-duration: 3.6s;
+	animation-delay: calc(var(--star-delay) + 1.3s + var(--reveal-delay, 0ms));
+	animation-iteration-count: infinite;
+}
+.rogue-crate-results.skip-animation .rogue-crate-stars > img { animation-delay: var(--star-delay); }
+@keyframes rogue-shiny-star-path {
+	from { transform: translate(calc(-50% + var(--star-from-x)), calc(-50% + var(--star-from-y))) scale(var(--star-from-scale)); }
+	to { transform: translate(calc(-50% + var(--star-to-x)), calc(-50% + var(--star-to-y))) scale(var(--star-to-scale)); }
+}
+@keyframes rogue-shiny-star-fade {
+	from { opacity: 1; }
+	to { opacity: 0; }
+}
+/* The 750ms entrance burst, followed by a quiet interval before the next one. */
+@keyframes rogue-crate-star-path {
+	0% { transform: translate(calc(-50% + var(--star-from-x)), calc(-50% + var(--star-from-y))) scale(var(--star-from-scale)); }
+	20.833333%, 100% { transform: translate(calc(-50% + var(--star-to-x)), calc(-50% + var(--star-to-y))) scale(var(--star-to-scale)); }
+}
+@keyframes rogue-crate-star-fade {
+	0% { opacity: 1; }
+	20.833333%, 100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.rogue-preview-shiny > img, .rogue-crate-stars > img {
+		animation-name: rogue-shiny-star-fade;
+		animation-duration: var(--star-duration);
+		animation-timing-function: linear;
+		animation-iteration-count: 1;
+		transform: translate(calc(-50% + var(--star-to-x)), calc(-50% + var(--star-to-y))) scale(var(--star-from-scale));
+	}
+	.rogue-crate-stars > img { animation-delay: var(--star-delay); }
+}

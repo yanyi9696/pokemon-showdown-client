@@ -111,143 +111,154 @@ compiledFiles += compiler.compileToDir(`replay.pokemonshowdown.com/src`, `replay
 
 compiledFiles += compiler.compileToDir(`teams.pokemonshowdown.com/src`, `teams.pokemonshowdown.com/js`, compileOpts);
 
-compiledFiles += compiler.compileToFile(
-	[
-		'play.pokemonshowdown.com/src/battle-dex.ts',
-		'play.pokemonshowdown.com/src/battle-dex-data.ts',
-		'play.pokemonshowdown.com/src/battle-log.ts',
-		'play.pokemonshowdown.com/src/battle-log-misc.js',
-		serverPath('server/chat-formatter.ts'),
-		'play.pokemonshowdown.com/data/text.js',
-		'play.pokemonshowdown.com/data/text-afd.js',
-		'play.pokemonshowdown.com/src/battle-text-parser.ts',
-	],
-	'play.pokemonshowdown.com/js/battledata.js',
-	compileOpts
-);
-
-if (!compileOpts.ignore) {
-	compiledFiles += compiler.compileToFile(
-		['play.pokemonshowdown.com/src/battle-animations.ts', 'play.pokemonshowdown.com/src/battle-animations-moves.ts'],
-		'play.pokemonshowdown.com/data/graphics.js',
+async function compileBundles() {
+	const battleDataFiles = await compiler.compileToFile(
+		[
+			'play.pokemonshowdown.com/src/battle-dex.ts',
+			'play.pokemonshowdown.com/src/battle-dex-data.ts',
+			'play.pokemonshowdown.com/src/battle-log.ts',
+			'play.pokemonshowdown.com/src/battle-log-misc.js',
+			serverPath('server/chat-formatter.ts'),
+			'play.pokemonshowdown.com/data/text.js',
+			'play.pokemonshowdown.com/data/text-afd.js',
+			'play.pokemonshowdown.com/src/battle-text-parser.ts',
+		],
+		'play.pokemonshowdown.com/js/battledata.js',
 		compileOpts
 	);
+	compiledFiles += battleDataFiles;
+
+	if (!compileOpts.ignore) {
+		const graphicsFiles = await compiler.compileToFile(
+			['play.pokemonshowdown.com/src/battle-animations.ts', 'play.pokemonshowdown.com/src/battle-animations-moves.ts'],
+			'play.pokemonshowdown.com/data/graphics.js',
+			compileOpts
+		);
+		compiledFiles += graphicsFiles;
+	}
 }
 
-const diff = process.hrtime(compileStartTime);
-console.log(
-	`(${compiledFiles} ${compiledFiles !== 1 ? "files" : "file"} in ${diff[0] + Math.round(diff[1] / 1e6) / 1e3}s) DONE`
-);
+function updatePages() {
+	const diff = process.hrtime(compileStartTime);
+	console.log(
+		`(${compiledFiles} ${compiledFiles !== 1 ? "files" : "file"} in ${diff[0] + Math.round(diff[1] / 1e6) / 1e3}s) DONE`
+	);
 
-/*********************************************************
- * Update cachebuster and News
- *********************************************************/
+	/*********************************************************
+	 * Update cachebuster and News
+	 *********************************************************/
 
-process.stdout.write("Updating cachebuster and URLs... ");
+	process.stdout.write("Updating cachebuster and URLs... ");
 
-const URL_REGEX = /(src|href)="(.*?)(\?[a-z0-9]*?)?"/g;
+	const URL_REGEX = /(src|href)="(.*?)(\?[a-z0-9]*?)?"/g;
 
-function addCachebuster(_, attr, url, urlQuery, templateDir) {
-	const hash = urlQuery ? assetVersion(url, templateDir, rootDir) : undefined;
-	url = url.replace('/replay.pokemonshowdown.com/', '/' + routes.replays + '/');
-	url = url.replace('/dex.pokemonshowdown.com/', '/' + routes.dex + '/');
-	url = url.replace('/play.pokemonshowdown.com/', '/' + routes.client + '/');
-	url = url.replace('/pokemonshowdown.com/', '/' + routes.root + '/');
-	url = url.replace('/teams.pokemonshowdown.com/', '/' + routes.teams + '/');
+	function addCachebuster(_, attr, url, urlQuery, templateDir) {
+		const hash = urlQuery ? assetVersion(url, templateDir, rootDir) : undefined;
+		url = url.replace('/replay.pokemonshowdown.com/', '/' + routes.replays + '/');
+		url = url.replace('/dex.pokemonshowdown.com/', '/' + routes.dex + '/');
+		url = url.replace('/play.pokemonshowdown.com/', '/' + routes.client + '/');
+		url = url.replace('/pokemonshowdown.com/', '/' + routes.root + '/');
+		url = url.replace('/teams.pokemonshowdown.com/', '/' + routes.teams + '/');
 
-	if (urlQuery) {
-		if (/(^|\/)showdex\/main\.js$/.test(url)) {
-			return attr + '="' + url + '?' + showdexAssets.files['main.js'].sha256.slice(0, 12) + '"';
+		if (urlQuery) {
+			if (/(^|\/)showdex\/main\.js$/.test(url)) {
+				return attr + '="' + url + '?' + showdexAssets.files['main.js'].sha256.slice(0, 12) + '"';
+			}
+			return attr + '="' + url + (hash ? '?' + hash : urlQuery) + '"';
+		} else {
+			return attr + '="' + url + '"';
 		}
-		return attr + '="' + url + (hash ? '?' + hash : urlQuery) + '"';
-	} else {
-		return attr + '="' + url + '"';
 	}
-}
 
-// add hashes to js and css files and rewrite URLs
-let indexContents = fs.readFileSync('play.pokemonshowdown.com/index.template.html', UTF8);
-indexContents = indexContents.replace(URL_REGEX, (match, attr, url, query) =>
-	addCachebuster(match, attr, url, query, 'play.pokemonshowdown.com'));
-let preactIndexContents = fs.readFileSync('play.pokemonshowdown.com/preactalpha.template.html', UTF8);
-preactIndexContents = preactIndexContents.replace(URL_REGEX, (match, attr, url, query) =>
-	addCachebuster(match, attr, url, query, 'play.pokemonshowdown.com'));
-let crossprotocolContents = fs.readFileSync('play.pokemonshowdown.com/crossprotocol.template.html', UTF8);
-crossprotocolContents = crossprotocolContents.replace(URL_REGEX, (match, attr, url, query) =>
-	addCachebuster(match, attr, url, query, 'play.pokemonshowdown.com'));
-let replayEmbedContents = fs.readFileSync('play.pokemonshowdown.com/js/replay-embed.template.js', UTF8);
-// Nihilslave: Disable this to get correct sprites if ur client doesn't have them.
-replayEmbedContents = replayEmbedContents.replace(/play\.pokemonshowdown\.com/g, routes.client);
-// Nihilslave: update the url over time
-const date = new Date();
-replayEmbedContents = replayEmbedContents.replace(/a7/g, date.getTime());
-// Nihilslave: we use testclient.html
-let testclientContents = fs.readFileSync('play.pokemonshowdown.com/testclient.template.html', { encoding: 'utf-8' });
-testclientContents = testclientContents.replace(URL_REGEX, (match, attr, url, query) =>
-	addCachebuster(match, attr, url, query, 'play.pokemonshowdown.com'));
-testclientContents = testclientContents.replace('Mmm dd, yyyy',
-	date.toDateString().split(" ")[1] + ' ' + date.getDate() + ', ' + date.getFullYear());
+	// add hashes to js and css files and rewrite URLs
+	let indexContents = fs.readFileSync('play.pokemonshowdown.com/index.template.html', UTF8);
+	indexContents = indexContents.replace(URL_REGEX, (match, attr, url, query) =>
+		addCachebuster(match, attr, url, query, 'play.pokemonshowdown.com'));
+	let preactIndexContents = fs.readFileSync('play.pokemonshowdown.com/preactalpha.template.html', UTF8);
+	preactIndexContents = preactIndexContents.replace(URL_REGEX, (match, attr, url, query) =>
+		addCachebuster(match, attr, url, query, 'play.pokemonshowdown.com'));
+	let crossprotocolContents = fs.readFileSync('play.pokemonshowdown.com/crossprotocol.template.html', UTF8);
+	crossprotocolContents = crossprotocolContents.replace(URL_REGEX, (match, attr, url, query) =>
+		addCachebuster(match, attr, url, query, 'play.pokemonshowdown.com'));
+	let replayEmbedContents = fs.readFileSync('play.pokemonshowdown.com/js/replay-embed.template.js', UTF8);
+	// Nihilslave: Disable this to get correct sprites if ur client doesn't have them.
+	replayEmbedContents = replayEmbedContents.replace(/play\.pokemonshowdown\.com/g, routes.client);
+	// Nihilslave: update the url over time
+	const date = new Date();
+	replayEmbedContents = replayEmbedContents.replace(/a7/g, date.getTime());
+	// Nihilslave: we use testclient.html
+	let testclientContents = fs.readFileSync('play.pokemonshowdown.com/testclient.template.html', { encoding: 'utf-8' });
+	testclientContents = testclientContents.replace(URL_REGEX, (match, attr, url, query) =>
+		addCachebuster(match, attr, url, query, 'play.pokemonshowdown.com'));
+	testclientContents = testclientContents.replace('Mmm dd, yyyy',
+		date.toDateString().split(" ")[1] + ' ' + date.getDate() + ', ' + date.getFullYear());
 
-// add news, only if it's actually likely to exist
-process.stdout.write("and news... ");
-let stdout = '';
-let newsid = 0;
-let news = '[failed to retrieve news]';
-try {
-	stdout = child_process.execSync('php ' + path.resolve(thisDir, 'news-embed.php'), {
-		stdio: 'pipe',
-	});
-} catch (e) {
-	console.log("git hook failed to retrieve news (exec command failed):\n" + (e.error + e.stderr + e.stdout));
-}
-try {
-	if (stdout) [newsid, news] = JSON.parse(stdout);
-} catch (e) {
-	if (stdout.includes("config/news.inc.php): Failed to open stream: No such file or directory")) {
-		console.log("news.inc.php unavailable");
-	} else {
-		console.log("git hook failed to retrieve news (parsing JSON failed):\n\n" + e.message + '\n\n' + stdout);
+	// add news, only if it's actually likely to exist
+	process.stdout.write("and news... ");
+	let stdout = '';
+	let newsid = 0;
+	let news = '[failed to retrieve news]';
+	try {
+		stdout = child_process.execSync('php ' + path.resolve(thisDir, 'news-embed.php'), {
+			stdio: 'pipe',
+		});
+	} catch (e) {
+		console.log("git hook failed to retrieve news (exec command failed):\n" + (e.error + e.stderr + e.stdout));
 	}
+	try {
+		if (stdout) [newsid, news] = JSON.parse(stdout);
+	} catch (e) {
+		if (stdout.includes("config/news.inc.php): Failed to open stream: No such file or directory")) {
+			console.log("news.inc.php unavailable");
+		} else {
+			console.log("git hook failed to retrieve news (parsing JSON failed):\n\n" + e.message + '\n\n' + stdout);
+		}
+	}
+
+	// Keep the same local announcement in the hosted client when the optional PHP news cache is absent.
+	if (news === '[failed to retrieve news]') {
+		const localNews = fs.readFileSync('play.pokemonshowdown.com/testclient.template.html', UTF8)
+			.match(/<div class="newsentry">([\s\S]*?)<\/div>/);
+		if (localNews) news = localNews[0];
+	} else if (!news.includes('幻想杯肉鸽内容目前还在内测中！')) {
+		news = news.replace(/(<p>[^<]*聊天室里输入[\s\S]*?\/avatars[\s\S]*?<\/p>)/,
+			'$1<p>幻想杯肉鸽内容目前还在内测中！</p>');
+	}
+	news = news.replace(/(<\/p>)\s*(?:<br\s*\/?>(?:\s*))+(?=<p>幻想杯肉鸽内容目前还在内测中！<\/p>)/g, '$1');
+	indexContents = indexContents.replace(/<!-- newsid -->/g, newsid);
+	indexContents = indexContents.replace(/<!-- news -->/g, news);
+
+	let indexContents2 = '';
+	try {
+		const indexContentsOld = indexContents;
+		indexContents = indexContents.replace(/<!-- head custom -->/g, '' + fs.readFileSync('config/head-custom.html'));
+		indexContents2 = indexContentsOld
+			.replace(/<!-- head custom -->/g, '' + fs.readFileSync('config/head-custom-test.html'));
+	} catch {}
+
+	fs.writeFileSync('play.pokemonshowdown.com/index.html', indexContents);
+	if (indexContents2) {
+		fs.writeFileSync('play.pokemonshowdown.com/index-test.html', indexContents2);
+	}
+	fs.writeFileSync('play.pokemonshowdown.com/preactalpha.html', preactIndexContents);
+	fs.writeFileSync('play.pokemonshowdown.com/crossprotocol.html', crossprotocolContents);
+	fs.writeFileSync('play.pokemonshowdown.com/js/replay-embed.js', replayEmbedContents);
+	fs.writeFileSync('play.pokemonshowdown.com/testclient.html', testclientContents);
+
+	let replaysContents = fs.readFileSync('replay.pokemonshowdown.com/index.template.php', UTF8);
+	replaysContents = replaysContents.replace(URL_REGEX, (match, attr, url, query) =>
+		addCachebuster(match, attr, url, query, 'replay.pokemonshowdown.com'));
+	fs.writeFileSync('replay.pokemonshowdown.com/index.php', replaysContents);
+
+	let teamsContents = fs.readFileSync('teams.pokemonshowdown.com/index.template.html', UTF8);
+	teamsContents = teamsContents.replace(URL_REGEX, (match, attr, url, query) =>
+		addCachebuster(match, attr, url, query, 'teams.pokemonshowdown.com'));
+	fs.writeFileSync('teams.pokemonshowdown.com/index.html', teamsContents);
+
+	console.log("DONE");
 }
 
-// Keep the same local announcement in the hosted client when the optional PHP news cache is absent.
-if (news === '[failed to retrieve news]') {
-	const localNews = fs.readFileSync('play.pokemonshowdown.com/testclient.template.html', UTF8)
-		.match(/<div class="newsentry">([\s\S]*?)<\/div>/);
-	if (localNews) news = localNews[0];
-} else if (!news.includes('幻想杯肉鸽内容目前还在内测中！')) {
-	news = news.replace(/(<p>[^<]*聊天室里输入[\s\S]*?\/avatars[\s\S]*?<\/p>)/,
-		'$1<p>幻想杯肉鸽内容目前还在内测中！</p>');
-}
-news = news.replace(/(<\/p>)\s*(?:<br\s*\/?>(?:\s*))+(?=<p>幻想杯肉鸽内容目前还在内测中！<\/p>)/g, '$1');
-indexContents = indexContents.replace(/<!-- newsid -->/g, newsid);
-indexContents = indexContents.replace(/<!-- news -->/g, news);
-
-let indexContents2 = '';
-try {
-	const indexContentsOld = indexContents;
-	indexContents = indexContents.replace(/<!-- head custom -->/g, '' + fs.readFileSync('config/head-custom.html'));
-	indexContents2 = indexContentsOld
-		.replace(/<!-- head custom -->/g, '' + fs.readFileSync('config/head-custom-test.html'));
-} catch {}
-
-fs.writeFileSync('play.pokemonshowdown.com/index.html', indexContents);
-if (indexContents2) {
-	fs.writeFileSync('play.pokemonshowdown.com/index-test.html', indexContents2);
-}
-fs.writeFileSync('play.pokemonshowdown.com/preactalpha.html', preactIndexContents);
-fs.writeFileSync('play.pokemonshowdown.com/crossprotocol.html', crossprotocolContents);
-fs.writeFileSync('play.pokemonshowdown.com/js/replay-embed.js', replayEmbedContents);
-fs.writeFileSync('play.pokemonshowdown.com/testclient.html', testclientContents);
-
-let replaysContents = fs.readFileSync('replay.pokemonshowdown.com/index.template.php', UTF8);
-replaysContents = replaysContents.replace(URL_REGEX, (match, attr, url, query) =>
-	addCachebuster(match, attr, url, query, 'replay.pokemonshowdown.com'));
-fs.writeFileSync('replay.pokemonshowdown.com/index.php', replaysContents);
-
-let teamsContents = fs.readFileSync('teams.pokemonshowdown.com/index.template.html', UTF8);
-teamsContents = teamsContents.replace(URL_REGEX, (match, attr, url, query) =>
-	addCachebuster(match, attr, url, query, 'teams.pokemonshowdown.com'));
-fs.writeFileSync('teams.pokemonshowdown.com/index.html', teamsContents);
-
-console.log("DONE");
+compileBundles().then(updatePages).catch(error => {
+	console.error(error);
+	process.exitCode = 1;
+});

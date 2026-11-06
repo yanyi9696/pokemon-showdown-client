@@ -43,6 +43,20 @@ describe('Shared 2D party sprite preference', () => {
 			assert.match(context.Dex.getTeambuilderSprite({species}), /sprites\/home\//);
 		});
 	}
+	it('reuses Rockruff art for its Own Tempo form while preserving its identity and distinct visual forms', () => {
+		const dusk = context.Dex.species.get('Rockruff-Dusk');
+		assert.equal(dusk.id, 'rockruffdusk'); assert.equal(dusk.abilities[0], 'Own Tempo');
+		for (const pixels of [false, true]) for (const shiny of [false, true]) {
+			preferences.bwgfx = pixels;
+			for (const front of [false, true]) for (const gen of [5, 9]) {
+				assert.equal(context.Dex.getSpriteData('Rockruff-Dusk', front, {gen, shiny}).url,
+					context.Dex.getSpriteData('Rockruff', front, {gen, shiny}).url);
+			}
+			assert.equal(context.Dex.getTeambuilderSprite({species: 'Rockruff-Dusk', shiny}),
+				context.Dex.getTeambuilderSprite({species: 'Rockruff', shiny}));
+			assert(context.Dex.getSpriteData('Basculin-White-Striped', true, {gen: 5, shiny}).url.includes('basculin-whitestriped'));
+		}
+	});
 	it('keeps custom pixel forms and ZA placeholders when enabling 2D', () => {
 		preferences.bwgfx = true;
 		for (const species of ['Flygon-Mega-Fantasy', 'Steelix-Mega-X-Fantasy', 'Shadow-Lugia-Fantasy']) {
@@ -69,7 +83,12 @@ describe('Shared 2D party sprite preference', () => {
 			for (const pixels of [false, true]) {
 				preferences.bwgfx = pixels;
 				const frontFile = `sprites/fantasy-rogue/kyurem-original${shiny ? '-shiny' : ''}.png`;
-				assert(context.Dex.getTeambuilderSprite({species: 'Kyurem-Original', shiny}).includes(frontFile));
+				const portrait = context.Dex.getTeambuilderSprite({species: 'Kyurem-Original', shiny});
+				assert(portrait.includes(frontFile));
+				assert.match(portrait, /background-size:var\(--teambuilder-art-size,94px\) auto/);
+				assert.match(portrait, /background-position:var\(--teambuilder-art-x,13px\) var\(--teambuilder-art-y,8px\)/);
+				assert.match(portrait, /image-rendering:auto/);
+				assert.match(portrait, /filter:blur\(\.2px\) drop-shadow/);
 				for (const front of [false, true]) {
 					const filename = `sprites/fantasy-rogue/kyurem-original${front ? '' : '-back'}${shiny ? '-shiny' : ''}.png`;
 					const dimensions = imageSize(path.join(webRoot, filename));
@@ -79,19 +98,24 @@ describe('Shared 2D party sprite preference', () => {
 					assert.equal(sprite.url, './' + filename); assert(sprite.pixelated);
 					assert.equal(sprite.isFrontSprite, front);
 					assert.equal(sprite.w, 128); assert.equal(sprite.h, 128);
+					assert.match(sprite.filter, /drop-shadow/);
 				}
 			}
 		}
 	});
-	it('uses the dedicated menu icon in party, teambuilder and battle callers', () => {
-		const filename = 'sprites/fantasy-rogue/kyurem-original-icon.png';
+	it('uses the approved atlas slot in party, teambuilder and battle callers', () => {
+		const filename = 'sprites/pokemonicons-sheet.png';
 		const dimensions = imageSize(path.join(webRoot, filename));
-		assert.equal(dimensions.width, 40); assert.equal(dimensions.height, 40);
+		assert.equal(dimensions.width, 480); assert(dimensions.height >= 4350);
 		const css = fs.readFileSync(path.join(webRoot, 'style/battle.css'), 'utf8');
-		assert.match(css, /\.picon\[style\*="kyurem-original-icon\.png"\]\s*\{\s*height: 40px;/);
+		assert(!/\.picon\[style\*="kyurem-original-icon\.png"\]/.test(css), 'custom icons must keep the normal 40 x 30 slot');
 		const normal = context.Dex.getPokemonIcon('Kyurem-Original');
 		assert(normal.includes(filename));
-		assert(!normal.slice('background:'.length).includes(';'), 'teambuilder assigns the background value directly');
+		assert(normal.includes(filename + '?v=20261104'));
+		assert.match(normal, /scroll -0px -4320px/);
+		assert(!normal.includes('background-size:'), 'atlas cells must not rescale the whole sheet');
+		assert.match(normal, /--is-fantasy:\s*1/);
+		assert.match(normal, /--glow-filter:\s*drop-shadow/);
 		for (const input of [{species: 'Kyurem-Original'}, {speciesForme: 'Kyurem-Original'},
 			{speciesForme: 'Kyurem', volatiles: {formechange: ['', 'Kyurem-Original']}}]) {
 			assert.equal(context.Dex.getPokemonIcon(input), normal);
@@ -105,13 +129,26 @@ describe('Shared 2D party sprite preference', () => {
 		assert.match(context.Dex.getPokemonIcon({speciesForme: 'Ditto',
 			volatiles: {formechange: ['', 'Kyurem-Original'], transform: ['Kyurem-Original']}}), /pokemonicons-sheet\.png/);
 	});
+	it('keeps the renamed and legacy triple Kyurem artwork identical', () => {
+		for (const shiny of [false, true]) {
+			const legacy = {species: 'Kyurem-Original', shiny}, renamed = {species: 'Kyurem-Original-Fantasy', shiny};
+			assert.equal(context.Dex.getPokemonIcon(renamed), context.Dex.getPokemonIcon(legacy));
+			assert.equal(context.Dex.getTeambuilderSprite(renamed), context.Dex.getTeambuilderSprite(legacy));
+			for (const front of [false, true]) {
+				const options = {gen: 9, mod: 'gen9fantasy', shiny};
+				const expected = context.Dex.getSpriteData(legacy.species, front, options);
+				const actual = context.Dex.getSpriteData(renamed.species, front, options);
+				for (const key of ['url', 'w', 'h', 'cryurl', 'filter', 'pixelated']) assert.equal(actual[key], expected[key], key);
+			}
+		}
+	});
 	it('resolves custom rear art and icons using the configured resource prefix', () => {
 		context.Dex.iconSheetPrefix = '';
 		try {
 			const base = context.Dex.resourcePrefix + 'sprites/fantasy-rogue/';
 			assert.equal(context.Dex.getSpriteData('Kyurem-Original', false, {gen: 9, mod: 'gen9fantasy'}).url,
 				base + 'kyurem-original-back.png');
-			assert(context.Dex.getPokemonIcon('Kyurem-Original').includes(base + 'kyurem-original-icon.png'));
+			assert(context.Dex.getPokemonIcon('Kyurem-Original').includes(context.Dex.resourcePrefix + 'sprites/pokemonicons-sheet.png'));
 		} finally {
 			context.Dex.iconSheetPrefix = './';
 		}

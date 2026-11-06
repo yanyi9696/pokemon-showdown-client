@@ -24,6 +24,7 @@ export class BattleTextParser {
 	/** escaped for string.replace */
 	p4 = "Player 4";
 	perspective: SideID;
+	gameType = 'singles';
 	gen = 9;
 	turn = 0;
 	curLineSection: 'break' | 'preMajor' | 'major' | 'postMajor' = 'break';
@@ -271,8 +272,7 @@ export class BattleTextParser {
 		let side = pokemon.slice(0, 2);
 		if (!['p1', 'p2', 'p3', 'p4'].includes(side)) return `???pokemon:${pokemon}???`;
 		const name = this.pokemonName(pokemon);
-		const isNear = side === this.perspective || side === BattleTextParser.allyID(side as SideID);
-		const template = BattleText.default[isNear ? 'pokemon' : 'opposingPokemon'];
+		const template = BattleText.default[this.isAlly(side) ? 'pokemon' : 'opposingPokemon'];
 		return template.replace('[NICKNAME]', name).replace(/\$/g, '$$$$');
 	}
 
@@ -301,10 +301,14 @@ export class BattleTextParser {
 		if (sideid === 'p4') return 'p2';
 		return '';
 	}
+	isAlly(side: string) {
+		return side === this.perspective ||
+			this.gameType === 'multi' && side === BattleTextParser.allyID(this.perspective);
+	}
 
 	team(side: string, isFar = false) {
 		side = side.slice(0, 2);
-		if (side === this.perspective || side === BattleTextParser.allyID(side as SideID)) {
+		if (this.isAlly(side)) {
 			return !isFar ? BattleText.default.team : BattleText.default.opposingTeam;
 		}
 		return isFar ? BattleText.default.team : BattleText.default.opposingTeam;
@@ -320,7 +324,7 @@ export class BattleTextParser {
 
 	party(side: string) {
 		side = side.slice(0, 2);
-		if (side === this.perspective || side === BattleTextParser.allyID(side as SideID)) {
+		if (this.isAlly(side)) {
 			return BattleText.default.party;
 		}
 		return BattleText.default.opposingParty;
@@ -461,6 +465,10 @@ export class BattleTextParser {
 			} else if (side === 'p4' && name) {
 				this.p4 = BattleTextParser.escapeReplace(name);
 			}
+			return '';
+		}
+		case 'gametype': {
+			this.gameType = args[1];
 			return '';
 		}
 

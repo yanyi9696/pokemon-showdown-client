@@ -114,6 +114,10 @@ export class DexSearch {
 		} else {
 			this.results = this.textSearch(query);
 		}
+		if (this.typedSearch?.searchType === 'item') {
+			// Rogue emblems use their own slot; they are not held items.
+			this.results = this.results.filter(row => row[0] !== 'item' || !/^rogue(?:emblem|universal)/.test(row[1]));
+		}
 		return true;
 	}
 
@@ -1061,7 +1065,8 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 		return BattleItems;
 	}
 	getDefaultResults(): SearchRow[] {
-		return this.dex.getItemSet();
+		return this.dex.getItemSet().filter((row: SearchRow) =>
+			row[0] !== 'item' || !/^rogue(?:emblem|universal)/.test(row[1]));
 	}
 	getBaseResults(): SearchRow[] {
 		if (!this.species) return this.getDefaultResults();

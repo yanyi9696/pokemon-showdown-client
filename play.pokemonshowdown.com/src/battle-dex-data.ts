@@ -149,6 +149,7 @@ export const BattleBaseSpeciesChart = [
 ] as ID[];
 
 export const BattlePokemonIconIndexes: { [id: string]: number } = {
+	kyuremoriginal: 1728, kyuremoriginalfantasy: 1728, // Approved icon, appended at (0, 4320) in the 40 x 30 atlas.
 	// alt forms
 	egg: 1032 + 1,
 	pikachubelle: 1032 + 2,
@@ -1601,6 +1602,7 @@ export class Species implements Effect {
 		this.spriteid = baseId + this.formeid;
 		if (this.spriteid.endsWith('totem')) this.spriteid = this.spriteid.slice(0, -5);
 		if (this.spriteid === 'greninja-bond') this.spriteid = 'greninja';
+		if (this.spriteid === 'rockruff-dusk') this.spriteid = 'rockruff';
 		if (this.spriteid.endsWith('-')) this.spriteid = this.spriteid.slice(0, -1);
 		this.baseForme = data.baseForme || '';
 

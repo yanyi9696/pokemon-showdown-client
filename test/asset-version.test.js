@@ -36,6 +36,26 @@ describe('Client asset versions and local startup', () => {
 		assert.throws(() => assetVersion('../../outside.js', 'play.pokemonshowdown.com', root), /outside/);
 		assert.equal(assetVersion('https://example.invalid/optional.js', 'play.pokemonshowdown.com', root), undefined);
 	});
+	it('finishes writing combined bundles before hashing both clean and incremental builds', async () => {
+		const {compileToFile} = require('../build-tools/compiler');
+		const src = path.join(root, 'source.js');
+		const dest = path.join(root, 'play.pokemonshowdown.com/js/bundle.js');
+		const options = {babelrc: false, configFile: false, sourceMaps: true, incremental: true};
+		fs.writeFileSync(src, 'const version = 1;');
+		assert.equal(await compileToFile(src, dest, options), 1);
+		const first = assetVersion('js/bundle.js', 'play.pokemonshowdown.com', root);
+		assert.match(fs.readFileSync(dest, 'utf8'), /version = 1/);
+		assert(fs.existsSync(dest + '.map'));
+		assert.equal(await compileToFile(src, dest, options), 0);
+		fs.writeFileSync(src, 'const version = 2;');
+		// Keep the assertion independent of the filesystem's timestamp resolution.
+		fs.utimesSync(dest, new Date(0), new Date(0));
+		assert.equal(await compileToFile(src, dest, options), 1);
+		assert.notEqual(assetVersion('js/bundle.js', 'play.pokemonshowdown.com', root), first);
+		assert.match(fs.readFileSync(dest, 'utf8'), /version = 2/);
+		assert.equal(options.incremental, true);
+		await assert.rejects(compileToFile(src, root, options));
+	});
 	it('never opens the optional private testclient key', () => {
 		// A directory is deliberately unreadable as a file; even an existing key path is skipped.
 		fs.mkdirSync(path.join(root, 'config/testclient-key.js'), {recursive: true});

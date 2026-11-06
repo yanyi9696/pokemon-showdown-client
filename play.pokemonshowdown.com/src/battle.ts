@@ -1137,6 +1137,7 @@ export class Battle {
 	speciesClause = false;
 	tier = '';
 	gameType: 'singles' | 'doubles' | 'triples' | 'multi' | 'freeforall' = 'singles';
+	rogueCoopPreview?: { ownSide: string, partnerSide: string, selections: { [side: string]: number[] } };
 	compatMode = true;
 	rated: string | boolean = false;
 	rules: { [ruleName: string]: 1 | undefined } = {};
@@ -3378,6 +3379,30 @@ export class Battle {
 			this.log(args, kwArgs);
 			break;
 		}
+		case '-roguegrowth': {
+			// Persistent growth comes from the Rogue server; keep replay metadata inert and bounded.
+			let growth;
+			try { growth = JSON.parse(args[1]); } catch { break; }
+			if (!growth || typeof growth.species !== 'string' || !Array.isArray(growth.moves)) break;
+			const translate = (window as typeof window & {
+				translateRogueName?: (value: string, kind?: string) => string,
+			}).translateRogueName || ((value: string) => value);
+			const name = BattleLog.escapeHTML(translate(Dex.species.get(growth.species).name, 'pokemon'));
+			const parts: string[] = [];
+			if (Number.isFinite(growth.experience) && growth.experience > 0) {
+				parts.push(`获得 <strong>${Math.floor(growth.experience)} 点经验</strong>`);
+			}
+			if (Number.isInteger(growth.level) && growth.level > 0 && growth.level <= 9999) {
+				parts.push(`升至 <strong>Lv.${growth.level}</strong>`);
+			}
+			if (growth.evolved === true) parts.push('<strong>进化完成</strong>');
+			const moves = growth.moves.slice(0, 20).filter((move: unknown) => typeof move === 'string').map((move: string) =>
+				BattleLog.escapeHTML(translate(Dex.moves.get(move).name, 'move')));
+			if (moves.length) parts.push(`学会了 <strong>${moves.join('、')}</strong>`);
+			if (growth.evolutionReady === true) parts.push('<strong>已满足进化条件</strong>');
+			if (parts.length) this.log(['raw', `<div class="battle-history"><strong>${name}</strong> ${parts.join('；')}。</div>`], {});
+			break;
+		}
 		case '-roguebossphase': {
 			const poke = this.getPokemon(args[1]);
 			const kind = args[2], phase = Number(args[3]), total = Number(args[4]);
@@ -3705,6 +3730,7 @@ export class Battle {
 		}
 		case 'gametype': {
 			this.gameType = args[1] as any;
+			this.log(args);
 			this.compatMode = false;
 			switch (args[1]) {
 			case 'multi':

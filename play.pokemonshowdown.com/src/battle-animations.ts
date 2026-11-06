@@ -21,6 +21,11 @@ import { BattleNatures } from './battle-dex-data';
 import { BattleTooltips } from './battle-tooltips';
 import { BattleTextParser, type Args, type KWArgs } from './battle-text-parser';
 
+const ROGUE_SPARKLE_SIZE = 0.85;
+function isRogueBattle(scene: BattleScene) {
+	return ['gen9fantasyrogue', 'gen9fantasyroguecoop', 'gen9fantasyroguedoubles'].includes(toID(scene.battle.tier));
+}
+
 const ROGUE_BLOOD_FILTER = 'drop-shadow(0 0 3px rgba(5,13,35,.8)) drop-shadow(0 0 9px rgba(19,44,94,.62))';
 const ROGUE_GHIDORAH_FILTER = 'sepia(1) saturate(3.5) brightness(1.2) drop-shadow(0 0 7px #ffd24a)';
 
@@ -372,10 +377,7 @@ export class BattleScene implements BattleSceneStub {
 			// own path. Use the scene queue so pause, seeking and speed still work.
 			const starData = { w: 18, h: 18, rawHTML:
 				'<div class="rogue-capture-star" aria-hidden="true" style="position:absolute;pointer-events:none">' +
-				'<svg viewBox="0 0 18 18" width="100%" height="100%" shape-rendering="crispEdges">' +
-				'<path fill="#b87822" d="M8 0h2v3h2v3h6v4h-3v3h1v5h-4v-2H6v2H2v-5h1v-3H0V6h6V3h2Z"/>' +
-				'<path fill="#ffe67c" d="M8 2h2v4h2v2h4v2h-3v3h1v3h-2v-2H6v2H4v-3h1v-3H2V8h4V6h2Z"/>' +
-				'<path fill="#fffad1" d="M8 6h2v2h2v2H6V8h2Z"/></svg></div>' };
+				Dex.getShinyStar() + '</div>' };
 			for (const [dx, dy] of [[-45, 30], [0, 55], [45, 30], [-28, -16], [28, -16]]) {
 				const star = new Sprite(starData, { ...landing, scale: 0.15, opacity: 0 }, this);
 				// Sprite skips its initial CSS when opacity is zero.
@@ -770,7 +772,10 @@ export class BattleScene implements BattleSceneStub {
 				pokemonhtml += `<span class="picon" style="${Dex.getPokemonIcon('zoroark')}" title="Unrevealed Illusion user" aria-label="Unrevealed Illusion user"></span>`;
 			} else if (!poke) {
 				pokemonhtml += `<span class="picon" style="${Dex.getPokemonIcon('pokeball')}" title="Not revealed" aria-label="Not revealed"></span>`;
-			} else if (!poke.ident && this.battle.teamPreviewCount && this.battle.teamPreviewCount < side.pokemon.length) {
+			} else if (!poke.ident && (
+				this.battle.teamPreviewCount && this.battle.teamPreviewCount < side.pokemon.length ||
+				this.battle.gameType === 'multi' && isRogueBattle(this) && side.totalPokemon < side.pokemon.length
+			)) {
 				// in VGC (bring 6 pick 4) and other pick-less-than-you-bring formats, this is
 				// a pokemon that's been brought but not necessarily picked
 				const details = this.getDetailsText(poke);
@@ -914,6 +919,10 @@ export class BattleScene implements BattleSceneStub {
 	}
 
 	teamPreview() {
+		if (this.battle.gameType === 'multi' && isRogueBattle(this)) {
+			this.rogueCoopTeamPreview();
+			return;
+		}
 		let newBGNum = 0;
 		for (let siden = 0; siden < 2 || (this.battle.gameType === 'multi' && siden < 4); siden++) {
 			let side = this.battle.sides[siden];
@@ -951,8 +960,12 @@ export class BattleScene implements BattleSceneStub {
 				textBuf += pokemon.speciesForme;
 				let url = spriteData.url;
 				// if (this.paused) url.replace('/xyani', '/xy').replace('.gif', '.png');
-				buf += `<img src="${url}" width="${spriteData.w}" height="${spriteData.h}" style="position:absolute;top:${Math.floor(y - spriteData.h / 2)}px;left:${Math.floor(x - spriteData.w / 2)}px" />`;
+				const spriteFilter = spriteData.filter ? `;filter:${spriteData.filter}` : '';
+				buf += `<img src="${url}" width="${spriteData.w}" height="${spriteData.h}" style="position:absolute;top:${Math.floor(y - spriteData.h / 2)}px;left:${Math.floor(x - spriteData.w / 2)}px${spriteFilter}" />`;
 				buf2 += `<div style="position:absolute;top:${y + 45}px;left:${x - 40}px;width:80px;font-size:10px;text-align:center;color:#FFF;">`;
+				if (pokemon.shiny && isRogueBattle(this)) {
+					buf += `<span class="rogue-preview-shiny" aria-label="闪光" style="top:${y - 33}px;left:${x - 32}px">${Dex.getShinySparkles(spriteIndex ? 1 : 1.5, ROGUE_SPARKLE_SIZE)}</span>`;
+				}
 				const gender = pokemon.gender;
 				if (gender === 'M' || gender === 'F') {
 					buf2 += `<img src="${Dex.fxPrefix}gender-${gender.toLowerCase()}.png" alt="${gender}" width="7" height="10" class="pixelated" style="margin-bottom:-1px" /> `;
@@ -988,6 +1001,60 @@ export class BattleScene implements BattleSceneStub {
 		}
 		this.wait(1000);
 		this.updateSidebars();
+	}
+
+	rogueCoopTeamPreview() {
+		const own = this.battle.mySide, partner = own.ally;
+		if (!partner) return;
+		this.$sprites[0].empty(); this.$sprites[1].empty();
+		const foes = this.battle.sides.filter(side => side !== own && side !== partner);
+		const rows = [
+			{ sides: foes, y: 76, role: 'foe', title: '对方的队伍' },
+			{ sides: [partner], y: 184, role: 'partner', title: `队友的队伍 · ${partner.name}` },
+			{ sides: [own], y: 286, role: 'own', title: `我的队伍 · ${own.name}` },
+		];
+		let buf = '';
+		for (const row of rows) {
+			const entries: { side: Side, pokemon: Pokemon, index: number }[] = [];
+			for (const side of row.sides) {
+				for (let index = 0; index < side.pokemon.length; index++) entries.push({ side, pokemon: side.pokemon[index], index });
+			}
+			buf += `<div class="rogue-coop-preview-row rogue-coop-preview-${row.role}">`;
+			buf += `<strong class="rogue-coop-preview-label" style="top:${row.y - 53}px">${BattleLog.escapeHTML(row.title)}</strong>`;
+			for (let i = 0; i < entries.length; i++) {
+				const { side, pokemon, index } = entries[i];
+				const data = Dex.getSpriteData(pokemon, row.role === 'foe', { gen: this.gen, noScale: true, mod: this.mod });
+				const scale = Math.min(1, 82 / data.w, 76 / data.h);
+				const w = Math.round(data.w * scale), h = Math.round(data.h * scale);
+				const x = 128 + i * Math.min(76, 384 / Math.max(1, entries.length - 1));
+				buf += `<div class="rogue-coop-preview-mon" data-side="${side.sideid}" data-index="${index}" style="left:${x - 42}px;top:${row.y - 38}px">`;
+				buf += `<img src="${data.url}" width="${w}" height="${h}" style="left:${42 - w / 2}px;top:${38 - h / 2}px${data.filter ? `;filter:${data.filter}` : ''}" />`;
+				buf += '<span class="rogue-coop-preview-order"></span>';
+				buf += `<small class="rogue-coop-preview-level">Lv.${pokemon.level}</small>`;
+				if (pokemon.shiny) {
+					buf += `<span class="rogue-preview-shiny" aria-label="闪光" style="top:5px;left:10px">${Dex.getShinySparkles(1, ROGUE_SPARKLE_SIZE)}</span>`;
+				}
+				buf += '</div>';
+			}
+			buf += '</div>';
+		}
+		this.$sprites[0].html(buf);
+		for (const side of this.battle.sides) {
+			side.totalPokemon = side.pokemon.length;
+			this.log.addDiv('chat battle-history', `<strong>${BattleLog.escapeHTML(side.name)} 的队伍：</strong> ` +
+			`<em style="color:#445566;display:block;">${BattleLog.escapeHTML(side.pokemon.map(mon => mon.speciesForme).join(' / '))}</em>`);
+		}
+		this.updateRogueCoopPreview();
+		this.wait(1000); this.updateSidebars();
+	}
+	updateRogueCoopPreview() {
+		const selections = this.battle.rogueCoopPreview?.selections || {};
+		this.$sprites[0].find('.rogue-coop-preview-mon').each((_, element) => {
+			const $mon = $(element), side = $mon.attr('data-side')!;
+			const order = (selections[side] || []).indexOf(Number($mon.attr('data-index')));
+			$mon.toggleClass('is-selected', order >= 0);
+			$mon.find('.rogue-coop-preview-order').text(order >= 0 ? `${order + 1}` : '');
+		});
 	}
 
 	showJoinButtons() {
@@ -1827,6 +1894,7 @@ export class Sprite {
 			let rawHTML = sp.rawHTML ||
 				`<img src="${sp.url!}" style="display:none;position:absolute"${sp.pixelated ? ' class="pixelated"' : ''} />`;
 			this.$el = $(rawHTML);
+			if (sp.filter) this.$el.css('filter', sp.filter);
 		} else {
 			sp = {
 				w: 0,
@@ -2096,6 +2164,14 @@ export class PokemonSprite extends Sprite {
 		this.cryurl = this.sp.cryurl;
 		this.isFrontSprite = isFrontSprite;
 	}
+	private applySpriteFilter($el = this.$el) {
+		const filter = [
+			this.effects.rogueghidorah ? ROGUE_GHIDORAH_FILTER : '',
+			this.effects.roguebloodrobe ? ROGUE_BLOOD_FILTER : '',
+			this.sp.filter || '',
+		].filter(Boolean).join(' ');
+		$el?.css({ filter, '-webkit-filter': filter });
+	}
 	override destroy() {
 		if (this.$el) this.$el.remove();
 		this.$el = null!;
@@ -2149,6 +2225,7 @@ export class PokemonSprite extends Sprite {
 
 		const $el = this.isSubActive ? this.$sub! : this.$el;
 		$el.attr('src', sp.url!);
+		this.applySpriteFilter();
 		$el.css(this.scene.pos({
 			x: this.x,
 			y: this.y,
@@ -2321,19 +2398,7 @@ export class PokemonSprite extends Sprite {
 
 		if (this.$el) this.scene.$sprites[+this.isFrontSprite].append(this.$el);
 		this.recalculatePos(pokemon.slot);
-		// =========== 注入：为幻想大岩蛇添加蓝色滤镜 ===========
-		// 这里的 getBaseSpecies() 修复了之前报错的问题
-		const aura = [pokemon.volatiles.rogueghidorah ? ROGUE_GHIDORAH_FILTER : '', pokemon.volatiles.roguebloodrobe ? ROGUE_BLOOD_FILTER : ''].filter(Boolean).join(' ');
-		if (aura) this.$el.css({filter: aura, '-webkit-filter': aura}); else if (pokemon.speciesForme === 'Onix-Fantasy' || pokemon.getBaseSpecies().baseSpecies === 'Onix-Fantasy') {
-			this.$el.css({
-				// sepia(1) 使灰色变黄，hue-rotate(190deg) 将黄转蓝，saturate(5) 加深蓝色，brightness(1.1) 保持亮度
-				'filter': 'sepia(1) hue-rotate(190deg) saturate(5) brightness(1.1) drop-shadow(0 0 5px rgba(0,191,255,0.8))',
-				'-webkit-filter': 'sepia(1) hue-rotate(190deg) saturate(5) brightness(1.1) drop-shadow(0 0 5px rgba(0,191,255,0.8))'
-			});
-		} else {
-			this.$el.css('filter', '');
-		}
-		// =========================================================
+		this.applySpriteFilter();
 		this.resetStatbar(pokemon);
 		this.$el.css(this.scene.pos({
 			display: 'block',
@@ -2499,7 +2564,9 @@ export class PokemonSprite extends Sprite {
 				time: 300 / this.scene.acceleration,
 			}, 'accel');
 		}
-		if (this.sp.shiny && this.scene.acceleration < 2) BattleOtherAnims.shiny.anim(this.scene, [this]);
+		if (this.sp.shiny && (isRogueBattle(this.scene) || this.scene.acceleration < 2)) {
+			BattleOtherAnims.shiny.anim(this.scene, [this]);
+		}
 		this.scene.waitFor(this.$el);
 
 		if (pokemon.hasVolatile('substitute' as ID)) {
@@ -2759,6 +2826,7 @@ export class PokemonSprite extends Sprite {
 		}
 		// Constructing here gives us 300ms extra time to preload the new sprite
 		let $newEl = $('<img src="' + sp.url + '" style="display:block;opacity:0;position:absolute"' + (sp.pixelated ? ' class="pixelated"' : '') + ' />');
+		this.applySpriteFilter($newEl);
 		$newEl.css(this.scene.pos({
 			x: this.x,
 			y: this.y,
@@ -2817,9 +2885,8 @@ export class PokemonSprite extends Sprite {
 	}
 	addEffect(id: ID, instant?: boolean) {
 		if (id === 'rogueghidorah' || id === 'roguebloodrobe') {
-			const aura = [id === 'rogueghidorah' || this.effects.rogueghidorah ? ROGUE_GHIDORAH_FILTER : '', id === 'roguebloodrobe' || this.effects.roguebloodrobe ? ROGUE_BLOOD_FILTER : ''].filter(Boolean).join(' ');
-			this.$el?.css({filter: aura, '-webkit-filter': aura});
 			this.effects[id] = [];
+			this.applySpriteFilter();
 			return;
 		}
 		if (id in this.effects) {
@@ -2886,9 +2953,8 @@ export class PokemonSprite extends Sprite {
 
 	removeEffect(id: ID, instant?: boolean) {
 		if (id === 'rogueghidorah' || id === 'roguebloodrobe') {
-			const other = id === 'rogueghidorah' ? 'roguebloodrobe' : 'rogueghidorah';
-			const aura = this.effects[other] ? (other === 'roguebloodrobe' ? ROGUE_BLOOD_FILTER : ROGUE_GHIDORAH_FILTER) : '';
-			this.$el?.css({filter: aura, '-webkit-filter': aura});
+			delete this.effects[id];
+			this.applySpriteFilter();
 		}
 		if (id === 'formechange') this.removeTransform();
 		if (id === 'substitute') this.animSubFade(instant);
@@ -4358,7 +4424,7 @@ export const BattleOtherAnims: AnimTable = {
 			}, 'accel');
 		},
 	},
-	shiny: {
+	shinyStandard: {
 		anim(scene, [attacker]) {
 			scene.backgroundEffect('#000000', 800, 0.3, 100);
 			scene.showEffect('shine', {
@@ -4437,6 +4503,30 @@ export const BattleOtherAnims: AnimTable = {
 				opacity: 0,
 				time: 900,
 			}, 'decel');
+		},
+	},
+	shiny: {
+		anim(scene, [attacker]) {
+			if (!isRogueBattle(scene)) return BattleOtherAnims.shinyStandard.anim(scene, [attacker]);
+			const speed = Math.max(1, scene.acceleration);
+			scene.backgroundEffect('#000000', Math.max(400, 1100 / speed), 0.12, 200 / speed);
+			for (const frame of Dex.getShinySparkleFrames()) {
+				const start = frame.delay / speed;
+				scene.showEffect('shine', {
+					x: attacker.x + frame.start.x,
+					y: attacker.y + 25 + frame.start.y,
+					z: attacker.z,
+					scale: frame.start.scale * ROGUE_SPARKLE_SIZE,
+					opacity: 1,
+					time: start,
+				}, {
+					x: attacker.x + frame.end.x,
+					y: attacker.y + 25 + frame.end.y,
+					scale: frame.end.scale * ROGUE_SPARKLE_SIZE,
+					opacity: 0,
+					time: start + Math.max(300, frame.duration / speed),
+				}, 'decel', undefined, { filter: Dex.getShinySparkleFilter() });
+			}
 		},
 	},
 	flight: {

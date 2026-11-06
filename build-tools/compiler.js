@@ -108,7 +108,8 @@ function noRebuildNeeded(src, dest) {
 		const srcStat = fs.statSync(src, { throwIfNoEntry: false });
 		if (!srcStat) return true;
 		const destStat = fs.statSync(dest);
-		if (srcStat.ctimeMs < destStat.ctimeMs) return true;
+		// Metadata changes can advance ctime even when the output's contents are stale.
+		if (srcStat.mtimeMs < destStat.mtimeMs) return true;
 	} catch {}
 
 	return false;
@@ -183,7 +184,8 @@ function compileToDir(srcDir, destDir, opts = {}) {
 	return total;
 }
 
-function compileToFile(srcFile, destFile, opts) {
+async function compileToFile(srcFile, destFile, opts) {
+	opts = { ...opts };
 	const incremental = opts.incremental;
 	delete opts.incremental;
 
@@ -206,12 +208,11 @@ function compileToFile(srcFile, destFile, opts) {
 		if (VERBOSE) console.log(src + " ->");
 	}
 
-	combineResults(results, {
+	const combined = await combineResults(results, {
 		file: path.basename(destFile),
 		sourceRoot: opts.sourceRoot,
-	}, opts).then(combined => {
-		outputFileSync(destFile, combined, opts);
-	});
+	}, opts);
+	outputFileSync(destFile, combined, opts);
 
 	if (VERBOSE) console.log("-> " + destFile);
 	if (incremental) opts.incremental = true; // incredibly dumb hack to preserve the option

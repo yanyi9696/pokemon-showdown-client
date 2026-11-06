@@ -1,4 +1,6 @@
 const assert = require('assert').strict;
+const fs = require('fs');
+const vm = require('vm');
 
 window = global;
 global.document = { getElementsByTagName: () => [], getElementById: () => ({}) };
@@ -9,6 +11,51 @@ require('../play.pokemonshowdown.com/js/battle-scene-stub.js');
 // global.BattleText = require('../play.pokemonshowdown.com/data/text.js').BattleText;
 require('../play.pokemonshowdown.com/js/battle-text-parser.js');
 require('../play.pokemonshowdown.com/js/battle.js');
+
+describe('Fantasy Rogue growth log playback', () => {
+	let battle, previousLog, previousTranslate, lines;
+	beforeEach(() => {
+		previousLog = global.BattleLog; previousTranslate = global.translateRogueName;
+		const context = {Config: {whitelist: [], routes: {}}};
+		vm.runInNewContext(fs.readFileSync(require.resolve('../play.pokemonshowdown.com/js/battle-log.js'), 'utf8'), context);
+		global.BattleLog = context.BattleLog;
+		battle = new Battle({debug: true, log: [
+			'|player|p1|Player', '|player|p2|Wild', '|gen|9', '|start',
+			'|switch|p1a: Partner|Bulbasaur, L8|20/30', '|switch|p2a: Wild|Magikarp, L5|20/20', '|turn|1',
+		]});
+		lines = []; battle.scene.log.add = args => lines.push(args);
+	});
+	afterEach(() => {
+		battle.destroy(); global.BattleLog = previousLog; global.translateRogueName = previousTranslate;
+	});
+	it('formats experience, levels, moves and evolution without mutating battle health or identity', () => {
+		const mon = battle.p1.active[0], identity = mon.ident;
+		global.translateRogueName = value => ({Bulbasaur: '妙蛙种子', leechseed: '寄生种子'}[value] || value);
+		battle.add('|-roguegrowth|' + JSON.stringify({species: 'Bulbasaur', experience: 61, level: 9,
+			moves: ['leechseed'], evolutionReady: true}));
+		battle.add('|-roguegrowth|' + JSON.stringify({species: 'Ivysaur', moves: [], evolved: true}));
+		const html = lines.filter(line => line[0] === 'raw').map(line => line[1]).join('');
+		assert(html.includes('<strong>妙蛙种子</strong>'));
+		assert(html.includes('<strong>61 点经验</strong>'));
+		assert(html.includes('<strong>Lv.9</strong>'));
+		assert(html.includes('<strong>寄生种子</strong>'));
+		assert(html.includes('<strong>已满足进化条件</strong>'));
+		assert(html.includes('<strong>进化完成</strong>'));
+		assert.equal(mon.hp, 20); assert.equal(mon.maxhp, 30); assert.equal(mon.ident, identity);
+	});
+	it('escapes names and ignores malformed or excessive replay metadata', () => {
+		global.translateRogueName = () => '<img src=x onerror=alert(1)>';
+		for (const payload of ['broken', 'null', '{}', '{"species":"Mew","moves":null}']) {
+			battle.add('|-roguegrowth|' + payload);
+		}
+		assert.equal(lines.length, 0);
+		battle.add('|-roguegrowth|' + JSON.stringify({species: 'Mew', experience: -1, level: 10000,
+			moves: Array(30).fill('tackle')}));
+		const html = lines.find(line => line[0] === 'raw')[1];
+		assert(!html.includes('<img')); assert(!html.includes('Lv.')); assert(!html.includes('点经验'));
+		assert.equal((html.match(/&lt;img/g) || []).length, 21, 'one species name and at most twenty move names');
+	});
+});
 
 describe('Battle', () => {
 

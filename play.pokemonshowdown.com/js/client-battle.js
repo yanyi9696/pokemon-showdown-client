@@ -138,6 +138,11 @@
 		},
 		add: function (data) {
 			if (!data) return;
+			if (data === '|fantasyrogueresumed|') {
+				this.battle.seekTurn(Infinity, true);
+				this.updateControls();
+				return;
+			}
 			if (data.substr(0, 20) === '|fantasyroguedefeat|') {
 				if (this.fantasyRogue && this.fantasyRogue.userid === app.user.get('userid')) {
 					this.fantasyRogueDefeat = JSON.parse(data.slice(20));
@@ -149,6 +154,7 @@
 				if (this.fantasyRogue && this.fantasyRogue.userid === app.user.get('userid')) {
 					this.battleEnded = true;
 					app.joinRoom('fantasyrogue');
+					if (this.fantasyRogue.cooperative && app.rooms.fantasyrogue) app.rooms.fantasyrogue.openCoop();
 					this.close();
 				}
 				return;
@@ -431,6 +437,10 @@
 			if (this.choice && this.choice.waiting) {
 				act = '';
 			}
+			if (this.request && this.request.rogueCoopTeamPreview) {
+				this.updateRogueCoopTeamControls();
+				return;
+			}
 
 			var type = this.choice ? this.choice.type : '';
 
@@ -524,7 +534,13 @@
 		updateRogueEscape: function () {
 			if (this.fantasyRogue && this.fantasyRogue.userid === app.user.get('userid') && !this.battleEnded && !this.battle.ended) {
 				this.$controls.find('.rogue-retreat').remove();
-				this.$controls.append('<div class="rogue-retreat"><button class="button" name="retreatRogue">逃跑</button>' +
+				if (this.fantasyRogue.cooperative) {
+					this.$controls.append('<div class="rogue-retreat"><button class="button" name="retreatRogue">协商共同撤退</button>' +
+						'<small>双方同意后返回场外；伤害、PP 和道具消耗保留。</small></div>');
+					return;
+				}
+				this.$controls.append('<div class="rogue-retreat"><button class="button" name="retreatRogue">逃跑（撤退到战斗外）</button>' +
+					(!this.fantasyRogue.preview ? '<button class="button" name="rematchRogue">再战（为全队恢复后重新挑战本场战斗）</button>' : '') +
 					'<small>' + (this.fantasyRogue.optionalChallenge ? '退出战斗后，可重试或逃离本层；本次无奖励；' : '返回场外；') + '伤害、PP 和道具消耗保留。</small></div>');
 			}
 		},
@@ -556,8 +572,8 @@
 				if (result.noHealing) {
 					html += '<p>本层为连续挑战，禁止途中治疗，请用仍可战斗的成员继续。</p>';
 				} else {
-						html += '<p>返回后可用道具复活和治疗；全队倒下且没有复活道具时，余额足够会自动支付 <b>' + Number(result.emergencyCost) +
-							' 金币</b>急救；余额不足则保留倒下状态。</p>';
+					html += '<p>返回后可用道具复活和治疗；全队倒下且没有复活道具时，余额足够会自动支付 <b>' + Number(result.emergencyCost) +
+						' 金币</b>急救；余额不足则保留倒下状态。</p>';
 				}
 			}
 			if (result.emergencyRecovery) html += '<p><strong>' + (result.emergencyRecovery.paid ?
@@ -567,7 +583,18 @@
 		},
 		retreatRogue: function () {
 			if (!this.fantasyRogue || this.fantasyRogue.userid !== app.user.get('userid') || this.battleEnded) return;
+			if (this.fantasyRogue.cooperative) {
+				app.send('/fantasyrogue coop {"action":"proposeexit","value":"retreat"}');
+				app.joinRoom('fantasyrogue');
+				if (app.rooms.fantasyrogue) app.rooms.fantasyrogue.openCoop();
+				return;
+			}
 			this.send('/fantasyrogue retreat');
+		},
+		rematchRogue: function () {
+			if (!this.fantasyRogue || this.fantasyRogue.userid !== app.user.get('userid') || this.battleEnded ||
+				this.fantasyRogue.preview || this.fantasyRogue.cooperative) return;
+			this.send('/fantasyrogue rematch');
 		},
 		timerInterval: 0,
 		getTimerHTML: function (nextTick) {
@@ -932,9 +959,9 @@
 				'<button class="button" name="chooseRoguePsychic"' + (rogue.psychic < 100 ? ' disabled' : '') + '>释放灵能 · 一击必杀</button></div>' : '';
 			var blood = rogue.blood && rogue.blood[this.choice && this.choice.choices ? this.choice.choices.length : 0];
 			if (rogue.number) {
-				var numberLabels = {atk: '攻击', def: '防御', spa: '特攻', spd: '特防', spe: '速度', all: '五项全部'};
-				psychic += '<label class="rogue-number-choice"><strong>' + (rogue.number.super ? '超大数字' : '大数字') + '</strong> · 每场一次 <select name="rogueNumberStat"' + (rogue.number.available ? '' : ' disabled') + '><option value="">本回合不发动</option>' + rogue.number.stats.map(function (stat) {
-					return '<option value="' + stat + '">' + numberLabels[stat] + ' ×' + (rogue.number.super ? 5 : 2) + '</option>';
+				var numberLabels = { atk: '攻击', def: '防御', spa: '特攻', spd: '特防', spe: '速度', all: '五项全部' };
+				psychic += '<label class="rogue-number-choice"><strong>' + (rogue.number['super'] ? '超大数字' : '大数字') + '</strong> · 每场一次 <select name="rogueNumberStat"' + (rogue.number.available ? '' : ' disabled') + '><option value="">本回合不发动</option>' + rogue.number.stats.map(function (stat) {
+					return '<option value="' + stat + '">' + numberLabels[stat] + ' ×' + (rogue.number['super'] ? 5 : 2) + '</option>';
 				}).join('') + '</select></label>';
 			}
 			if (blood) psychic += '<label class="rogue-blood-choice"><input type="checkbox" name="rogueBloodBoost"' + (blood.available ? '' : ' disabled') + '> 神衣鲜血：消耗 ' + blood.cost + ' HP，本次伤害 +' + Math.round((blood.factor - 1) * 100) + '%</label>';
@@ -943,7 +970,7 @@
 			var zSlot = this.choice && this.choice.choices ? this.choice.choices.length : 0;
 			var extraZ = rogue.companionZ && rogue.companionZ[zSlot];
 			if (extraZ) {
-				var zTargets = extraZ.target === 'normal' ? this.battle.farSide.active.map(function (p, i) { return {pokemon: p, loc: i + 1}; }).filter(function (p) { return p.pokemon && !p.pokemon.fainted; }) : [{loc: 1}];
+				var zTargets = extraZ.target === 'normal' ? this.battle.farSide.active.map(function (p, i) { return { pokemon: p, loc: i + 1 }; }).filter(function (p) { return p.pokemon && !p.pokemon.fainted; }) : [{ loc: 1 }];
 				psychic += '<div class="rogue-psychic"><p><strong>' + BattleLog.escapeHTML(extraZ.source) + '</strong></p>' + zTargets.map(function (target) {
 					return '<button class="button has-tooltip" name="chooseRogueCompanionZ" value="' + target.loc + '" data-tooltip="move|' + extraZ.move + '|' + zSlot + '">' + BattleLog.escapeHTML(extraZ.name) + (zTargets.length > 1 ? ' → ' + BattleLog.escapeHTML(target.pokemon.name) : '') + ' · 额外 Z</button>';
 				}).join(' ') + '<p>威力 <b>185</b> · ' + (extraZ.category === 'Physical' ? '群攻物理' : '声音特殊') + ' · 命中后五项能力各 +1。独立次数，不消耗常规 Z。</p></div>';
@@ -954,12 +981,31 @@
 					(targets.length ? '<select name="rogueRevivalTarget" aria-label="复活目标">' + targets.map(function (mon) {
 						return '<option value="' + mon.slot + '">' + BattleLog.escapeHTML(globals.translations && globals.translations[mon.name] || mon.name) + '</option>';
 					}).join('') + '</select> ' : '<span>暂无无法战斗的伙伴</span> ') + rogue.revival.items.map(function (item) {
-						return '<button class="button" name="chooseRogueRevival" value="' + item.id + '"' +
-							(!targets.length || !item.count ? ' disabled' : '') + '><span class="itemicon" style="' + Dex.getItemIcon(item.id) + '"></span>' +
-							BattleLog.escapeHTML(item.name) + ' ×' + item.count + '</button>';
-					}).join(' ') + '</div>';
+					return '<button class="button" name="chooseRogueRevival" value="' + item.id + '"' +
+						(!targets.length || !item.count ? ' disabled' : '') + '><span class="itemicon" style="' + Dex.getItemIcon(item.id) + '"></span>' +
+						BattleLog.escapeHTML(item.name) + ' ×' + item.count + '</button>';
+				}).join(' ') + '</div>';
 			}
 			if (!rogue.catchable) return psychic;
+			if (rogue.cooperativeCapture) {
+				var targetControls = (rogue.captureTargets || []).map(function (target) {
+					return '<div class="rogue-capture-target"><strong>' + BattleLog.escapeHTML(target.name) + ' · HP ' + target.hp + '/' + target.maxhp + '</strong><br />' +
+						rogue.balls.map(function (ball) {
+							var chance = target.chances && target.chances[ball.id];
+							var percent = typeof chance !== 'number' ? '暂不可捕捉' : chance === 1 ? '100%' : chance === 0 ? '0%' :
+								chance < 0.0001 ? '低于 0.01%' : chance > 0.9999 ? '高于 99.99%' : (chance * 100).toFixed(2) + '%';
+							var tip = '当前捕捉成功率：' + percent;
+							return '<span class="rogue-ball-option"><button class="button" name="chooseRogueBall" value="' +
+								BattleLog.escapeHTML(ball.id + '|' + target.key) + '"' + (ball.count ? '' : ' disabled') +
+								' aria-label="' + BattleLog.escapeHTML(target.name + ' · ' + ball.name + ' × ' + ball.count + '，' + tip) + '">' +
+								'<span class="itemicon" style="' + Dex.getItemIcon(ball.id) + '"></span>' +
+								BattleLog.escapeHTML('申请使用' + ball.name) + ' × ' + ball.count + '</button><span class="rogue-catch-tip" role="tooltip"><strong>' +
+								BattleLog.escapeHTML(tip) + '</strong><br />双方本回合不行动；失败后对手仍会出招。</span></span> ';
+						}).join('') + '</div>';
+				}).join('');
+				return psychic + '<div class="rogue-balls"><p>共同捕捉需要队友同意；请选择野生宝可梦和你要使用的精灵球。</p>' +
+					(targetControls || '<p>当前没有可捕捉的野生宝可梦。</p>') + '</div>';
+			}
 
 			return psychic + '<div class="rogue-balls"><p>投球占用本次行动；失败后对方仍会出招。</p>' + rogue.balls.map(function (ball) {
 				var chance = ball.chance;
@@ -978,8 +1024,10 @@
 			var options = king.options || ['longzhihuxi', 'drizzle'];
 			return '<div class="pad rogue-dragon-choice"><h3>龙王的工作 · 继任</h3><p>' + BattleLog.escapeHTML(species) +
 				'接任本场龙王。选择一个额外特性后继续，不消耗回合。</p><p>' +
-				options.map(function (id) { return '<button class="button" name="chooseDragonKing" value="' + id + '">' +
-					(id === 'drizzle' ? '降雨' : '龙之呼吸') + '</button>'; }).join(' ') + '</p>' +
+				options.map(function (id) {
+					return '<button class="button" name="chooseDragonKing" value="' + id + '">' +
+						(id === 'drizzle' ? '降雨' : '龙之呼吸') + '</button>';
+				}).join(' ') + '</p>' +
 				'<p>龙之呼吸：一般招式变为龙系，每次登场首次招式自降能力无效。<br />降雨：登场时开启下雨天气。</p></div>';
 		},
 		chooseDragonKing: function (ability, token) {
@@ -997,6 +1045,13 @@
 		},
 		chooseRogueBall: function (id) {
 			if (!this.choice || !this.request || !this.request.fantasyRogue || !this.request.fantasyRogue.catchable) return;
+			if (this.request.fantasyRogue.cooperativeCapture) {
+				var captureChoice = String(id).split('|');
+				if (captureChoice.length !== 2) return;
+				this.send('/fantasyrogue coop ' + JSON.stringify({ action: 'proposecapture', ball: captureChoice[0], captureTarget: captureChoice[1],
+					owner: this.request.fantasyRogue.coopOwnerUser }));
+				return;
+			}
 			this.choice.choices.push('rogueball ' + id);
 			this.endChoice();
 		},
@@ -1138,6 +1193,108 @@
 				);
 				this.selectSwitch();
 			}
+		},
+		getRogueCoopPreview: function () {
+			var controller = app.rooms.fantasyrogue, state = controller && controller.coopState;
+			var session = state && state.session, request = this.request;
+			if (!request || !request.rogueCoopTeamPreview || !session || session.roomid !== this.id || !session.adventure) return null;
+			var ownSide = session.role === 'host' ? 'p1' : 'p3', delegated = request.side.id !== ownSide;
+			var adventure = session.adventure;
+			return { controller: controller, session: session, adventure: adventure,
+				owner: delegated ? session.partnerUserId : state.userid,
+				ownSide: request.side.id, partnerSide: request.side.id === 'p1' ? 'p3' : 'p1',
+				ownTeam: delegated ? adventure.partnerTeam : adventure.team,
+				partnerTeam: delegated ? adventure.team : adventure.partnerTeam,
+				selection: delegated ? adventure.partnerBattlePreview : adventure.battlePreview,
+				partnerSelection: delegated ? adventure.battlePreview : adventure.partnerBattlePreview,
+				ready: delegated ? adventure.partnerPreviewConfirmed : adventure.previewConfirmed,
+				partnerReady: delegated ? adventure.previewConfirmed : adventure.partnerPreviewConfirmed,
+				partnerName: delegated ? (session.role === 'host' ? session.hostName : session.guestName) :
+				(session.role === 'host' ? session.guestName : session.hostName) };
+		},
+		updateRogueCoopPreview: function () {
+			if (!this.request || !this.request.rogueCoopTeamPreview) return;
+			var data = this.getRogueCoopPreview();
+			if (!data) return;
+			var ids = this.request.rogueCoopTeamPreview.members;
+			if (!this.choice || !this.choice.waiting) {
+				var chosen = (data.selection || []).map(function (id) { return ids.indexOf(id) + 1; }).filter(Boolean);
+				var order = chosen.concat(ids.map(function (_, index) { return index + 1; }).filter(function (pos) { return chosen.indexOf(pos) < 0; }));
+				this.choice = { choices: [], teamPreview: order, done: chosen.length, count: this.request.maxChosenTeamSize || 3 };
+			}
+			this.controlsShown = false; this.updateControls();
+		},
+		updateRogueCoopTeamControls: function () {
+			var data = this.getRogueCoopPreview();
+			if (!data) {
+				this.$controls.html('<div class="controls"><p>正在读取双方战前队伍…</p><button class="button" name="refreshRogueCoopPreview">刷新战前准备</button></div>');
+				return;
+			}
+			var ids = this.request.rogueCoopTeamPreview.members, mons = this.battle.myPokemon;
+			if (!this.choice || !this.choice.teamPreview) {
+				var waiting = this.choice && this.choice.waiting;
+				var chosen = (data.selection || []).map(function (id) { return ids.indexOf(id) + 1; }).filter(Boolean);
+				this.choice = { choices: [], waiting: waiting, teamPreview: chosen.concat(ids.map(function (_, i) { return i + 1; })
+					.filter(function (pos) { return chosen.indexOf(pos) < 0; })), done: chosen.length, count: this.request.maxChosenTeamSize || 3 };
+			}
+			var busy = !!data.controller.coopBusy, ready = data.ready || this.choice.waiting;
+			var disabled = busy || ready || data.session.canControl === false;
+			var partnerIds = data.partnerSelection || [], partnerTeam = data.partnerTeam || [];
+			var partnerOrder = partnerIds.map(function (id) { return partnerTeam.find(function (mon) { return mon.id === id; }); }).filter(Boolean)
+				.concat(partnerTeam.filter(function (mon) { return partnerIds.indexOf(mon.id) < 0; }));
+			var partner = partnerOrder.map(function (mon) {
+				var index = partnerIds.indexOf(mon.id), label = globals.translateRogueName ? globals.translateRogueName(mon.species, 'pokemon') : mon.species;
+				return '<span class="rogue-coop-team-choice' + (index >= 0 ? ' is-selected' : '') + '"><span class="picon" style="' +
+					Dex.getPokemonIcon(mon.species) + '"></span>' + (index >= 0 ? (index + 1) + ' · ' : '') + BattleLog.escapeHTML(label) + '</span>';
+			}).join('');
+			var own = this.choice.teamPreview.map(function (pos, index) {
+				var mon = mons[pos - 1], chosen = index < this.choice.done;
+				return '<button name="' + (chosen ? 'removeRogueCoopTeamPick' : 'chooseTeamPreview') + '" value="' + index +
+					'" class="has-tooltip' + (chosen ? ' rogue-coop-picked' : '') + '" data-tooltip="switchpokemon|' + (pos - 1) + '"' +
+					(disabled || !chosen && this.choice.done >= this.choice.count ? ' disabled' : '') + '><span class="picon" style="' +
+					Dex.getPokemonIcon(mon) + '"></span>' + (chosen ? (index + 1) + ' · ' : '') + BattleLog.escapeHTML(mon.name) +
+					(chosen ? ' ×' : '') + '</button>';
+			}, this).join(' ');
+			this.battle.rogueCoopPreview = { ownSide: data.ownSide, partnerSide: data.partnerSide, selections: {} };
+			this.battle.rogueCoopPreview.selections[data.ownSide] = this.choice.teamPreview.slice(0, this.choice.done).map(function (pos) { return pos - 1; });
+			this.battle.rogueCoopPreview.selections[data.partnerSide] = partnerIds.map(function (id) {
+				return partnerTeam.filter(function (mon) { return mon.hp > 0 && !mon.egg && !mon.nuzlockeDead; }).findIndex(function (mon) { return mon.id === id; });
+			});
+			if (this.battle.scene.updateRogueCoopPreview) this.battle.scene.updateRogueCoopPreview();
+			this.$controls.html('<div class="controls rogue-coop-team-controls"><div class="rogue-coop-team-partner"><strong>队友的队伍 · ' +
+				BattleLog.escapeHTML(data.partnerName) + ' · ' + partnerIds.length + ' / 3 · ' + (data.partnerReady ? '已确认' : '选择中') +
+				'</strong><div class="switchmenu">' + partner + '</div></div><div class="whatdo">我的出战顺序 · ' + this.choice.done +
+				' / ' + this.choice.count + ' · 第一只首发' + this.getTimerHTML() + '</div><div class="switchcontrols"><div class="switchmenu">' + own +
+				'</div></div><p>' + (ready ? '已确认，等待队友。' : '依次选择最多 3 只；点击已选伙伴可取消。') + '</p>' +
+				(ready ? '<button class="button" name="undoChoice">撤销确认，重新选择</button>' :
+				'<button class="button" name="confirmRogueCoopTeam"' + (disabled || !this.choice.done ? ' disabled' : '') + '>确认出战</button>') +
+				(data.controller.coopSelectionError ? '<p class="message-error">' + BattleLog.escapeHTML(data.controller.coopSelectionError) + '</p>' : '') + '</div>');
+		},
+		refreshRogueCoopPreview: function () {
+			var controller = app.rooms.fantasyrogue || app._addRoom('fantasyrogue', null, true);
+			controller.screen = 'coop';
+			if (!controller.coopBusy) controller.sendCoop('refresh');
+		},
+		sendRogueCoopTeamPreview: function () {
+			var data = this.getRogueCoopPreview();
+			if (!data || data.controller.coopBusy || data.ready || this.choice.waiting) return;
+			var ids = this.request.rogueCoopTeamPreview.members;
+			data.controller.coopSelectionError = '';
+			data.controller.sendCoop('previewbattle', { owner: data.owner, visit: data.adventure.battleSelectionKey,
+				members: this.choice.teamPreview.slice(0, this.choice.done).map(function (pos) { return ids[pos - 1]; }) });
+			this.updateRogueCoopTeamControls();
+		},
+		removeRogueCoopTeamPick: function (index) {
+			var data = this.getRogueCoopPreview(); index = Number(index);
+			if (!data || data.controller.coopBusy || data.ready || this.choice.waiting || index < 0 || index >= this.choice.done) return;
+			this.choice.teamPreview.push(this.choice.teamPreview.splice(index, 1)[0]); this.choice.done--;
+			this.sendRogueCoopTeamPreview();
+		},
+		confirmRogueCoopTeam: function () {
+			var data = this.getRogueCoopPreview();
+			if (!data || data.controller.coopBusy || data.ready || this.choice.waiting || !this.choice.done) return;
+			this.sendDecision('team ' + this.choice.teamPreview.slice(0, this.choice.done).join(','));
+			this.choice.waiting = true; this.updateRogueCoopTeamControls();
 		},
 		updateTeamControls: function (type) {
 			var switchables = this.request && this.request.side ? this.battle.myPokemon : [];
@@ -1336,6 +1493,7 @@
 			this.choice = choiceText ? { waiting: true } : null;
 			this.finalDecision = this.finalDecisionMove = this.finalDecisionSwitch = false;
 			this.request = request;
+			if (request.rogueCoopTeamPreview && (!app.rooms.fantasyrogue || !app.rooms.fantasyrogue.coopState)) this.refreshRogueCoopPreview();
 			if (request.side) {
 				this.updateSideLocation(request.side);
 			}
@@ -1601,6 +1759,13 @@
 		chooseTeamPreview: function (pos) {
 			if (!this.choice) return;
 			pos = parseInt(pos, 10);
+			if (this.request && this.request.rogueCoopTeamPreview) {
+				var data = this.getRogueCoopPreview();
+				if (!data || data.controller.coopBusy || data.ready || this.choice.waiting || this.choice.done >= this.choice.count ||
+					pos < this.choice.done || pos >= this.choice.teamPreview.length) return;
+				this.choice.teamPreview.splice(this.choice.done, 0, this.choice.teamPreview.splice(pos, 1)[0]); this.choice.done++;
+				this.sendRogueCoopTeamPreview(); return;
+			}
 			this.tooltips.hideTooltip();
 			if (this.choice.count) {
 				var temp = this.choice.teamPreview[pos];
@@ -1778,7 +1943,7 @@
 		type: 'semimodal',
 		initialize: function (data) {
 			this.room = data.room; this.token = data.king.token;
-			this.$el.html(this.room.dragonKingControls(data.king) + '<p><button class="button" name="retreatRogue">逃跑</button></p>');
+			this.$el.html(this.room.dragonKingControls(data.king) + '<p><button class="button" name="retreatRogue">逃跑（撤退到战斗外）</button></p>');
 		},
 		retreatRogue: function () {
 			this.room.retreatRogue(); this.close();
@@ -1795,7 +1960,7 @@
 			this.gameType = data.gameType;
 			if (this.gameType === 'battle' && this.room.fantasyRogue) {
 				this.$el.html('<form><p>' + (this.room.fantasyRogue.optionalChallenge ? '逃跑只退出本场战斗，不发奖励。你仍停留在挑战区域，之后可重试或选择逃离这一层。' : '逃跑后回到当前战斗的准备界面。') + 'HP、PP、异常状态和道具消耗保留，需要自行使用道具恢复。本场叠层恢复至开战前。</p>' +
-					'<p><button type="submit" class="button">逃跑</button> <button type="button" class="button autofocus" name="close">继续战斗</button></p></form>');
+					'<p><button type="submit" class="button">逃跑（撤退到战斗外）</button> <button type="button" class="button autofocus" name="close">继续战斗</button></p></form>');
 				return;
 			}
 			var buf = '<form><p>';

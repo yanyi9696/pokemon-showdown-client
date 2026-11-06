@@ -19,6 +19,10 @@
 // @updateURL https://update.greasyfork.org/scripts/432623/PSChina%20Server%20Translation%20SV.meta.js
 // ==/UserScript==
 var translations = {
+    "Rogue Item Module": "道具增幅",
+    "Rogue Universal Mega Stone": "万用超级石",
+    "Rogue Universal Wishing Star": "万用许愿星",
+    "He An Qin Shi": "黑暗侵蚀",
     "Rogue Emergency": "应急恢复",
     "rogueemergency": "应急恢复",
     "Rogue Psychic Burst": "灵能百分百",
@@ -3906,7 +3910,8 @@ var translations = {
     "Kyurem-White": "酋雷姆-焰白",
     "Kyurem-Black": "酋雷姆-暗黑",
     "Kyurem": "酋雷姆",
-    "Kyurem-Original": "酋雷姆-三合一",
+    "Kyurem-Original": "幻想酋雷姆-三合一",
+    "Kyurem-Original-Fantasy": "幻想酋雷姆-三合一",
     "Original Dragon": "最初之龙",
     "Keldeo": "凯路迪欧",
     "Meloetta": "美洛耶塔",
@@ -8795,15 +8800,46 @@ var regex_useroffinemessge = new RegExp(/User (.+) is offline. Send the message 
 // ==========================================================
 
 // Rogue uses explicit data contexts: menu labels such as Disable/Refresh are not move names.
+// Saved sets and event choices may contain IDs instead of their spaced display names.
+// Match entire names only, preserving ordinary prose and every protocol/storage ID.
+var translatedNameIDs;
+function translationForNameID(value) {
+    if (!translatedNameIDs) {
+        translatedNameIDs = Object.create(null);
+        Object.keys(translations).sort(function (a, b) {
+            // Prefer a name over a heading such as "Hidden Power:" with the same ID.
+            return Number(/[:.,%]/.test(a)) - Number(/[:.,%]/.test(b)) || a.length - b.length;
+        }).forEach(function (name) {
+            // Suffix-only entries such as -M/-F are not standalone names or item-size aliases.
+            if (name.startsWith('-') || !/^[A-Za-z0-9 ().,:'’%♀♂+-]+$/.test(name) || !/[\u3400-\u9fff]/.test(translations[name])) return;
+            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            // Form suffixes such as "-10%" must not become aliases for numeric counters.
+            if (/[a-z]/.test(id) && !translatedNameIDs[id]) translatedNameIDs[id] = translations[name];
+        });
+        Object.keys(translatedNameIDs).forEach(function (id) {
+            if (!translations[id]) translations[id] = translatedNameIDs[id];
+        });
+    }
+    return translatedNameIDs[String(value).toLowerCase().replace(/[^a-z0-9]/g, '')];
+}
+function translateCandyName(value) {
+    const match = String(value).match(/^(?:expcandy|exp\.?\s*candy[\s-]*|经验糖果[\s-]*)(xs|xl|s|m|l)(?=$|[（(\s])/i);
+    return match ? '经验糖果 ' + match[1].toUpperCase() + String(value).slice(match[0].length) : undefined;
+}
 function translateRogueName(value, kind) {
     if (!value) return value;
     value = String(value).trim();
+    const candyName = translateCandyName(value);
+    if (candyName) return candyName;
     if (/[+🔄]$/u.test(value)) {
         const plain = value.replace(/[+🔄]+$/u, '');
         return translateRogueName(plain, kind) + value.slice(plain.length);
     }
-    const moveNames = {Psychic: '精神强念', Metronome: '挥指', Refresh: '焕然一新', Disable: '定身法'};
-    if (kind === 'move' && moveNames[value]) return moveNames[value];
+    const moveNames = {psychic: '精神强念', metronome: '挥指', refresh: '焕然一新', disable: '定身法'};
+    const nameID = value.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (kind === 'move' && moveNames[nameID]) return moveNames[nameID];
+    const universalZ = value.match(/^Rogue Universal (\w+) Z$/i) || value.match(/^rogueuniversal(\w+)z$/i);
+    if (universalZ) return '万用霸主 Z（' + translateRogueName(universalZ[1]) + '）';
     const specialForms = {'Urshifu-G-Mega-Fantasy': '幻想武道熊师-爆击流-超巨进化', 'Urshifu-Rapid-Strike-G-Mega-Fantasy': '幻想武道熊师-瞬击流-超巨进化'};
     if (specialForms[value]) return specialForms[value];
     if (/-Fantasy$/.test(value)) {
@@ -8825,7 +8861,13 @@ function translateRogueName(value, kind) {
     if (/^幻想超级(?!进化)/.test(value)) return value.replace(/^幻想超级(.+?)([XYZ])?$/, '幻想$1-超级进化$2');
     if (fixed[value]) return fixed[value];
     if (translations[value]) return translations[value].replace(/\(Gen (\d+)\)/g, '（第 $1 世代）').replace(/Mega进化/gi, '超级进化');
-    if (/[\u3400-\u9fff]/.test(value)) return value.replace(/幻想mega/gi, '幻想超级进化').replace(/Mega进化/gi, '超级进化');
+    const byID = /^[A-Za-z0-9 ().,:'’%♀♂+-]+$/.test(value) && translationForNameID(value);
+    if (byID) return byID;
+    if (/[\u3400-\u9fff]/.test(value)) return value.replace(/幻想mega/gi, '幻想超级进化').replace(/Mega进化/gi, '超级进化')
+        .replace(/[A-Za-z][A-Za-z0-9'’.:%♀♂ -]*/g, function (phrase) {
+            const name = phrase.trim();
+            return translateRogueName(name, kind) + phrase.slice(name.length);
+        });
     if (/^TR\d\d$/.test(value)) return '招式记录' + value.slice(2);
     if (/-Fantasy$/.test(value)) return '幻想' + translateRogueName(value.slice(0, -8), kind);
     let match = value.match(/^(.+)-G-Mega$/);
@@ -8857,6 +8899,8 @@ function translateRogueName(value, kind) {
     if (match) return '让能够学习的宝可梦学会【' + translateRogueName(match[1], 'move') + '】。使用一次后消失。';
     return value;
 }
+// Older battle-log patterns read the dictionary directly; they need the same ID aliases.
+translationForNameID('');
 // Use the same Fantasy Mega form order in battles, validation and Rogue menus.
 Object.keys(translations).forEach(function (name) {
     const mega = name.match(/^(.+?)-Mega(?:-([XYZ]))?-Fantasy$/);
@@ -12491,6 +12535,8 @@ function translateBattleModifiers(value) {
         if (node.nodeType === 3) {
             let value = node.nodeValue;
             let trimmed = value.trim();
+            const candyName = translateCandyName(trimmed);
+            if (candyName) { node.nodeValue = value.replace(trimmed, candyName); return; }
             if (!trimmed) return;
             // Move-list bullets can contain Fantasy change markers and PP counters.
             // Translate the actual move name before the generic sentence matcher.
@@ -12538,6 +12584,11 @@ function translateBattleModifiers(value) {
             // 优先级别 1：基础词典全文本精确匹配
             if (translations[trimmed]) {
                 node.nodeValue = value.replace(trimmed, translations[trimmed]);
+                return;
+            }
+            const named = /^[A-Za-z0-9 ().,:'’%♀♂+-]+$/.test(trimmed) && translationForNameID(trimmed);
+            if (named) {
+                node.nodeValue = value.replace(trimmed, named);
                 return;
             }
 
@@ -12816,6 +12867,9 @@ function translateBattleModifiers(value) {
                 regexTranslated = t(value.replace("é", "e"));
             }
 
+            if (regexTranslated === value && /[\u3400-\u9fff]/.test(value) && /[A-Za-z]/.test(value)) {
+                regexTranslated = translateRogueName(value);
+            }
             // 发生改变才写回 DOM，优化性能
             if (regexTranslated !== value) {
                 node.nodeValue = regexTranslated;
@@ -12824,6 +12878,7 @@ function translateBattleModifiers(value) {
         } else if (node.nodeType === 1) {
             let tag = node.tagName.toUpperCase();
             if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'INPUT') return;
+            if (node.classList.contains('username') || node.classList.contains('usernametext')) return;
 
             // 依然保留您在 pokemonnamecol 中对 <b> 标签的强行重写逻辑
             if (node.classList.contains('pokemonnamecol') || node.parentElement?.classList.contains('pokemonnamecol')) {

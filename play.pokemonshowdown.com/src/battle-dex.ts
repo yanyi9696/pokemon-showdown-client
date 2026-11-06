@@ -230,6 +230,8 @@ export interface SpriteData {
 	isFrontSprite?: boolean;
 	cryurl?: string;
 	shiny?: boolean;
+	/** Applied to the transparent Pokemon sprite only, never the statbar/substitute. */
+	filter?: string;
 }
 
 export interface TeambuilderSpriteData {
@@ -548,7 +550,8 @@ export const Dex = new class implements ModdedDex {
 				return nameOrSpecies;
 			}
 			let name = nameOrSpecies || '';
-			let id = toID(nameOrSpecies);
+			if (toID(name) === 'kyuremoriginal') name = 'Kyurem-Original-Fantasy';
+			let id = toID(name);
 			let formid = id;
 			if (!window.BattlePokedexAltForms) window.BattlePokedexAltForms = {};
 			if (formid in window.BattlePokedexAltForms) return window.BattlePokedexAltForms[formid];
@@ -671,6 +674,16 @@ export const Dex = new class implements ModdedDex {
 		document.getElementsByTagName('body')[0].appendChild(el);
 	}
 	// sprite in battle
+	getFantasySpriteFilter(species: string) {
+		const id = toID(species);
+		if (!id.endsWith('fantasy') && id !== 'kyuremoriginal') return '';
+		const softness = ['kyuremoriginal', 'kyuremoriginalfantasy'].includes(id) ? 'blur(.2px) ' : '';
+		return softness + 'drop-shadow(3px 0 3px rgba(255,100,100,.5)) ' +
+			'drop-shadow(0 3px 3px rgba(100,235,130,.5)) ' +
+			'drop-shadow(-3px 0 3px rgba(100,220,255,.5)) ' +
+			'drop-shadow(0 -3px 3px rgba(165,110,255,.5))';
+	}
+
 	getSpriteData(pokemon: Pokemon | Species | string, isFront: boolean, options: {
 		gen?: number,
 		shiny?: boolean,
@@ -747,6 +760,9 @@ export const Dex = new class implements ModdedDex {
 			isFrontSprite: false,
 			cryurl: '',
 			shiny: options.shiny,
+			filter: (originalSpecies.id === 'onixfantasy' ?
+				'sepia(1) hue-rotate(190deg) saturate(5) brightness(1.1) ' : '') +
+				this.getFantasySpriteFilter(originalSpecies.id),
 		};
 		// Use baseSpriteId determined above for the filename
 		let name = baseSpriteId;
@@ -796,13 +812,21 @@ export const Dex = new class implements ModdedDex {
 		if (!animationData) animationData = {};
 		if (!miscData) miscData = {};
 
-		if (miscData.num !== 0 && miscData.num > -5000) {
+		// Fantasy forms reuse their official counterpart's cry. There is no
+		// sprites/gen9fantasy/audio directory on the shared asset host.
+		let crySpecies = originalSpecies;
+		if (originalSpecies.id.endsWith('fantasy') || originalSpecies.id === 'kyuremoriginal') {
+			crySpecies = Dex.species.get(baseSpriteId);
+			if (!crySpecies.exists) crySpecies = Dex.species.get(species.baseSpecies.replace(/-Fantasy$/i, ''));
+			if (!crySpecies.exists) crySpecies = Dex.species.get(baseSpriteId.split('-')[0]);
+		}
+		if (crySpecies.exists && (miscData.num !== 0 && miscData.num > -5000 || crySpecies !== originalSpecies)) {
 			// Use speciesForGenCheck to determine cry URL base ID
-			let baseSpeciesid = toID(speciesForGenCheck.baseSpecies);
+			let baseSpeciesid = toID(crySpecies.baseSpecies);
 			spriteData.cryurl = 'audio/cries/' + baseSpeciesid;
 			// Use originalSpecies to check forme for cry URL suffix
-			let formeid = originalSpecies.formeid;
-			if (originalSpecies.isMega || formeid && (
+			let formeid = crySpecies.formeid;
+			if (crySpecies.isMega || formeid && (
 				formeid === '-crowned' ||
 				formeid === '-eternal' ||
 				formeid === '-eternamax' ||
@@ -840,7 +864,7 @@ export const Dex = new class implements ModdedDex {
 		if (options.shiny && mechanicsGen > 1) dir += '-shiny';
 
 		// Mod Cries
-		if (options.mod) {
+		if (options.mod && options.mod !== 'gen9fantasy') {
 			spriteData.cryurl = `sprites/${options.mod}/audio/${toID(species.baseSpecies)}`;
 			spriteData.cryurl += '.mp3';
 		}
@@ -900,7 +924,7 @@ export const Dex = new class implements ModdedDex {
 		// 获取宝可梦的纯小写ID
 		const checkId = originalSpecies.id;
 
-		if (checkId === 'kyuremoriginal') {
+		if (['kyuremoriginal', 'kyuremoriginalfantasy'].includes(checkId)) {
 			const prefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
 			spriteData.url = `${prefix}sprites/fantasy-rogue/kyurem-original${isFront ? '' : '-back'}${options.shiny ? '-shiny' : ''}.png`;
 			spriteData.isFrontSprite = isFront;
@@ -1196,13 +1220,6 @@ export const Dex = new class implements ModdedDex {
 
 		if (!finalId) finalId = '0' as ID; // Default if ID determination failed
 		const faintedString = fainted ? ';opacity:.3;filter:grayscale(100%) brightness(.5)' : '';
-		if (finalId === 'kyuremoriginal') {
-			// The battle sidebar already mirrors its icons in CSS. Keep the native
-			// orientation here, and a plain background value for the teambuilder updater.
-			const url = `${iconSheetPrefix}sprites/fantasy-rogue/kyurem-original-icon.png?v=20261024`;
-			return `background:transparent url(${url}) no-repeat scroll center center${faintedString}`;
-		}
-
 		// ID for base sprite/data lookup (strip fantasy)
 		let lookupId = finalId;
 
@@ -1227,19 +1244,22 @@ export const Dex = new class implements ModdedDex {
 		// Generate CSS
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
-		const iconSheetUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v18`;
+		const customIcon = ['kyuremoriginal', 'kyuremoriginalfantasy'].includes(finalId);
+		const iconUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v=20261104g`;
+		const iconPosition = `-${left}px -${top}px`;
 
 		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量进行“真·图层分离”
 		let fantasyStyles = '';
-		if (finalId.endsWith('fantasy')) {
+		if (finalId.endsWith('fantasy') || customIcon) {
 			// 改为静态发光滤镜：合并了东南西北四个方向的彩虹色以及底层黑边，彻底解决性能卡顿问题
 			let staticGlow = fainted ? 'none' : 'drop-shadow(1.5px 0 1.5px rgba(255, 100, 100, 0.6)) drop-shadow(0 1.5px 1.5px rgba(100, 255, 100, 0.6)) drop-shadow(-1.5px 0 1.5px rgba(100, 255, 245, 0.6)) drop-shadow(0 -1.5px 1.5px rgba(130, 100, 255, 0.6)) drop-shadow(0 0 2px rgba(0, 0, 0, 0.35))';
 			
 			// 变量传递：--is-fantasy 触发图层分离，--bg-url/pos 传递底层坐标，--glow-filter 传递静态滤镜
-			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconSheetUrl}); --bg-pos: -${left}px -${top}px; --glow-filter: ${staticGlow};`;
+			fantasyStyles = `; --is-fantasy: 1; --bg-url: url(${iconUrl}); --bg-pos: ${iconPosition}; --glow-filter: ${staticGlow};`;
+			if (customIcon) fantasyStyles += ' --icon-detail-filter: contrast(1.055);';
 		}
 
-		return `background:transparent url(${iconSheetUrl}) no-repeat scroll -${left}px -${top}px${faintedString}${fantasyStyles}`;
+		return `background:transparent url(${iconUrl}) no-repeat scroll ${iconPosition}${faintedString}${fantasyStyles}`;
 	}
 
 
@@ -1361,13 +1381,20 @@ export const Dex = new class implements ModdedDex {
 	}
 
 	getTeambuilderSprite(pokemon: any, gen = 0, pixel = false) {
+		const style = this.getTeambuilderSpriteStyle(pokemon, gen, pixel);
+		const glow = this.getFantasySpriteFilter(pokemon?.species || '');
+		return style && glow ? `${style};filter:${glow} var(--pokemon-art-shadow,drop-shadow(0 0 0 transparent))` : style;
+	}
+
+	private getTeambuilderSpriteStyle(pokemon: any, gen = 0, pixel = false) {
 		if (!pokemon) return '';
 		const data = this.getTeambuilderSpriteData(pokemon, gen, pixel);
 		const shiny = (data.shiny ? '-shiny' : '');
 		const id = toID(pokemon.species);
-		if (id === 'kyuremoriginal') {
+		if (['kyuremoriginal', 'kyuremoriginalfantasy'].includes(id)) {
 			const prefix = Dex.iconSheetPrefix || Dex.resourcePrefix;
-			return `background-image:url(${prefix}sprites/fantasy-rogue/kyurem-original${shiny}.png);background-position:center;background-repeat:no-repeat;image-rendering:pixelated`;
+			// Use the same smooth scaling as the other custom portraits.
+			return `background-image:url(${prefix}sprites/fantasy-rogue/kyurem-original${shiny}.png);background-size:var(--teambuilder-art-size,94px) auto;background-position:var(--teambuilder-art-x,13px) var(--teambuilder-art-y,8px);background-repeat:no-repeat;image-rendering:auto`;
 		}
 		if (pixel || Dex.prefs('bwgfx')) {
 			const customPixels: { [id: string]: string } = {
@@ -1526,6 +1553,10 @@ export const Dex = new class implements ModdedDex {
 
 	getItemIcon(item: any) {
 		let num = 0;
+		if (typeof item === 'string' && toID(item) === 'intriguingstone') item = { spritenum: 768 };
+		if (typeof item === 'string' && (toID(item).startsWith('rogueuniversal') || toID(item) === 'gmegawishingstar')) {
+			item = Dex.mod('gen9fantasy' as ID).items.get(item);
+		}
 		if (typeof item === 'string' && exports.BattleItems) item = exports.BattleItems[toID(item)];
 		if (item?.spritenum) num = item.spritenum;
 
@@ -1534,9 +1565,48 @@ export const Dex = new class implements ModdedDex {
 
 		// 【修改这里】移除 Dex.resourcePrefix,改为指向本地存放道具图的相对路径
 		// 注意:将 ?v1 改为 ?v2 (或更高的数字) 可以帮助强制清除浏览器缓存,确保加载的是你最新的图片
-		const itemSheetUrl = `./sprites/itemicons-sheet.png?v2`;
+		const itemSheetUrl = `./sprites/itemicons-sheet.png?v=20261104`;
 
 		return `background:transparent url(${itemSheetUrl}) no-repeat scroll -${left}px -${top}px`;
+	}
+
+	/** Pixel star for capture-success celebrations. */
+	getShinyStar() {
+		return '<svg viewBox="0 0 18 18" width="100%" height="100%" shape-rendering="crispEdges" aria-hidden="true">' +
+			'<path fill="#b87822" d="M8 0h2v3h2v3h6v4h-3v3h1v5h-4v-2H6v2H2v-5h1v-3H0V6h6V3h2Z"/>' +
+			'<path fill="#ffe67c" d="M8 2h2v4h2v2h4v2h-3v3h1v3h-2v-2H6v2H4v-3h1v-3H2V8h4V6h2Z"/>' +
+			'<path fill="#fffad1" d="M8 6h2v2h2v2H6V8h2Z"/></svg>';
+	}
+
+	/** Shared shape and motion for shiny reveals; capture-success stars remain separate. */
+	getShinySparkleFilter(outline = 0.5) {
+		const gold = 'brightness(0) invert(1) brightness(.67) sepia(1) saturate(2.5)';
+		return gold + ` drop-shadow(${outline}px 0 0 rgba(0,0,0,.8))` +
+			` drop-shadow(-${outline}px 0 0 rgba(0,0,0,.8))` +
+			` drop-shadow(0 ${outline}px 0 rgba(0,0,0,.8))` +
+			` drop-shadow(0 -${outline}px 0 rgba(0,0,0,.8))`;
+	}
+	getShinySparkleOffsets(): number[][] {
+		return [[-1, 0.45], [-0.5, 1], [0.5, 1], [1, 0.45], [1, -0.45], [0.5, -1], [-0.5, -1], [-1, -0.45]];
+	}
+	getShinySparkleFrames() {
+		// Scene y grows upwards; HTML inverts it. Lower the whole burst together.
+		const centerY = -6;
+		return this.getShinySparkleOffsets().map(([x, y], index) => ({
+			start: { x: x * 26, y: y * 22 + centerY, scale: index % 2 ? 0.26 : 0.32 },
+			end: { x: x * 76, y: y * 65 + centerY, scale: 0.06 },
+			delay: 350 + index * 35, duration: 750,
+		}));
+	}
+	getShinySparkles(scale = 1, size = 1) {
+		return this.getShinySparkleFrames().map(({ start, end, delay, duration }) =>
+			`<img src="${this.fxPrefix}shine.png" alt="" aria-hidden="true" ` +
+			`style="--star-filter:${this.getShinySparkleFilter(0.5 / (start.scale * scale * size))};` +
+			`--star-from-x:${start.x * scale}px;--star-from-y:${-start.y * scale}px;` +
+			`--star-to-x:${end.x * scale}px;--star-to-y:${-end.y * scale}px;` +
+			`--star-from-scale:${start.scale * scale * size};--star-to-scale:${end.scale * scale * size};` +
+			`--star-delay:${delay}ms;--star-duration:${duration}ms" />`
+		).join('');
 	}
 
 	getTypeIconURL(type: string) {
@@ -1798,6 +1868,8 @@ export class ModdedDex {
 
 	species = {
 		get: (name: string): Species => {
+			// Legacy saved teams also work before the optional aliases table loads.
+			if (toID(name) === 'kyuremoriginal') name = 'Kyurem-Original-Fantasy';
 			let id = toID(name);
 			if (window.BattleAliases && id in BattleAliases) {
 				name = BattleAliases[id];
@@ -2810,6 +2882,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				top: 0; left: 0; right: 0; bottom: 0;
 				background-image: var(--bg-url);
 				background-position: var(--bg-pos);
+				background-size: var(--bg-size, auto);
 				background-repeat: no-repeat;
 				pointer-events: none;
 			}
@@ -2820,8 +2893,9 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 				z-index: 1;
 			}
 
-			/* 3. 清晰顶层：盖在发光层上面,没有任何 filter,永远保持 100% 原始像素锐利 */
+			/* The icon stays above the glow; only explicit per-icon detail adjustments apply here. */
 			span[style*="--is-fantasy"]::after {
+				filter: var(--icon-detail-filter, none);
 				z-index: 2;
 			}
 		`;
