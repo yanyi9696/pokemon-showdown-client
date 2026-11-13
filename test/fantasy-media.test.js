@@ -72,7 +72,7 @@ describe('Fantasy battle media', () => {
 				if (typeof key === 'string') this.style[key] = value;
 				else Object.assign(this.style, key);
 				return this;
-			}, attr() { return this; }};
+			}, attr() { return this; }, off() { return this; }};
 		}
 		context.$ = element;
 		context.$.easing = {};
@@ -111,11 +111,16 @@ describe('Fantasy battle media', () => {
 			const scene = Object.create(context.BattleScene.prototype);
 			scene.gen = 9; scene.mod = 'gen9fantasy';
 			scene.battle = {gameType: 'singles', viewpointSwitched: false,
-				sides: [0, 1].map(() => ({name: 'Test', pokemon:
+				sides: [0, 1].map(index => ({name: 'Test', sideid: 'p' + (index + 1), pokemon:
 					['Arceus-Legend-Fantasy', 'Arceus'].map(speciesForme => Object.assign(new context.Pokemon(), {
 						speciesForme, level: 100, volatiles: {}, getSpeciesForme() { return this.speciesForme; },
 					})),
 				}))};
+			// Native Pokemon instances always retain their owning side and battle.
+			for (const side of scene.battle.sides) {
+				side.battle = scene.battle;
+				for (const pokemon of side.pokemon) pokemon.side = side;
+			}
 			scene.$sprites = [0, 1].map(index => ({empty() {}, html: value => { rendered[index] = value; }}));
 			scene.log = {addDiv() {}}; scene.wait = () => {}; scene.updateSidebars = () => {};
 			scene.teamPreview();
@@ -139,12 +144,16 @@ describe('Fantasy battle media', () => {
 			const scene = Object.create(context.BattleScene.prototype);
 			scene.gen = 9; scene.mod = 'gen9fantasy';
 			scene.battle = {tier, gameType: 'singles', viewpointSwitched: false,
-				sides: [0, 1].map(() => ({name: 'Test', pokemon:
+				sides: [0, 1].map(index => ({name: 'Test', sideid: 'p' + (index + 1), pokemon:
 					[true, false].map(shiny => Object.assign(new context.Pokemon(), {
 						speciesForme: 'Pikachu', level: 100, shiny, volatiles: {},
 						getSpeciesForme() { return this.speciesForme; },
 					})),
 				}))};
+			for (const side of scene.battle.sides) {
+				side.battle = scene.battle;
+				for (const pokemon of side.pokemon) pokemon.side = side;
+			}
 			scene.$sprites = [0, 1].map(index => ({empty() {}, html: value => { rendered[index] = value; }}));
 			scene.log = {addDiv() {}}; scene.wait = () => {}; scene.updateSidebars = () => {};
 			scene.teamPreview();

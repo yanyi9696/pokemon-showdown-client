@@ -10,7 +10,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const { assetVersion } = require('./asset-version');
+const { assetVersion, versionReplayAssets } = require('./asset-version');
 const child_process = require('child_process');
 const compiler = require('./compiler');
 const { serverPath } = require('./server-source');
@@ -21,6 +21,7 @@ process.chdir(rootDir);
 
 // Fail the build instead of silently publishing a script tag whose bundle is absent.
 const showdexAssets = require('./showdex-assets').verifyShowdexAssets();
+require('./fantasy-data-split').verifyFantasyDataSplit(path.join(rootDir, 'play.pokemonshowdown.com/data'));
 
 const AUTOCONFIG_START = '/*** Begin automatically generated configuration ***/';
 const AUTOCONFIG_END = '/*** End automatically generated configuration ***/';
@@ -181,11 +182,8 @@ function updatePages() {
 	crossprotocolContents = crossprotocolContents.replace(URL_REGEX, (match, attr, url, query) =>
 		addCachebuster(match, attr, url, query, 'play.pokemonshowdown.com'));
 	let replayEmbedContents = fs.readFileSync('play.pokemonshowdown.com/js/replay-embed.template.js', UTF8);
-	// Nihilslave: Disable this to get correct sprites if ur client doesn't have them.
-	replayEmbedContents = replayEmbedContents.replace(/play\.pokemonshowdown\.com/g, routes.client);
-	// Nihilslave: update the url over time
+	replayEmbedContents = versionReplayAssets(replayEmbedContents, rootDir, routes.client);
 	const date = new Date();
-	replayEmbedContents = replayEmbedContents.replace(/a7/g, date.getTime());
 	// Nihilslave: we use testclient.html
 	let testclientContents = fs.readFileSync('play.pokemonshowdown.com/testclient.template.html', { encoding: 'utf-8' });
 	testclientContents = testclientContents.replace(URL_REGEX, (match, attr, url, query) =>

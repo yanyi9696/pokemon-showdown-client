@@ -69,6 +69,9 @@
 		renderRoomTab: function (room, id) {
 			if (!room && id !== 'rooms') return '';
 			if (!id) id = room.id;
+			if (room && room.el && room.el.dataset.fantasyShowdexPlaceholder === 'true') {
+				return '<li><a class="roomtab button" href="' + app.root + id + '"><i class="fa fa-heart"></i> <span>Hellodex</span></a></li>';
+			}
 			var buf = '<li><a class="roomtab button' + (app.curRoom === room || app.curSideRoom === room ? ' cur' : '') + (room && room.notificationClass || '') + (id === '' || id === 'rooms' ? '' : ' closable') + '" href="' + app.root + id + '"';
 			if (room && room.notifications) {
 				var title = '';

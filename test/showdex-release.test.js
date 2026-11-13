@@ -54,7 +54,7 @@ describe('Embedded calculator deployment', () => {
 
 	it('invalidates cached test-client code after a source update', () => {
 		const html = fs.readFileSync(path.join(webRoot, 'testclient.html'), 'utf8');
-		for (const resource of ['js/client.js', 'data/gen9fantasy.js', 'js/ps-china-translator.js']) {
+		for (const resource of ['js/client.js', 'data/gen9fantasy-core.js', 'js/ps-china-translator.js']) {
 			const script = fs.readFileSync(path.join(webRoot, resource), 'utf8');
 			const hash = crypto.createHash('md5').update(script).digest('hex').slice(0, 8);
 			assert(html.includes(`${resource}?${hash}"`));

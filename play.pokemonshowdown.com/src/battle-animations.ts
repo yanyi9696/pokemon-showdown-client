@@ -831,7 +831,10 @@ export class BattleScene implements BattleSceneStub {
 	updateLeftSidebar() {
 		const side = this.battle.nearSide;
 
-		if (side.ally) {
+		if (this.battle.rogueCoopBoss && side.sideid === 'p2' && side.ally &&
+			!side.ally.totalPokemon && !side.ally.pokemon.length) {
+			this.$leftbar.html(this.getSidebarHTML(side, 'near'));
+		} else if (side.ally) {
 			const side2 = side.ally;
 			this.$leftbar.html(this.getSidebarHTML(side, 'near2') + this.getSidebarHTML(side2, 'near'));
 		} else if (this.battle.sides.length > 2) { // FFA
@@ -844,7 +847,10 @@ export class BattleScene implements BattleSceneStub {
 	updateRightSidebar() {
 		const side = this.battle.farSide;
 
-		if (side.ally) {
+		if (this.battle.rogueCoopBoss && side.sideid === 'p2' && side.ally &&
+			!side.ally.totalPokemon && !side.ally.pokemon.length) {
+			this.$rightbar.html(this.getSidebarHTML(side, 'far'));
+		} else if (side.ally) {
 			const side2 = side.ally;
 			this.$rightbar.html(this.getSidebarHTML(side, 'far2') + this.getSidebarHTML(side2, 'far'));
 		} else if (this.battle.sides.length > 2) { // FFA
@@ -867,6 +873,7 @@ export class BattleScene implements BattleSceneStub {
 	}
 
 	resetSides(skipEmpty?: boolean) {
+		this.$messagebar.removeClass('rogue-coop-preview-hidden');
 		if (!skipEmpty) {
 			for (const $spritesContainer of this.$sprites) {
 				$spritesContainer.empty();
@@ -919,14 +926,16 @@ export class BattleScene implements BattleSceneStub {
 	}
 
 	teamPreview() {
-		if (this.battle.gameType === 'multi' && isRogueBattle(this)) {
-			this.rogueCoopTeamPreview();
-			return;
-		}
+		const rogueCoop = this.battle.gameType === 'multi' && isRogueBattle(this);
+		const own = this.battle.mySide;
+		const sides = rogueCoop ? [own, own.foe] : this.battle.sides;
+		if (rogueCoop) this.$messagebar.addClass('rogue-coop-preview-hidden');
 		let newBGNum = 0;
-		for (let siden = 0; siden < 2 || (this.battle.gameType === 'multi' && siden < 4); siden++) {
-			let side = this.battle.sides[siden];
-			const spriteIndex = +this.battle.viewpointSwitched ^ (siden % 2);
+		for (let siden = 0; siden < 2 || (!rogueCoop && this.battle.gameType === 'multi' && siden < 4); siden++) {
+			const side = sides[siden];
+			const team = rogueCoop && siden === 1 ?
+				this.battle.sides.filter(s => s !== own && s !== own.ally).reduce<Pokemon[]>((mons, s) => mons.concat(s.pokemon), []) : side.pokemon;
+			const spriteIndex = rogueCoop ? siden : +this.battle.viewpointSwitched ^ (siden % 2);
 			let textBuf = '';
 			let buf = '';
 			let buf2 = '';
@@ -934,8 +943,8 @@ export class BattleScene implements BattleSceneStub {
 
 			let ludicoloCount = 0;
 			let lombreCount = 0;
-			for (let i = 0; i < side.pokemon.length; i++) {
-				let pokemon = side.pokemon[i];
+			for (let i = 0; i < team.length; i++) {
+				let pokemon = team[i];
 				if (pokemon.speciesForme === 'Xerneas-*') {
 					pokemon.speciesForme = 'Xerneas-Neutral';
 				}
@@ -950,8 +959,8 @@ export class BattleScene implements BattleSceneStub {
 				let y = 0;
 				let x = 0;
 				if (spriteIndex) {
-					y = 48 + 50 + 3 * (i + 6 - side.pokemon.length);
-					x = 48 + 180 + 50 * (i + 6 - side.pokemon.length);
+					y = 48 + 50 + 3 * (i + 6 - team.length);
+					x = 48 + 180 + 50 * (i + 6 - team.length);
 				} else {
 					y = 48 + 200 + 3 * i;
 					x = 48 + 100 + 50 * i;
@@ -961,7 +970,7 @@ export class BattleScene implements BattleSceneStub {
 				let url = spriteData.url;
 				// if (this.paused) url.replace('/xyani', '/xy').replace('.gif', '.png');
 				const spriteFilter = spriteData.filter ? `;filter:${spriteData.filter}` : '';
-				buf += `<img src="${url}" width="${spriteData.w}" height="${spriteData.h}" style="position:absolute;top:${Math.floor(y - spriteData.h / 2)}px;left:${Math.floor(x - spriteData.w / 2)}px${spriteFilter}" />`;
+				buf += `<img src="${url}"${spriteData.fallbackURL ? ` data-fusion-fallback="${BattleLog.escapeHTML(spriteData.fallbackURL)}"` : ''} width="${spriteData.w}" height="${spriteData.h}" style="position:absolute;top:${Math.floor(y - spriteData.h / 2)}px;left:${Math.floor(x - spriteData.w / 2)}px${spriteFilter}" />`;
 				buf2 += `<div style="position:absolute;top:${y + 45}px;left:${x - 40}px;width:80px;font-size:10px;text-align:center;color:#FFF;">`;
 				if (pokemon.shiny && isRogueBattle(this)) {
 					buf += `<span class="rogue-preview-shiny" aria-label="闪光" style="top:${y - 33}px;left:${x - 32}px">${Dex.getShinySparkles(spriteIndex ? 1 : 1.5, ROGUE_SPARKLE_SIZE)}</span>`;
@@ -981,12 +990,20 @@ export class BattleScene implements BattleSceneStub {
 				buf2 += '</div>';
 			}
 			side.totalPokemon = side.pokemon.length;
-			if (textBuf) {
+			if (textBuf && !rogueCoop) {
 				this.log.addDiv('chat battle-history',
 					`<strong>${BattleLog.escapeHTML(side.name)}'s team:</strong> <em style="color:#445566;display:block;">${BattleLog.escapeHTML(textBuf)}</em>`
 				);
 			}
+			if (rogueCoop && spriteIndex && this.battle.rogueCoopBoss) {
+				buf2 += '<strong class="rogue-coop-boss-preview">对方的队伍 · 单战位</strong>';
+			}
 			this.$sprites[spriteIndex].html(buf + buf2);
+			if (buf.includes('data-fusion-fallback')) {
+				this.$sprites[spriteIndex].find('img[data-fusion-fallback]').each((i, el) => {
+					bindFusionFallback($(el), { fallbackURL: el.getAttribute('data-fusion-fallback')! });
+				});
+			}
 
 			if (!newBGNum) {
 				if (ludicoloCount >= 2) {
@@ -996,65 +1013,20 @@ export class BattleScene implements BattleSceneStub {
 				}
 			}
 		}
+		if (rogueCoop) {
+			for (const side of this.battle.sides) {
+				side.totalPokemon = side.pokemon.length;
+				const teamNames = side.pokemon.map(mon => typeof window !== 'undefined' && window.translateRogueName ?
+					window.translateRogueName(mon.speciesForme, 'pokemon') : mon.speciesForme);
+				this.log.addDiv('chat battle-history', `<strong>${BattleLog.escapeHTML(side.name)} 的队伍：</strong> ` +
+				`<em style="color:#445566;display:block;">${BattleLog.escapeHTML(teamNames.join(' / '))}</em>`);
+			}
+		}
 		if (newBGNum !== 0) {
 			this.setBgm(newBGNum);
 		}
 		this.wait(1000);
 		this.updateSidebars();
-	}
-
-	rogueCoopTeamPreview() {
-		const own = this.battle.mySide, partner = own.ally;
-		if (!partner) return;
-		this.$sprites[0].empty(); this.$sprites[1].empty();
-		const foes = this.battle.sides.filter(side => side !== own && side !== partner);
-		const rows = [
-			{ sides: foes, y: 76, role: 'foe', title: '对方的队伍' },
-			{ sides: [partner], y: 184, role: 'partner', title: `队友的队伍 · ${partner.name}` },
-			{ sides: [own], y: 286, role: 'own', title: `我的队伍 · ${own.name}` },
-		];
-		let buf = '';
-		for (const row of rows) {
-			const entries: { side: Side, pokemon: Pokemon, index: number }[] = [];
-			for (const side of row.sides) {
-				for (let index = 0; index < side.pokemon.length; index++) entries.push({ side, pokemon: side.pokemon[index], index });
-			}
-			buf += `<div class="rogue-coop-preview-row rogue-coop-preview-${row.role}">`;
-			buf += `<strong class="rogue-coop-preview-label" style="top:${row.y - 53}px">${BattleLog.escapeHTML(row.title)}</strong>`;
-			for (let i = 0; i < entries.length; i++) {
-				const { side, pokemon, index } = entries[i];
-				const data = Dex.getSpriteData(pokemon, row.role === 'foe', { gen: this.gen, noScale: true, mod: this.mod });
-				const scale = Math.min(1, 82 / data.w, 76 / data.h);
-				const w = Math.round(data.w * scale), h = Math.round(data.h * scale);
-				const x = 128 + i * Math.min(76, 384 / Math.max(1, entries.length - 1));
-				buf += `<div class="rogue-coop-preview-mon" data-side="${side.sideid}" data-index="${index}" style="left:${x - 42}px;top:${row.y - 38}px">`;
-				buf += `<img src="${data.url}" width="${w}" height="${h}" style="left:${42 - w / 2}px;top:${38 - h / 2}px${data.filter ? `;filter:${data.filter}` : ''}" />`;
-				buf += '<span class="rogue-coop-preview-order"></span>';
-				buf += `<small class="rogue-coop-preview-level">Lv.${pokemon.level}</small>`;
-				if (pokemon.shiny) {
-					buf += `<span class="rogue-preview-shiny" aria-label="闪光" style="top:5px;left:10px">${Dex.getShinySparkles(1, ROGUE_SPARKLE_SIZE)}</span>`;
-				}
-				buf += '</div>';
-			}
-			buf += '</div>';
-		}
-		this.$sprites[0].html(buf);
-		for (const side of this.battle.sides) {
-			side.totalPokemon = side.pokemon.length;
-			this.log.addDiv('chat battle-history', `<strong>${BattleLog.escapeHTML(side.name)} 的队伍：</strong> ` +
-			`<em style="color:#445566;display:block;">${BattleLog.escapeHTML(side.pokemon.map(mon => mon.speciesForme).join(' / '))}</em>`);
-		}
-		this.updateRogueCoopPreview();
-		this.wait(1000); this.updateSidebars();
-	}
-	updateRogueCoopPreview() {
-		const selections = this.battle.rogueCoopPreview?.selections || {};
-		this.$sprites[0].find('.rogue-coop-preview-mon').each((_, element) => {
-			const $mon = $(element), side = $mon.attr('data-side')!;
-			const order = (selections[side] || []).indexOf(Number($mon.attr('data-index')));
-			$mon.toggleClass('is-selected', order >= 0);
-			$mon.find('.rogue-coop-preview-order').text(order >= 0 ? `${order + 1}` : '');
-		});
 	}
 
 	showJoinButtons() {
@@ -1879,6 +1851,15 @@ interface InitScenePos {
 	display?: string;
 }
 
+function bindFusionFallback($el: JQuery, sp: { fallbackURL?: string }) {
+	$el.off('error.roguefusion');
+	if (!sp.fallbackURL) return;
+	const fallback = () => { $el.off('error.roguefusion').attr('src', sp.fallbackURL!); };
+	$el.one('error.roguefusion', fallback);
+	const el = $el[0] as HTMLImageElement;
+	if (el?.complete && !el.naturalWidth) fallback();
+}
+
 export class Sprite {
 	scene: BattleScene;
 	$el: JQuery = null!;
@@ -1894,6 +1875,7 @@ export class Sprite {
 			let rawHTML = sp.rawHTML ||
 				`<img src="${sp.url!}" style="display:none;position:absolute"${sp.pixelated ? ' class="pixelated"' : ''} />`;
 			this.$el = $(rawHTML);
+			bindFusionFallback(this.$el, sp);
 			if (sp.filter) this.$el.css('filter', sp.filter);
 		} else {
 			sp = {
@@ -1950,6 +1932,7 @@ export class PokemonSprite extends Sprite {
 		typechange: null,
 		typeadd: null,
 		fantasystats: null,
+		roguebasestats: null,
 		roguebrn: ['烧伤', 'bad'],
 		roguepar: ['麻痹', 'bad'],
 		rogueslp: ['睡眠', 'bad'],
@@ -2225,6 +2208,7 @@ export class PokemonSprite extends Sprite {
 
 		const $el = this.isSubActive ? this.$sub! : this.$el;
 		$el.attr('src', sp.url!);
+		bindFusionFallback($el, sp);
 		this.applySpriteFilter();
 		$el.css(this.scene.pos({
 			x: this.x,
@@ -2385,6 +2369,7 @@ export class PokemonSprite extends Sprite {
 			this.$el.stop(true, false);
 			this.$el.remove();
 			const $newEl = $(`<img src="${this.sp.url!}" style="display:none;position:absolute"${this.sp.pixelated ? ' class="pixelated"' : ''} />`);
+			bindFusionFallback($newEl, this.sp);
 			this.$el = $newEl;
 		}
 
@@ -2826,6 +2811,7 @@ export class PokemonSprite extends Sprite {
 		}
 		// Constructing here gives us 300ms extra time to preload the new sprite
 		let $newEl = $('<img src="' + sp.url + '" style="display:block;opacity:0;position:absolute"' + (sp.pixelated ? ' class="pixelated"' : '') + ' />');
+		bindFusionFallback($newEl, sp);
 		this.applySpriteFilter($newEl);
 		$newEl.css(this.scene.pos({
 			x: this.x,
@@ -3059,9 +3045,12 @@ export class PokemonSprite extends Sprite {
 		this.$statbar.toggleClass('rogue-boss-next-bar', boss?.kind === 'arceus' && remaining > 1);
 		this.$statbar.find('.rogue-boss-lives').remove();
 		this.$statbar.find('.rogue-boss-stage').remove();
+		const coopBoss = pokemon.side.sideid === 'p2' && !!pokemon.side.battle.rogueCoopBoss;
 		if (boss) {
 			this.$statbar.append(`<div class="rogue-boss-stage" role="status">${boss.kind === 'summit' ? '塔顶决战' : '神之挑战'} · ` +
 				`${boss.phase === boss.total ? '最终阶段' : `第 ${boss.phase} / ${boss.total} 阶段`}</div>`);
+		} else if (coopBoss) {
+			this.$statbar.append('<div class="rogue-boss-stage" role="status">联机首领</div>');
 		}
 		if (boss?.kind === 'arceus' && remaining > 1) {
 			this.$statbar.find('> strong').append(`<span class="rogue-boss-lives" title="剩余 ${remaining} 条生命">×${remaining}</span>`);
@@ -3130,9 +3119,11 @@ export class PokemonSprite extends Sprite {
 			const type = pokemon.volatiles.typeadd[1];
 			status += '+<img src="' + Dex.getTypeIconURL(type) + '" alt="' + type + '" class="pixelated" /> ';
 		}
-		if (pokemon.volatiles.fantasystats) {
-			const stats = pokemon.volatiles.fantasystats[1];
-			if (stats && stats !== '0/0/0/0/0/0') status += '<span class="neutral">' + stats + '</span> ';
+		if (pokemon.volatiles.roguebasestats || pokemon.volatiles.fantasystats) {
+			const stats = (pokemon.volatiles.roguebasestats || pokemon.volatiles.fantasystats)[1];
+			if (stats && /^\d+(?:\/\d+){5}$/.test(stats) && stats !== '0/0/0/0/0/0') {
+				status += '<span class="neutral" title="种族值：HP／攻击／防御／特攻／特防／速度">' + stats + '</span> ';
+			}
 		}
 		for (const stat in pokemon.boosts) {
 			if (pokemon.boosts[stat]) {

@@ -10,7 +10,7 @@ function client(startScreen = false, localized = false, runtime = {}) {
 		Room: {extend: room => room, prototype: {dispatchClickButton(e) {
 			this[e.currentTarget.name](e.currentTarget.value, e.currentTarget);
 		}}}, Popup: {extend: popup => popup, prototype: {remove() { this.removed = true; }}},
-		BattleLog: {escapeHTML: text => String(text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')},
+		BattleLog: {escapeHTML: text => String(text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')},
 		Dex: {
 			resolveAvatar: id => 'sprites/trainers/' + id + '.png',
 			getPokemonIcon: () => '', getItemIcon: () => '', getTeambuilderSprite: () => '',
@@ -33,7 +33,8 @@ function client(startScreen = false, localized = false, runtime = {}) {
 			socket: {readyState: 1}, send: message => sent.push(message), joinRoom: id => joined.push(id), updateLayout() {},
 			addPopup: (type, data) => {
 				context.app.lastPopup = {type, data};
-				if (![context.RogueLearnMovePopup, context.RogueRetryHealingPopup, context.RogueCratePopup, context.RogueDailyReplayPopup].includes(type)) return;
+				if (![context.RogueLearnMovePopup, context.RogueRetryHealingPopup, context.RogueCratePopup, context.RogueDailyReplayPopup,
+					context.RogueMonthlyPopup, context.RogueCoopRulesPopup, context.RogueCoopTradePopup, context.RogueCoopPlayersPopup].includes(type)) return;
 				const popup = Object.create(type);
 				popup.$el = {addClass() {}, html: html => { popup.html = html; },
 					scrollTop(value) { if (value !== undefined) popup.scroll = value; return popup.scroll || 0; }};
@@ -66,6 +67,7 @@ function client(startScreen = false, localized = false, runtime = {}) {
 	room.$el = {addClass() {}, html: html => { room.html = html; }, scrollTop: value => { if (value !== undefined) room.scroll = value; return room.scroll || 0; }};
 	room.controls = {};
 	room.$ = selector => ({
+		html(value) { room.controls[selector] = value; },
 		val() { return room.controls[selector]; },
 		each(callback) { for (const element of room.controls[selector] || []) callback.call(element); },
 		text(value) { room.controls[selector] = value; },
@@ -84,6 +86,141 @@ function state() {
 		message: '正式队伍与数值等待配置', starters: [], items: [], run: null,
 		account: {revision: 1, points: 25, slots: 1, boosts: {hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0}, captures: {}}};
 }
+
+describe('Fantasy Rogue cooperative comeback interface', () => {
+	it('shows only the affected owner and sends page-scoped common choices with delegation controls', () => {
+		const c = client(); c.room.state = state();
+		const session = { status: 'active', canControl: true, partnerUserId: 'friend', adventure: {
+			phase: 'settlement', comeback: { visit: 'elder:1:', owner: 'friend', choosing: true,
+				text: '继续旅程', ownChoice: 'yes', partnerChoice: 'no' } } };
+		c.room.coopState = { userid: 'rogueplayer', session }; c.room.coopBusy = false;
+		let html = c.room.renderCoopAdventure(session);
+		assert(html.includes('队友的队伍')); assert(html.includes('另一位玩家不会获得'));
+		assert(html.includes('撤回我的预选')); assert(!html.includes('免费复活队伍'));
+		c.room.chooseCoopComeback('');
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)), { action: 'comeback', visit: 'elder:1:', value: '' });
+		session.canControl = false; html = c.room.renderCoopAdventure(session);
+		assert(/name="chooseCoopComeback"[^>]*disabled/.test(html));
+		session.adventure.ownComeback = { active: true, remaining: 9, floorBuff: false };
+		session.adventure.partnerComeback = { active: true, remaining: 10, floorBuff: true };
+		html = c.room.renderCoopComebackStatus(session);
+		assert(html.includes('你的再启程 · 剩余 9 层')); assert(html.includes('队友的再启程 · 剩余 10 层'));
+		assert.equal(html.split('本层伤害、双防 +25%').length - 1, 1);
+	});
+});
+
+describe('Fantasy Rogue cooperative shop guard interface', () => {
+	function setup() {
+		const c = client(), session = {status: 'active', canControl: true, partnerUserId: 'friend',
+			adventure: {phase: 'route-interaction', shopChallenge: {key: 'guard-visit', count: 3,
+				locked: '', ownChoice: false, partnerChoice: false}}};
+		c.room.coopState = {userid: 'rogueplayer', session}; c.room.coopBusy = false;
+		c.room.state = state();
+		return {c, session, offer: session.adventure.shopChallenge};
+	}
+	it('explains closing, shared rewards and retry before explicit confirmation', () => {
+		const {c, session} = setup(), html = c.room.renderCoopShopChallenge(session);
+		assert(html.includes('各获得相同的 3 种')); assert(html.includes('正常战败后本店关闭'));
+		assert(html.includes('重试不重抽')); assert(html.includes('确认挑战店主'));
+		c.room.challengeCoopShop(''); assert.equal(c.sent.length, 0);
+		const {type, data} = c.app.lastPopup;
+		assert.equal(type, c.RogueCardConfirmPopup); assert(data.coop);
+		assert.equal(data.action, 'shopchallenge'); assert.equal(data.details.visit, 'guard-visit');
+		assert(data.details.confirmed);
+		const popup = Object.create(type);
+		popup.$el = {addClass() {}, html(html) { popup.html = html; }};
+		popup.initialize(data);
+		assert(popup.html.includes('原生战前选队')); assert(popup.html.includes('重试不会重抽奖品'));
+	});
+	it('shows both votes and allows withdrawing only the pending confirmation', () => {
+		const {c, session, offer} = setup(); offer.ownChoice = true; offer.partnerChoice = true;
+		const html = c.room.renderCoopShopChallenge(session);
+		assert(html.includes('你已确认')); assert(html.includes('队友已确认')); assert(html.includes('撤回挑战确认'));
+		c.room.challengeCoopShop('cancel');
+		assert(c.sent[0].includes('"action":"shopchallenge"')); assert(c.sent[0].includes('"confirmed":false'));
+	});
+	it('blocks busy, locked and delegated read-only actions and escapes lock messages', () => {
+		const {c, session, offer} = setup();
+		offer.locked = '<img src=x> pending';
+		assert(c.room.renderCoopShopChallenge(session).includes('&lt;img src=x&gt; pending'));
+		c.room.challengeCoopShop(''); assert(!c.app.lastPopup);
+		offer.locked = ''; session.canControl = false;
+		c.room.challengeCoopShop(''); c.room.challengeCoopShop('cancel'); assert.equal(c.sent.length, 0);
+		session.canControl = true; c.room.coopBusy = true;
+		c.room.challengeCoopShop(''); assert(!c.app.lastPopup);
+		assert.equal(c.room.renderCoopShopChallenge({adventure: {}}), '');
+	});
+	it('shows continuation after a closed shop defeat without offering another reward or retry', () => {
+		const {c, session} = setup();
+		Object.assign(session.adventure, {phase: 'settlement', floor: 9, team: [], partnerTeam: [], bag: {},
+			battleResult: {won: false, shopClosed: true, reward: {items: {}}, partnerReward: {items: {}}}});
+		let html = c.room.renderCoopAdventure(session);
+		assert(html.includes('本店关闭')); assert(html.includes('name="continueCoopBattle"'));
+		assert(!html.includes('name="retryCoopBattle"'));
+		session.adventure.battleResult.won = true; html = c.room.renderCoopAdventure(session);
+		assert(!html.includes('路线奖励会在节点最后一场结束后'));
+	});
+});
+
+describe('Fantasy Rogue monthly challenge interface', () => {
+	function setup() {
+		const c = client(true), data = state();
+		data.account.monthlyChallenges = { month: '2026-11', months: [{ month: '2026-11', entries: [
+			{id: 'venusaur', species: 'Venusaur', types: ['Grass', 'Poison'], best: 4, claimed: -1},
+			{id: 'charizard', species: 'Charizard', types: ['Fire', 'Flying'], best: -1, claimed: -1},
+		]}] };
+		c.room.receiveState(data); return {c, data};
+	}
+	it('places the entry beside the party heading and opens the native popup from that panel', () => {
+		const {c} = setup();
+		assert(c.panel.html.includes('rogue-party-heading')); assert(c.panel.html.includes('有奖励可领取'));
+		c.panel.dispatchClickButton({currentTarget: {name: 'openMonthlyChallenges', value: ''}});
+		assert(c.room.monthlyPopup.html.includes('每月宝可梦挑战'));
+		assert(c.room.monthlyPopup.html.includes('18 种属性'));
+		assert(c.room.monthlyPopup.html.includes('10 局外成长点＋4 崩坏适性'));
+		assert(c.room.monthlyPopup.html.includes('通关 5 档还可获得 1 崩坏适性'));
+	});
+	it('renders six tier rows with red unclaimed, green claimed and blank incomplete status', () => {
+		const {c, data} = setup(); c.room.openMonthlyChallenges(); const popup = c.room.monthlyPopup;
+		assert.equal((popup.html.match(/aria-label="待领取"/g) || []).length, 5);
+		data.account.revision++; data.account.monthlyChallenges.months[0].entries[0].claimed = 4; c.room.receiveState(data);
+		assert.equal((popup.html.match(/aria-label="已领取"/g) || []).length, 5);
+		assert(popup.html.includes('<tr><th>5 档</th><td>1 崩坏适性</td><td></td></tr>'));
+		popup.selectChallenge('charizard'); assert(!popup.html.includes('aria-label="已领取"'));
+		assert(popup.html.includes('value="charizard" aria-pressed="true"'));
+	});
+	it('sends the selected month and species once with the account revision, and rerenders a failed receipt', () => {
+		const {c, data} = setup(); c.room.openMonthlyChallenges(); const popup = c.room.monthlyPopup;
+		popup.claimChallenge(); const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'monthlyclaim'); assert.equal(request.value, '2026-11|venusaur'); assert.equal(request.revision, 1);
+		assert(popup.html.includes('name="claimChallenge" value="" disabled'));
+		const count = c.sent.length; popup.claimChallenge(); assert.equal(c.sent.length, count);
+		c.room.receiveAction({userid: data.userid, id: request.id, ok: false, message: '请刷新后重试', state: data});
+		assert(popup.html.includes('请刷新后重试')); assert(!c.room.pending);
+	});
+	it('keeps archived unclaimed months selectable and sanitizes response labels', () => {
+		const {c, data} = setup();
+		data.account.monthlyChallenges.months.push({month: '2026-10', entries: [
+			{id: 'old', species: '<img onerror=bad>', types: ['Fire'], best: 5, claimed: 4},
+		]});
+		c.room.receiveState(data); c.room.openMonthlyChallenges(); const popup = c.room.monthlyPopup;
+		popup.$ = () => ({val: () => '2026-10'}); popup.changeMonth();
+		assert(popup.html.includes('2026-10 · 待领奖励')); assert(popup.html.includes('本次可领：1 崩坏适性'));
+		assert(!popup.html.includes('<img onerror=bad>')); popup.claimChallenge();
+		assert.equal(c.room.pending.value, '2026-10|old');
+	});
+	it('disables claims offline and closes private progress when the nickname changes', () => {
+		const {c} = setup(); c.room.openMonthlyChallenges(); const popup = c.room.monthlyPopup;
+		c.app.socket.readyState = 0; c.room.disconnected();
+		assert(popup.html.includes('name="claimChallenge" value="" disabled'));
+		const count = c.sent.length; popup.claimChallenge(); assert.equal(c.sent.length, count);
+		c.setUser('anotherplayer'); c.room.identityChanged(); assert(popup.removed); assert(!c.room.monthlyPopup);
+	});
+	it('omits the entry for older servers without challenge capability', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openMonthlyChallenges();
+		assert(!c.panel.html.includes('name="openMonthlyChallenges"')); assert(!c.room.monthlyPopup);
+	});
+});
 
 describe('Fantasy Rogue universal allocation and Fantasy confirmation', () => {
 	function setup(kind = 'mega') {
@@ -141,6 +278,136 @@ describe('Fantasy Rogue universal allocation and Fantasy confirmation', () => {
 });
 
 describe('Fantasy Rogue cooperative lobby entry', () => {
+	it('debounces one-character searches, ignores stale results and preserves an invitation in flight', () => {
+		let pending;
+		const c = client(true, false, {setTimeout: fn => { pending = fn; return 1; }});
+		c.room.receiveState(state()); c.room.screen = 'coop';
+		c.room.changeCoopSearch({currentTarget: {value: 'a'}}); pending();
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)), {action: 'search', value: 'directory', target: 'a'});
+		c.room.coopBusy = true;
+		c.room.changeCoopSearch({currentTarget: {value: 'ab'}}); pending();
+		const reply = query => c.room.receiveCoop({userid: 'rogueplayer', action: 'search', ok: true,
+			state: {playerSearch: {query, results: [{name: '<Offline>', userid: 'ab', online: false}]}}});
+		reply('a'); assert.equal(c.room.coopSearchResults.length, 0);
+		reply('ab'); assert(c.room.controls['.rogue-coop-search-results'].includes('&lt;Offline&gt;'));
+		assert(c.room.controls['.rogue-coop-search-results'].includes('离线')); assert(c.room.coopBusy);
+		c.room.changeCoopSearch({currentTarget: {value: ''}}); const count = c.sent.length; pending();
+		assert.equal(c.sent.length, count); assert.equal(c.room.coopSearchResults.length, 0);
+		c.room.disconnected(); reply('ab'); assert.equal(c.room.coopSearchResults.length, 0);
+	});
+	it('refreshes the online picker and invites a selected player at the chosen difficulty', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.screen = 'coop'; c.room.coopDifficulty = 2;
+		c.room.openCoopPlayers(); assert(c.sent.at(-1).includes('"action":"refresh"')); assert(!c.room.coopPlayersPopup);
+		c.room.receiveCoop({userid: 'rogueplayer', ok: true, action: 'refresh', state: {userid: 'rogueplayer',
+			players: [{userid: 'friend', name: 'Friend', maxDifficulty: 3}], invitations: []}});
+		const popup = c.room.coopPlayersPopup; assert(popup.html.includes('Friend · 在线'));
+		popup.invite('friend'); assert.equal(c.room.coopPlayersPopup, null);
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)), {action: 'invite', target: 'friend', difficulty: 2});
+		assert(!c.room.html.includes('直接输入玩家名称')); assert(c.room.html.includes('搜索玩家名称'));
+	});
+	it('refreshes the personal account once per new cooperative account revision without a co-op request loop', () => {
+		const c = client(true); c.room.receiveState(state());
+		const receive = (revision, userid = 'rogueplayer') => c.room.receiveCoop({userid, ok:true, action:'refresh',
+			state:{userid, accountRevision:revision, players:[], invitations:[]}});
+		c.sent.length = 0;
+		for (const revision of [undefined, NaN, 0, 1]) receive(revision);
+		assert.equal(c.sent.length,0);
+		receive(2); receive(2); receive(1); receive(3,'someoneelse');
+		assert.deepEqual(c.sent,['/cmd fantasyrogue']);
+		receive(3); assert.equal(c.sent.length,2);
+		const updated = state(); updated.account.revision=3; updated.account.points=55;
+		c.room.receiveState(updated); receive(3);
+		assert(c.panel.html.includes('余额 55 点')); assert.equal(c.sent.length,2);
+		c.app.socket.readyState=3; receive(4); assert.equal(c.sent.length,2);
+		c.app.socket.readyState=1; receive(4); assert.equal(c.sent.length,3);
+		c.room.disconnected(); receive(4); assert.equal(c.sent.length,4);
+	});
+	it('localizes postgame effort notices using the normal reward text renderer', () => {
+		const c=client(true,true); c.room.receiveState(state());
+		const html=c.room.renderCoopAdventure({status:'active',canControl:true,adventure:{phase:'postgame',
+			postgame:{stage:'offer',key:'offer'},notices:['Mew 获得努力值：特防 +3。','<img> 获得奖励。']}});
+		assert(html.includes('梦幻 获得努力值：特防 +3。'));
+		assert(!html.includes('Mew 获得')); assert(html.includes('&lt;img&gt;')); assert(!html.includes('<img>'));
+	});
+	const rules = [{chapter: '共同出发', title: '邀请', text: '**双方确认** <script>危险</script>'},
+		{chapter: '培养与收集', title: '奖励', text: '个人保存'}];
+	function rulesReply(c, version = 'rules-v1', sections = rules) {
+		c.room.receiveCoop({userid: 'rogueplayer', ok: true, action: 'refresh', state: {
+			userid: 'rogueplayer', rulesVersion: version, rules: sections, players: [], invitations: [],
+		}});
+	}
+	it('opens versioned rules on entry, escapes content and never sends an invite on closing', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCoop();
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)), {action: 'refresh', value: 'rules'});
+		rulesReply(c);
+		const popup = c.room.coopRulesPopup; assert(popup); assert(popup.html.includes('<h2>联机规则</h2>'));
+		assert(popup.html.includes('<strong>双方确认</strong>')); assert(!popup.html.includes('<script>'));
+		assert.equal((popup.html.match(/<details/g) || []).length, 2);
+		assert.equal((popup.html.match(/ open>/g) || []).length, 1);
+		assert(popup.html.includes('name="close"')); const count = c.sent.length; popup.close();
+		assert.equal(c.sent.length, count); assert.equal(c.room.coopRulesPopup, null);
+		c.room.openCoopRules(); assert.equal(c.sent.length, count); assert(c.room.coopRulesPopup);
+	});
+	it('discards cached rules after a server version change and fetches them only on demand', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCoop(); rulesReply(c); c.room.coopRulesPopup.close();
+		const count = c.sent.length;
+		c.room.receiveCoop({userid: 'rogueplayer', ok: true, action: 'search', state: {userid:'rogueplayer', rulesVersion:'rules-v2'}});
+		assert.equal(c.room.coopGuide, null); assert.equal(c.sent.length, count);
+		c.room.openCoopRules(); assert.equal(c.sent.length, count + 1);
+		rulesReply(c, 'rules-v2', [{title:'新版规则', text:'已更新'}]); assert(c.room.coopRulesPopup.html.includes('新版规则'));
+	});
+	it('returns from battle without reopening rules, but keeps explicit entry and rules buttons available', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCoop(); rulesReply(c);
+		c.room.coopRulesPopup.close(); c.room.returnToCoop();
+		assert.equal(c.room.screen, 'coop'); assert(!c.room.coopRulesPending);
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)), {action: 'refresh'});
+		rulesReply(c); assert(!c.room.coopRulesPopup);
+		c.room.openCoopRules(); assert(c.room.coopRulesPopup); c.room.coopRulesPopup.close();
+		c.room.openCoop(); rulesReply(c); assert(c.room.coopRulesPopup);
+	});
+	it('finishes a native preview refresh only after the matching account enables co-op', () => {
+		for (const enabled of [true, false]) {
+			const c = client(true); c.room.screen = 'coop'; c.room.coopRefreshPending = true;
+			c.room.refresh(); assert(!c.sent.some(message => message.startsWith('/fantasyrogue coop')));
+			c.room.receiveState({...state(), userid: 'someoneelse', coopEnabled: true});
+			assert(!c.sent.some(message => message.startsWith('/fantasyrogue coop')));
+			c.room.receiveState({...state(), coopEnabled: enabled});
+			assert.equal(c.sent.filter(message => message === '/fantasyrogue coop {"action":"refresh"}').length, enabled ? 1 : 0);
+			assert(!c.room.coopRefreshPending);
+			rulesReply(c); assert(!c.room.coopRulesPopup);
+			assert.equal(c.sent.filter(message => message === '/fantasyrogue coop {"action":"refresh"}').length, enabled ? 1 : 0);
+		}
+	});
+	it('does not pop up after leaving or changing user while the rules are loading', () => {
+		for (const action of ['leave', 'user']) {
+			const c = client(true); c.room.receiveState(state()); c.room.openCoop();
+			if (action === 'leave') c.room.startMenu(); else { c.setUser('another'); c.room.identityChanged(); }
+			rulesReply(c); assert(!c.room.coopRulesPopup);
+		}
+	});
+	it('waits for an outstanding co-op request before fetching the entry rules', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.coopBusy = true;
+		const count = c.sent.length; c.room.openCoop(); assert.equal(c.sent.length, count);
+		c.room.receiveCoop({userid:'rogueplayer', ok:true, action:'search', state:{userid:'rogueplayer', rulesVersion:'rules-v1'}});
+		assert.equal(c.sent.length, count + 1); assert(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)).value === 'rules');
+		rulesReply(c); assert(c.room.coopRulesPopup);
+	});
+	it('retries an interrupted rules request after reconnect without opening duplicate dialogs', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCoop();
+		c.app.socket.readyState = 3; c.room.disconnected();
+		assert(c.room.coopRulesPending); assert(!c.room.coopRulesRequested);
+		c.app.socket.readyState = 1; c.room.refresh();
+		assert.equal(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)).value, 'rules');
+		rulesReply(c); const popup = c.room.coopRulesPopup; assert(popup);
+		rulesReply(c); assert.equal(c.room.coopRulesPopup, popup);
+	});
+	it('reports missing rules once without a refresh loop, and closes rules when access is disabled', () => {
+		const c = client(true); c.room.receiveState(state()); c.room.openCoop(); const count = c.sent.length;
+		rulesReply(c, '', []); assert(!c.room.coopRulesPopup); assert(!c.room.coopRulesPending);
+		assert(c.app.lastPopup.data.text.includes('尚未提供联机规则')); assert.equal(c.sent.length, count);
+		c.room.openCoopRules(); rulesReply(c); assert(c.room.coopRulesPopup);
+		c.room.receiveState({...state(), coopEnabled:false}); assert(!c.room.coopRulesPopup); assert.equal(c.room.screen, 'home');
+	});
 	it('hides and rejects co-op entry when the server disables it or has no capability field', () => {
 		for (const enabled of [undefined, false]) {
 			const c = client(true), data = state(); data.coopEnabled = enabled; c.room.receiveState(data);
@@ -164,6 +431,194 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		data.account.revision = 4; c.room.receiveState(data); c.room.openCoop();
 		return {c, data};
 	}
+	it('shows separate shared lake coverage and the permanent joint checkpoint result', () => {
+		const c = client(), round = {floor: 1, checkAt: 50, normal: 4, boss: 6,
+			types: ['Grass', 'Poison', 'Electric'], matched: ['Grass', 'Poison']};
+		const adventure = {lakeQuest: {own: {rounds: [round]}, partner: {rounds: [{...round, matched: ['Electric']}]}}};
+		let html = c.room.renderCoopLakeQuest(adventure);
+		assert(html.includes('不能把两队属性合并')); assert(html.includes('你的队伍')); assert(html.includes('队友的队伍'));
+		assert(html.includes('当前覆盖 2 / 3')); assert(html.includes('当前覆盖 1 / 3'));
+		round.result = 'kept'; round.matched = [...round.types];
+		html = c.room.renderCoopLakeQuest(adventure); assert(html.includes('双方未同时达标'));
+		round.result = 'reverted'; assert(c.room.renderCoopLakeQuest(adventure).includes('已永久回退'));
+		assert.equal(c.room.renderCoopLakeQuest({}), ''); assert.equal(c.sent.length, 0);
+	});
+	it('shows one shared tower spirit vote before starter selection, with versioned confirmations and revocation', () => {
+		const {c} = openLobby();
+		const choice = {key: 'spirit-epoch', own: null, partner: 'palkia', confirmed: false,
+			partnerConfirmed: false, randomAvailable: true, rule: '指定范围按档位向下兼容。',
+			selectable: [{id: 'palkia', name: '帕路奇亚的扭曲', text: '<永久空间>'}]};
+		const session = {id: 'spirit-session', role: 'host', status: 'lobby', canControl: true,
+			hostName: 'rogueplayer', guestName: 'friend', partnerUserId: 'friend', spiritChoice: choice};
+		const receive = () => c.room.receiveCoop({userid: 'rogueplayer', ok: true, action: 'refresh',
+			state: {userid: 'rogueplayer', session, players: [], invitations: []}});
+		receive(); assert(c.room.html.includes('共同选择塔灵')); assert(c.room.html.includes('队友已预选'));
+		assert(!c.room.html.includes('name="saveCoopStarters"')); assert(c.room.html.includes('&lt;永久空间&gt;'));
+		assert(!c.room.html.includes('<永久空间>')); assert(c.room.html.includes('双方共有资格'));
+		c.room.chooseCoopSpirit('palkia');
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)),
+			{action: 'spirit', visit: 'spirit-epoch', value: 'palkia', confirmed: false});
+		choice.own = 'palkia'; receive(); c.room.chooseCoopSpirit('confirm');
+		assert.equal(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)).confirmed, true);
+		choice.confirmed = true; receive(); assert(c.room.html.includes('撤回确认'));
+		c.room.chooseCoopSpirit('cancel');
+		assert.equal(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)).confirmed, false);
+		session.canControl = false; receive(); const count = c.sent.length;
+		c.room.chooseCoopSpirit('none'); assert.equal(c.sent.length, count);
+		delete session.spiritChoice; session.spirit = {name: '雷吉奇卡斯的试炼', text: '每人最多三只。'};
+		session.partyLimit = 3; receive();
+		assert(c.room.html.includes('本局共同塔灵')); assert(c.room.html.includes('每人队伍上限 3 只'));
+		assert(c.room.html.includes('name="saveCoopStarters"'));
+	});
+	it('renders shared collapse previews, confirms the current set and respects delegated control', () => {
+		const {c} = openLobby();
+		const choice = {key: 'collapse-epoch', count: 2, own: ['power'], partner: ['inflation'],
+			confirmed: false, partnerConfirmed: false, entries: [
+				{id: 'power', name: '威力过量', text: '敌方威力提升', detail: '<unsafe>'},
+				{id: 'inflation', name: '沉没成本', text: '商店加价', detail: '个人金币独立'},
+				{id: 'statbloat', name: '数值膨胀', text: '敌方能力提升', detail: '详细规则'},
+			]};
+		const session = {id: 'collapse-session', role: 'host', status: 'active', canControl: true,
+			hostName: 'rogueplayer', guestName: 'friend', partnerUserId: 'friend',
+			adventure: {floor: 1, difficulty: 1, phase: 'collapse-selection', team: [], partnerTeam: [],
+				bag: {}, money: 0, collapseChoice: choice}};
+		const receive = () => c.room.receiveCoop({userid: 'rogueplayer', ok: true, action: 'refresh',
+			state: {userid: 'rogueplayer', session, players: [], invitations: []}});
+		receive(); assert(c.room.html.includes('共同选择幻想崩坏')); assert(c.room.html.includes('队友已预选'));
+		assert(c.room.html.includes('&lt;unsafe&gt;')); assert(!c.room.html.includes('<unsafe>'));
+		assert.match(c.room.html, /name="chooseCoopCollapse" value="confirm" disabled/);
+		c.room.chooseCoopCollapse('inflation');
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)),
+			{action: 'collapse', visit: 'collapse-epoch', collapse: ['power', 'inflation'], confirmed: false});
+		choice.own.push('inflation'); receive();
+		assert.match(c.room.html, /name="chooseCoopCollapse" value="statbloat" disabled/);
+		c.room.chooseCoopCollapse('confirm');
+		assert.equal(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)).confirmed, true);
+		choice.confirmed = true; receive(); assert(c.room.html.includes('撤回确认'));
+		c.room.chooseCoopCollapse('cancel');
+		assert.equal(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)).confirmed, false);
+		session.canControl = false; receive(); const count = c.sent.length;
+		c.room.chooseCoopCollapse('power'); assert.equal(c.sent.length, count);
+		session.adventure.phase = 'area-selection'; session.adventure.difficultyRulesVersion = 5;
+		session.adventure.collapseRules = choice.entries.slice(0, 2);
+		const rules = c.room.renderCoopCollapseRules(session);
+		assert(rules.includes('已锁定')); assert(rules.includes('威力过量')); assert(!rules.includes('<unsafe>'));
+		assert(!rules.includes('name="chooseCoopCollapse"'));
+		delete session.adventure.difficultyRulesVersion;
+		assert(c.room.renderCoopCollapseRules(session).includes('本局保留原难度规则'));
+	});
+	it('keeps a failed cooperative growth save paused and requests the trusted server refresh', () => {
+		const {c} = openLobby();
+		c.room.coopBusy = false; c.room.coopRefreshPending = false;
+		c.room.receiveCoopNotice({session: 'growth-room', growthError: true});
+		assert(c.room.html.includes('战斗保持暂停'));
+		assert(c.room.html.includes('刷新共同冒险'));
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)), {action: 'refresh'});
+	});
+	it('shows a companion rescue as a deferred loss and confirms shared continuation without retry', () => {
+		const {c} = openLobby();
+		const session = {id: 'rescue-session', role: 'host', hostName: 'rogueplayer', guestName: 'friend',
+			partnerUserId: 'friend', status: 'active', canControl: true, adventure: {floor: 60,
+				phase: 'settlement', team: [], partnerTeam: [], bag: {}, money: 0,
+				battleResult: {won: false, companionRescue: true, reward: {money: 0, items: {}}, partnerReward: {money: 0, items: {}}}}};
+		c.room.receiveCoop({userid: 'rogueplayer', ok: true, action: 'refresh',
+			state: {userid: 'rogueplayer', session, players: [], invitations: []}});
+		assert(c.room.html.includes('本场未获胜')); assert(c.room.html.includes('原奖励留待复战获胜后领取'));
+		assert(c.room.html.includes('name="continueCoopBattle"')); assert(!c.room.html.includes('name="retryCoopBattle"'));
+		assert(!c.room.html.includes('本场获胜')); assert(!c.room.html.includes('返回共同事件'));
+		c.room.continueCoopBattle();
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)), {action: 'continuebattle'});
+	});
+	it('shows the shared postgame offer, disagreement, rollback-safe clear notice and versioned votes', () => {
+		const {c} = openLobby();
+		const session = {id: 'postgame-session', role: 'host', hostName: 'rogueplayer', guestName: 'friend',
+			partnerUserId: 'friend', status: 'active', canControl: true, adventure: {floor: 200,
+				phase: 'postgame', team: [], partnerTeam: [], bag: {}, money: 0,
+				postgame: {key: 'postgame-offer', stage: 'offer', cleared: true, ownChoice: 'accept', partnerChoice: 'decline'}}};
+		c.room.receiveCoop({userid: 'rogueplayer', ok: true, action: 'refresh',
+			state: {userid: 'rogueplayer', session, players: [], invitations: []}});
+		assert(c.room.html.includes('200 层通关记录已分别保存'));
+		assert(c.room.html.includes('你的选择：接受挑战；队友选择：结束旅程'));
+		assert(c.room.html.includes('不是极巨化')); assert(c.room.html.includes('撤回我的选择'));
+		c.room.chooseCoopPostgame('cancel');
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)),
+			{action: 'godchallenge', visit: 'postgame-offer', value: 'cancel'});
+		c.room.coopBusy = false; session.canControl = false;
+		const html = c.room.renderCoopAdventure(session), count = c.sent.length;
+		assert.match(html, /name="chooseCoopPostgame"[^>]*disabled/);
+		c.room.chooseCoopPostgame('accept'); assert.equal(c.sent.length, count);
+	});
+	it('shows an optional challenge result without another ordinary floor payout or retry button', () => {
+		const {c} = openLobby();
+		const session = {role: 'host', hostName: 'rogueplayer', guestName: 'friend', canControl: true,
+			adventure: {floor: 200, phase: 'postgame', postgame: {key: 'won', stage: 'won', points: 20, partnerPoints: 20}}};
+		let html = c.room.renderCoopAdventure(session);
+		assert(html.includes('挑战成功')); assert(html.includes('你获得 20 点，队友获得 20 点'));
+		assert(html.includes('确认结束旅程')); assert(!html.includes('name="continueCoopBattle"'));
+		session.adventure.postgame.stage = 'lost'; html = c.room.renderCoopAdventure(session);
+		assert(html.includes('本次挑战未获胜')); assert(!html.includes('name="retryCoopBattle"'));
+		assert(html.includes('双方已恢复挑战前的队伍与背包'));
+	});
+	it('renders shared companion rematch choices and completed rewards without a second personal choice', () => {
+		const {c} = openLobby();
+		const event = {id: 'companionrematch', key: 'rematch-visit', stage: 'choice', title: '再来一场，好吗？',
+			paragraphs: ['对手沿用上次的队伍与等级。'], rivalPortrait: 'clay',
+			branchOptions: [{id: 'accept', name: '准备好了，再来一场！'}, {id: 'decline', name: '再准备一阵'}]};
+		const session = {id: 'rematch-session', role: 'host', hostName: 'rogueplayer', guestName: 'friend',
+			partnerUserId: 'friend', status: 'active', canControl: true, delegatedTo: 'rogueplayer', adventure: {floor: 65,
+				phase: 'route-interaction', team: [], partnerTeam: [], bag: {}, money: 420,
+				selectedRoute: {kind: 'event'}, coopEvent: event}};
+		const receive = () => c.room.receiveCoop({userid: 'rogueplayer', ok: true, action: 'refresh',
+			state: {userid: 'rogueplayer', session, players: [], invitations: []}});
+		receive(); assert(c.room.html.includes('对手沿用上次的队伍与等级')); assert(c.room.html.includes('has-portrait'));
+		c.room.chooseCoopEvent('accept');
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)), {action: 'eventchoice', value: 'accept', visit: 'rematch-visit'});
+		Object.assign(event, {stage: 'result', branchResolved: true, ownComplete: true, partnerComplete: true,
+			options: [], partnerOptions: [], paragraphs: ['双方已各自补领一次延期奖励。']});
+		receive(); assert(c.room.html.includes('本次事件已完成，可共同继续旅程'));
+		assert(!c.room.html.includes('队友的个人步骤')); assert(c.room.html.includes('双方已各自补领一次延期奖励'));
+	});
+	it('keeps shared rival choices visible when only the guest can still accept an invitation', () => {
+		const {c} = openLobby();
+		const event = {id: 'rivalstory', key: 'rival-visit', stage: 'result', title: '与小银再会',
+			paragraphs: ['本人的同行邀请已处理，等待共同确认队友的选择。'], rivalPortrait: 'silver',
+			ownComplete: true, partnerComplete: false, branchResolved: false,
+			branchOptions: [{id: 'join', name: '好，一起走这一段。'}, {id: 'solo', name: '下次再见'}]};
+		const session = {id: 'rival-session', role: 'host', hostName: 'rogueplayer', guestName: 'friend',
+			partnerUserId: 'friend', status: 'active', canControl: true, adventure: {floor: 65,
+				phase: 'route-interaction', team: [], partnerTeam: [], bag: {}, money: 0,
+				selectedRoute: {kind: 'event'}, coopEvent: event}};
+		const receive = () => c.room.receiveCoop({userid: 'rogueplayer', ok: true, action: 'refresh',
+			state: {userid: 'rogueplayer', session, players: [], invitations: []}});
+		receive(); assert(c.room.html.includes('has-portrait')); assert(c.room.html.includes('好，一起走这一段。'));
+		assert(!c.room.html.includes('本次事件已完成，可共同继续旅程'));
+		c.room.chooseCoopEvent('join');
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)),
+			{action: 'eventchoice', value: 'join', visit: 'rival-visit'});
+		Object.assign(event, {branchResolved: true, partnerComplete: true, branchOptions: [], options: []});
+		receive(); assert(c.room.html.includes('本次事件已完成，可共同继续旅程'));
+		assert(!c.room.html.includes('队友的个人步骤'));
+	});
+	it('renders shared police destinations, the existing battle dialogue and completed rewards', () => {
+		const {c} = openLobby();
+		const event = {id: 'policeassist', key: 'police-map', title: '君莎的治安协助', stage: 'choice',
+			paragraphs: ['君莎：请一起协助恢复道路通行。'], rivalPortrait: 'jenny',
+			branchOptions: [{id: 'police:paldea', name: '前往帕底亚 · 天星队'}]};
+		const session = {id: 'police-session', role: 'host', hostName: 'rogueplayer', guestName: 'friend',
+			partnerUserId: 'friend', status: 'active', canControl: true, adventure: {floor: 21, phase: 'route-interaction',
+				team: [], partnerTeam: [], bag: {}, money: 0, selectedRoute: {kind: 'event'}, coopEvent: event}};
+		const receive = () => c.room.receiveCoop({userid: 'rogueplayer', ok: true, action: 'refresh',
+			state: {userid: 'rogueplayer', session, players: [], invitations: []}});
+		receive(); assert(c.room.html.includes('has-portrait')); assert(c.room.html.includes('前往帕底亚'));
+		c.room.chooseCoopEvent('police:paldea');
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)),
+			{action: 'eventchoice', value: 'police:paldea', visit: 'police-map'});
+		session.adventure.phase = 'settlement'; session.adventure.battleResult = {won: true, eventResolved: false};
+		event.paragraphs = ['天星队队员：下一场轮到我！']; receive(); assert(c.room.html.includes('下一场轮到我！'));
+		session.adventure.phase = 'route-interaction';
+		Object.assign(event, {id: 'policerevenge', stage: 'result', branchResolved: true, ownComplete: true, partnerComplete: true, options: []});
+		receive(); assert(c.room.html.includes('本次事件已完成，可共同继续旅程')); assert(!c.room.html.includes('队友的个人步骤'));
+	});
 	function safariLobby() {
 		const {c} = openLobby();
 		const session = {id: 'safari-session', role: 'host', hostName: 'rogueplayer', guestName: 'friend',
@@ -278,6 +733,7 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		}});
 		receive(); assert(c.html.includes('Own &lt;script')); assert(!c.html.includes('Own <script>'));
 		assert(c.html.includes('酒之卷轴')); assert(c.html.includes('协助队友')); assert(c.html.includes('队友的个人步骤'));
+		assert(c.html.includes('卷轴协同修行'));
 		c.room.coopBusy = false; c.room.chooseCoopEvent('friend|scroll:water');
 		assert.deepEqual(request(), {action: 'eventchoice', owner: 'friend', value: 'scroll:water', visit: 'other-scroll'});
 		session.adventure.coopEvent.scrollPartners[1] = {owner: 'friend', name: 'Friend'}; receive();
@@ -352,6 +808,17 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		assert.deepEqual(request(), {action: 'refresh'});
 		c.room.receiveCoopNotice({battleSelection: true}); assert(c.room.coopRefreshPending);
 		receive(); assert.equal(c.room.coopRefreshPending, false); assert(updates >= 2);
+	});
+	it('invalidates cached native controls on capture requests, responses and removal', () => {
+		const {c, session, receive, request} = liveBattleLobby();
+		session.roomid = 'battle-capture'; session.adventure.phase = 'battle';
+		const cache = [];
+		c.app.rooms[session.roomid] = {controlsShown:true, updateControls() {cache.push(this.controlsShown); this.controlsShown = true;}};
+		session.adventure.captureProposal = {id:'capture',state:'requested',isRecipient:true,targetName:'Magikarp'};
+		receive(); session.adventure.captureProposal.state = 'contested'; receive();
+		c.room.respondCoopCapture('give', 'greatball'); assert.equal(request().ball, 'greatball');
+		delete session.adventure.captureProposal; receive();
+		assert.deepEqual(cache, [false,false,false]);
 	});
 	it('sends every live checkbox change and cancellation without implying confirmation', () => {
 		const {c, session, receive, toggle, request} = liveBattleLobby(), adventure = session.adventure;
@@ -477,6 +944,32 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		assert(c.room.html.includes('队友的战利品：伤药（20 HP） ×6'));
 		assert(!c.room.html.includes('雄性的样子'));
 	});
+	it('renders shared mentor votes and sends versioned choices without enabling delegated-away controls', () => {
+		const {c} = openLobby();
+		const mentor = {key: 'mentor-19', floor: 20, ownChoice: 'attack', partnerChoice: 'guard', cards: [
+			{id: 'attack', name: '破阵之证', offense: 100, defense: 40, speed: 0},
+			{id: 'guard', name: '坚守之证', offense: 40, defense: 120, speed: 0},
+			{id: 'speed', name: '疾风之证', offense: 20, defense: 20, speed: 100},
+			{id: 'balanced', name: '同行之证', offense: 50, defense: 50, speed: 50},
+		]};
+		const session = {status: 'active', canControl: true, adventure: {mentor}};
+		c.room.coopState = {userid: 'rogueplayer', session}; c.room.coopBusy = false;
+		let html = c.room.renderCoopMentor(session);
+		assert.equal((html.match(/data-card=/g) || []).length, 4);
+		assert(html.includes('我已预选')); assert(html.includes('队友已预选')); assert(html.includes('撤回我的预选'));
+		assert(html.includes('双攻')); assert(html.includes('+120%')); assert(!html.includes('招式伤害'));
+		c.room.chooseCoopMentor('speed');
+		assert.deepEqual(JSON.parse(c.sent.at(-1).split('/fantasyrogue coop ')[1]), {
+			action: 'mentorcard', visit: 'mentor-19', value: 'speed',
+		});
+		c.room.coopBusy = false; c.room.chooseCoopMentor('');
+		assert.equal(JSON.parse(c.sent.at(-1).split('/fantasyrogue coop ')[1]).value, '');
+		c.room.coopBusy = false; session.delegatedTo = 'friend';
+		html = c.room.renderCoopMentor(session);
+		assert.equal((html.match(/ disabled/g) || []).length, 5);
+		mentor.card = 'guard'; html = c.room.renderCoopMentor(session);
+		assert(html.includes('共同收下【坚守之证】')); assert(!html.includes('name="chooseCoopMentor"'));
+	});
 	it('renders shared companion milestone choices and sends the current scoped visit', () => {
 		const {c} = openLobby();
 		const scene = {id: 'olivia', stage: 100, title: '一路同行', name: '莉兹', ownerName: '<b>队友</b>',
@@ -486,7 +979,7 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		c.room.coopState = {userid: 'rogueplayer', session}; c.room.coopBusy = false;
 		const html = c.room.renderCoopAdventure(session);
 		assert(html.includes('双方共同选择回应')); assert(html.includes('队友选择：成为恋人'));
-		assert(html.includes('&lt;b>队友&lt;/b>')); assert(!html.includes('<b>队友</b>'));
+		assert(html.includes('&lt;b&gt;队友&lt;/b&gt;')); assert(!html.includes('<b>队友</b>'));
 		assert(!html.includes('name="finishCoopRoute"')); assert(html.includes('name="chooseCoopAffection" value="cancel"'));
 		c.room.chooseCoopAffection('friends');
 		assert.deepEqual(JSON.parse(c.sent.at(-1).split('/fantasyrogue coop ')[1]), {
@@ -510,19 +1003,19 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		const c = client(true), data = state(); c.room.receiveState(data);
 		assert(c.room.html.includes('name="openCoop"'));
 		c.room.openCoop();
-		assert.equal(c.sent.at(-1), '/fantasyrogue coop {"action":"refresh"}');
+		assert.equal(c.sent.at(-1), '/fantasyrogue coop {"action":"refresh","value":"rules"}');
 		assert.equal(c.room.screen, 'coop');
 	});
-	it('renders only unlocked tiers and server-listed online players with invitation controls', () => {
+	it('renders only unlocked tiers and exposes online invitations through the picker', () => {
 		const {c} = openLobby(); c.room.coopDifficulty = 1;
 		c.room.receiveCoop({userid: 'rogueplayer', action: 'refresh', ok: true, state: {
 			userid: 'rogueplayer', maxDifficulty: 2, players: [{userid: 'friend', name: 'Friend', maxDifficulty: 1}],
 			invitations: [], session: null,
 		}});
-		assert(c.room.html.includes('Friend'));
+		assert(!c.room.html.includes('Friend'));
 		assert(c.room.html.includes('value="1" selected'));
 		assert(c.room.html.includes('第 3 档（尚未解锁）'));
-		assert(c.room.html.includes('name="inviteCoopPlayer" value="friend"'));
+		assert(c.room.html.includes('name="openCoopPlayers"'));
 	});
 	it('opens the native starter configuration and saves that member\'s choices and build', () => {
 		const {c} = openLobby();
@@ -649,7 +1142,7 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 			team: [{id: 'own-bulbasaur', species: 'Bulbasaur', level: 5, hp: 20, maxhp: 20}],
 			partnerTeam: [{id: 'partner-eevee', species: 'Eevee', level: 8, hp: 30, maxhp: 30}],
 			battleSelection: [], partnerBattleSelection: [], money: 1000, bag: {potion: 0},
-			centerCare: {needed: true, cost: 250, fainted: 0}, routeExitSelection: false, partnerRouteExitSelection: true,
+			centerCare: {needed: true, cost: 250, fainted: 0, revives: false}, routeExitSelection: false, partnerRouteExitSelection: true,
 			partnerMoney: 1300,
 			shopItems: [{id: 'potion', name: '伤药', kind: 'heal', price: 200, remaining: null, description: '恢复 HP'}],
 			partnerShopItems: [{id: 'potion', name: '伤药', kind: 'heal', price: 200, remaining: null, description: '恢复 HP'}],
@@ -660,6 +1153,7 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 				guestName: 'friend', difficulty: 0, status: 'active', starterSelection: ['bulbasaur'],
 				partnerStarterSelection: ['eevee'], adventure}}});
 		assert(c.room.html.includes('休整商店'));
+		assert(c.room.html.includes('不恢复 HP，也不复活倒下的伙伴'));
 		assert(c.room.html.includes('使用自己的金币购买'));
 		assert(c.room.html.includes('以“你”为发起方'));
 		assert(c.room.html.includes('name="coopTradeOwn" data-owner="rogueplayer"'));
@@ -705,7 +1199,8 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		c.room.coopBusy = false;
 		c.room.receiveCoopNotice({tradeCompleted: {id: 'trade-animation-1', offeredPokemon: 'Bulbasaur',
 			requestedPokemon: 'Eevee', fee: 2500}});
-		assert(c.room.html.includes('rogue-coop-trade-animation'));
+		assert.equal(c.app.lastPopup.type, c.RogueCoopTradePopup);
+		assert(c.app.popups.at(-1).html.includes('rogue-coop-trade-animation'));
 		clearTimeout(c.room.coopTradeTimer); c.room.coopTradeTimer = null;
 		c.room.$ = oldDollar;
 	});
@@ -719,6 +1214,72 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 			assert(html.includes('品质：' + label)); assert(!html.includes('品质：' + tier));
 		}
 	});
+	it('shows each owner receiving the opposite partner, including shiny appearance and trade evolution', () => {
+		const c = client(); c.room.receiveState(state());
+		c.room.coopState = {userid: 'rogueplayer', session: {id: 'visual-trade'}};
+		const participants = [
+			{fromUser: 'friend', fromName: '<Friend>', before: {species: 'Machoke', shiny: true, gender: 'F'},
+				after: {species: 'Machamp', shiny: true, gender: 'F'}},
+			{fromUser: 'rogueplayer', fromName: 'rogueplayer', before: {species: 'Haunter'}, after: {species: 'Gengar'}},
+		];
+		c.room.receiveCoopNotice({session: 'visual-trade', tradeCompleted: {id: 'first-swap', fee: 2500, participants}});
+		let html = c.room.renderCoopTradeAnimation();
+		assert(html.includes('sprites/gen5-shiny/Machamp.png'));
+		assert(html.includes('通讯进化：Machoke → Machamp'));
+		assert(html.includes('<b>你收到</b> Machamp'));
+		assert(html.includes('<b>&lt;Friend&gt;收到</b> Gengar'));
+		assert(html.includes('rogue-trade-ball-out')); assert(html.includes('rogue-trade-ball-in'));
+		assert(!html.includes('<Friend>')); assert.equal(participants[0].fromUser, 'friend');
+		c.room.coopState.userid = 'friend';
+		html = c.room.renderCoopTradeAnimation();
+		assert(html.includes('<b>你收到</b> Gengar'));
+		assert(html.includes('费用由发起者支付'));
+	});
+	it('resumes the exchange timeline across refreshes and ignores repeat or foreign-session notices', () => {
+		let now = 1000; const timers = [];
+		const c = client(false, false, {Date: class extends Date {static now() { return now; }},
+			setTimeout: (fn, delay) => { timers.push({fn, delay}); return timers.length; }});
+		c.room.receiveState(state()); c.room.coopState = {userid: 'rogueplayer', session: {id: 'visual-trade'}};
+		const notice = {session: 'visual-trade', tradeCompleted: {id: 'one-swap', fee: 2500,
+			offeredPokemon: 'Bulbasaur', requestedPokemon: 'Eevee'}};
+		c.room.receiveCoopNotice(notice);
+		assert(c.room.renderCoopTradeAnimation().includes('--trade-elapsed:-0ms'));
+		const popups = c.app.popups.length;
+		assert(c.app.popups.at(-1).html.includes('返回共同冒险'));
+		now = 2500;
+		assert(c.room.renderCoopTradeAnimation().includes('--trade-elapsed:-1500ms'));
+		c.room.receiveCoopNotice(notice);
+		assert(c.room.renderCoopTradeAnimation().includes('--trade-elapsed:-1500ms'));
+		assert.equal(timers.filter(timer => timer.delay === 8000).length, 1);
+		c.room.receiveCoopNotice({...notice, session: 'old-session', tradeCompleted: {...notice.tradeCompleted, id: 'old-swap'}});
+		assert.equal(c.room.coopTradeAnimation.id, 'one-swap');
+		assert.equal(c.app.popups.length, popups);
+		timers.find(timer => timer.delay === 8000).fn();
+		assert.equal(c.room.renderCoopTradeAnimation(), '');
+		c.room.receiveCoopNotice(notice); assert.equal(c.room.coopTradeAnimation, null);
+		assert.equal(c.app.popups.length, popups);
+	});
+	for (const kind of ['rest', 'trade']) {
+		it(`localizes ${kind} shop categories and rest exchange receipts without exposing markup`, () => {
+			const c = client(true, true); c.room.receiveState(state()); c.room.screen = 'coop';
+			const session = {id: 'rest-localization', role: 'host', status: 'active', difficulty: 0,
+				hostName: 'rogueplayer', guestName: 'friend', partnerUserId: 'friend', adventure: {
+					floor: 9, phase: 'route-interaction', selectedRoute: {id: 'center', name: '宝可梦中心', kind},
+					team: [], partnerTeam: [], bag: {}, money: 4000,
+					shopItems: [{id: 'potion', name: '伤药', kind: 'heal', price: 200, remaining: null}],
+					notices: ['Machoke 进化为 Machamp！', 'Machamp 学会了 Wide Guard。',
+						'交换完成：收到 Gengar。', '<script>危险</script>'],
+				}};
+			c.room.receiveCoop({userid: 'rogueplayer', ok: true, state: {userid: 'rogueplayer', session}});
+			assert(c.room.html.includes('恢复道具 · 200 金币'));
+			if (kind === 'rest') {
+				for (const text of ['豪力 进化为 怪力', '怪力 学会了 广域防守', '交换完成：收到 耿鬼']) {
+					assert(c.room.html.includes(text), text);
+				}
+				assert(!c.room.html.includes('<script>')); assert(c.room.html.includes('&lt;script&gt;'));
+			}
+		});
+	}
 	it('sends the selected owner’s visit for personal evolution scenes', () => {
 		const {c} = openLobby();
 		c.room.coopState = {userid: 'rogueplayer'};
@@ -759,10 +1320,34 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		const receive = () => c.room.receiveCoop({userid: 'rogueplayer', ok: true, action: 'refresh',
 			state: {userid: 'rogueplayer', session, players: [], invitations: []}});
 		receive(); assert(c.room.html.includes('你的选择：推荐阿罗拉地区；队友选择：尚未选择'));
+		event.branchOptions[0].name += '。'; event.partnerChoice = event.ownChoice; receive();
+		assert(c.room.html.includes('你的选择：推荐阿罗拉地区；队友选择：推荐阿罗拉地区。双方'));
+		assert(!c.room.html.includes('。。'));
 		Object.assign(event, {stage: 'result', branchResolved: true, ownComplete: true, partnerComplete: true,
 			options: [], partnerOptions: [], paragraphs: ['双方收下旅行特产。']});
 		receive(); assert(c.room.html.includes('本次事件已完成，可共同继续旅程'));
 		assert(!c.room.html.includes('队友的个人步骤')); assert(c.room.html.includes('双方收下旅行特产'));
+	});
+	it('renders a shared social visitor, preserves reunion text and sends one visit-scoped vote', () => {
+		const {c} = openLobby();
+		const event = {id: 'travellermeeting', key: 'social-visit', stage: 'choice', title: '旅途同行',
+			paragraphs: ['紫芋：爸爸？没想到会在这里遇见你。'], rivalPortrait: 'lacey', rivalApproval: true,
+			branchOptions: [{id: 'pokemon', name: '陪伴宝可梦'}], ownChoice: null, partnerChoice: 'pokemon'};
+		const session = {id: 'social-session', role: 'host', hostName: 'rogueplayer', guestName: 'friend',
+			partnerUserId: 'friend', status: 'active', canControl: true, adventure: {floor: 61,
+				phase: 'route-interaction', team: [], partnerTeam: [], bag: {}, money: 0,
+				selectedRoute: {kind: 'event'}, coopEvent: event}};
+		const receive = () => c.room.receiveCoop({userid: 'rogueplayer', ok: true, action: 'refresh',
+			state: {userid: 'rogueplayer', session, players: [], invitations: []}});
+		receive(); assert(c.room.html.includes('rogue-event-intro has-portrait'));
+		assert(c.room.html.includes('爸爸')); assert(c.room.html.includes('smiling'));
+		c.room.chooseCoopEvent('pokemon');
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)),
+			{action: 'eventchoice', value: 'pokemon', visit: 'social-visit'});
+		Object.assign(event, {stage: 'result', branchResolved: true, ownComplete: true, partnerComplete: true,
+			options: [], partnerOptions: [], paragraphs: ['共同对话结束，双方分别处理同行名额。']});
+		receive(); assert(c.room.html.includes('本次事件已完成，可共同继续旅程'));
+		assert(!c.room.html.includes('队友的个人步骤'));
 	});
 	it('shows the completed ranger return as shared and leaves full-party placement to the existing admission flow', () => {
 		const {c} = openLobby();
@@ -797,6 +1382,20 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 			text: value => { c.room.controls[selector] = value; }});
 		return {c, session, event, receive, advance: ms => {time += ms;}, tick: () => {if (tick) tick();}, active: () => !!tick};
 	}
+	it('renders a common ski course and routes controls through authorized co-op commands', () => {
+		const r = rhythmClient();
+		Object.assign(r.event, {id: 'skiing', key: 'ski-step', activity: undefined,
+			ski: {started: 20000, now: 20000, duration: 15000, lane: 1, checked: 0, obstacles: []},
+			branchOptions: [{id: 'skileft', name: '向左'}, {id: 'skitick', name: '继续滑行'}]});
+		r.receive();
+		assert(r.c.room.html.includes('共同雪道')); assert(r.c.room.html.includes('rogue-ski'));
+		r.c.room.skiMove('skileft');
+		assert.deepEqual(JSON.parse(r.c.sent.at(-1).slice('/fantasyrogue coop '.length)),
+			{action: 'eventchoice', value: 'skileft', visit: 'ski-step'});
+		r.c.room.coopBusy = false; r.session.delegatedTo = 'friend';
+		const count = r.c.sent.length; r.c.room.skiMove('skiright'); assert.equal(r.c.sent.length, count);
+		r.c.room.coopState.session = null; assert.equal(r.c.room.coopSkiEvent(), null);
+	});
 	it('shows a synchronized shared rhythm track and waits for consensus instead of auto-finishing', () => {
 		const r = rhythmClient();
 		assert(r.c.room.html.includes('共同节拍')); assert(r.c.room.html.includes('rogue-activity-track'));
@@ -849,6 +1448,31 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		session.adventure.phase = 'area-selection'; session.adventure.routeChoices = [];
 		html = c.room.renderCoopAdventure(session);
 		assert(html.includes('本局双攻、双防各 +0.27%'));
+		session.adventure.lastReward = {floor: 181, name: '选择伙伴', money: 0, items: {potion: 0}};
+		html = c.room.renderCoopAdventure(session);
+		assert(!html.includes('role="status"'));
+		session.adventure.lastReward.items.potion = 1;
+		html = c.room.renderCoopAdventure(session);
+		assert(html.includes('role="status"')); assert(html.includes('×1'));
+	});
+	it('shows a common fog route without presenting it as a failed or empty route', () => {
+		const {c} = openLobby();
+		c.room.coopBusy = false;
+		const html = c.room.renderCoopAdventure({id: 'fog-session', role: 'host', hostName: 'rogueplayer', guestName: 'friend',
+			status: 'active', difficulty: 0, adventure: {id: 'fog-run', floor: 2, phase: 'area-selection',
+				team: [], partnerTeam: [], routeChoices: [{id: 'grass', name: '迷雾区域', kind: 'fog', fogged: true, available: true}]}});
+		assert(html.includes('迷雾区域')); assert(html.includes('未知路线'));
+		assert(html.includes('进入后揭晓')); assert(!html.includes('name="chooseCoopArea" value="grass" disabled'));
+	});
+	it('explains the shared shop raid lock, personal bounty and reopening without claiming repeated rewards', () => {
+		const {c} = openLobby(), session = {adventure: {shopRaid: {cleared: false, reward: 6000}}};
+		let html = c.room.renderCoopShopRaid(session);
+		assert(html.includes('先共同击退火箭队')); assert(html.includes('双方各得 6000'));
+		assert(html.includes('失败或撤退保留本次对手'));
+		session.adventure.shopRaid.cleared = true; html = c.room.renderCoopShopRaid(session);
+		assert(html.includes('双方各获得 6000')); assert(html.includes('商店已恢复营业'));
+		assert(html.includes('不会重复领取'));
+		assert.equal(c.room.renderCoopShopRaid({adventure: {}}), '');
 	});
 	it('shows route-vote withdrawal and the separate shared-reward and trade-route interactions', () => {
 		const {c} = openLobby();
@@ -982,6 +1606,7 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 	});
 	it('previews individual co-op regional conversions and animates only a new successful exchange', () => {
 		const {c} = openLobby();
+		rulesReply(c); c.room.coopRulesPopup.close(); c.app.lastPopup = null;
 		const preview = {before: 'Vulpix', after: 'Vulpix-Alola', types: ['Ice'], ability: 'Snow Cloak',
 			stats: {hp: 60, atk: 30, def: 30, spa: 30, spd: 30, spe: 30}, hp: 20, maxhp: 60,
 			removed: ['ember'], added: ['powdersnow'], equipped: ['quickattack']};
@@ -1047,6 +1672,38 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		session.delegatedTo = null; update(); assert(!c.room.html.includes('value="friend|guest-mon|skip|leechseed"'));
 		session.adventure.partnerPendingMove = null; update(); assert(c.room.html.includes('name="finishCoopRoute"'));
 	});
+	it('renders safe battle growth decisions with freshness keys and delegated evolution confirmation', () => {
+		const {c} = openLobby();
+		const pending = {member: 'own-mon', species: 'Bulbasaur', move: 'leechseed', moveName: 'Leech Seed',
+			moves: [{id: 'tackle', name: 'Tackle'}]};
+		const evolution = {member: 'guest-mon', species: 'Bulbasaur', shiny: true, gender: 'F',
+			options: [{species: 'Ivysaur', ready: true, requirements: [{text: '等级达到 Lv.16'}]}]};
+		const session = {id: 'growth', status: 'active', role: 'host', canControl: true, partnerUserId: 'friend',
+			hostName: 'rogueplayer', guestName: 'friend', roomid: 'battle-growth', adventure: {id: 'growth-run', phase: 'battle',
+				team: [], partnerTeam: [{id: 'guest-mon', species: 'Bulbasaur'}], pendingMove: pending,
+				liveGrowth: {key: 'token:1', evolutions: [], partnerEvolutions: [evolution]}}};
+		let refreshed = 0;
+		c.app.rooms['battle-growth'] = {updateControls: () => refreshed++};
+		const update = () => c.room.receiveCoop({userid: 'rogueplayer', ok: true,
+			state: {userid: 'rogueplayer', players: [], invitations: [], session}});
+		update(); assert(refreshed > 0); assert(c.room.html.includes('共同战斗 · 成长暂停'));
+		assert(c.room.html.includes('value="rogueplayer|own-mon|skip|leechseed|token:1"'));
+		assert(c.room.html.includes('队友正在处理成长')); assert(!c.room.html.includes('name="evolveCoopMember"'));
+		c.room.coopLearnMove('rogueplayer|own-mon|skip|leechseed|token:1');
+		let request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length));
+		assert.equal(request.visit, 'token:1'); assert.equal(request.move, 'leechseed');
+		session.delegatedTo = 'rogueplayer'; update();
+		assert(c.room.html.includes('value="friend|guest-mon|ivysaur|token:1"'));
+		const popup = evolvePopup(c, 'friend|guest-mon|ivysaur|token:1');
+		const count = c.sent.length; session.adventure.liveGrowth.key = 'token:2';
+		popup.confirmEvolution(); assert.equal(c.sent.length, count, 'old popup cannot confirm a later pause');
+		update(); evolvePopup(c, 'friend|guest-mon|ivysaur|token:2').confirmEvolution();
+		request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length));
+		assert.equal(request.visit, 'token:2'); assert.equal(request.owner, 'friend'); assert.equal(request.action, 'evolve');
+		update(); session.delegatedTo = null; update();
+		const revokedCount = c.sent.length;
+		c.room.skipCoopEvolution('friend|guest-mon|token:2'); assert.equal(c.sent.length, revokedCount);
+	});
 	it('opens a co-op camp against the correct wallet and rejects stale or revoked popup confirmation', () => {
 		const {c} = openLobby();
 		const quote = {visit: 'camp-visit', money: 1000, offers: [{id: 'junior', name: '助理训练员', amount: 300, price: 150, remaining: 1}],
@@ -1102,6 +1759,144 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		update();
 		return {c, session, quote, update};
 	}
+	function storageLobby() {
+		const {c} = openLobby();
+		const mon = id => ({id, species: 'Bulbasaur', level: 50, stars: 1, hp: 99, maxhp: 120,
+			nature: 'Timid', experience: 125000, status: 'brn', ivs: {hp: 31, atk: 0, def: 31, spa: 31, spd: 31, spe: 31}, moves: ['tackle']});
+		const storage = {quote: 'storage-current', canMerge: true, capacity: 30, partyLimit: 6, locked: '',
+			team: [mon('a'), mon('b')], box: [mon('c')]};
+		const session = {id: 'storage-session', role: 'host', status: 'active', canControl: true,
+			hostName: 'rogueplayer', guestName: 'friend', partnerUserId: 'friend', difficulty: 0,
+			adventure: {id: 'storage-run', floor: 9, phase: 'route-interaction', team: [], partnerTeam: [], bag: {}, money: 0,
+				selectedRoute: {id: 'center', kind: 'rest', name: '休整中心'}, storage}};
+		const update = () => c.room.receiveCoop({userid: 'rogueplayer', ok: true,
+			state: {userid: 'rogueplayer', players: [], invitations: [], session}});
+		update(); return {c, session, storage, update};
+	}
+	function storagePopup(c, value = 'rogueplayer|a|deposit') {
+		c.room.openCoopStorage(value); assert.equal(c.app.lastPopup.type, c.RogueCoopStoragePopup);
+		const popup = Object.create(c.RogueCoopStoragePopup);
+		popup.$el = {addClass() {}, html: html => { popup.html = html; }};
+		popup.fields = {storageConsume0: 'b', storageConsume1: 'c', storageTarget: ''};
+		popup.$ = selector => ({val: () => popup.fields[selector.match(/name=(\w+)/)?.[1]], text: value => { popup.error = value; }});
+		popup.close = () => { popup.closed = true; }; popup.initialize(c.app.lastPopup.data); return popup;
+	}
+	it('renders personal box rules and sends explicit deposit, withdrawal and swap commands', () => {
+		for (const [selection, target, expected] of [['a|deposit', '', 'deposit'], ['c|withdraw', '', 'withdraw'], ['c|withdraw', 'b', 'swap']]) {
+			const {c} = storageLobby();
+			assert(c.room.html.includes('我的宝可梦箱子 · 1 / 30')); assert(c.room.html.includes('不增加捕捉次数'));
+			assert(c.room.html.includes('最高四星')); assert(c.room.html.includes('未完成结算时不能整理'));
+			const popup = storagePopup(c, 'rogueplayer|' + selection); popup.fields.storageTarget = target; popup.confirmStorage();
+			const sent = JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length));
+			assert.equal(sent.action, 'box'); assert.equal(sent.value, expected); assert.equal(sent.owner, 'rogueplayer');
+			assert.equal(sent.quote, 'storage-current'); assert.equal(sent.id, popup.requestid); assert.equal(sent.target, target);
+		}
+	});
+	it('previews the retained star member and requires two distinct materials before confirming consumption', () => {
+		const {c} = storageLobby(), popup = storagePopup(c, 'rogueplayer|a|merge');
+		assert(popup.html.includes('永久消耗')); assert(popup.html.includes('31 / 0 / 31 / 31 / 31 / 31'));
+		assert(popup.html.includes('倒下者不会复活')); assert(popup.html.includes('125000'));
+		assert(popup.html.includes('异常状态：烧伤'));
+		const count = c.sent.length; popup.fields.storageConsume1 = 'b'; popup.confirmStorage();
+		assert.equal(c.sent.length, count); assert(popup.error.includes('两位不同'));
+		popup.fields.storageConsume1 = 'c'; popup.confirmStorage();
+		const sent = JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length));
+		assert.equal(sent.action, 'merge'); assert.equal(sent.member, 'a'); assert.deepEqual(sent.members, ['b', 'c']);
+		assert.equal(sent.confirmed, true); assert(popup.closed);
+	});
+	it('supports delegated personal storage and rejects a popup after control is revoked', () => {
+		const {c, session, storage, update} = storageLobby();
+		assert.equal(c.room.coopStorage('friend'), null);
+		session.delegatedTo = 'rogueplayer'; session.adventure.partnerStorage = {...storage}; update();
+		assert(c.room.html.includes('队友的宝可梦箱子'));
+		let popup = storagePopup(c, 'friend|a|deposit'); popup.confirmStorage();
+		assert.equal(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)).owner, 'friend');
+		c.room.coopBusy = false; popup = storagePopup(c, 'friend|a|deposit');
+		delete session.delegatedTo; update(); const count = c.sent.length; popup.confirmStorage();
+		assert.equal(c.sent.length, count); assert(popup.closed);
+	});
+	it('closes stale box, session, phase and blocked previews without changing a party', () => {
+		for (const modify of [
+			s => { s.adventure.storage.quote = 'changed'; }, s => { s.id = 'other'; },
+			s => { s.adventure.phase = 'battle'; }, s => { s.adventure.phase = 'settlement'; },
+			s => { s.adventure.storage.locked = '请先安置新伙伴'; }, s => { s.canControl = false; },
+		]) {
+			const {c, session, update} = storageLobby(), popup = storagePopup(c);
+			modify(session); update(); const count = c.sent.length; popup.confirmStorage();
+			assert.equal(c.sent.length, count); assert(popup.closed);
+		}
+		const {c} = storageLobby(), popup = storagePopup(c), count = c.sent.length;
+		c.app.socket.readyState = 3; popup.confirmStorage(); assert.equal(c.sent.length, count);
+	});
+	it('does not offer impossible last-adult deposits, non-Zygarde merges or full-party withdrawals into a spare slot', () => {
+		const {c, storage, update} = storageLobby(); storage.team = [storage.team[0]]; storage.canMerge = false; update();
+		assert(c.room.html.includes('value="rogueplayer|a|deposit" disabled'));
+		assert(!c.room.html.includes('保留此伙伴升星'));
+		storage.team = Array.from({length: 6}, (_, n) => ({...storage.team[0], id: 'team-' + n})); update();
+		const popup = storagePopup(c, 'rogueplayer|c|withdraw');
+		assert(!popup.html.includes('加入空余队伍位置')); assert(popup.html.includes('交换位置'));
+	});
+	function hpShopLobby() {
+		const {c} = openLobby();
+		const quote = {visit: 'hp-run:9:center', remaining: 3, locked: '', payers: [
+			{id: 'healthy', species: 'Bulbasaur', hp: 120, maxhp: 120}, {id: 'weak', species: 'Eevee', hp: 10, maxhp: 100},
+		]};
+		const session = {id: 'hp-session', role: 'host', status: 'active', canControl: true,
+			hostName: 'rogueplayer', guestName: 'friend', partnerUserId: 'friend', difficulty: 0,
+			adventure: {id: 'hp-run', floor: 9, phase: 'route-interaction', team: [], partnerTeam: [], bag: {}, money: 0,
+				selectedRoute: {id: 'center', kind: 'rest', name: '休整中心'}, hpShop: quote,
+				shopItems: [{id: 'potion', name: '伤药', kind: 'heal', price: 100, remaining: 2}]}};
+		const update = () => c.room.receiveCoop({userid: 'rogueplayer', ok: true,
+			state: {userid: 'rogueplayer', players: [], invitations: [], session}});
+		update(); return {c, session, quote, update};
+	}
+	function hpShopPopup(c, owner = 'rogueplayer') {
+		c.room.openCoopHpShop(owner + '|potion'); assert.equal(c.app.lastPopup.type, c.RogueCoopHpShopPopup);
+		const popup = Object.create(c.RogueCoopHpShopPopup);
+		popup.$el = {addClass() {}, html: value => { popup.html = value; }};
+		popup.close = () => { popup.closed = true; }; popup.initialize(c.app.lastPopup.data); return popup;
+	}
+	it('shows HP payment beside coin shopping, previews the payer cost and sends one bounded personal purchase', () => {
+		const {c} = hpShopLobby();
+		assert.equal(c.room.coopHpCost({price: 3000}, {maxhp: 120}), 72);
+		assert.equal(c.room.coopHpCost({price: 1000}, {maxhp: 101}), 21);
+		assert(c.room.html.includes('每人每店最多 3 件')); assert(c.room.html.includes('金币购买不占次数'));
+		assert(c.room.html.includes('name="openCoopHpShop" value="rogueplayer|potion"'));
+		const popup = hpShopPopup(c);
+		assert(popup.html.includes('扣除我的伙伴 HP')); assert(popup.html.includes('支付 12 HP（120 → 108 / 120）'));
+		assert(popup.html.includes('name="confirm" value="weak" disabled'));
+		const before = c.sent.length; popup.confirm('weak'); assert.equal(c.sent.length, before);
+		popup.confirm('healthy');
+		const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length));
+		assert.equal(request.action, 'buyhp'); assert.equal(request.owner, 'rogueplayer');
+		assert.equal(request.member, 'healthy'); assert.equal(request.count, 1); assert.equal(request.value, 'potion');
+		assert.equal(request.visit, 'hp-run:9:center'); assert.equal(request.id, popup.requestId);
+		assert(popup.closed);
+	});
+	it('honors delegated HP ownership and closes a payment popup after delegation is revoked', () => {
+		const {c, session, quote, update} = hpShopLobby();
+		assert.equal(c.room.coopHpQuote('friend', 'potion'), null);
+		session.delegatedTo = 'rogueplayer'; session.adventure.partnerHpShop = {...quote};
+		session.adventure.partnerShopItems = session.adventure.shopItems; update();
+		let popup = hpShopPopup(c, 'friend'); assert(popup.html.includes('只扣') || popup.html.includes('扣除队友伙伴 HP'));
+		assert(c.room.html.includes('队友本店剩余 3 件'));
+		popup.confirm('healthy'); assert.equal(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)).owner, 'friend');
+		c.room.coopBusy = false; popup = hpShopPopup(c, 'friend'); delete session.delegatedTo; update();
+		const count = c.sent.length; popup.confirm('healthy'); assert(popup.closed); assert.equal(c.sent.length, count);
+	});
+	it('rejects stale shop, payer, stock, phase and session previews without sending a purchase', () => {
+		for (const alter of [
+			s => { s.adventure.hpShop.visit = 'new-visit'; }, s => { s.adventure.hpShop.payers[0].hp = 100; },
+			s => { s.adventure.shopItems[0].remaining = 0; }, s => { s.adventure.shopItems[0].price = 2000; },
+			s => { s.adventure.hpShop.remaining = 0; }, s => { s.adventure.phase = 'battle'; }, s => { s.id = 'another'; },
+		]) {
+			const {c, session, update} = hpShopLobby(), popup = hpShopPopup(c);
+			alter(session); update(); const count = c.sent.length;
+			popup.confirm('healthy'); assert(popup.closed); assert.equal(c.sent.length, count);
+		}
+		const {c} = hpShopLobby(), popup = hpShopPopup(c), count = c.sent.length;
+		c.app.socket.readyState = 3; popup.confirm('healthy'); assert.equal(c.sent.length, count);
+	});
 	function recyclingPopup(c, selection) {
 		c.room.openCoopRecycling(selection);
 		assert.equal(c.app.lastPopup.type, c.RogueCoopRecyclePopup);
@@ -1764,6 +2559,37 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		const {c} = evolutionClient(), popup = evolvePopup(c); popup.confirmEvolution();
 		c.room.identityChanged(); assert.equal(c.room.coopEvolutionIntent, null);
 	});
+	it('renders native companion services with co-op owner-scoped commands and locked partner controls', () => {
+		const {c} = openLobby();
+		const service = {visit: 'service-visit', locked: '', run: {phase: 'choose', team: [], blessings: {owned: []},
+			companions: [{id: 'liko', name: '莉可', source: '同行', type: 'Grass', canConsult: true,
+				abilityOptions: ['flowergift'], giftOptions: [{id: 'miracleseed', name: '奇迹种子'}]}],
+			socialCompanions: [{id: 'marnie', name: '玛俐', canConsult: true, giftOptions: []}]}};
+		const session = {id: 'services', role: 'host', status: 'active', partnerUserId: 'friend', difficulty: 0,
+			adventure: {phase: 'area-selection', floor: 3, team: [], partnerTeam: [], bag: {}, money: 0,
+				companionServices: service, partnerCompanionServices: structuredClone(service)}};
+		const receive = () => c.room.receiveCoop({userid: 'rogueplayer', ok: true, state: {
+			userid: 'rogueplayer', maxDifficulty: 0, players: [], invitations: [], session}});
+		receive();
+		assert(c.room.html.includes('我的同行服务')); assert(c.room.html.includes('队友的同行服务'));
+		assert(c.room.html.includes('name="coopCompanionAction" value="rogueplayer|liko|advice"'));
+		assert(!c.room.html.includes('name="companionAction"')); assert(!c.room.html.includes('name="socialCompanionAction"'));
+		assert(/name="coopCompanionAction" value="friend\|liko\|chat"[^>]*disabled/.test(c.room.html));
+		c.room.coopCompanionAction('rogueplayer|liko|ability:flowergift');
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)),
+			{action: 'companion', owner: 'rogueplayer', member: 'liko', value: 'ability:flowergift', visit: 'service-visit'});
+		receive(); const before = c.sent.length; c.room.coopCompanionAction('friend|liko|chat');
+		assert.equal(c.sent.length, before);
+		session.delegatedTo = 'rogueplayer'; receive();
+		c.room.coopSocialCompanionAction('friend|marnie|chat');
+		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)),
+			{action: 'socialcompanion', owner: 'friend', member: 'marnie', value: 'chat', visit: 'service-visit'});
+		session.adventure.partnerCompanionServices.locked = '等待战斗结束'; receive();
+		const locked = c.sent.length; c.room.coopSocialCompanionAction('friend|marnie|chat');
+		assert.equal(c.sent.length, locked); assert(c.room.html.includes('等待战斗结束'));
+		session.canControl = false; receive(); const delegated = c.sent.length;
+		c.room.coopCompanionAction('rogueplayer|liko|chat'); assert.equal(c.sent.length, delegated);
+	});
 	it('shows each co-op player their own blessing-adjusted battle loot and the partner copy', () => {
 		const {c} = openLobby();
 		const session = {id: 'session-loot', role: 'guest', hostName: 'friend', guestName: 'rogueplayer',
@@ -1784,6 +2610,20 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 			players: [], invitations: [], session}});
 		assert(c.room.html.includes('你的战利品：pokeball ×6'));
 		assert(c.room.html.includes('队友的战利品：pokeball ×5'));
+	});
+	it('localizes co-op battle growth receipts while keeping embedded text escaped', () => {
+		const c = client(true, true); c.room.receiveState(state()); c.room.screen = 'coop';
+		const session = {id: 'receipt', role: 'host', status: 'active', difficulty: 0,
+			hostName: 'rogueplayer', guestName: 'friend', partnerUserId: 'friend', adventure: {
+				floor: 1, phase: 'settlement', team: [], partnerTeam: [], bag: {}, money: 0,
+				battleResult: {retreated: true}, notices: ['Bulbasaur 获得 102 经验。',
+					'Treecko 学会了 Quick Attack。', 'Mudkip 学会了 Rock Smash。', '<script>危险</script>'],
+			}};
+		c.room.receiveCoop({userid: 'rogueplayer', ok: true, state: {userid: 'rogueplayer', session}});
+		for (const text of ['妙蛙种子 获得 102 经验', '木守宫 学会了 电光一闪', '水跃鱼 学会了 碎岩']) {
+			assert(c.room.html.includes(text), text);
+		}
+		assert(!c.room.html.includes('<script>')); assert(c.room.html.includes('&lt;script&gt;'));
 	});
 	it('shows shared recovery consent for a missing battle and a separate saved-result action', () => {
 		const {c} = openLobby();
@@ -1894,6 +2734,7 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 	});
 	it('clears the pending cooperative request on disconnect so reconnect can fetch authoritative progress', () => {
 		const {c} = openLobby();
+		rulesReply(c); c.room.coopRulesPopup.close(); c.room.coopRefresh();
 		assert.equal(c.room.coopBusy, true);
 		c.room.disconnected(); assert.equal(c.room.coopBusy, false);
 		const count = c.sent.length;
@@ -1994,12 +2835,12 @@ describe('Fantasy Rogue permanent starter crates', () => {
 		}});
 		return next;
 	}
-	it('opens one native dialog from the growth panel, between starter slots and difficulty', () => {
+	it('opens one native dialog from the start page and hides the entry in the party panel', () => {
 		const {c, popup} = setup();
-		assert(c.panel.html.indexOf('初始栏位') < c.panel.html.indexOf('name="openCrates"'));
-		assert(c.panel.html.indexOf('name="openCrates"') < c.panel.html.indexOf('冒险档位'));
+		assert(!c.panel.html.includes('name="openCrates"'));
+		c.room.startMenu(); assert(c.room.html.includes('name="openCrates"'));
 		assert.equal(c.sent.filter(message => message === '/cmd fantasyroguecrate').length, 1);
-		assert(c.panel.html.includes('抽取新的伙伴！'));
+		assert(c.room.html.includes('抽取新的伙伴！'));
 		c.room.openCrates(); assert.equal(c.room.cratePopup, popup); assert.equal(c.app.popups.length, 1);
 		assert(popup.html.includes('单次开箱 · 10 点')); assert(popup.html.includes('十连开箱 · 100 点'));
 		assert(popup.html.includes('传说保底还需 <b>72</b>')); assert(popup.html.includes('定向传说还需 <b>123</b>'));
@@ -2162,15 +3003,17 @@ describe('Fantasy Rogue permanent starter crates', () => {
 		assert.equal(popup.stage, 'ready'); assert(popup.html.includes('每周兑换已更新')); assert(!c.room.crateIntent);
 		assert.equal(c.room.state.account.points, 1000);
 	});
-	it('retains the last result on reopening and blocks spending during an active run', () => {
+	it('retains the last result and allows spending from the start page during an active run', () => {
 		const {c, data, popup} = setup(); popup.drawCrates('1'); const request = actions(c)[0];
 		c.room.receiveAction({userid: data.userid, id: request.id, ok: true, state: result(data, request)});
 		popup.close(); c.room.openCrates(); const reopened = c.room.cratePopup;
 		assert.equal(reopened.stage, 'results'); assert(reopened.html.includes('Kyogre'));
 		const ongoing = adventure('ready'); ongoing.account.crates = c.room.state.account.crates; ongoing.account.revision = 3;
 		c.room.receiveState(ongoing);
-		assert(reopened.html.includes('结束本局后开放开箱与兑换'));
-		reopened.drawCrates('1'); reopened.exchangeCrate('0:kyogre'); assert.equal(actions(c).length, 1);
+		assert(!reopened.locked()); assert(!c.panel.html.includes('name="openCrates"'));
+		c.room.startMenu(); assert(c.room.html.includes('name="openCrates"'));
+		reopened.drawCrates('1'); assert.equal(actions(c).length, 2);
+		c.room.state.continueOnly = true; assert(reopened.locked());
 	});
 	it('respects reduced motion and never loses results when animation is skipped', () => {
 		const {c, data, popup} = setup({matchMedia: () => ({matches: true})});
@@ -2197,7 +3040,7 @@ describe('Fantasy Rogue permanent starter crates', () => {
 	});
 	it('allows prediction during a run, resets invalid finalists and submits only once', () => {
 		const {c, data, popup} = setup();
-		assert(c.panel.html.includes('今日竞猜未参与'));
+		c.room.startMenu(); assert(c.room.html.includes('今日竞猜未参与'));
 		const ongoing = adventure('ready'); ongoing.account = data.account; c.room.receiveState(ongoing);
 		popup.crateTab('daily');
 		assert.equal((popup.html.match(/<h4>[ABCD] 队/g) || []).length, 4);
@@ -2221,7 +3064,7 @@ describe('Fantasy Rogue permanent starter crates', () => {
 		c.room.receiveCrates(submitted); assert.equal(c.room.crateIntent, null); assert.equal(c.room.pending, null);
 		assert(popup.html.includes('今日预测已提交')); assert(popup.busy());
 		data.account.revision = 2; data.account.crates = ledger; c.room.receiveState(data);
-		assert(!c.panel.html.includes('今日竞猜未参与'));
+		c.room.startMenu(); assert(!c.room.html.includes('今日竞猜未参与'));
 		popup.pickCup('0:1'); popup.submitCup(); assert.equal(actions(c).length, 2);
 		c.room.receiveCrates({...submitted, daily: {...query.daily, day: '2026-11-04', refreshAt: Date.UTC(2026, 10, 4, 16)}});
 		assert.equal(popup.picks.length, 0); assert(popup.html.includes('先选出两场胜者'));
@@ -2486,7 +3329,7 @@ describe('Fantasy Rogue optional challenge and voiced dialogue presentation', ()
 		data.run.challenge.name = '<img src=x onerror=alert(1)>';
 		data.run.challenge.paragraphs = ['<script>bad</script>⌈<img src=x>⌋']; c.room.receiveState(data);
 		assert(!c.html.includes('<script>bad')); assert(!c.html.includes('<img src=x'));
-		assert(c.html.includes('&lt;script>bad')); assert(c.html.includes('『&lt;img src=x>』'));
+		assert(c.html.includes('&lt;script&gt;bad')); assert(c.html.includes('『&lt;img src=x&gt;』'));
 	});
 	it('keeps player spoken replies distinct from action choices', () => {
 		const c = client(), data = adventure('event');
@@ -2538,6 +3381,21 @@ describe('Fantasy Rogue current partner move types and localized eggs', () => {
 });
 
 describe('Fantasy Rogue collapse echo panel', () => {
+	it('offers reverse exchange only when supported, unlocked and funded, through the ordinary command route', () => {
+		const c = client(), data = state(), account = data.account;
+		account.echo = {unlocked: true, points: 1, canExchange: true, cost: 10, systemCost: 50, exchangeCost: 10,
+			reverseExchangeGain: 10, types: {}, systems: {}, upgrades: {types: [], systems: [], guard: false, shiny: 0, catch: 0}};
+		const reverse = () => c.room.renderEcho(account, null, false).match(/<button[^>]*value="echo:exchangeback"[^>]*>/)[0];
+		assert(!reverse().includes('disabled'));
+		assert(c.room.renderEcho(account, null, false).includes('兑换 10 点局外成长点'));
+		account.echo.points = 0; assert(reverse().includes('disabled'));
+		account.echo.points = 1; account.echo.canExchange = false; assert(reverse().includes('disabled'));
+		account.echo.canExchange = true; c.room.receiveState(data); c.room.act('echo:exchangeback');
+		const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(command.action, 'echo'); assert.equal(command.value, 'exchangeback');
+		delete account.echo.reverseExchangeGain;
+		assert(!c.room.renderEcho(account, null, false).includes('value="echo:exchangeback"'));
+	});
 	it('hides locked progression, renders exact prices and disables purchases during an adventure', () => {
 		const c=client(), a=state().account;
 		assert.equal(c.room.renderEcho(a,null,false),'');
@@ -3047,7 +3905,7 @@ describe('Fantasy Rogue start menu and codex', () => {
 		assert(html.includes('两个同行名额')); assert(html.includes('15 次'));
 		assert(!html.includes('<script>'));
 		assert(html.includes('<strong>15 次偏好选择</strong>'));
-		assert(html.includes('<strong>&lt;script></strong>'));
+		assert(html.includes('<strong>&lt;script&gt;</strong>'));
 		c.room.openCodex('guide');
 		c.room.receiveCodex({userid: 'rogueplayer', codexSchema: 5, section: 'guide',
 			guide: {intro: [], beginner: data.beginnerGuide, modules: {}}});
@@ -3817,7 +4675,7 @@ describe('Fantasy Rogue start menu and codex', () => {
 		assert(c.room.html.includes('按名称拼音首字母排列'));
 		assert(c.room.html.includes('<strong class="rogue-term">【皮卡丘】</strong>'));
 		assert(c.room.html.includes('<strong class="rogue-term">【十万伏特】</strong>'));
-		assert(!c.room.html.includes('<script>')); assert(c.room.html.includes('&lt;script>'));
+		assert(!c.room.html.includes('<script>')); assert(c.room.html.includes('&lt;script&gt;'));
 		assert(c.room.html.includes('仅第 150 层出现'));
 	});
 	it('reads event choices without submitting any gameplay commands or showing battle logs', () => {
@@ -3833,7 +4691,7 @@ describe('Fantasy Rogue start menu and codex', () => {
 		c.room.readEvent('forest'); assert(c.room.html.includes('事件开头'));
 		assert(c.room.html.includes('<strong class="rogue-spoken-line">『准备好了吗？』</strong>'));
 		assert(c.room.html.includes('<strong class="rogue-spoken-line">『准备好了！』</strong>'));
-		assert(c.room.html.includes('&lt;script>bad')); assert(!c.room.html.includes('<script>'));
+		assert(c.room.html.includes('&lt;script&gt;bad')); assert(!c.room.html.includes('<script>'));
 		c.room.replayEventNext('nonexistent'); assert.equal(c.room.codexReplayHistory.length, 1);
 		c.room.replayEventNext('battle'); assert(c.room.html.includes('战斗画面已跳过'));
 		c.room.replayEventBack(); assert(c.room.html.includes('事件开头'));
@@ -4057,9 +4915,12 @@ describe('Fantasy Rogue story and clear-card controls', () => {
 			types: ['Grass'], sources: [{name: '个人永久训练', text: '双攻 +50%'}],
 			extraAbilities: [{id: 'hugepower', source: '已获得的额外特性'}]};
 		const card = {id: 'clear', owner: 'someone', name: '测试', completedAt: 1, contentVersion: 'test',
+			cooperative: {partnerName: '<伙伴>'},
 			snapshot: {team: [mon], boosts: data.run.boosts, blessings: [{id: 'hpgrowth', name: '越打命越硬', text: 'HP 提升', floor: 1}],
 				memberDetails: {[mon.id]: detail}, blessingEffects: {owned: []}}};
 		room.receiveGallery({userid: 'rogueplayer', account: {revision: 1}, own: [], cards: [card], invitations: [], offset: 0, rulesVersion: 'current'});
+		assert(room.html.includes('双人联机 · 队友：&lt;伙伴&gt;'));
+		assert(!room.html.includes('队友：<伙伴>'));
 		for (const text of ['增幅前', '常驻最终值', '增加值', '增幅比例', '个人永久训练', '额外特性', '越打命越硬', '+100%', '<strong>100</strong>', '殿堂留影', 'rogue-clear-stat-tiles']) assert(room.html.includes(text), text);
 		assert(!room.html.includes('<table'));
 		assert(room.html.includes('<details class="rogue-clear-details" data-member="' + mon.id + '">'));
@@ -4114,6 +4975,15 @@ describe('Fantasy Rogue story and clear-card controls', () => {
 		popup.initialize(c.app.lastPopup.data); popup.confirmCard();
 		const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
 		assert.equal(command.action, 'saveclear'); assert.equal(command.value, '');
+	});
+	it('shows queued clear decisions without increasing the three-card collection limit', () => {
+		const c = client();
+		const cards = [0, 1, 2].map(i => ({id: 'old-' + i, completedAt: 1000}));
+		const html = c.room.renderPendingClear({}, cards, false, 3);
+		assert(html.includes('还有 2 张通关卡等待选择')); assert(html.includes('最多收藏三张'));
+		assert.equal((html.match(/替换第/g) || []).length, 3);
+		assert(!html.includes('收藏至空位'));
+		assert(c.room.renderPendingClear({}, cards.slice(0, 2), false, 2).includes('还有 1 张'));
 	});
 });
 describe('Fantasy Rogue medicine-backed rematch interface', () => {
@@ -4339,7 +5209,7 @@ describe('Fantasy Rogue event display and spectator playback', () => {
 		];
 		c.room.receiveState(data);
 		for (const type of ['战斗', '精英', '奇遇', '遭遇']) assert(c.room.html.includes('class="rogue-route-type">' + type + '</strong>'));
-		assert(c.room.html.includes('class="rogue-route-subtitle">天空之柱&lt;test></span><small>Lv.3'));
+		assert(c.room.html.includes('class="rogue-route-subtitle">天空之柱&lt;test&gt;</span><small>Lv.3'));
 		assert(!c.room.html.includes('rogue-route-orange')); assert(c.room.html.includes('rogue-route-rose'));
 		assert.equal((c.room.html.match(/rogue-route-red/g) || []).length, 3);
 	});
@@ -4936,6 +5806,25 @@ describe('Fantasy Rogue client', () => {
 		assert(c.html.includes('name="showSpirit"')); assert(!c.html.includes('原生对战 · 捕捉伙伴'));
 		delete c.app.lastPopup; c.room.receiveState(run); assert(!c.app.lastPopup);
 	});
+	it('uses all three Lake Guardians portraits in the opening, detail card and shared spirit view', () => {
+		const c = client(), data = adventure('intro');
+		c.Dex.getTeambuilderSprite = mon => 'background-image:url(sprites/home/' + mon.species.toLowerCase() + '.png)';
+		data.run.spirit = {id: 'lakeguardians', species: 'Uxie', name: '三圣菇的求索', text: '进入下一节点时检查。'};
+		c.room.receiveState(data);
+		const popup = Object.create(c.RogueSpiritPopup);
+		popup.$el = {addClass() {}, html: html => { popup.html = html; }};
+		popup.initialize({room: c.room});
+		for (const html of [c.room.storyArt({scene: 'spirit'}), popup.html,
+			c.room.renderCoopSpirit({spirit: data.run.spirit})]) {
+			assert.equal((html.match(/rogue-spirit-trio-member/g) || []).length, 3);
+			for (const species of ['uxie', 'mesprit', 'azelf']) assert(html.includes('sprites/home/' + species + '.png'));
+			assert(html.includes('三圣菇：由克希、艾姆利多、亚克诺姆'));
+		}
+		assert(popup.html.indexOf('is-azelf') < popup.html.indexOf('<h3>三圣菇的求索'));
+		data.run.spirit = {id: 'yveltal', species: 'Yveltal'}; c.room.state = data;
+		const ordinary = c.room.storyArt({scene: 'spirit'});
+		assert(!ordinary.includes('rogue-spirit-trio')); assert(ordinary.includes('sprites/home/yveltal.png'));
+	});
 	it('offers only cleared spirits remotely and sends the manual choice with the starting party', () => {
 		const c = client(), data = state();
 		data.configured = true; data.starters = [{id: 'bulbasaur', species: 'Bulbasaur', available: true}];
@@ -4974,6 +5863,14 @@ describe('Fantasy Rogue client', () => {
 		assert(c.html.includes('name="buyWithHP" value="potion" disabled'));
 		assert(c.html.includes('value="buy:potion"'));
 		assert(c.html.includes('不恢复 HP'));
+	});
+	it('shows the exact sixty percent HP price in the ordinary solo shop', () => {
+		const c = client(), data = adventure('rest');
+		data.run.spirit = {id: 'yveltal', name: '交易', species: 'Yveltal'};
+		data.run.team[0].hp = 120; data.run.team[0].maxhp = 120;
+		data.items.push({id: 'lifeorb', name: '生命宝珠', kind: 'held', price: 3000, shopFloor: 1});
+		c.room.receiveState(data);
+		assert(c.html.includes('支付 72 HP')); assert(!c.html.includes('支付 73 HP'));
 	});
 	it('displays special-shop candies and keeps box/merge controls locked during battle', () => {
 		const c = client(), data = adventure('rest');
@@ -5561,13 +6458,16 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 	it('routes native cooperative retreat into shared consent and never offers solo paid rematch', () => {
 		const c = battleClient(), room = c.room;
 		room.fantasyRogue.cooperative = true; room.html = '';
-		c.app.rooms = {fantasyrogue: {openCoop() { c.openedCoop = true; }}};
+		c.app.rooms = {fantasyrogue: {returnToCoop() { c.openedCoop = true; },
+			openCoop() { assert.fail('battle return must not reopen entry rules'); }}};
 		c.app.send = value => c.sent.push(value);
 		room.updateRogueEscape();
 		assert(room.html.includes('协商共同撤退')); assert(!room.html.includes('name="rematchRogue"'));
 		room.rematchRogue(); assert.equal(c.sent.length, 0);
 		room.retreatRogue(); assert(c.openedCoop);
 		assert.equal(c.sent.at(-1), '/fantasyrogue coop {"action":"proposeexit","value":"retreat"}');
+		c.openedCoop = false; room.add('|fantasyrogueend|');
+		assert(c.openedCoop); assert(room.closed);
 	});
 	it('seeks to the current restored turn without replaying history or replacing the pending choice', () => {
 		const {room} = battleClient(), seeks = [];
@@ -5927,5 +6827,52 @@ describe('October 21 expansion controls', () => {
 		const c = client(), data = adventure('ready'); data.items.push({id: 'peatblock', name: '泥炭块', kind: 'evolution'}); data.run.bag.peatblock = 1;
 		c.room.receiveState(data); assert(c.html.includes('sprites/fantasy-rogue/peatblock.png'));
 		assert(fs.statSync(require.resolve('../play.pokemonshowdown.com/sprites/fantasy-rogue/peatblock.png')).size > 100);
+	});
+});
+
+
+describe('Potara appearance selection', () => {
+	function popup(artwork = []) {
+		const images = [], timers = [];
+		const c = client(false, false, {Image: function () { images.push(this); }, setTimeout: fn => { timers.push(fn); return timers.length; }});
+		c.Dex.getFusionSpriteURL = id => /^\d+\.\d+-[a-f0-9]{12}$/.test(id) ? 'sprites/fantasy-rogue/fusions/' + id + '.png' : '';
+		c.Dex.species.get = () => ({baseStats: {hp: 50, atk: 60, def: 70, spa: 80, spd: 90, spe: 100}});
+		const p = Object.create(c.RogueFusionPopup), controls = {}, html = {};
+		p.$el = {html: value => { p.html = value; }, addClass() {}};
+		p.$ = selector => ({val(value) { if (value !== undefined) controls[selector] = value; return controls[selector]; },
+			prop(key, value) { controls[selector + ':' + key] = value; }, html(value) { html[selector] = value; }, text() {},
+			map() { return {get: () => ['hp', 'atk', 'def']}; }});
+		controls['select[name=fusionFirst]'] = 'a'; controls['select[name=fusionSecond]'] = 'b';
+		c.room.state = {account: {revision: 2}, run: {id: 'run', fusionArtwork: artwork,
+			team: ['a', 'b'].map((id, i) => ({id, hp: 100, set: {species: i ? 'Charizard' : 'Pikachu', level: 50}, fusionAbilities: ['blaze']}))}};
+		p.initialize({room: c.room}); return {c, p, controls, html, images, timers};
+	}
+	const art = {head: 'a', body: 'b', sprite: '25.6-0123456789ab', artist: '<Artist>', source: 'https://example.org/art'};
+	it('requires explicit first/second choice when the pair is missing', () => {
+		const {p, controls, html} = popup();
+		assert(p.html.includes('第一位（头部）')); assert(p.html.includes('第二位（身体）'));
+		assert(html['.fusion-art-preview'].includes('请选择一位伙伴的立绘'));
+		assert.equal(controls['button[name=confirmFusion]:disabled'], true);
+		controls['select[name=fusionAppearance]'] = 'b'; p.updateStats();
+		assert.equal(controls['button[name=confirmFusion]:disabled'], false); assert.equal(p.appearance(), 'b');
+	});
+	it('waits for a real image load, escapes attribution and submits only the server selection', () => {
+		const {p, c, controls, html, images} = popup([art]);
+		assert.equal(controls['button[name=confirmFusion]:disabled'], true); assert.equal(images.length, 1);
+		images[0].onload(); assert.equal(p.appearance(), 'fusion');
+		assert(html['.fusion-art-preview'].includes('&lt;Artist&gt;')); assert.equal(controls['button[name=confirmFusion]:disabled'], false);
+		let sent; c.room.submit = (action, data) => { sent = {action, data}; }; p.close = () => {};
+		p.confirmFusion(); assert.equal(sent.data.appearance, 'fusion'); assert(!sent.data.sprite);
+	});
+	for (const failure of ['error', 'timeout']) it(`falls back on image ${failure} and ignores a late success`, () => {
+		const {p, html, images, timers} = popup([art]);
+		if (failure === 'error') images[0].onerror(); else timers.at(-1)();
+		assert(html['.fusion-art-preview'].includes('选择备用立绘')); images[0].onload(); assert.notEqual(p.appearance(), 'fusion');
+	});
+	it('does not apply an old image after swapping head/body or closing', () => {
+		const {p, controls, images, html} = popup([art]);
+		controls['select[name=fusionFirst]'] = 'b'; controls['select[name=fusionSecond]'] = 'a'; p.updatePair();
+		images[0].onload(); assert.notEqual(p.appearance(), 'fusion'); assert(html['.fusion-art-preview'].includes('没有这个头部'));
+		p.remove(); images[0].onload(); assert.notEqual(p.appearance(), 'fusion');
 	});
 });

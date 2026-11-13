@@ -225,6 +225,7 @@ export interface SpriteData {
 	y?: number;
 	gen?: number;
 	url?: string;
+	fallbackURL?: string;
 	rawHTML?: string;
 	pixelated?: boolean;
 	isFrontSprite?: boolean;
@@ -684,6 +685,10 @@ export const Dex = new class implements ModdedDex {
 			'drop-shadow(0 -3px 3px rgba(165,110,255,.5))';
 	}
 
+	getFusionSpriteURL(sprite: unknown): string {
+		return typeof sprite === 'string' && /^\d{1,4}\.\d{1,4}[a-z]{0,3}-[a-f0-9]{12}$/.test(sprite) ?
+			`${Dex.iconSheetPrefix || Dex.resourcePrefix}sprites/fantasy-rogue/fusions/${sprite}.png` : '';
+	}
 	getSpriteData(pokemon: Pokemon | Species | string, isFront: boolean, options: {
 		gen?: number,
 		shiny?: boolean,
@@ -695,6 +700,9 @@ export const Dex = new class implements ModdedDex {
 	} = { gen: 6 }) {
 		const mechanicsGen = options.gen || 6;
 		let isDynamax = !!options.dynamax;
+		const fusion = pokemon instanceof Pokemon ? this.getFusionSpriteURL(pokemon.rogueFusionSprite) : '';
+		const isCoopBoss = pokemon instanceof Pokemon && pokemon.side.sideid === 'p2' &&
+			!!pokemon.side.battle.rogueCoopBoss;
 		if (pokemon instanceof Pokemon) {
 			if (pokemon.volatiles.transform) {
 				options.shiny = pokemon.volatiles.transform[2];
@@ -756,6 +764,7 @@ export const Dex = new class implements ModdedDex {
 			h: 96,
 			y: 0,
 			url: Dex.resourcePrefix + 'sprites/',
+			fallbackURL: undefined as string | undefined,
 			pixelated: true,
 			isFrontSprite: false,
 			cryurl: '',
@@ -1127,6 +1136,14 @@ export const Dex = new class implements ModdedDex {
 		*/
 
 		// 原版代码:返回最终的数据对象
+		// Apply after custom sprite sizing. Preview thumbnails and icons retain their native layout.
+		if (isCoopBoss && !options.noScale) {
+			spriteData.w *= 1.5;
+			spriteData.h *= 1.5;
+		}
+		if (fusion) {
+			return { ...spriteData, fallbackURL: spriteData.url, url: fusion, w: 96, h: 96, y: 0, filter: '', pixelated: true };
+		}
 		return spriteData;
 	}
 
@@ -1381,6 +1398,10 @@ export const Dex = new class implements ModdedDex {
 	}
 
 	getTeambuilderSprite(pokemon: any, gen = 0, pixel = false) {
+		const fusion = this.getFusionSpriteURL(pokemon?.rogueFusionSprite);
+		if (fusion) {
+			return `background-image:url(${fusion});background-size:contain;background-position:center;background-repeat:no-repeat;image-rendering:pixelated`;
+		}
 		const style = this.getTeambuilderSpriteStyle(pokemon, gen, pixel);
 		const glow = this.getFantasySpriteFilter(pokemon?.species || '');
 		return style && glow ? `${style};filter:${glow} var(--pokemon-art-shadow,drop-shadow(0 0 0 transparent))` : style;

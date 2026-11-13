@@ -5,6 +5,8 @@ const fs = require("fs");
 const path = require('path');
 const child_process = require("child_process");
 const { serverDir, serverPath, useLocalServer } = require('./server-source');
+const { serializeLazyTable, serializeLazyValue } = require('./lazy-data');
+const { writeFantasyDataSplit } = require('./fantasy-data-split');
 
 const rootDir = path.resolve(__dirname, '..');
 process.chdir(rootDir);
@@ -1323,7 +1325,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		}
 	}
 
-	buf += `exports.BattleTeambuilderTable = JSON.parse('${JSON.stringify(BattleTeambuilderTable).replace(/['\\]/g, "\\$&")}');\n\n`;
+	buf += serializeLazyTable('BattleTeambuilderTable', BattleTeambuilderTable, { compactLearnsets: true });
 
 	fs.writeFileSync('play.pokemonshowdown.com/data/teambuilder-tables.js', buf);
 }
@@ -1807,7 +1809,7 @@ for (const mod of modNames)
 		}
 	}
 
-	buf += `exports.${Mod}Table = ` + JSON.stringify(ModTable).replace(/['\\]/g, "\\$&") + ';';
+	buf += serializeLazyTable(`${Mod}Table`, ModTable, { compactLearnsets: true });
 
 	for (const id in Moddex) {
 		const fdata = Dex.mod(mod).data.FormatsData[id];
@@ -1838,7 +1840,8 @@ for (const mod of modNames)
 	buf += `exports.${Mod}Items = ` + es3stringify(ModItems) + ';';
 	buf += `exports.${Mod}Abilities = ` + es3stringify(ModAbilities) + ';';
 	buf += `exports.${Mod}TypeChart = ` + es3stringify(ModTypeChart) + ';';
-	buf += `exports.${Mod}Learnsets = ` + es3stringify(ModLearnsets) + ';';
+	const learnsetsSource = serializeLazyValue(`${Mod}Learnsets`, ModLearnsets);
+	buf += learnsetsSource;
 	buf += '\n\n';
 	//#endregion
 
@@ -2080,7 +2083,7 @@ for (const mod of modNames)
 	buf += `exports.${Mod}ArticleTitles = ` + JSON.stringify(ModArticleTitles) + ';\n\n';
 	//#endregion
 
-	fs.writeFileSync(`play.pokemonshowdown.com/data/${mod}.js`, buf);
+	writeFantasyDataSplit('play.pokemonshowdown.com/data', mod, buf, learnsetsSource);
 }
 
 console.log("DONE");

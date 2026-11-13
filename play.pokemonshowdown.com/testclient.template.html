@@ -117,7 +117,7 @@
 		<script src="data/pokedex-mini-bw.js?" onerror="loadRemoteData(this.src)"></script>
 		<script src="data/typechart.js?" onerror="loadRemoteData(this.src)"></script>
 		<!-- note: add data for yourmod here -->
-		<script src="data/gen9fantasy.js?"></script>
+		<script src="data/gen9fantasy-core.js?"></script>
 		<script src="js/battle.js?"></script>
 		<script src="js/lib/sockjs-1.4.0-nwjsfix.min.js?"></script>
 		<script src="js/lib/color-thief.min.js?"></script>
@@ -160,7 +160,7 @@
 			// Remote images and optional assets must not delay login until window.load.
 			window.app = new App();
 		</script>
-		<script src="showdex/main.js?" data-fantasy-showdex defer></script>
+		<script src="js/client-showdex-loader.js?" data-bundle-src="showdex/main.js?"></script>
 
 	</body>
 </html>

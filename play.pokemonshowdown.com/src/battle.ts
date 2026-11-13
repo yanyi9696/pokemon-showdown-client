@@ -80,6 +80,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 
 	fainted = false;
 	rogueCapturedBall?: string;
+	rogueFusionSprite?: string;
 	rogueAbilityInfo?: ServerPokemon['rogueAbilityInfo'];
 	rogueBossPhase?: { kind: 'summit' | 'arceus', phase: number, total: number };
 	hp = 0;
@@ -776,6 +777,7 @@ export class Side {
 		const data = this.battle.parseDetails(name, ident, details);
 		const poke = new Pokemon(data, this);
 		if (oldPokemon) {
+			poke.rogueFusionSprite = oldPokemon.rogueFusionSprite;
 			poke.item = oldPokemon.item;
 			poke.baseAbility = oldPokemon.baseAbility;
 			poke.teraType = oldPokemon.teraType;
@@ -1138,6 +1140,8 @@ export class Battle {
 	tier = '';
 	gameType: 'singles' | 'doubles' | 'triples' | 'multi' | 'freeforall' = 'singles';
 	rogueCoopPreview?: { ownSide: string, partnerSide: string, selections: { [side: string]: number[] } };
+	/** Public terminal co-op presentation, independent of Dynamax battle state. */
+	rogueCoopBoss?: 'summit' | 'arceus';
 	compatMode = true;
 	rated: string | boolean = false;
 	rules: { [ruleName: string]: 1 | undefined } = {};
@@ -1301,6 +1305,7 @@ export class Battle {
 	}
 	resetStep() {
 		// battle state
+		delete this.rogueCoopBoss;
 		this.turn = -1;
 		this.started = !this.paused;
 		this.ended = false;
@@ -2935,8 +2940,10 @@ export class Battle {
 			this.scene.updateStatbar(poke);
 			// fantasy
 			case 'fantasystats': 
+			case 'roguebasestats':
 				const stats = Dex.sanitizeName(args[3]);
-				poke.addVolatile('fantasystats' as ID, stats);
+				if (!/^\d+(?:\/\d+){5}$/.test(stats)) break;
+				poke.addVolatile(effect.id, stats);
 				this.scene.updateStatbar(poke);
 				break;
 			}
@@ -3401,6 +3408,22 @@ export class Battle {
 			if (moves.length) parts.push(`学会了 <strong>${moves.join('、')}</strong>`);
 			if (growth.evolutionReady === true) parts.push('<strong>已满足进化条件</strong>');
 			if (parts.length) this.log(['raw', `<div class="battle-history"><strong>${name}</strong> ${parts.join('；')}。</div>`], {});
+			break;
+		}
+		case '-roguecoopboss': {
+			if (this.gameType === 'multi' && toID(this.tier) === 'gen9fantasyroguecoop' &&
+				(args[1] === 'summit' || args[1] === 'arceus')) this.rogueCoopBoss = args[1];
+			break;
+		}
+		case '-roguefusion': {
+			if (!['gen9fantasyrogue', 'gen9fantasyrogueduel', 'gen9fantasyroguecoop',
+				'gen9fantasyroguedoubles'].includes(toID(this.tier))) break;
+			const poke = this.getPokemon(args[1]);
+			if (!poke || args[2] && !Dex.getFusionSpriteURL(args[2])) break;
+			const sprite = args[2] || undefined;
+			if (poke.rogueFusionSprite === sprite) break;
+			poke.rogueFusionSprite = sprite;
+			this.scene.animTransform(poke, false, true);
 			break;
 		}
 		case '-roguebossphase': {
@@ -3912,6 +3935,9 @@ export class Battle {
 		}
 		case 'poke': {
 			let pokemon = this.rememberTeamPreviewPokemon(args[1], args[2]);
+			if (['gen9fantasyrogue', 'gen9fantasyrogueduel', 'gen9fantasyroguecoop',
+				'gen9fantasyroguedoubles'].includes(toID(this.tier)) &&
+				Dex.getFusionSpriteURL(kwArgs.fusion)) pokemon.rogueFusionSprite = kwArgs.fusion;
 			if (args[3] === 'mail') {
 				pokemon.item = '(mail)';
 			} else if (args[3] === 'item') {

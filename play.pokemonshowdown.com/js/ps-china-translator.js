@@ -7846,8 +7846,8 @@ var regex_curse = new RegExp(/^(.+?) cut its own HP and put a curse on (.+?)!$/)
 var regex_toweakdamageberry = new RegExp(/^The ([A-z0-9,'.() ’:-]+?) weakened the damage to the opposing (.+?)!$/);
 var regex_weakdamageberry = new RegExp(/^The ([A-z0-9,'.() ’:-]+?) weakened the damage to (.+?)!$/);
 var regex_celebrate = new RegExp(/^Congratulations, (.+?)!$/);
-var regex_tohpberry = new RegExp(/^The opposing (.+?) restored HP using its ([A-z0-9,'.() ’:-]+?)!$/);
-var regex_hpberry = new RegExp(/^(.+?) restored HP using its ([A-z0-9,'.() ’:-]+?)!$/);
+var regex_tohpberry = new RegExp(/^The opposing (.+?) restored HP using its (.+?)!$/);
+var regex_hpberry = new RegExp(/^(.+?) restored HP using its (.+?)!$/);
 var regex_toaquaring = new RegExp(/^A veil of water restored the opposing (.+?)'s HP!$/);
 var regex_aquaring = new RegExp(/^A veil of water restored (.+?)'s HP!$/);
 var regex_tosalacberry = new RegExp(/^The Salac Berry (sharply raised|raised|lowered) the opposing (.+?)'s Speed!$/);
@@ -8786,7 +8786,6 @@ var regex_2 = new RegExp(/^([A-z0-9é*'. ’:-]+?) \/ ([A-z0-9é*'. ’:-]+?)$
 var regex_1 = new RegExp(/^ ([A-z0-9é'() ’:-]+?) \/ $/);
 var regex_333 = new RegExp(/^ ([A-z0-9*'., -]+?), ([A-z0-9*'., -]+?), ([A-z0-9*'., -]+?)$/);
 var regex_222 = new RegExp(/^ ([A-z0-9*'., -]+?), ([A-z0-9*'., -]+?)$/);
-var regex_111 = new RegExp(/^(不开启|超能力|节拍器|刷新|攻击)$/);
 var regex_11 = new RegExp(/^！(.+?)$/);
 
 var regex_rating = new RegExp(/(.+)'s rating: (.+)/);
@@ -9005,6 +9004,12 @@ function translateBattleModifiers(value) {
             return originalStr.replace(/^(【老练狙神】)(.+?)(的要害射击训练：|完成要害射击训练)/, function (match, blessing, species, suffix) {
                 return blessing + translateRogueName(species) + suffix;
             });
+        }
+        var opposingRecovery = originalStr.match(regex_tohpberry);
+        var recovery = opposingRecovery || originalStr.match(regex_hpberry);
+        if (recovery) {
+            return (opposingRecovery ? "对手的" : "") + translateRogueName(recovery[1], 'pokemon') +
+                "用" + translateRogueName(recovery[2]) + "回复了体力！";
         }
         if (originalStr.match(regex_chn))
             return originalStr;
@@ -9498,12 +9503,6 @@ function translateBattleModifiers(value) {
         if (originalStr.match(regex_celebrate)) {
             return  "恭喜恭喜！" + RegExp.$1 + "！";
         }
-        if (originalStr.match(regex_tohpberry)) {
-            return  "对手的" + trans_from_dict(RegExp.$1) + "用" + trans_from_dict(RegExp.$2) + "回复了体力！";
-        }
-        if (originalStr.match(regex_hpberry)) {
-            return  trans_from_dict(RegExp.$1) + "用" + trans_from_dict(RegExp.$2) + "回复了体力！";
-        }
         if (originalStr.match(regex_toaquaring)) {
             return   "对手的" + trans_from_dict(RegExp.$1) + "通过水环回复了体力！";
         }
@@ -9735,14 +9734,14 @@ function translateBattleModifiers(value) {
         if (originalStr.match(regex_disconnected3)) {
             return  RegExp.$1 + "断开了连接！";
         }
-        if (originalStr.match(regex_usemove3)) {
-            return  translations[RegExp.$1] + "将对您的" + translations[RegExp.$3] + "使用" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
-        }
-        if (originalStr.match(regex_usemove2)) {
-            return  translations[RegExp.$1] + "将对" + translations[RegExp.$3] + "使用" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
-        }
-        if (originalStr.match(regex_usemove)) {
-            return  translations[RegExp.$1] + "将使用" + translations[RegExp.$2].replace("节拍器", "挥指").replace("超能力", "精神强念").replace("刷新", "焕然一新").replace("不开启", "定身法") + "。";
+        // Capture groups locally: name resolution may run other regular expressions.
+        var ownMoveChoice = originalStr.match(regex_usemove3);
+        var moveChoice = ownMoveChoice || originalStr.match(regex_usemove2) || originalStr.match(regex_usemove);
+        if (moveChoice) {
+            var moveTarget = moveChoice[3] ? "对" + (ownMoveChoice ? "您的" : "") +
+                translateRogueName(moveChoice[3], 'pokemon') : '';
+            return translateRogueName(moveChoice[1], 'pokemon') + "将" + moveTarget + "使用" +
+                translateRogueName(moveChoice[2], 'move') + "。";
         }
         if (originalStr.match(regex_reconnecte)) {
             return  RegExp.$1 + "还有" + RegExp.$2 + "秒的时间重新连接！";
@@ -12328,9 +12327,6 @@ function translateBattleModifiers(value) {
                 if (translations[RegExp.$1])
                     return  translations[RegExp.$1] + "，" + translations[RegExp.$2];
         }
-        if (originalStr.match(regex_111)) {
-            return  trans_from_dict(RegExp.$1 == "不开启" ? "定身法 " : RegExp.$1 == "超能力"  ? "精神强念 " : RegExp.$1 == "节拍器"  ? "挥指 " : RegExp.$1 == "刷新"  ? "焕然一新 " : "攻击 ");
-        }
         if (originalStr.match(regex_11)) {
             return  "!" + RegExp.$1;
         }
@@ -12593,6 +12589,11 @@ function translateBattleModifiers(value) {
             }
 
             // 优先级别 2：处理带有短横线的宝可梦名字及形态后缀
+            // Recovery is a complete sentence, even when its species has a form suffix.
+            if (regex_hpberry.test(trimmed)) {
+                node.nodeValue = value.replace(trimmed, t(trimmed));
+                return;
+            }
             if (trimmed.includes('-')) {
                 // 获取第一个横线前面的基础名字 (例如 "Type: Null-Fantasy" -> "Type: Null")
                 let firstDashIndex = trimmed.indexOf('-');

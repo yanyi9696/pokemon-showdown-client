@@ -6,7 +6,7 @@ const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
 const vm = require('vm');
-const {assetVersion} = require('../build-tools/asset-version');
+const {assetVersion, versionReplayAssets} = require('../build-tools/asset-version');
 
 describe('Client asset versions and local startup', () => {
 	let root;
@@ -35,6 +35,42 @@ describe('Client asset versions and local startup', () => {
 		assert.throws(() => assetVersion('js/missing.js', 'play.pokemonshowdown.com', root), /ENOENT/);
 		assert.throws(() => assetVersion('../../outside.js', 'play.pokemonshowdown.com', root), /outside/);
 		assert.equal(assetVersion('https://example.invalid/optional.js', 'play.pokemonshowdown.com', root), undefined);
+	});
+	it('keeps replay dependency URLs stable and invalidates only the changed public asset', () => {
+		const template = [
+			"requireScript('https://play.pokemonshowdown.com/js/client.js?a7');",
+			"linkStyle('https://teams.pokemonshowdown.com/js/client.js?a7');",
+			"requireScript('https://cdn.example.invalid/library.js?v1');",
+			"var replayText = 'a7';",
+		].join('\n');
+		const first = versionReplayAssets(template, root, 'play.psfantasy.xyz');
+		assert.equal(versionReplayAssets(template, root, 'play.psfantasy.xyz'), first);
+		assert(first.includes('https://play.psfantasy.xyz/js/client.js?'));
+		assert(first.includes("var replayText = 'a7';"));
+		assert(first.includes('https://cdn.example.invalid/library.js?v1'));
+		fs.appendFileSync(path.join(root, 'play.pokemonshowdown.com/js/client.js'), 'changed');
+		const second = versionReplayAssets(template, root, 'play.psfantasy.xyz').split('\n');
+		assert.notEqual(second[0], first.split('\n')[0]);
+		assert.deepEqual(second.slice(1), first.split('\n').slice(1));
+		assert.throws(() => versionReplayAssets("requireScript('https://play.pokemonshowdown.com/js/missing.js?a7');",
+			root, 'play.psfantasy.xyz'), /ENOENT/);
+	});
+	it('preserves replay loader order, versionless libraries and empty-query content hashing', () => {
+		const calls = [
+			'requireScript("//play.pokemonshowdown.com/js/library.js");',
+			"linkStyle('https://play.pokemonshowdown.com/js/client.js?');",
+			"requireScript('https://teams.pokemonshowdown.com/js/client.js?a7');",
+			"requireScript('https://play.psfantasy.xyz/js/client.js?a7');",
+		];
+		const result = versionReplayAssets(calls.join('\n'), root, 'localhost:8080');
+		const loaded = [];
+		vm.runInNewContext(result, {requireScript: url => loaded.push(['script', url]), linkStyle: url => loaded.push(['style', url])});
+		assert.deepEqual(loaded, [
+			['script', '//localhost:8080/js/library.js'],
+			['style', 'https://localhost:8080/js/client.js?' + assetVersion('js/client.js', 'play.pokemonshowdown.com', root)],
+			['script', 'https://teams.pokemonshowdown.com/js/client.js?' + assetVersion('js/client.js', 'teams.pokemonshowdown.com', root)],
+			['script', 'https://play.psfantasy.xyz/js/client.js?' + assetVersion('js/client.js', 'play.pokemonshowdown.com', root)],
+		]);
 	});
 	it('finishes writing combined bundles before hashing both clean and incremental builds', async () => {
 		const {compileToFile} = require('../build-tools/compiler');

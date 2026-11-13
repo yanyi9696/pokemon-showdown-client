@@ -1738,6 +1738,7 @@ function toId() {
 					this.roomList.push(room);
 				}
 			}
+			this.trigger('room:added', room);
 			return room;
 		},
 		focusRoom: function (id, focusTextbox) {

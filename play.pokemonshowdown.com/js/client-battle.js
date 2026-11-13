@@ -154,7 +154,7 @@
 				if (this.fantasyRogue && this.fantasyRogue.userid === app.user.get('userid')) {
 					this.battleEnded = true;
 					app.joinRoom('fantasyrogue');
-					if (this.fantasyRogue.cooperative && app.rooms.fantasyrogue) app.rooms.fantasyrogue.openCoop();
+					if (this.fantasyRogue.cooperative && app.rooms.fantasyrogue) app.rooms.fantasyrogue.returnToCoop();
 					this.close();
 				}
 				return;
@@ -437,6 +437,17 @@
 			if (this.choice && this.choice.waiting) {
 				act = '';
 			}
+			var growth = this.getRogueCoopGrowth();
+			if (growth) {
+				this.$controls.html('<div class="controls">' + growth.controller.renderCoopGrowth(growth.session) + '</div>');
+				return;
+			}
+			var capture = this.getRogueCoopCapture();
+			if (capture) {
+				this.$controls.html('<div class="controls">' + capture.controller.renderCoopCapture(
+					capture.session.adventure.captureProposal, capture.session.canControl) + '</div>');
+				return;
+			}
 			if (this.request && this.request.rogueCoopTeamPreview) {
 				this.updateRogueCoopTeamControls();
 				return;
@@ -586,7 +597,7 @@
 			if (this.fantasyRogue.cooperative) {
 				app.send('/fantasyrogue coop {"action":"proposeexit","value":"retreat"}');
 				app.joinRoom('fantasyrogue');
-				if (app.rooms.fantasyrogue) app.rooms.fantasyrogue.openCoop();
+				if (app.rooms.fantasyrogue) app.rooms.fantasyrogue.returnToCoop();
 				return;
 			}
 			this.send('/fantasyrogue retreat');
@@ -989,7 +1000,8 @@
 			if (!rogue.catchable) return psychic;
 			if (rogue.cooperativeCapture) {
 				var targetControls = (rogue.captureTargets || []).map(function (target) {
-					return '<div class="rogue-capture-target"><strong>' + BattleLog.escapeHTML(target.name) + ' · HP ' + target.hp + '/' + target.maxhp + '</strong><br />' +
+					var targetName = globals.translateRogueName ? globals.translateRogueName(target.name, 'pokemon') : target.name;
+					return '<div class="rogue-capture-target"><strong>' + BattleLog.escapeHTML(targetName) + ' · HP ' + target.hp + '/' + target.maxhp + '</strong><br />' +
 						rogue.balls.map(function (ball) {
 							var chance = target.chances && target.chances[ball.id];
 							var percent = typeof chance !== 'number' ? '暂不可捕捉' : chance === 1 ? '100%' : chance === 0 ? '0%' :
@@ -997,7 +1009,7 @@
 							var tip = '当前捕捉成功率：' + percent;
 							return '<span class="rogue-ball-option"><button class="button" name="chooseRogueBall" value="' +
 								BattleLog.escapeHTML(ball.id + '|' + target.key) + '"' + (ball.count ? '' : ' disabled') +
-								' aria-label="' + BattleLog.escapeHTML(target.name + ' · ' + ball.name + ' × ' + ball.count + '，' + tip) + '">' +
+								' aria-label="' + BattleLog.escapeHTML(targetName + ' · ' + ball.name + ' × ' + ball.count + '，' + tip) + '">' +
 								'<span class="itemicon" style="' + Dex.getItemIcon(ball.id) + '"></span>' +
 								BattleLog.escapeHTML('申请使用' + ball.name) + ' × ' + ball.count + '</button><span class="rogue-catch-tip" role="tooltip"><strong>' +
 								BattleLog.escapeHTML(tip) + '</strong><br />双方本回合不行动；失败后对手仍会出招。</span></span> ';
@@ -1194,17 +1206,40 @@
 				this.selectSwitch();
 			}
 		},
+		getRogueCoopGrowth: function () {
+			var controller = app.rooms && app.rooms.fantasyrogue, session = controller && controller.coopState && controller.coopState.session;
+			return session && session.status === 'active' && session.roomid === this.id && session.adventure && session.adventure.phase === 'battle' &&
+				session.adventure.liveGrowth && (this.side === 'p1' || this.side === 'p3') ? { controller: controller, session: session } : null;
+		},
+		coopLearnMove: function (value) { var data = this.getRogueCoopGrowth(); if (data) data.controller.coopLearnMove(value); },
+		evolveCoopMember: function (value) { var data = this.getRogueCoopGrowth(); if (data) data.controller.evolveCoopMember(value); },
+		skipCoopEvolution: function (value) { var data = this.getRogueCoopGrowth(); if (data) data.controller.skipCoopEvolution(value); },
+		getRogueCoopCapture: function () {
+			var controller = app.rooms && app.rooms.fantasyrogue, session = controller && controller.coopState && controller.coopState.session;
+			return session && session.status === 'active' && session.roomid === this.id && session.adventure && session.adventure.phase === 'battle' &&
+				session.adventure.captureProposal && (this.side === 'p1' || this.side === 'p3') ? { controller: controller, session: session } : null;
+		},
+		respondCoopCapture: function (value) {
+			var data = this.getRogueCoopCapture();
+			if (!data || data.session.canControl === false || data.controller.coopBusy) return;
+			data.controller.respondCoopCapture(value, value === 'give' ? this.$('select[name=coopCaptureBall]').val() : undefined);
+		},
+		cancelCoopCapture: function () {
+			var data = this.getRogueCoopCapture();
+			if (data && data.session.canControl !== false && !data.controller.coopBusy) data.controller.cancelCoopCapture();
+		},
 		getRogueCoopPreview: function () {
 			var controller = app.rooms.fantasyrogue, state = controller && controller.coopState;
 			var session = state && state.session, request = this.request;
 			if (!request || !request.rogueCoopTeamPreview || !session || session.roomid !== this.id || !session.adventure) return null;
 			var ownSide = session.role === 'host' ? 'p1' : 'p3', delegated = request.side.id !== ownSide;
 			var adventure = session.adventure;
+			var ownTeam = adventure.battleTeam || adventure.team, partnerTeam = adventure.partnerBattleTeam || adventure.partnerTeam;
 			return { controller: controller, session: session, adventure: adventure,
 				owner: delegated ? session.partnerUserId : state.userid,
 				ownSide: request.side.id, partnerSide: request.side.id === 'p1' ? 'p3' : 'p1',
-				ownTeam: delegated ? adventure.partnerTeam : adventure.team,
-				partnerTeam: delegated ? adventure.team : adventure.partnerTeam,
+				ownTeam: delegated ? partnerTeam : ownTeam,
+				partnerTeam: delegated ? ownTeam : partnerTeam,
 				selection: delegated ? adventure.partnerBattlePreview : adventure.battlePreview,
 				partnerSelection: delegated ? adventure.battlePreview : adventure.partnerBattlePreview,
 				ready: delegated ? adventure.partnerPreviewConfirmed : adventure.previewConfirmed,
@@ -1240,6 +1275,7 @@
 			var busy = !!data.controller.coopBusy, ready = data.ready || this.choice.waiting;
 			var disabled = busy || ready || data.session.canControl === false;
 			var partnerIds = data.partnerSelection || [], partnerTeam = data.partnerTeam || [];
+			var partnerLimit = Math.min(3, partnerTeam.filter(function (mon) { return mon.hp > 0 && !mon.egg && !mon.nuzlockeDead; }).length);
 			var partnerOrder = partnerIds.map(function (id) { return partnerTeam.find(function (mon) { return mon.id === id; }); }).filter(Boolean)
 				.concat(partnerTeam.filter(function (mon) { return partnerIds.indexOf(mon.id) < 0; }));
 			var partner = partnerOrder.map(function (mon) {
@@ -1249,10 +1285,13 @@
 			}).join('');
 			var own = this.choice.teamPreview.map(function (pos, index) {
 				var mon = mons[pos - 1], chosen = index < this.choice.done;
+				var species = mon.speciesForme || mon.species || mon.name;
+				var label = mon.name && mon.name !== species ? mon.name :
+					(globals.translateRogueName ? globals.translateRogueName(species, 'pokemon') : species);
 				return '<button name="' + (chosen ? 'removeRogueCoopTeamPick' : 'chooseTeamPreview') + '" value="' + index +
 					'" class="has-tooltip' + (chosen ? ' rogue-coop-picked' : '') + '" data-tooltip="switchpokemon|' + (pos - 1) + '"' +
 					(disabled || !chosen && this.choice.done >= this.choice.count ? ' disabled' : '') + '><span class="picon" style="' +
-					Dex.getPokemonIcon(mon) + '"></span>' + (chosen ? (index + 1) + ' · ' : '') + BattleLog.escapeHTML(mon.name) +
+					Dex.getPokemonIcon(mon) + '"></span>' + (chosen ? (index + 1) + ' · ' : '') + BattleLog.escapeHTML(label) +
 					(chosen ? ' ×' : '') + '</button>';
 			}, this).join(' ');
 			this.battle.rogueCoopPreview = { ownSide: data.ownSide, partnerSide: data.partnerSide, selections: {} };
@@ -1260,12 +1299,15 @@
 			this.battle.rogueCoopPreview.selections[data.partnerSide] = partnerIds.map(function (id) {
 				return partnerTeam.filter(function (mon) { return mon.hp > 0 && !mon.egg && !mon.nuzlockeDead; }).findIndex(function (mon) { return mon.id === id; });
 			});
-			if (this.battle.scene.updateRogueCoopPreview) this.battle.scene.updateRogueCoopPreview();
-			this.$controls.html('<div class="controls rogue-coop-team-controls"><div class="rogue-coop-team-partner"><strong>队友的队伍 · ' +
-				BattleLog.escapeHTML(data.partnerName) + ' · ' + partnerIds.length + ' / 3 · ' + (data.partnerReady ? '已确认' : '选择中') +
+			var story = data.adventure.coopEvent;
+			var storyHTML = story && ['policeassist', 'policerevenge', 'rivalstory'].includes(story.id) && story.paragraphs && story.paragraphs.length ?
+				'<details class="infobox rogue-coop-event-dialogue"><summary>本场事件对话 · ' + BattleLog.escapeHTML(story.title) + '</summary>' +
+				story.paragraphs.map(function (line) { return '<p>' + BattleLog.escapeHTML(line) + '</p>'; }).join('') + '</details>' : '';
+			this.$controls.html('<div class="controls rogue-coop-team-controls">' + storyHTML + '<div class="rogue-coop-team-partner"><strong>队友的队伍 · ' +
+				BattleLog.escapeHTML(data.partnerName) + ' · ' + partnerIds.length + ' / ' + partnerLimit + ' · ' + (data.partnerReady ? '已确认' : '选择中') +
 				'</strong><div class="switchmenu">' + partner + '</div></div><div class="whatdo">我的出战顺序 · ' + this.choice.done +
 				' / ' + this.choice.count + ' · 第一只首发' + this.getTimerHTML() + '</div><div class="switchcontrols"><div class="switchmenu">' + own +
-				'</div></div><p>' + (ready ? '已确认，等待队友。' : '依次选择最多 3 只；点击已选伙伴可取消。') + '</p>' +
+				'</div></div><p>' + (ready ? '已确认，等待队友。' : '依次选择最多 ' + this.choice.count + ' 只；点击已选伙伴可取消。') + '</p>' +
 				(ready ? '<button class="button" name="undoChoice">撤销确认，重新选择</button>' :
 				'<button class="button" name="confirmRogueCoopTeam"' + (disabled || !this.choice.done ? ' disabled' : '') + '>确认出战</button>') +
 				(data.controller.coopSelectionError ? '<p class="message-error">' + BattleLog.escapeHTML(data.controller.coopSelectionError) + '</p>' : '') + '</div>');
@@ -1273,7 +1315,12 @@
 		refreshRogueCoopPreview: function () {
 			var controller = app.rooms.fantasyrogue || app._addRoom('fantasyrogue', null, true);
 			controller.screen = 'coop';
-			if (!controller.coopBusy) controller.sendCoop('refresh');
+			if (!controller.state) {
+				controller.coopRefreshPending = true;
+				controller.refresh();
+			} else if (!controller.coopBusy) {
+				controller.sendCoop('refresh');
+			}
 		},
 		sendRogueCoopTeamPreview: function () {
 			var data = this.getRogueCoopPreview();
@@ -1493,7 +1540,8 @@
 			this.choice = choiceText ? { waiting: true } : null;
 			this.finalDecision = this.finalDecisionMove = this.finalDecisionSwitch = false;
 			this.request = request;
-			if (request.rogueCoopTeamPreview && (!app.rooms.fantasyrogue || !app.rooms.fantasyrogue.coopState)) this.refreshRogueCoopPreview();
+			if ((request.rogueCoopTeamPreview || request.fantasyRogue && request.fantasyRogue.cooperativeCapture) &&
+				(!app.rooms.fantasyrogue || !app.rooms.fantasyrogue.coopState)) this.refreshRogueCoopPreview();
 			if (request.side) {
 				this.updateSideLocation(request.side);
 			}

@@ -7,6 +7,35 @@ const heading = 'Your team was rejected for the following reasons:';
 const chineseHeading = '您的队伍未通过校验，原因如下：';
 
 describe('Rogue vocabulary contexts', () => {
+	it('preserves Chinese type, item and action labels on initial render and repeated translation', () => {
+		for (const label of ['超能力', '节拍器', '刷新', '不开启', '攻击']) {
+			const ui = client(label);
+			assert.equal(ui.paragraph.textContent, label);
+			ui.notify([{addedNodes: [ui.paragraph]}]);
+			assert.equal(ui.paragraph.textContent, label);
+		}
+		const ui = client('Psychic');
+		assert.equal(ui.paragraph.textContent, '超能力');
+		ui.notify([{addedNodes: [ui.paragraph]}]);
+		assert.equal(ui.paragraph.textContent, '超能力');
+		const move = element('STRONG', '', ui.popup);
+		text('Psychic', move); ui.notify([{addedNodes: [move]}]);
+		assert.equal(move.textContent, '精神强念');
+	});
+	it('translates pending move targets with Fantasy forms and preserves unknown names', () => {
+		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
+		for (const target of ['Koraidon-Fantasy', 'Miraidon-Fantasy', 'Mewtwo-Mega-Y-Fantasy', 'slot 2', 'My Partner']) {
+			for (const own of ['', 'your ']) {
+				const input = 'Mew will use Ice Beam at ' + own + target + '.';
+				assert.equal(client(input).paragraph.textContent, '梦幻将对' + (own ? '您的' : '') +
+					context.translateRogueName(target, 'pokemon') + '使用冰冻光束。');
+				assert.equal(client(input, 'en').paragraph.textContent, input);
+			}
+		}
+		assert.equal(client('My Partner will use Unknown Move at Koraidon-Fantasy.').paragraph.textContent,
+			'My Partner将对' + context.translateRogueName('Koraidon-Fantasy', 'pokemon') + '使用Unknown Move。');
+		assert.equal(client('Mew will use Psychic.').paragraph.textContent, '梦幻将使用精神强念。');
+	});
 	it('covers playable generated Fantasy names, including saved move and ability IDs', () => {
 		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
 		const fantasy = require('../play.pokemonshowdown.com/data/gen9fantasy.js');
@@ -83,6 +112,18 @@ describe('Rogue vocabulary contexts', () => {
 		assert.equal(client('• Powder Snow🔄', 'en').paragraph.textContent, '• Powder Snow🔄');
 	});
 	it('translates collapse recovery sources and Pokemon names without undefined text', () => {
+		for (const [name, translated] of [['Arceus', '阿尔宙斯'], ['Arceus-Legend-Fantasy', '幻想阿尔宙斯-传说']]) {
+			for (const prefix of ['', 'The opposing ']) {
+				const input = prefix + name + ' restored HP using its 神之挑战!';
+				assert.equal(client(input).paragraph.textContent,
+					(prefix ? '对手的' : '') + translated + '用神之挑战回复了体力！');
+				assert.equal(client(input, 'en').paragraph.textContent, input);
+			}
+		}
+		assert.equal(client('My Partner restored HP using its Unknown Effect!').paragraph.textContent,
+			'My Partner用Unknown Effect回复了体力！');
+		assert.equal(client('Mew restored HP using its Sitrus Berry!').paragraph.textContent,
+			'梦幻用文柚果回复了体力！');
 		assert.equal(client('The opposing Ralts restored HP using its Rogue Emergency!').paragraph.textContent,
 			'对手的拉鲁拉丝用应急恢复回复了体力！');
 		assert.equal(client('Ralts · 应急恢复：本场恢复机会已使用。').paragraph.textContent,
