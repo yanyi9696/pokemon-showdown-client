@@ -2654,6 +2654,7 @@ export class Battle {
 			// --- 开始修复 (添加于此处) ---
 			// 告诉场景更新状态栏，这将重绘种族值
 			this.scene.updateStatbar(poke);
+			this.scene.updateSidebar(poke.side);
 			// --- 结束修复 ---
 			
 			this.log(args, kwArgs);
@@ -2724,6 +2725,7 @@ export class Battle {
 
 			// 告诉场景更新状态栏，这将重绘种族值
 			this.scene.updateStatbar(poke);
+			this.scene.updateSidebar(poke.side);
 			// --- 结束修复 ---
 
 			this.log(args, kwArgs);

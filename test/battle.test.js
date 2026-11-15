@@ -58,6 +58,22 @@ describe('Fantasy Rogue growth log playback', () => {
 });
 
 describe('Battle', () => {
+	it('refreshes party sidebars on transient form changes, reversions and persistent detail changes', () => {
+		const battle = new Battle({debug: true, log: [
+			'|player|p1|FCPlayer', '|player|p2|Foe', '|gen|9', '|start',
+			'|switch|p1a: Partner|Meloetta, L50|100/100', '|switch|p2a: Foe|Magikarp, L50|100/100', '|turn|1',
+		]});
+		try {
+			const sides = []; battle.scene.updateSidebar = side => sides.push(side);
+			battle.add('|-formechange|p1a: Partner|Meloetta-Pirouette');
+			assert.equal(sides.at(-1), battle.p1);
+			assert.equal(battle.p1.active[0].volatiles.formechange[1], 'Meloetta-Pirouette');
+			battle.add('|-formechange|p1a: Partner|Meloetta');
+			assert.equal(sides.length, 2);
+			battle.add('|detailschange|p1a: Partner|Meloetta, L51');
+			assert.equal(sides.length, 3); assert.equal(battle.p1.active[0].level, 51);
+		} finally { battle.destroy(); }
+	});
 
 	it('should process a bunch of messages properly', () => {
 		let battle = new Battle({

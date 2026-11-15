@@ -76,7 +76,6 @@ var translations = {
     "Forum": "论坛",
     "Privacy policy": "隐私政策",
     "Pokémon": "宝可梦",
-    "FC": "幻想杯",
 
     "You are locked due to your proxy / VPN and can only private message members of the global moderation team.": "由于您的代理/VPN，您被锁定，只能向全服管理员团队发送私聊信息。",
     "Get help with this": "点击这里获取帮助",
@@ -8944,6 +8943,17 @@ function translateBattleModifiers(value) {
 (function() {
     // 1. 读取本地存储中的语言设置，如果没有设置，则默认开启汉化 ('zh')
     const currentLang = localStorage.getItem('ps_china_lang') || 'zh';
+    // Format labels have an explicit protocol identity; never apply this abbreviation to arbitrary text.
+    if (currentLang !== 'en' && typeof BattleLog !== 'undefined' && BattleLog.escapeFormat) {
+        const originalEscapeFormat = BattleLog.escapeFormat;
+        BattleLog.escapeFormat = function(formatid) {
+            const rendered = originalEscapeFormat.call(this, formatid);
+            const id = String(formatid || '').split('@@@')[0];
+            const formats = typeof BattleFormats !== 'undefined' ? BattleFormats : {};
+            if (!/^gen\d+fc/.test(id) || !formats[id]) return rendered;
+            return rendered.replace(/^(\[Gen \d+\] )FC /, '$1幻想杯 ');
+        };
+    }
 
     // 2. 监听全局 change 事件（专门捕获下拉框的改变）
     document.addEventListener('change', function(e) {
@@ -12528,6 +12538,11 @@ function translateBattleModifiers(value) {
     }
 
     function translateNode(node) {
+        // Observer callbacks can receive a text node directly, bypassing its parent's guard.
+        for (let parent = node.nodeType === 1 ? node : node.parentElement; parent; parent = parent.parentElement) {
+            if (['INPUT', 'TEXTAREA'].includes(parent.tagName) || parent.isContentEditable ||
+                ['username', 'usernametext', 'teamname', 'chat', 'chatmessage'].some(name => parent.classList?.contains(name))) return;
+        }
         if (node.nodeType === 3) {
             let value = node.nodeValue;
             let trimmed = value.trim();

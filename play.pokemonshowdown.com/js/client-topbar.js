@@ -131,7 +131,9 @@
 			}
 		},
 		updateTabbar: function () {
-			if ($(window).width() < 420) return this.updateTabbarMini();
+			var rogueTabs = app.rooms.fantasyrogue && app.rooms.fantasyrogueparty && app.curRoom &&
+				(/^(fantasyrogue|fantasyrogueparty)$/.test(app.curRoom.id) || /^battle-gen9fantasyrogue/.test(app.curRoom.id));
+			if ($(window).width() < 420 || rogueTabs && $(window).width() < 600) return this.updateTabbarMini();
 			this.$('.logo').show();
 			this.$('.maintabbar').removeClass('minitabbar');
 
@@ -206,7 +208,15 @@
 			}
 			var buf = '<ul><li><a class="button minilogo' + notificationClass + '" href="' + app.root + '"><img src="' + Dex.resourcePrefix + 'favicon-256.png" width="32" height="32" alt="Pok&eacute;mon Showdown! (beta)" /><i class="fa fa-caret-down" style="display:inline-block"></i></a></li></ul>';
 
-			buf += '<ul>' + this.renderRoomTab(app.curRoom) + '</ul>';
+			var rogueTabs = app.rooms.fantasyrogue && app.rooms.fantasyrogueparty && app.curRoom &&
+				(/^(fantasyrogue|fantasyrogueparty)$/.test(app.curRoom.id) || /^battle-gen9fantasyrogue/.test(app.curRoom.id));
+			if (rogueTabs) {
+				buf += '<ul class="rogue-mobile-tabs">' + ['fantasyrogue', 'fantasyrogueparty'].map(function (id) {
+					return '<li><a class="button' + (app.curRoom.id === id ? ' cur' : '') + '" href="' + app.root + id +
+						'"' + (app.curRoom.id === id ? ' aria-current="page"' : '') + '>' +
+						(id === 'fantasyrogue' ? '幻想杯肉鸽' : '队伍及背包') + '</a></li>';
+				}).join('') + '</ul>';
+			} else buf += '<ul>' + this.renderRoomTab(app.curRoom) + '</ul>';
 
 			this.$tabbar.html(buf);
 

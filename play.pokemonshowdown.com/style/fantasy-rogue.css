@@ -981,7 +981,7 @@
 /* Route copy spans both grid columns, including narrow trade cards. */
 .fantasyrogue .rogue-route-description { grid-column: 1 / -1; min-width: 0; line-height: 1.65; }
 .fantasyrogue .rogue-center-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
-.fantasyrogue .rogue-center-actions > .button { flex: 1 1 220px; min-height: 46px; padding: 10px 16px; font-size: 16px; font-weight: bold; color: #24546e; border: 1px solid #86acc1; background: linear-gradient(#f8fcff, #dbeef8); }
+.fantasyrogue .rogue-floor .rogue-center-actions > .button { flex: 1 1 220px; box-sizing: border-box; min-height: 50px; margin: 0; padding: 12px 16px; line-height: 24px; font-size: 16px; font-weight: bold; color: #24546e; border: 1px solid #86acc1; background: linear-gradient(#f8fcff, #dbeef8); }
 .fantasyrogue .rogue-item-ether { width: 18px; height: 24px; background-position: -85px -192px; }
 /* Compact party details without changing column widths between partners. */
 .fantasyrogue .rogue-system-status { font-size: 13px; line-height: 1.5; color: #4b6477; margin: 4px 0; }
@@ -1685,10 +1685,10 @@
 }
 .battle-controls .rogue-retreat { margin-top: 14px; padding: 18px 8px 4px; gap: 8px; }
 .battle-controls .rogue-retreat .button { font-size: 13px; line-height: 1.35; padding: 5px 9px; min-height: 30px; margin: 0; }
-.rogue-learn-move-popup { animation: rogue-learn-enter .16s ease-out both; }
+.rogue-learn-move-popup, .rogue-evolution-popup { animation: rogue-learn-enter .24s ease-out both; }
 @keyframes rogue-learn-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
-	.rogue-learn-move-popup { animation: none; }
+	.rogue-learn-move-popup, .rogue-evolution-popup { animation: none; }
 	.rogue-affection-gain { animation: rogue-affection-still 4s step-end both; }
 }
 /* Permanent starter crates: isolated from the adventure card layout. */
@@ -1929,3 +1929,28 @@
 	.ps-overlay .ps-popup.rogue-monthly-popup { padding: 14px; }
 	.rogue-monthly-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* The mini bar is the mobile-only navigation; retain the existing room instances. */
+.maintabbar.minitabbar:has(.rogue-mobile-tabs) { margin-right: 165px; }
+@media (max-width: 500px) { .maintabbar.minitabbar:has(.rogue-mobile-tabs) { margin-right: 96px; } }
+.minitabbar:has(.rogue-mobile-tabs) .inner { width: 100%; }
+.minitabbar:has(.rogue-mobile-tabs) .minilogo { width: 32px; padding: 2px; }
+.minitabbar:has(.rogue-mobile-tabs) .minilogo img { width: 24px; height: 24px; }
+.minitabbar:has(.rogue-mobile-tabs) .minilogo .fa { display: none !important; }
+.minitabbar .rogue-mobile-tabs { display: inline-flex; width: calc(100% - 44px); gap: 2px; }
+.minitabbar .rogue-mobile-tabs li { float: none; flex: 1; min-width: 0; }
+.minitabbar .rogue-mobile-tabs a.button { box-sizing: border-box; width: 100%; min-width: 0; height: 37px; padding: 11px 2px; font-size: 11px; text-align: center; white-space: nowrap; }
+.rogue-event-replay { max-height: calc(100dvh - 24px); overflow-y: auto; box-sizing: border-box; }
+.rogue-event-replay .battle { max-width: none; transform-origin: top left; }
+.rogue-event-replay > p { display: flex; flex-wrap: wrap; gap: 6px; }
+.rogue-event-replay > p .button { min-height: 36px; margin: 0; }
+
+.rogue-blessing-switch { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 4px 8px; border: 1px solid #a1bac8; border-radius: 20px; background: #f5fbff; color: #30586c; cursor: pointer; }
+.rogue-blessing-switch i { width: 36px; height: 20px; background: #7897ab; border-radius: 12px; position: relative; }
+.rogue-blessing-switch i::after { content: ''; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: white; transition: transform .2s; }
+.rogue-blessing-switch[aria-checked=true] i::after { transform: translateX(16px); }
+.rogue-blessing-switch:focus-visible { outline: 2px solid #326c9a; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .rogue-blessing-switch i::after { transition: none; } }
+
+.rogue-cup-moves { display: block; line-height: 1.6; padding: 0 5px 10px; overflow-wrap: anywhere; }
+.fantasyrogue button[name="chooseEvent"], .fantasyrogue button[name="chooseCoopEvent"] { touch-action: manipulation; }

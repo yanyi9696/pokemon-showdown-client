@@ -7,6 +7,29 @@ const heading = 'Your team was rejected for the following reasons:';
 const chineseHeading = '您的队伍未通过校验，原因如下：';
 
 describe('Rogue vocabulary contexts', () => {
+	it('translates only registered FC format labels and preserves user text and English mode', () => {
+		for (const language of ['zh', 'en']) {
+			const formats = {gen9fcou: {name: '[Gen 9] FC OU'}}, log = {escapeFormat: id => formats[id]?.name || id};
+			client('FC', language, false, {BattleFormats: formats, BattleLog: log});
+			assert.equal(log.escapeFormat('gen9fcou'), language === 'zh' ? '[Gen 9] 幻想杯 OU' : '[Gen 9] FC OU');
+			for (const raw of ['FC', 'FCBeta', 'gen9fcplayer', '[Gen 9] FC OU']) assert.equal(log.escapeFormat(raw), raw);
+			assert.equal(formats.gen9fcou.name, '[Gen 9] FC OU');
+		}
+	});
+	it('keeps FC handles, chat and custom team names intact even when individual text nodes are observed', () => {
+		const ui = client('FC');
+		assert.equal(ui.paragraph.textContent, 'FC');
+		for (const className of ['username', 'usernametext', 'teamname', 'chat', 'chatmessage']) {
+			for (const value of ['FCBeta26101902', 'fc', 'aFCxyz', '中文FC玩家', 'FC Psychic 我的队伍']) {
+				const wrapper = element('DIV', className, ui.popup), inner = element('SPAN', '', wrapper);
+				text(value, inner);
+				ui.notify([{addedNodes: [wrapper]}]);
+				ui.notify([{addedNodes: [inner.childNodes[0]]}]);
+				assert.equal(inner.textContent, value);
+			}
+		}
+		assert.equal(client('Psychic').paragraph.textContent, '超能力');
+	});
 	it('preserves Chinese type, item and action labels on initial render and repeated translation', () => {
 		for (const label of ['超能力', '节拍器', '刷新', '不开启', '攻击']) {
 			const ui = client(label);
@@ -192,7 +215,7 @@ function text(value, parent) {
 	parent.childNodes.push(node);
 	return node;
 }
-function client(message, language = 'zh', split = false) {
+function client(message, language = 'zh', split = false, runtime = {}) {
 	const body = element('BODY');
 	const popup = element('DIV', 'ps-popup', body);
 	const paragraph = element('P', '', popup);
@@ -209,6 +232,7 @@ function client(message, language = 'zh', split = false) {
 			constructor(callback) { notify = callback; }
 			observe() {}
 		},
+		...runtime,
 	});
 	return { body, popup, paragraph, label, notify };
 }

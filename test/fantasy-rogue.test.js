@@ -51,6 +51,7 @@ function client(startScreen = false, localized = false, runtime = {}) {
 		setTimeout: () => 1, clearTimeout: () => {}, setInterval: () => 1, clearInterval: () => {},
 		...runtime,
 	};
+	if (runtime.preferences) context.Dex.prefs = key => runtime.preferences[key];
 	if (localized) {
 		const translator = fs.readFileSync(require.resolve('../play.pokemonshowdown.com/js/ps-china-translator.js'), 'utf8');
 		vm.runInNewContext(translator.slice(0, translator.indexOf('(function() {')), context);
@@ -81,6 +82,80 @@ function client(startScreen = false, localized = false, runtime = {}) {
 	room.preparePanel();
 	return {...context, room, panel, get html() { return room.html + panel.html + (room.pendingMovePopup?.html || ''); }, sent, joined, setUser: id => { userid = id; }};
 }
+describe('Fantasy Rogue patch eleven interactions', () => {
+	it('shares brief/detail immediately across panes and restores the local preference', () => {
+		const preferences = {}, switches = [{}, {}], copies = [{}, {}];
+		for (const el of switches) el.setAttribute = (key, value) => { el[key] = value; };
+		for (const el of copies) el.getAttribute = key => key === 'data-detail' ? '提升攻击 20%。' : '提升攻击。';
+		const c = client(false, false, {preferences, Storage: {prefs: (key, value) => { preferences[key] = value; }},
+			document: {querySelectorAll: selector => selector.endsWith('switch') ? switches : copies}});
+		const data = adventure('blessing');
+		data.run.blessings = {owned: [], pending: [], shards: 0, candy: 0, swordUses: 0, swordRewards: [], levels: 0,
+			round: {tier: 'gold', remaining: 1, options: [{id: 'test', name: '测试', text: '提升攻击 20%。', shortText: '提升攻击。'}]}};
+		c.room.receiveState(data); const before = JSON.stringify(data);
+		assert(c.room.html.includes('rogue-blessing-switch')); assert(c.panel.html.includes('rogue-blessing-switch'));
+		c.panel.dispatchClickButton({currentTarget: {name: 'toggleBlessingDetail', value: ''}});
+		assert(switches.every(el => el['aria-checked'] === 'false'));
+		assert(copies.every(el => el.innerHTML === '提升攻击。')); assert.equal(preferences.rogueBlessingDetailed, false);
+		assert.equal(JSON.stringify(data), before); assert.equal(c.sent.length, 0);
+		const reopened = client(false, false, {preferences}); reopened.room.receiveState(data);
+		assert(reopened.room.html.includes('aria-checked="false"')); assert(reopened.room.html.includes('>提升攻击。</span>'));
+		c.room.toggleBlessingDetail(); assert(copies.every(el => el.innerHTML.includes('20%')));
+		assert(switches.every(el => el['aria-checked'] === 'true'));
+	});
+	for (const shards of [0, 49, 50, 99, 100, 101]) it(`renders authoritative fantasy eligibility with ${shards} shards`, () => {
+		const c = client(), data = adventure('ready'), mon = data.run.team[0];
+		mon.evolutionDetails = []; mon.fantasyInfo = {current: true, finals: [], cost: 100, shards, blocked: ''};
+		c.room.receiveState(data); assert(c.panel.html.includes(`幻想化：碎片 ${shards}/100`));
+		assert.equal(c.panel.html.includes('已满足碎片数量要求'), shards >= 100);
+		mon.fantasyInfo.current = false; mon.fantasyInfo.finals = ['Venusaur', 'Charizard']; c.room.receiveState(data);
+		assert(c.panel.html.includes('进化至【Venusaur】或【Charizard】后可幻想化'));
+		mon.fantasyInfo.finals = []; c.room.receiveState(data); assert(c.panel.html.includes('不可幻想化'));
+	});
+	it('opens learning and then healing on the currently visible party pane without switching rooms', () => {
+		const c = client(true), data = adventure('ready'); c.app.curRoom = c.panel; data.run.id = 'party-candy';
+		data.run.pendingMoves = [{member: data.run.team[0].id, move: 'vinewhip'}];
+		data.run.retryHealing = {key: 'heal-quote', purpose: 'heal', items: [], missingCures: [], members: []};
+		c.room.receiveState(data); const popup = c.room.pendingMovePopup;
+		assert(popup); assert(!c.room.retryHealingPopup); assert.equal(c.app.curRoom, c.panel);
+		popup.learnMove('skip'); popup.learnMove('skip'); assert.equal(c.sent.length, 1);
+		const next = structuredClone(data); next.run.pendingMoves = []; next.account.revision++;
+		c.room.receiveAction({userid: data.userid, id: c.room.pending.id, ok: true, state: next});
+		assert(popup.removed); assert(c.room.retryHealingPopup); assert.equal(c.app.curRoom, c.panel); assert.equal(c.joined.length, 0);
+	});
+	it('lets the player suspend a dialogue to resolve consecutive move decisions without advancing the story', () => {
+		const c = client(), data = adventure('ready'); data.run.id = 'dialogue-candy';
+		data.story = {key: 'story:one', title: '对话', text: '尚未完成', choices: []};
+		data.run.pendingMoves = [{member: data.run.team[0].id, move: 'vinewhip'}];
+		c.room.receiveState(data); assert(!c.room.pendingMovePopup); assert(c.room.html.includes('暂离对话，更替招式'));
+		const story = JSON.stringify(data.story); c.room.handlePendingMoves(); assert(c.room.pendingMovePopup);
+		data.run.pendingMoves[0].move = 'growl'; c.room.receiveState(data); assert(c.room.pendingMovePopup.html.includes('growl'));
+		assert.equal(JSON.stringify(data.story), story); assert.equal(c.sent.length, 0);
+		data.run.pendingMoves = []; c.room.receiveState(data); assert(!c.room.pendingMovePopup); assert.equal(c.room.moveDialogueKey, null);
+	});
+	it('handles pointer contact once, ignores the generated click and retains keyboard activation', () => {
+		let now = 1000; const c = client(false, false, {Date: {now: () => now}}), choices = [];
+		c.room.chooseEvent = value => choices.push(value);
+		const e = {type: 'pointerdown', button: 0, currentTarget: {name: 'chooseEvent', value: 'tap'}, preventDefault() {}, stopImmediatePropagation() {}};
+		c.room.rhythmPress(e); now += 100; c.room.rhythmPress({...e, type: 'click'}); assert.deepEqual(choices, ['tap']);
+		now += 600; c.room.rhythmPress({...e, type: 'click'}); assert.equal(choices.length, 2);
+		c.room.rhythmPress({...e, button: 2}); assert.equal(choices.length, 2);
+	});
+	it('fits spectator playback to its actual popup width and releases the resize observer', () => {
+		let resize, disconnected = false;
+		const c = client(false, false, {ResizeObserver: class {constructor(fn) { resize = fn; } observe() {} disconnect() { disconnected = true; }},
+			Battle: class {setViewpoint() {} subscribe() {} destroy() {} }});
+		const frame = {style: {}}, root = {clientWidth: 320, querySelector: () => frame};
+		const popup = Object.create(c.RogueEventReplayPopup);
+		popup.$el = {0: root, addClass() { return this; }, html() { return this; }}; popup.$ = () => ({});
+		popup.initialize({room: c.room, event: {key: 'forest', replay: [], support: 0}});
+		assert.equal(frame.style.transform, 'scale(0.4625)'); assert.equal(frame.style.marginBottom, '-193.5px');
+		root.clientWidth = 390; resize(); assert.equal(frame.style.transform, 'scale(0.571875)');
+		root.clientWidth = 900; resize(); assert.equal(frame.style.transform, 'scale(1)');
+		popup.remove(); assert(disconnected);
+	});
+});
+
 function state() {
 	return {userid: 'rogueplayer', protocolVersion: 1, enabled: true, coopEnabled: true, configured: false,
 		message: '正式队伍与数值等待配置', starters: [], items: [], run: null,
@@ -1407,7 +1482,7 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		assert.equal(r.c.sent.length, requests);
 		r.c.room.coopBusy = false; r.c.room.chooseCoopEvent('tap');
 		const command = JSON.parse(r.c.sent.at(-1).slice('/fantasyrogue coop '.length));
-		assert.deepEqual(command, {action: 'eventchoice', value: 'tap', visit: 'rhythm-step'});
+		assert.deepEqual(command, {action: 'eventchoice', value: 'tap', visit: 'rhythm-step', rhythmAt: 12400});
 		assert.equal(command.now, undefined); assert.equal(command.score, undefined);
 	});
 	it('renders and finishes separately scoped delegated sweet-dance clocks', () => {
@@ -2796,12 +2871,12 @@ describe('Fantasy Rogue permanent starter crates', () => {
 		const c = client(true, false, runtime), data = state();
 		data.configured = true; data.account.points = 1000;
 		data.account.crates = {total: 9, legendaryMisses: 18, targetedMisses: 57, points: 100, target: 'type:Water',
-			daily: {day: '2026-11-03', submitted: false}};
+			daily: {season: 2, day: '2026-11-03', submitted: false}};
 		c.room.receiveState(data);
 		c.room.openCrates();
 		const query = {userid: data.userid, enabled: true, revision: 1, growthPoints: 1000,
 			ledger: structuredClone(data.account.crates), shinyPerMillion: 2000,
-			daily: {day: '2026-11-03', refreshAt: Date.UTC(2026, 10, 3, 16), results: [], teams: [
+			daily: {season: 2, day: '2026-11-03', refreshAt: Date.UTC(2026, 10, 3, 16), results: [], teams: [
 				['Charizard', 'Snorlax', 'Gengar'], ['Blastoise', 'Dragonite', 'Arcanine'],
 				['Venusaur', 'Gyarados', 'Lucario'], ['Tyranitar', 'Gardevoir', 'Scizor'],
 			]},
@@ -3050,7 +3125,7 @@ describe('Fantasy Rogue permanent starter crates', () => {
 		popup.submitCup(); assert.equal(actions(c).length, 0);
 		popup.pickCup('2:1'); popup.submitCup(); popup.submitCup();
 		const request = actions(c)[0]; assert.equal(actions(c).length, 1);
-		assert.equal(request.action, 'crateprediction'); assert.equal(request.value, '2026-11-03:B:C:B');
+		assert.equal(request.action, 'crateprediction'); assert.equal(request.value, '2:2026-11-03:B:C:B');
 		assert.equal(popup.stage, 'ready'); assert.equal(c.room.crateIntent.id, request.id);
 	});
 	it('recovers a prediction acknowledgement after timeout and refreshes on the next day', () => {
@@ -3749,7 +3824,7 @@ describe('Fantasy Rogue start menu and codex', () => {
 		data.run.difficultyTest=true;
 		c.room.receiveState(data);c.room.showCharm();assert.equal(c.app.lastPopup.type,c.RogueCharmPopup);
 		const popup=Object.create(c.RogueCharmPopup);popup.$el={addClass(){},html(value){popup.html=value;}};popup.initialize({room:c.room});
-		assert(popup.html.includes('我方 90.0%'));assert(popup.html.includes('对手 65.0%'));
+		assert(!popup.html.includes('我方 90.0%'));assert(!popup.html.includes('我方强度'));assert(popup.html.includes('对手 65.0%'));
 		assert(!c.html.includes('本地测试（不解锁档位）'));assert(!c.panel.html.includes('select name="difficulty"'));assert(c.panel.html.includes('本局已锁定'));
 		assert(c.html.includes('本局护符 · 不占携带道具位'));assert(!c.html.includes('value="use:oldcharm"'));assert(!c.html.includes('value="sell:oldcharm"'));
 		assert(c.html.includes('<strong>不获得局外成长点数</strong>'));
