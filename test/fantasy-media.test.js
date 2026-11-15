@@ -84,13 +84,32 @@ describe('Fantasy battle media', () => {
 		assert.equal(sprite.$el.style.filter, fantasy.filter);
 		sprite.addEffect('roguebloodrobe');
 		assert(sprite.$el.style.filter.includes(fantasy.filter));
-		assert.match(sprite.$el.style.filter, /sepia\(1\).*hue-rotate\(185deg\).*brightness\(\.7\)/);
+		assert.match(sprite.$el.style.filter, /url\("#rogue-blood-robe-tint"\)/);
 		assert.match(sprite.$el.style.filter, /19,44,94/);
 		sprite.removeEffect('roguebloodrobe');
 		assert.equal(sprite.$el.style.filter, fantasy.filter);
 		sprite.oldsp = normal;
 		sprite.removeTransform();
 		assert.equal(sprite.$el.style.filter, '');
+	});
+	it('registers the selective robe filter once and keeps 2D/3D front/back art and animations intact', () => {
+		let inserts = 0, markup = '';
+		const oldDocument = context.document;
+		context.document = {getElementById: () => inserts ? {} : null,
+			body: {insertAdjacentHTML(where, html) { assert.equal(where, 'beforeend'); inserts++; markup = html; }}};
+		try {
+			for (const pixels of [true, false]) for (const front of [true, false]) {
+				preferences.bwgfx = pixels;
+				const data = context.Dex.getSpriteData('Zangoose', front, {gen: 9, mod: 'gen9fantasy'});
+				assert.match(data.url, pixels ? /zangoose\.png$/ : /zangoose\.gif$/);
+				const sprite = new context.PokemonSprite(data, {x: 0, y: 0, z: 0}, {animating: true, pos: x => x}, front);
+				sprite.addEffect('roguebloodrobe'); sprite.addEffect('roguebloodrobe');
+				assert.match(sprite.$el.style.filter, /rogue-blood-robe-tint/);
+				assert.equal(sprite.sp.url, data.url); assert.equal(sprite.sp.cryurl, data.cryurl);
+				sprite.removeEffect('roguebloodrobe'); assert.equal(sprite.$el.style.filter, data.filter || '');
+			}
+			assert.equal(inserts, 1); assert(markup.includes('in="SourceGraphic" in2="redmask" operator="in"'));
+		} finally { context.document = oldDocument; }
 	});
 	it('applies the larger contour to real animated 3D front and back sprites', () => {
 		preferences.bwgfx = false;

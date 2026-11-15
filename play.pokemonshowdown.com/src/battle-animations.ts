@@ -26,8 +26,20 @@ function isRogueBattle(scene: BattleScene) {
 	return ['gen9fantasyrogue', 'gen9fantasyroguecoop', 'gen9fantasyroguedoubles'].includes(toID(scene.battle.tier));
 }
 
-// Tint the sprite itself while retaining its markings; shadows alone leave white fur unchanged.
-const ROGUE_BLOOD_FILTER = 'sepia(1) hue-rotate(185deg) saturate(2.4) brightness(.7) ' +
+// Preserve red markings (including their shaded pixels); tint neutral fur, not the whole sprite.
+// The shared SVG operates on each animated frame without replacing art or changing its alpha.
+const ROGUE_BLOOD_FILTER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none">
+<defs><filter id="rogue-blood-robe-tint" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%">
+<feColorMatrix in="SourceGraphic" type="matrix" result="redness"
+values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  32 -16 -16 0 0"/>
+<feComponentTransfer in="redness" result="redmask"><feFuncA type="discrete" tableValues="0 1"/></feComponentTransfer>
+<feColorMatrix in="SourceGraphic" type="matrix" result="navy"
+values=".18 0 0 0 0  0 .25 0 0 0  0 0 .38 0 0  0 0 0 1 0"/>
+<feComposite in="navy" in2="redmask" operator="out" result="fur"/>
+<feComposite in="SourceGraphic" in2="redmask" operator="in" result="markings"/>
+<feMerge><feMergeNode in="fur"/><feMergeNode in="markings"/></feMerge>
+</filter></defs></svg>`;
+const ROGUE_BLOOD_FILTER = 'url("#rogue-blood-robe-tint") ' +
 	'drop-shadow(0 0 3px rgba(5,13,35,.55)) drop-shadow(0 0 9px rgba(19,44,94,.42))';
 const ROGUE_GHIDORAH_FILTER = 'sepia(1) saturate(3.5) brightness(1.2) drop-shadow(0 0 7px #ffd24a)';
 
@@ -2150,6 +2162,9 @@ export class PokemonSprite extends Sprite {
 		this.isFrontSprite = isFrontSprite;
 	}
 	private applySpriteFilter($el = this.$el) {
+		if (this.effects.roguebloodrobe && !document.getElementById('rogue-blood-robe-tint')) {
+			document.body.insertAdjacentHTML('beforeend', ROGUE_BLOOD_FILTER_SVG);
+		}
 		const filter = [
 			this.effects.rogueghidorah ? ROGUE_GHIDORAH_FILTER : '',
 			this.effects.roguebloodrobe ? ROGUE_BLOOD_FILTER : '',
