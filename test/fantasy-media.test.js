@@ -84,6 +84,7 @@ describe('Fantasy battle media', () => {
 		assert.equal(sprite.$el.style.filter, fantasy.filter);
 		sprite.addEffect('roguebloodrobe');
 		assert(sprite.$el.style.filter.includes(fantasy.filter));
+		assert.match(sprite.$el.style.filter, /sepia\(1\).*hue-rotate\(185deg\).*brightness\(\.7\)/);
 		assert.match(sprite.$el.style.filter, /19,44,94/);
 		sprite.removeEffect('roguebloodrobe');
 		assert.equal(sprite.$el.style.filter, fantasy.filter);

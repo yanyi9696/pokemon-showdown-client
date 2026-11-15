@@ -58,6 +58,31 @@ describe('Fantasy Rogue growth log playback', () => {
 });
 
 describe('Battle', () => {
+	it('does not play evolution effects for robe holders leveling up, but still animates real evolution', () => {
+		for (const species of ['Zangoose', 'Meowstic-F', 'Bulbasaur']) {
+			const battle = new Battle({debug: true, log: [
+				'|player|p1|Player', '|player|p2|Foe', '|gen|9', '|start',
+				`|switch|p1a: Partner|${species}, L10|30/40`, '|switch|p2a: Foe|Magikarp, L10|30/30', '|turn|1',
+			]});
+			try {
+				let transformations = 0, sidebars = 0;
+				battle.scene.animTransform = () => transformations++;
+				battle.scene.updateSidebar = () => sidebars++;
+				if (species === 'Zangoose') battle.add('|-start|p1a: Partner|Rogue Blood Robe|[silent]');
+				for (const level of [11, 12, 12, 13]) battle.add(`|detailschange|p1a: Partner|${species}, L${level}`);
+				assert.equal(transformations, 0, species);
+				assert.equal(battle.p1.active[0].level, 13); assert.equal(sidebars, 4);
+				assert.equal(battle.p1.active[0].hp, 30);
+				if (species === 'Zangoose') assert(battle.p1.active[0].volatiles.roguebloodrobe);
+				const finalSpecies = species === 'Bulbasaur' ? 'Ivysaur' : species;
+				battle.add(`|detailschange|p1a: Partner|${finalSpecies}, L16`);
+				assert.equal(transformations, species === 'Bulbasaur' ? 1 : 0);
+				assert.equal(battle.p1.active[0].speciesForme, finalSpecies);
+				battle.seekTurn(0); battle.seekTurn(Infinity);
+				assert.equal(battle.p1.active[0].speciesForme, finalSpecies);
+			} finally { battle.destroy(); }
+		}
+	});
 	it('refreshes party sidebars on transient form changes, reversions and persistent detail changes', () => {
 		const battle = new Battle({debug: true, log: [
 			'|player|p1|FCPlayer', '|player|p2|Foe', '|gen|9', '|start',

@@ -26,7 +26,9 @@ function isRogueBattle(scene: BattleScene) {
 	return ['gen9fantasyrogue', 'gen9fantasyroguecoop', 'gen9fantasyroguedoubles'].includes(toID(scene.battle.tier));
 }
 
-const ROGUE_BLOOD_FILTER = 'drop-shadow(0 0 3px rgba(5,13,35,.8)) drop-shadow(0 0 9px rgba(19,44,94,.62))';
+// Tint the sprite itself while retaining its markings; shadows alone leave white fur unchanged.
+const ROGUE_BLOOD_FILTER = 'sepia(1) hue-rotate(185deg) saturate(2.4) brightness(.7) ' +
+	'drop-shadow(0 0 3px rgba(5,13,35,.55)) drop-shadow(0 0 9px rgba(19,44,94,.42))';
 const ROGUE_GHIDORAH_FILTER = 'sepia(1) saturate(3.5) brightness(1.2) drop-shadow(0 0 7px #ffd24a)';
 
 /*

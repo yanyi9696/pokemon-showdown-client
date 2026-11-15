@@ -981,7 +981,7 @@
 /* Route copy spans both grid columns, including narrow trade cards. */
 .fantasyrogue .rogue-route-description { grid-column: 1 / -1; min-width: 0; line-height: 1.65; }
 .fantasyrogue .rogue-center-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
-.fantasyrogue .rogue-floor .rogue-center-actions > .button { flex: 1 1 220px; box-sizing: border-box; min-height: 50px; margin: 0; padding: 12px 16px; line-height: 24px; font-size: 16px; font-weight: bold; color: #24546e; border: 1px solid #86acc1; background: linear-gradient(#f8fcff, #dbeef8); }
+.fantasyrogue .rogue-floor .rogue-center-actions > .button[name="act"][value] { flex: 1 1 220px; box-sizing: border-box; min-height: 50px; margin: 0; padding: 12px 16px; line-height: 24px; font-size: 16px; font-weight: bold; color: #24546e; border: 1px solid #86acc1; background: linear-gradient(#f8fcff, #dbeef8); }
 .fantasyrogue .rogue-item-ether { width: 18px; height: 24px; background-position: -85px -192px; }
 /* Compact party details without changing column widths between partners. */
 .fantasyrogue .rogue-system-status { font-size: 13px; line-height: 1.5; color: #4b6477; margin: 4px 0; }

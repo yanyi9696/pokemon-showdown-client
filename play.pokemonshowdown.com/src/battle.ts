@@ -1697,7 +1697,11 @@ export class Battle {
 			effectOrName = effectOrName.name;
 		}
 		this.scene.abilityActivateAnim(pokemon, effectOrName);
-		pokemon.rememberAbility(effectOrName, isNotBase);
+		// A disclosed Rogue extra ability activates without replacing the primary ability.
+		const extraAbilities = pokemon.rogueAbilityInfo?.abilities;
+		if (!Array.isArray(extraAbilities) || !extraAbilities.includes(toID(effectOrName))) {
+			pokemon.rememberAbility(effectOrName, isNotBase);
+		}
 	}
 
 	runMinor(args: Args, kwArgs: KWArgs, nextArgs?: Args, nextKwargs?: KWArgs) {
@@ -2604,6 +2608,7 @@ export class Battle {
 		}
 		case 'detailschange': {
 			let poke = this.getPokemon(args[1])!;
+			const previousForme = poke.getSpeciesForme();
 			poke.removeVolatile('formechange' as ID);
 			poke.removeVolatile('typeadd' as ID);
 			poke.removeVolatile('typechange' as ID);
@@ -2649,7 +2654,9 @@ export class Battle {
 			}
 			// --- 结束修复 ---
 
-			this.scene.animTransform(poke, true, true);
+			// Rogue live growth also sends detailschange for levels. Keep those updates
+			// instant; only an actual species/form change should play evolution effects.
+			if (toID(previousForme) !== toID(newSpeciesForme)) this.scene.animTransform(poke, true, true);
 			
 			// --- 开始修复 (添加于此处) ---
 			// 告诉场景更新状态栏，这将重绘种族值

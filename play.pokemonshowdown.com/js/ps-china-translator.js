@@ -3313,6 +3313,7 @@ var translations = {
     "Haunter": "鬼斯通",
     "Gengar": "耿鬼",
     "Onix": "大岩蛇",
+    "Onix-Fantasy": "水晶大岩蛇-幻想",
     "Drowzee": "催眠貘",
     "Hypno": "引梦貘人",
     "Krabby": "大钳蟹",

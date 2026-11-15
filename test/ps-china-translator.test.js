@@ -7,6 +7,21 @@ const heading = 'Your team was rejected for the following reasons:';
 const chineseHeading = '您的队伍未通过校验，原因如下：';
 
 describe('Rogue vocabulary contexts', () => {
+	it('renames only the Fantasy Onix display and keeps ordinary Onix and player text intact', () => {
+		const ui = client('Onix-Fantasy');
+		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);
+		assert.equal(ui.paragraph.textContent, '水晶大岩蛇-幻想');
+		assert.equal(context.translateRogueName('Onix-Fantasy', 'pokemon'), '水晶大岩蛇-幻想');
+		assert.equal(context.translateRogueName('onixfantasy', 'pokemon'), '水晶大岩蛇-幻想');
+		assert.equal(context.translateRogueName('Onix', 'pokemon'), '大岩蛇');
+		const wrapper = element('DIV', 'username', ui.popup);
+		text('Onix-Fantasy', wrapper); ui.notify([{addedNodes: [wrapper]}]);
+		assert.equal(wrapper.textContent, 'Onix-Fantasy');
+	});
+	it('translates the actual draining ability holder in healing messages', () => {
+		assert.equal(client("[Zangoose's Ji Qu Su Sheng]").paragraph.textContent, '[猫鼬斩的汲取苏生]');
+		assert.equal(client("[The opposing Zangoose's Ji Qu Su Sheng]").paragraph.textContent, '[对手的猫鼬斩的汲取苏生]');
+	});
 	it('translates only registered FC format labels and preserves user text and English mode', () => {
 		for (const language of ['zh', 'en']) {
 			const formats = {gen9fcou: {name: '[Gen 9] FC OU'}}, log = {escapeFormat: id => formats[id]?.name || id};
