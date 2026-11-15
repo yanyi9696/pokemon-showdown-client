@@ -63,6 +63,28 @@ describe('Battle effectiveness and four speed benchmarks', () => {
 		assert.equal(power.value, 240); assert.equal(accuracy.value, 100);
 		assert.match(String(power), /某科学超电磁炮/); assert.match(String(accuracy), /某科学超电磁炮/);
 	});
+	it('shows next-use Stalwart power without raising the Technician threshold or affecting ordinary formats', () => {
+		const Value = vm.runInContext('ModifiableValue', context);
+		const ownBattle = {...battle, sides: [], abilityActive: () => false, mySide: {sideConditions: {}}};
+		const ownTips = Object.create(tips); ownTips.battle = ownBattle;
+		const p = mon('Mew', {boosts: {}, isActive: () => true, side: {active: [], foe: {active: []}},
+			effectiveAbility: () => 'Stalwart'});
+		for (const [count, expected] of [[0, 40], [1, 48], [2, 56], [3, 64], [4, 72], [5, 80]]) {
+			const server = {speciesForme: 'Mew', item: '', baseAbility: 'Stalwart', stats: {atk: 10, def: 10, spa: 10, spd: 10, spe: 10},
+				mechanicPowers: {watergun: {power: 40, source: '', stalwart: count}}};
+			const power = ownTips.getMoveBasePower(dex.moves.get('watergun'), 'Water', new Value(ownBattle, p, server));
+			assert.equal(power.value, expected);
+			if (count) assert.match(String(power), /坚毅\+·连续使用/);
+		}
+		p.effectiveAbility = () => 'Technician'; p.rogueAbilityInfo = {active: true, abilities: ['stalwart']};
+		const server = {speciesForme: 'Mew', item: '', baseAbility: 'Technician', stats: {atk: 10, def: 10, spa: 10, spd: 10, spe: 10},
+			mechanicPowers: {watergun: {power: 40, source: '', stalwart: 5}}};
+		assert.equal(ownTips.getMoveBasePower(dex.moves.get('watergun'), 'Water', new Value(ownBattle, p, server)).value, 120);
+		delete p.rogueAbilityInfo;
+		assert.equal(ownTips.getMoveBasePower(dex.moves.get('watergun'), 'Water', new Value(ownBattle, p, server)).value, 60);
+		p.effectiveAbility = () => 'Stalwart'; server.baseAbility = 'Stalwart'; ownBattle.dex = context.Dex.mod('gen9');
+		assert.equal(ownTips.getMoveBasePower(dex.moves.get('watergun'), 'Water', new Value(ownBattle, p, server)).value, 40);
+	});
 	it('shows rulebreaker bypassing type immunity, and preserves beneficial rain accuracy', () => {
 		const source = mon('Mew', {rogueAbilityInfo: {rulebreaker: true}});
 		assert.equal(factor('Earthquake', mon('Zapdos'), source), 2);

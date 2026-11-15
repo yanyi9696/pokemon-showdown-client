@@ -2475,7 +2475,7 @@ export class BattleTooltips {
 		const mechanic = serverPokemon.mechanicPowers?.[move.id];
 		if (mechanic) {
 			value.value = mechanic.power;
-			value.comment.push(` （${BattleLog.escapeHTML(mechanic.source)}）`);
+			if (mechanic.source) value.comment.push(` （${BattleLog.escapeHTML(mechanic.source)}）`);
 		}
 
 		// =================================================================
@@ -3083,6 +3083,10 @@ export class BattleTooltips {
 			}
 		}
 
+		if (isFantasyTier && mechanic?.stalwart && move.category !== 'Status' && value.tryAbility('Stalwart')) {
+			const count = Math.min(5, Math.max(0, Math.floor(mechanic.stalwart)));
+			value.modify([1, 1.2, 1.4, 1.6, 1.8, 2][count], '坚毅+·连续使用');
+		}
 		// Display personal weather like an ability modifier. It is damage-side,
 		// so apply after Technician and the Tera floor, and never apply it twice.
 		if (move.category !== 'Status' && value.value && ['Fire', 'Water'].includes(moveType)) {
