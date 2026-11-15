@@ -99,6 +99,22 @@ class ModifiableValue {
 		if (!this.tryItem(itemName)) return false;
 		return this.modify(factor, itemName);
 	}
+	/** Weather for this user's move, not for passive abilities or the field. */
+	moveWeather() {
+		if (this.tryAbility('Chao Ji Yu Shui')) return 'raindance';
+		if (this.tryAbility('Mega Sol')) return 'sunnyday';
+		if (!this.tryWeather()) return '';
+		const weather = this.battle.weather;
+		if (['sunnyday', 'desolateland', 'raindance', 'primordialsea'].includes(weather) &&
+			this.tryItem('Utility Umbrella')) return '';
+		return weather;
+	}
+	moveWeatherModify(factor: number, weatherName: string) {
+		if (this.moveWeather() !== toID(weatherName)) return false;
+		const source = this.tryAbility('Chao Ji Yu Shui') ? '超级雨水' :
+			this.tryAbility('Mega Sol') ? '超级日光' : weatherName;
+		return this.modify(factor, source);
+	}
 	abilityModify(factor: number, abilityName: string) {
 		if (!this.tryAbility(abilityName)) return false;
 		return this.modify(factor, abilityName);
@@ -1759,31 +1775,23 @@ export class BattleTooltips {
 		}
 		// Weather and pseudo-weather type changes.
 		if (move.id === 'weatherball') {
-			if (value.weatherModify(0)) {
-				switch (this.battle.weather) {
-				case 'sunnyday':
-				case 'desolateland':
-					if (item.id === 'utilityumbrella') break;
-					moveType = 'Fire';
-					break;
-				case 'raindance':
-				case 'primordialsea':
-					if (item.id === 'utilityumbrella') break;
-					moveType = 'Water';
-					break;
-				case 'sandstorm':
-					moveType = 'Rock';
-					break;
-				case 'hail':
-				case 'snowscape':
-					moveType = 'Ice';
-					break;
-				}
-			} else if (value.abilityModify(0, 'Mega Sol')) {
-                 	moveType = 'Fire';
-            } else if (value.abilityModify(0, 'Chao Ji Yu Shui')) {
-                	moveType = 'Water'; // 超级雨水使气象球变为水属性
-            }
+			switch (value.moveWeather()) {
+			case 'sunnyday':
+			case 'desolateland':
+				moveType = 'Fire';
+				break;
+			case 'raindance':
+			case 'primordialsea':
+				moveType = 'Water';
+				break;
+			case 'sandstorm':
+				moveType = 'Rock';
+				break;
+			case 'hail':
+			case 'snowscape':
+				moveType = 'Ice';
+				break;
+			}
 		}
 		if (move.id === 'terrainpulse' && pokemon.isGrounded(serverPokemon)) {
 			if (this.battle.hasPseudoWeather('Electric Terrain')) {
@@ -1821,7 +1829,7 @@ export class BattleTooltips {
 			if (pokemon.getSpeciesForme() === 'Toxtricity-Low-Key-Fantasy') {
 				moveType = 'Ice';
 			} else if (pokemon.getSpeciesForme() === 'Toxtricity-G-Mega-Fantasy'|| 
-           			   pokemon.getSpeciesForme() === 'Toxtricity-Low-Key-Fantasy') {
+				pokemon.getSpeciesForme() === 'Toxtricity-Low-Key-G-Mega-Fantasy') {
 				moveType = 'Psychic';
 			}
 		}
@@ -2282,12 +2290,12 @@ export class BattleTooltips {
 			return value;
 		}
 		if (move.id === 'blizzard' && this.battle.gen >= 4) {
-			value.weatherModify(0, 'Hail');
-			value.weatherModify(0, 'Snowscape');
+			value.moveWeatherModify(0, 'Hail');
+			value.moveWeatherModify(0, 'Snowscape');
 		}
 		if (['hurricane', 'thunder', 'bleakwindstorm', 'wildboltstorm', 'sandsearstorm'].includes(move.id)) {
-			value.weatherModify(0, 'Rain Dance');
-			value.weatherModify(0, 'Primordial Sea');
+			value.moveWeatherModify(0, 'Rain Dance');
+			value.moveWeatherModify(0, 'Primordial Sea');
 		}
 		value.abilityModify(0, 'No Guard');
 		if (!value.value) return value;
@@ -2402,11 +2410,8 @@ export class BattleTooltips {
 
 		if (move.id === 'hurricane' || move.id === 'thunder') {
 			if (!info?.rulebreaker) {
-				if (value.tryAbility('Mega Sol')) value.set(50, 'Mega Sol');
-				if (value.tryWeather('Sunny Day')) value.set(50, 'Sunny Day');
-				if (value.tryWeather('Desolate Land')) value.set(50, 'Desolate Land');
+				if (['sunnyday', 'desolateland'].includes(value.moveWeather())) value.set(50, '晴天');
 			}
-			if (value.tryAbility('Chao Ji Yu Shui')) { value.set(0, 'Chao Ji Yu Shui'); return value; }
 		}
 
 		// Chained modifiers round down on 0.5
@@ -2494,8 +2499,7 @@ export class BattleTooltips {
 				value.modify(2, "Acrobatics + no item");
 			}
 		}
-		// 1. 在客户端 Tooltips 中，依靠 tier（分级名称）判断是最准确的
-		let isFantasyTier = this.battle.tier.includes('FC');
+		const isFantasyTier = this.battle.dex.modid.includes('gen9fantasy' as ID);
 
 		// 2. 独立判断每种浮动威力招式，FC分级下的捏碎(crushgrip)返回 undefined 从而排除浮动
 		let variableBPCap = 
@@ -2592,20 +2596,14 @@ export class BattleTooltips {
 			}
 		}
 		if (move.id === 'weatherball') {
-            // 首先判断场上是否有真实天气，如果有则由原版逻辑翻倍
-            if (value.weatherModify(2)) {
-                // 原版天气导致的威力翻倍已触发
-            } else if (value.abilityModify(2, 'Mega Sol')) {
-                // 场上无天气，但拥有超级日光特性时翻倍
-            } else if (value.abilityModify(2, 'Chao Ji Yu Shui')) {
-                // 场上无天气，但拥有超级雨水特性时翻倍
-            }
-        }
-		if (move.id === 'hydrosteam') {
-			value.weatherModify(1.5, 'Sunny Day');
+			const weather = value.moveWeather();
+			if (weather && weather !== 'deltastream') value.modify(2, '气象球·天气');
+		}
+		if (move.id === 'hydrosteam' && !value.tryAbility('Chao Ji Yu Shui') && !value.tryAbility('Mega Sol')) {
+			value.moveWeatherModify(1.5, 'Sunny Day');
 		}
 		if (move.id === 'zhishareshe') {
-			value.weatherModify(2, 'Sandstorm');
+			value.moveWeatherModify(1.5, 'Sandstorm');
 		}
 		if (move.id === 'psyblade' && this.battle.hasPseudoWeather('Electric Terrain')) {
 			value.modify(1.5, 'Electric Terrain');
@@ -2765,12 +2763,13 @@ export class BattleTooltips {
 		if (['psn', 'tox'].includes(pokemon.status) && move.category === 'Physical') {
 			value.abilityModify(1.5, "Toxic Boost");
 		}
-		if (['Rock', 'Ground', 'Steel'].includes(moveType) && this.battle.weather === 'sandstorm') {
+		if ((isFantasyTier || ['Rock', 'Ground', 'Steel'].includes(moveType)) && this.battle.weather === 'sandstorm') {
 			if (value.tryAbility("Sand Force")) value.weatherModify(1.3, "Sandstorm", "Sand Force");
 		}
+		if (value.tryAbility('Kuang Sha Zhi Li')) value.weatherModify(1.3, 'Sandstorm', 'Kuang Sha Zhi Li');
 		if (this.battle.weather === 'hail' || this.battle.weather === 'snowscape') {
-			if (value.tryAbility("Xue Zhi Li")) value.weatherModify(1.3, "Snowscape", "Xue Zhi Li");
-			if (value.tryAbility("Bao Xue Zhi Li")) value.weatherModify(1.3, "Snowscape", "Bao Xue Zhi Li");
+			if (value.tryAbility("Xue Zhi Li")) value.weatherModify(1.3, undefined, "Xue Zhi Li");
+			if (value.tryAbility("Bao Xue Zhi Li")) value.weatherModify(1.3, undefined, "Bao Xue Zhi Li");
 		}
 		if (move.secondaries) {
 			value.abilityModify(1.3, "Sheer Force");
@@ -2780,6 +2779,7 @@ export class BattleTooltips {
 		}
 		if (move.flags['sound']) {
 			value.abilityModify(1.3, "Punk Rock");
+			value.abilityModify(1.5, 'Tian Lai Zhi Yin');
 		}
 		if (move.flags['slicing']) {
 			value.abilityModify(1.5, "Sharpness");
@@ -2832,6 +2832,8 @@ export class BattleTooltips {
 		if (moveType === 'Bug') {
 			value.abilityModify(1.5, "Wei Chong Ni Tai");
 		}
+		if (moveType === 'Poison' && pokemon.volatiles['tundu']) value.abilityModify(1.5, 'Tun Du');
+		if (moveType === 'Ghost' && pokemon.volatiles['shiyingli']) value.abilityModify(1.5, 'Shi Ying Li');
 
 		// 排外族群: 连续招式威力提升 50%
 		if (move.multihit && pokemon.getSpeciesForme() !== 'Zarude-Dada-Fantasy') {
@@ -2861,7 +2863,6 @@ export class BattleTooltips {
         if (moveType === 'Electric') {
             // 获取当前是否为你的 FC (Fantasy) 模式
             // 使用 ?. 是为了防止某些极其特殊的边缘情况下 this.battle.tier 未定义报错
-            let isFantasyTier = this.battle.tier?.includes('FC'); 
             
             // 官方第九世代削弱为1.3，但在 FC 模式下恢复为 1.5
             let transistorBoost = (this.battle.gen >= 9 && !isFantasyTier) ? 1.3 : 1.5;
@@ -3082,6 +3083,15 @@ export class BattleTooltips {
 			}
 		}
 
+		// Display personal weather like an ability modifier. It is damage-side,
+		// so apply after Technician and the Tera floor, and never apply it twice.
+		if (move.category !== 'Status' && value.value && ['Fire', 'Water'].includes(moveType)) {
+			if (value.tryAbility('Chao Ji Yu Shui')) {
+				value.modify(moveType === 'Water' ? 1.5 : 0.5, '超级雨水·视为雨天');
+			} else if (value.tryAbility('Mega Sol')) {
+				value.modify(moveType === 'Fire' || move.id === 'hydrosteam' ? 1.5 : 0.5, '超级日光·视为晴天');
+			}
+		}
 		return value;
 	}
 
