@@ -83,8 +83,20 @@ function client(startScreen = false, localized = false, runtime = {}) {
 	return {...context, room, panel, get html() { return room.html + panel.html + (room.pendingMovePopup?.html || ''); }, sent, joined, setUser: id => { userid = id; }};
 }
 describe('Fantasy Rogue patch eleven interactions', () => {
+	for (const preference of [undefined, false, true]) it(`defaults to brief unless detail was explicitly saved: ${preference}`, () => {
+		const preferences = preference === undefined ? {} : {rogueBlessingDetailed: preference};
+		const c = client(false, false, {preferences}), data = adventure('blessing');
+		const entry = {id: 'test', name: '测试', text: '提升攻击 20%。', shortText: '提升攻击。'};
+		data.run.blessings = {owned: [entry], pending: [], round: {tier: 'gold', remaining: 1, options: [entry]}};
+		c.room.receiveState(data);
+		for (const html of [c.room.html, c.panel.html]) {
+			assert(html.includes('aria-checked="' + (preference === true) + '"'));
+			assert(html.includes('>' + (preference === true ? entry.text : entry.shortText) + '</span>'));
+		}
+		assert.equal(Object.hasOwn(preferences, 'rogueBlessingDetailed'), preference !== undefined);
+	});
 	it('shares brief/detail immediately across panes and restores the local preference', () => {
-		const preferences = {}, switches = [{}, {}], copies = [{}, {}];
+		const preferences = {rogueBlessingDetailed: true}, switches = [{}, {}], copies = [{}, {}];
 		for (const el of switches) el.setAttribute = (key, value) => { el[key] = value; };
 		for (const el of copies) el.getAttribute = key => key === 'data-detail' ? '提升攻击 20%。' : '提升攻击。';
 		const c = client(false, false, {preferences, Storage: {prefs: (key, value) => { preferences[key] = value; }},
@@ -102,6 +114,70 @@ describe('Fantasy Rogue patch eleven interactions', () => {
 		assert(reopened.room.html.includes('aria-checked="false"')); assert(reopened.room.html.includes('>提升攻击。</span>'));
 		c.room.toggleBlessingDetail(); assert(copies.every(el => el.innerHTML.includes('20%')));
 		assert(switches.every(el => el['aria-checked'] === 'true'));
+	});
+	it('uses brief mode even when the preference API is unavailable, with old-server text fallback', () => {
+		const c = client(), data = adventure('blessing');
+		data.run.blessings = {owned: [], pending: [], round: {tier: 'gold', remaining: 1,
+			options: [{id: 'legacy', name: '旧祝福', text: '旧版本完整说明。'}]}};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('aria-checked="false"'));
+		assert(c.room.html.includes('>旧版本完整说明。</span>'));
+	});
+	it('links full and short upgrade names in both blessing panes and refreshes reference data', () => {
+		const c = client(), data = adventure('blessing');
+		data.blessingUpgradeHelp = [
+			{id: 'latebloom', name: '大方无隅，大器晚成，大音希声，大象无形', aliases: ['大器晚成'], tier: 'prismatic', text: '按谱系提升全队能力。'},
+			{id: 'supernumber', name: '超大数字', aliases: [], tier: 'prismatic', text: '每场一次，五项能力变为五倍。'},
+		];
+		const entries = [
+			{id: 'youngprodigy', name: '幼年伙伴', text: '升级为【大方无隅，大器晚成，大音希声，大象无形】。', shortText: '升级为【大器晚成】。'},
+			{id: 'bignumber', name: '大数字', text: '达标升级为【超大数字】。', shortText: '达标升级为【超大数字】。'},
+		];
+		data.run.blessings = {owned: entries, pending: [], round: {tier: 'gold', remaining: 1, options: entries}};
+		c.room.receiveState(data);
+		const before = JSON.stringify(data), sent = c.sent.length;
+		for (const detailed of [false, true]) {
+			for (const html of [c.room.html, c.panel.html]) {
+				for (const id of ['latebloom', 'supernumber']) assert(html.includes('data-reference-id="' + id + '"'));
+				assert(html.includes('data-reference-kind="blessing"'));
+				assert(html.includes(detailed ? '>大方无隅，大器晚成，大音希声，大象无形</span>' : '>大器晚成</span>'));
+				assert(html.includes('title="每场一次，五项能力变为五倍。"'));
+			}
+			if (!detailed) { c.room.toggleBlessingDetail(); c.room.render(); }
+		}
+		assert.equal(JSON.stringify(data), before); assert.equal(c.sent.length, sent);
+		data.account.revision++;
+		data.blessingUpgradeHelp = data.blessingUpgradeHelp.map(entry => ({...entry, text: '更新后的规则说明。'}));
+		c.room.receiveState(data); assert(c.room.html.includes('title="更新后的规则说明。"'));
+		const codexOnly = client(true);
+		codexOnly.room.receiveState(state()); codexOnly.room.openCodex('blessings');
+		codexOnly.room.receiveCodex({userid: 'rogueplayer', section: 'blessings', blessingUpgradeHelp: data.blessingUpgradeHelp,
+			entries: entries.map(entry => ({...entry, tier: 'gold', family: entry.id, unlocked: true}))});
+		assert(codexOnly.room.html.includes('data-reference-id="latebloom"'));
+		assert(codexOnly.room.html.includes('data-reference-id="supernumber"'));
+	});
+	it('opens upgrade details by click or keyboard without selecting the parent blessing or sending a game command', () => {
+		const c = client(), data = adventure('blessing');
+		data.blessingUpgradeHelp = [{id: 'supernumber', name: '超大数字', tier: 'prismatic', aliases: [], text: '完整效果：五项能力变为五倍。'}];
+		c.room.receiveState(data);
+		const popup = Object.create(c.RogueReferencePopup), listeners = [];
+		popup.el = {addEventListener: (name, callback, capture) => listeners.push({name, callback, capture})};
+		popup.$el = {addClass() {}, html: html => { popup.html = html; }};
+		popup.initialize({kind: 'blessing', ...data.blessingUpgradeHelp[0]});
+		assert(popup.html.includes('<small>祝福</small>')); assert(popup.html.includes('棱彩祝福'));
+		assert(popup.html.includes('完整效果：五项能力变为五倍。'));
+		const before = JSON.stringify(data), sent = c.sent.length;
+		for (const [type, key] of [['click', undefined], ['keydown', 'Enter'], ['keydown', ' ']]) {
+			let prevented = 0, stopped = 0;
+			const term = {dataset: {referenceKind: 'blessing', referenceId: 'supernumber'}};
+			listeners.find(listener => listener.name === type && listener.capture).callback({type, key,
+				target: {closest: () => term}, preventDefault() { prevented++; }, stopImmediatePropagation() { stopped++; }});
+			assert.equal(prevented, 1); assert.equal(stopped, 1);
+			assert.equal(c.app.lastPopup.type, c.RogueReferencePopup);
+			assert.equal(c.app.lastPopup.data.text, data.blessingUpgradeHelp[0].text);
+		}
+		assert.equal(JSON.stringify(data), before); assert.equal(c.sent.length, sent);
+		assert.equal(c.room.selectedBlessing, null);
 	});
 	for (const shards of [0, 49, 50, 99, 100, 101]) it(`renders authoritative fantasy eligibility with ${shards} shards`, () => {
 		const c = client(), data = adventure('ready'), mon = data.run.team[0];

@@ -2,7 +2,7 @@
 	'use strict';
 	var escape = BattleLog.escapeHTML;
 	var globals = this;
-	var blessingDetailed = typeof Dex.prefs === 'function' ? Dex.prefs('rogueBlessingDetailed') !== false : true;
+	var blessingDetailed = typeof Dex.prefs === 'function' && Dex.prefs('rogueBlessingDetailed') === true;
 	function blessingSwitch() {
 		return '<button type="button" name="toggleBlessingDetail" class="rogue-blessing-switch" role="switch" aria-label="祝福详细说明" aria-checked="' +
 			blessingDetailed + '"><span>简略</span><i aria-hidden="true"></i><span>详细</span></button>';
@@ -305,7 +305,7 @@
 			story.stage, story.index, story.key, round.id, round.remaining, reward.id, blessings.stage && blessings.stage.kind,
 			room.starterIndex, room.starterStage]);
 	}
-	var referenceCache, moveCategoryHelp = {}, referenceItems = [], blessingSupplyHelp = [];
+	var referenceCache, moveCategoryHelp = {}, referenceItems = [], blessingSupplyHelp = [], blessingUpgradeHelp = [];
 	var referenceGroups = {move: 'moves', ability: 'abilities', item: 'items', species: 'species'};
 	function categoryReference(name) {
 		var id = Object.keys(moveCategoryHelp).find(function (key) { return moveCategoryHelp[key].aliases.indexOf(name) >= 0; });
@@ -313,7 +313,7 @@
 	}
 	function blessingReferences() {
 		var tables = [globals.BattleMovedex, globals.Gen9fantasyMovedex, globals.BattleAbilities, globals.Gen9fantasyAbilities,
-			globals.BattleItems, globals.Gen9fantasyItems, globals.BattlePokedex, globals.Gen9fantasydex, referenceItems, blessingSupplyHelp];
+			globals.BattleItems, globals.Gen9fantasyItems, globals.BattlePokedex, globals.Gen9fantasydex, referenceItems, blessingSupplyHelp, blessingUpgradeHelp];
 		if (referenceCache && tables.every(function (table, i) { return table === referenceCache.tables[i]; })) return referenceCache;
 		var names = Object.create(null);
 		function register(name, kind, id) {
@@ -332,11 +332,19 @@
 		referenceItems.concat(blessingSupplyHelp).forEach(function (item) {
 			register(item.name, 'item', item.id); register(localName(item.name, 'item'), 'item', item.id);
 		});
+		blessingUpgradeHelp.forEach(function (entry) {
+			[entry.name].concat(entry.aliases || []).forEach(function (name) { register(name, 'blessing', entry.id); });
+		});
 		names['大法师'] = {kind: 'ability', id: 'roguegreatmage'};
 		names['无极汰那・无极形态'] = {kind: 'species', id: 'eternatuseternamax'};
 		return referenceCache = {tables: tables, names: names};
 	}
 	function referenceData(kind, id) {
+		if (kind === 'blessing') {
+			var blessing = blessingUpgradeHelp.find(function (entry) { return entry.id === id; });
+			return {kind: kind, id: id, name: blessing ? blessing.name : id, tier: blessing && blessing.tier,
+				text: blessing ? blessing.text : '暂无介绍'};
+		}
 		if (kind === 'category') {
 			var category = moveCategoryHelp[id];
 			var moves = category ? category.moves.map(function (move) { return localName(dex().moves.get(move).name || move, 'move'); }) : [];
@@ -371,7 +379,7 @@
 		function linkTerm(name) {
 			var ref = categoryReference(name) || refs.names[name.replace(/[+🔄]+$/u, '')];
 			if (!ref) return escape(name);
-			if (ref.kind !== 'category') name = localName(name, ref.kind);
+			if (ref.kind !== 'category' && ref.kind !== 'blessing') name = localName(name, ref.kind);
 			var info = referenceData(ref.kind, ref.id);
 			return '<span class="rogue-reference" role="button" tabindex="0" data-reference-kind="' + ref.kind +
 				'" data-reference-id="' + escape(ref.id) + '" aria-label="查看' + escape(name) + '介绍" title="' +
@@ -2902,6 +2910,7 @@
 			this.codices[data.section] = data;
 			if (data.moveCategoryHelp) moveCategoryHelp = data.moveCategoryHelp;
 			if (data.blessingSupplyHelp) blessingSupplyHelp = data.blessingSupplyHelp;
+			if (data.blessingUpgradeHelp) blessingUpgradeHelp = data.blessingUpgradeHelp;
 			if (this.screen === data.section) this.render();
 		},
 		filterCodex: function (filter) { this.codexFilter = filter; this.codexPage = 0; this.render(); },
@@ -2995,6 +3004,7 @@
 			if (state.moveCategoryHelp) moveCategoryHelp = state.moveCategoryHelp;
 			referenceItems = state.items || [];
 			if (state.blessingSupplyHelp) blessingSupplyHelp = state.blessingSupplyHelp;
+			if (state.blessingUpgradeHelp) blessingUpgradeHelp = state.blessingUpgradeHelp;
 			if (codexChanged && ['guide', 'blessings', 'events', 'stories'].indexOf(this.screen) >= 0) this.loadCodex(this.screen);
 			if (state.account && state.account.needsOnboarding && this.screen === 'game') this.screen = 'home';
 			if (this.$el[0] && this.$el[0].setAttribute) this.$el[0].setAttribute('aria-busy', this.pending ? 'true' : 'false');
@@ -3978,7 +3988,7 @@
 						'<div class="rogue-blessing-refresh">' + button('refreshBlessing', String(index), '刷新 ' + option.refreshes + ' 次',
 							busy || option.chosen || !option.refreshes, fa('refresh')) + '</div></article>';
 				});
-				html += '</div><p class="rogue-caption rogue-blessing-note">悬停或点击【】中带下划线的招式、特性、道具和宝可梦名称，可查看详细介绍；招式类别可查看所含招式。<br />每张卡片独立刷新，品质保持不变。<br />' +
+				html += '</div><p class="rogue-caption rogue-blessing-note">悬停或点击【】中带下划线的升级祝福、招式、特性、道具和宝可梦名称，可查看详细介绍；招式类别可查看所含招式。<br />每张卡片独立刷新，品质保持不变。<br />' +
 					'固定首领包括固定幻想精英、馆主、天王、冠军及最终首领；普通遭遇包括野生宝可梦、随机野生精英和事件 NPC。' +
 					'祝福效果立即生效，新增加级延后 10 层：开局从第 11 层，50／100／150 层领取的从第 61／111／161 层生效。此前已生效的加级保持不变。' +
 					'加级按每次领取累加，允许超过 100 级；命运赠送的祝福不重复加级，捕捉后移除祝福造成的等级。</p>';
@@ -6314,6 +6324,11 @@
 				return;
 			}
 			var details = '<p>' + escape(data.text) + '</p>';
+			if (data.kind === 'blessing') {
+				var tier = {silver: '白银', gold: '黄金', prismatic: '棱彩'}[data.tier];
+				details = (tier ? '<p>' + tier + '祝福</p>' : '') + '<p>' + blessingText(data.text) + '</p>';
+				bindReferenceHelp(this.el || this.$el[0]);
+			}
 			if (data.kind === 'species') {
 				details = '<div class="rogue-reference-species"><span class="picon" aria-hidden="true" style="' + Dex.getPokemonIcon(data.id) + '"></span>' + typeIcons(data.types) + '</div>' +
 					'<h4>种族值</h4><div class="rogue-reference-stats">' + data.stats.map(function (stat) {
@@ -6323,7 +6338,7 @@
 					}).join('') + '</dl>';
 			}
 			this.$el.html('<h3>' + escape(data.name) + ' <small>' +
-				({move: '招式', ability: '特性', item: '道具', species: '宝可梦'}[data.kind] || '') + '</small></h3>' +
+				({move: '招式', ability: '特性', item: '道具', species: '宝可梦', blessing: '祝福'}[data.kind] || '') + '</small></h3>' +
 				(data.kind === 'move' ? moveRow(data.id) : '') + details + button('close', '', '返回'));
 		}
 	});
