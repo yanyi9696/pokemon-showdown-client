@@ -2204,8 +2204,8 @@
 			(offer.choosing ? ['no', 'yes'] : [offer.answer ? 'continue' : 'next']).forEach(function (value) {
 				html += button('chooseCoopComeback', value, labels[value], disabled);
 			});
-			html += '<p class="rogue-caption">每人每局仅能接受一次；仅本次触发者获得本层伤害、双防 +25%，含本层的10层战斗经验 ×2，' +
-				'无战斗经验的楼层另获一级所需经验的25%。不免费复活，另一位玩家不会获得该增益。拒绝后保留机会。</p>' +
+			html += '<p class="rogue-caption">每人每局仅能接受一次；仅本次触发者获得本层伤害、双防 +20%，含本层的10层战斗经验 ×2，' +
+				'无战斗经验的楼层另获一级所需经验的20%。免费复活本次援助对象的全队，不消耗金币或道具；另一位玩家不会获得该增益。拒绝后保留机会；无恢复途径时老人会主动援助。</p>' +
 				'<p>你的预选：' + escape((labels[offer.ownChoice] || '尚未选择').replace(/。$/, '')) + '；队友预选：' + escape((labels[offer.partnerChoice] || '尚未选择').replace(/。$/, '')) + '。</p>';
 			if (offer.ownChoice) html += button('chooseCoopComeback', '', '撤回我的预选', disabled);
 			return html + '</section>';
@@ -2215,8 +2215,8 @@
 			[[adventure.ownComeback, '你'], [adventure.partnerComeback, '队友']].forEach(function (entry) {
 				var state = entry[0];
 				if (state && state.active) html += '<p class="infobox"><strong>' + entry[1] + '的再启程 · 剩余 ' + state.remaining +
-					' 层</strong><br />仅该玩家队伍战斗经验 ×2；无战斗经验的楼层获得一级所需经验的25%。' +
-					(state.floorBuff ? '<br />本层伤害、双防 +25%。' : '') + '</p>';
+					' 层</strong><br />仅该玩家队伍战斗经验 ×2；无战斗经验的楼层获得一级所需经验的20%。' +
+					(state.floorBuff ? '<br />本层伤害、双防 +20%。' : '') + '</p>';
 			});
 			return html;
 		},
@@ -4069,7 +4069,7 @@
 				(evo.extras || []).forEach(function (id) { html += '<li>' + escape(extraNames[id] || id) + '</li>'; });
 				html += '</ul>';
 			}
-			if (run.comeback && run.comeback.active) html += '<p class="infobox"><strong>再启程 · 剩余 ' + run.comeback.remaining + ' 层</strong><br />战斗经验 ×2；无战斗经验的楼层额外获得一级所需经验的 25%。' + (run.comeback.floorBuff ? '<br />本层伤害、双防 +25%。' : '') + '</p>';
+			if (run.comeback && run.comeback.active) html += '<p class="infobox"><strong>再启程 · 剩余 ' + run.comeback.remaining + ' 层</strong><br />战斗经验 ×2；无战斗经验的楼层额外获得一级所需经验的 20%。' + (run.comeback.floorBuff ? '<br />本层伤害、双防 +20%。' : '') + '</p>';
 			var locked = busy || !editable(run) || run.healingLocked;
 			if (state.owned.some(function (b) { return b.family === 'potara'; })) {
 				var fused = run.team.find(function (m) { return m.fusion; });
@@ -5592,7 +5592,7 @@
 			if (run && run.comeback && run.comeback.key) {
 				var c = run.comeback;
 				var elder = '<section class="rogue-floor rogue-comeback" role="dialog" aria-label="黑袍老人 · 再启程"><h3>黑袍老人 · 再启程</h3><div class="rogue-story-scene scene-stranger" style="height:220px;min-height:0"><div class="rogue-story-figure" style="top:65px;transform:scale(.65);transform-origin:top center" aria-label="黑袍老人"></div></div><p style="font-size:1.1em;line-height:1.9">' + escape(c.text) + '</p>';
-				if (c.choosing) elder += button('comebackChoice', 'no', '否，我还想靠自己和伙伴继续走下去。', busy) + button('comebackChoice', 'yes', '是，我需要重新找到前进的力量。', busy) + '<p class="rogue-caption">回答“否”保留机会；回答“是”将偏爱卡片换为一次性援助：本层伤害、双防 +25%，10 层经验加成。两者均不免费复活。</p>';
+				if (c.choosing) elder += button('comebackChoice', 'no', '否，我还想靠自己和伙伴继续走下去。', busy) + button('comebackChoice', 'yes', '是，我需要重新找到前进的力量。', busy) + '<p class="rogue-caption">回答“否”保留机会；回答“是”将偏爱卡片换为一次性援助：免费复活全队，恢复 HP、PP 并解除异常，不消耗金币或道具；本层伤害、双防 +20%，10 层经验加成。无恢复途径且机会尚未用掉时，老人会主动援助。</p>';
 				else elder += button('comebackChoice', c.answer ? 'continue' : 'next', c.answer ? '回到伙伴身边' : '继续对话', busy);
 				stableHTML(this, html + elder + '</section></div>'); this.$el.scrollTop(0); return;
 			}

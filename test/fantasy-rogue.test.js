@@ -247,7 +247,8 @@ describe('Fantasy Rogue cooperative comeback interface', () => {
 		c.room.coopState = { userid: 'rogueplayer', session }; c.room.coopBusy = false;
 		let html = c.room.renderCoopAdventure(session);
 		assert(html.includes('队友的队伍')); assert(html.includes('另一位玩家不会获得'));
-		assert(html.includes('撤回我的预选')); assert(!html.includes('免费复活队伍'));
+		assert(html.includes('撤回我的预选')); assert(html.includes('免费复活本次援助对象的全队'));
+		assert(html.includes('不消耗金币或道具')); assert(html.includes('一级所需经验的20%'));
 		c.room.chooseCoopComeback('');
 		assert.deepEqual(JSON.parse(c.sent.at(-1).slice('/fantasyrogue coop '.length)), { action: 'comeback', visit: 'elder:1:', value: '' });
 		session.canControl = false; html = c.room.renderCoopAdventure(session);
@@ -256,7 +257,13 @@ describe('Fantasy Rogue cooperative comeback interface', () => {
 		session.adventure.partnerComeback = { active: true, remaining: 10, floorBuff: true };
 		html = c.room.renderCoopComebackStatus(session);
 		assert(html.includes('你的再启程 · 剩余 9 层')); assert(html.includes('队友的再启程 · 剩余 10 层'));
-		assert.equal(html.split('本层伤害、双防 +25%').length - 1, 1);
+		assert.equal(html.split('本层伤害、双防 +20%').length - 1, 1);
+		session.canControl = true;
+		session.adventure.comeback = {visit: 'elder:2:yes', owner: 'friend', answer: 'yes', choosing: false,
+			text: '我也有我的坚持，愿尽绵薄之力。'};
+		html = c.room.renderCoopAdventure(session);
+		assert(html.includes('我也有我的坚持')); assert(html.includes('value="continue"'));
+		assert(!html.includes('value="yes"')); assert(!html.includes('value="no"'));
 	});
 });
 
@@ -4383,10 +4390,24 @@ describe('Fantasy Rogue start menu and codex', () => {
 		data.run.comeback = {key: 'elder', text: '已经到达自己的极限了吗？', choosing: true};
 		c.room.receiveState(data);
 		assert.equal(c.room.scroll, 0); assert(c.room.html.includes('role="dialog"'));
-		assert(c.room.html.includes('回答“否”保留机会')); assert(c.room.html.includes('两者均不免费复活'));
+		assert(c.room.html.includes('回答“否”保留机会')); assert(c.room.html.includes('免费复活全队'));
+		assert(c.room.html.includes('不消耗金币或道具')); assert(c.room.html.includes('双防 +20%'));
 		assert(!c.room.html.includes('name="startBattle"'));
 		c.room.comebackChoice('no'); const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
 		assert.equal(command.action, 'comeback'); assert.equal(command.member, 'elder'); assert.equal(command.value, 'no');
+	});
+	it('shows the automatic elder farewell without repeating the acceptance choice or submitting on render', () => {
+		const c = client(), data = adventure('ready');
+		data.run.comeback = {key: 'rescue', page: 2, answer: 'yes', choosing: false,
+			text: '你不愿受惠于人的坚持，我认可。但我也有我的坚持。已免费复活全队。'};
+		c.room.receiveState(data); const messages = c.sent.length;
+		c.room.receiveState(data); assert.equal(c.sent.length, messages);
+		assert(c.room.html.includes('我也有我的坚持')); assert(c.room.html.includes('回到伙伴身边'));
+		assert(!c.room.html.includes('value="yes"')); assert(!c.room.html.includes('value="no"'));
+		assert(!c.room.html.includes('name="startBattle"'));
+		c.room.comebackChoice('continue');
+		const command = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(command.member, 'rescue'); assert.equal(command.value, 'continue');
 	});
 	it('quotes a batch training price and submits exactly the selected members and stats', () => {
 		const c = client(), data = adventure('rest'); data.run.money = 5000;
