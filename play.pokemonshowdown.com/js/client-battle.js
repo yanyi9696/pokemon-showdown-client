@@ -129,7 +129,8 @@
 				log.shift();
 				app.roomTitleChanged(this);
 			}
-			if (this.battle.stepQueue.length) return;
+			if (this.battle.stepQueue.length && !this.needsReconnect) return;
+			this.needsReconnect = false;
 			this.battle.stepQueue = log;
 			this.battle.seekTurn(Infinity, true);
 			if (this.battle.ended) this.battleEnded = true;

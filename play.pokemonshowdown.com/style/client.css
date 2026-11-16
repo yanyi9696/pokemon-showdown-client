@@ -365,6 +365,24 @@ span.header-username:hover {
  * Rooms
  *********************************************************/
 
+#connection-recovery {
+	position: fixed;
+	top: 58px;
+	left: 50%;
+	transform: translateX(-50%);
+	max-width: calc(100% - 32px);
+	box-sizing: border-box;
+	padding: 8px 14px;
+	border: 1px solid #91b4cb;
+	border-radius: 8px;
+	background: rgba(240, 248, 255, 0.96);
+	color: #244b66;
+	font-size: 14px;
+	text-align: center;
+	pointer-events: none;
+	z-index: 101;
+}
+
 .ps-room {
 	position: absolute;
 	display: block;

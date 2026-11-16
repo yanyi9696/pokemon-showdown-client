@@ -991,7 +991,7 @@
 			this.listenTo(app, 'response:fantasyroguedailyreplay', this.receiveDailyReplay);
 			this.listenTo(app, 'response:fantasyrogueski', this.receiveSki);
 			this.listenTo(app, 'response:fantasyroguecodex', this.receiveCodex);
-			this.listenTo(app, 'init:socketopened', this.refresh);
+			this.listenTo(app, 'init:socketopened init:socketrecovered', this.refresh);
 			this.listenTo(app, 'init:socketclosed', this.disconnected);
 			// Sent after the server confirms a login, even if the user ID did not change.
 			this.listenTo(app, 'init:choosename', this.refresh);
@@ -5719,7 +5719,7 @@
 			this.$el.addClass('ps-room-light scrollable fantasyrogue rogue-history'); this.offset = 0; this.state = null;
 			bindReferenceHelp(this.el || this.$el[0]);
 			this.listenTo(app, 'response:fantasyroguehistory', this.receiveHistory);
-			this.listenTo(app, 'init:socketopened init:choosename', this.refresh);
+			this.listenTo(app, 'init:socketopened init:socketrecovered init:choosename', this.refresh);
 			this.listenTo(app.user, 'change:userid', this.identityChanged); this.render();
 		},
 		join: function () { this.refresh(); },
@@ -5750,7 +5750,7 @@
 			this.listenTo(app, 'response:fantasyrogueaction', this.receiveMutation);
 			this.listenTo(app, 'response:fantasyrogueduel', this.receiveDuel);
 			this.listenTo(app, 'response:fantasyrogueduelnotice', this.refresh);
-			this.listenTo(app, 'init:socketopened', this.refresh);
+			this.listenTo(app, 'init:socketopened init:socketrecovered', this.refresh);
 			this.listenTo(app, 'init:socketclosed', this.disconnected);
 			this.listenTo(app, 'init:choosename', this.refresh);
 			this.listenTo(app.user, 'change:userid', this.identityChanged);

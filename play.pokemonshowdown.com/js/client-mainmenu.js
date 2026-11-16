@@ -76,7 +76,7 @@
 				if (app.socket && app.socket.readyState === 1) app.send('/cmd fantasyrogueaccess');
 			};
 			this.listenTo(app.user, 'change:userid change:named', requestRogueAccess);
-			this.listenTo(app, 'init:socketopened init:choosename', requestRogueAccess);
+			this.listenTo(app, 'init:socketopened init:socketrecovered init:choosename', requestRogueAccess);
 			requestRogueAccess.call(this);
 
 			// right menu

@@ -349,8 +349,13 @@ function toId() {
 			this.challstr = challstr;
 			if (Storage.isLocalGuest()) {
 				this.set('registered', false);
-				this.finishLoginUpkeep();
 				var localName = Storage.prefs('localTestName');
+				if (app.connectionRecovering && typeof localName === 'string' && localName) {
+					// Rejoin private rooms only after the local server accepts the test nickname.
+					this.rename(localName);
+					return;
+				}
+				this.finishLoginUpkeep();
 				if (typeof localName === 'string' && localName) this.rename(localName);
 				return;
 			}
@@ -552,33 +557,8 @@ function toId() {
 				self.addPopupMessage('You have third-party cookies disabled in your browser, which is likely to cause problems. You should enable them and then refresh this page.');
 			});
 
-			this.on('init:socketclosed', function (message, showNotification) {
-				// Display a desktop notification if the user won't immediately see the popup.
-				if (self.isDisconnected) return;
-
-				clearTimeout(this.hostCheckInterval);
-				this.hostCheckInterval = null;
-				self.isDisconnected = true;
-
-				if (showNotification !== false && (self.popups.length || !self.focused) && window.Notification) {
-					self.rooms[''].requestNotifications();
-					self.rooms[''].notifyOnce("Disconnected", "You have been disconnected from Pokémon Showdown.", 'disconnected');
-				}
-
-				self.rooms[''].updateFormats();
-				$('.pm-log-add form').html('<small>You are disconnected and cannot chat.</small>');
-				$('.chat-log-add').html('<small>You are disconnected and cannot chat.</small>');
-				$('.battle-log-add').html('<small>You are disconnected and cannot chat.</small>');
-
-				self.reconnectPending = (message || true);
-				if (!self.popups.length) self.addPopup(ReconnectPopup, { message: message });
-			});
-
-			this.on('init:connectionerror', function () {
-				self.isDisconnected = true;
-				self.rooms[''].updateFormats();
-				self.addPopup(ReconnectPopup, { cantconnect: true });
-			});
+			this.on('init:socketclosed', this.connectionClosed, this);
+			this.on('init:connectionerror', this.connectionError, this);
 
 			this.user.on('login:invalidname', function (name, reason) {
 				self.addPopup(LoginPopup, { name: name, reason: reason });
@@ -770,6 +750,164 @@ function toId() {
 			});
 		},
 		setAFD: function (mode) {},
+		installConnectionRecovery: function () {
+			if (this.connectionRecoveryInstalled) return;
+			this.connectionRecoveryInstalled = true;
+			var self = this;
+			document.addEventListener('visibilitychange', function () {
+				if (document.hidden) {
+					self.clearConnectionTimers();
+				} else {
+					self.resumeConnection();
+				}
+			});
+			window.addEventListener('online', function () { self.resumeConnection(); });
+			window.addEventListener('pageshow', function (event) { if (event.persisted) self.resumeConnection(); });
+			this.on('login:state', function () {
+				if (!self.connectionRecovering || !self.user.loaded) return;
+				// Keep the old view during upkeep, but never retain a signed-in identity if upkeep fails.
+				if (self.recoveryGuest) {
+					var guest = self.recoveryGuest;
+					self.recoveryGuest = null;
+					self.recoveryUser = '';
+					self.user.set('registered', false);
+					self.receive(guest);
+				}
+				self.restoreConnectionRooms();
+			});
+		},
+		clearConnectionTimers: function () {
+			clearTimeout(this.reconnectTimer);
+			clearTimeout(this.connectionProbeTimer);
+			clearTimeout(this.connectionAttemptTimer);
+			this.reconnectTimer = this.connectionProbeTimer = this.connectionAttemptTimer = null;
+		},
+		showConnectionRecovery: function (text) {
+			var status = $('#connection-recovery');
+			if (!text) { status.remove(); return; }
+			if (!status.length) status = $('<div id="connection-recovery" role="status" aria-live="polite"></div>').appendTo('body');
+			status.text(text);
+		},
+		connectionClosed: function (message, showNotification) {
+			this.clearConnectionTimers();
+			clearTimeout(this.hostCheckInterval);
+			this.hostCheckInterval = null;
+			clearTimeout(this.user.loginUpkeepTimer);
+			this.user.loginUpkeepGeneration = (this.user.loginUpkeepGeneration || 0) + 1;
+			this.recoveryGuest = null;
+			if (message || showNotification === false) this.reconnectStopped = true;
+			if (this.hasConnected && !this.reconnectStopped) {
+				if (!this.connectionRecovering) {
+					this.recoveryUser = this.user.get('named') ? this.user.get('userid') : '';
+					this.recoveryNamed = false;
+					this.connectionRecovering = true;
+					for (var id in this.rooms) {
+						var room = this.rooms[id];
+						if (room.type === 'battle' && !room.expired) {
+							room.needsReconnect = true;
+							room.request = null;
+							room.choice = undefined;
+							room.controlsShown = false;
+							room.updateControls();
+						}
+					}
+				}
+				this.isDisconnected = true;
+				this.reconnectPending = false;
+				// Never replay purchases, choices, chat, or an assertion tied to the previous socket.
+				this.sendQueue = [];
+				this.user.loaded = false;
+				this.user.set({ loginState: 'pending', loginError: '' });
+				this.scheduleConnectionRecovery();
+				return;
+			}
+			this.connectionRecovering = false;
+			this.showConnectionRecovery('');
+			if (this.isDisconnected && !message) return;
+			this.isDisconnected = true;
+			if (showNotification !== false && (this.popups.length || !this.focused) && window.Notification) {
+				this.rooms[''].requestNotifications();
+				this.rooms[''].notifyOnce("Disconnected", "You have been disconnected from Pokémon Showdown.", 'disconnected');
+			}
+			this.rooms[''].updateFormats();
+			$('.pm-log-add form, .chat-log-add, .battle-log-add').html('<small>You are disconnected and cannot chat.</small>');
+			this.reconnectPending = (message || true);
+			if (!this.popups.length) this.addPopup(ReconnectPopup, { message: message });
+		},
+		connectionError: function () {
+			if (this.hasConnected && !this.reconnectStopped) {
+				this.trigger('init:socketclosed');
+				return;
+			}
+			this.isDisconnected = true;
+			this.rooms[''].updateFormats();
+			this.addPopup(ReconnectPopup, { cantconnect: true });
+		},
+		scheduleConnectionRecovery: function (immediate) {
+			if (this.reconnectStopped || this.down || Config.server.banned || !this.connectionRecovering) return;
+			clearTimeout(this.reconnectTimer);
+			this.reconnectTimer = null;
+			this.showConnectionRecovery(navigator.onLine === false ? '网络已断开，联网后自动恢复。' : '连接中断，正在自动重连…');
+			if (document.hidden || navigator.onLine === false) return;
+			var self = this;
+			var delay = immediate ? 0 : Math.min(30000, 1000 * Math.pow(2, Math.min(this.reconnectAttempts || 0, 5)));
+			this.reconnectTimer = setTimeout(function () {
+				self.reconnectTimer = null;
+				if (self.reconnectStopped || document.hidden || navigator.onLine === false) return;
+				self.reconnectAttempts = (self.reconnectAttempts || 0) + 1;
+				self.connect();
+			}, delay);
+		},
+		dropStaleConnection: function () {
+			if (this.reconnectStopped) return;
+			if (this.socket) {
+				this.socket.onopen = this.socket.onmessage = this.socket.onclose = null;
+				this.socket.close();
+			}
+			this.trigger('init:socketclosed');
+		},
+		resumeConnection: function () {
+			if (!this.hasConnected || this.reconnectStopped || document.hidden || this.down) return;
+			if (navigator.onLine === false) return;
+			if (!this.socket || this.socket.readyState > 1) {
+				if (!this.connectionRecovering) this.trigger('init:socketclosed');
+				this.scheduleConnectionRecovery(true);
+				return;
+			}
+			if (this.connectionRecovering && !this.connectionAttemptTimer) {
+				var remaining = Math.max(0, 20000 - (Date.now() - this.connectionStartedAt));
+				var recoveringApp = this;
+				this.connectionAttemptTimer = setTimeout(function () { recoveringApp.dropStaleConnection(); }, remaining);
+			}
+			if (this.socket.readyState === 0) {
+				if (Date.now() - this.connectionStartedAt > 20000) this.dropStaleConnection();
+				return;
+			}
+			if (this.connectionProbeTimer) return;
+			var self = this, socket = this.socket;
+			// A read-only response distinguishes a suspended/dead connection from a healthy one.
+			this.connectionProbeTimer = setTimeout(function () {
+				self.connectionProbeTimer = null;
+				if (self.socket === socket && !document.hidden) self.dropStaleConnection();
+			}, 8000);
+			this.send('/cmd rooms');
+		},
+		restoreConnectionRooms: function () {
+			if (!this.connectionRecovering || !this.user.loaded || this.isDisconnected ||
+				this.recoveryUser && !this.recoveryNamed) return;
+			this.clearConnectionTimers();
+			this.connectionRecovering = false;
+			this.reconnectAttempts = 0;
+			this.recoveryGuest = null;
+			this.sendQueue = [];
+			this.showConnectionRecovery('');
+			for (var id in this.rooms) {
+				var room = this.rooms[id];
+				if (id && !room.expired && ['chat', 'battle', 'html'].indexOf(room.type) >= 0) this.send('/join ' + id);
+			}
+			this.rooms[''].updateFormats();
+			this.trigger('init:socketrecovered');
+		},
 		/**
 		 * This function establishes the actual connection to the sim server.
 		 * This is intended to be called only by `initializeConnection` above.
@@ -777,6 +915,8 @@ function toId() {
 		 */
 		connect: function () {
 			if (this.down) return;
+			this.installConnectionRecovery();
+			if (this.socket && this.socket.readyState < 2) return;
 
 			if (Config.bannedHosts) {
 				for (var i = 0; i < Config.bannedHosts.length; i++) {
@@ -834,13 +974,26 @@ function toId() {
 				}
 			};
 			this.socket = constructSocket();
+			if (!this.socket) return;
+			this.connectionStartedAt = Date.now();
+			if (this.connectionRecovering) {
+				this.connectionAttemptTimer = setTimeout(function () { self.dropStaleConnection(); }, 20000);
+			}
 
 			var socketopened = false;
 			var altport = (Config.server.port === Config.server.altport);
 			var altprefix = false;
 
 			this.socket.onopen = function () {
+				if (this !== self.socket) return;
 				socketopened = true;
+				self.hasConnected = true;
+				self.isDisconnected = false;
+				if (self.connectionRecovering) {
+					clearTimeout(self.connectionAttemptTimer);
+					self.connectionStartedAt = Date.now();
+					self.connectionAttemptTimer = setTimeout(function () { self.dropStaleConnection(); }, 20000);
+				}
 				if (altport && window.ga) {
 					ga('send', 'event', 'Alt port connection', Config.server.id);
 				}
@@ -853,7 +1006,7 @@ function toId() {
 					self.send('/avatar ' + avatar + ',1');
 				}
 
-				if (self.sendQueue) {
+				if (self.sendQueue && !self.connectionRecovering) {
 					var queue = self.sendQueue;
 					delete self.sendQueue;
 					for (var i = 0; i < queue.length; i++) {
@@ -861,7 +1014,8 @@ function toId() {
 					}
 				}
 
-				this.hostCheckInterval = setTimeout(function checkHost() {
+				clearTimeout(self.hostCheckInterval);
+				self.hostCheckInterval = setTimeout(function checkHost() {
 					if (Config.server.host !== $.trim(Config.server.host)) {
 						app.socket.close();
 					} else {
@@ -870,6 +1024,9 @@ function toId() {
 				}, 500);
 			};
 			this.socket.onmessage = function (msg) {
+				if (this !== self.socket) return;
+				clearTimeout(self.connectionProbeTimer);
+				self.connectionProbeTimer = null;
 				if (window.console && console.log) {
 					console.log('<< ' + msg.data);
 				}
@@ -877,12 +1034,14 @@ function toId() {
 			};
 			var reconstructSocket = function (socket) {
 				var s = constructSocket();
+				if (!s) return null;
 				s.onopen = socket.onopen;
 				s.onmessage = socket.onmessage;
 				s.onclose = socket.onclose;
 				return s;
 			};
 			this.socket.onclose = function () {
+				if (this !== self.socket) return;
 				if (!socketopened) {
 					if (Config.server.altport && !altport) {
 						altport = true;
@@ -915,6 +1074,8 @@ function toId() {
 		 * Send to sim server
 		 */
 		send: function (data, room) {
+			if (this.connectionRecovering && !/^\/(?:trn |avatar |cmd rooms$)/.test(data)) return false;
+			if (this.hasConnected && (!this.socket || this.socket.readyState !== SockJS.OPEN)) return false;
 			if (room && room !== true) {
 				data = room + '|' + data;
 			} else if (room !== true) {
@@ -928,7 +1089,12 @@ function toId() {
 			if (window.console && console.log) {
 				console.log('>> ' + data);
 			}
-			this.socket.send(data);
+			try {
+				this.socket.send(data);
+			} catch (e) {
+				this.dropStaleConnection();
+				return false;
+			}
 		},
 		serializeForm: function (form, checkboxOnOff) {
 			// querySelector dates back to IE8 so we can use it
@@ -1162,6 +1328,14 @@ function toId() {
 				}
 				var parsed = BattleTextParser.parseNameParts(parts[1]);
 				var named = !!+parts[2];
+				if (this.connectionRecovering && !named && this.recoveryUser) {
+					this.recoveryGuest = nlIndex > 0 ? data.slice(0, nlIndex) : data;
+					break;
+				}
+				if (this.connectionRecovering && named) {
+					this.recoveryNamed = true;
+					this.recoveryGuest = null;
+				}
 
 				var userid = toUserid(parsed.name);
 				if (!Storage.isLocalGuest() && userid === this.user.get('userid') && parsed.name !== this.user.get('name')) {
@@ -1254,6 +1428,7 @@ function toId() {
 				break;
 
 			case 'disconnect':
+				this.reconnectStopped = true;
 				app.trigger('init:socketclosed', BattleLog.sanitizeHTML(data.substr(12)));
 				break;
 
