@@ -106,6 +106,17 @@
 		show: function () {
 			Room.prototype.show.apply(this, arguments);
 			this.updateLayout();
+			this.syncRogueLearning(false);
+		},
+		syncRogueLearning: function (refresh) {
+			if (!this.fantasyRogue || this.fantasyRogue.userid !== app.user.get('userid') ||
+				this.fantasyRogue.cooperative || this.fantasyRogue.preview) return;
+			var controller = app.rooms.fantasyrogue;
+			if (refresh) {
+				// A direct battle URL does not otherwise create the room that receives saved learning choices.
+				controller = controller || app._addRoom('fantasyrogue', null, true);
+				controller.refresh();
+			} else if (controller) controller.revealPendingMove();
 		},
 		receive: function (data) {
 			this.add(data);
@@ -162,6 +173,7 @@
 			}
 			if (data.substr(0, 14) === '|fantasyrogue|') {
 				this.fantasyRogue = JSON.parse(data.slice(14));
+				this.syncRogueLearning(true);
 				this.updateControls();
 				return;
 			}

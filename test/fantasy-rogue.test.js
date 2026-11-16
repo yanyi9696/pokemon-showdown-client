@@ -3,6 +3,61 @@ const fs = require('fs');
 const vm = require('vm');
 const {EventEmitter} = require('events');
 
+describe('Fantasy Rogue learning recovery', () => {
+	it('restores the saved move decision in a rejoined battle before entering the Rogue screen', () => {
+		const c = client(true), data = adventure('battle');
+		data.run.id = 'rejoined-growth'; data.run.roomid = 'battle-rejoined-growth'; data.run.growthPaused = true;
+		data.run.pendingMoves = [{member: data.run.team[0].id, move: 'leechseed'}];
+		c.app.curRoom = {id: data.run.roomid};
+		c.room.receiveState(data);
+		assert(c.room.pendingMovePopup, 'the server is waiting for learning in the visible battle');
+		assert(c.room.pendingMovePopup.html.includes('leechseed'));
+		assert.equal(c.room.screen, 'home'); assert.equal(c.app.curRoom.id, data.run.roomid);
+	});
+	it('restores learning from the visible Rogue home and party without advancing a hidden dialogue', () => {
+		for (const pane of ['room', 'panel']) {
+			const c = client(true), data = adventure('ready');
+			data.run.id = 'saved-candy'; c.app.curRoom = c[pane];
+			data.run.pendingMoves = [{member: data.run.team[0].id, move: 'leechseed'}];
+			if (pane === 'panel') data.story = {key: 'saved-story', title: '对话', text: '等待选择', choices: []};
+			const story = JSON.stringify(data.story);
+			c.room.receiveState(data);
+			assert(c.room.pendingMovePopup, pane);
+			assert.equal(JSON.stringify(data.story), story); assert.equal(c.sent.length, 0);
+		}
+	});
+	it('offers a retry inside the learning modal after a lost acknowledgement, keeping the original request', () => {
+		const timers = new Map(); let counter = 0;
+		const c = client(false, false, {setTimeout(fn, ms) { const id = ++counter; timers.set(id, {fn, ms}); return id; },
+			clearTimeout(id) { timers.delete(id); }}), data = adventure('ready');
+		data.run.id = 'lost-learn-ack'; data.run.pendingMoves = [{member: data.run.team[0].id, move: 'leechseed'}];
+		c.room.receiveState(data); c.room.pendingMovePopup.learnMove('0');
+		const original = c.sent.find(s => s.startsWith('/fantasyrogue action '));
+		const timeout = [...timers.values()].find(t => t.ms === 10000); timeout.fn();
+		assert(c.room.pendingMovePopup.html.includes('name="retryPendingMove"'));
+		assert.equal(JSON.parse(original.slice('/fantasyrogue action '.length)).move, 'leechseed');
+		c.room.pendingMovePopup.retryPendingMove();
+		assert.equal(c.sent.filter(s => s === original).length, 2);
+		c.room.pendingMovePopup.learnMove('skip');
+		assert.equal(c.sent.filter(s => s.startsWith('/fantasyrogue action ')).length, 2, 'do not create a second choice');
+		const next = structuredClone(data); next.account.revision++; next.run.pendingMoves = [];
+		c.room.receiveAction({userid: data.userid, id: c.room.pending.id, ok: true, state: next});
+		assert(!c.room.pending); assert(!c.room.pendingMovePopup);
+	});
+	it('recovers a detached modal reference and shows the saved choice after socket recovery', () => {
+		const c = client(), data = adventure('ready'); data.run.id = 'saved-dialog';
+		data.run.pendingMoves = [{member: data.run.team[0].id, move: 'leechseed'}];
+		c.room.receiveState(data); const stale = c.room.pendingMovePopup;
+		c.app.popups = []; c.room.revealPendingMove();
+		assert.notEqual(c.room.pendingMovePopup, stale); assert.equal(c.app.popups.length, 1);
+		c.room.pendingMovePopup.learnMove('skip'); c.app.socket.readyState = 3; c.room.disconnected();
+		assert(!c.room.pending); assert(c.room.pendingMovePopup.html.includes(' disabled'));
+		c.app.socket.readyState = 1; c.room.refresh(); c.room.receiveState(data);
+		assert(c.room.pendingMovePopup.html.includes('leechseed'));
+		assert(!c.room.pendingMovePopup.html.includes('name="learnMove" value="skip" disabled'));
+	});
+});
+
 function client(startScreen = false, localized = false, runtime = {}) {
 	const sent = [], joined = [];
 	let userid = 'rogueplayer';

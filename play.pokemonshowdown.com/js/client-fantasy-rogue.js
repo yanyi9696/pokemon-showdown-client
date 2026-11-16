@@ -3666,7 +3666,7 @@
 		},
 		learnMove: function (slot) {
 			var move = this.state.run.pendingMoves[0];
-			if (move) this.submit('learn', {value: slot, member: move.member});
+			if (move) this.submit('learn', {value: slot, member: move.member, move: move.move});
 		},
 		replaceMember: function (id) {
 			var run = this.state.run, pending = run.pendingCapture;
@@ -5523,11 +5523,17 @@
 			clearTimeout(this.movePopupTimer); this.movePopupTimer = null;
 			var run = this.state && this.state.run, pending = run && (run.pendingMoves || [])[0];
 			var key = pending && JSON.stringify([app.user.get('userid'), run.id, pending.member, pending.move]);
-			var waiting = this.screen !== 'game' && (!app.curRoom || app.curRoom.id !== 'fantasyrogueparty') ||
-				this.state && this.state.story && this.moveDialogueKey !== JSON.stringify([this.state.userid, run && run.id, this.state.story.key]) || run && (run.companionInvitation || run.affectionScene);
+			// A refreshed room starts on home, even when a rejoined battle is waiting for learning.
+			var current = app.curRoom && app.curRoom.id;
+			var inParty = current === 'fantasyrogueparty';
+			var inBattle = current && run && run.growthPaused && current === run.roomid;
+			var waiting = this.screen !== 'game' && current !== this.id && !inParty && !inBattle ||
+				!inParty && !inBattle && this.state && this.state.story &&
+				this.moveDialogueKey !== JSON.stringify([this.state.userid, run && run.id, this.state.story.key]) ||
+				run && (run.companionInvitation || run.affectionScene);
 			waiting = waiting || this.openingEvolutionAnimation || this.pending && this.pending.action === 'evolve';
 			var popup = this.pendingMovePopup;
-			if (popup && (!key || popup.key !== key || waiting)) {
+			if (popup && (!key || popup.key !== key || waiting || (app.popups || []).indexOf(popup) < 0)) {
 				var index = (app.popups || []).indexOf(popup);
 				if (index >= 0) app.popups.splice(index, 1);
 				popup.remove(); this.pendingMovePopup = null;
@@ -6855,14 +6861,22 @@
 		type: 'modal',
 		initialize: function (data) {
 			this.room = data.room; this.key = data.key;
-			this.room.pendingMovePopup = this;
 			this.$el.addClass('fantasyrogue rogue-learn-move-popup');
 			this.render();
+			this.room.pendingMovePopup = this;
 		},
 		render: function () {
 			var room = this.room;
+			var offline = !app.socket || app.socket.readyState !== 1;
 			stableHTML(this, (room.error ? '<p class="error">' + escape(room.error) + '</p>' : '') +
-				room.renderPendingMove(room.state.run, !!room.pending || !app.socket || app.socket.readyState !== 1));
+				room.renderPendingMove(room.state.run, !!room.pending || offline) +
+				(room.pending && room.error ? '<p>' + button('retryPendingMove', '', '查询／重发同一选择', offline) + '</p>' : ''));
+		},
+		retryPendingMove: function () {
+			if (!app.socket || app.socket.readyState !== 1) return;
+			// Preserve the request ID and revision so a lost acknowledgement cannot consume the next choice.
+			this.room.sendPending();
+			this.render();
 		},
 		learnMove: function (slot) {
 			var run = this.room.state && this.room.state.run, pending = run && (run.pendingMoves || [])[0];
