@@ -6,7 +6,7 @@ const ts = require('typescript');
 function sceneClient(perspective) {
 	const source = fs.readFileSync(require.resolve('../play.pokemonshowdown.com/src/battle-animations.ts'), 'utf8')
 		.replace(/^import .*;\r?$/gm, '').replace(/^export /gm, '');
-	const context = {Dex: {fxPrefix: '/fx/', resourcePrefix: '/',
+	const context = {Dex: {fxPrefix: '/fx/', resourcePrefix: '/', getTranslatedName: value => value,
 		getSpriteData: mon => ({url: mon.speciesForme + '.gif', w: 96, h: 96}), getShinySparkles: () => 'sparkle'},
 		BattleLog: {escapeHTML: value => String(value).replace(/</g, '&lt;')}, $: element => element,
 		toID: value => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, ''),

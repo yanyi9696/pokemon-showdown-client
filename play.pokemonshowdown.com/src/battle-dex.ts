@@ -407,6 +407,17 @@ export const Dex = new class implements ModdedDex {
 		return Dex.resourcePrefix + 'sprites/trainers/' + Dex.sanitizeName(avatar || 'unknown') + '.png';
 	}
 
+	/** Localize fixed game terminology only, never player names, chat or team nicknames. */
+	getTranslatedName(name: string, kind?: string): string {
+		const translate = (globalThis as typeof globalThis & {
+			translateRogueName?: (value: string, kind?: string) => string,
+		}).translateRogueName;
+		if (!translate) return name;
+		try {
+			if (globalThis.localStorage?.getItem('ps_china_lang') === 'en') return name;
+		} catch {} // Blocked storage should not prevent a tooltip from opening.
+		return translate(name, kind);
+	}
 	/**
 	 * This is used to sanitize strings from data files like `moves.js` and
 	 * `teambuilder-tables.js`.

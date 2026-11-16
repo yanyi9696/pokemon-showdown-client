@@ -6913,6 +6913,8 @@ var translations = {
     "(no weather)": "(没有天气变化)",
     "(no conditions)": "(没有场地状态)",
     "Ability:": "特性：",
+    "Base ability:": "原特性：",
+    "'s team:": "的队伍：",
     "Item:": "道具：",
     "(suppressed)": " (无效了)",
     "(fainted)": " (昏厥)",

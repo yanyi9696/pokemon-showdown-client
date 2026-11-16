@@ -58,6 +58,47 @@ describe('Fantasy Rogue growth log playback', () => {
 });
 
 describe('Battle', () => {
+	it('keeps level-only Rogue refreshes separate from visible form, ability and type changes', () => {
+		const battle = new Battle({debug: true, log: [
+			'|tier|[Gen 9] Fantasy Rogue', '|player|p1|FCPlayer', '|player|p2|Foe', '|gen|9', '|start',
+			'|switch|p1a: Partner|Ditto, L50|100/100', '|switch|p2a: Foe|Magikarp, L50|100/100', '|turn|1',
+		]});
+		try {
+			battle.add('|-transform|p1a: Partner|p2a: Foe');
+			battle.add('|-ability|p1a: Partner|Pressure');
+			battle.add('|-start|p1a: Partner|typechange|Fire|[silent]');
+			const mon = battle.p1.active[0];
+			let transformations = 0;
+			battle.scene.animTransform = () => transformations++;
+			for (const level of [51, 99, 100, 101]) {
+				battle.add(`|detailschange|p1a: Partner|Magikarp${level === 100 ? '' : ', L' + level}|[levelchange]`);
+				assert.equal(mon.level, level);
+				assert.equal(mon.speciesForme, 'Ditto');
+				assert.equal(mon.getSpeciesForme(), 'Magikarp');
+				assert.equal(mon.ability, 'Pressure');
+				assert.equal(mon.volatiles.typechange[1], 'Fire');
+				assert(mon.volatiles.transform);
+				assert.equal(mon.hp, 100);
+			}
+			assert.equal(transformations, 0);
+		} finally { battle.destroy(); }
+	});
+	it('keeps the actual Mega evolution animation after a quiet level update', () => {
+		const battle = new Battle({debug: true, log: [
+			'|tier|[Gen 9] Fantasy Rogue', '|player|p1|Player', '|player|p2|Foe', '|gen|9', '|start',
+			'|switch|p1a: Partner|Charizard, L50|100/100', '|turn|1',
+		]});
+		try {
+			let transformations = 0;
+			battle.scene.animTransform = () => transformations++;
+			battle.add('|detailschange|p1a: Partner|Charizard, L51|[levelchange]');
+			assert.equal(transformations, 0);
+			battle.add('|detailschange|p1a: Partner|Charizard-Mega-X, L51');
+			battle.add('|-mega|p1a: Partner|Charizard|Charizardite X');
+			assert.equal(transformations, 1);
+			assert.equal(battle.p1.active[0].getSpeciesForme(), 'Charizard-Mega-X');
+		} finally { battle.destroy(); }
+	});
 	it('does not play evolution effects for robe holders leveling up, but still animates real evolution', () => {
 		for (const species of ['Zangoose', 'Meowstic-F', 'Bulbasaur']) {
 			const battle = new Battle({debug: true, log: [

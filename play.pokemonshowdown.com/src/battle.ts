@@ -2608,6 +2608,22 @@ export class Battle {
 		}
 		case 'detailschange': {
 			let poke = this.getPokemon(args[1])!;
+			if (kwArgs.levelchange && ['gen9fantasyrogue', 'gen9fantasyroguedoubles',
+				'gen9fantasyroguecoop', 'gen9fantasyrogueduel'].includes(toID(this.tier))) {
+				const levelToken = args[2].split(',').map(part => part.trim()).find(part => /^L\d+$/.test(part));
+				const level = levelToken ? Number(levelToken.slice(1)) : 100;
+				if (!Number.isInteger(level) || level < 1 || level > 9999) break;
+				// Keep Illusion/Transform, changed abilities and types intact. This is only a level update.
+				poke.level = level;
+				const details = poke.details.split(',').map(part => part.trim())
+					.filter((part, index) => !index || !/^L\d+$/.test(part));
+				if (level !== 100) details.splice(1, 0, `L${level}`);
+				poke.details = details.join(', ');
+				poke.searchid = `${poke.ident}|${poke.details}`;
+				this.scene.updateStatbar(poke);
+				this.scene.updateSidebar(poke.side);
+				break;
+			}
 			const previousForme = poke.getSpeciesForme();
 			poke.removeVolatile('formechange' as ID);
 			poke.removeVolatile('typeadd' as ID);
@@ -3613,7 +3629,7 @@ export class Battle {
 		}
 		return { name, siden, slot, pokemonid };
 	}
-	getSwitchedPokemon(pokemonid: string, details: string) {
+	getSwitchedPokemon(pokemonid: string, details: string, allowFainted = false) {
 		if (pokemonid === '??') throw new Error(`pokemonid not passed`);
 		const { name, siden, slot, pokemonid: parsedPokemonid } = this.parsePokemonId(pokemonid);
 		pokemonid = parsedPokemonid;
@@ -3624,7 +3640,7 @@ export class Battle {
 		// search inactive revealed pokemon
 		for (let i = 0; i < side.pokemon.length; i++) {
 			let pokemon = side.pokemon[i];
-			if (pokemon.fainted) continue;
+			if (pokemon.fainted && !allowFainted) continue;
 			// already active, can't be switching in
 			if (side.active.includes(pokemon)) continue;
 			// just switched out, can't be switching in
@@ -3945,8 +3961,13 @@ export class Battle {
 		case 'poke': {
 			let pokemon = this.rememberTeamPreviewPokemon(args[1], args[2]);
 			if (['gen9fantasyrogue', 'gen9fantasyrogueduel', 'gen9fantasyroguecoop',
-				'gen9fantasyroguedoubles'].includes(toID(this.tier)) &&
-				Dex.getFusionSpriteURL(kwArgs.fusion)) pokemon.rogueFusionSprite = kwArgs.fusion;
+				'gen9fantasyroguedoubles'].includes(toID(this.tier))) {
+				if (Dex.getFusionSpriteURL(kwArgs.fusion)) pokemon.rogueFusionSprite = kwArgs.fusion;
+				if (kwArgs.fainted) {
+					this.parseDetails(kwArgs.fainted, `${args[1]}: ${kwArgs.fainted}`, args[2], pokemon);
+					this.parseHealth('0 fnt', pokemon);
+				}
+			}
 			if (args[3] === 'mail') {
 				pokemon.item = '(mail)';
 			} else if (args[3] === 'item') {
@@ -3992,7 +4013,11 @@ export class Battle {
 		}
 		case 'switch': case 'drag': case 'replace': {
 			this.endLastTurn();
-			let poke = this.getSwitchedPokemon(args[1], args[2]);
+			// A Rogue doubles opening can announce a pre-fainted slot before requesting a replacement.
+			// Match its known preview entry; healthy switch-ins must still skip fainted duplicates.
+			const faintedEntry = args[3] === '0 fnt' && ['gen9fantasyrogue', 'gen9fantasyroguedoubles',
+				'gen9fantasyroguecoop', 'gen9fantasyrogueduel'].includes(toID(this.tier));
+			let poke = this.getSwitchedPokemon(args[1], args[2], faintedEntry);
 			let slot = poke.slot;
 			poke.healthParse(args[3]);
 			poke.removeVolatile('itemremoved' as ID);

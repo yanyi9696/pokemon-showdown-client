@@ -346,7 +346,7 @@
 .fantasyrogue .rogue-starters label.is-disabled { color: #7b838a; opacity: .6; filter: grayscale(1); cursor: not-allowed; }
 .fantasyrogue .rogue-unlock-guide { margin: 8px 0; padding: 7px 9px; background: rgba(247, 251, 255, .92); border: 1px solid #bccdda; border-radius: 4px; }
 .fantasyrogue .rogue-unlock-guide ul { margin: 4px 0; padding-left: 20px; line-height: 1.6; }
-.fantasyrogue .rogue-upgrades { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 12px; }
+.fantasyrogue .rogue-upgrades { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 0 12px; }
 .fantasyrogue .button { box-sizing: border-box; min-height: 24px; padding: 2px 6px; margin: 2px 0; vertical-align: middle; }
 .fantasyrogue .rogue-exp { margin: 5px 0 0; color: #24628b; font-size: 12px; }
 .fantasyrogue .rogue-notices { padding: 6px 8px; background: #f0f5f9; border: 1px solid #ccd6df; border-radius: 4px; }
@@ -365,7 +365,7 @@
 .fantasyrogue .rogue-abandon button[name=askAbandon], .fantasyrogue .rogue-abandon button[name=abandon] { color: #803e40; border-color: #b78b8d; }
 .fantasyrogue .rogue-floor h3 { display: inline-block; vertical-align: middle; margin: 0 12px 4px 0; padding: 0; border: 0; }
 .fantasyrogue .rogue-routes {
-	display: grid; grid-template-columns: repeat(auto-fit, minmax(156px, 1fr)); gap: 8px;
+	display: grid; grid-template-columns: repeat(auto-fit, minmax(min(156px, 100%), 1fr)); gap: 8px;
 	padding: 12px 2px 2px; margin-top: 0;
 }
 .fantasyrogue .rogue-routes .rogue-route { grid-template-rows: auto auto auto auto 1fr auto; }
@@ -506,7 +506,7 @@
 .rogue-extra-abilities-popup dl { max-height: 60vh; overflow-y: auto; }
 .rogue-extra-abilities-popup dt { font-weight: bold; color: #705097; margin: 14px 0 5px; }
 .rogue-extra-abilities-popup dd { margin: 0; line-height: 1.65; }
-.fantasyrogue .rogue-member-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(142px, 1fr)); gap: 10px; width: 100%; }
+.fantasyrogue .rogue-member-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(142px, 100%), 1fr)); gap: 10px; width: 100%; }
 .fantasyrogue .rogue-member-choice { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; min-width: 0; margin: 0; padding: 10px; border: 1px solid #9fb8cc; border-radius: 9px; background: linear-gradient(145deg, #f9fcff, #e0edf5); color: #314f65; white-space: normal; }
 .fantasyrogue .rogue-member-choice:hover:not(:disabled), .fantasyrogue .rogue-member-choice:focus-visible { border-color: #527fa4; box-shadow: 0 0 0 2px #8fbbd780; background: #edf8ff; }
 .fantasyrogue .rogue-member-choice:disabled { opacity: .55; }
@@ -551,10 +551,10 @@
 .fantasyrogue .rogue-activity-time { margin: 3px 4px; font-weight: bold; font-variant-numeric: tabular-nums; }
 .fantasyrogue .rogue-cat-abilities > div { padding: 8px 0; border-top: 1px solid #b7cddd; }
 .fantasyrogue .rogue-cat-abilities .button { margin: 3px; font-size: 13px; }
-.fantasyrogue { overflow-anchor: none; scrollbar-gutter: stable; }
+.fantasyrogue { overflow-anchor: none; scrollbar-gutter: stable; overflow-wrap: anywhere; }
 .fantasyrogue .rogue-preference { padding: 7px 10px; margin: 8px 0; border-left-width: 3px; }
 .fantasyrogue .rogue-preference p { font-size: 12px; line-height: 1.5; margin: 4px 0 0; }
-.fantasyrogue .rogue-bag .rogue-inventory { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 5px; }
+.fantasyrogue .rogue-bag .rogue-inventory { grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 5px; }
 .fantasyrogue .rogue-bag .rogue-item-card { padding: 5px 6px; gap: 2px 4px; }
 .fantasyrogue .rogue-bag .rogue-item-heading { font-size: 13px; gap: 3px; }
 .fantasyrogue .rogue-bag .rogue-item-card > small { display: none; }
@@ -585,7 +585,7 @@
 .fantasyrogue .rogue-bag > .rogue-inventory { grid-column: 1 / -1; }
 .fantasyrogue .rogue-wallet { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; background: #fff5d7; border: 1px solid #d1b77c; border-radius: 4px; color: #735100; }
 .fantasyrogue .rogue-wallet strong { font-size: 20px; }
-.fantasyrogue .rogue-inventory { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px; margin-bottom: 10px; }
+.fantasyrogue .rogue-inventory { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 6px; margin-bottom: 10px; }
 .fantasyrogue .rogue-item-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: start; align-items: center; gap: 3px 6px; padding: 7px 8px; border: 1px solid #becdd8; border-radius: 5px; background: rgba(250, 253, 255, .94); }
 .fantasyrogue .rogue-item-card > .rogue-item-heading { grid-column: 1 / -1; }
 .fantasyrogue .rogue-item-card > small, .fantasyrogue .rogue-item-card > p { grid-column: 1; }
@@ -842,7 +842,7 @@
 .rogue-reference-popup h3 small { font-size: .7em; color: #577b96; }
 .rogue-category-tooltip { max-width: min(620px, calc(100vw - 24px)); max-height: 45vh; overflow-y: auto; pointer-events: auto; }
 .rogue-category-popup { width: min(760px, calc(100vw - 40px)); max-width: 760px; }
-.rogue-category-moves { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px 16px; max-height: 60vh; overflow-y: auto; margin-bottom: 16px; }
+.rogue-category-moves { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(120px, 100%), 1fr)); gap: 8px 16px; max-height: 60vh; overflow-y: auto; margin-bottom: 16px; }
 .fantasyrogue .rogue-collapse-panel { margin: 14px 0 4px; padding-top: 12px; border-top: 1px solid #afc6d6; }
 .fantasyrogue .rogue-collapse-panel h4 { display: flex; gap: 8px; align-items: center; margin: 0 0 8px; }
 .fantasyrogue .rogue-collapse-panel h4 > strong { font-weight: 800; color: #243f57; }
@@ -922,7 +922,7 @@
 .fantasyrogue .rogue-event-allocation input { width: 64px; padding: 6px; font-size: 16px; }
 .fantasyrogue .rogue-event-picker select { display: block; max-width: 100%; width: 100%; margin: 10px 0; padding: 10px; font-size: 15px; }
 .fantasyrogue .rogue-event-picker .button { padding: 10px 20px; font-weight: bold; font-size: 16px; }
-.ps-popup.rogue-exchange-animation { width: 480px; max-width: calc(100vw - 32px); padding: 20px; }
+.ps-popup.rogue-exchange-animation { box-sizing: border-box; width: 480px; max-width: calc(100vw - 32px); padding: 20px; }
 .rogue-exchange-stage { height: 180px; position: relative; container-type: inline-size; overflow: hidden; border-radius: 12px; background: linear-gradient(145deg, #dcecf5, #eef3dc); }
 .rogue-exchange-before, .rogue-exchange-after { position: absolute; width: 120px; height: 110px; top: 35px; background-repeat: no-repeat; background-position: center; }
 .rogue-exchange-before { left: 10%; animation: rogue-memory-recall 2.4s linear forwards; }
@@ -980,8 +980,9 @@
 
 /* Route copy spans both grid columns, including narrow trade cards. */
 .fantasyrogue .rogue-route-description { grid-column: 1 / -1; min-width: 0; line-height: 1.65; }
-.fantasyrogue .rogue-center-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
-.fantasyrogue .rogue-floor .rogue-center-actions > .button[name="act"][value] { flex: 1 1 220px; box-sizing: border-box; min-height: 50px; margin: 0; padding: 12px 16px; line-height: 24px; font-size: 16px; font-weight: bold; color: #24546e; border: 1px solid #86acc1; background: linear-gradient(#f8fcff, #dbeef8); }
+.fantasyrogue .rogue-center-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); grid-auto-rows: 1fr; align-items: stretch; gap: 10px; margin: 16px 0; }
+/* Keep both actions at the heal button's height, above the shared control theme. */
+.fantasyrogue .rogue-floor .rogue-center-actions > .button.rogue-control[name="act"][value] { display: flex; align-items: center; justify-content: center; gap: 4px; box-sizing: border-box; min-width: 0; min-height: 50px; margin: 0; padding: 12px 16px; line-height: 24px; font-size: 16px; font-weight: bold; color: #24546e; border: 1px solid #86acc1; background: linear-gradient(#f8fcff, #dbeef8); }
 .fantasyrogue .rogue-item-ether { width: 18px; height: 24px; background-position: -85px -192px; }
 /* Compact party details without changing column widths between partners. */
 .fantasyrogue .rogue-system-status { font-size: 13px; line-height: 1.5; color: #4b6477; margin: 4px 0; }
@@ -1115,7 +1116,7 @@
 
 .rogue-auction-board {padding: 12px; border: 1px solid #c8b07b; border-radius: 10px; background: #fff9e9;}
 .rogue-auction-board h4 {margin: 0 0 6px;}
-.rogue-auction-budgets {display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px;}
+.rogue-auction-budgets {display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 8px;}
 .rogue-auction-budgets > div {padding: 8px; background: #ffffffb8; border-radius: 6px;}
 .rogue-auction-budgets span {display: block; margin-top: 4px;}
 .rogue-area-notice {padding: 10px; background: #edf7ff; border-left: 4px solid #578ba8;}
@@ -1409,7 +1410,7 @@
 .rogue-echo-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .rogue-echo-heading h4 { margin: 4px 0 8px; font-size: 19px; color: #574477; }
 .rogue-echo-heading > strong { padding: 8px 12px; background: #e8dff6; border-radius: 10px; color: #574477; }
-.rogue-echo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin: 12px 0; }
+.rogue-echo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 10px; margin: 12px 0; }
 .rogue-echo-perk { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; background: rgba(255,255,255,.7); border: 1px solid #c8cddd; border-radius: 10px; }
 .rogue-echo-perk small { display: block; margin-top: 5px; font-size: 12px; line-height: 1.6; }
 .rogue-echo-perk.is-lit { border-color: #aa91ce; background: rgba(242,235,252,.8); }
@@ -1480,11 +1481,11 @@
 .rogue-codex-entry.rogue-mystery-entry { --codex-accent: #7b35b5; border-top-color: #8b3dc7; background: linear-gradient(135deg, #fcf8ff, #e9d8f7); }
 .dark .rogue-codex-entry.rogue-mystery-entry { --codex-accent: #d6b1f3; background: linear-gradient(135deg, #352144, #241a30); }
 .rogue-challenge-hint { padding: 10px 14px; border-left: 3px solid #ad8852; background: #fcf7e9; line-height: 1.7; }
-.rogue-challenge-roster { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.rogue-challenge-roster { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); }
 .rogue-challenge-roster details { border: 1px solid #bed0df; border-radius: 8px; padding: 10px; background: #fff9; }
 .rogue-challenge-roster summary { cursor: pointer; }
 .rogue-challenge-roster p { line-height: 1.8; }
-.rogue-challenge-prizes { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 16px 0; }
+.rogue-challenge-prizes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); gap: 10px; margin: 16px 0; }
 .rogue-challenge-prizes section { border: 1px solid #c2cfdc; border-radius: 9px; padding: 12px; background: #fff9; }
 .rogue-challenge-prizes h4 { margin: 0 0 10px; }
 .dark .rogue-optional-challenge { background: linear-gradient(135deg, #3d3524, #292419); color: #f4e3b9; }

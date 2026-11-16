@@ -3352,10 +3352,12 @@ export class BattleTooltips {
 	) {
 		let text = '';
 		const abilityData = this.getPokemonAbilityData(clientPokemon, serverPokemon);
+		const display = (name: string) => BattleLog.escapeHTML(Dex.getTranslatedName(name, 'ability'));
+		const label = '<small>' + BattleLog.escapeHTML(Dex.getTranslatedName('Ability:')) + '</small> ';
 		if (!isActive) {
 			// for switch tooltips, only show the original ability
 			const ability = abilityData.baseAbility || abilityData.ability;
-			if (ability) text = '<small>Ability:</small> ' + this.battle.dex.abilities.get(ability).name;
+			if (ability) text = label + display(this.battle.dex.abilities.get(ability).name);
 		} else {
 			let ability = abilityData.ability;
 			let abilityName = ability ? this.battle.dex.abilities.get(ability).name : '';
@@ -3370,10 +3372,10 @@ export class BattleTooltips {
 				}
 			}
 			if (ability && abilityName && abilityName !== 'No Ability') {
-				text = '<small>Ability:</small> ' + abilityName;
+				text = label + display(abilityName);
 				const baseAbilityName = this.battle.dex.abilities.get(abilityData.baseAbility).name;
 				if (baseAbilityName && baseAbilityName !== 'No Ability' && baseAbilityName !== abilityName) {
-					text += ' (base: ' + baseAbilityName + ')';
+					text += ' (' + BattleLog.escapeHTML(Dex.getTranslatedName('Base ability:')) + ' ' + display(baseAbilityName) + ')';
 				}
 			}
 		}
@@ -3381,7 +3383,8 @@ export class BattleTooltips {
 		if (!text && abilityData.possibilities.length && !hidePossible &&
 			!(tier.includes('Almost Any Ability') || tier.includes('Hackmons') ||
 				tier.includes('Inheritance') || tier.includes('Metronome'))) {
-			text = '<small>Possible abilities:</small> ' + abilityData.possibilities.join(', ');
+			text = '<small>' + BattleLog.escapeHTML(Dex.getTranslatedName('Possible abilities:')) + '</small> ' +
+				abilityData.possibilities.map(display).join(', ');
 		}
 		return text;
 	}

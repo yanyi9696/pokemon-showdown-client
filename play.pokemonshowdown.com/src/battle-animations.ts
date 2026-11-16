@@ -980,7 +980,7 @@ export class BattleScene implements BattleSceneStub {
 					x = 48 + 100 + 50 * i;
 				}
 				if (textBuf) textBuf += ' / ';
-				textBuf += pokemon.speciesForme;
+				textBuf += Dex.getTranslatedName(pokemon.speciesForme, 'pokemon');
 				let url = spriteData.url;
 				// if (this.paused) url.replace('/xyani', '/xy').replace('.gif', '.png');
 				const spriteFilter = spriteData.filter ? `;filter:${spriteData.filter}` : '';
@@ -1006,7 +1006,7 @@ export class BattleScene implements BattleSceneStub {
 			side.totalPokemon = side.pokemon.length;
 			if (textBuf && !rogueCoop) {
 				this.log.addDiv('chat battle-history',
-					`<strong>${BattleLog.escapeHTML(side.name)}'s team:</strong> <em style="color:#445566;display:block;">${BattleLog.escapeHTML(textBuf)}</em>`
+					`<strong><span class="username">${BattleLog.escapeHTML(side.name)}</span>${BattleLog.escapeHTML(Dex.getTranslatedName("'s team:"))}</strong> <em style="color:#445566;display:block;">${BattleLog.escapeHTML(textBuf)}</em>`
 				);
 			}
 			if (rogueCoop && spriteIndex && this.battle.rogueCoopBoss) {
@@ -1030,10 +1030,10 @@ export class BattleScene implements BattleSceneStub {
 		if (rogueCoop) {
 			for (const side of this.battle.sides) {
 				side.totalPokemon = side.pokemon.length;
-				const teamNames = side.pokemon.map(mon => typeof window !== 'undefined' && window.translateRogueName ?
-					window.translateRogueName(mon.speciesForme, 'pokemon') : mon.speciesForme);
-				this.log.addDiv('chat battle-history', `<strong>${BattleLog.escapeHTML(side.name)} 的队伍：</strong> ` +
-				`<em style="color:#445566;display:block;">${BattleLog.escapeHTML(teamNames.join(' / '))}</em>`);
+				const teamNames = side.pokemon.map(mon => Dex.getTranslatedName(mon.speciesForme, 'pokemon'));
+				this.log.addDiv('chat battle-history',
+					`<strong><span class="username">${BattleLog.escapeHTML(side.name)}</span>${BattleLog.escapeHTML(Dex.getTranslatedName("'s team:"))}</strong> <em style="color:#445566;display:block;">${BattleLog.escapeHTML(teamNames.join(' / '))}</em>`
+				);
 			}
 		}
 		if (newBGNum !== 0) {
