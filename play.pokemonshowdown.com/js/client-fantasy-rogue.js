@@ -3900,7 +3900,7 @@
 			if (!state) return '<p>正在读取祝福…</p>';
 			var tierNames = {silver: '白银', gold: '黄金', prismatic: '棱彩', mixed: '银 · 金 · 彩'};
 			var reward = state.pending[0];
-			var html = '<h3>' + (state.beforeAdventure ? '启程祝福 · 第一层开战前' : reward && !state.round ? '旅途奖励' : '塔中的祝福') + '</h3>' + blessingSwitch();
+			var html = '<h3>' + (state.beforeAdventure ? '启程祝福 · 第一层开战前' : reward && !state.round ? '旅途奖励' : '塔中的祝福') + '</h3>';
 			if (reward) {
 				html += '<h4>' + escape(reward.title) + '</h4>';
 				if (reward.text) html += '<p class="rogue-reward-dialogue">' + blessingText(reward.text) + '</p>';
@@ -3959,6 +3959,7 @@
 				html += '</div>';
 			} else if (state.round) {
 				var round = state.round;
+				if (round.options.length) html += blessingSwitch();
 				var selectedSlot = this.selectedBlessing;
 				if (!state.qualityLocked) html += '<div class="rogue-quality-action">' +
 					button('changeBlessingQuality', '', state.qualityRerolled ? '本局更换机会已使用' : '更换整批品阶 · 本局 1 次',
@@ -3999,7 +4000,9 @@
 		renderBlessings: function (run, busy) {
 			var state = run.blessings;
 			if (!state) return '';
-			var html = '<section class="rogue-owned-blessings"><h3>' + fa('star') + '本局祝福</h3>' + blessingSwitch() + '<div class="rogue-resource-panel">' + resourceMeter('幻想碎片', state.shards, 100, '每次幻想化需 100 片，可继续积攒');
+			var html = '<section class="rogue-owned-blessings"><h3>' + fa('star') + '本局祝福</h3>' +
+				(state.owned.length ? blessingSwitch() : '') + '<div class="rogue-resource-panel">' +
+				resourceMeter('幻想碎片', state.shards, 100, '每次幻想化需 100 片，可继续积攒');
 			if (run.futureSight) {
 				var forecasts = run.futureSight.bosses || (run.futureSight.roster ? [run.futureSight] : []);
 				html += '<details class="rogue-future-sight"><summary>未来视 · 后续首领阵容（' + forecasts.length + '）</summary>' +

@@ -82,6 +82,62 @@ function client(startScreen = false, localized = false, runtime = {}) {
 	room.preparePanel();
 	return {...context, room, panel, get html() { return room.html + panel.html + (room.pendingMovePopup?.html || ''); }, sent, joined, setUser: id => { userid = id; }};
 }
+describe('Fantasy Rogue blessing text switch visibility', () => {
+	const entry = {id: 'test', name: '测试祝福', text: '提升攻击 20%。', shortText: '提升攻击。'};
+	for (const kind of ['item', 'target', 'solo', 'gift', 'compound']) it(`hides the switch during ${kind} rewards without blocking collection`, () => {
+		const c = client(), data = adventure('blessing'), mon = data.run.team[0];
+		const reward = {id: 'event-reward', kind, title: '事件奖励', text: '请选择奖励后继续旅程。',
+			options: [{id: mon.id, name: mon.set.species}]};
+		if (kind === 'gift') reward.pokemon = mon;
+		if (kind === 'compound') reward.compound = {stage: 'member'};
+		// An unfinished blessing round can remain behind an event or blessing follow-up reward.
+		data.run.blessings = {owned: [entry], pending: [reward], shards: 0,
+			round: {tier: 'gold', remaining: 1, options: [entry]}};
+		data.run.partyLimit = 6;
+		c.room.receiveState(data);
+		assert(c.room.html.includes('事件奖励'));
+		assert(!c.room.html.includes('rogue-blessing-copy'));
+		assert(!c.room.html.includes('rogue-blessing-switch'));
+		assert(c.panel.html.includes('rogue-blessing-switch'), 'owned blessing descriptions retain their own switch');
+		const value = kind === 'gift' ? 'join' : mon.id;
+		assert(c.room.html.includes('name="chooseBlessingReward" value="' + value + '"'));
+		c.room.chooseBlessingReward(value);
+		const request = JSON.parse(c.sent.at(-1).slice('/fantasyrogue action '.length));
+		assert.equal(request.action, 'blessingreward'); assert.equal(request.member, reward.id); assert.equal(request.value, value);
+	});
+	for (const kind of ['direction', 'upgrade']) it(`hides the switch during the ${kind} step of attribute evolution`, () => {
+		const c = client(), data = adventure('blessing');
+		data.run.blessings = {owned: [], pending: [], shards: 0,
+			stage: {kind, options: [{id: kind === 'direction' ? 'stats' : 'stat:atk', name: '强化攻击'}]},
+			round: {tier: 'gold', remaining: 1, options: [entry]}};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('name="chooseBlessingUpgrade"'));
+		assert(!c.html.includes('rogue-blessing-switch'));
+	});
+	it('does not show a switch while no selectable or owned blessing descriptions exist', () => {
+		const c = client(), data = adventure('blessing');
+		data.run.blessings = {owned: [], pending: [], shards: 0};
+		c.room.receiveState(data); assert(!c.html.includes('rogue-blessing-switch'));
+		data.run.blessings.round = {tier: 'gold', remaining: 0, options: []};
+		c.room.receiveState(data); assert(!c.html.includes('rogue-blessing-switch'));
+	});
+	it('keeps ordinary events clear and restores the saved mode when blessing cards return', () => {
+		const c = client(false, false, {preferences: {rogueBlessingDetailed: true}}), data = adventure('event');
+		data.run.blessings = {owned: [], pending: [], shards: 0,
+			round: {tier: 'gold', remaining: 1, options: [entry]}};
+		data.run.event = {id: 'masterballgift', key: 'masterball:offer', stage: 'choice', title: '事件',
+			paragraphs: ['研究员托付了一份礼物。'], options: [{id: 'promise', name: '接受礼物'}]};
+		c.room.receiveState(data);
+		assert(c.room.html.includes('name="chooseEvent"')); assert(!c.html.includes('rogue-blessing-switch'));
+		data.run.phase = 'blessing'; c.room.receiveState(data);
+		assert(c.room.html.includes('rogue-blessing-switch')); assert(c.room.html.includes('aria-checked="true"'));
+		assert(c.room.html.includes('>' + entry.text + '</span>')); assert(!c.panel.html.includes('rogue-blessing-switch'));
+		data.run.phase = 'event'; data.run.blessings.owned = [entry]; c.room.receiveState(data);
+		assert(!c.room.html.includes('rogue-blessing-switch')); assert(c.panel.html.includes('rogue-blessing-switch'));
+		assert(c.panel.html.includes('>' + entry.text + '</span>')); assert.equal(c.sent.length, 0);
+	});
+});
+
 describe('Fantasy Rogue patch eleven interactions', () => {
 	for (const preference of [undefined, false, true]) it(`defaults to brief unless detail was explicitly saved: ${preference}`, () => {
 		const preferences = preference === undefined ? {} : {rogueBlessingDetailed: preference};
@@ -102,8 +158,9 @@ describe('Fantasy Rogue patch eleven interactions', () => {
 		const c = client(false, false, {preferences, Storage: {prefs: (key, value) => { preferences[key] = value; }},
 			document: {querySelectorAll: selector => selector.endsWith('switch') ? switches : copies}});
 		const data = adventure('blessing');
-		data.run.blessings = {owned: [], pending: [], shards: 0, candy: 0, swordUses: 0, swordRewards: [], levels: 0,
-			round: {tier: 'gold', remaining: 1, options: [{id: 'test', name: '测试', text: '提升攻击 20%。', shortText: '提升攻击。'}]}};
+		const entry = {id: 'test', name: '测试', text: '提升攻击 20%。', shortText: '提升攻击。'};
+		data.run.blessings = {owned: [entry], pending: [], shards: 0, candy: 0, swordUses: 0, swordRewards: [], levels: 0,
+			round: {tier: 'gold', remaining: 1, options: [entry]}};
 		c.room.receiveState(data); const before = JSON.stringify(data);
 		assert(c.room.html.includes('rogue-blessing-switch')); assert(c.panel.html.includes('rogue-blessing-switch'));
 		c.panel.dispatchClickButton({currentTarget: {name: 'toggleBlessingDetail', value: ''}});
