@@ -99,7 +99,8 @@ var translations = {
     "Notification volume:": "通知提醒音量",
     "You can't change name in the middle of these games:": "您目前在对战中无法更改用户名：",
     "Forfeit and change name": "投降并更改用户名",
-    "Please answer the anti-spam question given.": "请输入验证码。",
+    "Please answer the anti-spam question given.": "请回答防垃圾信息问题（输入皮卡丘）。",
+    "Answer the anti-spam question.": "请回答防垃圾信息问题（输入皮卡丘）。",
 
     //  权限等级
 
@@ -187,7 +188,7 @@ var translations = {
     "Register your account:": "注册您的账号：",
     "Password:": "密码：",
     "Password (confirm):": "确认密码：",
-    "What is this pokemon?": "这是哪只宝可梦? （输入pikachu）",
+    "What is this pokemon?": "这是哪只宝可梦？（输入皮卡丘）",
     "Cancel": "取消",
     "1 user": "1位用户",
     "None": "无",

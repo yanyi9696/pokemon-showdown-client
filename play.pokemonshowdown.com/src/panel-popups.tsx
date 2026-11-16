@@ -922,7 +922,8 @@ class RegisterPanel extends PSRoomPanel {
 			!cpassword?.length) return this.setState({ errorMsg: "All fields are required" });
 		if (password !== cpassword) return this.setState({ errorMsg: 'Passwords do not match' });
 		PSLoginServer.query("register", {
-			captcha,
+			// Normalize only the localized answer for the existing login service.
+			captcha: /^\s*皮卡丘\s*$/.test(captcha) ? 'pikachu' : captcha,
 			password,
 			cpassword,
 			username: PS.user.name,

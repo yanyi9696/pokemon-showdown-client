@@ -7,6 +7,12 @@ const heading = 'Your team was rejected for the following reasons:';
 const chineseHeading = '您的队伍未通过校验，原因如下：';
 
 describe('Rogue vocabulary contexts', () => {
+	it('prompts for the supported Chinese registration answer without changing English mode', () => {
+		const question = 'What is this pokemon?';
+		assert.equal(client(question).paragraph.textContent, '这是哪只宝可梦？（输入皮卡丘）');
+		assert.equal(client(question, 'en').paragraph.textContent, question);
+		assert.equal(client('Answer the anti-spam question.').paragraph.textContent, '请回答防垃圾信息问题（输入皮卡丘）。');
+	});
 	it('renames only the Fantasy Onix display and keeps ordinary Onix and player text intact', () => {
 		const ui = client('Onix-Fantasy');
 		const context = {}; vm.runInNewContext(source.slice(0, source.indexOf('(function() {')), context);

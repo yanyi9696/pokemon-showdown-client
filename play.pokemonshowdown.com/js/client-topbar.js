@@ -1059,7 +1059,8 @@
 				username: name,
 				password: data.password,
 				cpassword: data.cpassword,
-				captcha: captcha,
+				// The login service expects the English name; keep the player's answer for retries.
+				captcha: /^\s*皮卡丘\s*$/.test(captcha) ? 'pikachu' : captcha,
 				challstr: app.user.challstr
 			}, Storage.safeJSON(function (data) {
 				if (!data) data = {};
