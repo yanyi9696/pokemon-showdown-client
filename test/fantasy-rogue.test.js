@@ -156,6 +156,61 @@ describe('Fantasy Rogue patch eleven interactions', () => {
 		assert(codexOnly.room.html.includes('data-reference-id="latebloom"'));
 		assert(codexOnly.room.html.includes('data-reference-id="supernumber"'));
 	});
+	it('links all cross-blessing effects in the codex, choice cards and owned panel in either text mode', () => {
+		const help = [
+			['latebloom', '大方无隅，大器晚成，大音希声，大象无形', ['大器晚成']],
+			['supernumber', '超大数字'], ['bignumber', '大数字'], ['topclearmind', 'Top Clear Mind'],
+			['godrobe', '神衣鲜血'], ['puregodrobe', '神衣纯洁'], ['medic', '自带医疗队'],
+			['restinball', '进球休息'], ['wine', '酒'], ['cephalosporin', '头孢'],
+		].map(([id, name, aliases = []]) => ({id, name, aliases, tier: 'gold', text: `完整效果：${name}。`}));
+		for (const detailed of [false, true]) {
+			const c = client(false, false, {preferences: {rogueBlessingDetailed: detailed}}), data = adventure('blessing');
+			const copy = help.map(entry => `【${entry.name}】`).join('；');
+			const entry = {id: 'reference-card', name: '组合说明', family: 'reference-card', tier: 'gold',
+				text: copy, shortText: copy.replace(help[0].name, '大器晚成'), unlocked: true};
+			data.blessingUpgradeHelp = help;
+			data.run.blessings = {owned: [entry], pending: [], round: {tier: 'gold', remaining: 1, options: [entry]}};
+			c.room.receiveState(data);
+			const panes = [c.room.html, c.panel.html];
+			c.room.openCodex('blessings');
+			c.room.receiveCodex({userid: data.userid, section: 'blessings', blessingUpgradeHelp: help, entries: [entry]});
+			for (const html of panes.concat(c.room.html)) {
+				for (const target of help) {
+					assert(html.includes(`data-reference-id="${target.id}"`), target.id);
+					assert(html.includes(`title="${target.text}"`), target.name);
+				}
+			}
+		}
+	});
+	it('binds reference clicks on real room render paths without choosing or consuming a blessing', () => {
+		const c = client(), data = adventure('blessing');
+		data.blessingUpgradeHelp = [{id: 'latebloom', name: '大器晚成', aliases: [], tier: 'prismatic', text: '完整效果。'}];
+		const entry = {id: 'youngprodigy', name: '幼年伙伴', text: '升级为【大器晚成】。'};
+		data.run.blessings = {owned: [entry], pending: [], round: {tier: 'gold', remaining: 1, options: [entry]}};
+		const listeners = new Map();
+		for (const pane of [c.room, c.panel]) {
+			const handlers = []; listeners.set(pane, handlers);
+			// Minimal DOM supports the production stableHTML path; HTML content is checked separately above.
+			pane.$el[0] = {ownerDocument: {createElement: () => ({content: {childNodes: []}})},
+				setAttribute() {}, scrollTop: 0, scrollLeft: 0,
+				addEventListener: (type, callback, capture) => handlers.push({type, callback, capture})};
+		}
+		c.room.receiveState(data);
+		const before = JSON.stringify(data), sent = c.sent.length;
+		for (const pane of [c.room, c.panel]) {
+			for (const [type, key] of [['click', undefined], ['keydown', 'Enter'], ['keydown', ' ']]) {
+				let stopped = 0, prevented = 0;
+				const term = {dataset: {referenceKind: 'blessing', referenceId: 'latebloom'}};
+				listeners.get(pane).find(item => item.type === type && item.capture).callback({type, key,
+					target: {closest: () => term}, preventDefault() { prevented++; }, stopImmediatePropagation() { stopped++; }});
+				assert.equal(stopped, 1); assert.equal(prevented, 1);
+				assert.equal(c.app.lastPopup.type, c.RogueReferencePopup);
+				assert.equal(c.app.lastPopup.data.text, '完整效果。');
+			}
+		}
+		assert.equal(JSON.stringify(data), before); assert.equal(c.sent.length, sent);
+		assert.equal(c.room.selectedBlessing, null);
+	});
 	it('opens upgrade details by click or keyboard without selecting the parent blessing or sending a game command', () => {
 		const c = client(), data = adventure('blessing');
 		data.blessingUpgradeHelp = [{id: 'supernumber', name: '超大数字', tier: 'prismatic', aliases: [], text: '完整效果：五项能力变为五倍。'}];
