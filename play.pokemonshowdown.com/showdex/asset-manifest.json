@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "source": {
     "repository": "https://github.com/yanyi9696/showdex",
-    "commit": "f5d66e4c841d0b423268b0900451bc5b036ab752",
+    "commit": "2882fa7ad067e272cddda0f635de3d5518460991",
     "dirty": false,
     "archive": "source.tar.gz"
   },
@@ -121,11 +121,11 @@
     },
     "i18n.en.json": {
       "bytes": 58751,
-      "sha256": "811d823cdd215b95530c1e83037d2edbe4e56fe90c8cb2f60b17d736dc2bb207"
+      "sha256": "88cb91543f01a2d3f9ddc43bfabb204424802dfffd3b61074c459332b334851d"
     },
     "i18n.fr.json": {
       "bytes": 149804,
-      "sha256": "6c97e003be00c8004e605f9a0f1f63ba74bc88145bf339e429fb62ebd0be49b8"
+      "sha256": "e191bd19dc4a5d83bb756a317b597901d9f2b71dbb9f19e6a9da800d73ffd6a3"
     },
     "info-circle.svg": {
       "bytes": 364,
@@ -136,8 +136,8 @@
       "sha256": "6f1e622c82a380075843bb084a7ec3b1f1d12a4a02526d75e78b0924a860aa75"
     },
     "main.js": {
-      "bytes": 4833057,
-      "sha256": "82a5b621119dc3eb706c40f65413e01a265074dc5b386c47e9ea43d71d13aa55"
+      "bytes": 4836483,
+      "sha256": "fe620c2900d729683641ea94036daacfd8a86aa48d9407c35d7a627c7f8512fe"
     },
     "main.js.LICENSE.txt": {
       "bytes": 2632,
@@ -196,8 +196,8 @@
       "sha256": "37f44e11b7e208915e0471f2fb9d78e2d3b69218b92deb11b3447765fa35b508"
     },
     "source.tar.gz": {
-      "bytes": 1573617,
-      "sha256": "f699fbb13f4449b0abd60e84607ab09d2c00de0c0905741b630b879da8f8d0b6"
+      "bytes": 1577297,
+      "sha256": "fc9f2446513503b82d23e82a29ba79942c906f8aa811dbcc7a725b9bf907eb51"
     },
     "sparkle.svg": {
       "bytes": 494,
