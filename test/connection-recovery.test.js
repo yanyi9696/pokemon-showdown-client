@@ -83,6 +83,36 @@ function client(local = false) {
 }
 
 describe('Foreground connection recovery', () => {
+	for (const fault of ['timeout', 'empty', 'invalid']) it(`retries a registered session after transient ${fault} without password or replay`, () => {
+		const c = client(); c.sockets[0].close(); c.advance(1000);
+		const socket = c.sockets[1]; socket.open();
+		socket.message('|updateuser| Guest 2|0|1|{}'); socket.message('|challstr|0|retry-challenge');
+		if (fault === 'timeout') c.advance(15000);
+		else c.requests[0][2](fault === 'empty' ? '' : 'not-json');
+		assert.equal(c.userData.userid, 'returntester'); assert.equal(c.user.loaded, false);
+		assert.equal(c.recovered, 0); assert.equal(c.popups.length, 0);
+		c.app.send('/choose move 1', 'battle-test-1'); c.advance(1000);
+		assert.equal(c.requests.length, 2);
+		c.requests[0][2](JSON.stringify({username: ''})); // late failed attempt is obsolete
+		assert.equal(c.userData.userid, 'returntester');
+		c.requests[1][2](JSON.stringify({username:'ReturnTester',loggedin:true,assertion:'test-only-assertion'}));
+		socket.message('|updateuser| ReturnTester|1|1|{}');
+		assert.equal(c.recovered, 1); assert(!socket.messages.some(m => m.includes('/choose')));
+		assert.equal(c.popups.length, 0);
+	});
+	it('pauses failed upkeep in background and resumes the same account when visible', () => {
+		const c = client(); c.sockets[0].close(); c.advance(1000); const socket = c.sockets[1]; socket.open();
+		socket.message('|updateuser| Guest 2|0|1|{}'); socket.message('|challstr|0|background-challenge');
+		c.requests[0][2](''); c.visible(false); c.advance(2000);
+		assert.equal(c.requests.length, 1); c.visible(true);
+		assert.equal(c.requests.length, 2); assert.equal(c.user.loaded, false);
+	});
+	it('cancels a scheduled upkeep retry on explicit logout', () => {
+		const c = client(); c.sockets[0].close(); c.advance(1000); const socket = c.sockets[1]; socket.open();
+		socket.message('|updateuser| Guest 2|0|1|{}'); socket.message('|challstr|0|logout-challenge');
+		c.requests[0][2](''); c.user.logout(); const requests = c.requests.length;
+		c.advance(60000); assert.equal(c.requests.length, requests); assert(c.app.reconnectStopped);
+	});
 	it('retains a healthy socket when returning from background, including repeated lifecycle events', () => {
 		const c = client(), socket = c.sockets[0];
 		c.visible(false); c.advance(60000); c.visible(true); c.pageshow(); c.online(true);

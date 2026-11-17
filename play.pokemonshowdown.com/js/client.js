@@ -334,6 +334,9 @@ function toId() {
 		challstr: '',
 		finishLoginUpkeep: function (error) {
 			clearTimeout(this.loginUpkeepTimer);
+			clearTimeout(this.loginUpkeepRetryTimer);
+			this.loginUpkeepRetryTimer = null;
+			this.loginUpkeepRetries = 0;
 			this.loginUpkeepTimer = null;
 			this.loginUpkeepGeneration = (this.loginUpkeepGeneration || 0) + 1;
 			this.loaded = true;
@@ -360,6 +363,7 @@ function toId() {
 				return;
 			}
 			clearTimeout(this.loginUpkeepTimer);
+			clearTimeout(this.loginUpkeepRetryTimer);
 			var self = this, generation = this.loginUpkeepGeneration = (this.loginUpkeepGeneration || 0) + 1;
 			this.loaded = false;
 			this.set({ loginState: 'pending', loginError: '' });
@@ -367,6 +371,24 @@ function toId() {
 			app.trigger('login:state');
 			function fail() {
 				if (generation !== self.loginUpkeepGeneration) return;
+				// A network failure is not proof that the registered session expired.
+				// Keep actions blocked until the existing login server and game server accept the identity.
+				if (app.connectionRecovering && app.recoveryUser && self.get('registered') && !app.reconnectStopped) {
+					clearTimeout(self.loginUpkeepTimer);
+					self.loginUpkeepGeneration++;
+					self.set({ loginState: 'error', loginError: '连接已恢复，正在重试账号验证…' });
+					app.topbar.updateUserbar();
+					app.showConnectionRecovery('连接已恢复，正在重试账号验证…');
+					if (!document.hidden && navigator.onLine !== false) {
+						var delay = Math.min(15000, 1000 * Math.pow(2, Math.min(self.loginUpkeepRetries || 0, 4)));
+						self.loginUpkeepRetries = (self.loginUpkeepRetries || 0) + 1;
+						self.loginUpkeepRetryTimer = setTimeout(function () {
+							if (app.connectionRecovering && !app.reconnectStopped && !app.isDisconnected &&
+								!document.hidden && navigator.onLine !== false) self.retryLogin();
+						}, delay);
+					}
+					return;
+				}
 				self.finishLoginUpkeep('自动登录暂未完成，请重试登录。无需清除浏览器数据或重新注册。');
 			}
 			// Covers both XHR and the cross-domain storage bridge, whose $.post returns no jqXHR.
@@ -777,6 +799,7 @@ function toId() {
 			});
 		},
 		clearConnectionTimers: function () {
+			clearTimeout(this.user.loginUpkeepRetryTimer);
 			clearTimeout(this.reconnectTimer);
 			clearTimeout(this.connectionProbeTimer);
 			clearTimeout(this.connectionAttemptTimer);
@@ -883,6 +906,7 @@ function toId() {
 				if (Date.now() - this.connectionStartedAt > 20000) this.dropStaleConnection();
 				return;
 			}
+			if (this.connectionRecovering && this.recoveryUser && this.user.get('loginState') === 'error') this.user.retryLogin();
 			if (this.connectionProbeTimer) return;
 			var self = this, socket = this.socket;
 			// A read-only response distinguishes a suspended/dead connection from a healthy one.
