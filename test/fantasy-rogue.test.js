@@ -3,6 +3,106 @@ const fs = require('fs');
 const vm = require('vm');
 const {EventEmitter} = require('events');
 
+describe('Fantasy Rogue direct party learning recovery', () => {
+	function savedChoice() {
+		const data = adventure('ready');
+		data.run.id = 'party-direct-save';
+		data.run.pendingMoves = [
+			{member: data.run.team[0].id, move: 'leechseed'},
+			{member: data.run.team[0].id, move: 'razorleaf'},
+		];
+		return data;
+	}
+	for (const pane of ['curRoom', 'curSideRoom']) {
+		it(`restores the saved choices on a direct party URL in ${pane}, without navigating or mutating the save`, () => {
+			const c = client(true, false, {partyOnly: true}), data = savedChoice();
+			assert.equal(c.app.rooms.fantasyrogue, c.room, 'a single owner must be created before reading the queue');
+			assert.deepEqual(c.sent, ['/cmd fantasyrogue']);
+			c.app.curRoom = {id: ''}; c.app[pane] = c.panel;
+			c.panel.show();
+			const snapshot = JSON.stringify(data);
+			c.room.receiveState(data);
+			const popup = c.room.pendingMovePopup;
+			assert(popup, 'the visible party must recover the authoritative choice');
+			assert(popup.html.includes('leechseed')); assert(popup.html.includes('value="skip"'));
+			assert.equal(popup.key, JSON.stringify([data.userid, data.run.id, data.run.team[0].id, 'leechseed']));
+			c.panel.show(); c.room.receiveState(data);
+			assert.equal(c.room.pendingMovePopup, popup); assert.equal(c.app.popups.length, 1);
+			assert.equal(JSON.stringify(data), snapshot); assert.deepEqual(c.joined, []);
+			assert.equal(c.app[pane], c.panel); assert.equal(c.sent.length, 1);
+		});
+	}
+	it('waits for login and the socket when the party is opened before either is ready', () => {
+		const c = client(true, false, {partyOnly: true, disconnected: true});
+		assert.equal(c.app.rooms.fantasyrogue, c.room); assert.equal(c.sent.length, 0);
+		c.app.user.loaded = false; c.app.socket.readyState = 1; c.app.emit('init:socketopened');
+		assert.equal(c.sent.length, 0);
+		c.app.user.loaded = true; c.app.emit('init:choosename');
+		assert.deepEqual(c.sent, ['/cmd fantasyrogue']);
+		c.app.curRoom = c.panel; c.panel.show(); c.room.receiveState(savedChoice());
+		assert(c.room.pendingMovePopup);
+	});
+	it('does not steal focus for a hidden party, but reveals the saved choice when its tab is shown', () => {
+		const c = client(true, false, {partyOnly: true});
+		c.app.curRoom = {id: 'lobby'}; c.room.receiveState(savedChoice());
+		assert(!c.room.pendingMovePopup);
+		c.app.curRoom = c.panel; c.panel.show();
+		assert(c.room.pendingMovePopup); assert.equal(c.sent.length, 1);
+	});
+	it('restores the same queue after a full page recreation and sends each choice only once on repeated clicks', () => {
+		const data = savedChoice(), first = client(true, false, {partyOnly: true});
+		first.app.curRoom = first.panel; first.room.receiveState(data);
+		const c = client(true, false, {partyOnly: true}); c.app.curRoom = c.panel;
+		c.room.receiveState(structuredClone(data));
+		const popup = c.room.pendingMovePopup;
+		assert.equal(popup.key, first.room.pendingMovePopup.key);
+		popup.learnMove('0'); popup.learnMove('skip');
+		const actions = () => c.sent.filter(s => s.startsWith('/fantasyrogue action '));
+		assert.equal(actions().length, 1);
+		assert.equal(JSON.parse(actions()[0].slice('/fantasyrogue action '.length)).move, 'leechseed');
+		const next = structuredClone(data); next.account.revision++; next.run.pendingMoves.shift();
+		const result = {userid: data.userid, id: c.room.pending.id, ok: true, state: next};
+		c.room.receiveAction(result); c.room.receiveAction(result);
+		assert(c.room.pendingMovePopup.html.includes('razorleaf')); assert.equal(c.app.popups.length, 1);
+		popup.learnMove('skip'); assert.equal(actions().length, 1, 'stale choice cannot consume the next move');
+		c.room.pendingMovePopup.learnMove('skip');
+		const done = structuredClone(next); done.account.revision++; done.run.pendingMoves = [];
+		c.room.receiveAction({userid: data.userid, id: c.room.pending.id, ok: true, state: done});
+		assert(!c.room.pendingMovePopup); assert(!c.room.pending); assert.equal(actions().length, 2);
+		assert.equal(c.room.state.run.money, data.run.money);
+		assert.deepEqual(c.room.state.run.inventory, data.run.inventory);
+	});
+	it('reads authoritative progress after disconnect during confirmation, without replaying the choice automatically', () => {
+		const c = client(true, false, {partyOnly: true}), data = savedChoice();
+		c.app.curRoom = c.panel; c.room.receiveState(data); c.room.pendingMovePopup.learnMove('0');
+		c.app.socket.readyState = 3; c.app.emit('init:socketclosed');
+		assert(!c.room.pending); assert(c.room.pendingMovePopup.html.includes(' disabled'));
+		c.app.socket.readyState = 1; c.app.emit('init:socketrecovered');
+		assert.equal(c.sent.filter(s => s === '/cmd fantasyrogue').length, 2);
+		assert.equal(c.sent.filter(s => s.startsWith('/fantasyrogue action ')).length, 1);
+		const accepted = structuredClone(data); accepted.account.revision++; accepted.run.pendingMoves.shift();
+		c.app.emit('response:fantasyrogue', accepted); c.app.emit('response:fantasyrogue', data);
+		assert(c.room.pendingMovePopup.html.includes('razorleaf'));
+		assert(!c.room.pendingMovePopup.html.includes('name="learnMove" value="skip" disabled'));
+	});
+	it('reuses an existing controller and preserves its draft when the party is created from normal navigation', () => {
+		const c = client(), data = savedChoice();
+		c.room.receiveState(data); c.room.selectedMember = data.run.team[0].id;
+		c.panel.initialize(); c.app.curRoom = c.panel; c.panel.show();
+		assert.equal(c.app.rooms.fantasyrogue, c.room); assert.equal(c.room.selectedMember, data.run.team[0].id);
+		assert.equal(c.room.screen, 'game'); assert.equal(c.sent.length, 0);
+		assert.equal(c.app.popups.length, 1);
+	});
+	it('clears the previous identity and rejects its late saved queue after an account change', () => {
+		const c = client(true, false, {partyOnly: true}), data = savedChoice();
+		c.app.curRoom = c.panel; c.room.receiveState(data); assert(c.room.pendingMovePopup);
+		c.setUser('another-test-user'); c.app.user.emit('change:userid');
+		assert(!c.room.pendingMovePopup); assert(!c.room.state);
+		c.app.emit('response:fantasyrogue', data);
+		assert(!c.room.state); assert(!c.room.pendingMovePopup);
+	});
+});
+
 describe('Fantasy Rogue learning recovery', () => {
 	it('restores the saved move decision in a rejoined battle before entering the Rogue screen', () => {
 		const c = client(true), data = adventure('battle');
@@ -62,7 +162,7 @@ function client(startScreen = false, localized = false, runtime = {}) {
 	const sent = [], joined = [];
 	let userid = 'rogueplayer';
 	const context = {
-		Room: {extend: room => room, prototype: {dispatchClickButton(e) {
+		Room: {extend: room => room, prototype: {show() {}, dispatchClickButton(e) {
 			this[e.currentTarget.name](e.currentTarget.value, e.currentTarget);
 		}}}, Popup: {extend: popup => popup, prototype: {remove() { this.removed = true; }}},
 		BattleLog: {escapeHTML: text => String(text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')},
@@ -130,7 +230,23 @@ function client(startScreen = false, localized = false, runtime = {}) {
 		prop(name, value) { room.controls[selector] = {[name]: value}; },
 		trigger(name) { room.lastTriggered = {selector, name}; },
 	});
-	room.listenTo = (source, event, callback) => source.on(event, callback.bind(room));
+	room.listenTo = (source, events, callback) => {
+		for (const event of events.split(' ')) source.on(event, callback.bind(room));
+	};
+	if (runtime.partyOnly) {
+		delete context.app.rooms.fantasyrogue;
+		if (runtime.disconnected) context.app.socket.readyState = 3;
+		context.app._addRoom = id => {
+			assert.equal(id, 'fantasyrogue');
+			assert(!context.app.rooms[id], 'do not create a duplicate controller');
+			room.initialize();
+			context.app.rooms[id] = room;
+			return room;
+		};
+		panel.initialize();
+		context.app.rooms.fantasyrogueparty = panel;
+		return {...context, room, panel, sent, joined, setUser: id => { userid = id; }};
+	}
 	room.initialize();
 	// Existing flow tests exercise a player who has already pressed the start button.
 	if (!startScreen) room.screen = 'game';

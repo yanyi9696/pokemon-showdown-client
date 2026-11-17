@@ -5137,7 +5137,8 @@
 		},
 		renderParty: function () {
 			var state = this.state;
-			if (!state || !state.account) return '<p>请先在左侧打开幻想杯肉鸽，读取冒险存档。</p>';
+			if (!state) return '<p>正在读取冒险存档，连接并确认登录后会自动恢复。</p>';
+			if (!state.account) return '<p>' + escape(state.message || '请先登录获准的账号，读取冒险存档。') + '</p>';
 			var run = state.run, busy = !!this.pending || !app.socket || app.socket.readyState !== 1;
 			var monthly = state.account.monthlyChallenges;
 			var claimable = monthly && monthly.months.some(function (month) {
@@ -5525,7 +5526,7 @@
 			var key = pending && JSON.stringify([app.user.get('userid'), run.id, pending.member, pending.move]);
 			// A refreshed room starts on home, even when a rejoined battle is waiting for learning.
 			var current = app.curRoom && app.curRoom.id;
-			var inParty = current === 'fantasyrogueparty';
+			var inParty = current === 'fantasyrogueparty' || app.curSideRoom && app.curSideRoom.id === 'fantasyrogueparty';
 			var inBattle = current && run && run.growthPaused && current === run.roomid;
 			var waiting = this.screen !== 'game' && current !== this.id && !inParty && !inBattle ||
 				!inParty && !inBattle && this.state && this.state.story &&
@@ -6310,7 +6311,18 @@
 		},
 		initialize: function () {
 			this.$el.addClass('ps-room-light scrollable fantasyrogue rogue-party-room');
+			// Direct party URLs need the same owner/listeners as the main Rogue room.
+			// Do not focus it or create a second copy of the saved learning queue.
+			if (!app.rooms.fantasyrogue) {
+				var owner = app._addRoom('fantasyrogue', null, true);
+				owner.refresh();
+			}
 			this.render();
+		},
+		show: function () {
+			Room.prototype.show.apply(this, arguments);
+			var owner = app.rooms.fantasyrogue;
+			if (owner) owner.revealPendingMove();
 		},
 		dispatchClickButton: function (e) {
 			var owner = app.rooms.fantasyrogue;
