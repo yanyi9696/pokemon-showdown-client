@@ -3,6 +3,34 @@ const fs = require('fs');
 const vm = require('vm');
 const {EventEmitter} = require('events');
 
+describe('Pending companion invitation recovery', () => {
+	function pending() {
+		const data = adventure('event'); data.run.id = 'invite-recovery';
+		data.run.companionInvitation = {key: 'invite:3', id: 'nemona', name: '妮莫', roster: [
+			{id: 'brock', name: '小刚'}, {id: 'misty', name: '小霞'},
+		]};
+		data.run.affectionScene = {id: 'nemona', name: '妮莫', title: '一路同行的心意', stage: 50,
+			text: '之后一起前进吧。', options: [{id: 'thanks', name: '谢谢'}]};
+		data.run.pendingMoves = [{member: data.run.team[0].id, move: 'vinewhip'}];
+		return data;
+	}
+	it('presents the invitation before a blocked affection scene, including after reloading the party', () => {
+		for (const start of [false, true]) {
+			const c = client(start), data = pending(); c.room.receiveState(data);
+			if (!start) assert(c.room.html.includes('name="companionInviteAction"'));
+			assert(c.room.renderParty().includes('name="companionInviteAction"'));
+			assert(!c.room.pendingMovePopup, 'the server requires the invitation first');
+			assert(c.room.renderParty().includes('value="decline"'));
+			c.room.companionInviteAction('decline'); c.room.companionInviteAction('decline');
+			assert.equal(c.sent.filter(s => s.startsWith('/fantasyrogue action ')).length, 1);
+			const next = structuredClone(data); delete next.run.companionInvitation;
+			next.account.revision++; c.app.curRoom = c.panel;
+			c.room.receiveAction({userid: data.userid, id: c.room.pending.id, ok: true, state: next});
+			assert(c.room.pendingMovePopup, 'resume the original learning choice without a page switch');
+		}
+	});
+});
+
 describe('Bulk effort popup', () => {
 	function fixture() {
 		const c = client(), state = adventure('ready'); c.room.state = state;
@@ -224,6 +252,18 @@ describe('Fantasy Rogue learning recovery', () => {
 		assert(!c.room.pendingMovePopup.html.includes('name="learnMove" value="skip" disabled'));
 	});
 });
+
+function supplyPopup(c) {
+	const popup = Object.create(c.app.lastPopup.type), controls = {'input[name=supplyCount]': 1};
+	popup.$el = {html: value => { popup.html = value; }}; popup.close = () => {};
+	popup.$ = selector => ({
+		val(value) { if (value !== undefined) controls[selector] = value; return controls[selector]; },
+		text(value) { controls[selector] = value; },
+		prop(name, value) { controls[selector + ':' + name] = value; },
+	});
+	popup.initialize(c.app.lastPopup.data);
+	return {popup, controls};
+}
 
 function client(startScreen = false, localized = false, runtime = {}) {
 	const sent = [], joined = [];
@@ -3804,7 +3844,7 @@ describe('Fantasy Rogue optional challenge and voiced dialogue presentation', ()
 	});
 	it('previews the roster and exact choices before accepting and explains the two-step retreat', () => {
 		const c = client(), data = challenge('offer'); c.room.receiveState(data);
-		assert(c.html.includes('Lv.26')); assert(c.html.includes('最多获得 800 经验，止于 Lv.28'));
+		assert(c.html.includes('Lv.26')); assert(c.html.includes('当前可获得 800 经验，止于 Lv.28'));
 		assert(c.html.includes('不开放捕捉')); assert(c.html.includes('challenge:accept')); assert(c.html.includes('challenge:skip'));
 		assert(c.html.includes('全队采用本层精英等级')); assert(c.html.includes('战斗中逃跑只退出战斗'));
 		assert(!c.html.includes('value="challenge:supplies"'));
@@ -4914,7 +4954,10 @@ describe('Fantasy Rogue start menu and codex', () => {
 			assert(c.html.includes('candy/' + id + '.png'));
 			assert(fs.readFileSync(require.resolve('../play.pokemonshowdown.com/sprites/fantasy-rogue/candy/' + id + '.png')).length > 100);
 		}
-		c.room.useItem('rarecandy'); assert(!c.app.lastPopup); assert(c.sent.at(-1).includes('"value":"rarecandy"'));
+		const sent = c.sent.length; c.room.useItem('rarecandy'); assert.equal(c.sent.length, sent);
+		const {popup} = supplyPopup(c); assert.equal(popup.maximum, 1); popup.confirmSupply(); popup.confirmSupply();
+		assert.equal(c.sent.length, sent + 1); assert(c.sent.at(-1).includes('"count":1'));
+		assert(c.sent.at(-1).includes('"value":"rarecandy"'));
 		assert(c.sent.at(-1).includes('"action":"use"'));
 	});
 	it('previews batch candy levels, caps quantities and sends one atomic use command', () => {
@@ -4973,11 +5016,11 @@ describe('Fantasy Rogue start menu and codex', () => {
 		data.run.team[0].pp = [{id: 'tackle', pp: 0, maxpp: 35}, {id: 'growl', pp: 40, maxpp: 40}];
 		c.room.receiveState(data); const sent = c.sent.length;
 		c.room.useItem('ether'); assert.equal(c.sent.length, sent);
-		const popup = Object.create(c.app.lastPopup.type); let html;
-		popup.$el = {html: value => { html = value; }}; popup.close = () => {};
-		popup.initialize(c.app.lastPopup.data);
-		assert(html.includes('value="1" disabled'));
-		popup.restorePP('0');
+		const {popup, controls} = supplyPopup(c);
+		assert(popup.html.includes('value="1" disabled'));
+		controls['select[name=supplyMove]'] = '1'; popup.confirmSupply(); assert.equal(c.sent.length, sent);
+		controls['select[name=supplyMove]'] = '0'; popup.chooseCount('max'); popup.confirmSupply(); popup.confirmSupply();
+		assert.equal(c.sent.length, sent + 1); assert(c.sent.at(-1).includes('"count":6'));
 		assert(c.sent[c.sent.length - 1].includes('"slot":0'));
 		assert(c.sent[c.sent.length - 1].includes('"value":"ether"'));
 	});
@@ -6269,6 +6312,8 @@ describe('Fantasy Rogue client', () => {
 		assert.equal(c.room.selectedPokemon().id, 'other');
 		assert(c.panel.html.includes('name="useItem" value="potion" disabled>HP 已满'));
 		c.room.selectMember(first.id); c.room.useItem('potion');
+		assert.equal(c.app.lastPopup.data.member.id, first.id);
+		supplyPopup(c).popup.confirmSupply();
 		const request = JSON.parse(c.sent[0].slice('/fantasyrogue action '.length));
 		assert.equal(request.member, first.id); assert.equal(request.value, 'potion');
 	});
@@ -7024,13 +7069,13 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 	it('displays Super Number as x5', () => {
 		const {room} = battleClient();
 		room.request.fantasyRogue = {catchable: false, number: {available: true, super: true, stats: ['all']}};
-		assert(room.rogueBallControls().includes('五项全部 ×5'));
-		assert(!room.rogueBallControls().includes('×4'));
+		assert(room.rogueNumberControls().includes('五项全部 ×5'));
+		assert(!room.rogueNumberControls().includes('×4'));
 	});
 	it('preserves the number choice through doubles target selection', () => {
 		const {room} = battleClient();
 		room.request.fantasyRogue = {catchable: false, number: {available: true, super: false, stats: ['atk', 'def', 'spa', 'spd', 'spe']}};
-		assert(room.rogueBallControls().includes('大数字'));
+		assert(room.rogueNumberControls().includes('大数字'));
 		room.choice = {choices: []}; room.battle.nearSide = {active: [{}, {}]};
 		room.tooltips = {hideTooltip() {}}; room.updateControlsForPlayer = () => {};
 		room.$ = selector => ({prop: () => false, val: () => selector === 'select[name=rogueNumberStat]' ? 'atk' : ''});
@@ -7038,7 +7083,7 @@ describe('Fantasy Rogue native battle recovery UI', () => {
 		room.chooseMove('2', {getAttribute: () => 'normal'}); room.chooseMoveTarget('1');
 		assert.equal(room.choice.choices[0], 'roguenumber atk move 2 1');
 		room.request.fantasyRogue.number.available = false;
-		assert(room.rogueBallControls().includes('name="rogueNumberStat" disabled'));
+		assert(room.rogueNumberControls().includes('name="rogueNumberStat" disabled'));
 	});
 	it('preserves a selected blood boost through doubles target selection and shows its real cost', () => {
 		const c = battleClient(), room = c.room;
@@ -7397,4 +7442,46 @@ describe('Potara appearance selection', () => {
 		images[0].onload(); assert.notEqual(p.appearance(), 'fusion'); assert(html['.fusion-art-preview'].includes('没有这个头部'));
 		p.remove(); images[0].onload(); assert.notEqual(p.appearance(), 'fusion');
 	});
+});
+
+
+describe('Playability presentation receipts', () => {
+ it('shows co-op personal receipts once without sending reward commands', () => {
+  const c=client();c.room.state=adventure('ready');c.room.screen='coop';c.room.pending=null;c.room.coopBusy=false;
+  c.room.coopState={userid:'tester',session:{id:'coopreceipt',adventure:{phase:'settlement',notices:['【大数字】达成 5000 能力，升级为【超大数字】！']}}};
+  const sent=c.sent.length;c.room.maybeShowBlessingReward();assert.equal(c.app.lastPopup.type,c.RogueBlessingRewardPopup);
+  c.app.popups=[];c.app.lastPopup=null;c.room.maybeShowBlessingReward();assert.equal(c.app.lastPopup,null);assert.equal(c.sent.length,sent);
+ });
+ it('shows only committed blessing receipts once and waits for pending learning', () => {
+  const c=client(), data=adventure('ready');
+  data.run.notices=['【超大数字】达成 7600 能力，获得补给：银色王冠 ×1。'];
+  data.run.pendingMoves=[{member:data.run.team[0].id,move:'growl'}];
+  c.room.receiveState(data); assert.notEqual(c.app.lastPopup.type,c.RogueBlessingRewardPopup);
+  c.app.popups=[]; data.run.pendingMoves=[]; c.room.receiveState(data);
+  assert.equal(c.app.lastPopup.type,c.RogueBlessingRewardPopup);
+  assert.equal(c.app.lastPopup.data.texts[0],data.run.notices[0]);
+  const sent=c.sent.length; c.app.lastPopup=null; c.room.receiveState(data);
+  assert.equal(c.app.lastPopup,null); assert.equal(c.sent.length,sent);
+  c.app.popups=[]; data.run.notices.push('【负重训练】全力训练的成果：获得幻之力量镜 ×1，本局仅一次。');
+  c.room.receiveState(data); assert.deepEqual(Array.from(c.app.lastPopup.data.texts),[data.run.notices[1]]);
+ });
+ it('rejects supply confirmations after account or revision changes and invalid counts', () => {
+  for(const kind of ['revision','identity']) {
+   const c=client(),data=adventure('ready'); data.run.team[0].hp=1; c.room.receiveState(data);c.room.useItem('potion');
+   const {popup,controls}=supplyPopup(c),before=c.sent.length;
+   controls['input[name=supplyCount]']=1.5;popup.confirmSupply();assert.equal(c.sent.length,before);
+   controls['input[name=supplyCount]']=1;
+   if(kind==='revision')data.account.revision++;else c.setUser('different');
+   popup.confirmSupply();assert.equal(c.sent.length,before);
+  }
+ });
+ it('offers PP maximization only for eligible moves and confirms once', () => {
+  const c=client(),state=adventure('ready'),mon=state.run.team[0];c.room.state=state;
+  mon.pp=[{id:'tackle',pp:7,maxpp:35},{id:'splash',pp:40,maxpp:40},{id:'sketch',pp:1,maxpp:1}];
+  mon.ppMaxed=['splash'];c.Dex.moves.get=id=>({id,name:id,pp:id==='sketch'?1:35,noPPBoosts:id==='sketch'});
+  const popup=Object.create(c.RogueEtherPopup);popup.$el={html:value=>{popup.html=value;}};popup.close=()=>{};
+  popup.initialize({room:c.room,member:mon,item:{id:'ppmax',name:'PP极限提升剂',kind:'ppmax'}});
+  assert(popup.html.includes('上限 56'));assert(popup.html.includes('value="1" disabled'));assert(popup.html.includes('value="2" disabled'));
+  popup.restorePP('0');popup.restorePP('0');assert.equal(c.sent.filter(s=>s.startsWith('/fantasyrogue action')).length,1);
+ });
 });

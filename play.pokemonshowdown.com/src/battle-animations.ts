@@ -2887,6 +2887,12 @@ export class PokemonSprite extends Sprite {
 		}
 	}
 	addEffect(id: ID, instant?: boolean) {
+		if (id === 'rogueescort') {
+			this.effects[id] = [];
+			this.$el?.css('visibility', 'hidden');
+			this.$statbar?.css('visibility', 'hidden');
+			return;
+		}
 		if (id === 'rogueghidorah' || id === 'roguebloodrobe') {
 			this.effects[id] = [];
 			this.applySpriteFilter();
@@ -2955,6 +2961,12 @@ export class PokemonSprite extends Sprite {
 	}
 
 	removeEffect(id: ID, instant?: boolean) {
+		if (id === 'rogueescort') {
+			delete this.effects[id];
+			this.$el?.css('visibility', '');
+			this.$statbar?.css('visibility', '');
+			return;
+		}
 		if (id === 'rogueghidorah' || id === 'roguebloodrobe') {
 			delete this.effects[id];
 			this.applySpriteFilter();
@@ -3056,6 +3068,7 @@ export class PokemonSprite extends Sprite {
 			this.scene.$stat.append(this.$statbar);
 			updatePrevhp = true;
 		}
+		this.$statbar.css('visibility', pokemon.volatiles.rogueescort ? 'hidden' : '');
 		let hpcolor;
 		const boss = pokemon.rogueBossPhase;
 		const remaining = boss ? boss.total - boss.phase + 1 : 1;

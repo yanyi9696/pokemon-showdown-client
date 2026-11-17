@@ -17,6 +17,16 @@ describe('Rogue initial fainted sidebar icons', () => {
 		ctx.BattleLog = {escapeHTML: text => text};
 	});
 	afterEach(() => { battle?.destroy(); battle = null; });
+	for (const bwgfx of [true, false]) it(`hides only the protected escort sprite and HP bar in ${bwgfx ? '2D' : '3D'}`, () => {
+		ctx.Dex.prefs = key => key === 'bwgfx' && bwgfx;
+		const values = {}, sprite = {effects: {},
+			$el: {css: (key, value) => {values.sprite = value;}},
+			$statbar: {css: (key, value) => {values.bar = value;}}};
+		ctx.PokemonSprite.prototype.addEffect.call(sprite, 'rogueescort', true);
+		assert.equal(values.sprite, 'hidden'); assert.equal(values.bar, 'hidden');
+		ctx.PokemonSprite.prototype.removeEffect.call(sprite, 'rogueescort', true);
+		assert.equal(values.sprite, ''); assert.equal(values.bar, ''); assert(!sprite.effects.rogueescort);
+	});
 	function start(game = 'singles', tier = '[Gen 9] Fantasy Rogue') {
 		const sides = game === 'multi' ? ['p1', 'p2', 'p3', 'p4'] : ['p1', 'p2'];
 		const log = ['|gen|9', `|gametype|${game}`, `|tier|${tier}`];

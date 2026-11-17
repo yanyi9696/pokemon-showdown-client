@@ -1,0 +1,9 @@
+PP 极限提升剂图标来源
+
+文件：ppmax.png
+来源：https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/pp-max.png
+上游说明：https://github.com/PokeAPI/sprites/blob/master/README.md
+用途：本地静态道具图标；不使用外部热链。
+处理：保留原 PNG 透明像素，未修改配色或尺寸。
+SHA-256：7797c708bc905cbe756f8c61e50e84fc953b6a4691ecb8b50796a4450dbf08d0
+Pokemon 相关名称及图像权利归原权利人所有；本记录不代表另行取得商业授权。
