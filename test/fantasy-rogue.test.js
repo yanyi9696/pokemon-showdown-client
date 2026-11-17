@@ -3,6 +3,19 @@ const fs = require('fs');
 const vm = require('vm');
 const {EventEmitter} = require('events');
 
+describe('Quiz silhouette filter isolation', () => {
+	it('keeps the black filter outside the Fantasy sprite filters for solo and co-op', () => {
+		const c = client(); c.Dex.getTeambuilderSprite = () => 'background-image:url(zorua.png);filter:drop-shadow(0 0 5px cyan)';
+		const html = c.room.renderQuizSilhouette('Zorua-Hisui-Fantasy');
+		assert(html.startsWith('<div class="rogue-quiz-silhouette" aria-label="宝可梦剪影"><span style="'));
+		assert(html.includes('drop-shadow')); assert(html.endsWith('</span></div>'));
+		const css = fs.readFileSync('play.pokemonshowdown.com/style/fantasy-rogue.css', 'utf8');
+		assert(/\.rogue-quiz-silhouette\s*\{[^}]*filter:\s*brightness\(0\)/.test(css));
+		const source = fs.readFileSync('play.pokemonshowdown.com/js/client-fantasy-rogue.js', 'utf8');
+		assert.equal((source.match(/this\.renderQuizSilhouette\(event\.silhouette\)/g) || []).length, 2);
+	});
+});
+
 describe('Rhythm displayed-frame input and feedback', () => {
 	it('submits the displayed frame instead of a later handler timestamp, and locks repeated requests', () => {
 		const c = client(), data = adventure('event');

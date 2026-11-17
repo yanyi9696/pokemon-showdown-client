@@ -2521,8 +2521,7 @@
 							'</div><span class="rogue-portrait-anchor">' + socialArt + '</span></div>';
 					}
 					eventText += auctionBoardHTML(event.auction);
-					if (event.silhouette) eventText += '<div class="rogue-quiz-silhouette" aria-label="宝可梦剪影" style="' +
-						escape(Dex.getTeambuilderSprite({species: event.silhouette})) + '"></div>';
+					if (event.silhouette) eventText += this.renderQuizSilhouette(event.silhouette);
 					if (event.stage === 'choice' && event.teams) {
 						eventText += '<div class="rogue-event-teams">' + event.teams.map(function (team, index) {
 							return '<div><strong>' + (index ? '右边的队伍' : '左边的队伍') + '</strong>' + team.map(function (mon) {
@@ -4499,6 +4498,11 @@
 				if (elapsed >= a.duration && !self.pending && !(self.state.run.pendingMoves || []).length && self.screen === 'game') self.submit('event', {member: current.key, value: 'finish'});
 			}, 16);
 		},
+		renderQuizSilhouette: function (species) {
+			// Apply black after the sprite's own Fantasy colour/glow filters.
+			return '<div class="rogue-quiz-silhouette" aria-label="宝可梦剪影"><span style="' +
+				escape(Dex.getTeambuilderSprite({species: species})) + '"></span></div>';
+		},
         renderEvent: function (run, busy) {
 			var event = run.event;
 			if (!event) return '';
@@ -4510,7 +4514,7 @@
 				html += '<span class="rogue-portrait-anchor">' + (rivalArt ? '<span class="rogue-companion-portrait rogue-event-rival' + (event.rivalApproval ? ' smiling' : '') + '"' + affection + ' style="' + portraitStyle(event.rivalPortrait) + '"></span>' : '<img class="rogue-rival-native"' + affection + ' src="' + escape(Dex.resolveAvatar(event.rivalPortrait)) + '" alt="劲敌" />') + this.affectionGainBadge(event.rivalPortrait) + '</span>';
 			}
 			html += '</div>';
-			if (event.silhouette) html += '<div class="rogue-quiz-silhouette" aria-label="宝可梦剪影" style="' + Dex.getTeambuilderSprite({species: event.silhouette}) + '"></div>';
+			if (event.silhouette) html += this.renderQuizSilhouette(event.silhouette);
 			if (event.activity && event.stage === 'choice') html += '<div class="rogue-activity-track" aria-label="节拍轨道，中央绿色区域为命中区"><span class="rogue-activity-zone"></span><b class="rogue-activity-beat"></b></div><p class="rogue-activity-time">12.0 秒</p>' + this.renderRhythmFeedback(event.activity, busy);
 			if (event.ski && event.stage === 'choice') return html + this.renderSki(event, busy) + '</article>';
 			if (event.fishing && event.stage === 'choice') return html + this.renderFishing(event, busy) + '</article>';
