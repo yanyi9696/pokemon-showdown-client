@@ -1276,7 +1276,7 @@
 			}
 			if (command.value === 'tap') {
 				var clock = this.coopActivityClocks().find(function (entry) { return !command.owner || entry.owner === command.owner; });
-				if (clock) command.rhythmAt = Math.max(0, Date.now() + ((this.activityOffsets || {})[clock.scope] || 0) - clock.activity.startedAt);
+				if (clock) command.rhythmAt = this.rhythmTimestamp(clock.activity, clock.scope);
 			}
 			this.sendCoop('eventchoice', command);
 		},
@@ -4154,7 +4154,10 @@
 			var event = this.state && this.state.run && this.state.run.event;
 			if (!event) return;
 			var details = {member: event.key, value: choice};
-			if (choice === 'tap' && event.activity) details.rhythmAt = Math.max(0, Date.now() + (this.activityOffset || 0) - event.activity.startedAt);
+			if (choice === 'tap' && event.activity) {
+				details.rhythmAt = this.rhythmTimestamp(event.activity, 'solo');
+				this.$('.rogue-rhythm-feedback').text('已收到点击，正在判定…');
+			}
 			if (choice === 'allocate' && event.evAllocation) {
 				details.evs = {};
 				var self = this;
@@ -4420,12 +4423,25 @@
 		chooseCatAbility: function (value) {
 			var parts = value.split('|'); this.submit('catability', {member: decodeURIComponent(parts[0]), value: parts[1]});
 		},
+		rhythmTimestamp: function (activity, scope) {
+			var frame = (this.activityFrames || {})[scope];
+			if (frame && frame.startedAt === activity.startedAt) return frame.elapsed;
+			var offset = scope === 'solo' ? this.activityOffset : (this.activityOffsets || {})[scope];
+			return Math.max(0, Date.now() + (offset || 0) - activity.startedAt);
+		},
+		renderRhythmFeedback: function (activity, busy) {
+			var labels = {hit: '命中！+1 分', miss: '错拍：请在亮点进入绿色区域时点击。',
+				duplicate: '本拍已经点击过，不重复计分。', late: '节奏已结束，本次点击不计分。'};
+			return '<p class="rogue-rhythm-feedback" role="status" aria-live="polite">' +
+				(busy ? '已收到点击，正在判定…' : labels[activity.tapResult] || '准备好后，跟着绿色区域点击。') + '</p>';
+		},
 		renderCoopRhythm: function (activity, scope, title) {
 			if (!activity || activity.kind !== 'rhythm') return '';
 			return '<div class="rogue-coop-rhythm-' + scope + '"><strong>' + escape(title) + '</strong>' +
 				'<div class="rogue-activity-track" aria-label="节拍轨道，中央绿色区域为命中区">' +
 				'<span class="rogue-activity-zone"></span><b class="rogue-activity-beat"></b></div>' +
-				'<p class="rogue-activity-time" role="timer"></p><p>当前得分：' + Number(activity.score || 0) + '</p></div>';
+				'<p class="rogue-activity-time" role="timer"></p><p>当前得分：' + Number(activity.score || 0) + '</p>' +
+				this.renderRhythmFeedback(activity, this.coopBusy) + '</div>';
 		},
 		coopActivityClocks: function () {
 			var session = this.coopState && this.coopState.session, adventure = session && session.adventure;
@@ -4457,6 +4473,7 @@
 					if (!current.length) { clearInterval(self.activityClock); self.activityClock = null; return; }
 					current.forEach(function (clock) {
 						var a = clock.activity, elapsed = Math.max(0, Date.now() + (offsets[clock.scope] || 0) - a.startedAt);
+						(self.activityFrames || (self.activityFrames = {}))[clock.scope] = {startedAt: a.startedAt, elapsed: elapsed};
 						var selector = '.rogue-coop-rhythm-' + clock.scope;
 						self.$(selector + ' .rogue-activity-beat').css('left', Math.min(100, elapsed % a.period / a.period * 100) + '%');
 						self.$(selector + ' .rogue-activity-time').text(elapsed >= a.duration ?
@@ -4476,6 +4493,7 @@
 				var current = self.state && self.state.run && self.state.run.event;
 				if (!current || !current.activity || current.stage !== 'choice') { clearInterval(self.activityClock); self.activityClock = null; return; }
 				var a = current.activity, elapsed = Math.max(0, Date.now() + self.activityOffset - a.startedAt);
+				(self.activityFrames || (self.activityFrames = {})).solo = {startedAt: a.startedAt, elapsed: elapsed};
 				self.$('.rogue-activity-beat').css('left', Math.min(100, elapsed % a.period / a.period * 100) + '%');
 				self.$('.rogue-activity-time').text(Math.max(0, (a.duration - elapsed) / 1000).toFixed(1) + ' 秒');
 				if (elapsed >= a.duration && !self.pending && !(self.state.run.pendingMoves || []).length && self.screen === 'game') self.submit('event', {member: current.key, value: 'finish'});
@@ -4493,7 +4511,7 @@
 			}
 			html += '</div>';
 			if (event.silhouette) html += '<div class="rogue-quiz-silhouette" aria-label="宝可梦剪影" style="' + Dex.getTeambuilderSprite({species: event.silhouette}) + '"></div>';
-			if (event.activity && event.stage === 'choice') html += '<div class="rogue-activity-track" aria-label="节拍轨道，中央绿色区域为命中区"><span class="rogue-activity-zone"></span><b class="rogue-activity-beat"></b></div><p class="rogue-activity-time">12.0 秒</p>';
+			if (event.activity && event.stage === 'choice') html += '<div class="rogue-activity-track" aria-label="节拍轨道，中央绿色区域为命中区"><span class="rogue-activity-zone"></span><b class="rogue-activity-beat"></b></div><p class="rogue-activity-time">12.0 秒</p>' + this.renderRhythmFeedback(event.activity, busy);
 			if (event.ski && event.stage === 'choice') return html + this.renderSki(event, busy) + '</article>';
 			if (event.fishing && event.stage === 'choice') return html + this.renderFishing(event, busy) + '</article>';
 			html += auctionBoardHTML(event.auction);
@@ -6748,7 +6766,7 @@
 				this.valid = !!target && !inventory.suppliesLocked;
 				if (target) {
 					html += '<p>' + escape(eventText(item.name)) + ' → ' + escape(localName(mon.species)) + '（持有 ' + item.count + '）</p>';
-					if (item.kind === 'candy') html += '<label>使用数量 <input name="coopItemCount" type="number" min="1" max="' + item.count + '" value="1" /></label>';
+					if (item.kind === 'candy' || item.kind === 'effort') html += '<label>使用数量 <input name="coopItemCount" type="number" inputmode="numeric" min="1" max="' + (target.maxCount || item.count) + '" value="1" /></label>';
 					if (target.slots) {
 						html += '<label>提升个体值 <select name="coopItemSlot">';
 						target.slots.forEach(function (slot) { html += '<option value="' + slot + '">' + ['HP', '攻击', '防御', '特攻', '特防', '速度'][slot] + '</option>'; });

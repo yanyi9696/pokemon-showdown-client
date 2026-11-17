@@ -3,6 +3,34 @@ const fs = require('fs');
 const vm = require('vm');
 const {EventEmitter} = require('events');
 
+describe('Rhythm displayed-frame input and feedback', () => {
+	it('submits the displayed frame instead of a later handler timestamp, and locks repeated requests', () => {
+		const c = client(), data = adventure('event');
+		data.run.event = {key: 'rhythm', stage: 'choice', options: [], activity: {startedAt: 1000, kind: 'rhythm'}};
+		c.room.state = data; c.room.activityFrames = {solo: {startedAt: 1000, elapsed: 400}};
+		c.room.chooseEvent('tap'); c.room.chooseEvent('tap');
+		const requests = c.sent.filter(s => s.startsWith('/fantasyrogue action '));
+		assert.equal(requests.length, 1);
+		assert.equal(JSON.parse(requests[0].slice('/fantasyrogue action '.length)).rhythmAt, 400);
+	});
+	it('uses separate rendered clocks for delegated partners and never reuses an old event frame', () => {
+		const c = client(false, false, {Date: {now: () => 2000}});
+		c.room.activityFrames = {own: {startedAt: 1000, elapsed: 400}, partner: {startedAt: 900, elapsed: 560}};
+		assert.equal(c.room.rhythmTimestamp({startedAt: 1000}, 'own'), 400);
+		assert.equal(c.room.rhythmTimestamp({startedAt: 900}, 'partner'), 560);
+		assert.equal(c.room.rhythmTimestamp({startedAt: 1500}, 'own'), 500);
+	});
+	it('announces receipt, hit, miss, duplicate and expiry without changing the score', () => {
+		const c = client();
+		for (const [result, label] of [['hit', '命中'], ['miss', '错拍'], ['duplicate', '不重复'], ['late', '不计分']]) {
+			const activity = {tapResult: result, score: 3}, before = JSON.stringify(activity);
+			assert(c.room.renderRhythmFeedback(activity, false).includes(label));
+			assert(c.room.renderRhythmFeedback(activity, true).includes('已收到点击'));
+			assert.equal(JSON.stringify(activity), before);
+		}
+	});
+});
+
 describe('Fantasy Rogue direct party learning recovery', () => {
 	function savedChoice() {
 		const data = adventure('ready');
