@@ -3637,6 +3637,9 @@
 			if (item && item.kind === 'crown') {
 				app.addPopup(globals.RogueCrownPopup, {room: this, member: mon, item: item}); return;
 			}
+			if (item && item.kind === 'effort') {
+				app.addPopup(globals.RogueEffortPopup, {room: this, member: mon, item: item}); return;
+			}
 			if (item && item.kind === 'tonic') {
 				app.addPopup(globals.RogueCardConfirmPopup, {room: this, action: 'use', details: {value: id, member: mon.id},
 					title: '为' + localName(mon.set.species) + '使用' + item.name, text: item.description});
@@ -6228,6 +6231,46 @@
 			this.close();
 		}
 	});
+	this.RogueEffortPopup = this.Popup.extend({
+		type: 'modal',
+		events: {'input input[name=effortCount]': 'updatePreview'},
+		initialize: function (data) {
+			this.data = data; this.userid = app.user.get('userid'); this.revision = data.room.state.account.revision;
+			var evs = data.member.set.evs || {};
+			this.remaining = Math.max(0, Math.min(252 - (evs[data.item.stat] || 0),
+				510 - Object.keys(statNames).reduce(function (sum, stat) { return sum + (evs[stat] || 0); }, 0)));
+			this.maximum = Math.min(data.room.state.run.bag[data.item.id] || 0, Math.ceil(this.remaining / data.item.amount));
+			stableHTML(this, '<div class="rogue-candy-popup"><h3>使用' + escape(data.item.name) + '</h3><p>' +
+				escape(localName(data.member.set.species)) + ' · ' + statNames[data.item.stat] + '基础点数 ' + (evs[data.item.stat] || 0) + '</p>' +
+				'<label>使用数量 <input name="effortCount" type="number" inputmode="numeric" min="1" step="1" max="' + this.maximum + '" value="1" /></label>' +
+				'<p>' + [1,5,10].map(function (n) {return button('chooseCount', '' + n, n + ' 个');}).join(' ') +
+				' ' + button('chooseCount', 'max', '最多 ' + this.maximum + ' 个') + '</p><p class="rogue-effort-preview" role="status"></p>' +
+				'<p>' + button('confirmEffort', '', '确认使用') + ' ' + button('close', '', '取消') + '</p></div>');
+			this.updatePreview();
+		},
+		preview: function (count) {
+			return Number.isSafeInteger(count) && count > 0 && count <= this.maximum ?
+				{count: count, gained: Math.min(this.remaining, count * this.data.item.amount)} : null;
+		},
+		chooseCount: function (value) {
+			this.$('input[name=effortCount]').val(value === 'max' ? this.maximum : Math.min(this.maximum, Number(value)));
+			this.updatePreview();
+		},
+		updatePreview: function () {
+			var preview = this.preview(Number(this.$('input[name=effortCount]').val()));
+			this.$('.rogue-effort-preview').text(preview ? '基础点数 +' + preview.gained + '，消耗 ' + preview.count + ' 个。单项上限 252，总和上限 510。' : '请输入 1～' + this.maximum + ' 的整数。');
+			this.$('button[name=confirmEffort]').prop('disabled', !preview);
+		},
+		confirmEffort: function () {
+			var room = this.data.room, preview = this.preview(Number(this.$('input[name=effortCount]').val()));
+			if (!preview || this.submitted) return;
+			if (app.user.get('userid') !== this.userid || room.state.account.revision !== this.revision) {
+				this.close(); app.addPopup(globals.RogueNoticePopup, {text: '队伍或背包已更新，请重新选择使用数量。'}); return;
+			}
+			this.submitted = true;
+			room.submit('use', {member: this.data.member.id, value: this.data.item.id, count: preview.count}); this.close();
+		}
+	});
 	this.RogueCrownPopup = this.Popup.extend({
 		type: 'modal',
 		initialize: function (data) {
@@ -6802,7 +6845,7 @@
 					if (item && item.targets.some(function (entry) { return entry.member === this.member; }, this)) {
 						var target = item.targets.find(function (entry) { return entry.member === this.member; }, this);
 						this.room.sendCoop('use', {owner: this.owner, member: this.member, value: this.value, id: this.requestid,
-							count: item.kind === 'candy' ? Number(this.$('input[name=coopItemCount]').val()) : 1,
+							count: item.kind === 'candy' || item.kind === 'effort' ? Number(this.$('input[name=coopItemCount]').val()) : 1,
 							slot: target.slots ? Number(this.$('select[name=coopItemSlot]').val()) : undefined});
 					}
 				} else if ((this.action === 'equip' || this.action === 'equipemblem') &&

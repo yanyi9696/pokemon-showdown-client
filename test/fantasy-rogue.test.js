@@ -3,6 +3,32 @@ const fs = require('fs');
 const vm = require('vm');
 const {EventEmitter} = require('events');
 
+describe('Bulk effort popup', () => {
+	function fixture() {
+		const c = client(), state = adventure('ready'); c.room.state = state;
+		const mon = state.run.team[0]; mon.set.evs = {hp: 252, atk: 252, def: 0, spa: 0, spd: 0, spe: 0};
+		state.run.bag = {carbos: 30}; const item = {id: 'carbos', name: '速度增强剂', kind: 'effort', stat: 'spe', amount: 10};
+		const popup = Object.create(c.RogueEffortPopup), values = {'input[name=effortCount]': 1};
+		popup.$el = {html: s => {popup.html = s;}}; popup.close = () => {};
+		popup.$ = selector => ({val(v) {if (v !== undefined) values[selector] = v; return values[selector];}, text() {}, prop() {}});
+		popup.initialize({room: c.room, member: mon, item}); return {c, popup, state};
+	}
+	it('previews the capped actual gain and submits only once on a double click', () => {
+		const {c, popup} = fixture(); assert.equal(popup.maximum, 1); assert.equal(popup.preview(1).gained, 6);
+		for (const count of [0, -1, 1.5, 2, NaN]) assert.equal(popup.preview(count), null);
+		popup.chooseCount('max'); popup.confirmEffort(); popup.confirmEffort();
+		const actions = c.sent.filter(s => s.startsWith('/fantasyrogue action ')); assert.equal(actions.length, 1);
+		assert.equal(JSON.parse(actions[0].slice('/fantasyrogue action '.length)).count, 1);
+	});
+	it('rejects a stale or different-account popup without consumption', () => {
+		for (const reason of ['revision', 'identity']) {
+			const {c, popup, state} = fixture();
+			if (reason === 'revision') state.account.revision++; else c.setUser('someoneelse');
+			popup.confirmEffort(); assert.equal(c.sent.length, 0);
+		}
+	});
+});
+
 describe('Quiz silhouette filter isolation', () => {
 	it('keeps the black filter outside the Fantasy sprite filters for solo and co-op', () => {
 		const c = client(); c.Dex.getTeambuilderSprite = () => 'background-image:url(zorua.png);filter:drop-shadow(0 0 5px cyan)';
