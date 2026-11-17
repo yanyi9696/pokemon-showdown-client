@@ -952,7 +952,8 @@
 	}
 	this.FantasyRogueRoom = this.Room.extend({
 		type: 'fantasyrogue', title: '幻想杯肉鸽', minWidth: 320, bestWidth: 960,
-		events: {
+		events: {'mouseenter button[name=chooseRoute], button[name=chooseEvent], button[name=chooseBlessing], button[name=buy], button[name=chooseReward]': 'shareWatchFocus',
+			'focusin button[name=chooseRoute], button[name=chooseEvent], button[name=chooseBlessing], button[name=buy], button[name=chooseReward]': 'shareWatchFocus',
 			'pointerdown button[name=chooseEvent][value=tap], button[name=chooseCoopEvent][value$=tap]': 'rhythmPress',
 			'click button[name=chooseEvent][value=tap], button[name=chooseCoopEvent][value$=tap]': 'rhythmPress',
 			'change input[name=starter]': 'changeStarter', 'change input[name=coopStarter]': 'changeCoopStarter',
@@ -968,6 +969,12 @@
 			'change select[name=testSpirit]': 'changeSpirit', 'change select[name=selectedSpirit]': 'changeSpirit', 'change select[name=hpTarget]': 'changeHPTarget',
 			'change select[name=target]': 'changeItemTarget', 'keydown .rogue-start-deck': 'cardKey',
 			'keydown .rogue-ski': 'skiKey', 'input input[name=codexSearch]': 'codexSearchInput', 'change select[name=codexSearchMode]': 'codexSearchModeChanged', 'keydown input[name=codexSearch]': 'codexSearchKey', 'input .rogue-event-allocation input': 'updateEventEVTotal'},
+		shareWatchFocus: function (event) {
+			if (!this.state || !this.state.run || !app.socket || app.socket.readyState !== 1) return;
+			if (Date.now() - (this.lastWatchFocus || 0) < 350) return;
+			this.lastWatchFocus = Date.now();
+			app.send('/fantasyrogue watchfocus ' + String(event.currentTarget.value || '').slice(0, 120));
+		},
 		initialize: function () {
 			this.$el.addClass('ps-room-light scrollable fantasyrogue');
 			this.state = null;
@@ -5795,6 +5802,82 @@
 			app.addPopup(globals.RogueCardConfirmPopup, {room: this, action: 'saveclear', details: {value: id},
 				text: id === 'discard' ? '放下本次新通关卡？现有收藏不受影响。' : id ?
 					'用本次通关卡替换所选旧卡？旧卡和展示记录将移除。' : '将本次通关卡保存到空位？'});
+		}
+	});
+	this.FantasyRogueWatchRoom = this.Room.extend({
+		type: 'fantasyroguewatch', title: '爬塔观战', minWidth: 320, bestWidth: 960,
+		initialize: function () {
+			this.owner = this.id.slice('fantasyroguewatch-'.length); this.version = '';
+			this.$el.addClass('ps-room-light scrollable fantasyrogue');
+			this.listenTo(app, 'response:fantasyroguewatch', this.receiveWatch);
+			this.listenTo(app, 'init:socketopened init:socketrecovered init:choosename', this.refresh);
+			var self = this; this.watchTimer = setInterval(function () {
+				if (app.curRoom === self || app.curSideRoom === self) self.refresh();
+			}, 1000);
+			this.refresh();
+		},
+		show: function () { if (globals.Room.prototype.show) globals.Room.prototype.show.apply(this, arguments); this.refresh(); },
+		leave: function () { clearInterval(this.watchTimer); this.stopListening(); this.clearBattle(); },
+		clearBattle: function () {
+			if (this.battle) this.battle.destroy();
+			this.battle = null; this.battleId = ''; this.battleLog = [];
+		},
+		updateLayout: function () {
+			if (!this.battle) return;
+			var width = Math.min(640, this.$el.width()), scale = width / 640;
+			this.$('.rogue-watch-battle').css({width: width, height: 360 * scale});
+			this.$('.rogue-watch-battle .battle').css({width: 640, height: 360, transformOrigin: 'top left', transform: 'scale(' + scale + ')'});
+		},
+		updateBattle: function (data) {
+			if (!data || typeof Battle !== 'function') {
+				this.clearBattle(); this.$('.rogue-watch-stage').empty(); return;
+			}
+			var log = data.log || [], old = this.battleLog || [];
+			var replaced = old.length > log.length || old.some(function (line, i) { return line !== log[i]; });
+			if (!this.battle || this.battleId !== data.id || replaced) {
+				this.clearBattle();
+				this.$('.rogue-watch-stage').html('<div class="rogue-watch-battle" style="position:relative;overflow:hidden"><div class="battle"></div></div><div class="battle-log"></div>');
+				this.battle = new Battle({$frame: this.$('.battle'), $logFrame: this.$('.battle-log'), log: log.slice(), paused: true, isReplay: true});
+				this.battle.seekTurn(Infinity); this.battleId = data.id;
+			} else if (log.length > old.length) {
+				for (var i = old.length; i < log.length; i++) this.battle.add(log[i]);
+				this.battle.play();
+			}
+			this.battleLog = log.slice(); this.updateLayout();
+		},
+		refresh: function () {
+			if (app.socket && app.socket.readyState === 1 && /^[a-z0-9]{1,18}$/.test(this.owner)) app.send('/cmd fantasyroguewatch ' + this.owner + ',' + this.version);
+		},
+		receiveWatch: function (data) {
+			if (!data || data.owner !== this.owner || data.unchanged) return;
+			if (data.error || !data.view) {
+				this.clearBattle(); this.watchLayout = false;
+				this.version = ''; this.$el.html('<p>' + escape(data.error || '该旅程尚未开始、已经关闭或当前不可观战。') + '</p>'); return;
+			}
+			if (!this.watchLayout) {
+				this.$el.html('<div class="rogue-watch-body"></div><div class="rogue-watch-stage"></div>'); this.watchLayout = true;
+			}
+			this.version = data.version; var view = data.view, focus = data.focus;
+			var entries = function (list) { return (list || []).map(function (entry) {
+				return '<div class="rogue-watch-option" style="border:' + (focus === entry.id ? '3px solid #446b88' : '1px solid #aabcca') + ';padding:10px;border-radius:8px;margin:6px 0">' +
+					'<strong>' + escape(entry.name) + '</strong>' + (entry.text ? '<p>' + escape(eventText(entry.text)) + '</p>' : '') +
+					(entry.price !== undefined ? ' · ' + entry.price + ' 金币' : '') + '</div>';
+			}).join(''); };
+			var html = '<h2>' + escape(view.player) + '的爬塔旅程 · 第 ' + view.floor + ' 层</h2><p>只读观战 · ' +
+				(view.online ? '玩家在线' : '玩家暂时离线，等待恢复') + (view.ended ? ' · 本次旅程已结束' : '') + '</p>';
+			html += '<h3>' + escape(view.area || '选择下一段路线') + '</h3>' + entries(view.choices);
+			html += '<div class="rogue-watch-team">' + view.team.map(function (mon) {
+				return '<p><span class="picon" style="' + Dex.getPokemonIcon(mon.species) + '"></span>' + escape(localName(mon.species)) +
+					' · Lv.' + mon.level + ' · HP ' + mon.hp + '/' + mon.maxhp + '</p>';
+			}).join('') + '</div>';
+			[view.story, view.event, view.reward, view.affection, view.challenge].filter(Boolean).forEach(function (section) {
+				html += '<section class="rogue-story"><h3>' + escape(section.title) + '</h3>' +
+					(section.paragraphs || [section.text]).filter(Boolean).map(function (p) {return '<p>' + escape(eventText(p)) + '</p>';}).join('') + entries(section.options) + entries(section.branches) + '</section>';
+			});
+			html += entries(view.shop) + entries(view.blessings && view.blessings.options);
+			html += entries(view.blessings && view.blessings.owned);
+			html += (view.notices || []).map(function (n) {return '<p role="status">' + escape(eventText(n)) + '</p>';}).join('');
+			this.$('.rogue-watch-body').html(html); this.updateBattle(view.battle);
 		}
 	});
 	this.FantasyRogueHistoryRoom = this.Room.extend({

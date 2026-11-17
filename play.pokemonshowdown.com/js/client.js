@@ -1910,7 +1910,9 @@ function toId() {
 
 			// otherwise, infer the room type
 			if (!type) {
-				if (id.startsWith('battle-') || id.startsWith('game-')) {
+				if (id.startsWith('fantasyroguewatch-') && window.FantasyRogueWatchRoom) {
+					type = window.FantasyRogueWatchRoom;
+				} else if (id.startsWith('battle-') || id.startsWith('game-')) {
 					type = BattleRoom;
 				} else if (id.startsWith('view-')) {
 					type = HTMLRoom;

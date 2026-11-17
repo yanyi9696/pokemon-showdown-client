@@ -7475,6 +7475,33 @@ describe('Playability presentation receipts', () => {
    popup.confirmSupply();assert.equal(c.sent.length,before);
   }
  });
+ it('renders watcher choices as read-only and never submits player actions', () => {
+  const c=client(),watch=Object.create(c.FantasyRogueWatchRoom);watch.owner='player';watch.version='';
+  watch.$el={html: html=>{watch.html=html;}};
+  watch.$=()=>({html:html=>{watch.html=html;},empty(){}});
+  const before=c.sent.length;
+  watch.receiveWatch({owner:'player',version:'1',focus:'event',view:{player:'<FC玩家>',floor:51,phase:'choose',online:true,
+   team:[],choices:[{id:'event',name:'事件区域'}],shop:[],notices:[]}});
+  assert(watch.html.includes('&lt;FC玩家&gt;'));assert(watch.html.includes('3px solid'));
+  assert(!watch.html.includes('<button'));assert(!watch.submit);assert.equal(c.sent.length,before);
+  watch.receiveWatch({owner:'player',unchanged:true});assert(watch.html.includes('事件区域'));
+  watch.receiveWatch({owner:'player',view:null});assert(watch.html.includes('当前不可观战'));
+ });
+ it('appends live battle updates without replaying on focus changes, and clears invalid journeys', () => {
+  let created=0,destroyed=0,appended=[];
+  function MockBattle() {created++;this.seekTurn=()=>{};this.add=line=>appended.push(line);this.play=()=>{};this.destroy=()=>destroyed++;}
+  const c=client(false,false,{Battle:MockBattle}),watch=Object.create(c.FantasyRogueWatchRoom),styles={};
+  watch.owner='player';watch.$el={html(){},width:()=>390};
+  watch.$=selector=>({html(){},empty(){},css:value=>{styles[selector]=value;}});
+  const view={player:'player',floor:51,team:[],battle:{id:'battle-one',log:['|turn|1']}};
+  watch.receiveWatch({owner:'player',version:'a',view});
+  watch.receiveWatch({owner:'player',version:'b',focus:'one',view});assert.equal(created,1);
+  view.battle.log.push('|turn|2');watch.receiveWatch({owner:'player',version:'c',view});
+  assert.deepEqual(appended,['|turn|2']);assert.equal(created,1);assert.equal(styles['.rogue-watch-battle'].width,390);
+  view.battle={id:'battle-two',log:['|turn|1']};watch.receiveWatch({owner:'player',version:'d',view});
+  assert.equal(created,2);assert.equal(destroyed,1);
+  watch.receiveWatch({owner:'player',error:'不可观战'});assert.equal(destroyed,2);assert(!watch.battle);
+ });
  it('offers PP maximization only for eligible moves and confirms once', () => {
   const c=client(),state=adventure('ready'),mon=state.run.team[0];c.room.state=state;
   mon.pp=[{id:'tackle',pp:7,maxpp:35},{id:'splash',pp:40,maxpp:40},{id:'sketch',pp:1,maxpp:1}];
