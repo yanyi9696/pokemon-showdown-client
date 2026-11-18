@@ -1018,24 +1018,31 @@
 				}).join(' ') + '</div>';
 			}
 			if (!rogue.catchable) return psychic;
-			if (rogue.cooperativeCapture) {
+			if (rogue.cooperativeCapture || rogue.captureTargets) {
+				var cooperativeCapture = rogue.cooperativeCapture;
 				var targetControls = (rogue.captureTargets || []).map(function (target) {
 					var targetName = globals.translateRogueName ? globals.translateRogueName(target.name, 'pokemon') : target.name;
+					var targetSlot = Number(target.key.split(':')[1]) + 1;
+					if (!cooperativeCapture) targetName += '（位置 ' + targetSlot + '）';
 					return '<div class="rogue-capture-target"><strong>' + BattleLog.escapeHTML(targetName) + ' · HP ' + target.hp + '/' + target.maxhp + '</strong><br />' +
 						rogue.balls.map(function (ball) {
-							var chance = target.chances && target.chances[ball.id];
+							var chances = target.slotChances ? target.slotChances[zSlot] : target.chances;
+							var chance = chances && chances[ball.id];
 							var percent = typeof chance !== 'number' ? '暂不可捕捉' : chance === 1 ? '100%' : chance === 0 ? '0%' :
 								chance < 0.0001 ? '低于 0.01%' : chance > 0.9999 ? '高于 99.99%' : (chance * 100).toFixed(2) + '%';
 							var tip = '当前捕捉成功率：' + percent;
 							return '<span class="rogue-ball-option"><button class="button" name="chooseRogueBall" value="' +
-								BattleLog.escapeHTML(ball.id + '|' + target.key) + '"' + (ball.count ? '' : ' disabled') +
+								BattleLog.escapeHTML(ball.id + (cooperativeCapture ? '|' + target.key : ' ' + targetSlot)) + '"' +
+								(ball.count && typeof chance === 'number' ? '' : ' disabled') +
 								' aria-label="' + BattleLog.escapeHTML(targetName + ' · ' + ball.name + ' × ' + ball.count + '，' + tip) + '">' +
 								'<span class="itemicon" style="' + Dex.getItemIcon(ball.id) + '"></span>' +
-								BattleLog.escapeHTML('申请使用' + ball.name) + ' × ' + ball.count + '</button><span class="rogue-catch-tip" role="tooltip"><strong>' +
-								BattleLog.escapeHTML(tip) + '</strong><br />双方本回合不行动；失败后对手仍会出招。</span></span> ';
+								BattleLog.escapeHTML((cooperativeCapture ? '申请使用' : '') + ball.name) + ' × ' + ball.count + '</button><span class="rogue-catch-tip" role="tooltip"><strong>' +
+								BattleLog.escapeHTML(tip) + '</strong><br />' + (cooperativeCapture ? '双方本回合不行动' : '投球占用当前伙伴的行动') +
+								'；失败后对手仍会出招。</span></span> ';
 						}).join('') + '</div>';
 				}).join('');
-				return psychic + '<div class="rogue-balls"><p>共同捕捉需要队友同意；请选择野生宝可梦和你要使用的精灵球。</p>' +
+				return psychic + '<div class="rogue-balls"><p>' + (cooperativeCapture ? '共同捕捉需要队友同意；' : '') +
+					'请选择捕捉目标和精灵球。</p>' +
 					(targetControls || '<p>当前没有可捕捉的野生宝可梦。</p>') + '</div>';
 			}
 
