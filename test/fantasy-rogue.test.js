@@ -14,6 +14,53 @@ describe('Pending companion invitation recovery', () => {
 		data.run.pendingMoves = [{member: data.run.team[0].id, move: 'vinewhip'}];
 		return data;
 	}
+	for (const stage of [50, 100]) {
+		for (const entry of ['game', 'party', 'party-reconnect']) {
+			it(`prioritizes a full-roster invitation over affection ${stage} from ${entry}`, () => {
+				const c = client(entry !== 'game', false, {partyOnly: entry !== 'game', disconnected: entry === 'party-reconnect'});
+				c.app.curRoom = entry === 'game' ? c.room : c.panel;
+				if (entry === 'party-reconnect') {
+					c.app.socket.readyState = 1; c.app.emit('init:socketrecovered');
+				}
+				const data = pending(); delete data.run.pendingMoves;
+				data.run.affectionScene.stage = stage;
+				data.run.affectionScene.title = stage === 100 ? '想亲口告诉你的话' : '一路同行的心意';
+				c.room.receiveState(data);
+				const html = entry === 'game' ? c.room.html : c.panel.html;
+				assert(html.includes('name="companionInviteAction" value="decline"'));
+				assert(html.includes('name="companionInviteAction" value="brock"'));
+				assert(!html.includes('name="affectionAction"'), 'a server-blocked dialogue must not hide the invitation');
+				const original = JSON.stringify(data); c.room.companionInviteAction('decline');
+				c.room.companionInviteAction('brock');
+				assert.equal(JSON.stringify(data), original, 'the browser must not resolve either saved choice itself');
+				const actions = () => c.sent.filter(s => s.startsWith('/fantasyrogue action '));
+				assert.equal(actions().length, 1);
+				const next = structuredClone(data); next.account.revision++; delete next.run.companionInvitation;
+				c.room.receiveAction({userid: data.userid, id: c.room.pending.id, ok: true, state: next});
+				c.app.curRoom = c.room; c.room.enterGame();
+				assert(c.room.html.includes('name="affectionAction"'));
+				assert(c.room.html.includes('好感度 ' + stage));
+				c.room.affectionAction('nemona|thanks'); c.room.affectionAction('nemona|thanks');
+				assert.equal(actions().length, 2);
+				const done = structuredClone(next); done.account.revision++; delete done.run.affectionScene;
+				c.room.receiveAction({userid: data.userid, id: c.room.pending.id, ok: true, state: done});
+				assert(!c.room.html.includes('name="affectionAction"'));
+				assert(!c.room.html.includes('name="companionInviteAction"'));
+			});
+		}
+	}
+	it('recovers a committed invitation after disconnect without replaying it or reviving the older blocked scene', () => {
+		const c = client(), data = pending(); delete data.run.pendingMoves;
+		data.run.affectionScene.stage = 100; c.room.receiveState(data);
+		c.room.companionInviteAction('decline');
+		c.app.socket.readyState = 3; c.app.emit('init:socketclosed');
+		c.app.socket.readyState = 1; c.app.emit('init:socketrecovered');
+		const next = structuredClone(data); next.account.revision++; delete next.run.companionInvitation;
+		c.room.receiveState(next); c.room.receiveState(data);
+		assert(!c.room.html.includes('name="companionInviteAction"'));
+		assert(c.room.html.includes('name="affectionAction"'));
+		assert.equal(c.sent.filter(s => s.startsWith('/fantasyrogue action ')).length, 1);
+	});
 	it('presents the invitation before a blocked affection scene, including after reloading the party', () => {
 		for (const start of [false, true]) {
 			const c = client(start), data = pending(); c.room.receiveState(data);
