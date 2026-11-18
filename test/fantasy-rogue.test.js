@@ -3,6 +3,53 @@ const fs = require('fs');
 const vm = require('vm');
 const {EventEmitter} = require('events');
 
+describe('Ditto observation demonstrations and TM choice', () => {
+	function fixture() {
+		const c = client(), data = adventure('event');
+		Object.assign(c.translations, {Blastoise: '水箭龟', Venusaur: '妙蛙花', Charizard: '喷火龙', Smeargle: '图图犬', Ditto: '百变怪',
+			focusblast: '真气弹', thunderbolt: '十万伏特', earthquake: '地震', roaroftime: '时光咆哮', 'Roar of Time': '时光咆哮', Protect: '守住'});
+		data.run.event = {id: 'dittoshow', key: 'ditto-question', title: '百变怪观察站', stage: 'choice', paragraphs: [],
+			observation: [{species: 'Blastoise', move: 'focusblast'}, {species: 'Venusaur', move: 'thunderbolt'}, {species: 'Charizard', move: 'earthquake'}],
+			options: ['Blastoise', 'Venusaur', 'Charizard'].map((name, i) => ({id: 'identify:' + i, name, text: ''}))};
+		return {c, data};
+	}
+	it('renders three equally presented, localized specimens and their moves without a client answer hint', () => {
+		const {c, data} = fixture(); c.room.receiveState(data);
+		assert.equal((c.room.html.match(/class="rogue-observation-model"/g) || []).length, 3);
+		for (const text of ['水箭龟', '妙蛙花', '喷火龙', '真气弹', '十万伏特', '地震']) assert(c.room.html.includes(text));
+		assert(!c.room.html.includes('disguise')); assert(!c.room.html.includes('正确答案'));
+		c.room.chooseEvent('identify:1'); c.room.chooseEvent('identify:0');
+		const sent = c.sent.filter(s => s.startsWith('/fantasyrogue action ')); assert.equal(sent.length, 1);
+		const request = JSON.parse(sent[0].slice('/fantasyrogue action '.length));
+		assert.equal(request.value, 'identify:1'); assert.equal(request.member, 'ditto-question');
+	});
+	it('shows the sole signature surprise, then the revealed Ditto and a persistent TM selector', () => {
+		const {c, data} = fixture();
+		data.run.event.observation[0] = {species: 'Smeargle', move: 'roaroftime'};
+		data.run.event.options = [{id: 'astonished', name: 'Roar of Time！？'}];
+		c.room.receiveState(data);
+		assert(c.room.html.includes('时光咆哮！？')); assert(!c.room.html.includes('value="identify:'));
+		data.run.event.observation[0] = {species: 'Ditto', disguise: 'Smeargle', move: 'roaroftime'};
+		data.run.event.options = []; data.run.event.key = 'ditto-prize';
+		data.run.event.picker = {label: '自选招式学习机', buttonLabel: '领取学习机', options: [{id: 'machine:protect', name: 'Protect', text: '招式学习机 ×1'}]};
+		const before = JSON.stringify(data); c.room.receiveState(data); c.room.receiveState(data);
+		assert(c.room.html.includes('百变怪')); assert(c.room.html.includes('刚才伪装为 图图犬'));
+		assert(c.room.html.includes('领取学习机')); assert(c.room.html.includes('守住'));
+		assert.equal(JSON.stringify(data), before);
+		c.room.controls['select[name=eventMove]'] = 'machine:protect'; c.room.chooseEventMove(); c.room.chooseEventMove();
+		const actions = c.sent.filter(s => s.startsWith('/fantasyrogue action ')); assert.equal(actions.length, 1);
+		const request = JSON.parse(actions[0].slice('/fantasyrogue action '.length));
+		assert.equal(request.value, 'machine:protect'); assert.equal(request.member, 'ditto-prize');
+	});
+	it('leaves other event pickers on their native learning label and escapes specimen text', () => {
+		const {c, data} = fixture(); data.run.event.observation[0].species = '<script>bad</script>';
+		data.run.event.picker = {label: '学习招式', options: [{id: 'move:protect', name: 'Protect', text: ''}]};
+		const html = c.room.renderEvent(data.run, false);
+		assert(!html.includes('<script>bad')); assert(html.includes('&lt;script&gt;'));
+		assert(html.includes('确认学习'));
+	});
+});
+
 describe('Pending companion invitation recovery', () => {
 	function pending() {
 		const data = adventure('event'); data.run.id = 'invite-recovery';
@@ -2635,6 +2682,26 @@ describe('Fantasy Rogue cooperative lobby entry', () => {
 		c.room.coopBusy = false; update();
 		assert(c.room.html.includes('本次事件已完成')); assert(!c.room.html.includes('队友的个人步骤'));
 		assert(!/name="finishCoopRoute"[^>]*disabled/.test(c.room.html));
+	});
+	it('renders shared Ditto demonstrations and sends a single current TM vote from the selector', () => {
+		const {c, session, update} = recyclingLobby(); delete session.adventure.recycling;
+		Object.assign(c.translations, {Smeargle: '图图犬', roaroftime: '时光咆哮', 'Roar of Time': '时光咆哮', Protect: '守住', Ditto: '百变怪'});
+		session.adventure.selectedRoute = {id: 'activity', kind: 'event', name: '百变怪观察站'};
+		const event = session.adventure.coopEvent = {id: 'dittoshow', key: 'ditto-special', title: '百变怪观察站', stage: 'choice',
+			branchResolved: false, ownComplete: false, partnerComplete: false, ownChoice: null, partnerChoice: null, paragraphs: [],
+			observation: [{species: 'Smeargle', move: 'roaroftime'}], branchOptions: [{id: 'astonished', name: 'Roar of Time！？', text: ''}]};
+		update(); assert(c.room.html.includes('图图犬')); assert(c.room.html.includes('时光咆哮！？'));
+		event.key = 'ditto-machine'; event.observation[0] = {species: 'Ditto', disguise: 'Smeargle', move: 'roaroftime'};
+		event.branchOptions = [{id: 'machine:protect', name: 'Protect', text: '招式学习机 ×1', disabled: false}];
+		update(); assert(c.room.html.includes('双方各获一张')); assert(c.room.html.includes('守住'));
+		assert(!/name="chooseCoopEvent"[^>]*value="machine:/.test(c.room.html));
+		c.room.controls['select[name=coopObservationMachine]'] = 'machine:protect';
+		c.sent.length = 0; // Exclude the lobby's initial refresh; count only this confirmation.
+		c.room.chooseCoopObservationMachine(); c.room.chooseCoopObservationMachine();
+		const actions = c.sent.filter(s => s.startsWith('/fantasyrogue coop ')); assert.equal(actions.length, 1);
+		const request = JSON.parse(actions[0].slice('/fantasyrogue coop '.length));
+		assert.equal(request.value, 'machine:protect'); assert.equal(request.visit, 'ditto-machine');
+		assert.equal(request.action, 'eventchoice');
 	});
 	it('renders the shared quiz silhouette and localizes answers and selected votes', () => {
 		const {c, session, update} = recyclingLobby();

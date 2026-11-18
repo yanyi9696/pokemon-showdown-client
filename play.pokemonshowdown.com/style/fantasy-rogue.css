@@ -916,6 +916,10 @@
 .fantasyrogue .rogue-event-allocation,
 .fantasyrogue .rogue-event-picker { padding: 16px; margin: 16px 0; border: 1px solid #b9cddd; border-radius: 8px; background: #f5faff; }
 .fantasyrogue .rogue-event-form-sprite { width: 120px; height: 100px; margin: 8px auto; background-repeat: no-repeat; background-position: center; }
+.fantasyrogue .rogue-observation { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 12px; margin: 16px 0; }
+.fantasyrogue .rogue-observation-model { min-width: 0; padding: 12px; border: 1px solid #b9cddd; border-radius: 8px; background: #f4f9fd; text-align: center; overflow-wrap: anywhere; }
+.fantasyrogue .rogue-observation-model p { margin: 6px 0; }
+.fantasyrogue .rogue-observation-move { display: inline-block; max-width: 100%; padding: 4px 8px; box-sizing: border-box; color: #31576f; background: #dfedf5; border-radius: 6px; }
 .fantasyrogue .rogue-event-allocation { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .fantasyrogue .rogue-event-allocation p { grid-column: 1 / -1; margin: 0; }
 .fantasyrogue .rogue-event-allocation label { display: flex; align-items: center; gap: 8px; }

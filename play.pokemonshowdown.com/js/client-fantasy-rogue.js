@@ -49,6 +49,15 @@
 			moves(preview.removed) + '</p><p>新增当前等级招式：' + moves(preview.added) + '</p><p>转换后携带招式：' +
 			moves(preview.equipped) + '</p></div>';
 	}
+	function observationHTML(models) {
+		if (!models || !models.length) return '';
+		return '<div class="rogue-observation" aria-label="观察站招式演示">' + models.map(function (model) {
+			return '<div class="rogue-observation-model"><div class="rogue-event-form-sprite" role="img" aria-label="' +
+				escape(localName(model.species)) + '" style="' + Dex.getTeambuilderSprite({species: model.species}) + '"></div><strong>' +
+				escape(localName(model.species)) + '</strong><p>' + (model.disguise ? '刚才伪装为 ' + escape(localName(model.disguise)) : '使出了') +
+				'</p><span class="rogue-observation-move">' + escape(localName(Dex.moves.get(model.move).name, 'move')) + '</span></div>';
+		}).join('') + '</div>';
+	}
 	var companionPortraits = {guzma: 'guzma-expressions', iris: 'iris-champion'};
 	var dialogueSheets = ['mela', 'atticus', 'ortega', 'eri', 'kieran', 'penny', 'carmine', 'n', 'lillie', 'korrina', 'nemona', 'blue', 'gladion', 'bede', 'silver', 'brock', 'maxie', 'marnie', 'kahili', 'liko', 'jenny', 'sabrina', 'flannery', 'roxie', 'viola', 'nessa', 'larry', 'lorelei', 'lance', 'lacey', 'steven',
 		'giovanni', 'archer', 'archie', 'cyrus', 'ghetsis', 'piers', 'charm', 'clover', 'coin', 'giacomo', 'rocket', 'magma', 'aqua', 'galactic', 'plasma', 'flare', 'skull', 'yell', 'teamstar',
@@ -2491,6 +2500,11 @@
 					var delegated = session.delegatedTo === (this.coopState && this.coopState.userid);
 					var eventOptions = event.branchResolved ? (event.options || []).concat(event.picker && event.picker.options || []) : event.branchOptions || [];
 					var eventOptionLabel = function (option) {
+						if (event.id === 'dittoshow') {
+							if (/^identify:/.test(option.id)) return localName(option.name);
+							if (option.id === 'astonished') return localName(option.name.slice(0, -2), 'move') + '！？';
+							if (/^machine:/.test(option.id)) return localName(option.name, 'move');
+						}
 						if (event.id === 'identityquiz' && /^answer:\d+$/.test(option.id)) return localName(option.name);
 						if (option.service === 'fossil') return option.seat + 'P · ' + (option.items || []).map(function (item) {
 							return localName(item, 'item') + ' ×1';
@@ -2514,6 +2528,12 @@
 					var ownID = this.coopState && this.coopState.userid;
 					var eventOptionHTML = regionalPreviewHTML(event.preview) + this.renderCoopRhythm(event.activity, 'own',
 						event.sharedRhythm ? '共同节拍 · 任一方点击，每拍只计一次' : '你的节拍') + renderEventOptions(eventOptions, ownID);
+					if (event.id === 'dittoshow' && eventOptions.some(function (option) { return /^machine:/.test(option.id); })) {
+						eventOptionHTML = '<div class="rogue-event-picker"><label>共同选择招式学习机（双方各获一张）<select name="coopObservationMachine"' +
+							(this.coopBusy || !canControl ? ' disabled' : '') + '>' + eventOptions.map(function (option) {
+								return '<option value="' + escape(option.id) + '"' + (option.disabled ? ' disabled' : '') + '>' + escape(eventOptionLabel(option)) + '</option>';
+							}).join('') + '</select></label>' + button('chooseCoopObservationMachine', '', '确认学习机', this.coopBusy || !canControl) + '</div>';
+					}
 					if (event.safari) {
 						eventOptionHTML = '<p>共同狩猎球剩余 ' + event.safari.balls + ' 颗。成功捕获后结束本次狩猎，伙伴归最终投球者。</p>' +
 							this.renderCoopCapture(adventure.captureProposal, canControl) +
@@ -2542,6 +2562,7 @@
 							'</div><span class="rogue-portrait-anchor">' + socialArt + '</span></div>';
 					}
 					eventText += auctionBoardHTML(event.auction);
+					eventText += observationHTML(event.observation);
 					if (event.silhouette) eventText += this.renderQuizSilhouette(event.silhouette);
 					if (event.stage === 'choice' && event.teams) {
 						eventText += '<div class="rogue-event-teams">' + event.teams.map(function (team, index) {
@@ -4192,6 +4213,7 @@
 			this.submit('event', details);
 		},
 		chooseEventMove: function () { this.chooseEvent(this.$('select[name=eventMove]').val()); },
+		chooseCoopObservationMachine: function () { this.chooseCoopEvent(this.$('select[name=coopObservationMachine]').val()); },
 		updateEventEVTotal: function () {
 			var event = this.state && this.state.run && this.state.run.event;
 			if (!event || !event.evAllocation) return;
@@ -4542,6 +4564,7 @@
 			}
 			html += '</div>';
 			if (event.silhouette) html += this.renderQuizSilhouette(event.silhouette);
+			html += observationHTML(event.observation);
 			if (event.activity && event.stage === 'choice') html += '<div class="rogue-activity-track" aria-label="节拍轨道，中央绿色区域为命中区"><span class="rogue-activity-zone"></span><b class="rogue-activity-beat"></b></div><p class="rogue-activity-time">12.0 秒</p>' + this.renderRhythmFeedback(event.activity, busy);
 			if (event.ski && event.stage === 'choice') return html + this.renderSki(event, busy) + '</article>';
 			if (event.fishing && event.stage === 'choice') return html + this.renderFishing(event, busy) + '</article>';
@@ -4558,7 +4581,7 @@
 			if (event.picker) html += '<div class="rogue-event-picker"><label>' + escape(event.picker.label) +
 				'<select name="eventMove"' + (busy ? ' disabled' : '') + '>' + event.picker.options.map(function (entry) {
 					return '<option value="' + escape(entry.id) + '"' + (entry.disabled ? ' disabled' : '') + '>' + escape(localName(entry.name, 'move')) + ' · ' + escape(eventText(entry.text)) + '</option>';
-				}).join('') + '</select></label>' + button('chooseEventMove', '', '确认学习', busy || !event.picker.options.some(function (entry) { return !entry.disabled; })) + '</div>';
+				}).join('') + '</select></label>' + button('chooseEventMove', '', event.picker.buttonLabel || '确认学习', busy || !event.picker.options.some(function (entry) { return !entry.disabled; })) + '</div>';
 			if (event.stage === 'choice' && event.teams) {
 				html += '<div class="rogue-event-teams">' + event.teams.map(function (team, index) {
 					return '<div><strong>' + (index ? '右边的队伍' : '左边的队伍') + '</strong>' + team.map(function (mon) {
