@@ -26,7 +26,7 @@ describe('Rogue public effective base stats', () => {
 	afterEach(() => { battle.destroy(); });
 	function status(mon) {
 		let result = '';
-		const bar = {toggleClass() {}, append() {}, find(selector) { return {remove() {}, append() {},
+		const bar = {toggleClass() {}, css() {}, append() {}, find(selector) { return {remove() {}, append() {},
 			html(text) { if (selector === '.status') result = text; }}; }};
 		ctx.PokemonSprite.prototype.updateStatbar.call({scene: {animating: true}, $statbar: bar}, mon, false, false);
 		return result;

@@ -102,7 +102,7 @@ describe('Cooperative terminal boss presentation', () => {
 		assert(!html.join('').includes('非极巨化'));
 		function badge(pokemon) {
 			const appended = [];
-			const bar = {toggleClass() {}, find() { return {remove() {}, html() {}, append(text) { appended.push(text); }}; },
+			const bar = {toggleClass() {}, css() {}, find() { return {remove() {}, html() {}, append(text) { appended.push(text); }}; },
 				append(text) { appended.push(text); }};
 			ctx.PokemonSprite.prototype.updateStatbar.call({scene: {animating: true}, $statbar: bar}, pokemon, false, false);
 			return appended.join('');
