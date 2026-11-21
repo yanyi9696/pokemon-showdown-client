@@ -1075,6 +1075,7 @@
 		},
 		joinRoom: function (id) { app.joinRoom(id); },
 		identityChanged: function () {
+			this.codexRequests = {};
 			this.clearCoopDirectory();
 			if (this.monthlyPopup) this.monthlyPopup.close();
 			clearTimeout(this.crateQueryTimer); this.crateQueryTimer = null; this.crateLoadError = '';
@@ -1103,6 +1104,8 @@
 			this.selectedMember = null; this.itemTarget = null; this.state = null; this.pending = null; this.error = ''; this.refresh();
 		},
 		disconnected: function () {
+			this.codexRequests = {};
+			this.codices = {}; // Reconnect obtains a fresh authorized view.
 			this.clearCoopDirectory();
 			this.coopBusy = false;
 			this.coopAccountRequestedRevision = -1;
@@ -2941,7 +2944,18 @@
 			this.loadCodex(section); this.render(); app.updateLayout(); this.scrollCodexTop();
 		},
 		loadCodex: function (section) {
-			if (app.socket && app.socket.readyState === 1) app.send('/cmd fantasyroguecodex ' + section);
+			if (!app.socket || app.socket.readyState !== 1) return;
+			var state = this.state, cached = this.codices[section];
+			// Reuse only the exact content version and account revision. Never cache actions.
+			if (state && state.enabled && state.account && state.contentVersion && cached &&
+				cached.userid === app.user.get('userid') && cached.contentVersion === state.contentVersion &&
+				cached.revision === state.account.revision) return;
+			this.codexRequests = this.codexRequests || {};
+			var key = [app.user.get('userid'), state && state.contentVersion, state && state.account && state.account.revision].join('|');
+			var request = this.codexRequests[section];
+			if (request && request.socket === app.socket && request.key === key && Date.now() - request.at < 10000) return;
+			this.codexRequests[section] = {socket: app.socket, key: key, at: Date.now()};
+			app.send('/cmd fantasyroguecodex ' + section);
 		},
 		receiveCodex: function (data) {
 			if (!data || data.userid !== app.user.get('userid') || ['guide', 'blessings', 'events', 'stories'].indexOf(data.section) < 0) return;
@@ -2949,6 +2963,7 @@
 			var old = this.codices[data.section];
 			if (old && old.contentVersion === data.contentVersion && old.revision > data.revision) return;
 			this.codices[data.section] = data;
+			if (this.codexRequests) delete this.codexRequests[data.section];
 			if (data.moveCategoryHelp) moveCategoryHelp = data.moveCategoryHelp;
 			if (data.blessingSupplyHelp) blessingSupplyHelp = data.blessingSupplyHelp;
 			if (data.blessingUpgradeHelp) blessingUpgradeHelp = data.blessingUpgradeHelp;

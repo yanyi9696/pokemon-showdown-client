@@ -18,10 +18,13 @@ const { serverPath } = require('./server-source');
 const thisDir = __dirname;
 const rootDir = path.resolve(thisDir, '..');
 process.chdir(rootDir);
+const immutable = require('./immutable-assets').immutableAssets(path.join(rootDir, 'play.pokemonshowdown.com'));
+immutable.mediaMap();
 
 // Fail the build instead of silently publishing a script tag whose bundle is absent.
 const showdexAssets = require('./showdex-assets').verifyShowdexAssets();
 require('./fantasy-data-split').verifyFantasyDataSplit(path.join(rootDir, 'play.pokemonshowdown.com/data'));
+require('./teambuilder-data-split').verifyTeambuilderDataSplit(path.join(rootDir, 'play.pokemonshowdown.com/data'));
 
 const AUTOCONFIG_START = '/*** Begin automatically generated configuration ***/';
 const AUTOCONFIG_END = '/*** End automatically generated configuration ***/';
@@ -242,6 +245,8 @@ function updatePages() {
 	fs.writeFileSync('play.pokemonshowdown.com/crossprotocol.html', crossprotocolContents);
 	fs.writeFileSync('play.pokemonshowdown.com/js/replay-embed.js', replayEmbedContents);
 	fs.writeFileSync('play.pokemonshowdown.com/testclient.html', testclientContents);
+	fs.writeFileSync('play.pokemonshowdown.com/testclient.html', immutable.entry(testclientContents, routes.client));
+	immutable.finish();
 
 	let replaysContents = fs.readFileSync('replay.pokemonshowdown.com/index.template.php', UTF8);
 	replaysContents = replaysContents.replace(URL_REGEX, (match, attr, url, query) =>

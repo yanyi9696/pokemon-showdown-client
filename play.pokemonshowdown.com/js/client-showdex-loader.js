@@ -78,31 +78,46 @@
 				clearTimeout(timer);
 				timer = setTimeout(failed, 30000);
 			};
-			// The all-generations move picker needs raw learnsets before React mounts.
-			// Old pages already provide this export in their complete data script.
-			if (learnsets && !Object.prototype.hasOwnProperty.call(window, 'Gen9fantasyLearnsets')) {
-				// Fetch the calculator concurrently, but execute only after its data exists.
-				preload = document.createElement('link');
-				preload.rel = 'preload';
-				preload.as = 'script';
-				preload.href = bundle;
-				document.head.appendChild(preload);
-				prerequisite = document.createElement('script');
-				prerequisite.src = learnsets;
-				prerequisite.async = true;
-				prerequisite.onerror = function () { finish(false, true); };
-				prerequisite.onload = function () {
-					if (settled) return;
-					prerequisite.onload = prerequisite.onerror = null;
-					if (!Object.prototype.hasOwnProperty.call(window, 'Gen9fantasyLearnsets')) {
-						finish(false, true);
-						return;
-					}
+			function start() {
+				if (settled) return;
+				clearTimeout(timer);
+				timer = setTimeout(function () { finish(false, !window.__SHOWDEX_INIT); }, 30000);
+				// The all-generations move picker needs raw learnsets before React mounts.
+				// Old pages already provide this export in their complete data script.
+				if (learnsets && !Object.prototype.hasOwnProperty.call(window, 'Gen9fantasyLearnsets')) {
+					// Fetch the calculator concurrently, but execute only after its data exists.
+					preload = document.createElement('link');
+					preload.rel = 'preload';
+					preload.as = 'script';
+					preload.href = bundle;
+					document.head.appendChild(preload);
+					prerequisite = document.createElement('script');
+					prerequisite.src = learnsets;
+					prerequisite.async = true;
+					prerequisite.onerror = function () { finish(false, true); };
+					prerequisite.onload = function () {
+						if (settled) return;
+						prerequisite.onload = prerequisite.onerror = null;
+						if (!Object.prototype.hasOwnProperty.call(window, 'Gen9fantasyLearnsets')) {
+							finish(false, true);
+							return;
+						}
+						document.head.appendChild(script);
+					};
+					document.head.appendChild(prerequisite);
+				} else {
 					document.head.appendChild(script);
-				};
-				document.head.appendChild(prerequisite);
+				}
+			}
+			// The calculator can open from a direct battle link before the editor.
+			// Share the editor's in-flight request and never mount with partial data.
+			if (window.FantasyTeambuilder && !window.FantasyTeambuilder.ready()) {
+				window.FantasyTeambuilder.load().then(function (ok) {
+					if (ok) start();
+					else finish(false, true);
+				});
 			} else {
-				document.head.appendChild(script);
+				start();
 			}
 		});
 		var request = pending;

@@ -454,6 +454,31 @@ function client(startScreen = false, localized = false, runtime = {}) {
 	room.preparePanel();
 	return {...context, room, panel, get html() { return room.html + panel.html + (room.pendingMovePopup?.html || ''); }, sent, joined, setUser: id => { userid = id; }};
 }
+describe('Fantasy Rogue codex bandwidth reuse', () => {
+	it('coalesces concurrent read-only requests and reuses only exact account/content revisions', () => {
+		const c = client();
+		c.room.state = {enabled: true, contentVersion: 'v1', account: {revision: 7}};
+		c.room.loadCodex('events'); c.room.loadCodex('events');
+		assert.equal(c.sent.filter(s => s === '/cmd fantasyroguecodex events').length, 1);
+		c.room.receiveCodex({userid: 'rogueplayer', section: 'events', contentVersion: 'v1', revision: 7, entries: []});
+		for (let i = 0; i < 20; i++) c.room.loadCodex('events');
+		assert.equal(c.sent.filter(s => s === '/cmd fantasyroguecodex events').length, 1);
+		c.room.state.account.revision = 8; c.room.loadCodex('events');
+		assert.equal(c.sent.filter(s => s === '/cmd fantasyroguecodex events').length, 2);
+		c.room.state.contentVersion = 'v2'; c.room.loadCodex('events');
+		assert.equal(c.sent.filter(s => s === '/cmd fantasyroguecodex events').length, 3);
+	});
+	it('retries unanswered queries and does not share a request across sockets or identities', () => {
+		const c = client(); c.room.loadCodex('guide');
+		c.room.codexRequests.guide.at -= 10001; c.room.loadCodex('guide');
+		c.app.socket = {readyState: 1}; c.room.loadCodex('guide');
+		c.setUser('another'); c.room.loadCodex('guide');
+		assert.equal(c.sent.filter(s => s === '/cmd fantasyroguecodex guide').length, 4);
+		c.app.socket.readyState = 3; c.room.loadCodex('guide');
+		assert.equal(c.sent.filter(s => s === '/cmd fantasyroguecodex guide').length, 4);
+	});
+});
+
 describe('Fantasy Rogue blessing text switch visibility', () => {
 	const entry = {id: 'test', name: '测试祝福', text: '提升攻击 20%。', shortText: '提升攻击。'};
 	for (const kind of ['item', 'target', 'solo', 'gift', 'compound']) it(`hides the switch during ${kind} rewards without blocking collection`, () => {

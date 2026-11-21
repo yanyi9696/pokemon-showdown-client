@@ -128,7 +128,9 @@ export const BattleSound = new class {
 		// Keep HTTPS for remote assets, including clients opened with file://.
 		const localHTTP = location?.protocol === 'http:' && location.host === Config.routes.client &&
 			['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
-		return `${localHTTP ? 'http:' : 'https:'}//${Config.routes.client}/${url}`;
+		const absolute = `${localHTTP ? 'http:' : 'https:'}//${Config.routes.client}/${url}`;
+		const mapper = (window as any).FantasyAssetURL;
+		return typeof mapper === 'function' ? mapper(absolute) : absolute;
 	}
 
 	getSound(url: string) {

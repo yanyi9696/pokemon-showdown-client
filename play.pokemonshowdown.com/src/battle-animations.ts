@@ -174,7 +174,7 @@ export class BattleScene implements BattleSceneStub {
 		this.$battle = $('<div class="innerbattle"></div>');
 		this.$frame.append(this.$battle);
 
-		this.$bg = $('<div class="backdrop" style="background-image:url(' + Dex.resourcePrefix + this.backdropImage + ');display:block;opacity:0.8"></div>');
+		this.$bg = $('<div class="backdrop" style="background-image:url(' + Dex.resourceURL(Dex.resourcePrefix + this.backdropImage) + ');display:block;opacity:0.8"></div>');
 		this.$terrain = $('<div class="weather"></div>');
 		this.$weather = $('<div class="weather"></div>');
 		this.$bgEffect = $('<div></div>');
@@ -694,7 +694,7 @@ export class BattleScene implements BattleSceneStub {
 
 		this.backdropImage = bg;
 		if (this.$bg) {
-			this.$bg.css('background-image', `url(${Dex.resourcePrefix}${this.backdropImage})`);
+			this.$bg.css('background-image', `url(${Dex.resourceURL(Dex.resourcePrefix + this.backdropImage)})`);
 		}
 	}
 
@@ -1705,6 +1705,7 @@ export class BattleScene implements BattleSceneStub {
 	}
 
 	preloadImage(url: string) {
+		url = Dex.resourceURL(url);
 		let token = url.replace(/\.(gif|png)$/, '').replace(/\//g, '-');
 		if (this.preloadCache[token]) {
 			return;
@@ -3509,7 +3510,7 @@ const BattleEffects: { [k: string]: SpriteData } = {
 	if (!window.Dex || !Dex.resourcePrefix) return;
 	for (const id in BattleEffects) {
 		if (!BattleEffects[id].url) continue;
-		BattleEffects[id].url = Dex.fxPrefix + BattleEffects[id].url;
+		BattleEffects[id].url = Dex.resourceURL(Dex.fxPrefix + BattleEffects[id].url);
 	}
 })();
 const BattleBackdropsThree = [

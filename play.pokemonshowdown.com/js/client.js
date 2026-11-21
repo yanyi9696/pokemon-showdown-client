@@ -380,7 +380,7 @@ function toId() {
 					app.topbar.updateUserbar();
 					app.showConnectionRecovery('连接已恢复，正在重试账号验证…');
 					if (!document.hidden && navigator.onLine !== false) {
-						var delay = Math.min(15000, 1000 * Math.pow(2, Math.min(self.loginUpkeepRetries || 0, 4)));
+						var delay = app.connectionRetryDelay(self.loginUpkeepRetries || 0, 15000);
 						self.loginUpkeepRetries = (self.loginUpkeepRetries || 0) + 1;
 						self.loginUpkeepRetryTimer = setTimeout(function () {
 							if (app.connectionRecovering && !app.reconnectStopped && !app.isDisconnected &&
@@ -866,6 +866,14 @@ function toId() {
 			this.rooms[''].updateFormats();
 			this.addPopup(ReconnectPopup, { cantconnect: true });
 		},
+		connectionRetryDelay: function (attempt, maximum, immediate) {
+			// Spread retries after a shared network outage; keep the existing ceilings.
+			// Foreground recovery remains within half a second and never replays actions.
+			var random = Math.random();
+			if (immediate) return Math.floor(500 * (1 - random));
+			var ceiling = Math.min(maximum, 1000 * Math.pow(2, Math.min(attempt, 5)));
+			return Math.ceil(ceiling * (0.5 + random * 0.5));
+		},
 		scheduleConnectionRecovery: function (immediate) {
 			if (this.reconnectStopped || this.down || Config.server.banned || !this.connectionRecovering) return;
 			clearTimeout(this.reconnectTimer);
@@ -873,7 +881,7 @@ function toId() {
 			this.showConnectionRecovery(navigator.onLine === false ? '网络已断开，联网后自动恢复。' : '连接中断，正在自动重连…');
 			if (document.hidden || navigator.onLine === false) return;
 			var self = this;
-			var delay = immediate ? 0 : Math.min(30000, 1000 * Math.pow(2, Math.min(this.reconnectAttempts || 0, 5)));
+			var delay = this.connectionRetryDelay(this.reconnectAttempts || 0, 30000, immediate);
 			this.reconnectTimer = setTimeout(function () {
 				self.reconnectTimer = null;
 				if (self.reconnectStopped || document.hidden || navigator.onLine === false) return;

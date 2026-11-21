@@ -48,7 +48,10 @@ describe('Embedded calculator deployment', () => {
 		const manifest = verifyShowdexAssets(release);
 		for (const page of ['index.html', 'testclient.html']) {
 			const html = fs.readFileSync(path.join(webRoot, page), 'utf8');
-			assert(html.includes(`showdex/main.js?${manifest.files['main.js'].sha256.slice(0, 12)}"`));
+			const asset = page === 'testclient.html' ? `showdex/main.${manifest.files['main.js'].sha256.slice(0, 20)}.js` :
+				`showdex/main.js?${manifest.files['main.js'].sha256.slice(0, 12)}`;
+			assert(html.includes(asset + '"'));
+			assert.deepEqual(fs.readFileSync(path.join(webRoot, asset.split('?')[0])), fs.readFileSync(path.join(release, 'main.js')));
 		}
 	});
 
@@ -56,8 +59,10 @@ describe('Embedded calculator deployment', () => {
 		const html = fs.readFileSync(path.join(webRoot, 'testclient.html'), 'utf8');
 		for (const resource of ['js/client.js', 'data/gen9fantasy-core.js', 'js/ps-china-translator.js']) {
 			const script = fs.readFileSync(path.join(webRoot, resource), 'utf8');
-			const hash = crypto.createHash('md5').update(script).digest('hex').slice(0, 8);
-			assert(html.includes(`${resource}?${hash}"`));
+			const hash = crypto.createHash('sha256').update(script).digest('hex').slice(0, 20);
+			const asset = resource.replace(/\.js$/, `.${hash}.js`);
+			assert(html.includes(asset + '"'));
+			assert.equal(fs.readFileSync(path.join(webRoot, asset), 'utf8'), script);
 		}
 	});
 });

@@ -24,6 +24,7 @@ function client(options = {}) {
 	};
 	if (options.direct) app.curRoom = {id: 'view-hellodex'};
 	const window = {
+		FantasyTeambuilder: options.teambuilder,
 		app, __SHOWDEX_INIT: options.existing,
 		Gen9fantasyLearnsetsAsset: options.learnsets,
 		Room: {extend(methods) { function Room() {} Object.assign(Room.prototype, methods); return Room; }},
@@ -55,6 +56,16 @@ function client(options = {}) {
 }
 
 describe('Showdex on-demand entry', () => {
+	it('waits for shared editor data on a direct battle and retries a failed prerequisite', async () => {
+		let resolve, calls = 0;
+		const c = client({teambuilder: {ready: () => false, load: () => {calls++; return new Promise(r => {resolve = r;});}}});
+		c.battle(); const failed = c.loader.load(true);
+		assert.equal(calls, 1); assert.equal(c.scripts.length, 0);
+		resolve(false); assert.equal(await failed, false);
+		const retry = c.loader.load(true); resolve(true); await Promise.resolve();
+		assert.equal(calls, 2); assert.equal(c.scripts.length, 1);
+		c.emit('fantasyshowdexready'); assert.equal(await retry, true);
+	});
 	it('keeps a usable homepage tab without downloading the calculator', () => {
 		const c = client();
 		assert.equal(c.scripts.length, 0);

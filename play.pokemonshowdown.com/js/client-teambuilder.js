@@ -171,7 +171,27 @@
 
 		exportMode: false,
 		formatResources: {},
+		retryTeambuilderData: function () {
+			this.teambuilderDataFailed = false;
+			this.update();
+		},
 		update: function () {
+			if (exports.FantasyTeambuilder && !exports.FantasyTeambuilder.ready()) {
+				if (this.teambuilderDataPending) return;
+				if (this.teambuilderDataFailed) {
+					this.$el.html('<div class="pad"><p role="alert">队伍数据加载失败，请检查连接后重试。</p><button class="button" name="retryTeambuilderData">重试加载</button></div>');
+					return;
+				}
+				this.$el.html('<div class="pad"><p role="status">正在加载队伍与搜索数据…</p></div>');
+				var room = this;
+				this.teambuilderDataPending = exports.FantasyTeambuilder.load();
+				this.teambuilderDataPending.then(function (ok) {
+					room.teambuilderDataPending = null;
+					room.teambuilderDataFailed = !ok;
+					if (room.el && room.el.parentNode) room.update();
+				});
+				return;
+			}
 			teams = Storage.teams;
 			if (this.curTeam) {
 				if (

@@ -6,7 +6,7 @@ const vm = require('vm');
 const {EventEmitter} = require('events');
 const source = fs.readFileSync(require.resolve('../play.pokemonshowdown.com/js/client.js'), 'utf8');
 
-function client(local = false) {
+function client(local = false, random = 1) {
 	let now = 0, timerID = 0, notices = '', recovered = 0;
 	const timers = new Map(), sockets = [], requests = [], popups = [], events = {};
 	const userData = {name: 'ReturnTester', userid: 'returntester', named: true, registered: true, settings: {}};
@@ -26,6 +26,7 @@ function client(local = false) {
 		close() { this.readyState = 3; this.onclose?.call(this); }
 	}
 	const context = {
+		Math: Object.assign(Object.create(Math), {random: () => random}),
 		$, SockJS: Socket, WebSocket: Socket, Backbone: {Model: {extend: spec => spec}, Router: {extend: spec => spec}},
 		Config: {routes: {client: 'official.invalid'}, server: {id: 'test', host: 'game.invalid', port: 443}, sockjsprefix: '/showdown'},
 		location: {host: 'game.invalid'}, document: {hidden: false, addEventListener: (event, callback) => { events[event] = callback; }},
@@ -83,6 +84,30 @@ function client(local = false) {
 }
 
 describe('Foreground connection recovery', () => {
+	it('spreads a 500-client outage across bounded socket and upkeep retry windows', () => {
+		const socketDelays = new Set(), authDelays = new Set(), foregroundDelays = new Set();
+		for (let i = 0; i < 500; i++) {
+			const c = client(false, i / 500);
+			socketDelays.add(c.app.connectionRetryDelay(5, 30000));
+			authDelays.add(c.app.connectionRetryDelay(5, 15000));
+			foregroundDelays.add(c.app.connectionRetryDelay(0, 30000, true));
+		}
+		assert.equal(socketDelays.size, 500);
+		assert.equal(authDelays.size, 500);
+		assert(foregroundDelays.size >= 490);
+		assert(Math.min(...socketDelays) >= 15000 && Math.max(...socketDelays) <= 30000);
+		assert(Math.min(...authDelays) >= 7500 && Math.max(...authDelays) <= 15000);
+		assert(Math.min(...foregroundDelays) >= 0 && Math.max(...foregroundDelays) <= 500);
+	});
+	it('cancels jittered foreground retries when offline and does not replay pending choices', () => {
+		const c = client(false, 0); c.sockets[0].close();
+		c.online(true); c.app.send('/choose move 1', 'battle-test-1');
+		c.advance(499); assert.equal(c.sockets.length, 1);
+		c.online(false); c.advance(1000); assert.equal(c.sockets.length, 1);
+		c.online(true); c.advance(500); c.login();
+		assert.equal(c.recovered, 1);
+		assert(!c.sockets[1].messages.some(message => message.includes('/choose')));
+	});
 	for (const fault of ['timeout', 'empty', 'invalid']) it(`retries a registered session after transient ${fault} without password or replay`, () => {
 		const c = client(); c.sockets[0].close(); c.advance(1000);
 		const socket = c.sockets[1]; socket.open();

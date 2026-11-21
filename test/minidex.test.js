@@ -138,7 +138,10 @@ describe('Local mini Pokedex assets', () => {
 		for (const page of ['testclient.html', 'testclient-beta.html']) {
 			const html = fs.readFileSync(path.join(webRoot, page), 'utf8');
 			for (const file of ['pokedex-mini.js', 'pokedex-mini-bw.js']) {
-				assert(html.includes(`src="data/${file}`), `${page} must load ${file} locally first`);
+				const stem = file.slice(0, -3);
+				const match = html.match(new RegExp('src="(data/' + stem + '(?:\\.[a-f0-9]{20})?\\.js)(?:\\?[^" ]*)?"'));
+				assert(match, `${page} must load ${file} locally first`);
+				assert.deepEqual(fs.readFileSync(path.join(webRoot, match[1])), fs.readFileSync(path.join(webRoot, 'data', file)));
 			}
 		}
 	});

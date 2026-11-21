@@ -700,7 +700,18 @@ export const Dex = new class implements ModdedDex {
 		return typeof sprite === 'string' && /^\d{1,4}\.\d{1,4}[a-z]{0,3}-[a-f0-9]{12}$/.test(sprite) ?
 			`${Dex.iconSheetPrefix || Dex.resourcePrefix}sprites/fantasy-rogue/fusions/${sprite}.png` : '';
 	}
+	resourceURL(url: string) {
+		return (globalThis as typeof globalThis & { FantasyAssetURL?: (url: string) => string }).FantasyAssetURL?.(url) || url;
+	}
 	getSpriteData(pokemon: Pokemon | Species | string, isFront: boolean, options: {
+		gen?: number, shiny?: boolean, gender?: Dex.GenderName, afd?: boolean,
+		noScale?: boolean, mod?: string, dynamax?: boolean,
+	} = { gen: 6 }) {
+		const sprite = this.getUnversionedSpriteData(pokemon, isFront, options);
+		sprite.url = this.resourceURL(sprite.url);
+		return sprite;
+	}
+	getUnversionedSpriteData(pokemon: Pokemon | Species | string, isFront: boolean, options: {
 		gen?: number,
 		shiny?: boolean,
 		gender?: Dex.GenderName,
@@ -1273,7 +1284,7 @@ export const Dex = new class implements ModdedDex {
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
 		const customIcon = ['kyuremoriginal', 'kyuremoriginalfantasy'].includes(finalId);
-		const iconUrl = `${iconSheetPrefix}sprites/pokemonicons-sheet.png?v=20261104g`;
+		const iconUrl = this.resourceURL(`${iconSheetPrefix}sprites/pokemonicons-sheet.png?v=20261104g`);
 		const iconPosition = `-${left}px -${top}px`;
 
 		// 【全新逻辑】判断如果是 fantasy 宝可梦,注入 CSS 变量进行“真·图层分离”
@@ -1597,7 +1608,7 @@ export const Dex = new class implements ModdedDex {
 
 		// 【修改这里】移除 Dex.resourcePrefix,改为指向本地存放道具图的相对路径
 		// 注意:将 ?v1 改为 ?v2 (或更高的数字) 可以帮助强制清除浏览器缓存,确保加载的是你最新的图片
-		const itemSheetUrl = `./sprites/itemicons-sheet.png?v=20261104`;
+		const itemSheetUrl = this.resourceURL(`./sprites/itemicons-sheet.png?v=20261104`);
 
 		return `background:transparent url(${itemSheetUrl}) no-repeat scroll -${left}px -${top}px`;
 	}

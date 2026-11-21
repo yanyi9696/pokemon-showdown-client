@@ -33,6 +33,9 @@ Storage.bg = {
 	// futureproofing in case we ever add more?
 	// because doing this once was annoying
 	MENU_BUTTONS: 6,
+	assetURL: function (url) {
+		return url && url.charAt(0) !== '#' && window.FantasyAssetURL ? window.FantasyAssetURL(url) : url;
+	},
 	set: function (bgUrl, bgid, noSave) {
 		if (!this.load(bgUrl, bgid)) {
 			this.extractMenuColors(bgUrl, bgid, noSave);
@@ -72,6 +75,9 @@ Storage.bg = {
 		// bgid = 'digimon';
 		// bgUrl = Dex.resourcePrefix + 'sprites/afd/digimonbg.jpg';
 
+		// Render and color extraction must use the same content-addressed image.
+		// Keep the original URL in preferences so a future build can remap it.
+		bgUrl = this.assetURL(bgUrl);
 		var background;
 		if (bgUrl.charAt(0) === '#') {
 			background = bgUrl;
@@ -173,7 +179,7 @@ Storage.bg = {
 				}
 			} catch (e) {}
 		};
-		img.src = bgUrl;
+		img.src = this.assetURL(bgUrl);
 	},
 	getHueSat: function (r, g, b) {
 		var max = Math.max(r, g, b);

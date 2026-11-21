@@ -1328,6 +1328,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	buf += serializeLazyTable('BattleTeambuilderTable', BattleTeambuilderTable, { compactLearnsets: true });
 
 	fs.writeFileSync('play.pokemonshowdown.com/data/teambuilder-tables.js', buf);
+	require('./teambuilder-data-split').writeTeambuilderDataSplit('play.pokemonshowdown.com/data', BattleTeambuilderTable);
 }
 
 console.log("DONE");
